@@ -1,25 +1,14 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .record-container {
-  $record-table-cell-padding: 5px;
-  $record-table-cell-border-width: 1px;
-  $space-between-related-sections: 5px;
-  $row-focus-border-width: 2px;
-
-  /*
-     * In case of related entities, the accordion icon is adding this much space,
-     * so we're making sure the rest of titles and content are aligned with it.
-     */
-  $record-header-padding-left: 40px;
-
   .top-panel-container {
     padding-bottom: 10px;
 
     .top-flex-panel {
       .top-right-panel {
         .page-action-btns {
-          height: $btn-height;
+          height: variables.$btn-height;
           margin: 0;
 
           > div {
@@ -93,7 +82,7 @@
         .toc-heading {
           padding: 4px 10px 4px 0px;
           cursor: pointer;
-          font-size: $h4-font-size;
+          font-size: variables.$h4-font-size;
 
           & > a.empty-toc-heading {
             opacity: 0.55;
@@ -128,118 +117,9 @@
     }
 
     /******Related Entities in record **************/
-    .related-section-container {
-      .panel-group {
-        margin-bottom: 20px;
-      }
-
-      .related-table-accordion {
-        // override the default bootstrap styles
-        box-shadow: none;
-        border-radius: 0;
-        border: 0;
-        + .related-table-accordion {
-          margin-top: $space-between-related-sections;
-        }
-
-        // row-focus will add a border of 2px,
-        // - adding -2px margin to left and right to avoid shrinkage
-        // - reducing the margin-top from 5px to 3px to avoid moving
-        &.row-focus {
-          margin-left: -$row-focus-border-width;
-          margin-right: -$row-focus-border-width;
-          margin-top: $space-between-related-sections - $row-focus-border-width;
-
-          + .related-table-accordion:not(.row-focus) {
-            margin-top: $space-between-related-sections - $row-focus-border-width;
-          }
-
-          // if there are two row-focus on top of each other, we should
-          // change the margin to account for both of their borders.
-          + .row-focus {
-            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
-          }
-        }
-
-        // the first row doesn't have margin top
-        &:first-child.row-focus {
-          margin-top: -$row-focus-border-width;
-        }
-
-        .accordion-button {
-          cursor: pointer;
-          height: 44px;
-          text-transform: inherit;
-          padding: 8px 8px 8px 8px;
-          color: $white-color;
-          border: none;
-          border-radius: inherit;
-          background: $section-background-color;
-          // Overriding accordian-button css to align right angle bracket icon to left
-          flex-direction: row-reverse;
-          justify-content: flex-end;
-
-          &:focus {
-            box-shadow: none;
-          }
-
-          // Overriding accordian-button css to align right angle bracket icon to left
-          &::after {
-            margin-right: 11px;
-            margin-left: 2px;
-            background-image: none;
-            content: "\f054"; // fa-solid fa-chevron-right
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            transform: unset;
-            font-size: 1.75rem;
-            height: unset;
-          }
-
-          &:not(.collapsed)::after {
-            content: "\f078"; // fa-solid fa-chevron-down
-          }
-        }
-
-        .rt-section-header {
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          white-space: nowrap;
-          min-width: 0; // needed to avoid overflow
-
-          .rt-displayname {
-            font-size: 1.75rem;
-            text-overflow: ellipsis;
-            overflow: hidden;
-          }
-
-          .rt-section-header-buttons {
-            position: relative;
-            padding-left: 20px;
-            margin-top: 2px;
-
-            .rt-section-header-icons {
-              position: absolute;
-              left: 0;
-              top: 5px;
-            }
-          }
-        }
-
-        .accordion-body {
-          padding-left: $record-header-padding-left;
-          padding-right: 0;
-        }
-
-        .inline-tooltip {
-          margin-bottom: 10px;
-        }
-      }
-    }
 
     .row-focus {
-      border: $row-focus-border-width solid $primary-color !important;
+      border: map-get(variables.$record-spacing-map, 'row-focus-border-width') solid map-get(variables.$color-map, 'primary') !important;
     }
 
     .chaise-table-header {
@@ -256,34 +136,6 @@
       font-weight: 600;
     }
 
-    .loading-sticky {
-      float: left;
-      position: fixed;
-      z-index: 1;
-      bottom: 0;
-      background: #d9edf7;
-      margin: 5px;
-      padding: 5px 20px;
-      border: solid #446c73 1.5px;
-    }
-  }
-
-  .delete-spinner-container {
-    $delete-spinner-backdrop-z-index: 5;
-    .delete-spinner-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      z-index: $delete-spinner-backdrop-z-index;
-      background: black;
-      opacity: 0.5;
-    }
-    .delete-spinner.spinner-container {
-      top: 50%;
-      z-index: calc($delete-spinner-backdrop-z-index + 1);
-    }
   }
 
   .related-section-spinner {
@@ -416,7 +268,7 @@
       }
     }
 
-    .rt-section-header {
+    .chaise-accordion-header {
       font-size: 1.5rem !important;
     }
 
@@ -431,7 +283,7 @@
       display: none;
     }
 
-    .related-table-accordion {
+    .chaise-accordion {
       break-inside: avoid !important;
     }
 

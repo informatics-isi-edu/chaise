@@ -4,12 +4,12 @@
  * different files.
  */
 
-var pImport =  require('../../../utils/protractor.import.js');
-var chaisePage = require('../../../utils/chaise.page.js');
-var recordPage = chaisePage.recordPage;
-var recordEditPage = chaisePage.recordEditPage;
-var recordsetPage = chaisePage.recordsetPage;
-var EC = protractor.ExpectedConditions;
+const pImport =  require('../../../utils/protractor.import.js');
+const chaisePage = require('../../../utils/chaise.page.js');
+const recordPage = chaisePage.recordPage;
+const recordEditPage = chaisePage.recordEditPage;
+const recordsetPage = chaisePage.recordsetPage;
+const EC = protractor.ExpectedConditions;
 
 /**
  * dynamic_acl_main_table rows:
@@ -36,7 +36,7 @@ var EC = protractor.ExpectedConditions;
  *  1: editable, deletable
  *  2: non-edit, non-delete
  */
-var testParams = {
+const testParams = {
     dynamic_acl: {
         row_ids: {
             editable_deletable:    1,
@@ -54,7 +54,7 @@ var testParams = {
     }
 };
 
-var aclConfig = {
+const aclConfig = {
     "catalog": {
         "id": browser.params.catalogId,
         "schemas": {
@@ -205,7 +205,7 @@ var aclConfig = {
 };
 
 // just to ensure the acl is back to the original
-var erasedAclConfig = {
+const erasedAclConfig = {
     "catalog": {
         "id": browser.params.catalogId,
         "schemas": {
@@ -234,12 +234,12 @@ var erasedAclConfig = {
 }
 
 /******************** record helpers ************************/
-var getRecordURL = function (id) {
+const getRecordURL = function (id) {
     return browser.params.url + "/record/#" + browser.params.catalogId +
            "/multi-permissions:dynamic_acl_main_table/id=" + id;
 };
 
-var testRecordEditDelete = function (id, editable, deletable) {
+const testRecordEditDelete = function (id, editable, deletable) {
     beforeAll(function (done) {
         chaisePage.navigate(getRecordURL(id)).then(function () {
             return chaisePage.recordPageReady();
@@ -251,7 +251,7 @@ var testRecordEditDelete = function (id, editable, deletable) {
     });
 
     it("should display the Edit link" + (editable ? "" : " as a disabled"), function (done) {
-        var button = recordPage.getEditRecordButton();
+        const button = recordPage.getEditRecordButton();
         expect(button.isPresent()).toEqual(true, "edit button missing");
         if (editable) {
             expect(button.getAttribute("aria-disabled")).toBe('false', "edit button disabled");
@@ -263,7 +263,7 @@ var testRecordEditDelete = function (id, editable, deletable) {
     });
 
     it("should display the Delete link" + (deletable ? "" : " as disabled"), function (done) {
-        var button = recordPage.getDeleteRecordButton();
+        const button = recordPage.getDeleteRecordButton();
         expect(button.isPresent()).toEqual(true, "delete button missing");
         if (deletable) {
             expect(button.getAttribute("aria-disabled")).toBe('false', "delete button disabled");
@@ -275,30 +275,30 @@ var testRecordEditDelete = function (id, editable, deletable) {
     });
 };
 
-var testRelatedEdit = function (displayname, expectedVals) {
+const testRelatedEdit = function (displayname, expectedVals) {
     expectedVals.forEach(function (exp, index) {
-        var btn = chaisePage.recordPage.getRelatedTableRowEdit(displayname, index);
+        const btn = chaisePage.recordPage.getRelatedTableRowEdit(displayname, index);
 
         expect(btn.isPresent()).toEqual(exp, "edit button missmatch for index=" + index);
     });
 };
 
-var testRelatedDelete = function (displayname, expectedVals) {
+const testRelatedDelete = function (displayname, expectedVals) {
     expectedVals.forEach(function (exp, index) {
-        var btn = chaisePage.recordPage.getRelatedTableRowDelete(displayname, index);
+        const btn = chaisePage.recordPage.getRelatedTableRowDelete(displayname, index);
 
         expect(btn.isPresent()).toEqual(exp, "edit button missmatch for index=" + index);
     });
 };
 
 /******************** recordedit helpers ************************/
-var getRecordEditURL = function (filter) {
+const getRecordEditURL = function (filter) {
    return browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + filter + "/@sort(id)";
 };
 
 /******************** recordset helpers ************************/
 
-var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, expectedEditable, expectedDeletable) {
+const testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, expectedEditable, expectedDeletable) {
     beforeAll(function (done) {
         chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + uriFilter + "@sort(id)").then(function () {
             return chaisePage.recordsetPageReady();
@@ -316,7 +316,7 @@ var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, ex
     });
 
     it ("should " + (displayBulkEdit ? "" : " not") +  " display the bulk edit link.", function (done) {
-        var link = recordsetPage.getEditRecordLink();
+        const link = recordsetPage.getEditRecordLink();
         expect(link.isPresent()).toBe(displayBulkEdit, "bulk edit missmatch");
         done();
     });
@@ -372,13 +372,13 @@ describe("regarding dynamic ACL support, ", function () {
             });
 
             it ("should not display the Edit button.", function (done) {
-                var button = recordPage.getEditRecordButton();
+                const button = recordPage.getEditRecordButton();
                 expect(button.isPresent()).toBeFalsy();
                 done();
             });
 
             it ("should not display the Delete button.", function (done) {
-                var button = recordPage.getDeleteRecordButton();
+                const button = recordPage.getDeleteRecordButton();
                 expect(button.isPresent()).toBeFalsy();
                 done();
             });
@@ -449,8 +449,25 @@ describe("regarding dynamic ACL support, ", function () {
 
     /******************** recordedit tests ************************/
     describe("when viewing Recordedit app for a table with dynamic acls", function () {
-        describe("when the whole row cannot be edited", function () {
+        describe("when none of the rows can be edited.", () => {
+            it ('users should the unauthorized access error.', (done) => {
+                chaisePage.navigate(getRecordEditURL('id=2;id=5')).then(() => {
+                    chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
+
+                    const modalTitle = chaisePage.errorModal.getTitle();
+                    expect(modalTitle.getText()).toBe('Unauthorized Access');
+
+                    const modalText = chaisePage.errorModal.getBody();
+                    expect(modalText.getText()).toContain('You are not authorized to perform this action.');
+
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
+
+        describe("when some of the rows cannot be edited.", function () {
             beforeAll(function (done) {
+                // 1 all except id enabled, 2 table-level disabled, 3 all vis columns disabled
                 chaisePage.navigate(getRecordEditURL("id=1;id=2;id=5")).then(function () {
                     return chaisePage.recordeditPageReady();
                 }).then(function () {
@@ -466,53 +483,36 @@ describe("regarding dynamic ACL support, ", function () {
                 });
             });
 
-            it("the `ban` icon should be displayed on the header.", function (done) {
-                expect(recordEditPage.getDisabledRowIcon(0).isPresent()).toBe(false, "first row missmatch");
-                expect(recordEditPage.getDisabledRowIcon(1).isPresent()).toBe(true, "second row missmatch");
-                expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
-                done();
+            it ("a dismissiable warning should be displayed about omited forms", () => {
+                const alert = chaisePage.recordEditPage.getAlertWarning();
+                expect(alert.isDisplayed()).toBeTruthy();
+                expect(alert.getText()).toContain('2/3 entries were removed from editing due to the lack of permission.');
             });
 
-            it ("all the columns in the row should be disabled.", function (done) {
-                // 1 all except id enabled, 2 table-level disabled, 3 all vis columns disabled
-                expect(recordEditPage.getInputById(0, "id").getAttribute('disabled')).toBeTruthy("row=0 id missmatch");
-                expect(recordEditPage.getInputById(0, "name").getAttribute('disabled')).toBeFalsy("row=0 name missmatch");
-                expect(recordEditPage.getInputById(0, "fk_col").getAttribute('disabled')).toBeFalsy("row=0 fk_col missmatch");
+            it ("only the editable records should be displayed.", () => {
+                expect(recordEditPage.getRecordeditForms().count()).toBe(1);
 
-                expect(recordEditPage.getInputById(1, "id").getAttribute('disabled')).toBeTruthy("row=1 id missmatch");
-                expect(recordEditPage.getInputById(1, "name").getAttribute('disabled')).toBeTruthy("row=1 name missmatch");
-                expect(recordEditPage.getInputById(1, "fk_col").getAttribute('disabled')).toBeTruthy("row=1 fk_col missmatch");
-
-                expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
-                expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
-                expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
-                done();
+                expect(recordEditPage.getInputForAColumn('id', 1).getAttribute('disabled')).toBeTruthy("row=0 id missmatch");
+                expect(recordEditPage.getInputForAColumn('name', 1).getAttribute('disabled')).toBeFalsy("row=0 name missmatch");
             });
 
-            it ("submitting the form should not submit the value and show the rows a `disabled`", function (done) {
-                var nameInpt = recordEditPage.getInputById(0, "name");
+            it ("submitting the form should properly ignore the disabeld rows", function (done) {
+                const nameInpt = recordEditPage.getInputForAColumn('name', 1);
                 nameInpt.sendKeys("new one").then(function () {
                     return recordEditPage.submitForm();
                 }).then(function () {
-                    // Make sure the table shows up with the expected # of rows
-                    return browser.wait(function() {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return (ct == 3);
-                        });
+                    // wait for url change (which means successful request)
+                    browser.wait(function () {
+                      return browser.driver.getCurrentUrl().then(function(url) {
+                          return url.startsWith(process.env.CHAISE_BASE_URL + "/record/");
+                      });
                     }, browser.params.defaultTimeout);
-                }).then(function () {
-                    expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/3 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
-
-                    expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("2 disabled records (due to lack of permission)", "disabled header is incorrect.");
-
                     done();
-                }).catch(function (err) {
-                    done.fail(err);
-                });
+                }).catch(chaisePage.catchTestError(done));
             });
         });
 
-        describe("when some of the columns in the row cannot be edited", function () {
+        describe("when some of the columns in one of the rows cannot be edited", function () {
             beforeAll(function (done) {
                 chaisePage.navigate(getRecordEditURL("id=1;id=6")).then(() => {
                     return chaisePage.recordeditPageReady();
@@ -529,38 +529,34 @@ describe("regarding dynamic ACL support, ", function () {
                 });
             });
 
-            it ("The field should be disabled.", function (done) {
-                recordEditPage.getInputForAColumn("name", 1).then(function (input) {
-                    expect(input.getAttribute("disabled")).toBeTruthy("disabled missmatch");
-                    expect(input.getAttribute("value")).toEqual("six","value missmatch");
-                    done();
-                }).catch(function (err) {
-                    done.fail(err);
-                })
+            it ("The field should be disabled.", function () {
+                const input = recordEditPage.getInputForAColumn("name", 2);
+                expect(input.getAttribute("disabled")).toBeTruthy("disabled missmatch");
+                expect(input.getAttribute("value")).toEqual("six","value missmatch");
             });
 
             it ("Trying to edit a column in another row should display a warning", function (done) {
-                var warn;
+                let warn;
                 // we want to click on the first cell, so get it
-                var overlay = recordEditPage.getColumnPermissionOverlay(0, "name");
+                const overlay = recordEditPage.getColumnPermissionOverlay(1, "name");
                 expect(overlay.isPresent()).toBeTruthy("overlay not present");
                 overlay.click().then(function () {
-                    warn = recordEditPage.getColumnPermissionError(0, "name");
+                    warn = recordEditPage.getColumnPermissionError(1, "name");
 
                     return chaisePage.waitForElement(warn);
                 }).then(function () {
-                    var message = "This field cannot be modified. To modify it, remove all records that have this field disabled (e.g. Record Number 2)";
+                    const message = "This field cannot be modified. To modify it, remove all records that have this field disabled (e.g. Record Number 2)";
                     expect(warn.getText()).toEqual(message, "permission error text missmatch");
                     // remove the record from form
                     return recordEditPage.getDeleteRowButton(1);
                 }).then(function (button) {
                     return chaisePage.clickButton(button);
                 }).then(function () {
-                    return recordEditPage.getForms().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(1, "number of rows is incorrect after removing 1");
-
-                    var nameInpt = recordEditPage.getInputById(0, "name");
+                    return browser.wait(() => {
+                      return recordEditPage.getRecordeditForms().count().then((ct) => ct === 1);
+                    });
+                }).then(function () {
+                    const nameInpt = recordEditPage.getInputForAColumn("name", 1);
                     return nameInpt.sendKeys("1");
                 }).then(function () {
                     return recordEditPage.submitForm();
@@ -625,21 +621,20 @@ describe("regarding dynamic ACL support, ", function () {
                     expect(summaryTitle.getText()).toEqual('Batch Delete Summary', 'title missmatch');
                     const expectedBody = [
                       '1 record successfully deleted. 2 records could not be deleted. Check the error details below to see more information.',
-                      '\nClick OK to dismiss this dialog.',
-                      'Show Error Details'
+                      '\nShow Error Details'
                     ].join('\n');
                     expect(chaisePage.errorModal.getBody().getText()).toBe(expectedBody, 'body missmatch');
                     done();
                   }).catch(chaisePage.catchTestError(done));
             });
 
-            it ('clicking on "ok" button should remove the deleted rows', (done) => {
-                const summaryCloseBtn = chaisePage.errorModal.getOKButton();
+            it ('clicking on "close" button should remove the deleted rows', (done) => {
+                const summaryCloseBtn = chaisePage.errorModal.getCloseButton();
                 browser.wait(EC.elementToBeClickable(summaryCloseBtn), browser.params.defaultTimeout).then(() => {
                     return chaisePage.clickButton(summaryCloseBtn);
                 }).then(() => {
                     browser.wait(function() {
-                      return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                      return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                           // only one row was deletable
                           return (ct == 2);
                       });

@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating'
+  'debug', 'templating', 'hideRecordeditLeaveAlert'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -64,7 +64,8 @@ export const DEFAULT_CHAISE_CONFIG = {
   },
   templating: {
     engine: 'mustache'
-  }
+  },
+  hideRecordeditLeaveAlert: false,
 };
 
 export const dataFormats = {
@@ -73,13 +74,19 @@ export const dataFormats = {
     time: 'HH:MM:SS'
   },
   date: 'YYYY-MM-DD',
+  time: ['H:m:s', 'H:m', 'H'],
   time12: 'hh:mm:ss', // used for displaying values in recordedit properly
   time24: 'HH:mm:ss',
+  timestamp: 'YYYY-MM-DDTHH:mm:ss',
   datetime: {
     display: 'YYYY-MM-DD HH:mm:ss',
     displayZ: 'YYYY-MM-DD HH:mm:ssZ',
     return: 'YYYY-MM-DDTHH:mm:ssZ', // the format that the database returns when there are no fractional seconds to show
     submission: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
+  },
+  regexp: {
+    integer: /^\-?\d+$/,
+    float: /^\-?(\d+)?((\.)?\d+)?$/
   }
 }
 
@@ -131,12 +138,23 @@ export const BODY_CLASS_NAMES = {
 
 export const QUERY_PARAMS = {
   PROMPT_LOGIN: 'promptlogin',
-  SCROLL_TO: 'scrollTo'
+  SCROLL_TO: 'scrollTo',
+};
+
+// these are the captured as `cid` value in logs
+export const APP_NAMES = {
+  HELP: 'help',
+  LOGIN: 'login',
+  NAVBAR: 'navbar',
+  RECORD: 'record',
+  RECORDEDIT: 'recordedit',
+  RECORDSET: 'recordset'
 };
 
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden',
-  ZOOMED_IN: 'zoomed-in'
+  IMAGE_PREVIEW: 'chaise-image-preview',
+  IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in'
 };
 
 export const ID_NAMES = {

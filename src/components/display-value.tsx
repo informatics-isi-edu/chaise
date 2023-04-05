@@ -7,6 +7,7 @@ type DisplayValueProps = {
   specialNullEmpty?: boolean,
   addClass?: boolean,
   className?: string,
+  styles?: object,
   /**
    * Whether this is something that we're doing internally,
    * or is based on annotation-provided values.
@@ -19,14 +20,15 @@ const DisplayValue = ({
   value,
   specialNullEmpty,
   className,
+  styles,
 }: DisplayValueProps): JSX.Element => {
   if (specialNullEmpty) {
     if (value?.value === '') {
-      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }}></span>;
+      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }} style={styles}></span>;
     }
 
     if (value?.value == null) {
-      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }}></span>;
+      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }} style={styles}></span>;
     }
   }
 
@@ -39,12 +41,16 @@ const DisplayValue = ({
   if (value?.isHTML && value?.value) {
     return (
       <span
+        style={styles}
         dangerouslySetInnerHTML={{ __html: value.value }}
-        className={usedClassName}>
+        className={usedClassName}
+        // for foreign-key inputs display value
+        contentEditable={false}
+      >
       </span>
     )
   }
-  return <span className={usedClassName}>{value?.value}</span>
+  return <span style={styles} className={usedClassNames.join(' ')}>{value?.value}</span>
 }
 
 export default DisplayValue;

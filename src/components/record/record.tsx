@@ -647,13 +647,13 @@ const RecordInner = ({
         <RecordMainSection />
         {/* related section */}
         {relatedModels.length > 0 &&
-          <div className='related-section-container'>
+          <div className='related-section-container chaise-accordions'>
             <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
               {relatedModels.map((rm: RecordRelatedModel) => (
                 <Accordion.Item
                   key={`record-related-${rm.index}`}
                   eventKey={rm.index + ''}
-                  className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
+                  className={`chaise-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
                   id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                   as='div'
                 >
@@ -701,8 +701,8 @@ const RecordInner = ({
   return (
     <div className='record-container app-content-container'>
       {errors.length === 0 && showDeleteSpinner &&
-        <div className='delete-spinner-container'>
-          <div className='delete-spinner-backdrop'></div>
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner className='delete-spinner' message='Deleting...' />
         </div>
       }

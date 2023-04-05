@@ -1,4 +1,23 @@
-@import "variables";
+@use 'sass:map';
+@use 'variables';
+
+// override the default bootstrap
+.modal-backdrop {
+  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
+
+  // allows modal on modal (only two levels)
+  ~ .modal-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
+  }
+}
+.modal {
+  z-index: map-get(variables.$z-index-map, 'modal');
+
+  // allows modal on modal (only two levels)
+  ~ .modal {
+    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
+  }
+}
 
 // don't add border to the modal header
 .modal-header {
@@ -11,7 +30,7 @@
 }
 
 .modal-title {
-  font-size: $h2-font-size !important;
+  font-size: variables.$h2-font-size !important;
   font-weight: normal;
 }
 
@@ -21,6 +40,7 @@
     margin-bottom: 0;
     height: 30px;
     border: 1px solid #ccc9c9;
+    padding: 0;
   }
 
   .no-row-margin {
@@ -40,11 +60,11 @@
 /******** Popup modal for login instructions ********/
 .modal-login-instruction-backdrop {
   opacity: 0.7 !important;
-  z-index: 1035; // less than the modal itself
+  z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
 }
 
 .modal-login-instruction {
-  z-index: 1036; // less than navbar
+  z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
   .modal-dialog {
     position: absolute;
     top: 50%;
@@ -76,11 +96,11 @@
 /******* Popup modal for error ********/
 // NOTE less than the navbar z-index
 .modal-error-backdrop {
-  z-index: 1031; // less than the modal itself
+  z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
 }
 
 .modal-error {
-  z-index: 1036; // less than navbar
+  z-index: map-get(variables.$z-index-map, 'modal-error');
   overflow: hidden;
 
   .no-word-break {
@@ -107,13 +127,14 @@
 .search-popup {
   ~ .modal-error-backdrop,
   ~ .modal-login-instruction-backdrop {
-    z-index: 1061;
+    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
   }
 
   ~ .modal-error,
   ~ .modal-login-instruction {
-    z-index: 1066;
+    z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
   }
+
 }
 
 .modal-footer .chaise-btn {
@@ -122,11 +143,11 @@
 
 /******* Popup modal for export *******/
 .export-progress-backdrop {
-  z-index: 1030; // less than the modal itself
+  z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
 }
 
 .export-progress {
-  z-index: 1031; // less than login instruction modal
+  z-index: map-get(variables.$z-index-map, 'export-progress');
 }
 
 
@@ -282,31 +303,5 @@
   .progress-bar {
     background-size: 1.75rem 1.75rem;
     background-color: #4674a7;
-  }
-}
-
-.modal-submit-spinner-container {
-  $modal-submit-spinner-backdrop-z-index: 100;
-  .modal-submit-spinner-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: $modal-submit-spinner-backdrop-z-index;
-    background: black;
-    opacity: 0.5;
-  }
-  .modal-submit-spinner.spinner-container {
-    top: 50% !important;
-    z-index: calc($modal-submit-spinner-backdrop-z-index + 1) !important;
-  }
-}
-
-@media (min-width: 768px) {
-  .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
-    max-width: unset !important;
-    width: 600px !important;
-    margin: 30px auto !important;
   }
 }

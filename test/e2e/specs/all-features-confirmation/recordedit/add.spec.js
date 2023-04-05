@@ -59,6 +59,7 @@ var testParams = {
                 "color_rgb_hex_column": "#654321"
             }
         ],
+        formsOnLoad: 1,
         formsAfterInput: 3,
         result_columns: [
             "title", "website", "product-add_fk_category", "rating", "summary", "description",
@@ -98,6 +99,7 @@ var testParams = {
            {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime},
            {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime, validate: true}
        ],
+       formsOnLoad: 1,
        formsAfterInput: 3,
        result_columns: [
            "fileid", "uri", "filename", "bytes"
@@ -145,6 +147,7 @@ var testParams = {
           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
           {"fileid": "3", "uri": 1, "timestamp_txt": currentTimestampTime} // this form won't be submitted
       ],
+      formsOnLoad: 1,
       formsAfterInput: 3,
       result_columns: [
           "fileid", "uri", "filename", "bytes"
@@ -186,6 +189,7 @@ var testParams = {
           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
           {"fileid": "3", "uri": 1, "timestamp_txt": currentTimestampTime} // this form won't be submitted
       ],
+      formsOnLoad: 1,
       formsAfterInput: 3,
       result_columns: [
           "fileid", "uri", "filename", "bytes"
@@ -226,13 +230,12 @@ describe('Record Add', function() {
             + tableParams.inputs.length + " record(s) for table " + tableParams.table_name + " testing " + tableParams.comment + ",", function() {
 
                 beforeAll(function () {
-                    browser.ignoreSynchronization=true;
-
+                    uri = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
                     // if it's the same table-name, we have to reload. browser.get is not reloading the page
                     if (index > 0 && tableParams.table_name === testParams.tables[index-1].table_name) {
-                        browser.navigate().refresh();
+                        chaisePage.refresh(uri);
                     } else {
-                        browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
+                        chaisePage.navigate(uri);
                     }
                     chaisePage.recordeditPageReady();
                 });
@@ -247,7 +250,7 @@ describe('Record Add', function() {
                         });
                     }
 
-                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams, false);
+                    recordEditHelpers.testPresentationAndBasicValidation(tableParams, false);
                 });
 
                 describe("remove record, ", function() {
@@ -262,24 +265,29 @@ describe('Record Add', function() {
                             });
                         }
 
-                        it((tableParams.formsAfterInput) + " buttons should be visible and enabled", function() {
+                        it((tableParams.formsAfterInput) + " buttons should be visible and enabled", function(done) {
                             chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
                                 expect(buttons.length).toBe(tableParams.formsAfterInput);
                                 buttons.forEach(function(btn) {
                                     expect(btn.isDisplayed()).toBe(true);
                                     expect(btn.isEnabled()).toBe(true);
                                 });
-                            });
+
+                                done();
+                            }).catch(chaisePage.catchTestError(done));
                         });
 
-                        it("should click and remove the last record", function() {
-                            chaisePage.recordEditPage.getDeleteRowButton(tableParams.formsAfterInput - 1).then(function(button) {
-                                return chaisePage.clickButton(button);
+                        it("should click and remove the last record", function(done) {
+                            chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
+                                // NOTE: chaisePage.clickButton() was clicking the submit button instead of the remove form button
+                                // if this keeps happening after this change, scroll button into view then click
+                                return buttons[tableParams.formsAfterInput - 1].click();
                             }).then(function () {
                                 return chaisePage.recordEditPage.getAllDeleteRowButtons();
                             }).then(function(buttons) {
                                 expect(buttons.length).toBe(tableParams.formsAfterInput - 1);
-                            });
+                                done()
+                            }).catch(chaisePage.catchTestError(done));
                         });
                     } else {
                         it("zero delete buttons should be visible", function() {
@@ -310,9 +318,8 @@ describe('Record Add', function() {
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
-            browser.ignoreSynchronization=true;
             // Refresh the page
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
@@ -334,14 +341,14 @@ describe('Record Add', function() {
 
         it('should pre-fill fields from the prefill cookie', function() {
             // Reload the page with prefill query param in url
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
 
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 return browser.manage().getCookie('test');
             }).then(function(cookie) {
                 if (cookie) {
-                    var field = chaisePage.recordEditPage.getInputById(0, "Category");
-                    expect(field.getAttribute("value")).toBe(testCookie.rowname.value);
+                    var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
+                    expect(field.getText()).toBe(testCookie.rowname.value);
                 } else {
                     // Fail the test
                     expect('Cookie did not load').toEqual('but cookie should have loaded');
@@ -356,8 +363,7 @@ describe('Record Add', function() {
 
     describe('Markdown Editor Help button is clicked, ', function() {
         beforeAll(function() {
-            browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             helpBtn = element.all(by.css('button[title=Help]')).get(0);
             chaisePage.waitForElement(helpBtn);
         });

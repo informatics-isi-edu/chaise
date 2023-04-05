@@ -22,11 +22,10 @@ var testParams = {
         "If you have trouble removing dependencies please contact the site administrator.\n\n" +
         "Show Error Details"
     ],
-    uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record.",
     recordNotFoundModalText : "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to show the list of all records.",
     multipleRecordFoundModalText : "There are more than 1 record found for the filters provided.\n\nClick OK to show all the matched records.",
     tableNotFoundModalText : function() { return "Table " + this.tableNotFound + " not found in schema.\n\nClick OK to go to the Home Page."},
-    sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + ".\nClick Reload to start over."},
+    sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + "."},
     negativeLimitErrorText : "'limit' must be greater than 0\n\nClick OK to go to the Home Page.",
     hideErrors : "Hide Error Details",
     conflictRecordEditErrorBooking : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nClick Reload to start over.\nShow Error Details",
@@ -366,10 +365,13 @@ describe('Error related test cases,', function() {
           // make sure ok button is clickable
           browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
           chaisePage.clickButton(modalOkBtn).then(function(){
-              return browser.driver.getCurrentUrl();
-          }).then (function(currentUrl) {
-             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
-             expect(currentUrl).toContain(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
+              browser.wait(function () {
+                  return browser.driver.getCurrentUrl().then(function(url) {
+                      return url.toContain(recordsetWithoutFacetUrl);
+                  });
+              });
+
              done();
           }).catch(chaisePage.catchTestError(done));
       });
@@ -556,13 +558,19 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to RecordSet', function(done){
-            chaisePage.errorModal.getOKButton().click().then(function(){
-                return browser.driver.getCurrentUrl();
-            }).then (function(currentUrl) {
-              var newapplink = url.replace("recordedit", "recordset"),
-                  lastSlash = newapplink.lastIndexOf("/"),
-                  recordsetUrl = newapplink.slice(0, lastSlash);
-                expect(currentUrl).toContain(recordsetUrl, "The redirection from recordedit page to recordset failed");
+            const modalOkButton = chaisePage.errorModal.getOKButton();
+            chaisePage.waitForClickableElement(modalOkButton).then(() => {
+                return modalOkButton.click()
+            }).then(() => {
+                const newapplink = url.replace("recordedit", "recordset");
+                const recordsetUrl = newapplink.slice(0, newapplink.lastIndexOf("/"));
+
+                browser.wait(function () {
+                    return browser.driver.getCurrentUrl().then(function(url) {
+                        return url.toContain(recordsetUrl);
+                    });
+                });
+
                 done();
             }).catch(chaisePage.catchTestError(done));
         });

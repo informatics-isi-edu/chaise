@@ -130,6 +130,7 @@ const TableRow = ({
       // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
       if (dataCell && !hasOverflow) {
         // overflow is true if the content overflows the cell
+        // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
         hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
       }
 
@@ -383,7 +384,7 @@ const TableRow = ({
               className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
               onClick={() => onSelectChange(tuple)}
             >
-              <span className='chaise-btn-icon fa-solid fa-check'></span>
+              <span className='chaise-btn-icon fa-regular fa-square-check'></span>
             </button>
           </ChaiseTooltip>
         )
@@ -527,7 +528,7 @@ const TableRow = ({
         style={{ 'position': 'relative' }}
       >
         {showActionButtons &&
-          <td className='block action-btns'>
+          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
             {renderActionButtons()}
           </td>
         }

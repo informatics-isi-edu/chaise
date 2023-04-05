@@ -9,7 +9,7 @@ import { RecordContext } from '@isrd-isi-edu/chaise/src/providers/record';
 function useRecord() {
   const context = useContext(RecordContext);
   if (!context) {
-    throw new Error('No RecordPorivder found when calling RecordContext');
+    throw new Error('No RecordProvider found when calling RecordContext');
   }
   return context;
 }

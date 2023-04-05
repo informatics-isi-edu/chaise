@@ -10,7 +10,7 @@ exports.getConfig = function(options) {
       //browserName: 'firefox',
       browserName: 'chrome',
       version: 'latest', //to specify the browser version
-      timeZone: 'Los Angeles', // specify the timezone the browser should execute in
+      timeZone: 'Los_Angeles', // specify the timezone the browser should execute in
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       chromeOptions: {
@@ -65,7 +65,7 @@ exports.getConfig = function(options) {
     if (!process.env.CI) {
       config.capabilities.chromeOptions.args.push('--window-size=1280,960');
     }
-  
+
     // using chrome in headless mode
     // environment variables are of type "string" so verify the value is the string "true" instead of boolean true
     if (process.env.HEADLESS == "true") {

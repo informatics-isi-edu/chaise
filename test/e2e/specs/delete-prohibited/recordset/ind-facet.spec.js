@@ -103,21 +103,21 @@ var testParams = {
             name: "date_col",
             type: "date",
             listElems: 0,
-            invalid: "12-22-20067",
-            error: "Please enter a valid date value.",
+            invalid: "2013-",
+            error: "Please enter a valid date value in YYYY-MM-DD format.",
             range: {
-                min: "06-14-2002",
-                max: "12-12-2007",
+                min: "2002-06-14",
+                max: "2007-12-12",
                 filter: "date_col\n2002-06-14 to 2007-12-12",
                 numRows: 5
             },
             justMin: {
-                min: "12-14-2009",
+                min: "2009-12-14",
                 filter: "date_col\n≥ 2009-12-14",
                 numRows: 3
             },
             justMax: {
-                max: "04-18-2007",
+                max: "2007-04-18",
                 filter: "date_col\n≤ 2007-04-18",
                 numRows: 14
             }
@@ -129,23 +129,23 @@ var testParams = {
             notNullNumRows: 20,
             // invalid removed since mask protects against bad input values, clear date input to test validator
             // invalid: {...}
-            error: "Please enter a valid date and time value.",
+            error: "Please enter a valid date value in YYYY-MM-DD format.",
             range: {
-                minDate: "05-20-2004",
+                minDate: "2004-05-20",
                 minTime: "10:08:00",
-                maxDate: "12-06-2007",
+                maxDate: "2007-12-06",
                 maxTime: "17:26:12",
                 filter: "timestamp_col\n2004-05-20 10:08:00 to 2007-12-06 17:26:12",
                 numRows: 3
             },
             justMin: {
-                date: "05-20-2004",
+                date: "2004-05-20",
                 time: "10:08:00",
                 filter: "timestamp_col\n≥ 2004-05-20 10:08:00",
                 numRows: 8
             },
             justMax: {
-                date: "12-06-2007",
+                date: "2007-12-06",
                 time: "17:26:12",
                 filter: "timestamp_col\n≤ 2007-12-06 17:26:12",
                 numRows: 15
@@ -333,21 +333,6 @@ describe("Viewing Recordset with Faceting,", function () {
         });
 
         describe("default presentation based on facets annotation ", function () {
-            it("should have " + testParams.totalNumFacets + " facets", function (done) {
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
-                        return (ct == testParams.totalNumFacets);
-                    });
-                }, browser.params.defaultTimeout);
-
-                chaisePage.recordsetPage.getFacetTitles().then(function (titles) {
-                    titles.forEach(function (title, idx) {
-                        expect(title.getText()).toEqual(testParams.facetNames[idx], "All facets' names is incorrect");
-                    });
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-
-            });
 
             it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function (done) {
                 // default config: maxRecordsetRowHeight = 100
@@ -370,6 +355,21 @@ describe("Viewing Recordset with Faceting,", function () {
                     return testCell.getSize();
                 }).then(function (tallerDimensions) {
                     expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it("should have " + testParams.totalNumFacets + " facets", function (done) {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
+                        return (ct == testParams.totalNumFacets);
+                    });
+                }, browser.params.defaultTimeout);
+
+                chaisePage.recordsetPage.getFacetTitles().then(function (titles) {
+                    titles.forEach(function (title, idx) {
+                        expect(title.getText()).toEqual(testParams.facetNames[idx], "All facets' names is incorrect");
+                    });
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
@@ -810,7 +810,15 @@ describe("Viewing Recordset with Faceting,", function () {
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems + 1, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
-                                    // test validators
+                                    // first clear the min and max
+                                    chaisePage.waitForElement(minClear);
+                                    chaisePage.waitForClickableElement(minClear);
+                                    return minClear.click();
+                                }).then(function () {
+                                    return chaisePage.clickButton(maxClear);
+                                }).then(function () {
+
+                                    // now send an invalid value for min
                                     minInput.sendKeys(facetParams.invalid);
 
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeInputValidationError(idx)), browser.params.defaultTimeout);
@@ -819,9 +827,10 @@ describe("Viewing Recordset with Faceting,", function () {
                                 }).then(function (text) {
                                     expect(text).toBe(facetParams.error, "Validation error for '" + facetParams.name + "' did not show up or the message is incorrect");
 
+                                    // remove the invalid value so we can continue with the tests
+                                    chaisePage.waitForElement(minClear);
+                                    chaisePage.waitForClickableElement(minClear);
                                     return minClear.click();
-                                }).then(function () {
-                                    return chaisePage.clickButton(maxClear);
                                 }).then(function () {
                                     // test min and max being set
                                     // define test params values
@@ -869,6 +878,8 @@ describe("Viewing Recordset with Faceting,", function () {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
+                                    chaisePage.waitForElement(minClear);
+                                    chaisePage.waitForClickableElement(minClear);
                                     return minClear.click();
                                 }).then(function () {
                                     return chaisePage.clickButton(maxClear);
@@ -903,6 +914,13 @@ describe("Viewing Recordset with Faceting,", function () {
                                             browser.params.defaultTimeout,
                                             "clear-all didn't clear checkboxes"
                                         );
+
+                                        chaisePage.waitForElement(minClear);
+                                        chaisePage.waitForClickableElement(minClear);
+                                        return minClear.click();
+                                    }).then(function () {
+                                        return chaisePage.clickButton(maxClear);
+                                    }).then(function () {
                                         done();
                                     }).catch(chaisePage.catchTestError(done));
                                 });
@@ -951,7 +969,11 @@ describe("Viewing Recordset with Faceting,", function () {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
+                                    chaisePage.waitForElement(minClear);
+                                    chaisePage.waitForClickableElement(minClear);
                                     return minClear.click();
+                                }).then(function () {
+                                    return chaisePage.clickButton(maxClear);
                                 }).then(function () {
                                     done();
                                 }).catch(chaisePage.catchTestError(done));
@@ -1028,7 +1050,7 @@ describe("Viewing Recordset with Faceting,", function () {
                                 maxTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxTimeInputClearClass);
                             });
 
-                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
+                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function (done) {
                                 browser.wait(function () {
                                     return chaisePage.recordsetPage.getClosedFacets().count().then(function (ct) {
                                         return ct == testParams.totalNumFacets;
@@ -1053,6 +1075,14 @@ describe("Viewing Recordset with Faceting,", function () {
                                     return chaisePage.recordsetPage.getRangeInputValidationError(idx).getText();
                                 }).then(function (text) {
                                     expect(text).toBe(facetParams.error, "The date validation message did not show up or is incorrect");
+
+                                    // clear the inputs first so we can then change their values
+                                    return minTimeClear.click();
+                                }).then(function () {
+                                    return maxDateClear.click();
+                                }).then(function () {
+                                    return maxTimeClear.click();
+                                }).then(function () {
 
                                     // test min and max being set
                                     // define test params values
@@ -1111,6 +1141,8 @@ describe("Viewing Recordset with Faceting,", function () {
                                     );
 
                                     //clear the inputs
+                                    chaisePage.waitForElement(minDateClear);
+                                    chaisePage.waitForClickableElement(minDateClear);
                                     return minDateClear.click();
                                 }).then(function () {
                                     return minTimeClear.click();
@@ -1118,7 +1150,9 @@ describe("Viewing Recordset with Faceting,", function () {
                                     return maxDateClear.click();
                                 }).then(function () {
                                     return maxTimeClear.click();
-                                });
+                                }).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
 
                             if (facetParams.notNullNumRows) {
@@ -1139,28 +1173,33 @@ describe("Viewing Recordset with Faceting,", function () {
 
                                         return clearAll.click();
                                     }).then(function () {
+                                        // the next test cases assume that the input are empty, so we should empty them.
+                                        chaisePage.waitForElement(minDateClear);
+                                        chaisePage.waitForClickableElement(minDateClear);
+                                        return minDateClear.click();
+                                    }).then(function () {
+                                        return minTimeClear.click();
+                                    }).then(function () {
+                                        return maxDateClear.click();
+                                    }).then(function () {
+                                        return maxTimeClear.click();
+                                    }).then(function () {
                                         browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
                                         done();
                                     }).catch(chaisePage.catchTestError(done));
                                 });
                             }
 
-                            it("should filter on just a min value and update the search criteria.", function () {
-                                chaisePage.waitForElement(maxDateClear);
+                            it("should filter on just a min value and update the search criteria.", function (done) {
+                                // test just min being set
+                                minDateInput.sendKeys(facetParams.justMin.date);
+                                minTimeInput.sendKeys(facetParams.justMin.time);
 
-                                maxDateClear.click().then(function () {
-                                    return maxTimeClear.click();
-                                }).then(function () {
-                                    // test just min being set
-                                    minDateInput.sendKeys(facetParams.justMin.date);
-                                    minTimeInput.sendKeys(facetParams.justMin.time);
+                                // let validation dissappear
+                                browser.sleep(20);
 
-                                    //let validation dissappear
-                                    browser.sleep(20);
-
-                                    // get submit button
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click()
-                                }).then(function () {
+                                // submit the form
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
@@ -1199,26 +1238,33 @@ describe("Viewing Recordset with Faceting,", function () {
                                         browser.params.defaultTimeout,
                                         "clear-all didn't clear checkboxes"
                                     );
-                                });
-                            });
 
-                            it("should filter on just a max value and update the search criteria.", function () {
-                                chaisePage.waitForElement(minDateClear);
-
-                                //clear the min inputs
-                                minDateClear.click().then(function () {
+                                    //clear the inputs
+                                    // we also need to clear max inputs because "clear all" will update everything and add the values back
+                                    chaisePage.waitForElement(minDateClear);
+                                    chaisePage.waitForClickableElement(minDateClear);
+                                    return minDateClear.click();
+                                }).then(function () {
                                     return minTimeClear.click();
                                 }).then(function () {
-                                    // test just max being set
-                                    maxDateInput.sendKeys(facetParams.justMax.date);
-                                    maxTimeInput.sendKeys(facetParams.justMax.time);
-
-                                    //let validation dissappear
-                                    browser.sleep(20);
-
-                                    // get submit button
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click()
+                                    return maxDateClear.click();
                                 }).then(function () {
+                                    return maxTimeClear.click();
+                                }).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
+                            });
+
+                            it("should filter on just a max value and update the search criteria.", function (done) {
+                                // test just max being set
+                                maxDateInput.sendKeys(facetParams.justMax.date);
+                                maxTimeInput.sendKeys(facetParams.justMax.time);
+
+                                //let validation dissappear
+                                browser.sleep(20);
+
+                                // submit
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
@@ -1260,9 +1306,9 @@ describe("Viewing Recordset with Faceting,", function () {
 
                                     // close the facet
                                     return chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click();
-                                }).catch(function (exc) {
-                                    console.dir(exc);
-                                });
+                                }).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
                         });
                     } else if (facetParams.type == "check_presence") {

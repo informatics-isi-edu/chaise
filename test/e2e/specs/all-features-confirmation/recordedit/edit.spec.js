@@ -124,7 +124,7 @@ describe('Edit existing record,', function() {
 
     for (var i=0; i< testParams.tables.length; i++) {
 
-        (function(tableParams, index) {
+        (function(tableParams) {
 
             if (!process.env.CI && tableParams.files.length > 0) {
                 beforeAll(function() {
@@ -136,32 +136,18 @@ describe('Edit existing record,', function() {
 
             describe("For table " + tableParams.table_name + ",", function() {
 
-                var record;
-
                 beforeAll(function () {
 
                     var keys = [];
                     keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
-                    browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
+                    chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
 
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        return chaisePage.recordEditPage.getViewModelRows();
-                    }).then(function(records) {
-                        browser.params.record = record = records[0];
-                        tableParams.columns.forEach(function(c) {
-                            if (record[c.name]) {
-                                if (c.type !== "date" && c.type !== "timestamptz") {
-                                    c._value =  record[c.name] + "";
-                                }
-                            }
-                        });
-                    });
+                    chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
 
 
                 describe("Presentation and validation,", function() {
-                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams, true);
+                    recordEditHelpers.testPresentationAndBasicValidation(tableParams, true);
                 });
 
                 describe("Submitting an existing record,", function() {
@@ -178,6 +164,6 @@ describe('Edit existing record,', function() {
 
             });
 
-        })(testParams.tables[i], i);
+        })(testParams.tables[i]);
     }
 });

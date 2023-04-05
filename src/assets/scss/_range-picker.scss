@@ -1,52 +1,54 @@
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 // range picker directive
 .range-picker {
   hr {
-      color: $border-color;
-      width: 1px;
+    color: map-get(variables.$color-map, 'border');
+    width: 1px;
   }
 
   .js-plotly-plot {
-      height: 150px;
-      margin-left: -5px;
+    height: 150px;
+    margin-left: -5px;
   }
 
   .plotly-actions {
-      padding-top: 15px;
-      text-align: right;
-      line-height: 1;
+    padding-top: 15px;
+    text-align: right;
+    line-height: 1;
 
-      .chaise-info {
-          bottom: 1px;
-      }
+    .chaise-info {
+      bottom: 1px;
+    }
 
-      .chaise-zoom-in, .chaise-zoom-out {
-          left: 1px;
-          bottom: 1px;
-      }
+    .chaise-zoom-in,
+    .chaise-zoom-out {
+      left: 1px;
+      bottom: 1px;
+    }
 
-      .reset-plotly-button span {
-          color: inherit;
-      }
+    .reset-plotly-button span {
+      color: inherit;
+    }
   }
 
   .zoom-plotly-button {
-      border-top-left-radius: 4px !important;
-      border-bottom-left-radius: 4px !important;
+    border-top-left-radius: 4px !important;
+    border-bottom-left-radius: 4px !important;
   }
 
   .plotly-how-to {
-      border-color: white !important;
-      cursor: default;
+    border-color: white !important;
+    cursor: default;
   }
 
   .plotly-how-to:hover {
-      z-index: auto !important;
+    z-index: auto !important;
   }
 
-  .divider{
-      border: 0;
-      margin: 5px 0;
+  .divider {
+    border: 0;
+    margin: 5px 0;
   }
 }

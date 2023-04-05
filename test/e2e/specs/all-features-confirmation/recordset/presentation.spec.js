@@ -1278,7 +1278,7 @@ describe('View recordset,', function () {
                         // test columns length
 
                         chaisePage.recordeditPageReady();
-                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                        return chaisePage.recordEditPage.getAllColumnNames();
                     }).then(function (pageColumns) {
                         expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
 

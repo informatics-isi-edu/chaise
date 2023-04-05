@@ -242,13 +242,13 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create new " + testParams.table_displayname, "Recordedit title is incorrect.");
+                    expect(txt).toBe("Create 1 " + testParams.table_displayname + ' record', "Recordedit title is incorrect.");
 
-                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                    return chaisePage.recordEditPage.getEntityTitleLinkElement().element(by.tagName('span')).getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
 
-                    return chaisePage.recordEditPage.getForms().count();
+                    return chaisePage.recordEditPage.getRecordeditForms().count();
                 }).then(function(ct) {
                     // only 1 row is copied at this time
                     expect(ct).toBe(1);
@@ -272,7 +272,7 @@ describe('View existing record,', function() {
             });
 
             it("should have 'Automatically Generated' in an input that is generated rather than copying the value from the copied record.", function() {
-                chaisePage.recordEditPage.getInputById(0, "generated").getAttribute("placeholder").then(function (text) {
+                chaisePage.recordEditPage.getInputForAColumn('generated', 1).getAttribute("placeholder").then(function (text) {
                     expect(text).toBe("Automatically generated");
                 });
             });
@@ -300,7 +300,7 @@ describe('View existing record,', function() {
             });
 
             it("should redirect to record after changing the id and resubmitting.", function() {
-                var idInput = chaisePage.recordEditPage.getInputById(0, "id");
+                var idInput = chaisePage.recordEditPage.getInputForAColumn('id', 1);
                 idInput.clear();
                 idInput.sendKeys("777");
                 chaisePage.recordEditPage.submitForm();

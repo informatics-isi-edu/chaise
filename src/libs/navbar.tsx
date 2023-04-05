@@ -3,8 +3,11 @@ import { createRoot } from 'react-dom/client';
 // components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
+// utilities
+import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+
 const navbarLibSettings = {
-  appName: 'navbar'
+  appName: APP_NAMES.NAVBAR
 };
 
 /**

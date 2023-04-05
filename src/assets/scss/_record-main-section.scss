@@ -1,32 +1,22 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
 
 .record-container {
-  $record-table-cell-padding: 5px;
-  $record-table-cell-border-width: 1px;
-  $space-between-related-sections: 5px;
-  $row-focus-border-width: 2px;
-
-  /*
-     * In case of related entities, the accordion icon is adding this much space,
-     * so we're making sure the rest of titles and content are aligned with it.
-     */
-  $record-header-padding-left: 40px;
 
   .record-main-section {
-    $record-main-spinner-height: 97px;
 
     position: relative;
 
     &.with-spinner {
-      margin-top: -$record-main-spinner-height;
+      margin-top: map-get(variables.$record-spacing-map, 'main-spinner-height') * -1;
     }
     .record-main-spinner-container {
       position: sticky;
       position: -webkit-sticky;
       top: min(50px, 50%);
       .record-main-spinner {
-        height: $record-main-spinner-height;
+        height: map-get(variables.$record-spacing-map, 'main-spinner-height');
       }
     }
 
@@ -37,12 +27,12 @@
 
       // reduce the spacing of table cells (overrides bootstrap default)
       > tbody > tr.row {
-        border-top: $record-table-cell-border-width solid $border-color;
+        border-top: map-get(variables.$record-spacing-map, 'record-table-cell-border-width') solid map-get(variables.$color-map, 'border');
         margin: 0px;
 
         > td {
           border-top: 0;
-          padding: $record-table-cell-padding;
+          padding: map-get(variables.$record-spacing-map, 'record-table-cell-padding');
 
           &.entity-value {
             overflow-wrap: break-word;
@@ -54,7 +44,7 @@
         // rest of headers
         &.hidden-header {
           > .entity-value {
-            padding-left: $record-header-padding-left;
+            padding-left: map-get(variables.$record-spacing-map, 'record-header-padding-left');
           }
         }
 
@@ -62,26 +52,27 @@
           // row-focus will change the border top and bottom size,
           // so we should adjust that and account for the default border
           td {
-            padding-top: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
-            padding-bottom: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
+            $_row_focus_padding: map-get(variables.$record-spacing-map, 'record-table-cell-padding') - (map-get(variables.$record-spacing-map, 'row-focus-border-width') - map-get(variables.$record-spacing-map, 'record-table-cell-border-width'));
+            padding-top: $_row_focus_padding;
+            padding-bottom: $_row_focus_padding;
 
             // if the size of row-focus is bigger than the current border width,
             // we should adjust the content of inline tables so the whole page doesn't shift
-            @if $row-focus-border-width > $record-table-cell-border-width {
+            @if map-get(variables.$record-spacing-map, 'row-focus-border-width') > map-get(variables.$record-spacing-map, 'record-table-cell-border-width') {
               .inline-table-display {
-                padding-bottom: $row-focus-border-width;
+                padding-bottom: map-get(variables.$record-spacing-map, 'row-focus-border-width');
               }
             }
           }
 
           // when there are two of them, the bottom should use the default padding
           + tr.row-focus td {
-            padding-top: $record-table-cell-padding;
+            padding-top:  map-get(variables.$record-spacing-map, 'record-table-cell-padding');
           }
         }
 
         .entity-key {
-          padding-left: $record-header-padding-left;
+          padding-left: map-get(variables.$record-spacing-map, 'record-header-padding-left');
           border-bottom-width: 0px;
           position: relative;
           padding-right: 15px;

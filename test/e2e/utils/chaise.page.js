@@ -6,7 +6,7 @@ var recordEditPage = function() {
 
     // recordedit form view
     this.getEntityTitleElement = function() {
-        return element(by.css('.form-container #page-title'));
+        return element(by.css('.app-container #page-title'));
     };
 
     this.getEntityTitleLinkElement = function() {
@@ -18,30 +18,26 @@ var recordEditPage = function() {
         return element(by.css('.resultset-container #page-title'));
     };
 
-    this.getResultsetTitleLinkElement = function () {
-        return this.getResultsetTitleElement().element(by.tagName('a'));
-    };
-
-    this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
-    };
+    this.getRequiredInfoEl = () => {
+        return element(by.className('required-info'));
+    }
 
     this.getAllColumnNames = function() {
-        return element.all(by.css("td.entity-key > span.column-displayname > span"));
+        return element.all(by.css(".entity-key-column > .entity-key > span.column-displayname > span"));
     };
 
     this.getAllColumnPermissionOverlays = function () {
       return element.all(by.css(".column-permission-overlay"));
     }
 
-    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+    this.getColumnPermissionOverlay = function (formNumber, displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+        return element(by.css(".column-permission-overlay-" + formNumber + '-' + displayName));
     }
 
-    this.getColumnPermissionError = function (rowIndex, displayName) {
+    this.getColumnPermissionError = function (formNumber, displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+        return element(by.css(".column-permission-warning-" + formNumber + '-' + displayName));
     };
 
     this.getDisabledRowIcon = function (rowIndex) {
@@ -53,43 +49,49 @@ var recordEditPage = function() {
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname[uib-tooltip]')");
+        return element.all(by.css('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip'));
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().siblings('span[ng-if=\"::form.isRequired(columnIndex);\"].text-danger')[0];", el);
+        return el.element(by.xpath('./../..')).element(by.className('text-danger'));
     };
 
     this.getColumnComment = function(el) {
         return el.getAttribute('uib-tooltip');
     };
 
-    this.getInputForAPageColumn = function(el, index) {
-        index = index || 0;
-        return browser.executeScript("return $(arguments[0]).parents('tr').find('input.form-control')[0];", el);
-    };
+    this.getInputSwitchContainerForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.input-switch-container-' + inputName));
+    }
 
     this.getInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
-    this.getTextAreaForAcolumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
+    this.getTextAreaForAColumn = function(name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value textarea[name="' + inputName + '"]'));
     };
 
-    this.getColorInputBackground = function (index, name) {
-        index = index || 0;
-        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+    this.getColorInputBackground = function (name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        // var script = "var color = document.querySelector('.input-switch-container-" + inputName + "').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+        var script = "var color = document.querySelector('.input-switch-container-" + inputName + " .chaise-color-picker-preview').style.backgroundColor;";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
         return browser.executeScript(script);
     };
 
-    this.getColorInputBtn = function (index, columnDisplayName) {
-        columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
+    this.getColorInputBtn = function (name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.input-switch-container-' + inputName + ' button'));
     }
 
     this.getColorInputPopup = function () {
@@ -108,53 +110,56 @@ var recordEditPage = function() {
         return this.getColorInputPopup().element(by.css('.sp-choose'));
     };
 
-    this.getHelpTextBlock = function(el) {
-        return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
-    };
-
     this.getColumnSelectAllButton = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-"+columnDisplayName));
+        return element(by.css('.select-all-' + columnDisplayName));
     };
 
-    this.getSelectAllInput = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-"+columnDisplayName+"-input"));
+    this.getSelectAllInput = () => {
+        return element(by.css('.select-all-input'));
     }
 
     this.getSelectAllDate = function (name) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][date]'));
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
     }
 
-    this.getSelectAllTime = function (name) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][time]'));
+    this.getSelectAllTimestampDate = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-date"]'));
+    }
+
+    this.getSelectAllTimestampTime = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-time"]'));
     }
 
     this.getSelectAllPopupBtn = function (name) {
-        return this.getSelectAllInput(name).element(by.className("modal-popup-btn"));
+        return this.getSelectAllInput().element(by.className("modal-popup-btn"));
     }
 
-    this.getSelectAllFileInput = function (name, name2) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name2 + '"]'));
+    this.getSelectAllFileInput = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
+    }
+
+    this.getSelectAllTextFileInput = function (name) {
+        return this.getSelectAllInput().element(by.className('input-switch-container--1-' + name)).element(by.css('.chaise-input-control > span'));
     }
 
     this.getSelectAllTextArea = function (name) {
-        return this.getSelectAllInput(name).element(by.css('textarea[name="' + name + '"]'));
+        return this.getSelectAllInput().element(by.css('textarea[name="-1-' + name + '"]'));
     };
 
     this.getSelectAllApply = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-apply-"+columnDisplayName));
+        return element(by.css('.select-all-apply-' + columnDisplayName));
     }
 
     this.getSelectAllClear = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-clear-"+columnDisplayName));
+        return element(by.css('.select-all-clear-' + columnDisplayName));
     }
 
     this.getSelectAllCancel = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-cancel-"+columnDisplayName));
+        return element(by.css('.select-all-close-' + columnDisplayName));
     }
 
     // gets dropdowns relative to el
@@ -162,29 +167,28 @@ var recordEditPage = function() {
         return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
+    this.getDropdownElementByName = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
+    }
+
     // gets all dropdowns
     this.getDropdowns = function() {
         return element.all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
-    this.getDropdownText = function(el) {
-        return el.element(by.css(".ng-binding"));
+    this.getDropdownText = (el) => {
+        return el.element(by.css('.chaise-input-control'));
     };
 
-    this.getBooleanInputDisplay = function(columnDisplayName, index) {
-        columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
-    };
-
-    this.getBooleanInputValue = function(columnDisplayName, index) {
-        columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
-    };
+    this.getOpenDropdownOptionsContainer = () => {
+        return element(by.css(".dropdown-menu.show"));
+    }
 
     // Gets the boolean dropdown options after the input is opened and attached to input container
-    // NOTE: could be more general because of how `.uib-dropdown-open` works
     this.getDropdownOptions = function() {
-        return element(by.css(".uib-dropdown-open > .adjust-boolean-dropdown.dropdown-menu")).all(by.tagName('li'));
+        return element(by.css(".dropdown-menu.show")).all(by.tagName('li'));
     }
 
     // Gets the boolean dropdown options when the dropdown is closed/hidden
@@ -212,12 +216,15 @@ var recordEditPage = function() {
             if (txt.trim() !== value) {
                 // Click open the dropdown
                 dropdownEl.click().then(function () {
+                    const optionsContainer = self.getOpenDropdownOptionsContainer();
+                    return browser.wait(protractor.ExpectedConditions.visibilityOf(optionsContainer), browser.params.defaultTimeout);
+                }).then(() => {
                     // Get all the possible choices in the dropdown
-                    return self.getDropdownOptions(dropdownEl)
+                    return self.getDropdownOptions();
                 }).then(function (options) {
                     // loop through options and check for one that matches our value we want to click
                     options.forEach(function (option, index) {
-                        option.element(by.tagName('a')).getAttribute("innerHTML").then(function (optionTxt) {
+                        option.getAttribute("innerHTML").then(function (optionTxt) {
                             if (optionTxt.trim() == value + "") {
                                 try {
                                     option.click()
@@ -246,14 +253,6 @@ var recordEditPage = function() {
         return element.all(by.css(".modal-popup-btn"));
     };
 
-    this.getModalPopupBtnsUsingScript = function() {
-        return browser.executeScript("return $('.modal-popup-btn')");
-    };
-
-    this.getForeignKeyInputRemoveBtns = function() {
-        return browser.executeScript("return $('.foreignkey-remove');");
-    };
-
     this.getModalTitle = function() {
         return element(by.css(".modal-title"));
     };
@@ -263,11 +262,7 @@ var recordEditPage = function() {
     };
 
     this.getModalCloseBtn = function() {
-        return element(by.css(".modal-close"));
-    };
-
-    this.getForms = function() {
-        return element.all(by.css(".form-header"));
+        return element(by.css(".modal-close"));x
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
@@ -285,6 +280,10 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     };
 
+    this.getForeignKeyInputClear = function(columnDisplayName, index) {
+        return this.getForeignKeyInputDisplay(columnDisplayName, index).element(by.className('remove-input-btn'));
+    };
+
     this.getForeignKeyInputs = function() {
         return element.all(by.css(".popup-select-value"));
     };
@@ -298,80 +297,88 @@ var recordEditPage = function() {
         return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
     };
 
-    this.getDateInputForAColumn = function(name, index) {
-        index = index || 0;
-        return element.all(by.css('input[name="' + name + '"][date]')).first();
-    };
-
-    this.getDatePickerForAnInput = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().find('.ng-scope._720kb-datepicker-open')[0];", el);
-    };
-
     this.getDateInputsForAColumn = function(name, index) {
-        index = index || 0;
-        var inputs = {};
-        var inputControl = element(by.id("form-" + index + '-' + name + "-input"));
-        inputs.date = inputControl.element(by.tagName("input"));
-        inputs.todayBtn = inputControl.element(by.xpath('..')).element(by.css(".chaise-input-group-append > button"));
-        return inputs;
+        index = index || 1;
+        const inputName = index + '-' + name;
+        const inputObj = {};
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '"]'));
+        inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
+        return inputObj;
     };
 
-    // NOTE: currently only works for Date
-    this.getRemoveButton = function (name, index, removeClass) {
-        return element(by.id("form-" + index + '-' + name + "-input")).element(by.css("." + removeClass));
+    this.getInputRemoveButton = function (name, index) {
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.remove-input-btn'));
     }
 
     this.getTimestampInputsForAColumn = function(name, index) {
-        index = index || 0;
-        var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
-        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).get(index);
-        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).get(index);
-        inputs.nowBtn = element.all(by.css('button[name="' + name + '-now"]')).get(index);
-        inputs.clearBtn = element.all(by.css('button[name="' + name + '-clear"]')).get(index);
-        return inputs;
+        index = index || 1;
+        const inputName = index + '-' + name;
+        var inputObj = {};
+        const container =  element(by.className(`input-switch-container-${inputName}`));
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '-date"]'));
+        inputObj.time = element(by.css('.entity-value input[name="' + inputName + '-time"]'));
+        inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
+        inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
+        return inputObj;
     };
 
-    this.getIntegerInputForAColumn = function(name, index) {
-        index = index || 0
-        return browser.executeScript("return $('td.entity-value input[type=\"text\"][integer][name=\"" + name + "\"]')[" + index + "];");
-    };
+    this.getColorInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
+    }
 
-    this.getFloatInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[type=\"text\"][float][name=\"" + name + "\"]')[" + index + "];");
-    };
+    this.getInputControlForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
+    }
+
+    this.getTextFileInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
+    }
 
     this.submitForm = function() {
-        return browser.executeScript("$('.alert-danger button').click(), $('button[type=\"submit\"]').click();");
+        const defer = Q.defer();
+
+        element(by.css(('button[type="submit"]'))).click().then(() => {
+            defer.resolve();
+        });
+
+        return defer.promise;
     };
+
+    this.getErrorMessageForAColumn= (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error.text-danger'));
+    }
 
     this.getInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('.chaise-input-control').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
-    this.getTimestampInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
-    this.getJSONInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    this.getJSONInputErrorMessage = function(el) {
+        // similar input structure as array detailed below
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
     this.getArrayInputErrorMessage = function(el) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"array\"]').siblings('.text-danger.ng-active').find('div').text();", el);
-    };
-
-    this.getDateInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
-    this.getFileInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"file\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
-    };
-
-    this.getColorInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"color\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+        /**
+         * The error message is a sibling of the grandparent to the textarea. Get the great grandparent and select the error from there
+         *  <div class='input-switch-container-{index}-{name}'>
+         *    <div class='input-switch-array'>
+         *      <div class='chaise-input-control'>
+         *        <textarea name='{index}-{name}' />
+         *      </div>
+         *    </div>
+         *    <span class='input-switch-error'>...</span>]
+         *  </div>
+         */
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
     this.clearInput = function(el) {
@@ -385,19 +392,11 @@ var recordEditPage = function() {
 
     this.getDeleteRowButton = function(index) {
         index = index || 0;
-        return browser.executeScript("return $('button.remove-form-btn')[" + index  + "];");
+        return this.getAllDeleteRowButtons().get(index);
     };
 
     this.getAllDeleteRowButtons = function() {
-        return browser.executeScript("return $('button.remove-form-btn');");
-    };
-
-    this.getDeleteModalButton = function() {
-        return browser.executeScript("return $('.modal .btn-danger')[0]");
-    };
-
-    this.getDayButtonsForDatePicker = function(dp) {
-        return browser.executeScript("return $(arguments[0]).find('._720kb-datepicker-calendar-day:not(._720kb-datepicker-disabled)');", dp);
+        return element.all(by.css('button.remove-form-btn'));
     };
 
     /**
@@ -430,20 +429,28 @@ var recordEditPage = function() {
         return browser.executeScript('return document.querySelector(\'.alert-danger\');');
     };
 
-    this.getAlertErrorLinkHref = function() {
-        return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
+    this.getAlertErrorClose = () => {
+        return element(by.css('.alert-danger button'));
+    }
+
+    this.getAlertErrorLink = function() {
+        return element(by.css('.alert-danger a'));
     };
 
     this.getAlertWarning = function() {
         return element(by.css('.alert-warning'));
     };
 
+    this.getRecordeditForms = () => {
+        return element.all(by.css('.recordedit-form .form-header'))
+    }
+
+    /**
+     * TODO used in a spec that we're not running (no-delete-btn.spec.ignored.js), that's why I didn't remove it.
+     * should be removed with the spec but didn't want to include it in React migration changes
+     */
     this.getViewModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
-    };
-
-    this.getSubmissionModelRows = function() {
-        return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
     this.getSubmitRecordButton = function () {
@@ -458,13 +465,13 @@ var recordEditPage = function() {
         return element(by.id("copy-rows-submit"));
     };
 
+    this.getRecordeditResetButton = function () {
+        return element(by.id('recordedit-reset'));
+    };
+
     this.getInputById = function (index, displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + index + '-' + displayName + "-input"));
-    };
-
-    this.getClearButton = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().parent().find('.fa-xmark')[0]", el);
     };
 
     this.getDisabledResultSet = function () {
@@ -524,7 +531,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTables = function () {
-        return element.all(by.css(".related-table-accordion:not(.forced-hidden)"));
+        return element.all(by.css(".chaise-accordion:not(.forced-hidden)"));
     };
 
     this.getRelatedTable = function(displayName) {
@@ -547,7 +554,7 @@ var recordPage = function() {
     }
 
     this.getRelatedTableHeadings = function() {
-        return element.all(by.css(".related-table-accordion"));
+        return element.all(by.css(".chaise-accordion"));
     };
 
     // TODO this function might not be needed and we should evaluate it during react migration
@@ -555,13 +562,13 @@ var recordPage = function() {
     // given that we're using ng-show, this function is returning the hidden related tables too
     this.getRelatedTableTitles = function() {
         return browser.executeScript(`
-          return Array.from(document.querySelectorAll('.related-table-accordion .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+          return Array.from(document.querySelectorAll('.chaise-accordion .chaise-accordion-header .chaise-accordion-displayname')).map((el) => el.textContent.trim());
         `);
     }
     // the following function only returns the related tables that are displayed
     this.getDisplayedRelatedTableTitles = function() {
       return browser.executeScript(`
-          return Array.from(document.querySelectorAll('.related-table-accordion:not(.forced-hidden) .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+          return Array.from(document.querySelectorAll('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')).map((el) => el.textContent.trim());
       `);
     }
 
@@ -575,11 +582,11 @@ var recordPage = function() {
     };
 
     this.getRelatedTableSectionHeader = function(displayName) {
-        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
+        return this.getRelatedTableHeading(displayName).element(by.css('.chaise-accordion-header'));
     };
 
     this.getRelatedTableSectionHeaderDisplayname = function(displayName) {
-        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header .rt-displayname'));
+        return this.getRelatedTableHeading(displayName).element(by.css('.chaise-accordion-header .chaise-accordion-displayname'));
     };
 
     this.getRelatedTableInlineComment = function(displayname) {
@@ -772,10 +779,6 @@ var recordPage = function() {
         return element.all(by.css("li.toc-heading"));
     };
 
-    this.getSidePanelHeading = function () {
-        return browser.executeScript('return $(".side-panel-heading").text()');
-    }
-
     this.getSidePanelTableTitles = function() {
         return element.all(by.css('.columns-container li.toc-heading'));
     }
@@ -819,14 +822,6 @@ var recordsetPage = function() {
 
     this.getPageTitleInlineComment = function () {
         return this.getPageTitleElement().element(by.css(".inline-tooltip"));
-    };
-
-    this.getPageSubtitle = function() {
-        return browser.executeScript("return $('#page-subtitle).text();')");
-    };
-
-    this.getPageSubtitleElement = function() {
-        return element(by.id('page-subtitle'));
     };
 
     this.getShowUnfilterdButton = function() {
@@ -878,10 +873,6 @@ var recordsetPage = function() {
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
     };
 
-    this.getModalFirstColumnValues = function () {
-        return browser.executeScript('return $(".modal-body .chaise-table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
-    };
-
     this.getModalFirstColumn = function () {
         return element.all(by.css(".modal-body .chaise-table-row td:nth-child(2)"));
     };
@@ -930,13 +921,14 @@ var recordsetPage = function() {
     };
 
     this.getInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
-    this.getModalPopupBtn = function(index) {
-        index = index || 0;
-        return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
+    this.getModalPopupBtn = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     };
 
     this.getActionHeaderSpan = function () {
@@ -1010,17 +1002,18 @@ var recordsetPage = function() {
 
     /******* Facet selectors for recordset with faceting ********/
     this.getHideFilterPanelBtn = function(el) {
-        var locator = by.className('hide-filter-panel-btn');
+        const locator = by.css('.hide-filter-panel-btn');
         return el ? el.element(locator) : element(locator);
     }
 
     this.getShowFilterPanelBtn = function(el) {
-        var locator = by.className('show-filter-panel-btn');
+        const locator = by.css('.show-filter-panel-btn');
         return el ? el.element(locator) : element(locator);
     }
 
-    this.getSidePanel = function() {
-      return element(by.css('.side-panel-resizable'));
+    this.getSidePanel = function(el) {
+        const locator = by.css('.side-panel-resizable');
+        return el ? el.element(locator) : element(locator);
     }
 
     this.getAllFacets = function (){
@@ -1077,11 +1070,6 @@ var recordsetPage = function() {
         return element(by.css(".chiclets-container")).all(by.css(".filter-chiclet"));
     }
 
-    // NOTE: keeping around until angular apps are rewritten
-    this.getAngularFacetFilters = function () {
-        return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet"));
-    }
-
     this.getClearAllFilters = function () {
         return element(by.css(".clear-all-filters"));
     }
@@ -1118,11 +1106,6 @@ var recordsetPage = function() {
       return browser.executeScript(`
         return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) =>  { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} })
       `);
-    }
-
-    // NOTE: keeping around until angular apps are rewritten
-    this.getAngularFacetOption = function (idx, option) {
-        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }
 
     this.getFacetOption = function (idx, option) {
@@ -1363,10 +1346,6 @@ function chaisePage() {
         return browser.executeScript("arguments[0].click();", button);
     };
 
-    this.jqueryClickButton = function(button) {
-        return browser.executeScript("$(arguments[0]).click();", button);
-    };
-
     /**
      * For longer strings, the sendKeys can be very slow.
      * If the string length is more than 10, it will change the value of input directly
@@ -1402,8 +1381,7 @@ function chaisePage() {
         return this.waitForElementInverse(self.recordPage.getRelatedSectionSpinner());
     }
     this.recordeditPageReady = function() {
-        this.waitForClickableElement(element(by.id("submit-record-button")));
-        return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
+        return this.waitForClickableElement(element(by.id("submit-record-button")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
@@ -1626,6 +1604,8 @@ function chaisePage() {
                 browser.actions().mouseMove(self.recordPage.getEntityTitleElement()).perform();
             } else if (appName === 'recordset') {
                 browser.actions().mouseMove(self.recordsetPage.getTotalCount()).perform();
+            } else if (appName === 'recordedit') {
+                browser.actions().mouseMove(self.recordEditPage.getRequiredInfoEl()).perform();
             }
 
             // TODO what about other apps

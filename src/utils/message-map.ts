@@ -66,7 +66,8 @@ export const MESSAGE_MAP = {
     showMore: 'Click to show more available filters',
     showDetails: 'Click to show more details about the filters',
     saveQuery: 'Click to save the current search criteria',
-    export: 'Click to choose an export format.'
+    export: 'Click to choose an export format.',
+    liveData: 'You are viewing snapshotted data. Click here to return to the live data catalog.'
   },
   URLLimitMessage: 'Maximum URL length reached. Cannot perform the requested action.',
   queryTimeoutList: '<ul class=\'show-list-style\'><li>Reduce the number of facet constraints.</li><li>Minimize the use of \'No value\' and \'All Records with Value\' filters.</li></ul>',

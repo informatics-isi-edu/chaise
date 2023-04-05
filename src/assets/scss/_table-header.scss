@@ -1,4 +1,5 @@
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .chaise-table-header {
   padding-bottom: 10px;
@@ -10,7 +11,7 @@
     // position in both display modes.
     display: flex;
     align-items: center;
-    height: $btn-height;
+    height: variables.$btn-height;
     white-space: nowrap;
 
     &:not(.with-page-size-dropdown) {
@@ -49,7 +50,7 @@
   }
 
   .chaise-table-header-spinner {
-    color: $spinner-color;
+    color: map-get(variables.$color-map, 'spinner');
     margin-left: 4px;
   }
 }

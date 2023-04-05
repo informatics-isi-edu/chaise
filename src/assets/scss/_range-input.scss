@@ -1,4 +1,5 @@
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .range-input-container {
     display: flex;
@@ -7,6 +8,14 @@
     width: 100%;
     flex-wrap: wrap;
     margin-top: -5px;
+
+    .range-input-form{
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        width: 100%;
+        flex-wrap: wrap;
+    }
 
     .range-input {
         width: 40%;
@@ -26,7 +35,7 @@
             min-width: 140px;
             max-width: 180px;
         }
-      
+
         &.time-width {
             min-width: 150px;
             max-width: 180px;
@@ -37,11 +46,16 @@
         }
     }
 
+    &.range-inputs-timestamp-width .range-input-submit-btn {
+      // input-switch is adding 3px margin to inputs
+      margin-bottom: 3px;
+    }
+
     .range-input-submit-btn {
         margin-top: 5px;
     }
 }
 
 .range-input-error {
-    color: $danger-color;
+    color: map-get(variables.$color-map, 'danger');
 }

@@ -27,10 +27,10 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
-  appName: 'record',
+  appName: APP_NAMES.RECORD,
   appTitle: 'Record',
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: true,

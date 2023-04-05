@@ -260,6 +260,7 @@ type RecordsetProviderProps = {
    * The parent page's tuple
    */
   parentTuple?: any,
+  initialPage?: any
 }
 
 export default function RecordsetProvider({
@@ -274,7 +275,8 @@ export default function RecordsetProvider({
   onSelectedRowsChanged,
   onFavoritesChanged,
   parentReference,
-  parentTuple
+  parentTuple,
+  initialPage
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -287,11 +289,11 @@ export default function RecordsetProvider({
   /**
    * whether the component has initialized or not
    */
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading, isLoadingRef] = useStateRef(true);
+  const [isInitialized, setIsInitialized] = useState<boolean>(!!initialPage);
+  const [isLoading, setIsLoading, isLoadingRef] = useStateRef<boolean>(!initialPage);
   const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
-  const [page, setPage, pageRef] = useStateRef<any>(null);
-  const [colValues, setColValues] = useState<any>([]);
+  const [page, setPage, pageRef] = useStateRef<any>(initialPage ? initialPage : null);
+  const [colValues, setColValues] = useState<any>(initialPage ? getColumnValuesFromPage(initialPage) : []);
   /**
    * The columns that should be displayed in the result table
    */
@@ -555,6 +557,9 @@ export default function RecordsetProvider({
   };
 
   const processRequests = () => {
+    // TODO does this make sense?
+    if (initialPage) return;
+
     printDebugMessage('running update page');
 
     if (!flowControl.current.haveFreeSlot()) {

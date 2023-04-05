@@ -1,5 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import Spinner from 'react-bootstrap/Spinner';
@@ -42,6 +42,8 @@ const RecordsetTable = ({
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
 
+  const [ showAllRows, setShowAllRows ] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
+
   /**
    * capture the state of selected and disabled of rows in here so
    * we don't have to populate this multiple times
@@ -75,7 +77,7 @@ const RecordsetTable = ({
   // when sort column has changed, call the callback
   useEffect(() => {
     // TODO why isInitialized is needed? (removing it triggers two updates on load)
-    if (!currSortColumn || !isInitialized) return;
+    if (!currSortColumn || !isInitialized || !config.sortable) return;
 
     const ref = reference.sort([currSortColumn]);
 
@@ -178,6 +180,7 @@ const RecordsetTable = ({
 
   // whether we should show the action buttons or not (used in multiple places)
   const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
+  const numHiddenRecords = config.maxDisplayedRows && page && page.length > 0 ? page.length - config.maxDisplayedRows : 0;
 
   /**
    * render the header for the action(s) column
@@ -342,6 +345,11 @@ const RecordsetTable = ({
     if (colValues.length === 0) return;
 
     return page.tuples.map((tuple: any, index: number) => {
+      // only show the number of rows that we allowed
+      if (!showAllRows && config.maxDisplayedRows && index >= config.maxDisplayedRows) {
+        return;
+      }
+
       const rowValues: any[] = [];
       colValues.forEach((valueArr: any[]) => {
         rowValues.push(valueArr[index]);
@@ -410,7 +418,17 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      {renderNextPreviousBtn()}
+      {!hasTimeoutError && numHiddenRecords > 0 &&
+        <div className='chaise-table-footer'>
+          <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>
+            {showAllRows ?
+              'Show less records' :
+              `Show all records (${numHiddenRecords} more available)`
+            }
+          </button>
+        </div>
+      }
+      {config.displayMode !== RecordsetDisplayMode.TABLE && renderNextPreviousBtn()}
     </div>
   )
 }

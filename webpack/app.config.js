@@ -174,7 +174,14 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       }),
       new MiniCssExtractPlugin({
         // contenthash will help with avoiding to send unchanged files to server
-        filename: '[name].[contenthash].css'
+        filename: '[name].[contenthash].css',
+        /**
+         * TODO needs more testing
+         * given that we're using CSS modules, this shouldn't cause any issues.
+         * The input-switch.scss was causing circular dep issue and this has been
+         * added to remove the warning.
+         */
+        ignoreOrder: true
       })
     ],
     optimization: {

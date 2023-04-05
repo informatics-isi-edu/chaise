@@ -1,5 +1,5 @@
-// required here because the output of this file (navbar.css) is used for login.index.html as well still
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 body > .container {
 	min-height: 100%;
@@ -14,25 +14,25 @@ body > .container {
 
 // navheader includes navbar as well as banners
 #navheader {
-    z-index: 1037;
+    z-index: map-get(variables.$z-index-map, 'navbar');
     position: relative; // for z-index to work, position must be non-static
 }
 
 .navbar-inverse {
-    background-color: #000;
-    border-color: #000;
+    background-color: map-get(variables.$color-map, 'navbar-inverse');
+    border-color: map-get(variables.$color-map, 'navbar-inverse');
 }
 
 .navbar-inverse .navbar-nav > div > a {
-   color: #C1C1C1;
+   color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
 }
 
 .navbar-inverse .navbar-nav.navbar-right > div > a{
-   color: #59C4FF;
+   color: map-get(variables.$color-map, 'navbar-inverse-link');
 }
 
-.navbar-brand {
-    color: #59C4FF;
+.navbar-inverse .navbar-brand {
+    color: map-get(variables.$color-map, 'navbar-inverse-link');
     float: left;
     height: 50px;
     padding: 15px 15px;
@@ -43,7 +43,7 @@ body > .container {
 
 #live-btn {
     margin-right: 0px; // offset marging-right: -15px from navbar-right
-    color: #59C4FF;
+    color: map-get(variables.$color-map, 'navbar-inverse-link');
     padding: 15px;
     text-decoration: none;
 
@@ -54,7 +54,7 @@ body > .container {
 
 
 .navbar-inverse .navbar-nav.navbar-right > div > a:hover{
-   color: #FFF;
+   color: map-get(variables.$color-map, 'navbar-inverse-menu-link-hover');
 }
 
 .navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
@@ -79,7 +79,7 @@ body > .container {
 .navbar .navbar-nav .disable-link {
     pointer-events: none;
     cursor: default;
-    color: $disabled-color;
+    color: map-get(variables.$color-map, 'disabled');
 }
 
 // positioning of searh box in navbar
@@ -92,13 +92,13 @@ body > .container {
 
     .chaise-input-control-sm {
         width: 100px;
-        border-color: $black-color;
+        border-color: map-get(variables.$color-map, 'black');
         border-radius: 4px 0px 0px 4px;
     }
 }
 
 #rid-search-input {
-    background-color: $table-striped-background-color;
+    background-color: map-get(variables.$color-map, 'table-striped-background');
     overflow-x: auto;
 }
 
@@ -136,13 +136,13 @@ body > .container {
     display: block;
     padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
     line-height: 20px;
-    color: #C1C1C1;
+    color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
 }
 
 .chaise-navbar-banner-container {
     margin-bottom: 0;
     padding: 10px 20px 10px 20px;
-    background-color: #f9e3a1;
+    background-color: map-get(variables.$color-map, 'navbar-banner');
     text-align: center;
 
     // use the normal font instead of light and make it bigger
@@ -166,7 +166,7 @@ body > .container {
         font-size: 21px;
         font-weight: 700;
         line-height: 1;
-        color: #000;
+        color: map-get(variables.$color-map, 'black');
         text-shadow: 0 1px 0 #fff;
         filter: alpha(opacity=20);
         opacity: .2;
@@ -194,8 +194,8 @@ nav.navbar {
     .chaise-dropdown-header {
         padding: 3px 15px 3px 15px;
         cursor: default;
-        font-size: $font-size;
-        color: $black-color;
+        font-size: variables.$font-size;
+        color: map-get(variables.$color-map, 'black');
         font-weight: 600;
     }
 
@@ -224,7 +224,7 @@ nav.navbar {
         border-color: transparent;
         border-style: solid;
         border-width: 6px 0 6px 6px; /* was 5px 0 5px 5px */
-        border-left-color: #428bca; /* was #ccc */
+        border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
         // to center
         margin: auto;
         margin-right: -15px;
@@ -234,7 +234,7 @@ nav.navbar {
 
     .dropdown-submenu:hover>a:after,
     .dropdown-submenu:hover>div>div>a:after {
-        border-left-color: #777; /* was #fff */
+        border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu');
     }
 
     .dropdown-submenu.pull-left {
@@ -307,16 +307,16 @@ nav.navbar {
         cursor: pointer;
         display: flex;
         justify-content: space-between;
-        color: #333;
+        color: map-get(variables.$color-map, 'black');
         margin-bottom: 2px;
         padding: 3px 15px 3px 15px;
         line-height: 1.4;
 
         &:focus,
         &:hover {
-            color: #262626;
+            color: lighten(map-get(variables.$color-map, 'black'), 10%);
             text-decoration: none;
-            background-color: #f5f5f5;
+            background-color: darken(map-get(variables.$color-map, 'white'), 10%);
         }
     }
 
@@ -373,7 +373,7 @@ nav.navbar {
     // Horizontal navbar
     @media (min-width: 768px) {
         .child-opened {
-            background-color: $table-header-background-color;
+            background-color: map-get(variables.$color-map, 'table-header-background');
         }
         .navbar-header {
             float: left;
@@ -413,28 +413,28 @@ nav.navbar {
 
         .dropdown-menu > a,
         .dropdown-menu > div > a {
-            color: $dropdown-menu-anchor-color;
+            color: map-get(variables.$color-map, 'dropdown-menu-anchor');
 
             &:focus,
             &:hover {
-                color: white;
+                color: map-get(variables.$color-map, 'white');
                 background: transparent;
             }
         }
 
         // Menu Toggler css in smaller screens
         .navbar-toggler {
-            border: 1px solid white;
+            border: 1px solid map-get(variables.$color-map, 'white');
             padding: 8px;
             margin-right: 16px;
-            color: white;
+            color: map-get(variables.$color-map, 'white');
 
             &:hover {
-                background-color: $black-color;
+                background-color: map-get(variables.$color-map, 'black');
             }
             &:focus {
                 box-shadow: none;
-                background-color: $black-color;
+                background-color: map-get(variables.$color-map, 'black');
             }
         }
     }
@@ -446,7 +446,7 @@ nav.navbar {
         }
 
         div.dropdown-submenu.show {
-            background-color: $table-header-background-color;
+            background-color: map-get(variables.$color-map, 'navbar-collapsed-submenu');
         }
     }
 }

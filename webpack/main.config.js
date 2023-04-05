@@ -34,6 +34,11 @@ module.exports = (env) => {
         ]
       },
       {
+        appName: 'recordedit',
+        appTitle: 'Recordedit',
+        externalFiles: [...recordsetExtFiles]
+      },
+      {
         appName: 'help',
         appTitle: 'Wiki Pages',
       },

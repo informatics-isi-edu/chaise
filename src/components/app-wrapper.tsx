@@ -204,14 +204,14 @@ const AppWrapperInner = ({
        */
       const maxHeight = img ? img.getAttribute('image-preview-max-height') : null;
 
-      if (element.classList.contains(CLASS_NAMES.ZOOMED_IN)) {
-        element.classList.remove(CLASS_NAMES.ZOOMED_IN);
+      if (element.classList.contains(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN)) {
+        element.classList.remove(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
         if (maxHeight && img) {
           element.style.maxHeight = 'unset';
           img.style.maxHeight = maxHeight;
         }
       } else {
-        element.classList.add(CLASS_NAMES.ZOOMED_IN);
+        element.classList.add(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
         if (maxHeight && img) {
           element.style.maxHeight = maxHeight;
           img.style.maxHeight = 'unset';

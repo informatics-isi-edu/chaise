@@ -167,7 +167,66 @@ The rules that should be followed while writing code.
 - Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
 - Comment your rule to make it easier for others to figure out why a rule was added.
 - If you're doing some calculations, don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
-- Use variables if you're using the same value more than once, and these values should be the same all the time (Just because you're using the value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
+- Use variables if you're using the same value more than once, and these values should be the same all the time (Just because you're using the value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well). The following is an example of using variables:
+  ```scss
+  $border-width: 2px;
+  .chaise-btn {
+    border: $border-width solid;
+  }
+
+  .chaise-btn-btn-group > > .chaise-btn:not(:first-child):not([disabled]) {
+    margin-left: $border-width * -1;
+  }
+  ```
+- If the variables you want to define are used in multiple places, add them to `variables.scss`. And make sure to use `@use` for using this variable in other places. For example:
+  ```scss
+  // _variables.scss
+  $my-variable: 5px;
+
+  // _file1.scss
+  @use 'variables';
+
+  .sample-element {
+    margin-right: variables.$my-variable;
+  }
+
+  // _file2.scss
+  @use 'variables';
+
+  .another-element {
+    margin-right: variables.$my-variable * -1;
+  }
+  ```
+- You can also opt to define a map instead of simple variables. To do so,
+  - Add a new file under `src/assets/scss/maps`, and define your map in there.
+    ```scss
+    // _my-new-map.scss
+    $my-map: (
+      'value1': #333,
+      'value2': #ccc
+    );
+    ```
+  - Import your file at the end of `src/assets/scss/_variables.scss`.
+    ```scss
+    // _variables.scss
+    // ...
+
+    @import 'maps/my-new-map';
+    ```
+  - Use `map-get` for accessing the map values:
+    ```scss
+    // _file.scss
+
+    @use 'sass:map';
+    @use 'variables';
+
+    // ...
+    .my-element {
+      color: map-get(variables.$my-new-map, 'value1');
+    }
+    ```
+
+
 - How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc.). Hence we need to keep in mind the following while writing print rules in CSS.
 
   - If table borders or other line elements are not visible in the print preview or the PDF, check if there exists any overriding
@@ -236,7 +295,7 @@ Regarding `timestamp` and `timestamptz` column types:
 
 - A `timestamptz` value is stored as a single point in time in Postgres. When the value is retrieved, the value is in whatever time zone the database is in.
 - A `timestamp` value is stored as a string with the date and time; time zone info will be dropped in Postgres.
-- When submitting values for `timestamp` and `timestamptz` columns, the app should just submit the values as browser's local time. (The app currently converts to UTC before submitting, which is unnecessary.)
+- When submitting values for `timestamp` and `timestamptz` columns, the app should just submit the values as browser's local time.
 - When displaying `timestamp` value, display whatever is in the database (the date and time, no need to convert to local time because there's no time zone info attached anyway)
 - When displaying `timestamptz` value, convert that value to browser's local time.
 

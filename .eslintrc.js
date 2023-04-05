@@ -65,9 +65,7 @@ module.exports = {
   },
   // ignore the old code
   ignorePatterns: [
-    'common/**/*', 'record/**/*', 'recordedit/**/*',
-    'viewer/**/*', 'help/**/*', 'lib/**/*',
-    'styles/**/*',
+    'common/**/*', 'viewer/**/*', 'lib/**/*', 'styles/**/*',
     // we might want to remove the following later:
     'test/**/*'
   ]

@@ -24,7 +24,7 @@ const RelatedTableHeader = ({
   relatedModel
 }: RelatedTableHeaderProps): JSX.Element => {
   /**
-   * variable to store ref of facet header text
+   * variable to store ref of header text
    */
   const contentRef = useRef(null);
   /**
@@ -58,7 +58,7 @@ const RelatedTableHeader = ({
   };
 
   return (
-    <div className='rt-section-header'>
+    <div className='chaise-accordion-header'>
       <ChaiseTooltip
         placement='top'
         tooltip={renderTooltipContent()}
@@ -73,14 +73,14 @@ const RelatedTableHeader = ({
         }}
         show={showTooltip}
       >
-        <div className='rt-displayname' ref={contentRef}>
+        <div className='chaise-accordion-displayname' ref={contentRef}>
           {renderedDisplayname}
           {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
         </div>
       </ChaiseTooltip>
 
-      <div className='rt-section-header-buttons'>
-        <div className='rt-section-header-icons'>
+      <div className='chaise-accordion-header-buttons'>
+        <div className='chaise-accordion-header-icons'>
           {relatedModel.recordsetState.isLoading && !relatedModel.recordsetState.hasTimeoutError &&
             <Spinner animation='border' size='sm' />
           }

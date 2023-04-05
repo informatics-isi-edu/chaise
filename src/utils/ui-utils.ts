@@ -18,6 +18,8 @@ import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
  *    - .top-panel-container
  *    - .bottom-panel-container
  * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
+ *
+ * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
 export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
   try {
@@ -170,8 +172,10 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
  * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
  * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
  * @param {DOMElement} parent - the parent element
+ * @param {boolean?} fixedPos - whether the scrollbar is fixed position or not (if so, we will attach extra rules)
+ * @param {HTMLElement?} extraSensorTarget - if we want to trigger the logic based on changes to another element
  */
-export function addTopHorizontalScroll(parent: HTMLElement) {
+export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, extraSensorTarget?: HTMLElement) {
   if (!parent) return;
 
   const topScrollElementWrapper = parent.querySelector<HTMLElement>('.chaise-table-top-scroll-wrapper'),
@@ -202,8 +206,12 @@ export function addTopHorizontalScroll(parent: HTMLElement) {
     isSyncingTableScroll = false;
   });
 
-  // make sure that the length of the scroll is identical to the scroll at the bottom of the table
-  new ResizeSensor(scrollableContent, function () {
+  const setTopScrollStyles = () => {
+    if (fixedPos) {
+      topScrollElementWrapper!.style.width = `${scrollableContent.clientWidth}px`;
+      topScrollElementWrapper!.style.marginTop = '-15px';
+    }
+
     // there is no need of a scrollbar, content is not overflowing
     if (scrollableContent!.scrollWidth == scrollableContent!.clientWidth) {
       topScrollElement!.style.width = '0';
@@ -213,7 +221,16 @@ export function addTopHorizontalScroll(parent: HTMLElement) {
       topScrollElementWrapper!.style.height = '15px';
       topScrollElement!.style.width = scrollableContent!.scrollWidth + 'px';
     }
-  });
+  }
+
+  const sensors = [];
+
+  // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+  sensors.push(new ResizeSensor(scrollableContent, setTopScrollStyles));
+
+  if (extraSensorTarget) {
+    sensors.push(new ResizeSensor(extraSensorTarget, setTopScrollStyles));
+  }
 
   // make top scroll visible after adding the handlers to ensure its visible only when working
   topScrollElementWrapper.style.display = 'block';
@@ -221,6 +238,8 @@ export function addTopHorizontalScroll(parent: HTMLElement) {
   if (scrollableContent.scrollWidth == scrollableContent.clientWidth) {
     topScrollElementWrapper.style.height = '15px';
   }
+
+  return sensors;
 }
 
 export function copyToClipboard(text: string) {
