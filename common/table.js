@@ -793,6 +793,8 @@
             }
 
             if (updateCount) {
+                // remove the count right away so we're not showing an outdated count
+                vm.totalRowsCnt = null;
                 if (!Number.isInteger(vm._recountStartTime) || vm._recountStartTime === -1) {
                     vm._recountStartTime = ERMrest.getElapsedTime();
                 }
