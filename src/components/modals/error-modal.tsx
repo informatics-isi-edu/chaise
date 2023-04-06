@@ -225,6 +225,9 @@ const ErrorModal = (): JSX.Element | null => {
     new ResizeSensor(mainnav, () => {
       node.style.top = `${mainnav.offsetHeight}px`;
     });
+
+    // this class is used in test cases so we know when the transition has ended
+    node.classList.add('modal-error-entered');
   };
 
   return (
