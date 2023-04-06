@@ -507,6 +507,9 @@ export default function RecordsetProvider({
     }
 
     if (updateCount) {
+      // remove the count right away so we're not showing an outdated count
+      setTotalRowCount(null);
+
       if (!Number.isInteger(flowControl.current.recountStartTime) || flowControl.current.recountStartTime === -1) {
         flowControl.current.recountStartTime = ConfigService.ERMrest.getElapsedTime();
       }
