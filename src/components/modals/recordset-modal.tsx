@@ -119,7 +119,9 @@ const RecordsetModal = ({
    * to the provider and therefore cannot get the selectedRows.
    * This will also allow us to set the state of submit button
    */
-  const [submittedRows, setSubmittedRows] = useState<any>([]);
+  const [submittedRows, setSubmittedRows] = useState<SelectedRow[]>(() => (
+    Array.isArray(recordsetProps.initialSelectedRows) ? recordsetProps.initialSelectedRows : []
+  ));
 
   /**
    * when the submit button is pressed, we should hide it so it doesn't block other elements.
