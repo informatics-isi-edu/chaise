@@ -1,22 +1,44 @@
 const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
-var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+const recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
     tocHeaders: ['Summary', 'accommodation_image (4)', 'booking (2)', 'more-files (1)',
         'more-media (1)', 'new_media (2)', 'new_media_2 (2)', 'new_media_3 (2)',
         'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)',
         'new_media_7 (2)', 'new_media_8 (2)', 'new_media_9 (2)'],
-    table_displayname: "Editable Id Table",
-    table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
     entity_inner_html_title: "<strong>1</strong>",
     html_table_name: "html-name-table",
     html_table_display: "<strong>Html Name</strong>",
-    keys: [{"name": "id", "value": 1, "operator": "="}],
     html_keys: [{"name": "id", "value": 1, "operator": "="}],
-    html_table_name_record_url: browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:html-name-table/RID=" + chaisePage.getEntityRow("editable-id", "html-name-table", [{column: "id", value: "1"}]).RID
+    html_table_name_record_url: browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:html-name-table/RID=" + chaisePage.getEntityRow("editable-id", "html-name-table", [{column: "id", value: "1"}]).RID,
+    copy_test: {
+      table_name: "editable-id-table",
+      table_displayname: "Editable Id Table",
+      table_inner_html_display: "<strong>Editable Id Table</strong>",
+      keys: [{"name": "id", "value": 1, "operator": "="}],
+      /**
+       * testing the following scenarios:
+       * - normal columns can be copied over.
+       * - generated columns are ignored.
+       * - asset metadata are copied with the asset.
+       */
+      column_names: ["id", "text", "int", "asset1_uri", "asset1_filename", "asset1_bytes"],
+      column_values: {
+        'id': '1777',
+        'int': '17',
+        'text': 'text',
+        'asset1_uri': {
+          link: 'https://example.com/path/to/saved_filename.png',
+          value: 'saved_filename.png'
+        },
+        'asset1_filename': 'saved_filename.png',
+        'asset1_bytes': '512,000'
+      }
+
+    }
 };
 
 var relatedTableTestParams = {
@@ -157,17 +179,14 @@ describe('View existing record,', function() {
         });
     });
 
-    // below are the tests for the copy button, and no csv option
-    describe("For table " + testParams.table_name + ",", function() {
-
-        var table, record;
+    describe("For table " + testParams.copy_test.table_name + ",", function() {
 
         beforeAll(function() {
             var keys = [];
-            testParams.keys.forEach(function(key) {
+            testParams.copy_test.keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
             });
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.copy_test.table_name + "/" + keys.join("&");
             chaisePage.navigate(url);
             chaisePage.recordPageReady();
         });
@@ -208,8 +227,8 @@ describe('View existing record,', function() {
                     titleElement = chaisePage.recordPage.getEntityTitleElement();
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
-                    expect(html).toBe(testParams.table_inner_html_display);
-                    expect(subtitleElement.getText()).toBe(testParams.table_displayname);
+                    expect(html).toBe(testParams.copy_test.table_inner_html_display);
+                    expect(subtitleElement.getText()).toBe(testParams.copy_test.table_displayname);
 
                     return titleElement.getAttribute("innerHTML");
                 }).then(function(html) {
@@ -242,11 +261,11 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create 1 " + testParams.table_displayname + ' record', "Recordedit title is incorrect.");
+                    expect(txt).toBe("Create 1 " + testParams.copy_test.table_displayname + ' record', "Recordedit title is incorrect.");
 
                     return chaisePage.recordEditPage.getEntityTitleLinkElement().element(by.tagName('span')).getAttribute("innerHTML");
                 }).then(function(html) {
-                    expect(html).toBe(testParams.table_inner_html_display);
+                    expect(html).toBe(testParams.copy_test.table_inner_html_display);
 
                     return chaisePage.recordEditPage.getRecordeditForms().count();
                 }).then(function(ct) {
@@ -262,7 +281,7 @@ describe('View existing record,', function() {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     // Create new <table-name> | chaiseConfig.headTitle
                     // should only use the inner text and should not have the <strong> tag
-                    expect(browser.getTitle()).toBe("Create new " + testParams.table_displayname + " | " + chaiseConfig.headTitle);
+                    expect(browser.getTitle()).toBe("Create new " + testParams.copy_test.table_displayname + " | " + chaiseConfig.headTitle);
 
                     done();
                 }).catch(function (err) {
@@ -304,9 +323,16 @@ describe('View existing record,', function() {
                 idInput.clear();
                 idInput.sendKeys("777");
                 chaisePage.recordEditPage.submitForm();
-                browser.driver.getCurrentUrl().then(function(url) {
-                    expect(url.indexOf("record")).toBeGreaterThan(-1);
-                });
+                // wait for url change
+                browser.wait(function () {
+                    return browser.driver.getCurrentUrl().then(function(url) {
+                        return url.startsWith(process.env.CHAISE_BASE_URL + "/record/");
+                    });
+                }, browser.params.defaultTimeout);
+            });
+
+            it ("all the appropriate data should be copied.", function () {
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.copy_test.column_names, testParams.copy_test.column_values, testParams.copy_test.column_names.length);
             });
         });
     });
