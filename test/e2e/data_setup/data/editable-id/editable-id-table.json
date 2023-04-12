@@ -1,1 +1,11 @@
-[{"id": 1, "text": "text", "int": 17, "generated": 1}]
+[
+  {
+    "id": 1,
+    "text": "text",
+    "int": 17,
+    "generated": 1,
+    "asset1_uri": "https://example.com/path/to/saved_filename.png",
+    "asset1_filename": "saved_filename.png",
+    "asset1_bytes": 512000
+  }
+]

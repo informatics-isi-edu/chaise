@@ -29,21 +29,24 @@
                             "hidden"
                         ]
                     }
-                }, {
+                },
+                {
                     "name": "text",
                     "default": "default text",
                     "nullok": true,
                     "type": {
                         "typename": "text"
                     }
-                }, {
+                },
+                {
                     "name": "int",
                     "default": 100,
                     "nullok": true,
                     "type": {
                         "typename": "int"
                     }
-                }, {
+                },
+                {
                     "name": "generated",
                     "nullok": true,
                     "type": {
@@ -53,11 +56,36 @@
                         "tag:isrd.isi.edu,2016:generated": null,
                         "tag:isrd.isi.edu,2016:immutable": null
                     }
+                },
+                {
+                  "name": "asset1_uri",
+                  "type": {
+                    "typename": "text"
+                  },
+                  "annotations": {
+                    "tag:isrd.isi.edu,2017:asset": {
+                      "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
+                      "filename_column" : "asset1_filename",
+                      "byte_count_column": "asset1_bytes"
+                    }
+                  }
+                },
+                {
+                  "name": "asset1_filename",
+                  "type": {
+                    "typename": "text"
+                  }
+                },
+                {
+                  "name": "asset1_bytes",
+                  "type": {
+                    "typename": "int8"
+                  }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["RID", "id", "text", "int", "generated"],
+                    "*": ["id", "text", "int", "generated", "asset1_uri", "asset1_filename", "asset1_bytes"],
                     "export": []
                 },
                 "tag:misd.isi.edu,2015:display" : {

@@ -1817,7 +1817,7 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
         if (process.env.CI && column_values[columnName].ignoreInCI) {
             continue;
         }
-        else if (typeof column_values[columnName].link === 'string') {
+        else if (column_values[columnName] && typeof column_values[columnName].link === 'string') {
             column = column.element(by.css("a"));
             var link = mustache.render(column_values[columnName].link, {
                 "catalog_id": process.env.catalogId,

@@ -249,13 +249,30 @@ export function populateCreateInitialValues(
             const metaObj: any = {};
             metaObj[column.name] = defaultValue;
 
-            // TODO: asset metadata type
             const metadata: any = column.getMetadata(metaObj);
             initialModelValue = {
               url: metadata.url || '',
               filename: metadata.filename || metadata.caption || '',
               filesize: metadata.byteCount || ''
             }
+
+            /**
+             * populate the metadata values based on the default value as well
+             * (same thing is done in copy mode)
+             */
+            if (metadata.filename) {
+              values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+            }
+            if (metadata.byteCount) {
+              values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+            }
+            if (metadata.md5) {
+              values[`${formValue}-${column.md5.name}`] = metadata.md5;
+            }
+            if (metadata.sha256) {
+              values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+            }
+
           } else if (column.isForeignKey) {
             // if all the columns of the foreignkey are prefilled, use that instead of default
             const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
@@ -414,28 +431,38 @@ export function populateEditInitialValues(
               filename: metadata.filename || metadata.caption,
               filesize: metadata.byteCount
             };
+
+            /**
+             * make sure we're also copying the metadata values.
+             *
+             * we don't need to do this in edit mode as we're not showing any of these values
+             * and won't need to submit any of these values in update mode.
+             * if user selects a new file, these values will be populated by ermrest.js based
+             * on the new file.
+             */
+            if (appMode === appModes.COPY) {
+              if (metadata.filename) {
+                values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+              }
+              if (metadata.byteCount) {
+                values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+              }
+              if (metadata.md5) {
+                values[`${formValue}-${column.md5.name}`] = metadata.md5;
+              }
+              if (metadata.sha256) {
+                values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+              }
+            }
+
           } else {
             value = tupleValues[i];
           }
 
-          // TODO: Copy + asset
-          // if in copy mode and copying an asset column with metadata available, attach that to the submission model
-          // if (column.isAsset && isCopy) {
-          //   // may not have been set or fetched above because of disabled case
-          //   // we still want to copy the metadata
-          //   metadata = column.getMetadata(tuple.data);
-
-          //   // I don't think this should be done brute force like this
-          //   if (metadata.filename) model.submissionRows[tupleIndex][column.filenameColumn.name] = metadata.filename;
-          //   if (metadata.byteCount) model.submissionRows[tupleIndex][column.byteCountColumn.name] = metadata.byteCount;
-          //   if (metadata.md5) model.submissionRows[tupleIndex][column.md5.name] = metadata.md5;
-          //   if (metadata.sha256) model.submissionRows[tupleIndex][column.sha256.name] = metadata.sha256;
-          // }
           break;
       }
 
       // no need to check for copy here because the case above guards against the negative case for copy
-
       if (isTimestamp) {
         values[`${formValue}-${column.name}`] = value?.datetime || '';
         values[`${formValue}-${column.name}-date`] = value?.date || '';
@@ -522,6 +549,14 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       col.foreignKey.colset.columns.forEach((fkCol: any) => {
         setSubmission(fkCol);
       });
+    } else if (col.isAsset) {
+      // if due to copy the metadata values are set, use them
+      if (col.filenameColumn) setSubmission(col.filenameColumn, true);
+      if (col.byteCountColumn) setSubmission(col.byteCountColumn, true);
+      if (col.md5) setSubmission(col.md5, true);
+      if (col.sha256) setSubmission(col.sha256, true);
+
+      setSubmission(col);
     } else {
       setSubmission(col);
     }
