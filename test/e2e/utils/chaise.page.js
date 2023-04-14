@@ -13,11 +13,6 @@ var recordEditPage = function() {
         return this.getEntityTitleElement().element(by.tagName('a'));
     };
 
-    // resultset view
-    this.getResultsetTitleElement = function() {
-        return element(by.css('.resultset-container #page-title'));
-    };
-
     this.getRequiredInfoEl = () => {
         return element(by.className('required-info'));
     }
@@ -40,14 +35,6 @@ var recordEditPage = function() {
         return element(by.css(".column-permission-warning-" + formNumber + '-' + displayName));
     };
 
-    this.getDisabledRowIcon = function (rowIndex) {
-        return element.all(by.css('.form-header')).get(rowIndex).all(by.css('.disabled-row-icon'));
-    }
-
-    this.getColumnCaptionsWithHtml = function() {
-        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
-    };
-
     this.getColumnsWithUnderline = function() {
         return element.all(by.css('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip'));
     };
@@ -56,20 +43,54 @@ var recordEditPage = function() {
         return el.element(by.xpath('./../..')).element(by.className('text-danger'));
     };
 
-    this.getColumnComment = function(el) {
-        return el.getAttribute('uib-tooltip');
+    this.getRecordeditForms = () => {
+        return element.all(by.css('.recordedit-form .form-header'))
+    }
+
+    this.getMultiFormInput = function () {
+        return element(by.id("copy-rows-input"));
     };
 
-    this.getInputSwitchContainerForAColumn = (name, index) => {
-        index = index || 1;
+    this.getMultiFormInputSubmitButton = function () {
+        return element(by.id("copy-rows-submit"));
+    };
+
+    this.getRecordeditResetButton = function () {
+        return element(by.id('recordedit-reset'));
+    };
+
+    this.getSubmitRecordButton = function () {
+        return element(by.id("submit-record-button"));
+    };
+
+    this.getBulkDeleteButton = function () {
+        return element(by.id('bulk-delete-button'));
+    };
+
+    /* input selectors */
+    this.getInputRemoveButton = function (name, index) {
         const inputName = index + '-' + name;
-        return element(by.css('.input-switch-container-' + inputName));
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.remove-input-btn'));
     }
+
+    this.clearInput = function(el) {
+        return el.getAttribute('value').then(function(value) {
+            el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
+            browser.sleep(10);
+        }).catch(function (err) {
+            console.log(err)
+        });
+    };
 
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value input[name="' + inputName + '"]'));
+    };
+
+    this.getInputById = function (index, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
 
     this.getTextAreaForAColumn = function(name, index) {
@@ -78,10 +99,49 @@ var recordEditPage = function() {
         return element(by.css('.entity-value textarea[name="' + inputName + '"]'));
     };
 
+    this.getDateInputsForAColumn = function(name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        const inputObj = {};
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '"]'));
+        inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
+        return inputObj;
+    };
+
+    this.getTimestampInputsForAColumn = function(name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        var inputObj = {};
+        const container =  element(by.className(`input-switch-container-${inputName}`));
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '-date"]'));
+        inputObj.time = element(by.css('.entity-value input[name="' + inputName + '-time"]'));
+        inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
+        inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
+        return inputObj;
+    };
+
+    this.getInputControlForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
+    }
+
+    this.getTextFileInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
+    }
+
+    /* Color input selectors */
+    this.getColorInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
+    }
+
     this.getColorInputBackground = function (name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
-        // var script = "var color = document.querySelector('.input-switch-container-" + inputName + "').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
         var script = "var color = document.querySelector('.input-switch-container-" + inputName + " .chaise-color-picker-preview').style.backgroundColor;";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
@@ -110,6 +170,7 @@ var recordEditPage = function() {
         return this.getColorInputPopup().element(by.css('.sp-choose'));
     };
 
+    /* select all selectors */
     this.getColumnSelectAllButton = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.select-all-' + columnDisplayName));
@@ -162,21 +223,12 @@ var recordEditPage = function() {
         return element(by.css('.select-all-close-' + columnDisplayName));
     }
 
-    // gets dropdowns relative to el
-    this.getDropdownElements = function(el) {
-        return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
-    };
-
+    /* dropdown boolean selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
-
-    // gets all dropdowns
-    this.getDropdowns = function() {
-        return element.all(by.css(".chaise-input-control.dropdown-toggle"));
-    };
 
     this.getDropdownText = (el) => {
         return el.element(by.css('.chaise-input-control'));
@@ -189,23 +241,6 @@ var recordEditPage = function() {
     // Gets the boolean dropdown options after the input is opened and attached to input container
     this.getDropdownOptions = function() {
         return element(by.css(".dropdown-menu.show")).all(by.tagName('li'));
-    }
-
-    // Gets the boolean dropdown options when the dropdown is closed/hidden
-    // the list is relative to the input when hidden
-    this.getRelativeDropdownOptions = function(el) {
-        // el is "form-x-colname-display"
-        return el.element(by.xpath('ancestor::td')).all(by.tagName('li'));
-    }
-
-    this.getRelativeDropdownOptionsATag = function(el) {
-        // el is "form-x-colname-display"
-        return el.element(by.xpath('ancestor::td')).all(by.css('li a'));
-    }
-
-    this.getDropdownClear = function (el) {
-        // el is "form-x-colname-display"
-        return el.element(by.xpath('ancestor::td')).element(by.css(".boolean-remove"));
     }
 
     this.selectDropdownValue = function(dropdownEl, value) {
@@ -245,10 +280,7 @@ var recordEditPage = function() {
         });
     };
 
-    this.getCreateBtns = function() {
-        return element.all(by.css(".create-record-btn"));
-    };
-
+    /* Foreign key input and popup selectors */
     this.getModalPopupBtns = function() {
         return element.all(by.css(".modal-popup-btn"));
     };
@@ -270,11 +302,6 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
     };
 
-    this.getForeignKeyInputValue = function(columnDisplayName, index) {
-        columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
-    };
-
     this.getForeignKeyInputButton = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
@@ -288,59 +315,6 @@ var recordEditPage = function() {
         return element.all(by.css(".popup-select-value"));
     };
 
-    this.getUploadInput = function (columnName, index) {
-        return element(by.id("form-" + index + '-' + columnName + "-input")).element(by.css("input[name='txt" + columnName + "']"));
-    }
-
-    this.getInputValue = function(columnName, index) {
-        index = index || 0;
-        return element(by.model('form.recordEditModel.rows[' + index + ']["' + columnName + '"]'));
-    };
-
-    this.getDateInputsForAColumn = function(name, index) {
-        index = index || 1;
-        const inputName = index + '-' + name;
-        const inputObj = {};
-        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '"]'));
-        inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
-        return inputObj;
-    };
-
-    this.getInputRemoveButton = function (name, index) {
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.remove-input-btn'));
-    }
-
-    this.getTimestampInputsForAColumn = function(name, index) {
-        index = index || 1;
-        const inputName = index + '-' + name;
-        var inputObj = {};
-        const container =  element(by.className(`input-switch-container-${inputName}`));
-        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '-date"]'));
-        inputObj.time = element(by.css('.entity-value input[name="' + inputName + '-time"]'));
-        inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
-        inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
-        return inputObj;
-    };
-
-    this.getColorInputForAColumn = (name, index) => {
-        index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
-    }
-
-    this.getInputControlForAColumn = (name, index) => {
-        index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
-    }
-
-    this.getTextFileInputForAColumn = (name, index) => {
-        index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
-    }
-
     this.submitForm = function() {
         const defer = Q.defer();
 
@@ -351,7 +325,8 @@ var recordEditPage = function() {
         return defer.promise;
     };
 
-    this.getErrorMessageForAColumn= (name, index) => {
+    /* error message selectors */
+    this.getErrorMessageForAColumn = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error.text-danger'));
@@ -379,15 +354,6 @@ var recordEditPage = function() {
          *  </div>
          */
         return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
-    };
-
-    this.clearInput = function(el) {
-        return el.getAttribute('value').then(function(value) {
-            el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
-            browser.sleep(10);
-        }).catch(function (err) {
-            console.log(err)
-        });
     };
 
     this.getDeleteRowButton = function(index) {
@@ -418,6 +384,7 @@ var recordEditPage = function() {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
 
+    /* alert selectors */
     this.getAlertError = function() {
         /**
          * TODO while this is only used in recordedit, the submission might be
@@ -441,57 +408,8 @@ var recordEditPage = function() {
         return element(by.css('.alert-warning'));
     };
 
-    this.getRecordeditForms = () => {
-        return element.all(by.css('.recordedit-form .form-header'))
-    }
-
-    /**
-     * TODO used in a spec that we're not running (no-delete-btn.spec.ignored.js), that's why I didn't remove it.
-     * should be removed with the spec but didn't want to include it in React migration changes
-     */
-    this.getViewModelRows = function() {
-        return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
-    };
-
-    this.getSubmitRecordButton = function () {
-        return element(by.id("submit-record-button"));
-    };
-
-    this.getMultiFormInput = function () {
-        return element(by.id("copy-rows-input"));
-    };
-
-    this.getMultiFormInputSubmitButton = function () {
-        return element(by.id("copy-rows-submit"));
-    };
-
-    this.getRecordeditResetButton = function () {
-        return element(by.id('recordedit-reset'));
-    };
-
-    this.getInputById = function (index, displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("form-" + index + '-' + displayName + "-input"));
-    };
-
-    this.getDisabledResultSet = function () {
-        return element(by.id("resultset-disabled-table"));
-    };
-
-    this.getDisabledResultSetHeader = function () {
-        return element(by.id("resultset-disabled-table")).element(by.tagName("h3"));
-    };
-
-    this.getDisabledResultSetRows = function () {
-        return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
-    };
-
     this.getRecordSetTable = function() {
         return element(by.className('recordset-table'));
-    };
-
-    this.getBulkDeleteButton = function () {
-      return element(by.id('bulk-delete-button'));
     };
 };
 
@@ -530,6 +448,11 @@ var recordPage = function() {
         return el.element(by.css("a"));
     };
 
+    this.getMarkdownContainer = function (el) {
+        return el.all(by.css(".markdown-container")).first();
+    };
+
+    /* related table selectors */
     this.getRelatedTables = function () {
         return element.all(by.css(".chaise-accordion:not(.forced-hidden)"));
     };
@@ -544,18 +467,9 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName));
     };
 
-    this.getEntityRelatedTableScope = function (displayName,safeId=false) { //if safeId==true then no need to call the function
-        displayName = safeId?displayName:makeSafeIdAttr(displayName);
-        return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
-    };
-
     this.getInlineRelatedTableInlineComment = function (displayname) {
         return this.getEntityRelatedTable(displayname).element(by.css(".inline-tooltip"));
     }
-
-    this.getRelatedTableHeadings = function() {
-        return element.all(by.css(".chaise-accordion"));
-    };
 
     // TODO this function might not be needed and we should evaluate it during react migration
     //      (we might only need the getDisplayedRelatedTableTitles function)
@@ -593,11 +507,6 @@ var recordPage = function() {
         return this.getRelatedTableAccordion(displayname).element(by.css('.inline-tooltip'));
     }
 
-    this.getRelatedTableHeadingTitle = function(displayname) {
-        displayName = makeSafeIdAttr(displayname);
-        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-heading'))
-    };
-
     this.getRelatedTableColumnNamesByTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
@@ -608,6 +517,7 @@ var recordPage = function() {
         return el.all(by.css(".chaise-table-row"));
     };
 
+    /* related table actions selectors */
     this.getRelatedTableRowLink = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName, isInline);
         return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".view-action-button")).first();
@@ -621,6 +531,10 @@ var recordPage = function() {
     this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
         return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".delete-action-button"));
+    };
+
+    this.getDeleteActionButtons = function (displayname) {
+        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -647,15 +561,12 @@ var recordPage = function() {
         return el.element(by.css(".toggle-display-link"));
     };
 
-    this.getRelatedTableRowValues = function(displayName, isInline) {
-        return this.getRelatedTableRows(displayName, isInline).all(by.tagName("td"));
-    };
-
     this.getNoResultsRow = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
         return el.element(by.id("no-results-row"));
     };
 
+    /* record page action selectors */
     this.getCreateRecordButton = function() {
         return element(by.css(".title-buttons .create-record-btn"));
     };
@@ -684,6 +595,7 @@ var recordPage = function() {
         return element(by.css(".toggle-empty-sections"));
     };
 
+    /* share citation popup selectors */
     this.getShareButton = function() {
         return element(by.css('.share-cite-btn'));
     };
@@ -695,18 +607,6 @@ var recordPage = function() {
     this.getLiveLinkElement = function() {
         return element(by.css('.share-modal-live-link'));
     };
-
-    this.getModalText = function() {
-        return element(by.css(".modal-body"));
-    };
-
-    this.getConfirmDeleteModalText = function () {
-        return element(by.css(".confirm-delete-modal .modal-body"));
-    }
-
-    this.getErrorModalText = function () {
-        return element(by.css(".modal-error .modal-body"));
-    }
 
     this.getShareModal = function() {
         return element(by.css(".chaise-share-citation-modal"));
@@ -751,22 +651,28 @@ var recordPage = function() {
         return element(by.css(".bibtex-download-btn"));
     };
 
+    /* general record modal selectors */
+    this.getModalText = function() {
+        return element(by.css(".modal-body"));
+    };
+
+    this.getConfirmDeleteModalText = function () {
+        return element(by.css(".confirm-delete-modal .modal-body"));
+    }
+
+    this.getErrorModalText = function () {
+        return element(by.css(".modal-error .modal-body"));
+    }
+
     this.getModalDisabledRows = function () {
       return element.all(by.css('.modal-body tr.disabled-row'));
-    };
-
-    this.getSuccessAlert = function () {
-        return element(by.css(".alert-success"));
-    };
-
-    this.getDeleteActionButtons = function (displayname) {
-        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
     };
 
     this.getRelatedSectionSpinner = function () {
         return element(by.css(".related-section-spinner"));
     }
 
+    /* side panel selectors */
     this.getSidePanel = function() {
       return element(by.css('.side-panel-resizable'));
     }
@@ -791,17 +697,9 @@ var recordPage = function() {
         return element(by.className('show-toc-btn'));
     }
 
-    this.getModalHideFilterPanelBtn = function() {
-        return element(by.css(".modal-body")).element(by.className('hide-filter-panel-btn'));
-    }
-
     this.getModalSidePanel = function() {
         return element(by.css(".modal-body")).element(by.css('.side-panel-resizable'));
     }
-
-    this.getMarkdownContainer = function (el) {
-        return el.all(by.css(".markdown-container")).first();
-    };
 };
 
 var recordsetPage = function() {
@@ -824,22 +722,19 @@ var recordsetPage = function() {
         return this.getPageTitleElement().element(by.css(".inline-tooltip"));
     };
 
-    this.getShowUnfilterdButton = function() {
-        return element(by.id('show-unfiltered'));
-    };
-
     this.getTotalCount = function() {
         return element(by.css('.chaise-table-header-total-count'));
-    };
-
-    this.getModalRecordsetTotalCount = function() {
-        return element(by.css('.modal-body .chaise-table-header-total-count'));
     };
 
     this.getColumnNames = function() {
         return element.all(by.css(".table-column-displayname > span"));
     };
 
+    this.getWarningAlert = function () {
+        return element(by.css(".alert-warning"));
+    };
+
+    /* sort selectors */
     this.getColumnSortButton = function(rawColumnName){
         return element(by.css('.c_' + rawColumnName)).element(by.css('.not-sorted-icon'));
     };
@@ -852,6 +747,7 @@ var recordsetPage = function() {
         return element(by.css('.c_' + rawColumnName)).element(by.css('.asc-sorted-icon'));
     };
 
+    /* main table selectors */
     this.getRows = function() {
         return element.all(by.css('.chaise-table-row'));
     };
@@ -871,15 +767,7 @@ var recordsetPage = function() {
     this.waitForInverseModalSpinner = function () {
         var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };
-
-    this.getModalFirstColumn = function () {
-        return element.all(by.css(".modal-body .chaise-table-row td:nth-child(2)"));
-    };
-
-    this.getModalCloseBtn = function() {
-        return element(by.css(".modal-close"));
-    };
+    };    
 
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));
@@ -889,6 +777,7 @@ var recordsetPage = function() {
         return element.all(by.css("span.table-column-displayname.chaise-icon-for-tooltip"));
     };
 
+    /* main search selectors */
     this.getMainSearchBox = function(el) {
         var locator = by.className("recordset-main-search");
         return el ? el.element(locator) : element(locator);
@@ -910,6 +799,23 @@ var recordsetPage = function() {
         return this.getMainSearchBox(el).element(by.className("remove-search-btn"));
     };
 
+    /* table actions selectors */
+    this.getNextButton = function () {
+        return element(by.css(".chaise-table-next-btn"));
+    };
+
+    this.getPreviousButton = function () {
+        return element(by.css(".chaise-table-previous-btn"));
+    };
+
+    this.getPageLimitDropdown = function () {
+        return element(by.css(".page-size-dropdown"));
+    };
+
+    this.getPageLimitSelector = function (limit) {
+        return element(by.css(".page-size-limit-" + limit));
+    };
+
     this.getAddRecordLink = function(el) {
         var locator = by.css(".chaise-table-header-create-link");
         return el ? el.element(locator) : element(locator);
@@ -920,17 +826,20 @@ var recordsetPage = function() {
         return el ? el.element(locator) : element(locator);
     };
 
+    // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
+    // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
     this.getModalPopupBtn = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     };
 
+    /* action column selectors */
     this.getActionHeaderSpan = function () {
         return element(by.css('.actions-header span'));
     }
@@ -955,22 +864,7 @@ var recordsetPage = function() {
         return element(by.id("delete-confirmation"));
     };
 
-    this.getNextButton = function () {
-        return element(by.css(".chaise-table-next-btn"));
-    };
-
-    this.getPreviousButton = function () {
-        return element(by.css(".chaise-table-previous-btn"));
-    };
-
-    this.getPageLimitDropdown = function () {
-        return element(by.css(".page-size-dropdown"));
-    };
-
-    this.getPageLimitSelector = function (limit) {
-        return element(by.css(".page-size-limit-" + limit));
-    };
-
+    /* export and other page action selectors */
     this.getExportDropdown = function () {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
@@ -995,10 +889,6 @@ var recordsetPage = function() {
     this.getTableHeader = function () {
         return element(by.tagName("thead"));
     }
-
-    this.getRecordsetColumnHeader = function (name) {
-        return element(by.id(name + "-header"));
-    };
 
     /******* Facet selectors for recordset with faceting ********/
     this.getHideFilterPanelBtn = function(el) {
@@ -1044,6 +934,14 @@ var recordsetPage = function() {
         return element(by.css(".fc-" + idx)).element(by.css(".chaise-search-box"));
     }
 
+    this.getFacetSearchBox = function (idx) {
+        return element(by.css(".fc-" + idx)).element(by.css(".facet-search-input"));
+    }
+
+    this.getFacetSearchBoxClear = function (idx) {
+        return element(by.css(".fc-" + idx)).element(by.css(".remove-search-btn"));
+    }
+
     this.getFacetSearchPlaceholderById = function (idx) {
         return this.getFacetSearchBoxById(idx).element(by.className("chaise-input-placeholder"))
     }
@@ -1061,6 +959,7 @@ var recordsetPage = function() {
         return element.all(by.css(".panel-open .facet-header-text"));
     }
 
+    /* facet and selected filters selectors */
     this.getSelectedRowsFilters = function () {
         // adding ".selected-chiclet-name" to the selector to not select the clear-all-btn
         return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet .selected-chiclet-name"));
@@ -1100,33 +999,42 @@ var recordsetPage = function() {
       `);
     }
 
-    // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
-    // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
-    this.getJsonbFacetOptionsText = function (idx) {
-      return browser.executeScript(`
-        return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) =>  { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} })
-      `);
-    }
-
     this.getFacetOption = function (idx, option) {
         return element(by.css(".fc-" + idx)).element(by.css(".checkbox-" + option));
-    }
-
-    this.getFacetSearchBox = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css(".facet-search-input"));
-    }
-
-    this.getFacetSearchBoxClear = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css(".remove-search-btn"));
     }
 
     this.getList = function (idx) {
         return element(by.css(".fc-" + idx)).element(by.css(".chaise-list-container"));
     }
 
+    this.getModalMatchNullInput = function () {
+        return element(by.className("chaise-table-header-match-null"));
+    };
+
+    this.getModalDisabledRows = function () {
+        return element.all(by.css('.modal-body tr.disabled-row'));
+    };
+
+    this.getDisabledFacetOptions = function (idx) {
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[disabled]"));
+    };
+
+    /* facet show more and popup selectors */
     this.getShowMore = function (idx) {
         return element(by.css(".fc-" + idx)).element(by.css(".show-more-btn"));
     }
+
+    this.getModalRecordsetTotalCount = function() {
+        return element(by.css('.modal-body .chaise-table-header-total-count'));
+    };
+
+    this.getModalFirstColumn = function () {
+        return element.all(by.css(".modal-body .chaise-table-row td:nth-child(2)"));
+    };
+
+    this.getModalCloseBtn = function() {
+        return element(by.css(".modal-close"));
+    };
 
     this.getCheckedModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input.checked"));
@@ -1156,14 +1064,15 @@ var recordsetPage = function() {
         return element(by.id("multi-select-submit-btn"));
     }
 
-    this.getModalCancel = function () {
-        return element(by.css(".modal-close"));
-    }
-
-    this.getRangeFacetForm = function (idx) {
-        return element(by.css(".fc-"+ idx)).element(by.css("fieldset"));
+    this.getSelectAllBtn = function () {
+        return element(by.css(".table-select-all-rows"));
     };
 
+    this.getModalWarningAlert = function (popup) {
+        return popup.element(by.css(".alert-warning"));
+    };
+
+    /* range facet selectors */
     // there's integer/float/date/timestamp inputs
     this.getRangeMinInput = function (idx, className) {
         return element(by.css(".fc-" + idx)).element(by.css("." + className));
@@ -1185,26 +1094,7 @@ var recordsetPage = function() {
         return element(by.css(".fc-" + idx)).element(by.css(".range-input-submit-btn"));
     }
 
-    this.getModalMatchNotNullInput = function () {
-        return element(by.className("chaise-table-header-match-not-null"));
-    };
-
-    this.getModalMatchNullInput = function () {
-        return element(by.className("chaise-table-header-match-null"));
-    };
-
-    this.getModalDisabledRows = function () {
-        return element.all(by.css('.modal-body tr.disabled-row'));
-    };
-
-    this.getFacetSpinner = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css(".spinner"));
-    };
-
-    this.getDisabledFacetOptions = function (idx) {
-        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[disabled]"));
-    };
-
+    /* histogram selectors */
     this.getHistogram = function (idx) {
         return element(by.css(".fc-" + idx)).element(by.css(".js-plotly-plot"));
     };
@@ -1227,22 +1117,6 @@ var recordsetPage = function() {
 
     this.getPlotlyReset = function (idx) {
         return element(by.css(".fc-" + idx)).element(by.css(".reset-plotly-button"));
-    };
-
-    this.getModalWarningAlert = function (popup) {
-        return popup.element(by.css(".alert-warning"));
-    };
-
-    this.getWarningAlert = function () {
-        return element(by.css(".alert-warning"));
-    };
-
-    this.getWarningAlertDissmBtn = function () {
-        return element(by.css(".alert-warning")).element(by.css("button"));
-    };
-
-    this.getSelectAllBtn = function () {
-        return element(by.css(".table-select-all-rows"));
     };
 };
 
@@ -1342,47 +1216,29 @@ function chaisePage() {
         return browser.executeScript("arguments[0].click();", button);
     };
 
-    this.clickButtonAndUnblur = function (button) {
-        return browser.executeScript("arguments[0].click();", button);
-    };
-
-    /**
-     * For longer strings, the sendKeys can be very slow.
-     * If the string length is more than 10, it will change the value of input directly
-     * and then does the sendKeys for the last character, just to make sure it's
-     * triggering angularjs digest cycle.
-     */
-    this.setInputValue = function (el, value) {
-        var sendKeysVal = value;
-        if (value.length > 10) {
-            browser.executeScript("arguments[0].value='" + value.substring(0, value.length-1) + "';", el);
-            sendKeysVal = value[value.length-1];
-        }
-        el.sendKeys(sendKeysVal);
-    }
-    this.customExpect = {
-        elementContainClass: function (ele, className) {
-            expect(ele.getAttribute('class')).toContain(className);
-        }
-    };
     this.getWindowName = function() {
         return browser.executeScript("return window.name;");
     };
+
     this.getPageId = function() {
         return browser.executeScript("return window.dcctx.contextHeaderParams.pid");
     };
+
     this.recordsetPageReady = function() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
+
     this.recordPageReady = function() {
         var self = this;
         this.waitForElement(self.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.css('.record-main-section-table')));
         return this.waitForElementInverse(self.recordPage.getRelatedSectionSpinner());
     }
+
     this.recordeditPageReady = function() {
         return this.waitForClickableElement(element(by.id("submit-record-button")));
     }
+
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
             // Visit the default page and set the authorization cookie if required
@@ -1391,60 +1247,6 @@ function chaisePage() {
             browser.driver.executeScript('document.cookie="' + authCookie + 'path=/;secure;"');
         }
     };
-    this.getConfig = function(paths) {
-        var suite = browser.params.configuration.tests;
-        for (var i = 0; i < paths.length; i++) {
-            if (!suite) break;
-            suite = suite[paths[i]];
-        }
-
-        if (!suite || suite == 'ignore') {
-            return false;
-        }
-        return suite;
-    };
-    this.getCurrentContext = function() {
-
-        var deferred = protractor.promise.defer();
-
-        browser.executeScript('return window.location.hash;').then(function(hash) {
-            var context = {};
-
-            if (hash === undefined || hash == '' || hash.length == 1) {
-                return deferred.fulfill(context);
-            }
-
-            var parts = hash.substring(1).split('/');
-            context.catalogID = parts[0];
-            if (parts[1]) {
-                var params = parts[1].split(':');
-                if (params.length > 1) {
-                    context.schemaName = decodeURIComponent(params[0]);
-                    context.tableName = decodeURIComponent(params[1]);
-                } else {
-                    context.tableName = decodeURIComponent(params[0]);
-                }
-            }
-
-            // If there are filters appended to the URL, add them to context.js
-            if (parts[2]) {
-                context.filters = {};
-                var filters = parts[2].split('&');
-                for (var i = 0, len = filters.length; i < len; i++) {
-                    var filter = filters[i].split('=');
-                    if (filter[0] && filter[1]) {
-                        context.filters[decodeURIComponent(filter[0])] = decodeURIComponent(filter[1]);
-                    }
-                }
-            }
-
-            deferred.fulfill(context);
-        });
-
-        return deferred.promise;
-    };
-
-    this.dataUtils = new (require('./page.utils.js'))();
 
     this.waitForUrl = function(expectedUrlFragment, timeout) {
         return browser.wait(function() {
@@ -1469,15 +1271,6 @@ function chaisePage() {
     this.waitForElementCondition = function(condition, timeout) {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
-
-    /**
-     * Given a text wait for it to be available in the element.
-     * It waits for the result of locator.getText() to be the given `text`
-     * NOTE it will ignore all the newlines, so you should not inlcude any in the `text`
-     */
-    this.waitForTextInElement = function(locator, text, timeout, message) {
-        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout, message);
-    }
 
     this.waitForTextInUrl = function(text, errMsg, timeout){
         return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
@@ -1506,10 +1299,6 @@ function chaisePage() {
         }
         return match;
     }
-
-    this.getErmrest = function () {
-        return browser.executeScript("return window");
-    };
 
     this.getTooltipDiv = function() {
         return element(by.css('.tooltip'));

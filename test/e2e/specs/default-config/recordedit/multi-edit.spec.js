@@ -153,7 +153,7 @@ describe('Edit multiple existing record,', function() {
                 });
             }
 
-            describe("when the user edits " + tableParams.keys.length + " records at a time " + (hasFile ? "with files" : "") + ", ", function() {
+            describe("when the user edits " + tableParams.keys.length + " records at a time" + (hasFile ? " with files" : "") + ", ", function() {
 
                 beforeAll(function() {
                     chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")");
