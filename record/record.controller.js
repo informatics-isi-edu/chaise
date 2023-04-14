@@ -92,7 +92,7 @@
                 action: logService.getActionString(logService.logActions.DELETE),
                 stack: logService.getStackObject()
             };
-            $rootScope.reference.delete(logObj).then(function deleteSuccess() {
+            $rootScope.reference.delete(null, logObj).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
