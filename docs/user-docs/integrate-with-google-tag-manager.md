@@ -3,17 +3,28 @@
 
 In this document, we will go over the recommended way of collecting user analytics in Chaise or static pages using Google Tag Manager and Google Analytics.
 
-### 1. Create a Google Analytics (GA) account
+> While you don't necessarily need to create a Google Tag Manager tag and can connect Google Analytics directly to your website, we recommend following what we described here since it will give you more flexibility and will be consistent.
+
+## Table of Contents
+
+  - [1. Create a Google Analytics (GA) account](#1-create-a-google-analytics-ga-account)
+  - [2. Create a Google Tag Manager (GTM) account](#2-create-a-google-tag-manager-gtm-account)
+  - [3. Install the GTM container on the server](#3-install-the-gtm-container-on-the-server)
+  - [4. Add GTM container to static pages](#4-add-gtm-container-to-static-pages)
+  - [5. Connect Google Tag Manager to Google Analytics](#5-connect-google-tag-manager-to-google-analytics)
+
+
+## 1. Create a Google Analytics (GA) account
 
 The first thing that you need to do is create a Google Analytics account and add a "data stream". You will see the aggregated data of user interaction with your website in Google Analytics. Please refer to [this tutorial](https://support.google.com/analytics/answer/9304153?sjid=17908509460315618267-NA) on how to create the account.
 
 > :warning: After creating a GA4 account, it might prompt a "Install your Google tag" step. Please ignore this as we will go over it in the following steps.
 
-### 2. Create a Google Tag Manager (GTM) account
+## 2. Create a Google Tag Manager (GTM) account
 
 You also need to set up a Google Tag Manager account. Google Tag Manager allows us to collect data from our website and send it wherever we want. You can find more information on how to do this [here](https://support.google.com/tagmanager/answer/6103696?sjid=17908509460315618267-NA).
 
-### 3. Install the GTM container on the server
+## 3. Install the GTM container on the server
 
 We now need to connect our website to Google Tag Manager. To do so,
 
@@ -54,7 +65,7 @@ var gtmId = null; // Change null to be your GTM ID (e.g. "GTM-XXXXXX")
 
 By doing this, Chaise is now connected to the GTM container and will collect user data for you.
 
-### 4. Add GTM container to static pages
+## 4. Add GTM container to static pages
 
 Now that we have the `gtm-id.js` file, we need to ensure the static sites include the same file. The following is how we recommend doing this for Jekyll pages:
 
@@ -63,7 +74,7 @@ Now that we have the `gtm-id.js` file, we need to ensure the static sites includ
 3. Make sure all pages have `<script src="/gtm-id.js"></script>` in the `<head>` tag of their templates.
 
 
-### 5. Connect Google Tag Manager to Google Analytics
+## 5. Connect Google Tag Manager to Google Analytics
 
 The last step is connecting the GTM and GA together. To do so, please follow [the official guide](https://support.google.com/tagmanager/answer/9442095?hl=en). In summary, 
 
