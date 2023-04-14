@@ -1343,7 +1343,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 expect(ct).toBe(params.countAfterUnlink, "association count missmatch after delete.");
                 // close modal and check UI after
 
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCloseBtn());
             }).then(function () {
                 // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
@@ -1607,7 +1607,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function(ct){
                 expect(ct).toBe(params.countAfterAclUnlink, "association count missmatch after delete.");
 
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCloseBtn());
             }).then(function () {
                 // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

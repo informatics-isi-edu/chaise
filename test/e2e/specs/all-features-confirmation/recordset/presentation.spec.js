@@ -1095,10 +1095,6 @@ describe('View recordset,', function () {
         });
 
         it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
-            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-                return entity.id == accommodationParams.data[0].id;
-            });
-
             chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
                 return chaisePage.clickButton(viewButtons[0]);
             }).then(function () {
@@ -1114,9 +1110,6 @@ describe('View recordset,', function () {
         });
 
         it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
-            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-                return entity.id == accommodationParams.data[0].id;
-            });
             var allWindows;
 
             chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
@@ -1173,7 +1166,6 @@ describe('View recordset,', function () {
 
         if (!process.env.CI) {
             describe("For when no catalog or schema:table is specified,", function () {
-                var baseUrl;
 
                 it("should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri.", function () {
                     chaisePage.navigate(process.env.CHAISE_BASE_URL + "/recordset");
