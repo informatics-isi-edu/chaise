@@ -18,12 +18,6 @@
 
 ***
 
-* **There are errors with the import module 'ermrest-data-utils' importing schemas in the test**
-
-    > This is mostly because of some changes in the `ermrest-data-utils` module. Just update it ~~using command `npm update ermrest-data-utils`~~ by pulling from master.
-
-***
-
 * **Test Failed: "defer.fulfill" is not a function**
 
     > This is mostyl because of a newer version of the promise library [Q](https://www.npmjs.com/package/q). We have fixed the version to `^1.4.1`. If you face issues with any other modules, just try to fix their version numbers in the `package.json` to the last stable version.
@@ -32,11 +26,7 @@
 
 * **Installation issues: saying selenium not found or unable to run tests because of selenium issue or some other module issue**
 
-   > The best way to tackle this is deleting your `node_modules` folder and reinstall all dependencies. Once you're done deleting the folder, run `sudo make deps`. This command will install all possible dependencies defined in the `package.json` and update your selenium-driver.
-
-   > An alternative is to run this command: `node_modules/.bin/webdriver-manager update --standalone`
-
-   > **Error: No selenium server jar found at the specified location** can be handled by running this command: `node_modules/protractor/bin/webdriver-manager update`  
+   > Run `make update-webdriver` and make sure the webdriver has been successfuly installed (it might fail on the first attempt if you're connected to VPN).
 
 ***
 

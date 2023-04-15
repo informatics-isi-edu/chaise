@@ -96,11 +96,6 @@ jobs:
           cd ../chaise
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
-      - name: Install ermrest-data-utils
-        run: |
-          git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
-          cd ErmrestDataUtils
-          sudo npm install
       - name: Install ermrestjs
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
