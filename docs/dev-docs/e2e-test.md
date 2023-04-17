@@ -10,7 +10,7 @@ For now, we only have E2E tests in Chaise. E2E tests are automation tests that s
 - **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by CI
 - **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
 - **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
-- **ErmrestDataUtils**: tool created in house for catalog/schema creation and seeding data ([Found here](https://github.com/informatics-isi-edu/ErmrestDataUtils))
+- **ErmrestDataUtils**: tool created in house for catalog/schema creation and seeding data ([Found here](https://github.com/informatics-isi-edu/ErmrestDataUtils)). This is installed with the rest of NodeJS packages.
 
 ## Setup
 
@@ -30,7 +30,7 @@ export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 
-These variables are used in `ErmrestDataUtils` to communicate with `ERMrest`. A copy of `ErmrestDataUtils` should be pulled from master and placed alongside chaise in your workspace. The following is how these variables most probably should look like:
+These variables are used in our test framework to communicate with `ERMrest`. The following is how these variables most probably should look like:
 
 ```sh
 export CHAISE_BASE_URL=https://dev.isrd.isi.edu/~<your-user-directory>chaise # No trailing `/`

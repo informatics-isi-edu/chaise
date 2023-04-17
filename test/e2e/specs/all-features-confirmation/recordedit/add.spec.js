@@ -1,7 +1,6 @@
 var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js'), chance = require('chance').Chance();
-var exec = require('child_process').execSync;
 var moment = require('moment');
 
 // take a look at the comments in recordedit-helpers.js for the expected structure of tableParams.

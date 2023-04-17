@@ -1,5 +1,6 @@
 var Q = require("q");
 var fs = require("fs");
+const axios = require('axios');
 
 exports.parameterize = function(config, configParams) {
 
@@ -75,23 +76,21 @@ exports.parameterize = function(config, configParams) {
      */
     var getSessionByCookie = function (cookie, authCookieEnvName) {
         var defer = Q.defer();
-        require('request')({
+        axios({
             url: process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
             method: 'GET',
             headers: {
                 'Cookie': cookie
             }
-        }, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var info = JSON.parse(body);
-                process.env[authCookieEnvName + '_ID'] = info.client.id;
-                console.log(authCookieEnvName + "_ID: ", info.client.id);
+        }).then(function (response) {
+            process.env[authCookieEnvName + '_ID'] = response.data.client.id;
+            console.log(authCookieEnvName + "_ID: ", response.data.client.id);
 
-                defer.resolve(body);
-            } else {
-                defer.reject('Unable to retreive userinfo for ' + authCookieEnvName);
-            }
-        });
+            defer.resolve(response.data);
+        }).catch(function (err) {
+          console.log(err);
+          defer.reject('Unable to retreive userinfo for ' + authCookieEnvName);;
+        })
         return defer.promise;
     }
 
@@ -103,38 +102,35 @@ exports.parameterize = function(config, configParams) {
     var getSessionByUserPass = function (username, password, authCookieEnvName) {
         var defer = Q.defer();
 
-        require('request')({
+        axios({
             url: process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
             method: 'POST',
-            body: 'username=' + username + '&password=' + password
-        }, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var cookies = require('set-cookie-parser').parse(response);
-                cookies.forEach(function(c) {
-                    // auth cookie env variable
-                    if (c.name == "webauthn") {
-                        if (authCookieEnvName == "AUTH_COOKIE") { // main user
-                            testConfiguration.authCookie = c.name + "=" + c.value + ";";
-                            // set the session information to be parsed later
-                            process.env.WEBAUTHN_SESSION = body;
-                        }
-                        // webauthn cookie
-                        process.env[authCookieEnvName] = c.name + '=' + c.value + ';';
+            data: 'username=' + username + '&password=' + password
+        }).then((response) => {
+            var cookies = require('set-cookie-parser').parse(response);
+            cookies.forEach(function(c) {
+                // auth cookie env variable
+                if (c.name == "webauthn") {
+                    if (authCookieEnvName == "AUTH_COOKIE") { // main user
+                        testConfiguration.authCookie = c.name + "=" + c.value + ";";
+                        // set the session information to be parsed later
+                        process.env.WEBAUTHN_SESSION = JSON.stringify(response.data);
                     }
-                });
-
-                if (process.env[authCookieEnvName]) {
-                    // user id
-                    var info = JSON.parse(body);
-                    process.env[authCookieEnvName + '_ID'] = info.client.id;
-                    defer.resolve();
-                } else {
-                    defer.reject('Unable to retreive ' + authCookieEnvName);
+                    // webauthn cookie
+                    process.env[authCookieEnvName] = c.name + '=' + c.value + ';';
                 }
+            });
+
+            if (process.env[authCookieEnvName]) {
+                // user id
+                process.env[authCookieEnvName + '_ID'] = response.data.client.id;
+                defer.resolve();
             } else {
-                console.dir('Unable to retreive ' + authCookieEnvName);
-                defer.reject(error);
+                defer.reject('Unable to retreive ' + authCookieEnvName);
             }
+        }).catch((error) => {
+            console.dir('Unable to retreive ' + authCookieEnvName);
+            defer.reject(error);
         });
 
         return defer.promise;
@@ -170,7 +166,7 @@ exports.parameterize = function(config, configParams) {
             console.log("testing AUTH_COOKIE");
             getSessionByCookie(process.env.AUTH_COOKIE, "AUTH_COOKIE").then(function (res) {
                 // set the session information to be parsed later
-                process.env.WEBAUTHN_SESSION = res;
+                process.env.WEBAUTHN_SESSION = JSON.stringify(res);
 
                 console.log("testing RESTRICTED_AUTH_COOKIE");
                 return getSessionByCookie(process.env.RESTRICTED_AUTH_COOKIE, "RESTRICTED_AUTH_COOKIE");
