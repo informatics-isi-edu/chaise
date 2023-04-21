@@ -1482,7 +1482,7 @@
                 });
 
                 // generate the requeust by filtering based on the stable key values
-                var filterRes = ERMrest._generateKeyValueFilters(
+                var filterRes = ERMrest.generateKeyValueFilters(
                     [{name: storedKeyColumnName}],
                     rowValues,
                     table.schema.catalog,
