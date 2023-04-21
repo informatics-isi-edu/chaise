@@ -2536,49 +2536,81 @@
 
                 // fetch the favorites
                 scope.vm.getFavorites = function (vm, page) {
-                    var defer = $q.defer();
+                    var defer = $q.defer(), table = scope.vm.reference.table;
 
-                    var table = scope.vm.reference.table;
                     // if the stable key is greater than length 1, the favorites won't be supported for now
-                    // TODO: support this for composite stable keys
-                    if (scope.$root.session && table.favoritesPath && table.stableKey.length == 1) {
-                        // array of column names that represent the stable key of leaf with favorites
-                        // favorites_* will use stable key to store this information
-                        // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
-                        var key = table.stableKey[0];
-                        var displayedFacetIds = "(";
-                        page.tuples.forEach(function (tuple, idx) {
-                            // use the stable key here
-                            displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data[key.name]);
-                            if (idx !== page.tuples.length-1) displayedFacetIds += ";";
-                        });
-                        displayedFacetIds += ")"
-                        // resolve favorites reference for this table with given user_id
-                        var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+                    var enableFavorite = scope.$root.session && table.favoritesPath && table.stableKey.length == 1;
+                    if (!enableFavorite) {
+                        return defer.resolve({page: page}), defer.promise;
+                    }
 
-                        ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                    /**
+                     * we're storing the value of the stable key into a column in
+                     * the favorite table that has the same name as table.
+                     * so if we're storing a favorite for "gene" table, the favorites table
+                     * will store the "id" of "gene" table into the "gene" column.
+                     */
+                    var stableKeyColumnName = table.stableKey[0].name;
+                    var storedKeyColumnName = table.name;
+
+                    // // resolve favorites reference for this table with given user_id
+                    var basePath = table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&";
+
+                    var favoriteRequests = [];
+                    var processFavorites = function () {
+                        var req = favoriteRequests.shift();
+                        // there aren't any requests, so resolve the promise
+                        if (!req) {
+                            return defer.resolve({page: page}), defer.promise;
+                        }
+
+                        ERMrest.resolve($window.location.origin + basePath + req.path, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
                             // read favorites on reference
-                            // use 10 since that's the max our facets will show at once
                             // TODO proper log object
-                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit, null, true, true);
+                            return favoritesReference.contextualize.compact.read(req.keyData.length, null, true, true);
                         }).then(function (favoritesPage) {
                             favoritesPage.tuples.forEach(function (favTuple) {
                                 // should only be 1
                                 var matchedTuple = page.tuples.filter(function (tuple) {
                                     // favTuple has data as table.name and user_id
                                     // tuple comes from leaf table, so find value based on key info
-                                    return favTuple.data[table.name] == tuple.data[key.name]
+                                    return favTuple.data[storedKeyColumnName] == tuple.data[stableKeyColumnName]
                                 });
 
                                 matchedTuple[0].isFavorite = true;
                             });
 
-                            defer.resolve({page: page});
+                            // call the next batch if there are more (based on url length)
+                            processFavorites();
                         }).catch(function (error) {
-                            defer.resolve({page: page});
+                            // one request failed, so abort the whole request
+                            return defer.resolve({page: page}), defer.promise;
                         });
-                    } else {
+                    }
+
+
+                    var rowValues = [];
+                    page.tuples.forEach(function (tuple) {
+                        var val = {};
+                        val[storedKeyColumnName] = tuple.data[stableKeyColumnName];
+                        rowValues.push(val);
+                    });
+
+                    // generate the requeust by filtering based on the stable key values
+                    var filterRes = ERMrest.generateKeyValueFilters(
+                        [{name: storedKeyColumnName}],
+                        rowValues,
+                        table.schema.catalog,
+                        basePath.length,
+                        table.displayname.value
+                    );
+
+                    if (!filterRes.successful) {
+                        console.log('unbale to generate the favorites request: ', filterRes.message);
                         defer.resolve({page: page});
+                    } else {
+                        favoriteRequests = filterRes.filters;
+                        processFavorites();
                     }
 
                     return defer.promise;

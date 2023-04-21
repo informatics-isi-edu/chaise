@@ -1405,6 +1405,8 @@
             function updateFavorites(scope, checkboxRows) {
                 var defer = $q.defer(), table = scope.reference.table;
 
+                // "enableFavorites" is only true for simple keys, so in the
+                // following we're assuming that the key is simple
                 if (!scope.facetModel.enableFavorites) {
                     return defer.resolve(true), defer.promise;
                 }
@@ -1413,32 +1415,31 @@
                     checkboxRows = scope.checkboxRows;
                 }
 
-                // if the stable key is greater than length 1, the favorites won't be supported for now
-                // TODO: support this for composite stable keys
-                // array of column names that represent the stable key of leaf with favorites
-                // favorites_* will use stable key to store this information
-                // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
-                var key = table.stableKey[0];
-                var displayedFacetIds = "(", rowCount = 0;
-                checkboxRows.forEach(function (row, idx) {
-                    // filter out null and not null rows
-                    if (row.tuple) {
-                        rowCount++;
+                /**
+                 * we're storing the value of the stable key into a column in
+                 * the favorite table that has the same name as table.
+                 * For example, if we're storing a favorite for "gene" table, the favorites table
+                 * will store the "id" of "gene" table into the "gene" column.
+                 */
+                var stableKeyColumnName = table.stableKey[0].name;
+                var storedKeyColumnName = table.name;
 
-                        // use the stable key here
-                        displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data[key.name]);
-                        if (idx !== checkboxRows.length-1) displayedFacetIds += ";";
-                    }
-                });
-                displayedFacetIds += ")"
                 // resolve favorites reference for this table with given user_id
-                var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+                var basePath = table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&";
 
-                (function (uri) {
-                    ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                var favoriteRequests = [];
+                var processFavorites = function (uri) {
+                    var req = favoriteRequests.shift();
+                    // there aren't any requests, so resolve the promise
+                    if (!req) {
+                        defer.resolve(true);
+                        return defer.promse;
+                    }
+
+                    ERMrest.resolve($window.location.origin + basePath + req.path, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
                         // read favorites on reference
                         // TODO proper log object
-                        return favoritesReference.contextualize.compact.read(rowCount, null, true, true);
+                        return favoritesReference.contextualize.compact.read(req.keyData.length, null, true, true);
                     }).then(function (favoritesPage) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
@@ -1453,7 +1454,7 @@
                                 if (cbRow.tuple) {
                                     // tuple has data as table.name and user_id
                                     // cbRow.tuple is the whole row of data with ermrest columns
-                                    return tuple.data[table.name] == cbRow.tuple.data[key.name]
+                                    return tuple.data[storedKeyColumnName] == cbRow.tuple.data[stableKeyColumnName]
                                 }
                                 return false;
                             });
@@ -1461,13 +1462,41 @@
                             matchedRow[0].isFavorite = true;
                         });
 
-                        defer.resolve(true);
+                        processFavorites(uri);
                     }).catch(function (error) {
                         $log.warn("could not fetch favorites")
                         $log.warn(error);
                         defer.resolve(true)
                     });
-                })(scope.reference.uri);
+                }
+
+                // filter out null and not null rows
+                var rowValues = [];
+                checkboxRows.forEach(function (row) {
+                    if (row.tuple) {
+                        // we're assuming that the table name is used in the favorites table for storing the ids
+                        var val = {};
+                        val[storedKeyColumnName] = row.tuple.data[stableKeyColumnName];
+                        rowValues.push(val);
+                    }
+                });
+
+                // generate the requeust by filtering based on the stable key values
+                var filterRes = ERMrest.generateKeyValueFilters(
+                    [{name: storedKeyColumnName}],
+                    rowValues,
+                    table.schema.catalog,
+                    basePath.length,
+                    table.displayname.value
+                );
+
+                if (!filterRes.successful) {
+                    $log.warn('unbale to generate the favorites request: ', filterRes.message);
+                    defer.resolve(true);
+                } else {
+                    favoriteRequests = filterRes.filters;
+                    processFavorites(scope.reference.uri);
+                }
 
                 return defer.promise;
             }
