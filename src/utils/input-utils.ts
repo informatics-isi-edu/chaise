@@ -164,7 +164,8 @@ export const ERROR_MESSAGES = {
   INVALID_TIME: `Please enter a valid time value in 24-hr ${dataFormats.placeholder.time} format.`,
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
   INVALID_COLOR: 'Please enter a valid color value.',
-  INVALID_JSON: 'Please enter a valid JSON value.'
+  INVALID_JSON: 'Please enter a valid JSON value.',
+  INVALID_BOOLEAN: 'Please enter a valid boolean value.'
 }
 
 export function formatInt(value: string) {

@@ -26,7 +26,7 @@ var testParams = {
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" },
+            { name: "luxurious", title: "Is Luxurious", type: "boolean", nullok: false },
             { name: "text_array", title: "text_array", type: "array", baseType: "text" },
             { name: "boolean_array", title: "boolean_array", type: "array", baseType: "boolean" },
             { name: "int4_array", title: "int4_array", type: "array", baseType: "integer" },
