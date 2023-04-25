@@ -176,7 +176,6 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         // contenthash will help with avoiding to send unchanged files to server
         filename: '[name].[contenthash].css',
         /**
-         * TODO needs more testing
          * given that we're using CSS modules, this shouldn't cause any issues.
          * The input-switch.scss was causing circular dep issue and this has been
          * added to remove the warning.
@@ -189,23 +188,43 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
+        /**
+         * avoid making very small or very large chunks
+         */
+        minSize: 50000,
+        maxSize: 500000,
+        hidePathInfo: true,
         name: 'common',
         cacheGroups: {
+          // this group is useful for deriva-webapps
+          chaiseVendor: {
+            test: /[\\/]node_modules[\\/]\@isrd-isi-edu[\\/]chaise[\\/]/,
+            name: 'vendor-chaise',
+            chunks: 'all',
+            priority: 4
+          },
           reactVendor: {
             test: /[\\/]node_modules[\\/](react|react-dom|react-bootstrap)[\\/]/,
             name: 'vendor-react',
             chunks: 'all',
+            priority: 3
           },
           bootstrapVendor: {
-            test: /[\\/]node_modules[\\/](bootstrap)[\\/]/,
+            test: /[\\/]node_modules[\\/]bootstrap[\\/]/,
             name: 'vendor-bootstrap',
             chunks: 'all',
+            priority: 2
           },
           vendor: {
-            test: /[\\/]node_modules[\\/]((?!(react|react-dom|react-bootstrap|bootstrap)).*)[\\/]/,
+            test: /[\\/]node_modules[\\/]/,
             name: 'vendor-rest',
             chunks: 'all',
-          },
+            /**
+             * we have to make sure priority of this group is less than the rest
+             * so this rule is used when others failed
+             */
+            priority: 1
+          }
         },
       },
     },

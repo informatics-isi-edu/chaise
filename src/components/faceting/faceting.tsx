@@ -38,23 +38,35 @@ type FacetingProps = {
    * the recordset's log stack path
    */
   recordsetLogStackPath: string,
+  /**
+   * callback that should be called when we're ready to initalize the data
+   */
+  setReadyToInitialize: () => void,
 }
 
 const Faceting = ({
   facetPanelOpen,
   registerRecordsetCallbacks,
-  recordsetLogStackPath
+  recordsetLogStackPath,
+  setReadyToInitialize
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
   const {
-    reference, registerFacetCallbacks, initialize, update,
+    reference, registerFacetCallbacks, update,
     printDebugMessage, checkReferenceURL,
     logRecordsetClientAction, getLogAction, getLogStack
   } = useRecordset();
 
+  /**
+   * we can display the facets as soon as we populate the facetModels
+   */
   const [displayFacets, setDisplayFacets] = useState(false);
-  const [readyToInitialize, setReadyToInitialize] = useState(false);
+
+  /**
+   * used to signal to recordset that we can initialize the page
+   */
+  const [allFacetsRegistered, setAllFacetsRegistered] = useState(false);
 
   const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
     const res: FacetModel[] = [];
@@ -158,10 +170,10 @@ const Faceting = ({
     });
 
     /**
-     * if there wasn't any facets, just mark the page as ready to initialize
+     * if there wasn't any facets, just mark the facets are registered
      */
     if (reference.facetColumns.length === 0) {
-      setReadyToInitialize(true);
+      setAllFacetsRegistered(true);
       return;
     }
 
@@ -191,13 +203,14 @@ const Faceting = ({
   }, [displayFacets])
 
   /**
-   * After all the facets are registerd, now we can initialize the data
+   * let recordset know that all the facets are registered and it can initialize.
+   * we're changing the state here instead of directly calling to make sure
+   * the internal state of faceting is ready as we're doing the registery outside of state.
    */
   useEffect(() => {
-    if (!readyToInitialize) return;
-    // initialize the recordset data only when facets are loaded
-    initialize();
-  }, [readyToInitialize]);
+    if (!allFacetsRegistered) return;
+    setReadyToInitialize();
+  }, [allFacetsRegistered]);
 
   /**
    * This will ensure the registered functions in flow-control
@@ -341,7 +354,7 @@ const Faceting = ({
     facetRequestModels.current[index].registered = true;
 
     if (facetRequestModels.current.every((el) => el.registered)) {
-      setReadyToInitialize(true);
+      setAllFacetsRegistered(true);
     }
   }
 

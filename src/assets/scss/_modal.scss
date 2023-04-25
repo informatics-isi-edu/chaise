@@ -2,7 +2,7 @@
 @use 'variables';
 
 // override the default bootstrap
-.modal-backdrop {
+div.modal-backdrop {
   z-index: map-get(variables.$z-index-map, 'modal-backdrop');
 
   // allows modal on modal (only two levels)
@@ -10,7 +10,7 @@
     z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
   }
 }
-.modal {
+div.modal {
   z-index: map-get(variables.$z-index-map, 'modal');
 
   // allows modal on modal (only two levels)
@@ -20,7 +20,7 @@
 }
 
 // don't add border to the modal header
-.modal-header {
+div.modal-header {
   border-bottom: none;
 
   &.center-aligned-title {
@@ -29,7 +29,7 @@
   }
 }
 
-.modal-title {
+div.modal-title {
   font-size: variables.$h2-font-size !important;
   font-weight: normal;
 }
@@ -181,7 +181,7 @@
   max-width: 95vw;
 }
 
-.chaise-body .modal-dialog.modal-lg {
+.modal-dialog.modal-lg {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 80vw;
@@ -189,7 +189,7 @@
 
 // NOTE in bootstrap3 this used to be modal-md,
 // but we don't have that notion anymore and therefore this is just the default size
-.chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+.modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -271,12 +271,6 @@
       }
     }
   }
-}
-
-// don't show alerts on modals
-// except facet since it has to show the url length error
-.modal:not(.faceting-show-details-popup) .recordset-container alerts {
-  display: none !important;
 }
 
 .scalar-show-details-popup {
