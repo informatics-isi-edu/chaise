@@ -1,7 +1,5 @@
 exports.getConfig = function(options) {
   var config = {
-    sauceUser: process.env.SAUCE_USERNAME,
-    sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
     capabilities: {
       commandTimeout: 300,
@@ -57,6 +55,12 @@ exports.getConfig = function(options) {
         browser.addMockModule('disableNgAnimate', disableNgAnimate);
     }
   };
+
+  // if CI and NOT headless, set sauce user credentials
+  if (process.env.CI && process.env.HEADLESS !== "true") {
+    config.sauceUser = process.env.SAUCE_USERNAME;
+    config.sauceKey = process.env.SAUCE_ACCESS_KEY;
+  }
 
   if (config.capabilities.chromeOptions) {
     // setting screen size when running the tests locally to be consistent across different laptops and external displays

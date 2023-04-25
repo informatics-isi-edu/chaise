@@ -27,9 +27,12 @@ exports.parameterize = function(config, configParams) {
 
     if (process.env.CI) {
         console.log("In CI");
-        config.sauceUser = process.env.SAUCE_USERNAME;
-        config.sauceKey = process.env.SAUCE_ACCESS_KEY;
-        config.capabilities['tunnel-identifier'] = process.env.SAUCE_TUNNEL_IDENTIFIER;
+        if (process.env.HEADLESS !== "true") {
+            config.sauceUser = process.env.SAUCE_USERNAME;
+            config.sauceKey = process.env.SAUCE_ACCESS_KEY;
+            config.capabilities['tunnel-identifier'] = process.env.SAUCE_TUNNEL_IDENTIFIER;
+        }
+
         config.capabilities['build'] = process.env.GITHUB_RUN_ID;
         config.capabilities['name'] = process.env.GITHUB_WORKFLOW;
         config.capabilities['idleTimeout'] = 190;
