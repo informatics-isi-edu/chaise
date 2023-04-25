@@ -10,6 +10,7 @@ import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
+import SavedQueryDropdown from '@isrd-isi-edu/chaise/src/components/recordset/saved-query-dropdown';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
@@ -31,6 +32,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // services
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 
 // utilities
@@ -57,7 +59,8 @@ const Recordset = ({
   parentStickyArea,
   onFacetPanelOpenChanged,
   parentReference,
-  parentTuple
+  parentTuple,
+  savedQueryConfig
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -73,6 +76,7 @@ const Recordset = ({
         onFavoritesChanged={onFavoritesChanged}
         parentReference={parentReference}
         parentTuple={parentTuple}
+        savedQueryConfig={savedQueryConfig}
       >
         <RecordsetInner
           initialReference={initialReference}
@@ -127,7 +131,10 @@ const RecordsetInner = ({
     selectedRows,
     setSelectedRows,
     update,
-    forceShowSpinner
+    forceShowSpinner,
+    savedQueryConfig,
+    savedQueryReference,
+    setSavedQueryReference
   } = useRecordset();
 
   /**
@@ -251,6 +258,20 @@ const RecordsetInner = ({
       }
     };
   }, [isInitialized]);
+
+  useEffect(() => {
+    if (!facetColumnsReady || !savedQueryConfig?.showUI) return;
+
+    const savedQueryReferenceUrl = windowRef.location.origin + savedQueryConfig.ermrestTablePath;
+    windowRef.ERMrest.resolve(savedQueryReferenceUrl, ConfigService.contextHeaderParams).then((reference: any) => {
+      setSavedQueryReference(reference);
+    }).catch((error: any) => {
+      // an error here could mean a misconfiguration of the saved query ermrest table path
+      $log.warn(error);
+
+      dispatchError({ error: error });
+    });
+  }, [facetColumnsReady])
 
   /**
    * attach the event listener and resize sensors
@@ -498,6 +519,10 @@ const RecordsetInner = ({
     }
   };
 
+  const getRecordsetAppliedFilters = () => {
+    return facetCallbacks.current?.getAppliedFilters();
+  }
+
   //-------------------  render logics:   --------------------//
 
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
@@ -729,21 +754,9 @@ const RecordsetInner = ({
                       <span>Permalink</span>
                     </a>
                   </ChaiseTooltip>
-                  {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
-                            <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
-                                <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
-                                    <span className='chaise-btn-icon fa-solid fa-floppy-disk'></span>
-                                    <span>Saved searches</span>
-                                    <span className='caret '></span>
-                                </button>
-                            </div>
-                            <ul className='dropdown-menu dropdown-menu-right' style='min-width:unset; top:20px;'>
-                                <li>
-                                    <a ng-click='::saveQuery()'>Save current search criteria</a>
-                                    <a ng-click='::showSavedQueries()'>Show saved search criteria</a>
-                                </li>
-                            </ul>
-                        </div> */}
+                  {savedQueryConfig?.showUI && savedQueryReference && 
+                    <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
+                  }
 
                 </div>
                 <h1 id='page-title'>

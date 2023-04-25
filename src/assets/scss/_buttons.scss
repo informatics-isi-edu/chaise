@@ -113,7 +113,8 @@
 }
 
 // export dropdown item
-.dropdown-item.export-menu-item {
+.dropdown-item.export-menu-item,
+.dropdown-item.saved-query-menu-item {
   color: map-get(variables.$color-map, 'black') !important;
 
   &:hover,

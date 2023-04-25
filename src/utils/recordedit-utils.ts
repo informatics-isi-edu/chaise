@@ -46,7 +46,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     type = getInputType(column.type);
   }
 
-  const prefillObj = getPrefillObject(queryParams);
+  
+  const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
   if (prefillObj) {
     if (column.isForeignKey) {
