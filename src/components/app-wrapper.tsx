@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import { StrictMode, useEffect, useRef, useState } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 

@@ -450,7 +450,7 @@ npm-install-all-modules:
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
-.PHONY: test-deps
+.PHONY: deps-test
 deps-test: npm-install-all-modules update-webdriver
 
 # install all the dependencies

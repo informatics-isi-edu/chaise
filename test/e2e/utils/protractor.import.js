@@ -1,8 +1,6 @@
-//var ermrestUtils = require("ermrest-data-utils");
-
-var ermrestUtils = require(process.env.PWD + "/../ErmrestDataUtils/import.js");
+const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
 var Q = require('q');
-var http = require('request-q');
+const axios = require('axios');//var ermrestUtils = require("ermrest-data-utils");
 
 //**********************************************************************
 // function waitfor - Wait until a condition is met
@@ -186,7 +184,7 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
 
-    http.get(process.env.ERMREST_URL).then(function (res) {
+    axios.get(process.env.ERMREST_URL).then(function (res) {
         return ermrestUtils.createSchemasAndEntities(settings);
     }).then(function (data) {
         process.env.catalogId = data.catalogId;
@@ -307,15 +305,20 @@ exports.tear = function(testConfiguration, catalogId, defer) {
  */
 exports.deleteHatracNamespaces = function (authCookie, namespaces) {
     var promises = [];
-    http.setDefaults({headers: {'Cookie': authCookie}});
     namespaces.forEach(function (ns) {
         var defer = Q.defer();
 
-        http.delete(ns).then(function() {
-            console.log("namespace " + ns + " deleted from hatrac.");
+        axios({
+          url: ns,
+          method: 'DELETE',
+          headers: {
+            'Cookie': authCookie
+          }
+        }).then(() => {
+            console.log(`namespace ${ns} deleted from hatrac.`);
             defer.resolve();
-        }, function (error) {
-            console.log("namespace " + ns + " could not be deleted.");
+        }).catch((error) => {
+            console.log(`namespace ${ns} could not be deleted from hatrac.`);
             console.log(error)
             defer.reject(error);
         });

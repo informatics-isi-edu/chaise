@@ -150,8 +150,14 @@ const RecordsetInner = ({
 
   /**
    * We have to validate the facets first, and then we can show them.
+   * This will just start the process of registering the facets and we have
+   * to wait for facetsRegistered and then we can send the requests.
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
+  /**
+   * whether all the facet callbacks are registered and ready to use.
+   */
+  const [facetsRegistered, setFacetsRegistered] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
@@ -211,8 +217,10 @@ const RecordsetInner = ({
       return;
     }
 
-    // NOTE this will affect the reference uri so it must be
-    //      done before initializing recordset
+    /**
+     * this will affect the reference uri so it must be done before initializing recordset.
+     * it includes potentially adding more facets as well as a different way of validating facets.
+     */
     reference.generateFacetColumns().then((res: any) => {
 
       setFacetColumnsReady(true);
@@ -272,6 +280,15 @@ const RecordsetInner = ({
       dispatchError({ error: error });
     });
   }, [facetColumnsReady])
+
+  /**
+   * if facet panel is not disabled,
+   * initialize the recordset data only when all facets are ready and registered
+   */
+  useEffect(() => {
+    if (!facetsRegistered) return;
+    initialize();
+  }, [facetsRegistered]);
 
   /**
    * attach the event listener and resize sensors
@@ -337,8 +354,8 @@ const RecordsetInner = ({
       scrollMainContainerToTop();
     }
 
-    // change the url location in fullscreen mode
-    if (config.displayMode.indexOf(RecordsetDisplayMode.FULLSCREEN) === 0) {
+    // change the url location in fullscreen mode (only if there aren't any error)
+    if (errors.length === 0 && config.displayMode.indexOf(RecordsetDisplayMode.FULLSCREEN) === 0) {
       windowRef.history.replaceState({}, '', getRecordsetLink(reference));
     }
 
@@ -680,6 +697,9 @@ const RecordsetInner = ({
             facetPanelOpen={facetPanelOpen}
             registerRecordsetCallbacks={registerCallbacksFromFaceting}
             recordsetLogStackPath={logInfo.logStackPath}
+            setReadyToInitialize={() => {
+              setFacetsRegistered(true);
+            }}
           />
         </div>
       }
@@ -792,7 +812,7 @@ const RecordsetInner = ({
                 </div>
               </div>
             }
-            {facetColumnsReady && renderSelectedFilterChiclets()}
+            {facetsRegistered && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>

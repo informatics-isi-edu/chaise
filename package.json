@@ -1,7 +1,7 @@
 {
   "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=14.0.0",
@@ -27,10 +27,10 @@
     "ui"
   ],
   "devDependencies": {
+    "@isrd-isi-edu/ermrest-data-utils": "0.0.2",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "chance": "x",
-    "ermrest-data-utils": "x",
     "eslint": "^8.10.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jsx-a11y": "^6.5.1",
@@ -43,8 +43,6 @@
     "moment-timezone": "0.5.14",
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
-    "request": "x",
-    "request-q": "x",
     "set-cookie-parser": "x",
     "webpack-bundle-analyzer": "^4.5.0"
   },
