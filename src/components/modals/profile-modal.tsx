@@ -1,5 +1,3 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_modal.scss';
-
 // components
 import Modal from 'react-bootstrap/Modal';
 
@@ -10,10 +8,15 @@ import { useEffect, useState } from 'react';
 // models
 import { Client } from '@isrd-isi-edu/chaise/src/models/user';
 
+type ProfileModalProps = {
+  showProfile: boolean,
+  setShowProfile: Function
+};
 
 const ProfileModal = ({
-  showProfile, setShowProfile,
-}: any): JSX.Element | null => {
+  showProfile,
+  setShowProfile,
+}: ProfileModalProps): JSX.Element => {
   const { session } = useAuthn();
 
   const [initialized, setInitialzed]          = useState<boolean>(false);
@@ -55,7 +58,7 @@ const ProfileModal = ({
 
   // the profile modal only makes sense when we have a user
   if (!session) {
-    return null;
+    return <></>;
   }
 
   const handleClose = () => {
@@ -124,7 +127,7 @@ const ProfileModal = ({
   }
 
   if (!showProfile) {
-    return null;
+    return <></>;
   }
 
   return (
