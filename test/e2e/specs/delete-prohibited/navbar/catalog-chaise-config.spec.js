@@ -7,18 +7,17 @@ describe('Navbar ', function() {
         url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/catalog-config-navbar:config-table";
         chaisePage.navigate(url).then(function () {
             navbar = element(by.id('mainnav'));
-            
+            return chaisePage.waitForElement(navbar);
+        }).then(function () {
+
             return browser.executeScript('return chaiseConfig;')
         }).then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
-        }).then(function () {
             return chaisePage.recordsetPageReady();
         }).then(function () {
             done();
         }).catch(function (err) {
-            done.fail();
-            console.log(err);
+            done.fail(err);
         });
     });
 
@@ -82,7 +81,7 @@ describe('Navbar ', function() {
 
     it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
         chaisePage.refresh(url + "?hideNavbar=true");
-        // browser wait for navbar if not needed, only checking recordset table is present is sufficient 
+        // browser wait for navbar if not needed, only checking recordset table is present is sufficient
         chaisePage.recordsetPageReady()
 
         expect(navbar.isPresent()).toBeFalsy();

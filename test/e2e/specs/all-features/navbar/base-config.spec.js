@@ -6,25 +6,18 @@ describe('Navbar ', function() {
     beforeAll(function (done) {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation").then(function () {
             navbar = element(by.id('mainnav'));
+            return chaisePage.waitForElement(navbar);
+        }).then(function () {
             menu = element(by.css('.navbar-menu-options'));
-            
+
             return browser.executeScript('return chaiseConfig;');
         }).then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
-        }).then(function () {
             return chaisePage.recordsetPageReady();
         }).then(function () {
-            return browser.driver.manage().getCookies();
-        }).then(function (allCookies) {
-            allCookies.forEach(function (cookie) {
-                console.log(cookie.name + " -> " + cookie.value);
-            });
-
             done();
         }).catch(function (err) {
-            done.fail();
-            console.log(err);
+            done.fail(err);
         });
     });
 
@@ -87,14 +80,14 @@ describe('Navbar ', function() {
 
     if (!process.env.CI) {
         var menuDropdowns, disabledSubMenuOptions, editMenu;
-        
+
         it("should have 4 top level dropdown menus", function() {
             expect(menu.all(by.css('.chaise-nav-item')).count()).toBe(4, "number of top level dropdown menus is wrong");
         });
 
         it('should have a disabled "Records" link.', function () {
             // get index 2 (3rd item)
-            expect(menu.element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");            
+            expect(menu.element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");
         });
 
         it('should have a header and a disabled "Edit Existing Record" submenu link (no children).', function () {

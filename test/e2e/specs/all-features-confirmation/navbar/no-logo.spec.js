@@ -6,20 +6,19 @@ describe('Navbar ', function() {
     beforeAll(function (done) {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation").then(function () {
             navbar = element(by.id('mainnav'));
+            return chaisePage.waitForElement(navbar);
+        }).then(function () {
             menu = element(by.css('.navbar-menu-options'));
             loginMenu = element(by.css('.username-display > div.dropdown-menu'));
 
             return browser.executeScript('return chaiseConfig')
         }).then(function(config) {
             chaiseConfig = config;
-            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
-        }).then(function () {
             return chaisePage.recordsetPageReady();
         }).then(function () {
             done();
         }).catch(function (err) {
-            done.fail();
-            console.log(err);
+            done.fail(err);
         });
     });
 
@@ -214,12 +213,12 @@ describe('Navbar ', function() {
         });
 
         it('should have a disabled link named "Disabled Link".', function () {
-            // .dropdown-menu > * is needed as we can have multiple nested submenu 
+            // .dropdown-menu > * is needed as we can have multiple nested submenu
             // inside login dropdown (including div, a, etc). This selector will select all first level children under login dropdown
             var dropdownOptions = element.all(by.css('.username-display > div.dropdown-menu > *'));
 
             expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
-            
+
             const disabledEle = loginMenu.all(by.css('a.disable-link')).get(0);
             expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
         });
@@ -231,7 +230,7 @@ describe('Navbar ', function() {
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
             loginDropdown.click().then(function() {
                 var nodesInDOM = loginMenu.all(by.tagName('a'));
-        
+
                 return nodesInDOM.count();
             }).then(function(count) {
                 // counted from chaise config doc rather than having code count
