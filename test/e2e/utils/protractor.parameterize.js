@@ -196,6 +196,9 @@ exports.parameterize = function(config, configParams) {
         browser.params.configuration = testConfiguration, defer = Q.defer();
         browser.params.client = JSON.parse(process.env.WEBAUTHN_SESSION).client;
 
+        console.log('webauthn client info of the main user:');
+        console.log(browser.params.client);
+
         // Set catalogId in browser params for future reference to delete it if required
         browser.params.catalogId = catalogId = process.env.CATALOGID;
 

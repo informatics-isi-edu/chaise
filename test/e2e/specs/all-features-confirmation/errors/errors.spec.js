@@ -46,10 +46,7 @@ var testParams = {
             "\nClick OK to go to the Home Page.",
             "Show Error Details"
         ].join("\n"),
-        details: [
-            "409 Conflict",
-            "The request conflicts with the state of the server. invalid input syntax for type boolean: \"12\"",
-        ].join("\n")
+        details: "invalid input syntax for type boolean: \"12\""
     }
 };
 

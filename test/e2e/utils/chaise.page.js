@@ -706,7 +706,7 @@ var recordsetPage = function() {
     var that = this;
 
     this.waitForInverseMainSpinner = function () {
-        var locator = element(by.id("main-spinner"));
+        var locator = element(by.css(".recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
     };
 
@@ -767,7 +767,7 @@ var recordsetPage = function() {
     this.waitForInverseModalSpinner = function () {
         var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };    
+    };
 
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));
