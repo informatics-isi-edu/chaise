@@ -84,7 +84,7 @@ const FacetRangePicker = ({
 
   const [compState, setCompState] = useState<RangePickerState>(() => {
     const defaultPlotLayout: PlotlyLayout = {
-      // autosize: true,
+      autosize: true,
       height: 150,
       margin: {
         l: 40,
