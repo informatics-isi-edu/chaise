@@ -99,6 +99,7 @@ const FacetRangePicker = ({
         tickangle: 45,
         // set to "linear" for int/float graphs
         // set to "date" for date/timestamp graphs
+        // when set to `-`, plotly tries to figure out the type of data and automatically set the type
         type: '-'
         // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
         // autorange: true // default is true. if range is provided, set to false.
@@ -464,6 +465,7 @@ const FacetRangePicker = ({
         // set xaxis range
         if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
           plotLayout.xaxis.range = updateHistogramXRange(min, max);
+          plotLayout.xaxis.fixedrange = disableZoomIn(min, max);
         }
 
         response.min = requestMin;
@@ -758,6 +760,7 @@ const FacetRangePicker = ({
     const rangeOptions = updateRangeMinMax(data.min, data.max);
     if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
       plotLayout.xaxis.range = updateHistogramXRange(rangeOptions.absMin, rangeOptions.absMax);
+      plotLayout.xaxis.fixedrange = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax)
     }
 
     setCompState({
@@ -845,6 +848,7 @@ const FacetRangePicker = ({
       const plotLayout = { ...compState.plot.layout }
       if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
         plotLayout.xaxis.range = updateHistogramXRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
+        plotLayout.xaxis.fixedrange = disableZoomIn(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
       }
 
       setCompState({
