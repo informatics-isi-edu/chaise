@@ -84,7 +84,7 @@ const FacetRangePicker = ({
 
   const [compState, setCompState] = useState<RangePickerState>(() => {
     const defaultPlotLayout: PlotlyLayout = {
-      autosize: true,
+      // autosize: true,
       height: 150,
       margin: {
         l: 40,
@@ -107,7 +107,8 @@ const FacetRangePicker = ({
       yaxis: {
         fixedrange: true,
         zeroline: true,
-        tickformat: ',d'
+        tickformat: ',d',
+        tickmode: 'linear'
       },
       bargap: 0
     }
@@ -460,7 +461,10 @@ const FacetRangePicker = ({
         plotData[0].y = response.y;
 
         const plotLayout = { ...compState.plot.layout };
-        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') plotLayout.xaxis.range = updateHistogramRange(min, max);
+        // set xaxis range
+        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
+          plotLayout.xaxis.range = updateHistogramXRange(min, max);
+        }
 
         response.min = requestMin;
         response.max = requestMax;
@@ -476,7 +480,8 @@ const FacetRangePicker = ({
           plot: {
             ...compState.plot,
             data: plotData,
-            layout: plotLayout
+            layout: plotLayout,
+            labels: response.labels
           },
           relayout: shouldRelayout,
           rangeOptions: {
@@ -647,7 +652,7 @@ const FacetRangePicker = ({
     return windowRef.moment(ts).format(format);
   }
 
-  const updateHistogramRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
+  const updateHistogramXRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     if (isColumnOfType('timestamp')) {
       return [dateTimeToTimestamp(min as TimeStamp), dateTimeToTimestamp(max as TimeStamp)];
     } else {
@@ -752,7 +757,7 @@ const FacetRangePicker = ({
 
     const rangeOptions = updateRangeMinMax(data.min, data.max);
     if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
-      plotLayout.xaxis.range = updateHistogramRange(rangeOptions.absMin, rangeOptions.absMax);
+      plotLayout.xaxis.range = updateHistogramXRange(rangeOptions.absMin, rangeOptions.absMax);
     }
 
     setCompState({
@@ -839,7 +844,7 @@ const FacetRangePicker = ({
     } catch (err) {
       const plotLayout = { ...compState.plot.layout }
       if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
-        plotLayout.xaxis.range = updateHistogramRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
+        plotLayout.xaxis.range = updateHistogramXRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
       }
 
       setCompState({
@@ -885,6 +890,7 @@ const FacetRangePicker = ({
       config={compState.plot.config}
       data={compState.plot.data}
       layout={compState.plot.layout ? compState.plot.layout : {}}
+      labels={compState.plot.labels}
       onRelayout={(event: any) => plotlyRelayout(event)}
       ref={plotlyRef}
       style={{ 'width': '100%' }}
