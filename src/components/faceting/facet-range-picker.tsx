@@ -101,15 +101,12 @@ const FacetRangePicker = ({
         // set to "date" for date/timestamp graphs
         // when set to `-`, plotly tries to figure out the type of data and automatically set the type
         type: '-'
-        // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
-        // autorange: true // default is true. if range is provided, set to false.
-        // rangemode: "normal"/"tozero"/"nonnegative"
       },
       yaxis: {
         fixedrange: true,
-        zeroline: true,
-        tickformat: ',d',
-        tickmode: 'linear'
+        zeroline: true
+        // removed tickformat: ',d' since it would cause small data sets to show [0, 1, 1, 2, 2] 
+        // when the yaxis labels were really [0, 0.5, 1, 1.5, 2] by rounding non whole numbers
       },
       bargap: 0
     }
@@ -657,9 +654,23 @@ const FacetRangePicker = ({
   const updateHistogramXRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     if (isColumnOfType('timestamp')) {
       return [dateTimeToTimestamp(min as TimeStamp), dateTimeToTimestamp(max as TimeStamp)];
-    } else {
-      return [min, max];
+    } else if (isColumnOfType('date')) {
+      const minDate = windowRef.moment(min);
+      const maxDate = windowRef.moment(max);
+      const limitedRange = windowRef.moment.duration((maxDate.diff(minDate))).asDays();
+      
+      if (limitedRange <= 4) {
+        const minDateDisplay = minDate.subtract(2, 'days').format(dataFormats.date);
+        const maxDateDisplay = maxDate.add(2, 'days').format(dataFormats.date);
+        return [minDateDisplay, maxDateDisplay];
+      }
+    } else if (isColumnOfType('int')) {
+      const intMax = max as number;
+      const intMin = min as number;
+      if ((intMax-intMin) <= 4) return [intMin-2, intMax+2];
     }
+
+    return [min, max];
   }
 
 
