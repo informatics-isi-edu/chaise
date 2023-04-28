@@ -651,6 +651,8 @@ const FacetRangePicker = ({
     return windowRef.moment(ts).format(format);
   }
 
+  // if the date range is very small, the labels on the plot are repeated and the bars stretch across a few dates
+  // pad either side of min/max with 2 extra labels being shown so the content is centered
   const updateHistogramXRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     if (isColumnOfType('timestamp')) {
       return [dateTimeToTimestamp(min as TimeStamp), dateTimeToTimestamp(max as TimeStamp)];
