@@ -50,6 +50,11 @@ describe('Navbar ', function() {
         expect(banner.getText()).toEqual("This is a banner with link");
     });
 
+    it ('should not show the login link as user is logged in.', () => {
+      expect(element(by.css('.login-menu-options')).isPresent()).toBeTruthy();
+      expect(element(by.css('#login-link')).isPresent()).toBeFalsy();
+    });
+
     it('should show a link for the login information since chaiseConfig.loggedInMenu is an object', function() {
         expect(element(by.css('.login-menu-options')).getText()).toBe("Outbound Profile Link", "user's displayed name is incorrect");
     });

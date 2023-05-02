@@ -120,6 +120,11 @@ describe('Navbar ', function() {
         });
     }
 
+    it ('should not show the login link as user is logged in', () => {
+      expect(element(by.css('.login-menu-options')).isPresent()).toBeTruthy();
+      expect(element(by.css('#login-link')).isPresent()).toBeFalsy();
+    });
+
     it('should show the "Full Name" of the logged in user in the top right', function () {
         var name = (!process.env.CI ? browser.params.client.full_name : browser.params.client.display_name);
         expect(element(by.css('.username-display')).getText()).toBe(name, "user's displayed name is incorrect");

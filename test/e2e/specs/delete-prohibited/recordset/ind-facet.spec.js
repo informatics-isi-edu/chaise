@@ -421,7 +421,7 @@ describe("Viewing Recordset with Faceting,", function () {
                 var showMore = chaisePage.recordsetPage.getShowMore(0);
 
                 // open show more, verify only 1 row checked, check another and submit
-                showMore.click().then(function () {
+                chaisePage.clickButton(showMore).then(function () {
                     // one row is selected
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function (ct) {

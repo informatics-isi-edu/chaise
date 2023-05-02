@@ -187,6 +187,11 @@ describe('Navbar ', function() {
     describe('for the login menu', function () {
         var allWindows;
 
+        it ('should not show the login link as user is logged in', () => {
+          expect(element(by.css('.login-menu-options')).isPresent()).toBeTruthy();
+          expect(element(by.css('#login-link')).isPresent()).toBeFalsy();
+        });
+
         it('should show the "Display Name" of the logged in user in the top right based on chaise-config property', function () {
             var name = browser.params.client.display_name;
             // Removing login tagName as we are not using it anymore
