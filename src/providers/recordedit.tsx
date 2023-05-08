@@ -46,6 +46,8 @@ export const RecordeditContext = createContext<{
   appMode: string,
   /* the main entity reference */
   reference: any,
+  /* the reference of the parent page when recordedit is loaded in a popup */
+  parentReference?: any,
   /* the tuples correspondeing to the displayed form */
   tuples: any,
   /**
@@ -109,8 +111,10 @@ export const RecordeditContext = createContext<{
 type RecordeditProviderProps = {
   appMode: string;
   children: JSX.Element;
+  prefillRowData?: any[];
   queryParams: any;
   reference: any;
+  parentReference: any;
   logInfo: {
     logAppMode: string;
     logObject?: any;
@@ -123,8 +127,10 @@ export default function RecordeditProvider({
   appMode,
   children,
   logInfo,
+  prefillRowData,
   queryParams,
-  reference
+  reference,
+  parentReference,
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -366,7 +372,7 @@ export default function RecordeditProvider({
     const submissionRows: any[] = [];
     // f is the number in forms array that is
     forms.forEach((f: number) => {
-      submissionRows.push(populateSubmissionRow(reference, f, data));
+      submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
     });
 
     /**
@@ -436,10 +442,17 @@ export default function RecordeditProvider({
 
           // redirect to record app
           if (forms.length === 1) {
-            // Created a single entity or Updated one
-            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+            if (parentReference) {
+              // in saved query popup
+              addAlert('Your data has been saved. Closing the modal...', ChaiseAlertType.SUCCESS);
 
-            windowRef.location = page.reference.contextualize.detailed.appLink;
+              // TODO: close modal
+            } else {
+              // Created a single entity or Updated one
+              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+
+              windowRef.location = page.reference.contextualize.detailed.appLink;
+            }
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
@@ -655,7 +668,7 @@ export default function RecordeditProvider({
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams);
+      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
@@ -925,6 +938,7 @@ export default function RecordeditProvider({
       // main entity:
       appMode,
       reference,
+      parentReference,
       tuples,
       foreignKeyData,
       columnModels,

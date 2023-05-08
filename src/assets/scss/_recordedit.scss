@@ -3,7 +3,8 @@
 @use 'helpers';
 
 // From _recordedit-app.scss
-#recordedit .app-container {
+// #recordedit .app-container {
+.recordedit-container{
   .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
     padding: 5px 3px;
   }

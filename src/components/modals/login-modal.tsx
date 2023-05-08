@@ -5,12 +5,13 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 
 const LoginModal = (): JSX.Element => {
-  const { dispatchError, loginModal, closeLoginModal } = useError();
+  const { loginModal, closeLoginModal } = useError();
   const { popupLogin } = useAuthn();
 
   const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL);
   // TODO: Call closeLoginModal to process any attached callbacks
-  //    This wasn't working properly in angularJS where this callback would be ignored when the modal popup login was being shown
+  //    - This wasn't working properly in angularJS where this callback would be ignored when the modal popup login was being shown
+  //    - careful since the repercussions of doing this are unknown
   // const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { closeLoginModal('login') });
 
   const cancel = () => closeLoginModal('cancel');

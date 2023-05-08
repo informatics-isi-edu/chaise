@@ -20,7 +20,7 @@ const KeyColumn = (): JSX.Element => {
 
   const {
     appMode, columnModels, activeSelectAll, toggleActiveSelectAll,
-    columnPermissionErrors, forms, logRecordeditClientAction,
+    columnPermissionErrors, forms, logRecordeditClientAction
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {

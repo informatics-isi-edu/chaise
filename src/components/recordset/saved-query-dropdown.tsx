@@ -1,19 +1,24 @@
 // components
-import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DuplicateSavedQueryModal from '@isrd-isi-edu/chaise/src/components/modals/duplicate-saved-query-modal';
+import RecordeditModal from '@isrd-isi-edu/chaise/src/components/modals/recordedit-modal';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 
 // hooks
 import { useEffect, useState } from 'react';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogAppModes, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditProps } from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import {
-  FacetModel, RecordsetConfig, RecordsetDisplayMode,
+  RecordsetConfig, RecordsetDisplayMode,
   RecordsetProps, RecordsetSelectMode
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
@@ -52,13 +57,9 @@ const SavedQueryDropdown = ({
     savedQueryReference,
   } = useRecordset();
 
-  const {
-    session
-  } = useAuthn();
-
-  const {
-    dispatchError
-  } = useError();
+  const { session } = useAuthn();
+  const { addAlert } = useAlert();
+  const { dispatchError } = useError();
 
   /**
    * whether to show the tooltip or not
@@ -71,7 +72,10 @@ const SavedQueryDropdown = ({
   const [displayedTooltip, setDisplayedTooltip] = useState<string>(MESSAGE_MAP.tooltip.saveQuery);
   const [disableDropdown, setDisableDropdown] = useState<boolean>(true);
 
+  const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null)
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
+  // set after checking if the existing search criteria exists to open the duplcate saved query modal
+  const [tupleForDuplicateSavedQuery, setTupleForDuplicateSavedQuery] = useState<any | null>(null)
 
   useEffect(() => {
     if (!savedQueryReference) return;
@@ -116,8 +120,10 @@ const SavedQueryDropdown = ({
     *  ]
     * }
     * NOTE: will return null if there aren't any facets
+    * 
+    * @param facetModels: array of appliedFilter arrays
     */
-  function _getStableFacets(facetModels: SavedQueryFacetModel[]) {
+  function _getStableFacets(facetModels: any[][]) {
     const filters = [];
     if (reference.location.searchTerm) {
       // TODO this is a bit hacky
@@ -138,7 +144,7 @@ const SavedQueryDropdown = ({
       const fm = facetModels[i],
         fc = reference.facetColumns[i];
 
-      if (fm.appliedFilters.length == 0) {
+      if (fm.length == 0) {
         continue;
       }
 
@@ -177,8 +183,8 @@ const SavedQueryDropdown = ({
           filter.choices = [];
 
 
-          for (let j = 0; j < fm.appliedFilters.length; j++) {
-            let af = fm.appliedFilters[j];
+          for (let j = 0; j < fm.length; j++) {
+            let af = fm[j];
             // ignore the not-null choice (it's already encoded and we don't need to map it)
             if (af.isNotNull) {
               continue;
@@ -226,9 +232,12 @@ const SavedQueryDropdown = ({
       columnModels.push(columnToColumnModel(col));
     });
 
-    const isDescriptionMarkdown = columnModels.filter((model: RecordeditColumnModel) => {
+    // should be only one description column
+     const descriptionColumn = columnModels.filter((model: RecordeditColumnModel) => {
       return model.column.name == 'description'
-    })[0].inputType == 'longtext'
+    })[0]
+
+    const isDescriptionMarkdown = descriptionColumn.inputType == 'longtext' || descriptionColumn.inputType == 'markdown';
 
     const facetOptionsToString = (options: any[]) => {
       let str = '';
@@ -287,9 +296,6 @@ const SavedQueryDropdown = ({
     let description = nameDescriptionPrefix + ':\n';
 
     const allFilters = appliedFiltersCallback();
-    console.log(allFilters);
-    // TODO: facetModels are not on recordset provider?
-    //     think of how to do this different
     const modelsWFilters: SavedQueryFacetModel[] = [];
 
     allFilters.forEach((facetFilter: any, idx: number) => {
@@ -302,9 +308,7 @@ const SavedQueryDropdown = ({
       };
 
       modelsWFilters.push(tempObj);
-    })
-
-    console.log(modelsWFilters);
+    });
 
     if (reference.location.searchTerm) {
       name += ' ' + reference.location.searchTerm;
@@ -349,10 +353,18 @@ const SavedQueryDropdown = ({
     row.description = description;
 
     // get the stable facet
-    const facetObj = _getStableFacets(modelsWFilters);
-    console.log(facetObj);
+    const facetObj = _getStableFacets(allFilters);
     const query_id = SparkMD5.hash(JSON.stringify(facetObj));
 
+    /**  
+     * TODO: column names are hard coded for storing data
+     *    which columns should be configured and which should be hardcoded?
+     * 
+     *   hardcoded:
+     *     encoded_facets, facets
+     *   configurable:
+     *     schema_name (schema?), table_name (table?), user_id (user?), query_id (query?) 
+     */
     // set id based on hash of `facets` columns
     row.query_id = query_id;
     row.encoded_facets = facetObj ? windowRef.ERMrest.encodeFacet(facetObj) : null;
@@ -362,7 +374,6 @@ const SavedQueryDropdown = ({
     row.user_id = session?.client.id;
 
     rowData.rows.push(row);
-
 
     // check to see if the saved query exists for the given user, table, schema, and selected facets
     let queryUri = savedQueryReference.uri + '/user_id=' + fixedEncodeURIComponent(row.user_id);
@@ -380,41 +391,32 @@ const SavedQueryDropdown = ({
 
       return response.read(1, logObj);
     }).then((page: any) => {
-      console.log(page);
       // if a row is returned, a query with this set of facets exists already
       if (page.tuples.length > 0) {
-        // modalUtils.showModal({
-        //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/duplicateSavedQuery.modal.html",
-        //   windowClass: "duplicate-saved-query",
-        //   controller: "DuplicateSavedQueryModalDialogController",
-        //   controllerAs: "ctrl",
-        //   keyboard: true,
-        //   resolve: {
-        //     params: {
-        //       tuple: page.tuples[0]
-        //     }
-        //   }
-        // }, null, null, false, false);
+        setTupleForDuplicateSavedQuery(page.tuples[0]);
       } else {
-        // modalUtils.showModal({
-        //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
-        //   windowClass: "create-saved-query",
-        //   controller: "SavedQueryModalDialogController",
-        //   controllerAs: "ctrl",
-        //   size: "md",
-        //   keyboard: true,
-        //   resolve: {
-        //     params: {
-        //       reference: savedQueryReference,
-        //       parentReference: scope.vm.reference,
-        //       columnModels: columnModels,
-        //       rowData: rowData
-        //     }
-        //   }
-        // }, function success() {
-        //   // notify user of success before closing
-        //   AlertsService.addAlert("Search criteria saved.", "success");
-        // }, null, false, false);
+        const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
+        const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, tempSavedQueryReference.table);
+        const logObj = {
+            action: LogService.getActionString(LogActions.CREATE, stackPath, LogAppModes.CREATE),
+            stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), {'num_created': 1})
+        };
+
+        // TODO parent container?
+        setRecordeditModalProps({
+          appMode: 'create',
+          reference: tempSavedQueryReference,
+          parentReference: reference,
+          queryParams: {},
+          prefillRowData: rowData.rows,
+          /* The log related APIs */
+          logInfo: {
+            logAppMode: LogAppModes.CREATE,
+            logObject: logObj,
+            logStack: logObj.stack,
+            logStackPath: stackPath
+          }
+        })
       }
     }).catch((err: any) => {
       $log.debug(err);
@@ -422,7 +424,8 @@ const SavedQueryDropdown = ({
   }
 
   const showSavedQueries = () => {
-    var facetBlob = {
+    // TODO: when fetching saved queries, column names for table_name column and user_id column are hardcoded
+    const facetBlob = {
       and: [{
         choices: [reference.table.name],
         source: 'table_name' // name of column storing table name in saved_query table
@@ -432,7 +435,7 @@ const SavedQueryDropdown = ({
       }]
     }
 
-    const uri = savedQueryReference.uri + "/" + facetTxt + windowRef.ERMrest.encodeFacet(facetBlob) + '@sort(last_execution_time::desc::)';
+    const uri = savedQueryReference.uri + '/' + facetTxt + windowRef.ERMrest.encodeFacet(facetBlob) + '@sort(last_execution_time::desc::)';
     windowRef.ERMrest.resolve(uri, ConfigService.contextHeaderParams).then((ref: any) => {
       // we don't want to allow faceting in the popup
       const tempSavedQueryReference = ref.contextualize.compactSelectSavedQueries.hideFacets();
@@ -442,7 +445,7 @@ const SavedQueryDropdown = ({
         editable: true,
         deletable: true,
         sortable: true,
-        selectMode: RecordsetSelectMode.SINGLE_SELECT,
+        selectMode: RecordsetSelectMode.NO_SELECT,
         // NOTE: when supporting faceting in saved_queries popup
         //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
         showFaceting: false,
@@ -450,8 +453,6 @@ const SavedQueryDropdown = ({
         // used popup/savedquery so that we can configure which button to show and change the modal title
         displayMode: RecordsetDisplayMode.SAVED_QUERY_POPUP
       };
-
-      // params.saveQueryRecordset = true;
 
       const stackElement = LogService.getStackNode(
         LogStackTypes.SET,
@@ -462,6 +463,7 @@ const SavedQueryDropdown = ({
       const logStack = LogService.getStackObject(stackElement),
         logStackPath = LogService.getStackPath('', LogStackPaths.SAVED_QUERY_SELECT_POPUP);
 
+      // TODO parent container?
       setRecordsetModalProps({
         parentReference: reference,
         initialReference: tempSavedQueryReference,
@@ -479,9 +481,14 @@ const SavedQueryDropdown = ({
     });
   }
 
-  const hideRecordsetModal = () => {
-    setRecordsetModalProps(null);
-  };
+  const hideDuplicateSavedQueryModal = () => setTupleForDuplicateSavedQuery(null);
+  const hideRecordsetModal = () => setRecordsetModalProps(null);
+  const hideRecordeditModal = () => setRecordeditModalProps(null);
+
+  const onCreateSavedQuerySuccess = () => {
+    addAlert('Your data has been saved. Closing the modal...', ChaiseAlertType.SUCCESS);
+    hideRecordeditModal();
+  }
 
   return (
     <>
@@ -504,12 +511,25 @@ const SavedQueryDropdown = ({
         </Dropdown.Menu>
       </Dropdown>
 
-      {/* <SavedQueryModal></SavedQueryModal> */}
-      { recordsetModalProps &&
+      {tupleForDuplicateSavedQuery && 
+        <DuplicateSavedQueryModal
+          tuple={tupleForDuplicateSavedQuery}
+          onClose={hideDuplicateSavedQueryModal}
+        />
+      }
+      {recordeditModalProps &&
+        <RecordeditModal
+          recordeditProps={recordeditModalProps}
+          onSubmitSuccess={onCreateSavedQuerySuccess}
+          onClose={hideRecordeditModal}
+        />
+      }
+      {recordsetModalProps &&
         <RecordsetModal
           modalClassName='saved-query-popup'
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
+          // TODO: 
           onSubmit={() => { return }}
         />
       }

@@ -6,15 +6,16 @@ div.modal-backdrop {
   z-index: map-get(variables.$z-index-map, 'modal-backdrop');
 
   // allows modal on modal (only two levels)
-  ~ .modal-backdrop {
+  ~.modal-backdrop {
     z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
   }
 }
+
 div.modal {
   z-index: map-get(variables.$z-index-map, 'modal');
 
   // allows modal on modal (only two levels)
-  ~ .modal {
+  ~.modal {
     z-index: map-get(variables.$z-index-map, 'modal-on-modal');
   }
 }
@@ -65,6 +66,7 @@ div.modal-title {
 
 .modal-login-instruction {
   z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
+
   .modal-dialog {
     position: absolute;
     top: 50%;
@@ -78,12 +80,15 @@ div.modal-title {
 
     .modal-header {
       justify-content: space-around;
+
       .modal-title {
         font-size: 22px !important;
       }
     }
+
     .modal-body {
       text-align: center;
+
       button {
         margin-left: 5px;
       }
@@ -110,6 +115,7 @@ div.modal-title {
   .toggle-error-details {
     display: block;
     padding-left: 0;
+
     i {
       padding-right: 3px;
     }
@@ -125,13 +131,14 @@ div.modal-title {
 }
 
 .search-popup {
-  ~ .modal-error-backdrop,
-  ~ .modal-login-instruction-backdrop {
+
+  ~.modal-error-backdrop,
+  ~.modal-login-instruction-backdrop {
     z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
   }
 
-  ~ .modal-error,
-  ~ .modal-login-instruction {
+  ~.modal-error,
+  ~.modal-login-instruction {
     z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
   }
 
@@ -158,7 +165,8 @@ div.modal-title {
     padding-left: 10px;
   }
 
-  h2, h3 {
+  h2,
+  h3 {
     margin-top: 20px;
     margin-bottom: 10px;
   }
@@ -200,6 +208,7 @@ div.modal-title {
   right: 15px;
   top: 15px;
 }
+
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
   margin: auto;
@@ -207,6 +216,7 @@ div.modal-title {
   overflow: hidden;
   max-width: 95vw;
 }
+
 /*Sets the maximum height of the modal body to 85% of the screen height*/
 .modal-xl .modal-body {
   max-height: 90vh;
@@ -231,10 +241,12 @@ div.modal-title {
 
 /************* Profile Card ****************/
 .profile-popup {
+
   // to allow scrolling and showing all content
   .modal-content {
     max-height: unset;
   }
+
   ul li {
     list-style-type: disc;
 
@@ -244,7 +256,7 @@ div.modal-title {
   }
 
   // remove the last border since it's not needed
-  table tr:last-child > td {
+  table tr:last-child>td {
     border-bottom: none;
   }
 
@@ -257,15 +269,18 @@ div.modal-title {
 .search-popup {
   .modal-content {
     height: 95vh;
+
     .modal-header {
       padding: 0;
       padding-top: 20px;
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
     }
+
     .modal-body {
       padding: 0;
       height: 90vh;
+
       .top-panel-container {
         padding-top: 0;
       }
@@ -274,6 +289,7 @@ div.modal-title {
 }
 
 .scalar-show-details-popup {
+
   // change width of number of Occurrences
   // we cannot use the class name because the scalar column might be using the same name
   .recordset-table th:nth-child(3) {
@@ -297,5 +313,32 @@ div.modal-title {
   .progress-bar {
     background-size: 1.75rem 1.75rem;
     background-color: #4674a7;
+  }
+}
+
+/******** Popup modal for Saving Queries ********/
+.create-saved-query {
+  .top-panel-container {
+    padding-right: 5px;
+
+    .top-flex-panel .top-left-panel.close-panel+.top-right-panel {
+      padding-left: 5px;
+    }
+  }
+
+  .bottom-panel-container {
+    .side-panel-resizable.close-panel~.main-container {
+      padding-left: 5px;
+    }
+
+    .main-container:not(.dynamic-padding) {
+      padding-right: 5px;
+    }
+
+    .main-container {
+      .main-body {
+        padding-bottom: 20px;
+      }
+    }
   }
 }
