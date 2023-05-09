@@ -555,17 +555,16 @@ export default function RecordeditProvider({
       setUploadProgressModalProps({
         rows: submissionRowsCopy,
         onSuccess: onSuccess,
-        onCancel: () => {
-        // onCancel: (exception: any) => {
+        onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
 
-          // if (typeof exception !== "string") {
-          //   // happens with an error with code 0 (Timeout Error)
-          //   const message = exception.message || MESSAGE_MAP.errorMessageMissing;
+          if (typeof exception !== "string") {
+            // happens with an error with code 0 (Timeout Error)
+            const message = exception.message || MESSAGE_MAP.errorMessageMissing;
 
-          //   // if online, we don't know how to handle the error
-          //   if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
-          // }
+            // if online, we don't know how to handle the error
+            if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
+          }
 
           // close the modal
           setUploadProgressModalProps(undefined);
