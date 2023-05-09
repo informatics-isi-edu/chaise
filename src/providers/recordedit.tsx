@@ -558,11 +558,11 @@ export default function RecordeditProvider({
         onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
 
-          if (typeof exception !== "string") {
+          if (typeof exception !== 'string') {
             // happens with an error with code 0 (Timeout Error)
             const message = exception.message || MESSAGE_MAP.errorMessageMissing;
 
-            // if online, we don't know how to handle the error
+            // we don't know how to handle the error in the code, show error to user as alert
             if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
           }
 
