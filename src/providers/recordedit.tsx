@@ -46,8 +46,6 @@ export const RecordeditContext = createContext<{
   appMode: string,
   /* the main entity reference */
   reference: any,
-  /* the reference of the parent page when recordedit is loaded in a popup */
-  parentReference?: any,
   /* the tuples correspondeing to the displayed form */
   tuples: any,
   /**
@@ -114,7 +112,6 @@ type RecordeditProviderProps = {
   prefillRowData?: any[];
   queryParams: any;
   reference: any;
-  parentReference: any;
   logInfo: {
     logAppMode: string;
     logObject?: any;
@@ -130,7 +127,6 @@ export default function RecordeditProvider({
   prefillRowData,
   queryParams,
   reference,
-  parentReference,
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -442,17 +438,15 @@ export default function RecordeditProvider({
 
           // redirect to record app
           if (forms.length === 1) {
-            if (parentReference) {
-              // in saved query popup
-              addAlert('Your data has been saved. Closing the modal...', ChaiseAlertType.SUCCESS);
+              // // in saved query popup
+              // addAlert('Your data has been saved. Closing the modal...', ChaiseAlertType.SUCCESS);
 
-              // TODO: close modal
-            } else {
-              // Created a single entity or Updated one
-              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+              // // TODO: close modal
+          
+            // Created a single entity or Updated one
+            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-              windowRef.location = page.reference.contextualize.detailed.appLink;
-            }
+            windowRef.location = page.reference.contextualize.detailed.appLink;
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
@@ -938,7 +932,6 @@ export default function RecordeditProvider({
       // main entity:
       appMode,
       reference,
-      parentReference,
       tuples,
       foreignKeyData,
       columnModels,

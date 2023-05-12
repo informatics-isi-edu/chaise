@@ -1,3 +1,5 @@
+// disable unescaped check for `"` being included in HTML content that is "not" escaped but shows properly
+/* eslint-disable react/no-unescaped-entities */
 import Modal from 'react-bootstrap/Modal';
 
 type DuplicateSavedQueryModalProps = { 
@@ -12,6 +14,8 @@ const DuplicateSavedQueryModal = ({
 
   const onHide = () => onClose();
 
+  const renderRecordLink = () => (<a href={tuple.reference.contextualize.entryEdit.appLink} target='_blank' rel='noreferrer'>here</a>);
+
   return (
     <Modal
       className='duplicate-saved-query'
@@ -24,7 +28,7 @@ const DuplicateSavedQueryModal = ({
       <Modal.Body>
         <p>A saved search with the same supplied filter criteria already exists with the name "{tuple.data.name}".</p>
 
-        <p>Click "<b>Cancel</b>" to go back to the search interface. You may click <a href={tuple.reference.contextualize.entryEdit.appLink} target='_blank'>here</a> to modify the existing saved search name.</p>
+        <p>Click "<b>Cancel</b>" to go back to the search interface. You may click {renderRecordLink()} to modify the existing saved search name.</p>
       </Modal.Body>
       <Modal.Footer>
         <button

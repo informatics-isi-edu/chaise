@@ -47,7 +47,6 @@ export type RecordeditProps = {
   queryParams: any;
   prefillRowData?: any[];
   reference: any;
-  parentReference?: any;
   /* The log related APIs */
   logInfo: {
     logAppMode: string;
@@ -64,12 +63,11 @@ const Recordedit = ({
   prefillRowData,
   queryParams,
   reference,
-  parentReference,
   logInfo
 }: RecordeditProps): JSX.Element => {
   return (
     <AlertsProvider>
-      <RecordeditProvider reference={reference} logInfo={logInfo} appMode={appMode} queryParams={queryParams} prefillRowData={prefillRowData} parentReference={parentReference}>
+      <RecordeditProvider reference={reference} logInfo={logInfo} appMode={appMode} queryParams={queryParams} prefillRowData={prefillRowData}>
         <RecordeditInner parentContainer={parentContainer} />
       </RecordeditProvider>
     </AlertsProvider>
@@ -88,7 +86,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, parentReference, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
+    appMode, reference, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
     forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
     showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction,
   } = useRecordedit()
@@ -109,7 +107,7 @@ const RecordeditInner = ({
 
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
-  const [isCreatePopup, setIsCreatePopup] = useState<boolean>(Boolean(parentReference));
+  // const [isCreatePopup, setIsCreatePopup] = useState<boolean>(Boolean(parentReference));
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const copyFormRef = useRef<HTMLInputElement>(null);
@@ -365,12 +363,6 @@ const RecordeditInner = ({
           link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
         <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
       </>);
-    } else if (isCreatePopup) {
-      // currently only used for saved queries
-      return(<>
-        <span>Save current search criteria for table </span>
-        <Title reference={parentReference} />
-      </>)
     }
 
     const tableName = <Title addLink reference={reference} />;
@@ -404,7 +396,7 @@ const RecordeditInner = ({
           </div>
         }
         <div className='top-panel-container'>
-          {/* recordset level alerts */}
+          {/* recordedit level alerts */}
           <Alerts />
           <div className='top-flex-panel'>
             {/* This is here so the spacing can be done in one place for all the apps */}
@@ -437,18 +429,17 @@ const RecordeditInner = ({
                       <span>Delete</span>
                     </button>
                   </ChaiseTooltip>}
-                  {/* {isCreatePopup && <button className='chaise-btn chaise-btn-secondary modal-close' onClick={modalClose}> */}
-                  {isCreatePopup && <button className='chaise-btn chaise-btn-secondary modal-close'>
+                  <button className='chaise-btn chaise-btn-secondary modal-close'>
                     <strong className='chaise-btn-icon'>X</strong>
                     <span>Close</span>
-                  </button>}
+                  </button>
                 </div>}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
               {!resultsetProps && <div className='form-controls'>
                 {/* required-info used in testing for reseting cursor position when testing tooltips */}
                 <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
-                {!isCreatePopup && <div className='add-forms chaise-input-group'>
+                <div className='add-forms chaise-input-group'>
                   {appMode === appModes.EDIT ?
                     <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
                       <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
@@ -491,7 +482,7 @@ const RecordeditInner = ({
                       </span>
                     </div>
                   }
-                </div>} 
+                </div>
               </div>}
             </div>
           </div>
@@ -548,7 +539,7 @@ const RecordeditInner = ({
                 </Accordion>
               </div>
             }
-            {!isCreatePopup && <Footer />}
+            <Footer />
           </div>
         </div>
         {showDeleteConfirmationModal &&

@@ -144,7 +144,7 @@ const SavedQueryDropdown = ({
       const fm = facetModels[i],
         fc = reference.facetColumns[i];
 
-      if (fm.length == 0) {
+      if (fm.length === 0) {
         continue;
       }
 
@@ -175,7 +175,7 @@ const SavedQueryDropdown = ({
         const stableKeyCols = fc.column.table.stableKey,
           stableKeyColName = stableKeyCols[0].name;
 
-        if (stableKeyColName != fc.column.name) {
+        if (stableKeyColName !== fc.column.name) {
           // TODO we're assuming that it's just simple key,
           //     if this assumption has changed, we should change this implementation too
           // we have to change the column and choices values
@@ -184,13 +184,13 @@ const SavedQueryDropdown = ({
 
 
           for (let j = 0; j < fm.length; j++) {
-            let af = fm[j];
+            const af = fm[j];
             // ignore the not-null choice (it's already encoded and we don't need to map it)
             if (af.isNotNull) {
               continue;
             }
             // add the null choice manually
-            if (af.uniqueId == null) {
+            if (af.uniqueId === null) {
               filter.choices.push(null);
             } else {
               filter.choices.push(af.tuple.data[stableKeyColName]);
@@ -215,6 +215,7 @@ const SavedQueryDropdown = ({
     const columnModels: any[] = [];
     const tempSavedQueryReference = savedQueryReference.contextualize.entryCreate;
 
+    // TODO: mostly not needed anymore, maybe just rows?
     const rowData: {
       rows: any[],
       submissionRows: any[],
@@ -234,10 +235,10 @@ const SavedQueryDropdown = ({
 
     // should be only one description column
      const descriptionColumn = columnModels.filter((model: RecordeditColumnModel) => {
-      return model.column.name == 'description'
+      return model.column.name === 'description'
     })[0]
 
-    const isDescriptionMarkdown = descriptionColumn.inputType == 'longtext' || descriptionColumn.inputType == 'markdown';
+    const isDescriptionMarkdown = descriptionColumn.inputType === 'longtext' || descriptionColumn.inputType === 'markdown';
 
     const facetOptionsToString = (options: any[]) => {
       let str = '';
@@ -252,7 +253,7 @@ const SavedQueryDropdown = ({
         } else {
           str += ' ' + name;
         }
-        if (idx + 1 != options.length) str += ','
+        if (idx + 1 !== options.length) str += ','
       });
       return str;
     }
@@ -301,7 +302,7 @@ const SavedQueryDropdown = ({
     allFilters.forEach((facetFilter: any, idx: number) => {
       if (facetFilter.length === 0) return;
 
-      let tempObj: SavedQueryFacetModel = {
+      const tempObj: SavedQueryFacetModel = {
         appliedFilters: facetFilter,
         displayname: reference.facetColumns[idx].displayname.value,
         preferredMode: reference.facetColumns[idx].preferredMode
@@ -321,7 +322,7 @@ const SavedQueryDropdown = ({
       // ===== setting default name =====
       // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
       facetNames += ' ' + fm.displayname;
-      if (modelIdx + 1 != modelsWFilters.length) facetNames += ',';
+      if (modelIdx + 1 !== modelsWFilters.length) facetNames += ',';
 
       const numChoices = fm.appliedFilters.length;
       const facetDetails = ' ' + fm.displayname + ' (' + numChoices + ' choice' + (numChoices > 1 ? 's' : '') + ')';
@@ -330,23 +331,25 @@ const SavedQueryDropdown = ({
 
       // used for the description and name if not too long
       let facetOptionsString = ''; // the concatenation of facet option names
-      if (fm.preferredMode == 'ranges') facetOptionsString += ' ' + fm.displayname + ' (';
+      if (fm.preferredMode === 'ranges') facetOptionsString += ' ' + fm.displayname + ' (';
       facetOptionsString += facetOptionsToString(fm.appliedFilters);
-      if (fm.preferredMode == 'ranges') facetOptionsString += ')';
+      if (fm.preferredMode === 'ranges') facetOptionsString += ')';
 
       // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
       const underChoiceLimit = fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit;
       const underTextLimit = facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit;
       if (underChoiceLimit && underTextLimit) facetInfo = facetOptionsString;
       name += facetInfo;
-      if (modelIdx + 1 != modelsWFilters.length) name += ';'
+      if (modelIdx + 1 !== modelsWFilters.length) name += ';'
 
       // ===== setting default description =====
-      description += facetDescription(facetDetails, facetOptionsString, modelIdx + 1 != modelsWFilters.length);
+      description += facetDescription(facetDetails, facetOptionsString, modelIdx + 1 !== modelsWFilters.length);
     });
 
     // if name is longer than the set string length threshold, show the compact version with facet names only
-    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = nameDescriptionPrefix + ' ' + modelsWFilters.length + ' facets:' + facetNames;
+    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) {
+      name = nameDescriptionPrefix + ' ' + modelsWFilters.length + ' facets:' + facetNames;
+    }
 
     const row: any = {};
     row.name = name;
@@ -402,11 +405,9 @@ const SavedQueryDropdown = ({
             stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), {'num_created': 1})
         };
 
-        // TODO parent container?
         setRecordeditModalProps({
           appMode: 'create',
           reference: tempSavedQueryReference,
-          parentReference: reference,
           queryParams: {},
           prefillRowData: rowData.rows,
           /* The log related APIs */
@@ -506,8 +507,8 @@ const SavedQueryDropdown = ({
           </Dropdown.Toggle>
         </ChaiseTooltip>
         <Dropdown.Menu>
-          <Dropdown.Item className="saved-query-menu-item" onClick={saveQuery}>Save current search criteria</Dropdown.Item>
-          <Dropdown.Item className="saved-query-menu-item" onClick={showSavedQueries}>Show saved search criteria</Dropdown.Item>
+          <Dropdown.Item className='saved-query-menu-item' onClick={saveQuery}>Save current search criteria</Dropdown.Item>
+          <Dropdown.Item className='saved-query-menu-item' onClick={showSavedQueries}>Show saved search criteria</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
 
@@ -520,6 +521,7 @@ const SavedQueryDropdown = ({
       {recordeditModalProps &&
         <RecordeditModal
           recordeditProps={recordeditModalProps}
+          parentReference={reference}
           onSubmitSuccess={onCreateSavedQuerySuccess}
           onClose={hideRecordeditModal}
         />

@@ -317,7 +317,12 @@ div.modal-title {
 }
 
 /******** Popup modal for Saving Queries ********/
-.create-saved-query {
+.create-saved-query .modal-content {
+  .modal-header {
+    // we don't want it to be flex, since we're doing flex ourselves
+    display: block;
+  }
+
   .top-panel-container {
     padding-right: 5px;
 
