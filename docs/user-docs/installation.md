@@ -72,6 +72,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
     Notes:
       - Before bundling and deploying Chaise packages, this command will install the node modules. You can also use alternative commands to modify this behavior. For more information please refer to the [developer guide](../dev-docs/dev-guide.md#building-and-installation).
       - If the given directory does not exist, it will first create it. So you may need to run `make deploy` with _super user_ privileges depending on the installation directory you choose.
+      - If the given directory already exists and you want to make sure any extra files that Chaise doesn't need are removed, use the `make deploy-clean` command instead.
 
 ## Configuration
 

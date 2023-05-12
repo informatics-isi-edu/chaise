@@ -272,6 +272,8 @@ $(SASS): $(shell find $(COMMON)/styles/scss/)
 	@$(BIN)/sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 	@$(BIN)/sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
+GOOGLE_DATASET_CONFIG=google-dataset-config.js
+
 JS_CONFIG=chaise-config.js
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
@@ -510,6 +512,16 @@ deploy: dont_deploy_in_root .make-rsync-list
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
+# deploy chaise to the location and remove extra files
+# this is separated into two rsyncs
+#   - send React related files and remove any extra files
+#   - send AngularJS files
+.PHONY: deploy-clean
+deploy-clean: dont_deploy_in_root .make-rsync-list
+	$(info - deploying the package while syncing the files)
+	@rsync -avz --delete --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' --exclude='$(GOOGLE_DATASET_CONFIG)' $(DIST)/react/ $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+
 # rsync the build and config files to the location
 # refer to the previous comment for why this is separated into three different rsyncs
 .PHONY: deploy-w-config
@@ -549,6 +561,7 @@ usage:
 	@echo "  dist                           local install of node dependencies, build the chaise bundles"
 	@echo "  dist-wo-deps                   build the chaise bundles"
 	@echo "  deploy                         deploy chaise to the given location"
+	@echo "  deploy-clean                   deploy chaise to the given location and remove any extra files in the remote location (except config files)"
 	@echo "  deploy-w-config                deploy chaise to the given location with config files"
 	@echo "  clean                          remove the files and folders created during build"
 	@echo "  distclean                      the same as clean, and also removes npm dependencies"
