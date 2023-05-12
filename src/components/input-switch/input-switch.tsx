@@ -12,6 +12,7 @@ import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-fie
 import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
 import NumericField from '@isrd-isi-edu/chaise/src/components/input-switch/numeric-field';
 import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-field';
+import RUIField from '@isrd-isi-edu/chaise/src/components/input-switch/rui-field';
 
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -157,6 +158,20 @@ const InputSwitch = ({
 
   return (() => {
     switch (type) {
+      case 'ccf-rui':
+        return <RUIField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+        />;
       case 'array':
         return <ArrayField
           baseArrayType={columnModel?.column.type.baseType.name}

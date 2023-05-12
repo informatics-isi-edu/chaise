@@ -38,7 +38,11 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
-  if (column.isAsset) {
+  // TODO this is just a proof of concept and we should add a specific flag for this in ermrestjs
+  if (column._baseCols.length === 1 && column._baseCols[0].annotations.contains('tag:isrd.isi.edu,2023:ccf-rui')) {
+    type = 'ccf-rui'
+  }
+  else if (column.isAsset) {
     type = 'file'
   } else if (column.isForeignKey) {
     type = 'popup-select';
