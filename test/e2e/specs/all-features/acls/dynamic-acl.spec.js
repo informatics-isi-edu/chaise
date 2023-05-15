@@ -365,7 +365,7 @@ const testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, 
 
 describe("regarding dynamic ACL support, ", function () {
     beforeAll(function (done) {
-        recordEditHelpers.createFiles(testParams.files);
+        if (!process.env.CI && testParams.files.length > 0) recordEditHelpers.createFiles(testParams.files);
         // add ACLs
         pImport.importACLs(aclConfig).then(function () {
             // make sure the restricted user is logged in
@@ -670,44 +670,46 @@ describe("regarding dynamic ACL support, ", function () {
             });
         });
 
-        describe('when trying to create a file without permission, user should be shown an error alert', () => {
-            beforeAll((done) => {
-                const fileUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + '/multi-permissions:dynamic_acl_file_table/id=1';
-                chaisePage.navigate(fileUrl).then(() => {
-                    return chaisePage.recordeditPageReady();
-                }).then(() => {
-                    return browser.wait(() => {
-                        return recordEditPage.getAllColumnNames().count().then((ct) => {
-                            return (ct == 3);
-                        });
-                    }, browser.params.defaultTimeout);
-                }).then(() => {
-                    done();
-                }).catch((err) => {
-                    done.fail(err);
+        if (!process.env.CI && testParams.files.length > 0) {
+            describe('when trying to create a file without permission, user should be shown an error alert', () => {
+                beforeAll((done) => {
+                    const fileUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + '/multi-permissions:dynamic_acl_file_table/id=1';
+                    chaisePage.navigate(fileUrl).then(() => {
+                        return chaisePage.recordeditPageReady();
+                    }).then(() => {
+                        return browser.wait(() => {
+                            return recordEditPage.getAllColumnNames().count().then((ct) => {
+                                return (ct == 3);
+                            });
+                        }, browser.params.defaultTimeout);
+                    }).then(() => {
+                        done();
+                    }).catch((err) => {
+                        done.fail(err);
+                    });
                 });
-            });
 
-            it('attach file to be uploaded', (done) => {
-                recordEditHelpers.testFileInput('uri', 0, testParams.files[0]);
-
-                done();
-            });
-
-            it('submit the form and show an alert', (done) => {
-                recordEditPage.submitForm().then(() => {
-                    browser.wait(EC.invisibilityOf(element(by.css('.upload-table'))), browser.params.defaultTimeout);
-
-                    return browser.wait(() => { 
-                        return chaisePage.recordEditPage.getAlertError(); 
-                    }, browser.params.defaultTimeout);
-                }).then((alert) => {
-                    expect(alert.getText()).toContain(testParams.unauthorized_message, 'alert message is incorrect');
+                it('attach file to be uploaded', (done) => {
+                    recordEditHelpers.testFileInput('uri', 0, testParams.files[0]);
 
                     done();
-                }).catch(chaisePage.catchTestError(done));
-            })
-        });
+                });
+
+                it('submit the form and show an alert', (done) => {
+                    recordEditPage.submitForm().then(() => {
+                        browser.wait(EC.invisibilityOf(element(by.css('.upload-table'))), browser.params.defaultTimeout);
+
+                        return browser.wait(() => { 
+                            return chaisePage.recordEditPage.getAlertError(); 
+                        }, browser.params.defaultTimeout);
+                    }).then((alert) => {
+                        expect(alert.getText()).toContain(testParams.unauthorized_message, 'alert message is incorrect');
+
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
+                })
+            });
+        }
     });
 
     /******************** recordset tests ************************/
@@ -723,7 +725,7 @@ describe("regarding dynamic ACL support, ", function () {
     });
 
     afterAll(function (done) {
-        recordEditHelpers.deleteFiles(testParams.files);
+        if (!process.env.CI && testParams.files.length > 0) recordEditHelpers.deleteFiles(testParams.files);
         
         // clean up the ACLs
         pImport.importACLs(erasedAclConfig).then(function () {
