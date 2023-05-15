@@ -558,12 +558,20 @@ export default function RecordeditProvider({
         onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
 
+          // NOTE: This check was being done in angularJS since the modal was closed with a message if the user aborted uploading
+          //   - in ReactJS it's handling the case when the modal is closed and no "exception" is returned (undefined)
           if (typeof exception !== 'string') {
-            // happens with an error with code 0 (Timeout Error)
-            const message = exception.message || MESSAGE_MAP.errorMessageMissing;
+            let message;
+            if (exception.message) {
+              message = exception.message;
+              if (exception.code === 403) message = MESSAGE_MAP.hatracUnauthorizedMessage + ' ' + message;
+            } else {
+              // happens with an error with code 0 (Timeout Error)
+              message = MESSAGE_MAP.errorMessageMissing;
+            }
 
             // we don't know how to handle the error in the code, show error to user as alert
-            if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
+            addAlert(message, ChaiseAlertType.ERROR);
           }
 
           // close the modal
