@@ -911,6 +911,102 @@
                 }
             }
         },
+        "dynamic_acl_file_table": {
+            "table_name": "dynamic_acl_file_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": {}
+                    }
+                },
+                {
+                    "name": "name",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "comment": null,
+                    "name": "filename",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                      "typename": "text"
+                    },
+                    "annotations": {
+                      "comment": [
+                        "name"
+                      ]
+                    }
+                  },
+                  {
+                    "name": "uri",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                      "typename": "text"
+                    },
+                    "annotations": {
+                      "comment": [
+                        "thumbnail",
+                        "download"
+                      ],
+                      "tag:isrd.isi.edu,2017:asset": {
+                        "url_pattern":"/hatrac/js/chaise/{{{_id}}}/{{{_uri.md5_hex}}}",
+                        "filename_column" : "filename",
+                        "byte_count_column": "bytes",
+                        "md5": "preview"
+                      }
+                    }
+                  },
+                  {
+                    "comment": null,
+                    "name": "content_type",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                      "typename": "text"
+                    },
+                    "annotations": {
+                      "comment": [
+                        "type"
+                      ]
+                    }
+                  },
+                  {
+                    "comment": null,
+                    "name": "bytes",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                      "typename": "int8"
+                    },
+                    "annotations": {
+                      "comment": [
+                        "orderby"
+                      ]
+                    }
+                  }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": [
+                        "id", "name", "uri"
+                    ]
+                }
+            }
+        },
         "dynamic_acl_related_table": {
             "table_name": "dynamic_acl_related_table",
             "schema_name": "multi-permissions",
