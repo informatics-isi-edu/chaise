@@ -344,7 +344,7 @@
                       'for full annotation support.'
                     ].join('');
 
-                    var error = new Errors.CustomError("Limited Browser Support", errorMessage, null, messageMap.clickActionMessage.dismissDialog, true);
+                    var error = new Errors.LimitedBrowserSupport(errorMessage, null, messageMap.clickActionMessage.dismissDialog, true);
                     ErrorService.handleException(error, true);
                 }
 
