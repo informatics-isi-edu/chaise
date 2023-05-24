@@ -77,8 +77,9 @@ The rules that should be followed while writing code.
   - The helper functions are case sensitive and use camelCase.
 
 ### General
-- Use semicolons everywhere. Even though it's unnecessary, use a semicolon after each line for consistency.
 - Stick with the indentation size of 2. If a file is not using size 2, just change the whole file.
+- Use single quotes (`'some string'`) for defining strings.
+- Use semicolons everywhere. Even though it's unnecessary, use a semicolon after each line for consistency.
 
 ### React/TypeScript
 
