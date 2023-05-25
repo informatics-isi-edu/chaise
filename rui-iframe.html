@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HuBMAP CCF Registration User Interface (CCF-RUI)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+  <link href="dist/rui/styles.css" rel="stylesheet">
+  <script src="dist/rui/wc.js" async></script>
+</head>
+<body class="mat-typography">
+  <ccf-rui></ccf-rui>
+  <script>
+    const configureRUI = (json) => {
+      const rui = document.querySelector('ccf-rui');
+
+      rui.useDownload = false;
+
+      // TODO avoid hardcoding
+      rui.baseHref = 'https://dev.isrd.isi.edu/~ashafaei/ccf-ui/dist/rui/';
+
+      // TODO
+      // rui.editRegistration = json;
+
+      // rui.user = {firstName: 'Jane', lastName: 'Doe'};
+      // rui.organ = { name: 'kidney', side: 'left', sex: 'female' };
+      // rui.editRegistration = sampleRegistration;
+
+      // rui.fetchPreviousRegistrations = () => {
+      //   return Promise.resolve([sampleRegistration]);
+      // };
+      // rui.cancelRegistration = () => {
+      //   window.location.href = 'https://ingest.hubmapconsortium.org/'
+      // };
+
+      rui.register = (data) => {
+        dispatchMessage('submit-data', data);
+      }
+
+    }
+
+    /**
+     *
+     * @param {string} type the message type
+     * @param {object?} data the data (could be undefined)
+     * @returns
+     */
+    const dispatchMessage = (type, content) => {
+      if (!window.parent) return;
+      window.parent.postMessage({type: type, content: content}, window.location.origin);
+    }
+
+
+    /**
+     * recieve messages
+     */
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
+      const type = event.data.type;
+      const content = event.data.content;
+
+      switch (type) {
+        case 'initialize-iframe':
+          configureRUI(json);
+          break;
+      }
+
+    });
+
+    // let the parent know that the iframe is loaded and ready to recieve messages
+    window.addEventListener('DOMContentLoaded', () => {
+      dispatchMessage('iframe-loaded');
+    });
+
+  </script>
+</body>
+</html>

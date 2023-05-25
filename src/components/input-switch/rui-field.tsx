@@ -28,17 +28,37 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
 
   const iframeRef = useRef<any>(null);
 
+  /**
+   * messages:
+   *
+   *  from iframe to iframe
+   *    - 'iframe-loaded': on initial load
+   *    - 'submit-data': when data is submitted
+   *
+   *  from parent to iframe
+   *    - 'initialize-iframe': send the data to iframe
+   *
+   */
   useEffect(() => {
+    /**
+     * messages that the iframe will send
+     */
     window.addEventListener('message', (event) => {
       if (event.origin !== window.location.origin) return;
 
-      const data = event.data.data;
       const type = event.data.type;
+      const content = event.data.content;
 
-      if (type === 'json-download') {
-        console.log('recieved the json in chaise');
-        console.log(data);
-        setShowModal(false);
+      switch(type) {
+        case 'iframe-loaded':
+          // TODO in edit mode fetch the file and send the json
+          iframeRef.current.contentWindow.postMessage({type: 'iframe-opened', data: {value: 'test'}})
+          break;
+        case 'submit-data':
+          console.log('recieved the json in chaise');
+          console.log(content);
+          setShowModal(false);
+          break;
       }
     })
   }, []);
@@ -101,11 +121,13 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
                     <span>Close</span>
                 </button>
               </Modal.Header>
+              {/* TODO move the styles to scss files and don't have them inline */}
               <Modal.Body style={{minHeight: '90vh'}}>
                 <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: '15px'}}>
                   <ChaiseSpinner />
                   <iframe
                     ref={iframeRef}
+                    // TODO should be hardcoded
                     src='https://dev.isrd.isi.edu/~ashafaei/ccf-ui/'
                     style={{height: '100%', width: '100%', zIndex: 12, position: 'relative'}}
                   />
