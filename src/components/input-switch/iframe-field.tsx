@@ -12,17 +12,26 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
+
+// models
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
-const RUIField = (props: InputFieldProps): JSX.Element => {
+type IframeFieldProps = InputFieldProps & {
+  /**
+   * The column model representing this field in the form.
+   */
+  columnModel: RecordeditColumnModel,
+};
+
+const IframeField = (props: IframeFieldProps): JSX.Element => {
 
   const [showModal, setShowModal] = useState(false);
 
@@ -40,10 +49,7 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
    *
    */
   useEffect(() => {
-    /**
-     * messages that the iframe will send
-     */
-    window.addEventListener('message', (event) => {
+    const recieveIframeMessage = (event: any) => {
       if (event.origin !== window.location.origin) return;
 
       const type = event.data.type;
@@ -52,15 +58,46 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
       switch(type) {
         case 'iframe-loaded':
           // TODO in edit mode fetch the file and send the json
-          iframeRef.current.contentWindow.postMessage({type: 'iframe-opened', data: {value: 'test'}})
+          iframeRef.current.contentWindow.postMessage({type: 'initialize-iframe', data: null})
           break;
         case 'submit-data':
           console.log('recieved the json in chaise');
-          console.log(content);
+          const json = JSON.parse(content);
+
+
+          /**
+           * TODO
+           * save the json as a file in the RUI field.
+           * take a look at how file-field is saving files in handleChange function.
+           **/
+          console.log(json);
+
+          /**
+           * TODO
+           * you also need to save the "@id" property of json in a separate
+           * "RUI_ID" column. for now you can hardcode this column name.
+           * In edit mode, as well as when user picked a registery, we should display
+           * this value in the input.
+           */
+          if (json['@id']) {
+            // TODO
+            console.log(json['@id'])
+          }
+
+          // hide the modal
           setShowModal(false);
           break;
       }
-    })
+    }
+
+    /**
+     * listen for the messages that the iframe will send
+     */
+    window.addEventListener('message', recieveIframeMessage);
+
+    return () => {
+      window.removeEventListener('message', recieveIframeMessage);
+    }
   }, []);
 
   const openRUIModal = () => {
@@ -80,6 +117,7 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
               className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
             >
               {isStringAndNotEmpty(field?.value) ?
+                // TODO instead of the field value, you need to show the value of "RUID_id" column.
                 <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
                 <span
                   className='chaise-input-placeholder popup-select-value'
@@ -127,7 +165,7 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
                   <ChaiseSpinner />
                   <iframe
                     ref={iframeRef}
-                    // TODO should be hardcoded
+                    // TODO should not be hardcoded
                     src='https://dev.isrd.isi.edu/~ashafaei/ccf-ui/'
                     style={{height: '100%', width: '100%', zIndex: 12, position: 'relative'}}
                   />
@@ -141,4 +179,4 @@ const RUIField = (props: InputFieldProps): JSX.Element => {
   );
 };
 
-export default RUIField;
+export default IframeField;

@@ -71,7 +71,13 @@
 
     // let the parent know that the iframe is loaded and ready to recieve messages
     window.addEventListener('DOMContentLoaded', () => {
-      dispatchMessage('iframe-loaded');
+      const inIframe = window.self !== window.parent;
+
+      if (inIframe) {
+        dispatchMessage('iframe-loaded');
+      } else {
+        configureRUI();
+      }
     });
 
   </script>

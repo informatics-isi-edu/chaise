@@ -38,9 +38,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
-  // TODO this is just a proof of concept and we should add a specific flag for this in ermrestjs
-  if (column._baseCols.length === 1 && column._baseCols[0].annotations.contains('tag:isrd.isi.edu,2023:ccf-rui')) {
-    type = 'ccf-rui'
+  if (column.isIframeInput) {
+    type = 'iframe'
   }
   else if (column.isAsset) {
     type = 'file'
