@@ -175,6 +175,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          formNumber={formNumber}
         />;
       case 'array':
         return <ArrayField

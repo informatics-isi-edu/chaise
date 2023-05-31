@@ -26,6 +26,10 @@ import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type IframeFieldProps = InputFieldProps & {
   /**
+   * the "formNumber" that this input belongs to (used for setting the value)
+   */
+  formNumber?: number,
+  /**
    * The column model representing this field in the form.
    */
   columnModel: RecordeditColumnModel,
