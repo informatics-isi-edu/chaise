@@ -312,6 +312,8 @@ export default function RecordeditProvider({
   useEffect(() => {
     if (appMode !== appModes.EDIT || tuples.length === 0 || !canUpdateValues) return;
 
+    const a = "";
+
     // update the column permission errors when forms are changed removed
     const res: { [columnName: string]: string } = {};
     forms.forEach(({ }, formIndex) => {
