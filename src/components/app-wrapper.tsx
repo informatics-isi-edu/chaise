@@ -60,7 +60,12 @@ type AppWrapperProps = {
   /**
    * whether we should ignore hash change, or reload the page on hash change
    */
-  ignoreHashChange?: boolean
+  ignoreHashChange?: boolean,
+  /**
+   * whether we should fetch the session on load or not
+   * (useful when testing locally and webauthn is not available)
+   */
+  dontFetchSession?: boolean
 }
 
 const AppWrapperInner = ({
@@ -69,7 +74,8 @@ const AppWrapperInner = ({
   includeAlerts,
   includeNavbar,
   displaySpinner,
-  ignoreHashChange
+  ignoreHashChange,
+  dontFetchSession
 }: AppWrapperProps): JSX.Element => {
   const { dispatchError, logTerminalError, errors } = useError();
   const [configDone, setConfigDone] = useState(false);
@@ -100,7 +106,13 @@ const AppWrapperInner = ({
      */
     windowRef.addEventListener('hashchange', onHashChange);
 
-    getSession('').then((response: any) => {
+    new Promise((resolve, reject) => {
+      if (dontFetchSession) {
+        resolve(null);
+      } else {
+        getSession('').then((response) => resolve(response)).catch((err) => reject(err));
+      }
+    }).then((response: any) => {
       return ConfigService.configure(appSettings, response);
     }).then(() => {
       setConfigDone(true);
@@ -269,7 +281,8 @@ const AppWrapper = ({
   includeNavbar,
   includeAlerts,
   displaySpinner,
-  ignoreHashChange
+  ignoreHashChange,
+  dontFetchSession
 }: AppWrapperProps): JSX.Element => {
   return (
     <ErrorProvider>
@@ -288,6 +301,7 @@ const AppWrapper = ({
             includeNavbar={includeNavbar}
             displaySpinner={displaySpinner}
             ignoreHashChange={ignoreHashChange}
+            dontFetchSession={dontFetchSession}
           >
             {children}
           </AppWrapperInner>

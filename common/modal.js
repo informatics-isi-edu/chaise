@@ -253,7 +253,8 @@
             vm.switchUserAccounts = function () {
                 $window.open(UriUtils.getHelpPageURL(helpPages.SWITCH_USER_ACCOUNTS.location), '_blank');
             }
-        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
+        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage)
+            || notAllowedPermissionAccess || exception instanceof Errors.LimitedBrowserSupport) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
