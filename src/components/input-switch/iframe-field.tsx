@@ -57,12 +57,12 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
 
       const type = event.data.type;
       const content = event.data.content;
-
       switch(type) {
         case 'iframe-loaded':
           iframeRef.current.contentWindow.postMessage({type: 'initialize-iframe', data: getValues()[props.name]})
           break;
         case 'submit-data':
+          const id = JSON.parse(event.data.data)['@id'];
           /**
            * TODO
            * save the json as a file in the RUI field.
@@ -75,7 +75,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
           };
   
           tempFileObject.file = content;
-          tempFileObject.url = 'data.json';
+          tempFileObject.url = content.name;
           tempFileObject.filesize = content.size;
           setValue(`${props.name}`, tempFileObject);
 
@@ -87,8 +87,8 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
            * In edit mode, as well as when user picked a registery, we should display
            * this value in the input.
            */
-          if (content['name'] !== '') {
-            setValue(`${props.formNumber}- ̰`, content['name']);
+          if (id !== '') {
+            setValue(`${props.formNumber}-RUI_id`, id);
           }
 
           // hide the modal
