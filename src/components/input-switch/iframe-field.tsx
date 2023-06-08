@@ -10,21 +10,20 @@
 
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+import InputField, { InputFieldProps, InputFieldCompProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Modal from 'react-bootstrap/Modal';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
-
+import { useFormContext } from 'react-hook-form';
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-
-type IframeFieldProps = InputFieldProps & {
+type IframeFieldProps = InputFieldCompProps & {
   /**
    * the "formNumber" that this input belongs to (used for setting the value)
    */
@@ -38,9 +37,9 @@ type IframeFieldProps = InputFieldProps & {
 const IframeField = (props: IframeFieldProps): JSX.Element => {
 
   const [showModal, setShowModal] = useState(false);
-
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const iframeRef = useRef<any>(null);
-
+  const { setValue, getValues } = useFormContext();
   /**
    * messages:
    *
@@ -54,27 +53,32 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
    */
   useEffect(() => {
     const recieveIframeMessage = (event: any) => {
-      if (event.origin !== window.location.origin) return;
+      // if (event.origin !== window.location.origin) return;
 
       const type = event.data.type;
       const content = event.data.content;
 
       switch(type) {
         case 'iframe-loaded':
-          // TODO in edit mode fetch the file and send the json
-          iframeRef.current.contentWindow.postMessage({type: 'initialize-iframe', data: null})
+          iframeRef.current.contentWindow.postMessage({type: 'initialize-iframe', data: getValues()[props.name]})
           break;
         case 'submit-data':
-          console.log('recieved the json in chaise');
-          const json = JSON.parse(content);
-
-
           /**
            * TODO
            * save the json as a file in the RUI field.
            * take a look at how file-field is saving files in handleChange function.
            **/
-          console.log(json);
+          const tempFileObject: FileObject = {
+            url: '',
+            filename: '',
+            filesize: 0
+          };
+  
+          tempFileObject.file = content;
+          tempFileObject.url = 'data.json';
+          tempFileObject.filesize = content.size;
+          setValue(`${props.name}`, tempFileObject);
+
 
           /**
            * TODO
@@ -83,9 +87,8 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
            * In edit mode, as well as when user picked a registery, we should display
            * this value in the input.
            */
-          if (json['@id']) {
-            // TODO
-            console.log(json['@id'])
+          if (content['name'] !== '') {
+            setValue(`${props.formNumber}- ̰`, content['name']);
           }
 
           // hide the modal
@@ -116,7 +119,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
     <InputField {...props}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey'>
-          <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRUIModal })}>
+          <div className='chaise-input-group'  ref={inputRef} {... (!props.disableInput && { onClick: openRUIModal })}>
             <div
               className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
             >
@@ -127,7 +130,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                   className='chaise-input-placeholder popup-select-value'
                   contentEditable={false}
                 >
-                  {props.placeholder ? props.placeholder : 'Select a value'}
+                  {props.placeholder ? props.placeholder : getValues()[`${props.formNumber}-RUI_id`] || 'Select a value'}
                 </span>
               }
               <ClearInputBtn
@@ -170,7 +173,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                   <iframe
                     ref={iframeRef}
                     // TODO should not be hardcoded
-                    src='https://dev.isrd.isi.edu/~ashafaei/ccf-ui/'
+                    src='https://dev.isrd.isi.edu/~povijaya/ccf-rui/'
                     style={{height: '100%', width: '100%', zIndex: 12, position: 'relative'}}
                   />
                 </div>

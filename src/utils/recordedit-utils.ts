@@ -558,7 +558,9 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       if (col.byteCountColumn) setSubmission(col.byteCountColumn, true);
       if (col.md5) setSubmission(col.md5, true);
       if (col.sha256) setSubmission(col.sha256, true);
-
+      if (col.isIframeInput) {
+        setSubmission('RUI_id', true);
+      }
       setSubmission(col);
     } else {
       setSubmission(col);
