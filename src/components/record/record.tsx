@@ -188,7 +188,7 @@ const RecordInner = ({
       let url = tuple.reference.contextualize.detailed.appLink;
       url = url.substring(0, url.lastIndexOf('?'));
 
-      $log.info([
+      $log.log([
         'Default export template is accessible through `defaultExportTemplate` variable. ',
         'To get the string value of it call `JSON.stringify(defaultExportTemplate)`'
       ].join(''));
