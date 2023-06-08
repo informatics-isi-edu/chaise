@@ -12,6 +12,7 @@
 </head>
 <body class="mat-typography">
   <ccf-rui></ccf-rui>
+
   <script>
     const configureRUI = (json) => {
       const rui = document.querySelector('ccf-rui');
@@ -22,8 +23,21 @@
       rui.baseHref = 'https://dev.isrd.isi.edu/~ashafaei/ccf-ui/dist/rui/';
 
       // TODO
-      // rui.editRegistration = json;
-
+      console.log(json);
+	    fetch(json.data.url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Request failed');
+          }
+          return response.json();
+          })
+          .then(data => {
+            rui.editRegistration = data;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      
       // rui.user = {firstName: 'Jane', lastName: 'Doe'};
       // rui.organ = { name: 'kidney', side: 'left', sex: 'female' };
       // rui.editRegistration = sampleRegistration;
@@ -36,7 +50,11 @@
       // };
 
       rui.register = (data) => {
-        dispatchMessage('submit-data', data);
+	    const json = JSON.stringify(JSON.parse(data), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      // Create a File object from the Blob
+      const file = new File([blob], 'data.json', { type: 'application/json' });
+      dispatchMessage('submit-data', file, data);
       }
 
     }
@@ -47,9 +65,9 @@
      * @param {object?} data the data (could be undefined)
      * @returns
      */
-    const dispatchMessage = (type, content) => {
+    const dispatchMessage = (type, content, data) => {
       if (!window.parent) return;
-      window.parent.postMessage({type: type, content: content}, window.location.origin);
+      window.parent.postMessage({type: type, content: content, data: data}, window.location.origin);
     }
 
 
@@ -63,7 +81,7 @@
 
       switch (type) {
         case 'initialize-iframe':
-          configureRUI(json);
+          configureRUI(event.data);
           break;
       }
 
