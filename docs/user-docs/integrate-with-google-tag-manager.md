@@ -53,7 +53,7 @@ We now need to connect our website to Google Tag Manager. To do so,
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
         })(window,document,'script','dataLayer', gtmId);
-        
+
         // Insert <body> tag
         var bodyScript = document.createElement('noscript');
         bodyScript.innerHTML = '<iframe src="https://www.googletagmanager.com/ns.html?id=' + gtmId + '" height="0" width="0" style="display:none;visibility:hidden"></iframe>';
@@ -70,14 +70,14 @@ By doing this, Chaise is now connected to the GTM container and will collect use
 
 Now that we have the `gtm-id.js` file, we need to ensure the static sites include the same file. The following is how we recommend doing this for Jekyll pages:
 
-1. Add `<script src="/gtm-id.js"></script>` to the `www/_includes/header.html` file in your Jekyll files. 
+1. Add `<script src="/gtm-id.js"></script>` to the `www/_includes/header.html` file in your Jekyll files.
 2. Regenerate your Jekyll pages.
 3. Make sure all pages have `<script src="/gtm-id.js"></script>` in the `<head>` tag of their templates.
 
 
 ## 5. Connect Google Tag Manager to Google Analytics
 
-The last step is connecting the GTM and GA together. To do so, please follow [the official guide](https://support.google.com/tagmanager/answer/9442095?hl=en). In summary, 
+The last step is connecting the GTM and GA together. To do so, please follow [the official guide](https://support.google.com/tagmanager/answer/9442095?hl=en). In summary,
 
 1. We need first to grab the measurement ID associated with our GA account. The ID will start with _"G-"_ and on new accounts is visible on the home page of the GA account. If you cannot find it, navigate to the "Admin" page. Click on "Data Streams" on this page. You should see a data stream, click on it, and it will show you the Measeuerment ID.
 
@@ -100,20 +100,22 @@ The following is how you can achieve this:
 
 5. Choose the "Custom JavaScript" variable type.
 
-6. Copy the following code in the code block and save it.
+6. Copy the following code in the code block and save it. As we mentioned in the code, you should add your own rules for special pages that you might. For any pages that is not chaise or deriva-webapps, we're reporting the query parameter. If you don't want this behavior, feel free to change it.
 
     ```js
     /**
+     * TODO feel free to customize it by adding special rules for your own pages.
+     *
      * make sure path includes the information that we care about.
-    * - for chaise pages:
-    *    - include the hash
-    *    - remove query parameters, facets, cfacets, sort, and page modifiers
-    *    - handle urls that are using query parameter instead of hash
-    * - for deriva-webapps:
-    *    - heatmap: keep the hash
-    *    - other apps: keep appropriate query parameters
-    * - other pages: only report the pathname
-    */
+     * - for chaise pages:
+     *    - include the hash
+     *    - remove query parameters, facets, cfacets, sort, and page modifiers
+     *    - handle urls that are using query parameter instead of hash
+     * - for deriva-webapps:
+     *    - heatmap: keep the hash
+     *    - other apps: keep appropriate query parameters
+     * - other pages: ignore the fragment
+     */
     function () {
       var pathname = window.location.pathname;
 
@@ -200,16 +202,19 @@ The following is how you can achieve this:
 
         return pathname + (allowedQueryParams.length > 0 ? ('?' + allowedQueryParams.join('&')) : '');
       }
+
+      // TODO add any other rules for any other special page that your deployment might have.
+
       // for any other page just return the pathname (no query param or fragment)
       else {
-        return pathname;
+        return pathname + window.location.search;
       }
     }
     ```
 
 7. Navigate to the "Tags" page in the sidebar menu and click on your tag.
 
-8. Modify your tag Configuration by adding a new "Fields to Set". 
+8. Modify your tag Configuration by adding a new "Fields to Set".
 
 9. In this tutorial, we will use "customized_deriva_page_path" for "Field Name". And for "Value", click the plus button beside the field and choose the user-defined variable you created previously.
 
