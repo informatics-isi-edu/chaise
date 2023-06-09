@@ -108,29 +108,54 @@ The following is how you can achieve this:
      *
      * make sure path includes the information that we care about.
      * - for chaise pages:
-     *    - include the hash
-     *    - remove query parameters, facets, cfacets, sort, and page modifiers
-     *    - handle urls that are using query parameter instead of hash
+     *    - help and login: pathname with appropriate query parameters
+     *    - other apps:
+     *      - handle urls that are using query parameter instead of fragment
+     *      - include the fragment
+     *      - remove query parameters, facets, cfacets, sort, and page modifiers
      * - for deriva-webapps:
-     *    - heatmap: keep the hash
-     *    - other apps: keep appropriate query parameters
-     * - other pages: ignore the fragment
+     *    - heatmap: pathname and the fragment
+     *    - other apps: pathname with appropriate query parameters
+     * - other pages: pathname and query parameters
      */
     function () {
       var pathname = window.location.pathname;
 
       var pathStartsWith = function (str) {
         return pathname.indexOf(str) === 0;
-      }
+      };
 
       var getParameterByName = function (name) {
         var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
         return match && match[1].replace(/\+/g, ' ');
-      }
+      };
+
+      var getAllowedSearch = function (allowedKeys) {
+        var allowedQueryParams = [];
+        if (window.location.search) {
+          allowedKeys.forEach(function (k) {
+            var q = getParameterByName(k);
+            if (q) {
+              allowedQueryParams.push(k + '=' + q);
+            }
+          })
+        }
+        return (allowedQueryParams.length > 0 ? ('?' + allowedQueryParams.join('&')) : '');
+      };
 
       // for chaise pages, remove query parameter, facet, and sort/page modifiers.
       if (pathStartsWith('/chaise/')) {
         var hash = window.location.hash;
+
+        // help url is different and allows `page` query parameter
+        if (pathStartsWith('/chaise/help')) {
+          return pathname + getAllowedSearch(['page']);
+        }
+
+        // login url is different from other apps
+        if (pathStartsWith('/chaise/login')) {
+          return pathname;
+        }
 
         // chaise can be initiated with query parameters instead of hash, so we should change it back to hash
         if (!hash && window.location.href.indexOf('?') !== -1) {
@@ -190,22 +215,12 @@ The following is how you can achieve this:
           allowedKeys = ['config'];
         }
 
-        var allowedQueryParams = [];
-        if (window.location.search) {
-          allowedKeys.forEach(function (k) {
-            var q = getParameterByName(k);
-            if (q) {
-              allowedQueryParams.push(k + '=' + q);
-            }
-          })
-        }
-
-        return pathname + (allowedQueryParams.length > 0 ? ('?' + allowedQueryParams.join('&')) : '');
+        return pathname + getAllowedSearch(allowedKeys);
       }
 
       // TODO add any other rules for any other special page that your deployment might have.
 
-      // for any other page just return the pathname (no query param or fragment)
+      // for any page: remove the url fragment and keep the query parameter
       else {
         return pathname + window.location.search;
       }
