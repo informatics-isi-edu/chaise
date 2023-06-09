@@ -107,6 +107,10 @@
     .related-table-actions {
       float: right;
 
+      // make sure the content is not touching the buttons
+      padding-left: 2px;
+      padding-bottom: 2px;
+
       .chaise-btn:not(:first-child) {
         margin-left: 5px;
       }
