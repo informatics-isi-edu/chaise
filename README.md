@@ -3,7 +3,7 @@
 
 A suite of web applications that adapt to the data model for data discovery, analysis, visualization, editing, sharing and collaboration. 
 
-Chaise is the main front-end component of the [DERIVA asset management Platform](http://isrd.isi.edu/deriva) and utilizes [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs) client library to interact with the DERIVA services including [ERMrest](https://github.com/informatics-isi-edu/ermrest) (a general relational data storage service), [webauthn](https://github.com/informatics-isi-edu/webauthn) (authentication provider framework), [Hatrac](https://github.com/informatics-isi-edu/hatrac) (an object store service), and [deriva-web export](https://github.com/informatics-isi-edu/deriva-web). 
+Chaise is the main front-end component of the [DERIVA asset management Platform](http://isrd.isi.edu/deriva) and utilizes [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs) client library to interact with the DERIVA services including [ERMrest](https://github.com/informatics-isi-edu/ermrest) (a general relational data storage service), [webauthn](https://github.com/informatics-isi-edu/webauthn) (authentication provider framework), [Hatrac](https://github.com/informatics-isi-edu/hatrac) (an object store service), and [deriva-web export](https://github.com/informatics-isi-edu/deriva-web/blob/master/docs/export/api.md) (allows export from an ERMrest catalog). 
 
 ## Table of Contents
 
@@ -29,55 +29,51 @@ Chaise includes the following applications:
     <tr>
       <td><strong>Recordset</strong></td>
       <td>
-        Shows a set of entities for a table and allow users to search through them.
-        <br/><br/><strong>Notable features:</strong><br/>
+        Provides faceted search and text search over an entity set, using structured queries with joins and filter predicates.
         <ul>
-          <li>Full-text search</li>
-          <li>Customizable faceted search</li>
-          <li>Export set of data</li>
-          <li>Customizable tabular view of entities</li>
+          <li> The facet panel contains a list of facets, each of which offers predicate values applicable to further filter the current result set</li>
+          <li>Search results are displayed as tabular data, showing a subset of entity details and providing navigation to per-entity RecordEdit or Record application instances</li>
         </ul>
       </td>
-      <td><img src='https://dev.isrd.isi.edu/~ashafaei/images/atlas_collection_recordset-min.png' height=300 /></td>
+      <td><img height="300" alt="Recordset screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/11d39c51-7b7a-45f3-ad94-799b154dea1d" /></td>
     </tr>
     <tr>
       <td><strong>Record</strong></td>
       <td>
-        Shows all the information for an entity.
-        <br/><br/><strong>Notable features:</strong><br/>
+        Presents details of an entity of interest as well as summaries of related entities—entities that reference or are associated with the entity of interest.
         <ul>
-          <li>Fully customizable column values through annotation.</li>
-          <li>Display entities from other tables that have relationship with the main table.</li>
-          <li>...</li>
+          <li>An embedded editing component allows management of binary associations or creation of new child records.</li>
+          <li>The related entity sets are usually displayed as embedded tabular sets, but this can be customized.</li>
+          <li>Scientific data visualization, such as plots or 3D rendering, can be flexibly integrated into the display.</li>
         </ul>
       </td>
-      <td><img src='https://dev.isrd.isi.edu/~ashafaei/images/atlas_collection_record-min.png' height=300 /></td>
+      <td><img height="300" alt="Record screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/0f73c8e8-1200-4b5a-a8e8-bae79230f928" /></td>
     </tr>
     <tr>
       <td><strong>Recordedit</strong></td>
       <td>
-        Gives the ability to add(or update) single or multiple entities.
-        <br/><br/><strong>Notable features:</strong><br/>
+        Enables users to create, edit, or delete an entity or
+set of entities in the database.
         <ul>
-          <li>Displays appropriate inputs based on the column types (including color and markdown).</li>
-          <li>Allows users to upload files to hatrac.</li>
+          <li>Data entry forms are built based on the ERM, with appropriate input fields for different column types or constraints</li>
+          <li>Available and selected foreign entities are displayed with human-readable entity names while populating actual foreign key fields with their often cryptic values</li>
+          <li>The form adapts to access rights, e.g., disabling inputs on fields immutable by a given user.</li>
         </ul>
       </td>
-      <td><img src='https://dev.isrd.isi.edu/~ashafaei/images/atlas_collection_recordedit-min.png' height=300 /></td>
+      <td><img height="300" alt="Recordedit screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/302671b7-dd1c-47b4-8ac9-f40189de1ed7" /></td>
     </tr>
     <tr>
       <td><strong><a href='https://github.com/informatics-isi-edu/chaise/blob/master/docs/viewer/viewer-app.md'>Viewer</a></strong></td>
       <td>
         High resolution pyramidal, tiled image visualization tool with pan and zoom capability.
-        <br/><br/><strong>Notable features:</strong><br/>
         <ul>
           <li>Supports IIIF, DZI, and other browser compatible images.</li>
-          <li>Manipulate the color filters applied to the displayed image.</li>
-          <li>Add or modify image annotations that overlay on top of the image.</li>
+          <li>Allows Manipulation of the color filters applied to the displayed image.</li>
+          <li>Users can add or modify image annotations that overlay on top of the image.</li>
           <li>Navigate between image scenes with different Z-indices.</li>
         </ul>
       </td>
-      <td><img src='https://dev.isrd.isi.edu/~ashafaei/images/atlas_image_viewer-min.png' height=300 /></td>
+      <td><img height="300" alt="Viewer screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/1c3a0adf-c0de-4126-978f-feb9231d4448" /></td>
     </tr>
   </tbody>
 </table>
@@ -112,7 +108,7 @@ Chaise uses its rending heuristics to decide, for instance, how to flatten a hie
 
 ## Resources
 
-The following are the documents and resources that we've prepared for users and developers of Chaise:
+The following are some of the documents and resources that we've prepared for users and developers of Chaise. Please refer to `docs` folder for a full list of documents:
 
 - [User guides](docs/user-docs): Contains documents and examples on how you can configure and use Chaise. Some of the more notable documents are:
   -  [Installation](docs/user-docs/installation.md): How to install Chaise.
@@ -121,6 +117,8 @@ The following are the documents and resources that we've prepared for users and 
   -  [Logging](docs/user-docs/logging.md): How Chaise is logging server requests as well as client actions.
   -  [Query parameters](docs/user-docs/query-parameters.md): Query parameters that can be used in different Chaise applications.
 - [Deveoper guides](docs/user-docs): 
+  - [Chaise developer guide](docs/dev-docs/dev-guide.md): Useful information for developers of Chaise.
+  - [End to End Testing](/docs/dev-docs/e2e-test.md): How end to end testing in Chaise works.
 
 ## How to Contribute
 
