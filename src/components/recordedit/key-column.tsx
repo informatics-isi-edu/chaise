@@ -6,7 +6,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -19,8 +19,8 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 const KeyColumn = (): JSX.Element => {
 
   const {
-    appMode, columnModels, activeSelectAll, toggleActiveSelectAll,
-    columnPermissionErrors, forms, logRecordeditClientAction
+    appMode, activeSelectAll, columnModels, columnPermissionErrors, 
+    config, forms, logRecordeditClientAction, toggleActiveSelectAll
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -87,7 +87,7 @@ const KeyColumn = (): JSX.Element => {
 
   return (
     <div className='entity-key-column'>
-      <div className='form-header entity-key'>Record Number</div>
+      {config.displayMode !== RecordeditDisplayMode.POPUP && <div className='form-header entity-key'>Record Number</div>}
       {columnModels.map((cm: any, cmIndex: number) => {
         const column = cm.column;
         const colName = column.name;

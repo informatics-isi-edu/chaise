@@ -2,7 +2,7 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DuplicateSavedQueryModal from '@isrd-isi-edu/chaise/src/components/modals/duplicate-saved-query-modal';
-import RecordeditModal from '@isrd-isi-edu/chaise/src/components/modals/recordedit-modal';
+import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 
 // hooks
@@ -15,8 +15,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogAppModes, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { RecordeditProps } from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
+import { RecordeditColumnModel, RecordeditDisplayMode, RecordeditProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProps, RecordsetSelectMode
@@ -211,22 +210,10 @@ const SavedQueryDropdown = ({
   }
 
   const saveQuery = () => {
-    if (!savedQueryConfig) return;
+    if (!savedQueryConfig || !savedQueryConfig.mapping.columnNameMapping) return;
     const columnModels: any[] = [];
+    const rows: any[] = [];
     const tempSavedQueryReference = savedQueryReference.contextualize.entryCreate;
-
-    // TODO: mostly not needed anymore, maybe just rows?
-    const rowData: {
-      rows: any[],
-      submissionRows: any[],
-      foreignKeyData: any[],
-      oldRows: any[]
-    } = {
-      rows: [],
-      submissionRows: [],
-      foreignKeyData: [],
-      oldRows: []
-    };
 
     // set columns list
     tempSavedQueryReference.columns.forEach((col: any) => {
@@ -234,12 +221,18 @@ const SavedQueryDropdown = ({
     });
 
     // should be only one description column
-     const descriptionColumn = columnModels.filter((model: RecordeditColumnModel) => {
+    const descriptionInputType = columnModels.filter((model: RecordeditColumnModel) => {
       return model.column.name === 'description'
-    })[0]
+    })[0].inputType;
+    const isDescriptionMarkdown = descriptionInputType === 'longtext' || descriptionInputType === 'markdown';
 
-    const isDescriptionMarkdown = descriptionColumn.inputType === 'longtext' || descriptionColumn.inputType === 'markdown';
-
+    /** 
+     * Checks each option.displayname.value and formats it properly for display
+     *   - special cases for `null`, `empty string` and `All records with value` options
+     * 
+     * @param options - array of selected facet option objects for 1 facet
+     * @returns formatted string to display for 1 facet
+     **/
     const facetOptionsToString = (options: any[]) => {
       let str = '';
       options.forEach((option: any, idx: number) => {
@@ -255,14 +248,102 @@ const SavedQueryDropdown = ({
         }
         if (idx + 1 !== options.length) str += ','
       });
+
       return str;
     }
 
-    const facetDescription = (facet: string, optionsString: string, notLastIdx: boolean) => {
-      let value = (isDescriptionMarkdown ? '  -' : '') + facet + ':' + optionsString + ';';
-      if (notLastIdx) value += '\n';
+    /**
+     * Appends each facet name to the name string to be returned until the length of 
+     *   the returned name exceeds `savedQueryConfig.defaultNameLimits.totalTextLimit`
+     * 
+     * @param names - array of facet names with options selected in them
+     * @returns formatted string of all facet names appended together
+     */
+    const iterativeDefaultName = (names: string[]) => {
+      let name: string = nameDescriptionPrefix + ' ' + modelsWFilters.length + ' facets: ';
 
+      // iterate over facetNames, appending each facet name if the length isn't over the limit
+      for (let i=0; i<names.length; i++) {
+        const fn = names[i];
+        if ((name + ', ' + fn).length <= savedQueryConfig.defaultNameLimits.totalTextLimit) {
+          if (i !=0) name += ', ';
+          name += fn;
+        } else {
+          name += '...';
+          break;
+        }
+      }
+      
+      return name;
+    }
+
+    /**
+     * Creates the description for a single facet to append with other facet descriptions to use as 
+     *   a default value for the saved query description field
+     * 
+     * @param facet - string that includes the facet name and total number of selections
+     * @param optionsString - formatted string of all selected facet options for the given facet
+     * @returns formatted string of the facet name, number selected, and selected facet options rownames
+     */
+    const facetDescription = (facet: string, optionsString: string, isFirst: boolean) => {
+      // no need for preText in non markdown
+      const preText = (isDescriptionMarkdown ? '  -' : '');
+      const value = preText + facet + ':' + optionsString + ';';
       return value;
+    }
+
+    /**
+     * 
+     * 
+     * @param descriptions - array of facet descriptions generated from `facetDescription()`
+     * @param initialValue - initial string that facet descriptions will be appended to
+     * @returns default description value to fill in for the saved query description field
+     */
+    const iterativeDefaultDescription = (descriptions: string[], initialValue: string) => {
+      const separator = isDescriptionMarkdown ? '\n' : '';
+
+      /**  
+       * appends the list of facetDescriptions together and prepends the initial value
+       * if the length is over the totalTextLimit, false is returned
+       * 
+       * @param stringArray - array of facet descriptions
+       * @returns string | false
+       */
+      const shouldReturnDescription = (stringArray: string[]): string | false => {
+        const description = initialValue + stringArray.join(separator);
+        return description.length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit ? description : false;
+      }
+
+      // call function to check if we can return the default decription value and stay under the length
+      let descriptionOrFalse = shouldReturnDescription(descriptions);
+      if (descriptionOrFalse) return descriptionOrFalse;
+
+      // Truncate each individual facet description and perform length limit check again
+      const tempDescriptions = [...descriptions];
+      const singleLimit = savedQueryConfig.defaultDescriptionLimits.facetTextLimit
+      descriptions.forEach((description: string, idx: number) => {
+        if (description.length > singleLimit) tempDescriptions[idx] = description.substring(0, singleLimit) + '...';
+      });
+
+      // call function again after truncated the length of individual facet descriptions
+      descriptionOrFalse = shouldReturnDescription(tempDescriptions);
+      if (descriptionOrFalse) return descriptionOrFalse;
+
+      // if here, description is still over the max length limit, add each facet description if the length isn't over the limit
+      // use tempDescriptions since we want to use each truncated description still
+      let description = initialValue;
+      for (let i=0; i<tempDescriptions.length; i++) {
+        const fd = tempDescriptions[i];
+        if ((description + fd + separator).length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit) {
+          description += fd;
+          if (i !=tempDescriptions.length-1) description += separator;
+        } else {
+          description += isDescriptionMarkdown ? '  - ...' : ', ...';
+          break;
+        }
+      }
+
+      return description;
     }
 
     /*
@@ -291,10 +372,11 @@ const SavedQueryDropdown = ({
      * Otherwise, the description is all one line with no hyphens
      */
     const nameDescriptionPrefix = reference.displayname.value + ' with';
-    let facetNames = '';
+    let facetNames: string[] = [];
+    let facetDescriptions: string[] = [];
 
     let name = nameDescriptionPrefix
-    let description = nameDescriptionPrefix + ':\n';
+    const initialDescription = nameDescriptionPrefix + ':' + (isDescriptionMarkdown ? '\n' : '');
 
     const allFilters = appliedFiltersCallback();
     const modelsWFilters: SavedQueryFacetModel[] = [];
@@ -312,17 +394,17 @@ const SavedQueryDropdown = ({
     });
 
     if (reference.location.searchTerm) {
-      name += ' ' + reference.location.searchTerm;
+      const searchTerm = ' ' + reference.location.searchTerm;
+      name += searchTerm;
       if (modelsWFilters.length > 0) name += ';';
-      description += facetDescription(' Search', reference.location.searchTerm, modelsWFilters.length > 0)
+      facetDescriptions.push(facetDescription(' Search', searchTerm, true));
     }
 
     // iterate over the facetModels to create the default name and description values;
     modelsWFilters.forEach((fm: any, modelIdx: number) => {
       // ===== setting default name =====
-      // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
-      facetNames += ' ' + fm.displayname;
-      if (modelIdx + 1 !== modelsWFilters.length) facetNames += ',';
+      // create the facetNames array in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
+      facetNames.push(fm.displayname);
 
       const numChoices = fm.appliedFilters.length;
       const facetDetails = ' ' + fm.displayname + ' (' + numChoices + ' choice' + (numChoices > 1 ? 's' : '') + ')';
@@ -343,45 +425,43 @@ const SavedQueryDropdown = ({
       if (modelIdx + 1 !== modelsWFilters.length) name += ';'
 
       // ===== setting default description =====
-      description += facetDescription(facetDetails, facetOptionsString, modelIdx + 1 !== modelsWFilters.length);
+      let isFirstFacet = facetDescriptions.length === 0;
+      facetDescriptions.push(facetDescription(facetDetails, facetOptionsString, isFirstFacet))
     });
 
     // if name is longer than the set string length threshold, show the compact version with facet names only
-    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) {
-      name = nameDescriptionPrefix + ' ' + modelsWFilters.length + ' facets:' + facetNames;
-    }
+    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = iterativeDefaultName(facetNames);
+    // set the default description based on length limit heuristics defined in `iterativeDefaultDescription()` function
+    const description = iterativeDefaultDescription(facetDescriptions, initialDescription);
 
     const row: any = {};
-    row.name = name;
-    row.description = description;
 
     // get the stable facet
     const facetObj = _getStableFacets(allFilters);
     const query_id = SparkMD5.hash(JSON.stringify(facetObj));
 
     /**  
-     * TODO: column names are hard coded for storing data
-     *    which columns should be configured and which should be hardcoded?
-     * 
-     *   hardcoded:
-     *     encoded_facets, facets
-     *   configurable:
-     *     schema_name (schema?), table_name (table?), user_id (user?), query_id (query?) 
+     * column names come from the configuration
+     * ['catalog', 'description', 'encodedFacets', 'facets', 'queryId', 'queryName', 'schemaName', 'tableName', 'userId']
      */
+    const colMap = savedQueryConfig.mapping.columnNameMapping;
+    row[colMap.queryName] = name;
+    row[colMap.description] = description;
     // set id based on hash of `facets` columns
-    row.query_id = query_id;
-    row.encoded_facets = facetObj ? windowRef.ERMrest.encodeFacet(facetObj) : null;
-    row.facets = facetObj;
-    row.table_name = reference.table.name;
-    row.schema_name = reference.table.schema.name;
-    row.user_id = session?.client.id;
+    row[colMap.queryId] = query_id;
+    row[colMap.encodedFacets] = facetObj ? windowRef.ERMrest.encodeFacet(facetObj) : null;
+    row[colMap.facets] = facetObj;
+    row[colMap.tableName] = reference.table.name;
+    row[colMap.schemaName] = reference.table.schema.name;
+    row[colMap.catalog] = reference.table.schema.catalog.name;
+    row[colMap.userId] = session?.client.id;
 
-    rowData.rows.push(row);
+    rows.push(row);
 
     // check to see if the saved query exists for the given user, table, schema, and selected facets
-    let queryUri = savedQueryReference.uri + '/user_id=' + fixedEncodeURIComponent(row.user_id);
-    queryUri += '&schema_name=' + fixedEncodeURIComponent(row.schema_name);
-    queryUri += '&table_name=' + fixedEncodeURIComponent(row.table_name) + '&query_id=' + row.query_id;
+    let queryUri = savedQueryReference.uri + '/user_id=' + fixedEncodeURIComponent(row[colMap.userId]);
+    queryUri += '&schema_name=' + fixedEncodeURIComponent(row[colMap.schemaName]);
+    queryUri += '&table_name=' + fixedEncodeURIComponent(row[colMap.tableName]) + '&query_id=' + row[colMap.queryId];
 
     windowRef.ERMrest.resolve(queryUri, ConfigService.contextHeaderParams).then((response: any) => {
       const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
@@ -407,9 +487,16 @@ const SavedQueryDropdown = ({
 
         setRecordeditModalProps({
           appMode: 'create',
-          reference: tempSavedQueryReference,
+          config: {displayMode: RecordeditDisplayMode.POPUP},
+          modalOptions: {
+            parentReference: reference,
+            onSubmitSuccess: onCreateSavedQuerySuccess,
+            onClose: hideRecordeditModal
+          },
+          // TODO: parentContainer?
+          prefillRowData: rows,
           queryParams: {},
-          prefillRowData: rowData.rows,
+          reference: tempSavedQueryReference,
           /* The log related APIs */
           logInfo: {
             logAppMode: LogAppModes.CREATE,
@@ -487,10 +574,11 @@ const SavedQueryDropdown = ({
   const hideRecordeditModal = () => setRecordeditModalProps(null);
 
   const onCreateSavedQuerySuccess = () => {
-    addAlert('Your data has been saved. Closing the modal...', ChaiseAlertType.SUCCESS);
     hideRecordeditModal();
+    addAlert('Search criteria saved.', ChaiseAlertType.SUCCESS);
   }
 
+  // TODO: tooltip stays showing after closing either modal
   return (
     <>
       <Dropdown className='saved-query-menu' onToggle={onDropdownToggle}>
@@ -511,7 +599,6 @@ const SavedQueryDropdown = ({
           <Dropdown.Item className='saved-query-menu-item' onClick={showSavedQueries}>Show saved search criteria</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-
       {tupleForDuplicateSavedQuery && 
         <DuplicateSavedQueryModal
           tuple={tupleForDuplicateSavedQuery}
@@ -519,12 +606,7 @@ const SavedQueryDropdown = ({
         />
       }
       {recordeditModalProps &&
-        <RecordeditModal
-          recordeditProps={recordeditModalProps}
-          parentReference={reference}
-          onSubmitSuccess={onCreateSavedQuerySuccess}
-          onClose={hideRecordeditModal}
-        />
+        <Recordedit {...recordeditModalProps} ></Recordedit>
       }
       {recordsetModalProps &&
         <RecordsetModal

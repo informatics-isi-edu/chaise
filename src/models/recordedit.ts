@@ -1,7 +1,41 @@
+// TODO: change to enum
 export const appModes = {
   COPY: 'copy',
   CREATE: 'create',
   EDIT: 'edit'
+}
+
+export type RecordeditProps = {
+  appMode: string;
+  config: RecordeditConfig;
+  modalOptions?: RecordeditModalOptions;
+  parentContainer?: HTMLElement;
+  prefillRowData?: any[];
+  queryParams: any;
+  reference: any;
+  /* The log related APIs */
+  logInfo: {
+    logAppMode: string;
+    /* the object that will be logged with the first request */
+    logObject?: any;
+    logStack: any;
+    logStackPath: string;
+  }
+}
+
+export enum RecordeditDisplayMode {
+  FULLSCREEN = 'fullscreen',
+  POPUP = 'popup'
+}
+
+export type RecordeditConfig = {
+  displayMode: RecordeditDisplayMode
+}
+
+export type RecordeditModalOptions = {
+  parentReference: any;
+  onSubmitSuccess: () => void;
+  onClose: () => void;
 }
 
 export interface RecordeditColumnModel {

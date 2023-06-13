@@ -342,7 +342,18 @@ div.modal-title {
 
     .main-container {
       .main-body {
+        padding-top: unset;
         padding-bottom: 20px;
+
+        .entity-key-column .entity-key {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
+    
+        .recordedit-form .entity-value {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
       }
     }
   }

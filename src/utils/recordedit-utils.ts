@@ -500,6 +500,8 @@ export function populateEditInitialValues(
  * @param reference the reference object
  * @param formNumber indicate which form the data belongs to
  * @param formData the data for all the displayed fields
+ * @param initialValues initalValues to submit that don't appear as inputs in the form
+ *    - this happens in the case of saving queries with multiple columns being invisible but required for saving a query
  * @returns
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
@@ -569,6 +571,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     }
   });
 
+  // used in the case of saving queries with multiple columns being invisible but required for saving a query
   if (initialValues && initialValues.length > 0) {
     const row = initialValues[0];
     Object.keys(row).forEach((columnName) => {
