@@ -156,7 +156,7 @@ If a property appears in the same configuration twice, the property defined late
    - Attributes:
      - `markdownPattern`: String - What should be displayed in the banner. If results in an empty string, the banner will be ignored.
      - `dismissible`: Boolean (_optional_) - Whether users should be able to dismiss the banner.
-     - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the banner and using this attribute you can change that.
+     - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the navbar and using this attribute you can change that.
      - `key`: String (_optional_) - Used in the `class` attribute that is attached to the banner using the `chaise-navbar-banner-container-<key>` format. For instance if the `key` is defined as `"feedback"`, you can use `.chaise-navbar-banner-container-feedback` to refer to this banner.
      - `acls`: Object _optional_ - has one attribute array (`show`) used to define lists of globus groups or users that can see the banner.  If missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the banner for everyone.
    - Sample syntax:
