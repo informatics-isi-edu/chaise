@@ -24,7 +24,7 @@ Chaise includes the following applications:
     <tr>
       <th>App</th>
       <th>Description</th>
-      <th width="500px">Screenshot</th>
+      <th width="400px">Screenshot</th>
     </tr>
     <tr>
       <td><strong>Recordset</strong></td>
@@ -35,7 +35,7 @@ Chaise includes the following applications:
           <li>Search results are displayed as tabular data, showing a subset of entity details and providing navigation to per-entity RecordEdit or Record application instances</li>
         </ul>
       </td>
-      <td><img height="300" alt="Recordset screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/11d39c51-7b7a-45f3-ad94-799b154dea1d" /></td>
+      <td><img height="275" alt="Recordset screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/11d39c51-7b7a-45f3-ad94-799b154dea1d" /></td>
     </tr>
     <tr>
       <td><strong>Record</strong></td>
@@ -47,7 +47,7 @@ Chaise includes the following applications:
           <li>Scientific data visualization, such as plots or 3D rendering, can be flexibly integrated into the display.</li>
         </ul>
       </td>
-      <td><img height="300" alt="Record screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/0f73c8e8-1200-4b5a-a8e8-bae79230f928" /></td>
+      <td><img height="275" alt="Record screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/0f73c8e8-1200-4b5a-a8e8-bae79230f928" /></td>
     </tr>
     <tr>
       <td><strong>Recordedit</strong></td>
@@ -60,7 +60,7 @@ set of entities in the database.
           <li>The form adapts to access rights, e.g., disabling inputs on fields immutable by a given user.</li>
         </ul>
       </td>
-      <td><img height="300" alt="Recordedit screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/302671b7-dd1c-47b4-8ac9-f40189de1ed7" /></td>
+      <td><img height="275" alt="Recordedit screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/302671b7-dd1c-47b4-8ac9-f40189de1ed7" /></td>
     </tr>
     <tr>
       <td><strong><a href='https://github.com/informatics-isi-edu/chaise/blob/master/docs/viewer/viewer-app.md'>Viewer</a></strong></td>
@@ -73,7 +73,7 @@ set of entities in the database.
           <li>Navigate between image scenes with different Z-indices.</li>
         </ul>
       </td>
-      <td><img height="300" alt="Viewer screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/1c3a0adf-c0de-4126-978f-feb9231d4448" /></td>
+      <td><img height="275" alt="Viewer screenshot" src="https://github.com/informatics-isi-edu/chaise/assets/2129750/1c3a0adf-c0de-4126-978f-feb9231d4448" /></td>
     </tr>
   </tbody>
 </table>
