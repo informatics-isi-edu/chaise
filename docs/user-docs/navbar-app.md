@@ -14,6 +14,7 @@ This documentation focuses on the navbar and how it can be used in external HTML
     - [2.2. Dynamically fetch the dependencies](#22-dynamically-fetch-the-dependencies)
   + [3. Prefetch custom styles (optional)](#3-prefetch-custom-styles-optional)
   + [4. Use navbar](#4-use-navbar)
+  + [5. Avoid manually injecting bootstrap](#5-avoid-manually-including-bootstrap)
 * [How to configure navbar](#how-to-configure-navbar)
 * [How to customize navbar UI](#how-to-customize-navbar-ui)
 * [Migrate from AngularJS](#migrate-from-angularjs)
@@ -112,6 +113,10 @@ The navbar React app expects a `navbar` tag on the page and will populate the ap
    <!-- the rest of the page  -->
 </body>
 ```
+
+### 5. Avoid manually including bootstrap
+
+Chaise uses [Bootstrap version 5.1.9](https://getbootstrap.com/docs/5.1/getting-started/introduction/), so it will be included in pages using Navbar. Therefore there's no reason to include Bootstrap manually. Apart from an extra file that has to be fetched to render the page, the Bootstrap version you have included might be different from the one that Chaises uses, which might have some side effects.
 
 ## How to configure navbar
 
@@ -214,6 +219,8 @@ The following are the major things that have changed from AngularJS to React:
    - The navbar implementation has been changed, and we're no longer using `ul` or `li` for the menu options. Please refer to the previous section for more information.
    - The default color of links and buttons has been changed (Bootstrap 5 uses a less saturated blue color. Links also show the underline in the new version).
    - Bootstrap rules for `container` width and margin have changed.
+
+4. As mentioned in [here](#5-avoid-manually-including-bootstrap), you should not include bootstrap in your static site and rely on the one that navbar dependencies will include. So if you have `bootstrap.min.css` or `bootstrap.css` on your pages, you should remove them. Otherwise, the clashing rules might have some unwanted consequences.
 
 ## Notes
 

@@ -1,6 +1,13 @@
 @use 'sass:map';
 @use 'variables';
 
+// This is added to fix the clashing bootstrap3 rules in static sites.
+// default bootstrap3 rules are setting opacity of fade to 0, which is wrong
+// bootstrap5 is onlu setting the opacity of fade to 0 if it doesn't have .show
+.fade {
+  opacity: unset;
+}
+
 // don't add border to the modal header
 div.modal-header {
   border-bottom: none;
