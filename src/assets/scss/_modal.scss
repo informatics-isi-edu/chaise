@@ -1,23 +1,11 @@
 @use 'sass:map';
 @use 'variables';
 
-// override the default bootstrap
-div.modal-backdrop {
-  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
-
-  // allows modal on modal (only two levels)
-  ~.modal-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
-  }
-}
-
-div.modal {
-  z-index: map-get(variables.$z-index-map, 'modal');
-
-  // allows modal on modal (only two levels)
-  ~.modal {
-    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
-  }
+// This is added to fix the clashing bootstrap3 rules in static sites.
+// default bootstrap3 rules are setting opacity of fade to 0, which is wrong
+// bootstrap5 is onlu setting the opacity of fade to 0 if it doesn't have .show
+.fade {
+  opacity: unset;
 }
 
 // don't add border to the modal header
@@ -61,12 +49,9 @@ div.modal-title {
 /******** Popup modal for login instructions ********/
 .modal-login-instruction-backdrop {
   opacity: 0.7 !important;
-  z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
 }
 
 .modal-login-instruction {
-  z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
-
   .modal-dialog {
     position: absolute;
     top: 50%;
@@ -99,13 +84,7 @@ div.modal-title {
 
 
 /******* Popup modal for error ********/
-// NOTE less than the navbar z-index
-.modal-error-backdrop {
-  z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
-}
-
 .modal-error {
-  z-index: map-get(variables.$z-index-map, 'modal-error');
   overflow: hidden;
 
   .no-word-break {
@@ -130,33 +109,9 @@ div.modal-title {
   }
 }
 
-.search-popup {
-
-  ~.modal-error-backdrop,
-  ~.modal-login-instruction-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
-  }
-
-  ~.modal-error,
-  ~.modal-login-instruction {
-    z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
-  }
-
-}
-
 .modal-footer .chaise-btn {
   margin-left: 5px;
 }
-
-/******* Popup modal for export *******/
-.export-progress-backdrop {
-  z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
-}
-
-.export-progress {
-  z-index: map-get(variables.$z-index-map, 'export-progress');
-}
-
 
 /******* Popup modal for share ********/
 .chaise-share-citation-modal {
@@ -356,5 +311,63 @@ div.modal-title {
         }
       }
     }
+  }
+}
+/*************** z-index for modal backdrops ***************/
+div.modal-backdrop {
+  // override the default bootstrap value
+  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
+
+  &.modal-error-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
+  }
+
+  &.export-progress-backdrop {
+    z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
+  }
+
+  &.modal-login-instruction-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
+  }
+
+  // allows modal on modal (only two levels)
+  ~ .modal-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
+  }
+}
+
+/*************** z-index for modals ***************/
+div.modal {
+  // override the default bootstrap value
+  z-index: map-get(variables.$z-index-map, 'modal');
+
+  &.modal-error {
+    z-index: map-get(variables.$z-index-map, 'modal-error');
+  }
+
+  &.export-progress {
+    z-index: map-get(variables.$z-index-map, 'export-progress');
+  }
+
+  &.modal-login-instruction {
+    z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
+  }
+
+  // make sure errors show up properly on top of search-popup
+  &.search-popup {
+    ~ .modal-error-backdrop,
+    ~ .modal-login-instruction-backdrop {
+      z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
+    }
+
+    ~ .modal-error,
+    ~ .modal-login-instruction {
+      z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
+    }
+  }
+
+  // allows modal on modal (only two levels)
+  ~ .modal {
+    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
   }
 }

@@ -211,7 +211,10 @@ html {
 
   #page-title .inline-tooltip {
     display: block;
+    // the page title has a larger font, so this 2px will make sure
+    // the title and inline-tooltip are alinged.
     padding-left: 2px;
+    padding-top: 5px;
   }
 
   // make sure the tooltips don't go outside the view
@@ -855,9 +858,8 @@ html {
 
   // section accordion (used both in record and recordedit)
   .chaise-accordions {
-    $space-between-accordions: 5px;
-    $row-focus-border-width: 2px;
-    $chaise-accordion-content-padding-left: 40px;
+    $_space-between-accordions: map-get(variables.$chaise-accordion-spacing-map, 'space-between');
+    $_row-focus-border-width: map-get(variables.$chaise-accordion-spacing-map, 'row-focus-border-width');
 
     .panel-group {
       margin-bottom: 20px;
@@ -869,38 +871,38 @@ html {
       border-radius: 0;
       border: 0;
       + .chaise-accordion {
-        margin-top: $space-between-accordions;
+        margin-top: $_space-between-accordions;
       }
 
       // row-focus will add a border of 2px,
       // - adding -2px margin to left and right to avoid shrinkage
       // - reducing the margin-top from 5px to 3px to avoid moving
       &.row-focus {
-        margin-left: -$row-focus-border-width;
-        margin-right: -$row-focus-border-width;
-        margin-top: $space-between-accordions - $row-focus-border-width;
+        margin-left: -$_row-focus-border-width;
+        margin-right: -$_row-focus-border-width;
+        margin-top: $_space-between-accordions - $_row-focus-border-width;
 
         + .chaise-accordion:not(.row-focus) {
-          margin-top: $space-between-accordions - $row-focus-border-width;
+          margin-top: $_space-between-accordions - $_row-focus-border-width;
         }
 
         // if there are two row-focus on top of each other, we should
         // change the margin to account for both of their borders.
         + .row-focus {
-          margin-top: $space-between-accordions - ($row-focus-border-width * 2);
+          margin-top: $_space-between-accordions - ($_row-focus-border-width * 2);
         }
       }
 
       // the first row doesn't have margin top
       &:first-child.row-focus {
-        margin-top: -$row-focus-border-width;
+        margin-top: -$_row-focus-border-width;
       }
 
       .accordion-button {
         cursor: pointer;
         height: 44px;
         text-transform: inherit;
-        padding: 8px 8px 8px 8px;
+        padding: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
         color: map-get(variables.$color-map, 'white');
         border: none;
         border-radius: inherit;
@@ -966,12 +968,15 @@ html {
       }
 
       .accordion-body {
-        padding-left: $chaise-accordion-content-padding-left;
-        padding-right: 0;
+        // make sure content is alidned with header on the left
+        padding-left: map-get(variables.$chaise-accordion-spacing-map, 'body-padding-left');
+        // make sure content is aligned with header on the right.
+        padding-right: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
+        padding-top: 10px;
       }
 
       .inline-tooltip {
-        margin-bottom: 10px;
+        padding-bottom: 10px;
       }
     }
   }

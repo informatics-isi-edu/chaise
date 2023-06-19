@@ -125,7 +125,7 @@ export interface UploadProgressProps {
   /**
    * prop to trigger on cancel
    */
-  onCancel: () => void;
+  onCancel: (exception?: any) => void;
 }
 
 /**

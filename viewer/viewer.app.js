@@ -61,8 +61,8 @@
 
     // Hydrate values providers and set up iframe
     .run([
-        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', 'messageMap', '$window', 'context', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, messageMap, $window, context, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+        'ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', 'messageMap', '$window', 'context', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, ErrorService, DataUtils, FunctionUtils, headInjector, UriUtils, logService, messageMap, $window, context, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
 
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -320,6 +320,32 @@
                     console.log("there wasn't any parameters that we could send to OSD viewer");
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
+                }
+
+                /**
+                 * Some features are not working properly in safari, so we should let them know
+                 *
+                 * since the issues are only related to annotaion, we're only showing this error if
+                 * there are some annotations, or user can create or edit annotations.
+                 */
+                var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                var hasOrCanHaveAnnot = ($rootScope.annotationTuples.length > 0 || $rootScope.canUpdateAnnotation || $rootScope.canCreateAnnotation);
+                if (isSafari && hasOrCanHaveAnnot) {
+                    var errorMessage = [
+                      'You are using a browser that has limited support for this application.',
+                      '<br/><br/>',
+                      'The following features related to the annotation tool might not work as expected:',
+                      '<ul><br/>',
+                      '<li style="list-style-type: inherit"><strong>Arrow line</strong>: The arrowheads might not be visible on high-resolution images.</li>',
+                      '<li style="list-style-type: inherit"><strong>Text</strong>: The text box cannot be resized during drawing.</li>',
+                      '<br/></ul>',
+                      'We recommend using <a target="_blank" href="https://www.google.com/chrome/">Google Chrome</a> ',
+                      'or <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a> ',
+                      'for full annotation support.'
+                    ].join('');
+
+                    var error = new Errors.LimitedBrowserSupport(errorMessage, null, messageMap.clickActionMessage.dismissDialog, true);
+                    ErrorService.handleException(error, true);
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";

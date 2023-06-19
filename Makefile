@@ -443,10 +443,10 @@ npm-install-modules:
 	@npm clean-install
 
 # install packages needed for production and development (including testing)
-# --production=false makes sure to ignore NODE_ENV and install everything
+# --include=dev makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
-	@npm clean-install --production=false
+	@npm clean-install --include=dev
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
