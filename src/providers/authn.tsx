@@ -170,31 +170,29 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       };
     }
 
-    // make sure the width and height are not bigger than the screen
     const popupWidth = Math.min(800, screen.availWidth);
-    const popupHeight = Math.min(750, screen.availHeight)
-    const topOffset = 50;
+    const popupHeight = Math.min(750, screen.availHeight);
 
-    // left should be in the middle of the screen
-    const popupLeft = (screen.availWidth - popupWidth) / 2;
-    // top should just have some small offset if there's available space
-    const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
+    const primaryScreen = window.screen;
 
+    // Calculate the center position based on the primary screen dimensions and popup size
+    const centerLeft = Math.max(0, (primaryScreen.availWidth - popupWidth) / 2 + primaryScreen.availLeft);
+    const centerTop = Math.max(0, (primaryScreen.availHeight - popupHeight) / 2 + primaryScreen.availTop);
+
+    // Open the popup with the calculated position
+    const newWindow = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${centerLeft},top=${centerTop}`);
+    if (newWindow && newWindow.focus) {
+      newWindow.focus();
+    }
     // close the existing popup (if any)
     if (popupWindowRef.current) {
       popupWindowRef.current.close();
     }
 
-    // open a window with proper position and width and height
-    const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
-
-    // focus on the opened window
-    win?.focus();
-
     // keep track of the window, so we ensure only one is opened at a time.
-    popupWindowRef.current = win;
+    popupWindowRef.current = newWindow;
 
-    _logInHelper(win, postLoginCB, 'popUp', null, logAction);
+    _logInHelper(newWindow, postLoginCB, 'popUp', null, logAction);
   };
 
   // NOTE: sessionParam attached so it can be passed back to callbacks for comparisons since functions execute synchronously
