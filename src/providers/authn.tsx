@@ -175,15 +175,19 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     const topOffset = 50;
     const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
 
+   
+    const screenWidth = window.screen.availWidth;
+     
     /*
-      * This is to get the screen left offset using availLeft - It represents the left  position
+      * This is to get the screen left offset using screenLeft - It represents the left  position
       * of the available screen space, excluding areas occupied by other system elements .
       * We need to add those so that it  calculates the centre position and aligns the popup in the centre. 
-      * We add Math.max so that it takes care if the calculation comes to negative. This can happen when screen size
-      * is smaller than popup size.
     */
-    const left = Math.max(0, (screen.availWidth - popupWidth) / 2 + screen.availLeft);
-    const openedWindow = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${popupTop}`);
+    const leftOffset = Math.floor((screenWidth - popupWidth) / 2) + window.screenLeft ;
+
+    // Open the popup window to the calculated center position
+    const openedWindow = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${leftOffset},top=${popupTop}`);
+    // Focus the window opened
     if (openedWindow && openedWindow.focus) {
       openedWindow.focus();
     }
