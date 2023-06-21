@@ -172,17 +172,20 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
     const popupWidth = Math.min(800, screen.availWidth);
     const popupHeight = Math.min(750, screen.availHeight);
+    const topOffset = 50;
+    const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
 
-    const primaryScreen = window.screen;
-
-    // Calculate the center position based on the primary screen dimensions and popup size
-    const centerLeft = Math.max(0, (primaryScreen.availWidth - popupWidth) / 2 + primaryScreen.availLeft);
-    const centerTop = Math.max(0, (primaryScreen.availHeight - popupHeight) / 2 + primaryScreen.availTop);
-
-    // Open the popup with the calculated position
-    const newWindow = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${centerLeft},top=${centerTop}`);
-    if (newWindow && newWindow.focus) {
-      newWindow.focus();
+    /*
+      * This is to get the screen left offset using availLeft - It represents the left  position
+      * of the available screen space, excluding areas occupied by other system elements .
+      * We need to add those so that it  calculates the centre position and aligns the popup in the centre. 
+      * We add Math.max so that it takes care if the calculation comes to negative. This can happen when screen size
+      * is smaller than popup size.
+    */
+    const left = Math.max(0, (screen.availWidth - popupWidth) / 2 + screen.availLeft);
+    const openedWindow = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${popupTop}`);
+    if (openedWindow && openedWindow.focus) {
+      openedWindow.focus();
     }
     // close the existing popup (if any)
     if (popupWindowRef.current) {
@@ -190,9 +193,9 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
 
     // keep track of the window, so we ensure only one is opened at a time.
-    popupWindowRef.current = newWindow;
+    popupWindowRef.current = openedWindow;
 
-    _logInHelper(newWindow, postLoginCB, 'popUp', null, logAction);
+    _logInHelper(openedWindow, postLoginCB, 'popUp', null, logAction);
   };
 
   // NOTE: sessionParam attached so it can be passed back to callbacks for comparisons since functions execute synchronously
