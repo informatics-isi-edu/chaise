@@ -47,7 +47,7 @@ export class LogService {
       logObj[key] = contextHeaderParams[key];
     }
     headers[ConfigService.ERMrest.contextHeaderName] = logObj;
-    ConfigService.http.head(`${cc.ermrestLocation}/client_action`, {headers}).catch(() => {
+    ConfigService.http.head(`${ConfigService.ERMrestLocation}/client_action`, {headers}).catch(() => {
       // we expect to get a server error, so just catch it her
     });
   }

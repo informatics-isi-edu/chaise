@@ -31,6 +31,13 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'debug', 'templating', 'hideRecordeditLeaveAlert'
 ];
 
+/**
+ * The properties that are only allowed in chaise-config.js file
+ */
+export const CHAISE_CONFIG_STATIC_PROPERTIES = [
+  'ermrestLocation'
+];
+
 export const DEFAULT_CHAISE_CONFIG = {
   internalHosts: [window.location.host],
   ermrestLocation: `${window.location.origin}/ermrest`,

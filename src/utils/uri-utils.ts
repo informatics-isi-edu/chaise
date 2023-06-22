@@ -183,7 +183,7 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
     }
   }
 
-  const baseUri = chaiseConfig.ermrestLocation;
+  const baseUri = ConfigService.ERMrestLocation;
   const path = `/catalog/${catalogId}/entity${hash}`;
 
   return {

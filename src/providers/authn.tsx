@@ -51,8 +51,13 @@ type AuthnProviderProps = {
 }
 
 export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Element {
-  // authn API no longer communicates through ermrest, removing the need to check for ermrest location
-  const serviceURL: string = windowRef.location.origin;
+  /**
+   * we can assume that ermrest and authn are in the same server
+   *
+   * (we're doing something similar in hatrac )
+   */
+  const serviceURL: string = ConfigService.ERMrestLocation.replace(/\/ermrest\/?/, '');
+
   const LOCAL_STORAGE_KEY = 'session'; // name of object session information is stored under
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
