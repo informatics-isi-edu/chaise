@@ -260,11 +260,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             if (recordIndex > 0) {
                 it("should click add record button", function(done) {
                     chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
-                        browser.wait(function() {
+                        return browser.wait(function() {
                             return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
-                                return (ct == recordIndex);
+                                return (ct == recordIndex + 1);
                             });
                         }, browser.params.defaultTimeout);
+                    }).then(() => {
                         done();
                     }).catch(chaisePage.catchTestError(done));
                 });
