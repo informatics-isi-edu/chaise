@@ -18,7 +18,7 @@ If a property appears in the same configuration twice, the property defined late
  * [General Configuration:](#general-configuration)
    * [ermrestLocation](#ermrestlocation)
    * [defaultCatalog](#defaultcatalog)
-   * [defaultTables](#defaulttables)
+   * [defaultTable](#defaulttable)
  * [Navbar Configuration:](#navbar-configuration)
    * [headTitle](#headtitle)
    * [navbarBanner](#navbarbanner)
@@ -70,6 +70,8 @@ If a property appears in the same configuration twice, the property defined late
 ### General Configuration:
  #### ermrestLocation
  The location of the ERMrest service.
+
+ > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
    - Type: String - URL
    - Default value:	`window.location.protocol + // + window.location.host + /ermrest`
    - Sample syntax:
@@ -78,32 +80,35 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### defaultCatalog
- Use this parameter to specify which catalog Chaise shows by default. When a user navigates to “/chaise/recordset” and omits the rest of the path, the `defaultCatalog` paired with `defaultTables` are used to generate a valid recordset link for the user. It is strongly recommended defining this in your `chaise-config.js` file. This property is used to fetch the catalog annotation information for pages that rely on `chaise-config.js` but don’t have a catalog id in the path. For example, the navbar on static pages uses this property to try to fetch a catalog annotation for configuring the navbar.
+ Use this parameter to specify which catalog Chaise shows by default.
+
+ > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
+
+ It is strongly recommended defining this in your `chaise-config.js` file. This property is used to fetch the catalog annotation information for pages that rely on `chaise-config.js` but don’t have a catalog id in the path. For example, the navbar on static pages uses this property to try to fetch a catalog annotation for configuring the navbar.
+
+ When a user navigates to “/chaise/recordset” and omits the rest of the path, the `defaultCatalog` paired with `defaultTable` are used to generate a valid recordset link for the user.
+
    - Type: String - Catalog ID
    - Sample syntax:
      ```
      defaultCatalog: "1"
      ```
 
- #### defaultTables
- Use this parameter to specify for each catalog `N`, which table Chaise shows by default.
+ #### defaultTable
+ Use this parameter to specify which table Chaise shows by default for the current catalog.
    - Type: Object
    - General syntax:
      ```
-     defaultTables: {
-       N: {
-         schema: <schema name>,
-         table: <table name>
-       }
+     defaultTable: {
+        schema: <schema name>,
+        table: <table name>
      }
      ```
    - Sample syntax:
      ```
-     defaultTables: {
-       1: {
-         schema: "isa",
-         table: "dataset"
-       }, ...
+     defaultTable: {
+        schema: "isa",
+        table: "dataset"
      }
      ```
 

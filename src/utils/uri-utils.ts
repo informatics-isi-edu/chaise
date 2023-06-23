@@ -129,10 +129,10 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   // If the hash is empty, check for defaults
   if (!hash || hash.length === 1) {
     if (chaiseConfig.defaultCatalog) {
-      if (chaiseConfig.defaultTables) {
+      if (chaiseConfig.defaultTable) {
         catalogId = chaiseConfig.defaultCatalog;
 
-        const tableConfig = chaiseConfig.defaultTables[catalogId];
+        const tableConfig = chaiseConfig.defaultTable
         if (tableConfig) {
           hash = `/${fixedEncodeURIComponent(tableConfig.schema)}:${fixedEncodeURIComponent(tableConfig.table)}`;
         } else {
@@ -165,8 +165,8 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
     // there is no '/' character (only a catalog id) or a trailing '/' after the id
     if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
       // check for default Table
-      if (chaiseConfig.defaultTables) {
-        const tableConfig = chaiseConfig.defaultTables[catalogId];
+      if (chaiseConfig.defaultTable) {
+        const tableConfig = chaiseConfig.defaultTable;
         if (tableConfig) {
           hash = `/${fixedEncodeURIComponent(tableConfig.schema)}:${fixedEncodeURIComponent(tableConfig.table)}`;
         } else {

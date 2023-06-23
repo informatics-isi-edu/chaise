@@ -21,7 +21,7 @@ export const APP_CONTEXT_MAPPING = {
 export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'ermrestLocation', 'showAllAttributes', 'headTitle', 'customCSS', 'navbarBrand', 'navbarBrandText',
   'navbarBrandImage', 'logoutURL', 'maxRecordsetRowHeight', 'dataBrowser', 'defaultAnnotationColor',
-  'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTables',
+  'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTable',
   'signUpURL', 'navbarBanner', 'navbarMenu', 'sidebarPosition', 'attributesSidebarHeading', 'userGroups',
   'allowErrorDismissal', 'footerMarkdown', 'showFaceting', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
@@ -35,7 +35,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
  * The properties that are only allowed in chaise-config.js file
  */
 export const CHAISE_CONFIG_STATIC_PROPERTIES = [
-  'ermrestLocation'
+  'ermrestLocation', 'defaultCatalog'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
