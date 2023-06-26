@@ -1,4 +1,5 @@
-const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
+// const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
+const ermrestUtils = require('../../../../ErmrestDataUtils');
 var Q = require('q');
 const axios = require('axios');//var ermrestUtils = require("ermrest-data-utils");
 
@@ -340,6 +341,25 @@ exports.importACLs = function (params) {
         defer.resolve();
     }).catch(function (err) {
         console.log("error while trying to change ACLs");
+        console.dir(err);
+        defer.reject(err);
+    });
+    return defer.promise;
+}
+
+exports.updateCatalogAnnotation = function (catalogId, annotation) {
+    var defer = Q.defer();
+
+    var catalogObj = {
+        url: process.env.ERMREST_URL,
+        id: catalogId
+    };
+
+    ermrestUtils.createOrModifyCatalog(catalogObj, annotation, null).then(function () {
+        console.log("successfully updated the catalog annotation");
+        defer.resolve();
+    }).catch(function (err) {
+        console.log("error while trying to update catalog annotation");
         console.dir(err);
         defer.reject(err);
     });
