@@ -2,6 +2,17 @@ The file contains changes made to chaise-config parameters.
 - Refer to [chaise-config.d](chaise-config.md) for currently supported parameters
 - Refer to [chaise-config-deprecated.md](chaise-config-deprecated.md) for deprecated parameters
 
+#### 06/23/2023 ####
+
+###### PR Link
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2324)
+
+###### Removed
+  - `defaultTables` property was deprecated as it doesn't make sense to encode catalog number in it.
+
+###### Added
+  - `defaultTable` property which is similar to the deprecated `defaultTables` property and is defined for the existing catalog.
+
 #### 11/17/2022 ####
 
 ###### PR Link

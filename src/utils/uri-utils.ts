@@ -129,10 +129,10 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   // If the hash is empty, check for defaults
   if (!hash || hash.length === 1) {
     if (chaiseConfig.defaultCatalog) {
-      if (chaiseConfig.defaultTables) {
+      if (chaiseConfig.defaultTable) {
         catalogId = chaiseConfig.defaultCatalog;
 
-        const tableConfig = chaiseConfig.defaultTables[catalogId];
+        const tableConfig = chaiseConfig.defaultTable
         if (tableConfig) {
           hash = `/${fixedEncodeURIComponent(tableConfig.schema)}:${fixedEncodeURIComponent(tableConfig.table)}`;
         } else {
@@ -164,9 +164,21 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
 
     // there is no '/' character (only a catalog id) or a trailing '/' after the id
     if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
+      /**
+       * if the hash was actually just query parameter, don't even attempt the default logic
+       *
+       * this function is used in every react app as part of config.ts. in some cases (like help app),
+       * the url doesn't have any hash fragment and has only query parameter. therefore we should
+       * throw an error here since the combination of chaise-config properties might accidently
+       * cause side effects.
+       */
+      if (isQueryParameter) {
+        throw new ConfigService.ERMrest.MalformedURIError(catalogMissing);
+      }
+
       // check for default Table
-      if (chaiseConfig.defaultTables) {
-        const tableConfig = chaiseConfig.defaultTables[catalogId];
+      if (chaiseConfig.defaultTable) {
+        const tableConfig = chaiseConfig.defaultTable;
         if (tableConfig) {
           hash = `/${fixedEncodeURIComponent(tableConfig.schema)}:${fixedEncodeURIComponent(tableConfig.table)}`;
         } else {
@@ -183,7 +195,7 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
     }
   }
 
-  const baseUri = chaiseConfig.ermrestLocation;
+  const baseUri = ConfigService.ERMrestLocation;
   const path = `/catalog/${catalogId}/entity${hash}`;
 
   return {
