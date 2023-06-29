@@ -49,7 +49,9 @@ export interface ConfigServiceSettings {
   overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
-  openIframeLinksInTab?: boolean
+  openIframeLinksInTab?: boolean,
+  // TODO isLib can be used for gradually showing content
+  isLib?: boolean
 }
 
 export interface ContextHeaderParams {
@@ -144,6 +146,7 @@ export class ConfigService {
       // the server object that can be used in other places
       ConfigService._server = ERMrest.ermrestFactory.getServer(service, ConfigService._contextHeaderParams);
 
+      console.log('asking for catalog!');
       const response = await ConfigService._server.catalogs.get(catalogId, true);
       // we already setup the defaults and the configuration based on chaise-config.js
       if (response && response.chaiseConfig) {

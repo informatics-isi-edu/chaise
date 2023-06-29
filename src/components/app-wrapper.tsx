@@ -107,14 +107,17 @@ const AppWrapperInner = ({
     windowRef.addEventListener('hashchange', onHashChange);
 
     new Promise((resolve, reject) => {
+      console.log('fecthing session');
       if (dontFetchSession) {
         resolve(null);
       } else {
         getSession('').then((response) => resolve(response)).catch((err) => reject(err));
       }
     }).then((response: any) => {
+      console.log('configuring chaise');
       return ConfigService.configure(appSettings, response);
     }).then(() => {
+      console.log('config done!');
       setConfigDone(true);
     }).catch((err: any) => {
       dispatchError({ error: err });

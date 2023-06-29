@@ -81,6 +81,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
+        scriptLoading: ac.isLib ? 'blocking' : 'defer',
         chunks: [bundleName],
         template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
