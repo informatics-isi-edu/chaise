@@ -251,6 +251,29 @@ div.modal-title {
   }
 }
 
+.iframe-input-popup {
+  .modal-body {
+    min-height: 90vh;
+  }
+
+  .iframe-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+
+    iframe {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      // TODO is the following needed?
+      // z-index: 12
+    }
+  }
+}
+
 /*************** z-index for modal backdrops ***************/
 div.modal-backdrop {
   // override the default bootstrap value

@@ -37,9 +37,13 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   );
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
+  let isRequired = !column.nullok;
+
   let type;
-  if (column.isIframeInput) {
-    type = 'iframe'
+  if (column.isInputIframe) {
+    type = 'iframe';
+    // as long as any of the columns in the mapping are required, it should say its required
+    // isRequired
   }
   else if (column.isAsset) {
     type = 'file'
@@ -71,7 +75,7 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   return {
     column: column,
     isDisabled: isInputDisabled || isPrefilled,
-    isRequired: !column.nullok && !isInputDisabled,
+    isRequired: isRequired && !isInputDisabled,
     inputType: type,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
@@ -129,7 +133,7 @@ export function copyOrClearValue(
   const dstKey = `${destFormValue}-${column.name}`;
 
 
-  if (clearValue) {
+if (clearValue) {
     values[dstKey] = '';
   } else if (srcKey) {
     values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
@@ -164,6 +168,17 @@ export function copyOrClearValue(
       }
       if (val === null || val === undefined) return;
       values[`${destFormValue}-${col.name}`] = val;
+    });
+  }
+
+  if (columnModel.column.isInputIframe) {
+    column.inputIframeProps.columns.forEach((c: any) => {
+      const k = `${destFormValue}-${c.name}`;
+      if (clearValue) {
+        values[k] = '';
+      } else if (typeof srcFormValue === 'number') {
+        values[k] = replaceNullOrUndefined(values[ `${srcFormValue}-${c.name}`], '');
+      }
     });
   }
 
@@ -336,6 +351,116 @@ export function populateCreateInitialValues(
   return { values, foreignKeyData, shouldWaitForForeignKeyData }
 }
 
+function _setEditValueForColumn(column: any, isDisabled: boolean, usedValue: any, tuple: any, appMode: string, formValue: any, values: any) {
+  let value;
+
+  // stringify the returned array value
+  if (column.type.isArray) {
+    if (usedValue !== null) {
+      values[`${formValue}-${column.name}`] = JSON.stringify(usedValue, undefined, 2);
+    }
+    return;
+  }
+
+  // Transform column values for use in view model
+  const options: TimestampOptions = { outputMomentFormat: '' };
+  let isTimestamp = false
+  // we're using rootName so we can properly handle system columns
+  switch (column.type.rootName) {
+    case 'timestamp':
+      // this is only going to change the underlying raw value
+      options.outputMomentFormat = dataFormats.timestamp;
+      value = formatDatetime(usedValue, options);
+      isTimestamp = true;
+      break;
+    case 'timestamptz':
+      // this is only going to change the underlying raw value
+      options.outputMomentFormat = dataFormats.datetime.return;
+      value = formatDatetime(usedValue, options);
+      isTimestamp = true;
+      break;
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      // If input is disabled, there's no need to transform the column value.
+      value = isDisabled ? usedValue : formatInt(usedValue);
+      break;
+    case 'float4':
+    case 'float8':
+    case 'numeric':
+      // If input is disabled, there's no need to transform the column value.
+      value = isDisabled ? usedValue : formatFloat(usedValue);
+      break;
+    default:
+      // the structure for asset type columns is an object with a 'url' property
+      let metadata;
+      if (column.isAsset) {
+        metadata = column.getMetadata(tuple.data);
+        value = {
+          url: usedValue || '',
+          filename: metadata.filename || metadata.caption,
+          filesize: metadata.byteCount
+        };
+
+        /**
+         * make sure we're also copying the metadata values.
+         *
+         * we don't need to do this in edit mode as we're not showing any of these values
+         * and won't need to submit any of these values in update mode.
+         * if user selects a new file, these values will be populated by ermrest.js based
+         * on the new file.
+         */
+        if (appMode === appModes.COPY) {
+          if (metadata.filename) {
+            values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+          }
+          if (metadata.byteCount) {
+            values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+          }
+          if (metadata.md5) {
+            values[`${formValue}-${column.md5.name}`] = metadata.md5;
+          }
+          if (metadata.sha256) {
+            values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+          }
+        }
+
+      } else {
+        value = usedValue;
+      }
+
+      break;
+  }
+
+  // no need to check for copy here because the case above guards against the negative case for copy
+  if (isTimestamp) {
+    values[`${formValue}-${column.name}`] = value?.datetime || '';
+    values[`${formValue}-${column.name}-date`] = value?.date || '';
+    values[`${formValue}-${column.name}-time`] = value?.time || '';
+  } else {
+    values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
+  }
+
+  // capture the raw values of the columns that create the fk relationship
+  // the `value` above is what users sees and not the raw value that we will
+  // send to the database.
+  if (column.isForeignKey) {
+    if (value !== null || value !== undefined) {
+      column.foreignKey.colset.columns.forEach((col: any) => {
+        values[`${formValue}-${col.name}`] = tuple.data[col.name];
+      });
+    }
+  }
+
+  if (column.isInputIframe) {
+    column.inputIframeProps.columns.forEach((c: any) => {
+      // TODO isDisabled?
+      _setEditValueForColumn(c, isDisabled, tuple.data[c.name], tuple, appMode, formValue, values);
+    })
+  }
+
+}
+
 export function populateEditInitialValues(
   reference: any,
   columnModels: RecordeditColumnModel[],
@@ -363,9 +488,8 @@ export function populateEditInitialValues(
       foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
     });
 
-    columnModels.forEach((colModel: RecordeditColumnModel, i: number) => {
+    columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
       const column = colModel.column;
-      let value;
 
       // add the select-all input values
       if (formIndex === 0) {
@@ -380,111 +504,14 @@ export function populateEditInitialValues(
 
       if (appMode !== appModes.COPY) {
         // whether certain columns are disabled or not
-        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[i];
+        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[colModelIndex];
 
         // while we cannot change the isDisabled state, this will be
         // taken care of by calling getInputTypeOrDisabled in other places
-        isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
+        isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[colModelIndex]);
       }
 
-      // stringify the returned array value
-      if (column.type.isArray) {
-        if (tupleValues[i] !== null) {
-          values[`${formValue}-${column.name}`] = JSON.stringify(tupleValues[i], undefined, 2);
-        }
-        return;
-      }
-
-      // Transform column values for use in view model
-      const options: TimestampOptions = { outputMomentFormat: '' }
-      let isTimestamp = false
-      // we're using rootName so we can properly handle system columns
-      switch (column.type.rootName) {
-        case 'timestamp':
-          // this is only going to change the underlying raw value
-          options.outputMomentFormat = dataFormats.timestamp;
-          value = formatDatetime(tupleValues[i], options);
-          isTimestamp = true;
-          break;
-        case 'timestamptz':
-          // this is only going to change the underlying raw value
-          options.outputMomentFormat = dataFormats.datetime.return;
-          value = formatDatetime(tupleValues[i], options);
-          isTimestamp = true;
-          break;
-        case 'int2':
-        case 'int4':
-        case 'int8':
-          // If input is disabled, there's no need to transform the column value.
-          value = isDisabled ? tupleValues[i] : formatInt(tupleValues[i]);
-          break;
-        case 'float4':
-        case 'float8':
-        case 'numeric':
-          // If input is disabled, there's no need to transform the column value.
-          value = isDisabled ? tupleValues[i] : formatFloat(tupleValues[i]);
-          break;
-        default:
-          // the structure for asset type columns is an object with a 'url' property
-          let metadata;
-          if (column.isAsset) {
-            metadata = column.getMetadata(tuple.data);
-            value = {
-              url: tupleValues[i] || '',
-              filename: metadata.filename || metadata.caption,
-              filesize: metadata.byteCount
-            };
-
-            /**
-             * make sure we're also copying the metadata values.
-             *
-             * we don't need to do this in edit mode as we're not showing any of these values
-             * and won't need to submit any of these values in update mode.
-             * if user selects a new file, these values will be populated by ermrest.js based
-             * on the new file.
-             */
-            if (appMode === appModes.COPY) {
-              if (metadata.filename) {
-                values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
-              }
-              if (metadata.byteCount) {
-                values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
-              }
-              if (metadata.md5) {
-                values[`${formValue}-${column.md5.name}`] = metadata.md5;
-              }
-              if (metadata.sha256) {
-                values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
-              }
-            }
-
-          } else {
-            value = tupleValues[i];
-          }
-
-          break;
-      }
-
-      // no need to check for copy here because the case above guards against the negative case for copy
-      if (isTimestamp) {
-        values[`${formValue}-${column.name}`] = value?.datetime || '';
-        values[`${formValue}-${column.name}-date`] = value?.date || '';
-        values[`${formValue}-${column.name}-time`] = value?.time || '';
-      } else {
-        values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
-      }
-
-      // capture the raw values of the columns that create the fk relationship
-      // the `value` above is what users sees and not the raw value that we will
-      // send to the database.
-      if (column.isForeignKey) {
-        if (value !== null || value !== undefined) {
-          column.foreignKey.colset.columns.forEach((col: any) => {
-            values[`${formValue}-${col.name}`] = tuple.data[col.name];
-          });
-        }
-      }
-
+      _setEditValueForColumn(column, isDisabled, tupleValues[colModelIndex], tuple, appMode, formValue, values);
     });
   });
 
@@ -500,9 +527,10 @@ export function populateEditInitialValues(
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
   const submissionRow: any = {};
-  const setSubmission = (col: any, skipEmpty?: boolean) => {
+  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
     let v = formData[formNumber + '-' + col.name];
 
+    // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
       if (col.type.isArray) {
         v = JSON.parse(v);
@@ -558,8 +586,24 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       if (col.byteCountColumn) setSubmission(col.byteCountColumn, true);
       if (col.md5) setSubmission(col.md5, true);
       if (col.sha256) setSubmission(col.sha256, true);
-
       setSubmission(col);
+    } else if (col.isInputIframe) {
+      setSubmission(col);
+      col.inputIframeProps.columns.forEach((c: any) => {
+        if (c.isAsset) {
+          // if due to copy the metadata values are set, use them
+          if (c.filenameColumn) setSubmission(c.filenameColumn, true);
+          if (c.byteCountColumn) setSubmission(c.byteCountColumn, true);
+          if (c.md5) setSubmission(c.md5, true);
+          if (c.sha256) setSubmission(c.sha256, true);
+        }
+
+        // TODO we should make sure we're doing this even for disabled inputs
+        // but we're always setting submission rows even for disabled inputs
+        // I think this is only working because ermrestjs is ignoring the disabled inputs?
+        // should be tested
+        setSubmission(c);
+      });
     } else {
       setSubmission(col);
     }
