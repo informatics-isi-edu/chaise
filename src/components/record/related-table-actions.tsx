@@ -1,11 +1,11 @@
-import { MouseEvent, useState, useRef } from 'react';
+import React, { MouseEvent, useState, useRef, useEffect, useLayoutEffect } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
-
+import Dropdown from 'react-bootstrap/Dropdown';
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -15,7 +15,13 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  RecordsetConfig,
+  RecordsetDisplayMode,
+  RecordsetProps,
+  RecordsetSelectMode,
+  SelectedRow,
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // providers
@@ -28,48 +34,73 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { allowCustomModeRelated, displayCustomModeRelated, getPrefillCookieObject } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { RECORDSET_DEAFULT_PAGE_SIZE, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import {
+  allowCustomModeRelated,
+  displayCustomModeRelated,
+  getPrefillCookieObject,
+} from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import {
+  RECORDSET_DEAFULT_PAGE_SIZE,
+  CUSTOM_EVENTS,
+} from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import Q from 'q';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 type RelatedTableActionsProps = {
-  relatedModel: RecordRelatedModel
-}
+  relatedModel: RecordRelatedModel;
+  istableHeader?: boolean;
+};
 
 const RelatedTableActions = ({
-  relatedModel
+  relatedModel,
+  istableHeader,
 }: RelatedTableActionsProps): JSX.Element => {
-
   const {
-    reference: recordReference, page: recordPage,
+    reference: recordReference,
+    page: recordPage,
     toggleRelatedDisplayMode,
-    updateRecordPage, pauseUpdateRecordPage, resumeUpdateRecordPage,
-    logRecordClientAction, getRecordLogStack,
+    updateRecordPage,
+    pauseUpdateRecordPage,
+    resumeUpdateRecordPage,
+    logRecordClientAction,
+    getRecordLogStack,
   } = useRecord();
 
   const { validateSessionBeforeMutation } = useAuthn();
   const { addAlert } = useAlert();
   const { dispatchError } = useError();
+  const containerRef = useRef<any>(null);
+  const buttonRef = useRef<any>(null);
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [buttonsInDropdown, setButtonsInDropdown] = useState([]);
   // add Pure and Binary
-  const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null);
-  const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
+  const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(
+    null
+  );
+  const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<
+    ((selectedRows: SelectedRow[]) => void) | null
+  >(null);
   // unlink Pure and Binary
-  const [unlinkPureBinaryModalProps, setUnlinkPureBinaryModalProps] = useState<RecordsetProps | null>(null);
-  const [unlinkPureBinaryCB, setUnlinkPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
+  const [unlinkPureBinaryModalProps, setUnlinkPureBinaryModalProps] =
+    useState<RecordsetProps | null>(null);
+  const [unlinkPureBinaryCB, setUnlinkPureBinarySubmitCB] = useState<
+    ((selectedRows: SelectedRow[]) => void) | null
+  >(null);
   const [showPureBinarySpinner, setShowPureBinarySpinner] = useState(false);
 
   // when object is null, hide the modal
   // object is the props for the the modal
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
-    onConfirm: () => void,
-    onCancel: () => void,
-    buttonLabel: string,
-    title: string,
-    message: JSX.Element
+    onConfirm: () => void;
+    onCancel: () => void;
+    buttonLabel: string;
+    title: string;
+    message: JSX.Element;
   } | null>(null);
 
   const container = useRef<HTMLDivElement>(null);
@@ -87,7 +118,7 @@ const RelatedTableActions = ({
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
     toggleRelatedDisplayMode(relatedModel.index, relatedModel.isInline);
-  }
+  };
 
   const onCreate = (e: MouseEvent<HTMLElement>) => {
     // this is to avoid the accordion header to recieve the click
@@ -100,15 +131,21 @@ const RelatedTableActions = ({
     }
 
     // log the client action
-    LogService.logClientAction({
-      action: LogService.getActionString(LogActions.ADD_INTEND, relatedModel.recordsetProps.logInfo.logStackPath),
-      stack: relatedModel.recordsetProps.logInfo.logStack
-    }, relatedModel.initialReference.defaultLogInfo);
+    LogService.logClientAction(
+      {
+        action: LogService.getActionString(
+          LogActions.ADD_INTEND,
+          relatedModel.recordsetProps.logInfo.logStackPath
+        ),
+        stack: relatedModel.recordsetProps.logInfo.logStack,
+      },
+      relatedModel.initialReference.defaultLogInfo
+    );
 
     // Generate a unique cookie name and set it to expire after 24hrs.
     const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
     const cookieValue = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
-    CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + (60 * 60 * 24 * 1000)));
+    CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + 60 * 60 * 24 * 1000));
 
     // Generate a unique id for this request
     // append it to the URL
@@ -119,8 +156,8 @@ const RelatedTableActions = ({
         id: referrer_id,
         containerDetails: {
           isInline: relatedModel.isInline,
-          index: relatedModel.index
-        }
+          index: relatedModel.index,
+        },
       });
     }
 
@@ -130,7 +167,7 @@ const RelatedTableActions = ({
         relatedModel.initialReference.unfilteredReference.contextualize.entryCreate.appLink,
         {
           prefill: cookieName,
-          invalidate: referrer_id
+          invalidate: referrer_id,
         }
       ),
       '_blank'
@@ -148,19 +185,27 @@ const RelatedTableActions = ({
     // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
     fkToRelated.key.colset.columns.forEach(function (col: any) {
       andFilters.push({
-        'source': col.name,
-        'hidden': true,
-        'not_null': true
+        source: col.name,
+        hidden: true,
+        not_null: true,
       });
     });
     // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
     let customFacets: any = null;
-    if (domainRef.pseudoColumn && domainRef.pseudoColumn.filterProps && domainRef.pseudoColumn.filterProps.leafFilterString) {
+    if (
+      domainRef.pseudoColumn &&
+      domainRef.pseudoColumn.filterProps &&
+      domainRef.pseudoColumn.filterProps.leafFilterString
+    ) {
       // NOTE should we display the filters or not?
-      customFacets = { ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString, removable: false };
+      customFacets = {
+        ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
+        removable: false,
+      };
     }
 
-    const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets).contextualize.compactSelectAssociationLink;
+    const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets)
+      .contextualize.compactSelectAssociationLink;
 
     const recordsetConfig: RecordsetConfig = {
       viewable: false,
@@ -190,13 +235,18 @@ const RelatedTableActions = ({
      * so users doesn't resubmit them.
      */
     const getDisabledTuples = (
-      page: any, pageLimit: number, logStack: any,
-      logStackPath: string, requestCauses: any, reloadStartTime: any
+      page: any,
+      pageLimit: number,
+      logStack: any,
+      logStackPath: string,
+      requestCauses: any,
+      reloadStartTime: any
     ) => {
       const defer = Q.defer();
       const disabledRows: any = [];
 
-      let action = LogActions.LOAD, newStack = logStack;
+      let action = LogActions.LOAD,
+        newStack = logStack;
       if (Array.isArray(requestCauses) && requestCauses.length > 0) {
         action = LogActions.RELOAD;
         newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
@@ -204,21 +254,25 @@ const RelatedTableActions = ({
       // using the service instead of the record one since this is called from the modal
       const logObj = {
         action: LogService.getActionString(action, logStackPath),
-        stack: newStack
+        stack: newStack,
       };
       // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
-      domainRef.setSamePaging(page).read(pageLimit, logObj, false, true).then(function (newPage: any) {
-        newPage.tuples.forEach(function (newTuple: any) {
-          const index = page.tuples.findIndex(function (tuple: any) {
-            return tuple.uniqueId == newTuple.uniqueId;
+      domainRef
+        .setSamePaging(page)
+        .read(pageLimit, logObj, false, true)
+        .then(function (newPage: any) {
+          newPage.tuples.forEach(function (newTuple: any) {
+            const index = page.tuples.findIndex(function (tuple: any) {
+              return tuple.uniqueId == newTuple.uniqueId;
+            });
+            if (index > -1) disabledRows.push(page.tuples[index]);
           });
-          if (index > -1) disabledRows.push(page.tuples[index]);
-        });
 
-        defer.resolve({ disabledRows: disabledRows, page: page });
-      }).catch(function (err: any) {
-        defer.reject(err);
-      });
+          defer.resolve({ disabledRows: disabledRows, page: page });
+        })
+        .catch(function (err: any) {
+          defer.reject(err);
+        });
 
       return defer.promise;
     };
@@ -247,34 +301,47 @@ const RelatedTableActions = ({
       validateSessionBeforeMutation(() => {
         const logObj = {
           action: LogService.getActionString(LogActions.LINK, logInfo.logStackPath),
-          stack: logInfo.logStack
+          stack: logInfo.logStack,
         };
 
         const createRef = derivedRef.unfilteredReference.contextualize.entryCreate;
-        createRef.create(submissionRows, logObj).then(() => {
-          setAddPureBinaryModalProps(null);
-          addAlert('Your data has been submitted. Showing you the result set...', ChaiseAlertType.SUCCESS);
+        createRef
+          .create(submissionRows, logObj)
+          .then(() => {
+            setAddPureBinaryModalProps(null);
+            addAlert(
+              'Your data has been submitted. Showing you the result set...',
+              ChaiseAlertType.SUCCESS
+            );
 
-          const details = relatedModel.recordsetProps.config.containerDetails!;
-          updateRecordPage(true, undefined, [{
-            ...details,
-            cause: details?.isInline ? LogReloadCauses.RELATED_INLINE_CREATE : LogReloadCauses.RELATED_CREATE
-          }]);
-        }).catch((error: any) => {
-          dispatchError({ error: error, isDismissible: true });
-        }).finally(() => setShowPureBinarySpinner(false));
+            const details = relatedModel.recordsetProps.config.containerDetails!;
+            updateRecordPage(true, undefined, [
+              {
+                ...details,
+                cause: details?.isInline
+                  ? LogReloadCauses.RELATED_INLINE_CREATE
+                  : LogReloadCauses.RELATED_CREATE,
+              },
+            ]);
+          })
+          .catch((error: any) => {
+            dispatchError({ error: error, isDismissible: true });
+          })
+          .finally(() => setShowPureBinarySpinner(false));
       });
-    }
+    };
     setAddPureBinarySubmitCB(() => submitCB);
 
     setAddPureBinaryModalProps({
       initialReference: modalReference,
-      initialPageLimit: modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize :  RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: modalReference.display.defaultPageSize
+        ? modalReference.display.defaultPageSize
+        : RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       getDisabledTuples,
       parentTuple: recordPage.tuples[0],
-      parentReference: recordReference
+      parentReference: recordReference,
     });
   };
 
@@ -311,7 +378,7 @@ const RelatedTableActions = ({
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       showFaceting: true,
       disableFaceting: false,
-      displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK
+      displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK,
     };
 
     const stackElement = LogService.getStackNode(
@@ -331,7 +398,7 @@ const RelatedTableActions = ({
       if (!selectedRows) return;
 
       const cc = ConfigService.chaiseConfig;
-      const CONFIRM_DELETE = (cc.confirmDelete === undefined || cc.confirmDelete) ? true : false;
+      const CONFIRM_DELETE = cc.confirmDelete === undefined || cc.confirmDelete ? true : false;
 
       // NOTE: This reference has to be filtered so creating the path in the ermrestJS function works properly
       const leafReference = selectedRows[0].tupleReference;
@@ -357,10 +424,10 @@ const RelatedTableActions = ({
                 fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
                   cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
                   pageStates: { updateResult: true, updateCount: true, updateFacets: true },
-                  response: response
+                  response: response,
                 });
               }
-            }
+            },
           });
         };
 
@@ -374,12 +441,15 @@ const RelatedTableActions = ({
         };
 
         if (!CONFIRM_DELETE) {
-          return leafReference.deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows).then(deleteResponse).catch(deleteError);
+          return leafReference
+            .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
+            .then(deleteResponse)
+            .catch(deleteError);
         }
 
         logRecordClientAction(LogActions.UNLINK_INTEND);
 
-        const multiple = (selectedRows.length > 1 ? 's' : '');
+        const multiple = selectedRows.length > 1 ? 's' : '';
         const confirmMessage: JSX.Element = (
           <>
             Are you sure you want to unlink {selectedRows.length} record{multiple}?
@@ -391,14 +461,17 @@ const RelatedTableActions = ({
           title: 'Confirm Unlink',
           onConfirm: () => {
             setShowDeleteConfirmationModal(null);
-            return leafReference.deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows).then(deleteResponse).catch(deleteError)
+            return leafReference
+              .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
+              .then(deleteResponse)
+              .catch(deleteError);
           },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
             setShowPureBinarySpinner(false);
             logRecordClientAction(LogActions.UNLINK_CANCEL);
           },
-          message: confirmMessage
+          message: confirmMessage,
         });
       });
     };
@@ -410,9 +483,9 @@ const RelatedTableActions = ({
       config: recordsetConfig,
       logInfo,
       parentTuple: recordPage.tuples[0],
-      parentReference: recordReference
+      parentReference: recordReference,
     });
-  }
+  };
 
   const closeUnlinkPureBinaryModal = () => {
     resumeUpdateRecordPage();
@@ -420,22 +493,36 @@ const RelatedTableActions = ({
     updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
   };
 
-  const mainTable = <code><DisplayValue value={recordReference.displayname}></DisplayValue></code>;
-  const currentTable = <code><DisplayValue value={usedRef.displayname}></DisplayValue></code>;
+  const mainTable = (
+    <code>
+      <DisplayValue value={recordReference.displayname}></DisplayValue>
+    </code>
+  );
+  const currentTable = (
+    <code>
+      <DisplayValue value={usedRef.displayname}></DisplayValue>
+    </code>
+  );
 
   const exploreLink = addQueryParamsToURL(usedRef.appLink, {
-    paction: LogParentActions.EXPLORE
+    paction: LogParentActions.EXPLORE,
   });
 
-  const renderCustomModeBtn = () => {
-    let tooltip: string | JSX.Element = '', icon = '', label = '';
+  const renderCustomModeBtn = (tertiary?: boolean) => {
+    let tooltip: string | JSX.Element = '',
+      icon = '',
+      label = '';
     if (displayCustomModeRelated(relatedModel)) {
       icon = 'fas fa-table';
       if (relatedModel.canEdit) {
-        tooltip = <span>Display edit controls for {currentTable} records related to this {mainTable}.</span>;
+        tooltip = (
+          <span>
+            Display edit controls for {currentTable} records related to this {mainTable}.
+          </span>
+        );
         label = 'Edit mode';
       } else {
-        tooltip = <span>Display related {currentTable} in tabular mode.</span>
+        tooltip = <span>Display related {currentTable} in tabular mode.</span>;
         label = 'Table mode';
       }
     } else {
@@ -445,48 +532,68 @@ const RelatedTableActions = ({
     }
 
     return (
-      <ChaiseTooltip
-        placement='top'
-        tooltip={tooltip}
-      >
-        <button className='chaise-btn chaise-btn-secondary toggle-display-link' onClick={onToggleDisplayMode}>
+      <ChaiseTooltip placement='top' tooltip={tooltip}>
+        <button
+          className={`chaise-btn toggle-display-link ${
+            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+          }`}
+          onClick={tertiary ? undefined : onToggleDisplayMode}
+        >
           <span className={`chaise-btn-icon ${icon}`}></span>
           <span>{label}</span>
         </button>
       </ChaiseTooltip>
-    )
+    );
   };
 
   const renderCreateBtnTooltip = () => {
     if (relatedModel.canCreateDisabled) {
       let fkr;
       if (relatedModel.initialReference.derivedAssociationReference) {
-        fkr = relatedModel.initialReference.derivedAssociationReference.origFKR
+        fkr = relatedModel.initialReference.derivedAssociationReference.origFKR;
       } else {
         fkr = relatedModel.initialReference.origFKR;
       }
-      const keyset = (<code>{fkr.key.colset.columns.map((c: any) => c.name).join(', ')}</code>);
+      const keyset = <code>{fkr.key.colset.columns.map((c: any) => c.name).join(', ')}</code>;
 
       if (relatedModel.isPureBinary) {
-        return <span>Unable to connect to {currentTable} records until {keyset} in this {mainTable} is set.</span>;
+        return (
+          <span>
+            Unable to connect to {currentTable} records until {keyset} in this {mainTable} is set.
+          </span>
+        );
       }
-      return <span>Unable to create {currentTable} records for this {mainTable} until {keyset} in this {mainTable} is set.</span>
+      return (
+        <span>
+          Unable to create {currentTable} records for this {mainTable} until {keyset} in this{' '}
+          {mainTable} is set.
+        </span>
+      );
     }
 
     if (relatedModel.isPureBinary) {
-      return <span>Connect {currentTable} records to this {mainTable}.</span>;
+      return (
+        <span>
+          Connect {currentTable} records to this {mainTable}.
+        </span>
+      );
     }
-    return <span>Create {currentTable} records for this {mainTable}.</span>
+    return (
+      <span>
+        Create {currentTable} records for this {mainTable}.
+      </span>
+    );
   };
 
-  return (
-    <>
-      <div className='related-table-actions' ref={container}>
-        {relatedModel.canCreate &&
-          <ChaiseTooltip
-            placement='top'
-            tooltip={renderCreateBtnTooltip()}
-          >
+  const renderButtons = () => {
+    return (
+      <div
+        ref={buttonRef}
+        className='button-wrapper'
+        style={{ marginRight: `${buttonsInDropdown.length > 0 ? '5px' : '0px'}` }}
+      >
+        {relatedModel.canCreate && (
+          <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
             <button
               className='chaise-btn chaise-btn-secondary add-records-link'
               onClick={onCreate}
@@ -496,31 +603,273 @@ const RelatedTableActions = ({
               <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
             </button>
           </ChaiseTooltip>
-        }
-        {relatedModel.isPureBinary && relatedModel.canDelete &&
+        )}
+
+        {relatedModel.isPureBinary && relatedModel.canDelete && (
           <ChaiseTooltip
             placement='top'
-            tooltip={<span>Disconnect {currentTable} records from this {mainTable}.</span>}
+            tooltip={
+              <span>
+                Disconnect {currentTable} records from this {mainTable}.
+              </span>
+            }
           >
-            <button className='chaise-btn chaise-btn-secondary unlink-records-link' onClick={onUnlink}>
+            <button
+              className='chaise-btn chaise-btn-secondary unlink-records-link'
+              onClick={onUnlink}
+            >
               <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
               <span>Unlink records</span>
             </button>
           </ChaiseTooltip>
-        }
-        {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
+        )}
+
+        {renderCustomModeBtn()}
+
+        {relatedModel.canEdit && (
+          <ChaiseTooltip
+            placement='top'
+            tooltip={
+              <span>
+                Explore more {currentTable} records related to this {mainTable}.
+              </span>
+            }
+          >
+            <button
+              className='chaise-btn chaise-btn-secondary edit-records-link'
+              onClick={onUnlink}
+            >
+              <span className='chaise-btn-icon fa fa-pencil'></span>
+              <span>Bulk Edit</span>
+            </button>
+          </ChaiseTooltip>
+        )}
+
         <ChaiseTooltip
           placement='top'
-          tooltip={<span>Explore more {currentTable} records related to this {mainTable}.</span>}
+          tooltip={
+            <span>
+              Explore more {currentTable} records related to this {mainTable}.
+            </span>
+          }
         >
-          <a className='chaise-btn chaise-btn-secondary more-results-link' href={exploreLink} onClick={onExplore}>
+          <a
+            className='chaise-btn chaise-btn-secondary more-results-link'
+            href={exploreLink}
+            onClick={onExplore}
+          >
             <span className='chaise-btn-icon fa-solid fa-magnifying-glass'></span>
             <span>Explore</span>
           </a>
         </ChaiseTooltip>
       </div>
-      {
-        addPureBinaryModalProps && submitPureBinaryCB &&
+    );
+  };
+  /*
+   * This function is to render the button in the dropdown with the tooltip.
+   */
+  const renderButton = (button: any, index: number) => {
+    const buttonText = button.textContent;
+    const spanClass = button.children[0].className;
+    const createBtnTooltip = renderCreateBtnTooltip();
+    const unlinkBtnTooltip = (
+      <span>
+        Disconnect {currentTable} records from this {mainTable}.
+      </span>
+    );
+    const exploreBtnTooltip = (
+      <span>
+        Explore more {currentTable} records related to this {mainTable}.
+      </span>
+    );
+    let tooltip: any;
+    switch (buttonText) {
+      case 'Explore':
+        tooltip = exploreBtnTooltip;
+        return (
+          <ChaiseTooltip
+            placement='top'
+            tooltip={
+              <span>
+                Explore more {currentTable} records related to this {mainTable}.
+              </span>
+            }
+          >
+            <a
+              className='chaise-btn chaise-btn-tertiary more-results-link dropdown-button'
+              href={exploreLink}
+              onClick={onExplore}
+            >
+              <span className='chaise-btn-icon fa-solid fa-magnifying-glass'></span>
+              <span>Explore</span>
+            </a>
+          </ChaiseTooltip>
+        );
+      case 'Bulk Edit':
+        tooltip = exploreBtnTooltip;
+        return (
+          <ChaiseTooltip
+            placement='top'
+            tooltip={
+              <span>
+                Explore more {currentTable} records related to this {mainTable}.
+              </span>
+            }
+          >
+            <a
+              className='chaise-btn chaise-btn-tertiary more-results-link dropdown-button'
+              href={exploreLink}
+              onClick={onExplore}
+            >
+              <span className='chaise-btn-icon fa fa-pencil'></span>
+              <span>Bulk Edit</span>
+            </a>
+          </ChaiseTooltip>
+        );
+      case 'Link Records':
+      case 'Add Records':
+        tooltip = createBtnTooltip;
+        break;
+      case 'Unlink records':
+        tooltip = unlinkBtnTooltip;
+        break;
+      case 'Edit mode':
+      case 'Custom mode':
+      case 'Table mode':
+        return renderCustomModeBtn(true);
+    }
+
+    return (
+      <ChaiseTooltip placement='top' tooltip={tooltip}>
+        <button
+          key={`button-${index}`}
+          className={'chaise-btn chaise-btn-tertiary dropdown-button'}
+        >
+          <span className={spanClass}></span>
+          <span className='dropdown-button-text'>{buttonText}</span>
+        </button>
+      </ChaiseTooltip>
+    );
+  };
+  /*
+   * This hook is to push the buttons to the dropdown if it exceeds the container width.
+   * We are using ResizeSensor to listen to the resize event.
+   */
+  useLayoutEffect(() => {
+    const mainnav = document.querySelector('#navheader') as HTMLElement;
+    if (!buttonRef.current) return;
+
+    const calculateButtons = () => {
+      setIsMobile(window.innerWidth < 600);
+      let buttons: any = [];
+      if (containerRef.current) {
+        const buttonContainer = buttonRef.current;
+
+        const containerWidth = buttonContainer.getBoundingClientRect().width;
+        buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
+
+        const tableHeaderButtonsToAddToDropdown: any = [];
+        let buttonLeftOffset = 0;
+        let totalWidth = 0;
+
+        if (isMobile) {
+          setButtonsInDropdown(buttons);
+          buttonContainer.style.display = 'none';
+          return;
+        } else {
+          buttonContainer.style.display = 'block';
+          setButtonsInDropdown([]);
+          buttons.forEach((button: any, index: number) => {
+            const buttonWidth = button.getBoundingClientRect().width;
+            if (index === 0) {
+              buttonLeftOffset =
+                button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
+            }
+
+            if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
+              totalWidth += buttonWidth;
+            } else {
+              tableHeaderButtonsToAddToDropdown.push(button);
+            }
+          });
+          setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
+        }
+      }
+    };
+    calculateButtons();
+
+    const mainNavResizeSensor = new ResizeSensor(mainnav as Element, () => {
+      calculateButtons();
+    });
+
+    return () => {
+      mainNavResizeSensor.detach();
+    };
+  }, [isMobile]);
+
+  const toggleDropdown = (bool: boolean, evt: any) => {
+    evt.originalEvent.stopPropagation();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const containerClassName = `related-table-actions ${isMobile ? 'is-mobile ' : ''}${
+    istableHeader ? 'table-header-actions' : 'main-section-actions'
+  }`;
+
+  /*
+   * Callback function for dropdown item click
+   */
+  const handleDropDownClick = (evt: any, button: any) => {
+    const buttonText = button.textContent;
+    evt.stopPropagation();
+    switch (buttonText) {
+      case 'Explore':
+        onExplore(evt);
+        break;
+      case 'Link Records':
+      case 'Add Records':
+        onCreate(evt);
+        break;
+      case 'Edit Records':
+        onUnlink(evt);
+        break;
+      case 'Unlink records':
+        onUnlink(evt);
+        break;
+      case 'Edit mode':
+      case 'Custom mode':
+      case 'Table mode':
+        onToggleDisplayMode(evt);
+        break;
+    }
+  };
+  return (
+    <>
+      <div className={containerClassName} ref={containerRef}>
+        {renderButtons()}
+        {buttonsInDropdown.length > 0 && (
+          <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
+            <Dropdown.Toggle
+              disabled={false}
+              className='chaise-btn chaise-btn-primary dropdown-toggle-table'
+            >
+              <span className='fa fa-angle-double-right'></span>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {buttonsInDropdown.map((button: any, index) => (
+                <Dropdown.Item
+                  className={''}
+                  key={`dropdown-button-${index}`}
+                  onClick={(e: any) => handleDropDownClick(e, button)}
+                >
+                  {renderButton(button, index)}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
+      </div>
+
+      {addPureBinaryModalProps && submitPureBinaryCB && (
         <RecordsetModal
           modalClassName='add-pure-and-binary-popup'
           recordsetProps={addPureBinaryModalProps}
@@ -528,9 +877,9 @@ const RelatedTableActions = ({
           showSubmitSpinner={showPureBinarySpinner}
           onClose={closeAddPureBinaryModal}
         />
-      }
-      {
-        unlinkPureBinaryModalProps && unlinkPureBinaryCB &&
+      )}
+
+      {unlinkPureBinaryModalProps && unlinkPureBinaryCB && (
         <RecordsetModal
           modalClassName='unlink-pure-and-binary-popup'
           recordsetProps={unlinkPureBinaryModalProps}
@@ -538,8 +887,9 @@ const RelatedTableActions = ({
           showSubmitSpinner={showPureBinarySpinner}
           onClose={closeUnlinkPureBinaryModal}
         />
-      }
-      {showDeleteConfirmationModal &&
+      )}
+
+      {showDeleteConfirmationModal && (
         <DeleteConfirmationModal
           show={!!showDeleteConfirmationModal}
           message={showDeleteConfirmationModal.message}
@@ -548,7 +898,7 @@ const RelatedTableActions = ({
           onCancel={showDeleteConfirmationModal.onCancel}
           title={showDeleteConfirmationModal.title}
         />
-      }
+      )}
     </>
   );
 };
