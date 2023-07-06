@@ -256,20 +256,19 @@ div.modal-title {
     min-height: 90vh;
   }
 
+  .alerts-container {
+    // make sure it's consistent with the modal title padding
+    margin: 0 1rem;
+  }
+
   .iframe-container {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: flex;
     width: 100%;
     height: 100%;
-    padding: 15px;
 
     iframe {
-      position: relative;
       height: 100%;
       width: 100%;
-      // TODO is the following needed?
-      // z-index: 12
     }
   }
 }

@@ -24,6 +24,20 @@
       CREATOR: 'registry_creator'
     }
 
+    // TODO https://github.com/informatics-isi-edu/atlas-d2k/issues/11
+    const ORGAN_LOOKUP = {
+      'http://purl.org/ccf/latest/ccf.owl#VHFRightKidney': {
+        'name': 'kidney',
+        'side': 'right',
+        'sex': 'female'
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHMRightKidney': {
+        'name': 'kidney',
+        'side': 'right',
+        'sex': 'male'
+      }
+    }
+
     /**
      * expected data structure of content:
      * {
@@ -39,6 +53,9 @@
       }
       rui.baseHref = window.location.pathname + ruiPath;
 
+      // hide the default header
+      rui.header = false;
+
       rui.useDownload = !IN_IFRAME;
       if (IN_IFRAME) {
         rui.register = (data) => {
@@ -53,6 +70,17 @@
           submittedData[FIELD_NAMES.FILE] = file;
           submittedData[FIELD_NAMES.ID] = dataObject['@id'];
           submittedData[FIELD_NAMES.CREATOR] = dataObject['creator'];
+
+          // check the organ and make sure we're supporting it.
+          let organID;
+          if (dataObject['placement'] && dataObject['placement']['target']) {
+            organID = dataObject['placement']['target'];
+          }
+
+          if (!(organID in ORGAN_LOOKUP)) {
+            dispatchMessage('show-alert', {type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.'});
+            return;
+          }
 
           dispatchMessage('submit-data', submittedData);
         }
@@ -72,8 +100,20 @@
             throw new Erorr('couldn\'t fetch the file');
           }
         }).then(data => {
-          if (data.creator_first_name && data.creator_last_name) {
+          // preselect the user info
+          if (data && data.creator_first_name && data.creator_last_name) {
             rui.user = { firstName: data.creator_first_name, lastName: data.creator_last_name };
+          }
+
+          // preselect the organ
+          if (data && data.placement && data.placement.target) {
+            const org = ORGAN_LOOKUP[data.placement.target];
+            if (!org) {
+              // TODO what should we say? do we even support this?
+              dispatchMessage('show-alert', {type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.'});
+            } else {
+              rui.organ = org;
+            }
           }
 
           rui.editRegistration = data;
