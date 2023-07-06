@@ -7,6 +7,14 @@
     height: auto;
   }
 
+  .has-scrollbar {
+    padding-right: 2rem !important;
+  }
+
+  .has-scrollbar-clear {
+    margin-right: 10px;
+  }
+
   .input-switch-clear {
     position: absolute;
     top: 2px;
@@ -25,7 +33,7 @@
 
     textarea,
     .disabled-textarea {
-      padding: 4px 10px !important;
+      padding: 4px 10px;
       min-height: 110px;
       display: flex;
       width: 100%;
@@ -178,6 +186,7 @@
   .chaise-image-preview {
     margin-top: 5px;
   }
+
   .chaise-input-control {
     cursor: text;
   }

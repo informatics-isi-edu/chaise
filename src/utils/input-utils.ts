@@ -227,8 +227,8 @@ export function arrayFieldPlaceholder(baseType: string) {
 
 export function humanFileSize(size: number) {
   // Math.log(0) is -Infinity
-  const i = size === 0 ? 0 : Math.floor( Math.log(size) / Math.log(1024) );
-  return Number(( size / Math.pow(1024, i) ).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+  const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return Number((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
 const integer2FieldValidation = (value: string) => {
@@ -326,4 +326,11 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'timestamp': timestampFieldValidation,
   'timestamptz': timestamptzFieldValidation,
   'color': colorFieldValidation,
+};
+/**
+ * Function to check if there is scrollbar for textarea
+ */
+export const hasScrollbar = (element: any) => {
+  if (!element) return;
+  return element.scrollHeight > element.clientHeight;
 };

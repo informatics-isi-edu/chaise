@@ -13,11 +13,11 @@ import { useFormContext, useController } from 'react-hook-form';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { hasScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
+ 
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [showModalPreview, setShowModalPreview] = useState<boolean>(false);
   const [previewContent, setPreviewContent] = useState<string>('');
@@ -165,12 +165,21 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
             {!showPreview ?
               <div className={`chaise-input-control has-feedback content-box ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
                 <textarea
-                  placeholder={props.placeholder} rows={5} className={`${props.inputClasses} input-switch`} {...field}
+                  placeholder={props.placeholder}
+                  rows={5}
+                  className={`${props.inputClasses} input-switch ${
+                    hasScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+                  }`}
+                  {...field}
                   disabled={props.disableInput}
-                  onChange={onChange} ref={textAreaRef} data-provide='markdown'
+                  onChange={onChange}
+                  ref={textAreaRef}
+                  data-provide='markdown'
                 />
                 <ClearInputBtn
-                  btnClassName={`${props.clearClasses} input-switch-clear`}
+                  btnClassName={`${props.clearClasses} input-switch-clear ${
+                    hasScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+                  }`}
                   clickCallback={clearInput}
                   show={showClear && !props.disableInput}
                 />
