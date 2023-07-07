@@ -516,10 +516,12 @@ const SavedQueryDropdown = ({
     const facetBlob = {
       and: [{
         choices: [reference.table.name],
-        source: 'table_name' // name of column storing table name in saved_query table
+         // name of column storing table name in saved_query table
+        source: savedQueryConfig?.mapping.columnNameMapping?.tableName || 'table_name'
       }, {
         choices: [session?.client.id],
-        source: 'user_id'
+         // name of column storing user id in saved_query table
+        source: savedQueryConfig?.mapping.columnNameMapping?.userId || 'user_id'
       }]
     }
 
@@ -551,7 +553,6 @@ const SavedQueryDropdown = ({
       const logStack = LogService.getStackObject(stackElement),
         logStackPath = LogService.getStackPath('', LogStackPaths.SAVED_QUERY_SELECT_POPUP);
 
-      // TODO parent container?
       setRecordsetModalProps({
         parentReference: reference,
         initialReference: tempSavedQueryReference,
@@ -613,7 +614,8 @@ const SavedQueryDropdown = ({
           modalClassName='saved-query-popup'
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
-          // TODO: 
+          // NOTE: needs to be defined for RecordsetModal but isn't used in this case
+          // TODO: do we want to update reference instead of reloading the page?
           onSubmit={() => { return }}
         />
       }

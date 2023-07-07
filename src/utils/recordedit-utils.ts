@@ -216,7 +216,7 @@ export function populateCreateInitialValues(
 
       let defaultValue = column.default;
 
-      // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
+      // only want to set primitive values in the input fields so make sure it isn't null, undefined, or foreignkey (an object)
       // used by saved query feature (and maybe viewer in the future?)
       if (initialValues[column.name] && !column.isForeignKey) {
         defaultValue = initialValues[column.name];

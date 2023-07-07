@@ -105,8 +105,6 @@ const RecordeditInner = ({
 
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
-  // const [isCreatePopup, setIsCreatePopup] = useState<boolean>(Boolean(parentReference));
-
   const mainContainer = useRef<HTMLDivElement>(null);
   const copyFormRef = useRef<HTMLInputElement>(null);
 

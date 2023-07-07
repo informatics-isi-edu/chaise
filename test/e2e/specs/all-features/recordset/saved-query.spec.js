@@ -135,7 +135,6 @@ describe('View recordset page and form a query,', () => {
     });
 
     it('have correct modal title and default values then save the query', (done) => {
-      // TODO: .toContain maybe?
       expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe('Save current search criteria for table main', 'modal title is incorrect');
 
       const queryNameInput = chaisePage.recordEditPage.getInputForAColumn('name');

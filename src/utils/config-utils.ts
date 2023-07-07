@@ -85,8 +85,7 @@ export function initializeSavingQueries(reference: any, queryParams: any) {
     },
     defaultDescriptionLimits: {
       facetTextLimit: 600,
-      // totalTextLimit: 3000
-      totalTextLimit: 1000
+      totalTextLimit: 3000
     },
     ermrestTablePath: null,
     ermrestAGPath: null,
