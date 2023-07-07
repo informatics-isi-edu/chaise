@@ -11,7 +11,7 @@
           height: variables.$btn-height;
           margin: 0;
 
-          > div {
+          >div {
             display: flex;
           }
 
@@ -33,6 +33,7 @@
             .page-title-container {
               width: 100%;
               display: inline-block;
+
               #page-title {
                 margin: 0px;
               }
@@ -43,15 +44,21 @@
               padding-top: 7px;
               width: 330px;
             }
-          } // end .entity-display-header
-        } // end .title
+          }
+
+          // end .entity-display-header
+        }
+
+        // end .title
 
         .show-toc-btn {
           margin-top: 10px;
           padding-left: 2px;
           padding-bottom: 0px;
         }
-      } // end .top-right-panel
+      }
+
+      // end .top-right-panel
     }
   }
 
@@ -61,7 +68,7 @@
     }
 
     /** bottom left panel **/
-    > .side-panel-resizable {
+    >.side-panel-resizable {
 
       .side-panel-container {
         height: 100%;
@@ -84,7 +91,7 @@
           cursor: pointer;
           font-size: variables.$h4-font-size;
 
-          & > a.empty-toc-heading {
+          &>a.empty-toc-heading {
             opacity: 0.55;
           }
 
@@ -119,44 +126,51 @@
         text-decoration: none;
       }
     }
+
     .related-table-actions {
       display: flex;
       align-items: baseline;
+
       .button-wrapper {
         height: 30px;
         overflow: hidden;
         position: relative;
         text-align: right;
       }
+
       .dropdown-toggle-table {
         color: #4674a7;
         background-color: #fff;
         cursor: pointer;
         border-color: #4674a7;
       }
+
       .dropdown-item {
         padding: 0;
+
         .dropdown-button {
           .dropdown-button-text {
             margin-left: 4px;
           }
         }
       }
-   }
-   
+    }
+
     .table-header-actions {
       width: 100%;
       justify-content: end;
     }
+
     .chaise-accordion-header {
       .chaise-accordion-displayname {
         white-space: nowrap;
         min-width: 25%
       }
+
       white-space: unset !important;
       align-items: center;
     }
-   
+
     /******Related Entities in record **************/
 
     .row-focus {
@@ -198,6 +212,7 @@
     }
 
     .top-right-panel {
+
       //Action button top right corner
       .page-action-btns {
         display: none;
@@ -292,12 +307,12 @@
         border-bottom: none;
       }
 
-      > thead > tr > th,
-      > tbody > tr > th,
-      > tfoot > tr > th,
-      > thead > tr > td,
-      > tbody > tr > td,
-      > tfoot > tr > td {
+      >thead>tr>th,
+      >tbody>tr>th,
+      >tfoot>tr>th,
+      >thead>tr>td,
+      >tbody>tr>td,
+      >tfoot>tr>td {
         border-top: none;
         border-right: 1px solid #bbbbbb;
       }
@@ -342,7 +357,7 @@
 
     //Removes bubbles and represents the vocab as a dot separated list
     .related-section-container {
-      .vocab + .vocab::before {
+      .vocab+.vocab::before {
         content: "\2022" !important;
         padding-right: 6px;
       }

@@ -51,12 +51,10 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 type RelatedTableActionsProps = {
   relatedModel: RecordRelatedModel;
-  istableHeader?: boolean;
 };
 
 const RelatedTableActions = ({
-  relatedModel,
-  istableHeader,
+  relatedModel
 }: RelatedTableActionsProps): JSX.Element => {
   const {
     reference: recordReference,
@@ -507,6 +505,7 @@ const RelatedTableActions = ({
   const exploreLink = addQueryParamsToURL(usedRef.appLink, {
     paction: LogParentActions.EXPLORE,
   });
+  const editLink = usedRef.contextualize.entryEdit.appLink;
 
   const renderCustomModeBtn = (tertiary?: boolean) => {
     let tooltip: string | JSX.Element = '',
@@ -584,7 +583,10 @@ const RelatedTableActions = ({
       </span>
     );
   };
-
+  /*
+    * This function is to render each button. We call the renderButton function with button text,
+    * inner element classname and boolean flag to show tertiary class(for the dropdown buttons) or not
+  */
   const renderButtons = () => {
     return (
       <div
@@ -592,100 +594,34 @@ const RelatedTableActions = ({
         className='button-wrapper'
         style={{ marginRight: `${buttonsInDropdown.length > 0 ? '5px' : '0px'}` }}
       >
-        {relatedModel.canCreate && (
-          <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
-            <button
-              className='chaise-btn chaise-btn-secondary add-records-link'
-              onClick={onCreate}
-              disabled={relatedModel.canCreateDisabled}
-            >
-              <span className='chaise-btn-icon fa-solid fa-plus'></span>
-              <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
-            </button>
-          </ChaiseTooltip>
-        )}
+        {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`,
+        'chaise-btn-icon fa-solid fa-plus', false)}
+       
 
-        {relatedModel.isPureBinary && relatedModel.canDelete && (
-          <ChaiseTooltip
-            placement='top'
-            tooltip={
-              <span>
-                Disconnect {currentTable} records from this {mainTable}.
-              </span>
-            }
-          >
-            <button
-              className='chaise-btn chaise-btn-secondary unlink-records-link'
-              onClick={onUnlink}
-            >
-              <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
-              <span>Unlink records</span>
-            </button>
-          </ChaiseTooltip>
-        )}
+        {relatedModel.isPureBinary && relatedModel.canDelete && 
+        renderButton('Unlink records', 'chaise-btn-icon fa-regular fa-circle-xmark', false)
+        }
 
         {renderCustomModeBtn()}
 
-        {relatedModel.canEdit && (
-          <ChaiseTooltip
-            placement='top'
-            tooltip={
-              <span>
-                Explore more {currentTable} records related to this {mainTable}.
-              </span>
-            }
-          >
-            <button
-              className='chaise-btn chaise-btn-secondary edit-records-link'
-              onClick={onUnlink}
-            >
-              <span className='chaise-btn-icon fa fa-pencil'></span>
-              <span>Bulk Edit</span>
-            </button>
-          </ChaiseTooltip>
-        )}
+        {relatedModel.canEdit && 
+        renderButton('Bulk Edit', 'chaise-btn-icon fa fa-pencil', false)
+        }
 
-        <ChaiseTooltip
-          placement='top'
-          tooltip={
-            <span>
-              Explore more {currentTable} records related to this {mainTable}.
-            </span>
-          }
-        >
-          <a
-            className='chaise-btn chaise-btn-secondary more-results-link'
-            href={exploreLink}
-            onClick={onExplore}
-          >
-            <span className='chaise-btn-icon fa-solid fa-magnifying-glass'></span>
-            <span>Explore</span>
-          </a>
-        </ChaiseTooltip>
+        {renderButton('Explore', 'chaise-btn-icon fa-solid fa-magnifying-glass', false)}
       </div>
     );
   };
-  /*
+  /** 
    * This function is to render the button in the dropdown with the tooltip.
-   */
-  const renderButton = (button: any, index: number) => {
-    const buttonText = button.textContent;
-    const spanClass = button.children[0].className;
-    const createBtnTooltip = renderCreateBtnTooltip();
-    const unlinkBtnTooltip = (
-      <span>
-        Disconnect {currentTable} records from this {mainTable}.
-      </span>
-    );
-    const exploreBtnTooltip = (
-      <span>
-        Explore more {currentTable} records related to this {mainTable}.
-      </span>
-    );
-    let tooltip: any;
+   * @param  {string}   buttonText title of button
+   * @param  {string}   spanClass classname of inner span        
+   * @param  {boolean}   tertiary boolean to differentiate dropdown button and outside button
+   * @param  {number} index
+  */
+  const renderButton = (buttonText: string, spanClass: string, tertiary?: boolean, index?: number) => {
     switch (buttonText) {
       case 'Explore':
-        tooltip = exploreBtnTooltip;
         return (
           <ChaiseTooltip
             placement='top'
@@ -696,7 +632,9 @@ const RelatedTableActions = ({
             }
           >
             <a
-              className='chaise-btn chaise-btn-tertiary more-results-link dropdown-button'
+              className={`chaise-btn more-results-link ${
+                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+              }`}
               href={exploreLink}
               onClick={onExplore}
             >
@@ -706,19 +644,20 @@ const RelatedTableActions = ({
           </ChaiseTooltip>
         );
       case 'Bulk Edit':
-        tooltip = exploreBtnTooltip;
         return (
           <ChaiseTooltip
             placement='top'
             tooltip={
               <span>
-                Explore more {currentTable} records related to this {mainTable}.
+                Edit this page of {currentTable} records related to this {mainTable}.
               </span>
             }
           >
             <a
-              className='chaise-btn chaise-btn-tertiary more-results-link dropdown-button'
-              href={exploreLink}
+            className={`chaise-btn more-results-link ${
+              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+            }`}
+              href={editLink}
               onClick={onExplore}
             >
               <span className='chaise-btn-icon fa fa-pencil'></span>
@@ -726,52 +665,71 @@ const RelatedTableActions = ({
             </a>
           </ChaiseTooltip>
         );
-      case 'Link Records':
-      case 'Add Records':
-        tooltip = createBtnTooltip;
-        break;
+      case 'Link records':
+      case 'Add records':
+        return (
+          <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
+          <button
+          className={`chaise-btn add-records-link ${
+            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+          }`}
+            onClick={tertiary ? undefined : onCreate}
+            disabled={relatedModel.canCreateDisabled}
+          >
+            <span className='chaise-btn-icon fa-solid fa-plus'></span>
+            <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
+          </button>
+        </ChaiseTooltip>
+        )
       case 'Unlink records':
-        tooltip = unlinkBtnTooltip;
-        break;
+        return (
+          <ChaiseTooltip
+            placement='top'
+            tooltip={
+              <span>
+                Disconnect {currentTable} records from this {mainTable}.
+              </span>
+            }
+          >
+            <button
+            className={`chaise-btn unlink-records-link ${
+              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+            }`}
+              onClick={tertiary ? undefined : onUnlink}
+            >
+              <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
+              <span>Unlink records</span>
+            </button>
+          </ChaiseTooltip>
+        )
       case 'Edit mode':
       case 'Custom mode':
       case 'Table mode':
         return renderCustomModeBtn(true);
     }
-
-    return (
-      <ChaiseTooltip placement='top' tooltip={tooltip}>
-        <button
-          key={`button-${index}`}
-          className={'chaise-btn chaise-btn-tertiary dropdown-button'}
-        >
-          <span className={spanClass}></span>
-          <span className='dropdown-button-text'>{buttonText}</span>
-        </button>
-      </ChaiseTooltip>
-    );
   };
   /*
    * This hook is to push the buttons to the dropdown if it exceeds the container width.
    * We are using ResizeSensor to listen to the resize event.
    */
   useLayoutEffect(() => {
-    const mainnav = document.querySelector('#navheader') as HTMLElement;
+    const mainContainer = document.querySelector('.main-container') as HTMLElement;
     if (!buttonRef.current) return;
 
     const calculateButtons = () => {
-      setIsMobile(window.innerWidth < 600);
+      
       let buttons: any = [];
       if (containerRef.current) {
         const buttonContainer = buttonRef.current;
 
         const containerWidth = buttonContainer.getBoundingClientRect().width;
         buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
-
+        setIsMobile(containerRef.current.getBoundingClientRect().width < 200);
         const tableHeaderButtonsToAddToDropdown: any = [];
         let buttonLeftOffset = 0;
         let totalWidth = 0;
 
+        //This condition is to push all the buttons to the dropdown when the container width is below 200
         if (isMobile) {
           setButtonsInDropdown(buttons);
           buttonContainer.style.display = 'none';
@@ -779,6 +737,8 @@ const RelatedTableActions = ({
         } else {
           buttonContainer.style.display = 'block';
           setButtonsInDropdown([]);
+          // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
+          // is overflowing the container width. If yes, push the button to the dropdown
           buttons.forEach((button: any, index: number) => {
             const buttonWidth = button.getBoundingClientRect().width;
             if (index === 0) {
@@ -787,32 +747,37 @@ const RelatedTableActions = ({
             }
 
             if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
+              // calculate the total button container width if it doesn't overflow
               totalWidth += buttonWidth;
             } else {
+              // Push to dropdown if it overflowa
               tableHeaderButtonsToAddToDropdown.push(button);
             }
           });
           setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
-        }
+         }
       }
     };
     calculateButtons();
 
-    const mainNavResizeSensor = new ResizeSensor(mainnav as Element, () => {
+    const mainResizeSensor = new ResizeSensor(mainContainer as Element, () => {
       calculateButtons();
     });
 
     return () => {
-      mainNavResizeSensor.detach();
+      mainResizeSensor.detach();
     };
   }, [isMobile]);
 
+  // This function is to toggle the dropdown to show or hide with options
   const toggleDropdown = (bool: boolean, evt: any) => {
     evt.originalEvent.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+  // Adding different classname for table header and main section to apply styles
   const containerClassName = `related-table-actions ${isMobile ? 'is-mobile ' : ''}${
-    istableHeader ? 'table-header-actions' : 'main-section-actions'
+    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
   }`;
 
   /*
@@ -825,8 +790,8 @@ const RelatedTableActions = ({
       case 'Explore':
         onExplore(evt);
         break;
-      case 'Link Records':
-      case 'Add Records':
+      case 'Link records':
+      case 'Add records':
         onCreate(evt);
         break;
       case 'Edit Records':
@@ -857,11 +822,11 @@ const RelatedTableActions = ({
             <Dropdown.Menu>
               {buttonsInDropdown.map((button: any, index) => (
                 <Dropdown.Item
-                  className={''}
+                  as={'li'}
                   key={`dropdown-button-${index}`}
-                  onClick={(e: any) => handleDropDownClick(e, button)}
+                   onClick={(e: any) => handleDropDownClick(e, button)}
                 >
-                  {renderButton(button, index)}
+                  {renderButton(button.textContent, button.children[0].className, true, index)}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>

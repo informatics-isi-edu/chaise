@@ -93,7 +93,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
             </ChaiseTooltip>
           )}
         </div>
-        <RelatedTableActions istableHeader={true} relatedModel={relatedModel} />
+        <RelatedTableActions relatedModel={relatedModel} />
       </div>
     </div>
   );
