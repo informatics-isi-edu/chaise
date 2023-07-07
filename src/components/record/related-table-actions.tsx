@@ -729,14 +729,14 @@ const RelatedTableActions = ({
         let totalWidth = 0;
 
         //This condition is to push all the buttons to the dropdown when the container width is below 200
-        if (isMobile) {
-          setButtonsInDropdown(buttons);
-          containerRef.current.style.float = 'none';
-          return;
-        } else {
+          if (isMobile) {
+            buttonContainer.style.height = '0';
+          } else {
+            buttonContainer.style.height = '30px';
+          }
           // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
           // is overflowing the container width. If yes, push the button to the dropdown
-          containerRef.current.style.float = 'right';
+          
           buttons.forEach((button: any, index: number) => {
             const buttonWidth = button.getBoundingClientRect().width;
             if (index === 0) {
@@ -747,6 +747,9 @@ const RelatedTableActions = ({
             if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
               // calculate the total button container width if it doesn't overflow
               totalWidth += buttonWidth;
+              if(buttonContainer.getBoundingClientRect().height === 0){
+                tableHeaderButtonsToAddToDropdown.push(button);
+              }
             } else {
               // Push to dropdown if it overflowa
               tableHeaderButtonsToAddToDropdown.push(button);
@@ -754,7 +757,6 @@ const RelatedTableActions = ({
           });
           setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
         }
-      }
     };
     calculateButtons();
 
@@ -813,7 +815,8 @@ const RelatedTableActions = ({
           <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
             <Dropdown.Toggle
               disabled={false}
-              className='chaise-btn chaise-btn-primary dropdown-toggle-table'
+              className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${isMobile
+                && !relatedModel.isInline ? 'dropdown-toggle-table-mobile' : ''}`}
             >
               <span className='fa fa-angle-double-right'></span>
             </Dropdown.Toggle>
