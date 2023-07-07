@@ -251,8 +251,8 @@
                     "filter": {
                         "and": [
                             {"source": "id", "ux_mode": "choices"},
-                            {"source": "int_col"},
-                            {"source": "float_col", "open": true},
+                            {"source": "int_col", "open": true},
+                            {"source": "float_col"},
                             {"source": "date_col"},
                             {"source": "boolean_col"},
                             {"source": "timestamp_col", "bar_plot": {"n_bins": 100}},

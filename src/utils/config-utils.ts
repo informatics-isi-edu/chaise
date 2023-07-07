@@ -73,7 +73,7 @@ function validateColumnNameMapping(columnMap: any) {
 }
 
 export function initializeSavingQueries(reference: any, queryParams: any) {
-  const chaiseConfig = windowRef.chaiseConfig;
+  const chaiseConfig = ConfigService.chaiseConfig;
   // initalize to null as if there is no saved query table
   // savedQuery object should be defined with showUI true || false for UI purposes
   const savedQuery: SavedQuery = {

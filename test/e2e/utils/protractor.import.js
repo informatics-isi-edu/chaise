@@ -1,7 +1,6 @@
-// const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
-const ermrestUtils = require('../../../../ErmrestDataUtils');
+const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
 var Q = require('q');
-const axios = require('axios');//var ermrestUtils = require("ermrest-data-utils");
+const axios = require('axios');
 
 //**********************************************************************
 // function waitfor - Wait until a condition is met

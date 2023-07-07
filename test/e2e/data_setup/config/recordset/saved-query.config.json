@@ -1,5 +1,7 @@
 {
-  "catalog": {},
+  "catalog": {
+    "annotations": {}
+  },
   "schema": {
       "name": "saved_query",
       "createNew": true,

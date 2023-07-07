@@ -18,7 +18,7 @@ const DuplicateSavedQueryModal = ({
 
   return (
     <Modal
-      className='duplicate-saved-query'
+      className='duplicate-saved-query-modal'
       show={true}
       onHide={onHide}
     >
@@ -32,9 +32,8 @@ const DuplicateSavedQueryModal = ({
       </Modal.Body>
       <Modal.Footer>
         <button
-          // TODO: use a better id
-          id='confirm-btn'
-          className='chaise-btn chaise-btn-secondary'
+          id='cancel-btn'
+          className='chaise-btn chaise-btn-secondary modal-close'
           type='button'
           onClick={onHide}
         >
