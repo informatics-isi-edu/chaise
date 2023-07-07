@@ -713,8 +713,7 @@ const RelatedTableActions = ({
    * We are using ResizeSensor to listen to the resize event.
    */
   useLayoutEffect(() => {
-    const mainContainer = document.querySelector('.main-container') as HTMLElement;
-    if (!buttonRef.current) return;
+    if (!containerRef.current) return;
 
     const calculateButtons = () => {
       
@@ -732,13 +731,12 @@ const RelatedTableActions = ({
         //This condition is to push all the buttons to the dropdown when the container width is below 200
         if (isMobile) {
           setButtonsInDropdown(buttons);
-          buttonContainer.style.display = 'none';
+          containerRef.current.style.float = 'none';
           return;
         } else {
-          buttonContainer.style.display = 'block';
-          setButtonsInDropdown([]);
           // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
           // is overflowing the container width. If yes, push the button to the dropdown
+          containerRef.current.style.float = 'right';
           buttons.forEach((button: any, index: number) => {
             const buttonWidth = button.getBoundingClientRect().width;
             if (index === 0) {
@@ -755,12 +753,12 @@ const RelatedTableActions = ({
             }
           });
           setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
-         }
+        }
       }
     };
     calculateButtons();
 
-    const mainResizeSensor = new ResizeSensor(mainContainer as Element, () => {
+    const mainResizeSensor = new ResizeSensor(containerRef.current as Element, () => {
       calculateButtons();
     });
 
