@@ -13,7 +13,7 @@ import { useFormContext, useController } from 'react-hook-form';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { hasScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -168,7 +168,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                   placeholder={props.placeholder}
                   rows={5}
                   className={`${props.inputClasses} input-switch ${
-                    hasScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
                   }`}
                   {...field}
                   disabled={props.disableInput}
@@ -178,7 +178,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 />
                 <ClearInputBtn
                   btnClassName={`${props.clearClasses} input-switch-clear ${
-                    hasScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
                   }`}
                   clickCallback={clearInput}
                   show={showClear && !props.disableInput}

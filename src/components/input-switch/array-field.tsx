@@ -8,7 +8,7 @@ import { getSimpleColumnType } from '@isrd-isi-edu/chaise/src/utils/input-utils'
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { arrayFieldPlaceholder } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { hasScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
   baseArrayType: string,
@@ -86,14 +86,14 @@ const ArrayField = (props : ArrayFieldProps): JSX.Element => {
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <textarea
               placeholder={placeholder} rows={5} className={`${props.inputClasses} input-switch ${
-                hasScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
               }`}
               {...field} onChange={onChange} disabled={props.disableInput}
               ref={textAreaRef}
             />
             <ClearInputBtn
               btnClassName={`${props.clearClasses} input-switch-clear ${
-                hasScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
               }`}
               clickCallback={clearInput}
               show={showClear && !props.disableInput}

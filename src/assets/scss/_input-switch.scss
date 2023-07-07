@@ -7,10 +7,12 @@
     height: auto;
   }
 
+  // This padding is added to prevent overlap of "x" button with the text area if the text is long
   .has-scrollbar {
     padding-right: 2rem !important;
   }
 
+  // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
   .has-scrollbar-clear {
     margin-right: 10px;
   }

@@ -330,7 +330,7 @@ export const VALIDATE_VALUE_BY_TYPE: {
 /**
  * Function to check if there is scrollbar for textarea
  */
-export const hasScrollbar = (element: any) => {
+export const hasVerticalScrollbar = (element: any) => {
   if (!element) return;
   return element.scrollHeight > element.clientHeight;
 };
