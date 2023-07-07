@@ -501,9 +501,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     let v = formData[formNumber + '-' + col.name];
 
     if (v && !col.isDisabled) {
-      if (col.type.isArray) {
-        v = JSON.parse(v);
-      } else if (col.isAsset) {
+      if (col.isAsset) {
         // dereference formData so we aren't modifying content in react-hook-form
         // v is an object with `file`, `filename`, `filesize`, and `url` defined
         const tempVal = { ...v };

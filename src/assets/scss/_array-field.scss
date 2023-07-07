@@ -1,0 +1,112 @@
+.entity-value {
+    container-type: inline-size;
+    container-name: row-container;
+    .fieldInputContainer {
+        ul {
+            padding-left: 0.15rem;
+        }
+        .input-items {
+            width: 100%;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            & *:focus {
+                outline: 1px dotted gray;
+            }
+            li {
+                list-style: none;
+            }
+            .item {
+                border-radius: 3px;
+                min-height: 30px;
+                height: auto;
+                width: 100%;
+                padding-top: 5px;
+                padding-bottom: 5px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 5px;
+                box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+                .move-icon {
+                    display: flex;
+                    padding-left: 3px;
+                    & * {
+                        position: relative;
+                        top: 50%;
+                        transform: translateY(-7px);
+                    }
+                }
+                .input-box,
+                .input-switch {
+                    border: 2px solid transparent;
+                    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+                    &:focus {
+                        outline: none;
+                    }
+                }
+                button:not(.chaise-btn.chaise-btn-primary) {
+                    background-color: transparent;
+                    height: 100%;
+                    width: auto;
+                    padding: 1px 2px;
+                    font-size: small;
+                }
+                .action-buttons {
+                    height: 100%;
+                    & * {
+                        margin-right: 5px;
+                        font-size: medium;
+                    }
+                }
+                [class*="input-switch-container"] {
+                    flex: 1 1 1px;
+                }
+                [class$="array_date"] {
+                    flex: 1 1 1px;
+                }
+                [class$="array_timestamp"] {
+                    flex: 1 1 1px;
+                }
+            }
+        }
+        .timestamp {
+            position: relative;
+            padding-bottom: 30px !important;
+            .move-icon * {
+                top: 70% !important;
+            }
+            .chaise-btn-group {
+                position: absolute;
+            }
+            .action-buttons {
+                position: absolute;
+                right: -3px;
+                top: 35px
+            }
+        }
+    }
+}
+
+@container row-container (max-width:250px) {
+    .fieldInputContainer {
+        .input-items {
+            .item {
+                .action-buttons {
+                    margin-right: 1px;
+                }
+                .action-buttons button {
+                    margin-right: -4px !important;
+                    margin-left: 1px;
+                }
+            }
+            .timestamp {
+                .action-buttons {
+                    right: 4px;
+                }
+            }
+        }
+    }
+}
