@@ -74,7 +74,7 @@ const RelatedTableActions = ({
   const buttonRef = useRef<any>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [showAllActionsAsDropdown, setShowAllActionsAsDropdown] = useState(false);
   const [buttonsInDropdown, setButtonsInDropdown] = useState([]);
   // add Pure and Binary
   const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(
@@ -104,6 +104,107 @@ const RelatedTableActions = ({
   const container = useRef<HTMLDivElement>(null);
 
   const usedRef = relatedModel.initialReference;
+  /*
+   * This hook is to push the buttons to the dropdown if it exceeds the container width.
+   * We are using ResizeSensor to listen to the resize event.
+   */
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    const calculateButtons = () => {
+      
+      let buttons: any = [];
+      if (containerRef.current) {
+        const buttonContainer = buttonRef.current;
+
+        const containerWidth = buttonContainer.getBoundingClientRect().width;
+        buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
+        // 200 is based on the width of the container containing dropdown and last visible button. 
+        // If its less than 200 push it to dropdown.
+        setShowAllActionsAsDropdown(containerRef.current.getBoundingClientRect().width < 200);
+        const tableHeaderButtonsToAddToDropdown: any = [];
+        let buttonLeftOffset = 0;
+        let totalWidth = 0;
+
+        //This condition is to push all the buttons to the dropdown when the container width is below 200
+          if (showAllActionsAsDropdown) {
+            buttonContainer.style.height = '0';
+          } else {
+            buttonContainer.style.height = '30px';
+          }
+          // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
+          // is overflowing the container width. If yes, push the button to the dropdown
+          
+          buttons.forEach((button: any, index: number) => {
+            const buttonWidth = button.getBoundingClientRect().width;
+            if (index === 0) {
+              buttonLeftOffset =
+                button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
+            }
+
+            if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
+              // calculate the total button container width if it doesn't overflow
+              totalWidth += buttonWidth;
+              if(showAllActionsAsDropdown){
+                tableHeaderButtonsToAddToDropdown.push(button);
+              }
+            } else {
+              // Push to dropdown if it overflowa
+              tableHeaderButtonsToAddToDropdown.push(button);
+            }
+          });
+          setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
+        }
+    };
+    calculateButtons();
+
+    const mainResizeSensor = new ResizeSensor(containerRef.current as Element, () => {
+      calculateButtons();
+    });
+
+    return () => {
+      mainResizeSensor.detach();
+    };
+  }, [showAllActionsAsDropdown]);
+
+   // This function is to toggle the dropdown to show or hide with options
+   const toggleDropdown = (bool: boolean, evt: any) => {
+    evt.originalEvent.stopPropagation();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Adding different classname for table header and main section to apply styles
+  const containerClassName = `related-table-actions ${
+    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
+  }`;
+
+  /*
+   * Callback function for dropdown item click
+   */
+  const handleDropDownClick = (evt: any, button: any) => {
+    const buttonText = button.textContent;
+    evt.stopPropagation();
+    switch (buttonText) {
+      case 'Explore':
+        onExplore(evt);
+        break;
+      case 'Link records':
+      case 'Add records':
+        onCreate(evt);
+        break;
+      case 'Edit Records':
+        onUnlink(evt);
+        break;
+      case 'Unlink records':
+        onUnlink(evt);
+        break;
+      case 'Edit mode':
+      case 'Custom mode':
+      case 'Table mode':
+        onToggleDisplayMode(evt);
+        break;
+    }
+  };
 
   /**
    * this is to avoid the accordion header to recieve the click
@@ -594,21 +695,20 @@ const RelatedTableActions = ({
         className='button-wrapper'
         style={{ marginRight: `${buttonsInDropdown.length > 0 ? '5px' : '0px'}` }}
       >
-        {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`,
-        'chaise-btn-icon fa-solid fa-plus', false)}
+        {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`, false)}
        
 
         {relatedModel.isPureBinary && relatedModel.canDelete && 
-        renderButton('Unlink records', 'chaise-btn-icon fa-regular fa-circle-xmark', false)
+        renderButton('Unlink records', false)
         }
 
         {renderCustomModeBtn()}
 
         {relatedModel.canEdit && 
-        renderButton('Bulk Edit', 'chaise-btn-icon fa fa-pencil', false)
+        renderButton('Bulk Edit', false)
         }
 
-        {renderButton('Explore', 'chaise-btn-icon fa-solid fa-magnifying-glass', false)}
+        {renderButton('Explore', false)}
       </div>
     );
   };
@@ -619,7 +719,7 @@ const RelatedTableActions = ({
    * @param  {boolean}   tertiary boolean to differentiate dropdown button and outside button
    * @param  {number} index
   */
-  const renderButton = (buttonText: string, spanClass: string, tertiary?: boolean, index?: number) => {
+  const renderButton = (buttonText: string, tertiary?: boolean) => {
     switch (buttonText) {
       case 'Explore':
         return (
@@ -708,118 +808,29 @@ const RelatedTableActions = ({
         return renderCustomModeBtn(true);
     }
   };
-  /*
-   * This hook is to push the buttons to the dropdown if it exceeds the container width.
-   * We are using ResizeSensor to listen to the resize event.
-   */
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const calculateButtons = () => {
-      
-      let buttons: any = [];
-      if (containerRef.current) {
-        const buttonContainer = buttonRef.current;
-
-        const containerWidth = buttonContainer.getBoundingClientRect().width;
-        buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
-        setIsMobile(containerRef.current.getBoundingClientRect().width < 200);
-        const tableHeaderButtonsToAddToDropdown: any = [];
-        let buttonLeftOffset = 0;
-        let totalWidth = 0;
-
-        //This condition is to push all the buttons to the dropdown when the container width is below 200
-          if (isMobile) {
-            buttonContainer.style.height = '0';
-          } else {
-            buttonContainer.style.height = '30px';
-          }
-          // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
-          // is overflowing the container width. If yes, push the button to the dropdown
-          
-          buttons.forEach((button: any, index: number) => {
-            const buttonWidth = button.getBoundingClientRect().width;
-            if (index === 0) {
-              buttonLeftOffset =
-                button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
-            }
-
-            if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
-              // calculate the total button container width if it doesn't overflow
-              totalWidth += buttonWidth;
-              if(buttonContainer.getBoundingClientRect().height === 0){
-                tableHeaderButtonsToAddToDropdown.push(button);
-              }
-            } else {
-              // Push to dropdown if it overflowa
-              tableHeaderButtonsToAddToDropdown.push(button);
-            }
-          });
-          setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
-        }
-    };
-    calculateButtons();
-
-    const mainResizeSensor = new ResizeSensor(containerRef.current as Element, () => {
-      calculateButtons();
-    });
-
-    return () => {
-      mainResizeSensor.detach();
-    };
-  }, [isMobile]);
-
-  // This function is to toggle the dropdown to show or hide with options
-  const toggleDropdown = (bool: boolean, evt: any) => {
-    evt.originalEvent.stopPropagation();
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  // Adding different classname for table header and main section to apply styles
-  const containerClassName = `related-table-actions ${isMobile ? 'is-mobile ' : ''}${
-    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
-  }`;
-
-  /*
-   * Callback function for dropdown item click
-   */
-  const handleDropDownClick = (evt: any, button: any) => {
-    const buttonText = button.textContent;
-    evt.stopPropagation();
-    switch (buttonText) {
-      case 'Explore':
-        onExplore(evt);
-        break;
-      case 'Link records':
-      case 'Add records':
-        onCreate(evt);
-        break;
-      case 'Edit Records':
-        onUnlink(evt);
-        break;
-      case 'Unlink records':
-        onUnlink(evt);
-        break;
-      case 'Edit mode':
-      case 'Custom mode':
-      case 'Table mode':
-        onToggleDisplayMode(evt);
-        break;
-    }
-  };
+ 
   return (
     <>
       <div className={containerClassName} ref={containerRef}>
         {renderButtons()}
         {buttonsInDropdown.length > 0 && (
           <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
+            <ChaiseTooltip
+          placement='top'
+          tooltip={
+            <span>
+              {`${showAllActionsAsDropdown ? 'Click here to view the available actions.' : 'Click here to view the extra available actions.'}`}
+            </span>
+          }
+        >
             <Dropdown.Toggle
               disabled={false}
-              className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${isMobile
-                && !relatedModel.isInline ? 'dropdown-toggle-table-mobile' : ''}`}
+              className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${showAllActionsAsDropdown
+                && !relatedModel.isInline ? 'show-all-actions-as-dropdown' : ''}`}
             >
               <span className='fa fa-angle-double-right'></span>
             </Dropdown.Toggle>
+            </ChaiseTooltip>
             <Dropdown.Menu>
               {buttonsInDropdown.map((button: any, index) => (
                 <Dropdown.Item
@@ -827,7 +838,7 @@ const RelatedTableActions = ({
                   key={`dropdown-button-${index}`}
                    onClick={(e: any) => handleDropDownClick(e, button)}
                 >
-                  {renderButton(button.textContent, button.children[0].className, true, index)}
+                  {renderButton(button.textContent, true)}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>

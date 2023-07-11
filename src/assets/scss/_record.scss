@@ -145,17 +145,20 @@
         border-color: #4674a7;
       }
 
-      .dropdown-toggle-table-mobile {
+      .show-all-actions-as-dropdown {
         position: absolute;
         right: 0;
         top: -15px;
-        margin-right: 2rem;
       }
 
       .dropdown-item {
         padding: 0;
 
         .dropdown-button {
+          width: 100%;
+          text-align: left;
+          padding: 4px 18px;
+
           .dropdown-button-text {
             margin-left: 4px;
           }
@@ -166,6 +169,14 @@
     .table-header-actions {
       width: 100%;
       justify-content: end;
+    }
+
+    .chaise-table-top-scroll-wrapper {
+      z-index: 1;
+    }
+
+    .chaise-table-header {
+      min-width: 250px;
     }
 
     .chaise-accordion-header {
