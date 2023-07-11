@@ -247,9 +247,14 @@ The following is how you can achieve this:
 
 16. The "Event parameter" must be the same name that you choose for "Field Name" in GTM (step 9). So, "customized_deriva_page_path".
 
-17. You can now use this new dimension in your Google Analytics reports. Please refer to the official guides for creating or customizing Google Analytics reports. But to give you an example, the following is how you can add this custom dimension to the default "Page and Screens" report.
-  a. You can find the "Page and Screens" report under "Reports" > "Engagement". It's also included as part of the default homepage of Reports.
-  b. Click on the Customize report on the top right (pencil icon).
-  c. It will show some options on the right side of the page. You should see "Dimensions" under the "Report Data" section. Click on it.
-  d. Click "Add dimension" to find the custom dimension you've added.
-  e. Apply and save your changes.
+17. You can now use this new dimension in your Google Analytics reports. Please refer to the official guides for creating or customizing Google Analytics reports. But to give you an example, the following is how you can add this custom dimension to the default "Page and Screens" report:
+
+    1. You can find the "Page and Screens" report under "Reports" > "Engagement". It's also included as part of the default homepage of Reports.
+  
+    2. Click on the Customize report on the top right (pencil icon).
+  
+    3. It will show some options on the right side of the page. You should see "Dimensions" under the "Report Data" section. Click on it.
+  
+    4. Click "Add dimension" to find the custom dimension you've added.
+  
+    5. Apply and save your changes.

@@ -19,11 +19,9 @@ var chaiseConfig = {
     logClientActions: false,
     hideRecordeditLeaveAlert: true,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-    defaultTables: {
-        "1": {
-            "schema": "isa",
-            "table": "dataset"
-        }
+    defaultTable: {
+        "schema": "isa",
+        "table": "dataset"
     },
     templating: {
       engine: 'handlebars'

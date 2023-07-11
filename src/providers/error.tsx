@@ -120,7 +120,7 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
    */
   const logTerminalError = (error: any) => {
     if (!windowRef.ERMrest) return;
-    const ermrestUri = ConfigService.chaiseConfig.ermrestLocation;
+    const ermrestUri = ConfigService.ERMrestLocation;
     windowRef.ERMrest.logError(error, ermrestUri, ConfigService.contextHeaderParams).then(() => {
       $log.log('logged the error');
     }).catch((err: any) => {
