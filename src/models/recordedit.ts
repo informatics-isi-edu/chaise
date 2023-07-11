@@ -1,8 +1,7 @@
-// TODO: change to enum
-export const appModes = {
-  COPY: 'copy',
-  CREATE: 'create',
-  EDIT: 'edit'
+export enum appModes {
+  COPY = 'copy',
+  CREATE = 'create',
+  EDIT = 'edit'
 }
 
 export type RecordeditProps = {

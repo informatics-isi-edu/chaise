@@ -60,15 +60,11 @@ const SavedQueryDropdown = ({
   const { addAlert } = useAlert();
   const { dispatchError } = useError();
 
-  /**
-   * whether to show the tooltip or not
-   */
+  // whether to show the tooltip or not
   const [showTooltip, setShowTooltip] = useState(false);
-  /**
-   * when the dropdown is open, we should not use the tooltip
-   */
-  const [useTooltip, setUseTooltip] = useState<boolean>(true);
-  const [displayedTooltip, setDisplayedTooltip] = useState<string>(MESSAGE_MAP.tooltip.saveQuery);
+  // when the dropdown is open, we should not use the tooltip
+  const [useTooltip, setUseTooltip] = useState(true);
+  
   const [disableDropdown, setDisableDropdown] = useState<boolean>(true);
 
   const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null)
@@ -79,28 +75,10 @@ const SavedQueryDropdown = ({
   useEffect(() => {
     if (!savedQueryReference) return;
     // if insert is false, disable the button
-    // should this be checking for insert !== true ?
+    // TODO: should this be checking for insert !== true ?
     const shouldDisableDropdown = !savedQueryReference.table.rights.insert;
     setDisableDropdown(shouldDisableDropdown);
-    // TODO: fix <code> tag not being rendered properly
-    //       fix tooltip not showing on disabled element
-    // if (shouldDisableDropdown) setDisplayedTooltip('Please login to be able to save searches for <code>' + reference.displayname.value + '</code>.');
   }, [savedQueryReference])
-
-  // nextShow is true when the dropdown is open
-  const onDropdownToggle = (nextShow: boolean) => {
-    // toggle the tooltip based on dropdown's inverse state 
-    setUseTooltip(!nextShow);
-    if (nextShow === true) setShowTooltip(false);
-
-    // log the action
-    if (nextShow) {
-      LogService.logClientAction({
-        action: LogService.getActionString(LogActions.EXPORT_OPEN),
-        stack: LogService.getStackObject()
-      }, savedQueryReference.defaultLogInfo)
-    }
-  };
 
   /**
     * Transform facets to a more stable version that can be saved.
@@ -263,17 +241,17 @@ const SavedQueryDropdown = ({
       let name: string = nameDescriptionPrefix + ' ' + modelsWFilters.length + ' facets: ';
 
       // iterate over facetNames, appending each facet name if the length isn't over the limit
-      for (let i=0; i<names.length; i++) {
+      for (let i = 0; i < names.length; i++) {
         const fn = names[i];
         if ((name + ', ' + fn).length <= savedQueryConfig.defaultNameLimits.totalTextLimit) {
-          if (i !=0) name += ', ';
+          if (i !== 0) name += ', ';
           name += fn;
         } else {
           name += '...';
           break;
         }
       }
-      
+
       return name;
     }
 
@@ -285,7 +263,7 @@ const SavedQueryDropdown = ({
      * @param optionsString - formatted string of all selected facet options for the given facet
      * @returns formatted string of the facet name, number selected, and selected facet options rownames
      */
-    const facetDescription = (facet: string, optionsString: string, isFirst: boolean) => {
+    const facetDescription = (facet: string, optionsString: string) => {
       // no need for preText in non markdown
       const preText = (isDescriptionMarkdown ? '  -' : '');
       const value = preText + facet + ':' + optionsString + ';';
@@ -316,6 +294,7 @@ const SavedQueryDropdown = ({
 
       // call function to check if we can return the default decription value and stay under the length
       let descriptionOrFalse = shouldReturnDescription(descriptions);
+      // if !false, return the description without changing it
       if (descriptionOrFalse) return descriptionOrFalse;
 
       // Truncate each individual facet description and perform length limit check again
@@ -332,11 +311,11 @@ const SavedQueryDropdown = ({
       // if here, description is still over the max length limit, add each facet description if the length isn't over the limit
       // use tempDescriptions since we want to use each truncated description still
       let description = initialValue;
-      for (let i=0; i<tempDescriptions.length; i++) {
+      for (let i = 0; i < tempDescriptions.length; i++) {
         const fd = tempDescriptions[i];
         if ((description + fd + separator).length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit) {
           description += fd;
-          if (i !=tempDescriptions.length-1) description += separator;
+          if (i !== tempDescriptions.length - 1) description += separator;
         } else {
           description += isDescriptionMarkdown ? '  - ...' : ', ...';
           break;
@@ -372,8 +351,8 @@ const SavedQueryDropdown = ({
      * Otherwise, the description is all one line with no hyphens
      */
     const nameDescriptionPrefix = reference.displayname.value + ' with';
-    let facetNames: string[] = [];
-    let facetDescriptions: string[] = [];
+    const facetNames: string[] = [];
+    const facetDescriptions: string[] = [];
 
     let name = nameDescriptionPrefix
     const initialDescription = nameDescriptionPrefix + ':' + (isDescriptionMarkdown ? '\n' : '');
@@ -397,11 +376,11 @@ const SavedQueryDropdown = ({
       const searchTerm = ' ' + reference.location.searchTerm;
       name += searchTerm;
       if (modelsWFilters.length > 0) name += ';';
-      facetDescriptions.push(facetDescription(' Search', searchTerm, true));
+      facetDescriptions.push(facetDescription(' Search', searchTerm));
     }
 
     // iterate over the facetModels to create the default name and description values;
-    modelsWFilters.forEach((fm: any, modelIdx: number) => {
+    modelsWFilters.forEach((fm: SavedQueryFacetModel, modelIdx: number) => {
       // ===== setting default name =====
       // create the facetNames array in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
       facetNames.push(fm.displayname);
@@ -425,8 +404,7 @@ const SavedQueryDropdown = ({
       if (modelIdx + 1 !== modelsWFilters.length) name += ';'
 
       // ===== setting default description =====
-      let isFirstFacet = facetDescriptions.length === 0;
-      facetDescriptions.push(facetDescription(facetDetails, facetOptionsString, isFirstFacet))
+      facetDescriptions.push(facetDescription(facetDetails, facetOptionsString))
     });
 
     // if name is longer than the set string length threshold, show the compact version with facet names only
@@ -481,13 +459,13 @@ const SavedQueryDropdown = ({
         const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
         const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, tempSavedQueryReference.table);
         const logObj = {
-            action: LogService.getActionString(LogActions.CREATE, stackPath, LogAppModes.CREATE),
-            stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), {'num_created': 1})
+          action: LogService.getActionString(LogActions.CREATE, stackPath, LogAppModes.CREATE),
+          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { 'num_created': 1 })
         };
 
         setRecordeditModalProps({
           appMode: 'create',
-          config: {displayMode: RecordeditDisplayMode.POPUP},
+          config: { displayMode: RecordeditDisplayMode.POPUP },
           modalOptions: {
             parentReference: reference,
             onSubmitSuccess: onCreateSavedQuerySuccess,
@@ -516,11 +494,11 @@ const SavedQueryDropdown = ({
     const facetBlob = {
       and: [{
         choices: [reference.table.name],
-         // name of column storing table name in saved_query table
+        // name of column storing table name in saved_query table
         source: savedQueryConfig?.mapping.columnNameMapping?.tableName || 'table_name'
       }, {
         choices: [session?.client.id],
-         // name of column storing user id in saved_query table
+        // name of column storing user id in saved_query table
         source: savedQueryConfig?.mapping.columnNameMapping?.userId || 'user_id'
       }]
     }
@@ -579,18 +557,47 @@ const SavedQueryDropdown = ({
     addAlert('Search criteria saved.', ChaiseAlertType.SUCCESS);
   }
 
-  // TODO: tooltip stays showing after closing either modal
-  return (
-    <>
-      <Dropdown className='saved-query-menu' onToggle={onDropdownToggle}>
-        <ChaiseTooltip
-          placement='bottom-end' tooltip={displayedTooltip}
-          show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
+  // isOpen is true when the dropdown is open
+  const onDropdownToggle = (isOpen: boolean) => {
+    // toggle the tooltip based on dropdown's inverse state 
+    setUseTooltip(!isOpen);
+    if (isOpen === true) setShowTooltip(false);
+
+    // log the action
+    if (isOpen) {
+      LogService.logClientAction({
+        action: LogService.getActionString(LogActions.EXPORT_OPEN),
+        stack: LogService.getStackObject()
+      }, savedQueryReference.defaultLogInfo)
+    }
+  };
+
+  // render a dropdown or a div that looks like a disabled dropdown
+  const renderDropdown = () => {
+    if (disableDropdown) {
+      // if dropdown is disabled, create a "fake" dropdown element
+      return (
+        <ChaiseTooltip 
+          placement='bottom-end' 
+          tooltip={<span>Please login to be able to save searches for <code>{reference.displayname.value}</code>.</span>} 
         >
-          <Dropdown.Toggle
-            disabled={disableDropdown}
-            className='chaise-btn chaise-btn-primary'
-          >
+          <div className='chaise-btn chaise-btn-primary disabled dropdown-toggle'>
+            <span className='chaise-btn-icon fa-solid fa-floppy-disk' />
+            <span>Saved searches</span>
+          </div>
+        </ChaiseTooltip>
+      )
+    }
+
+    return (
+      <Dropdown className='saved-query-menu' onToggle={onDropdownToggle}>
+        <ChaiseTooltip 
+          placement='bottom-end' 
+          tooltip={MESSAGE_MAP.tooltip.saveQuery}
+          show={showTooltip}
+          onToggle={(show) => setShowTooltip(useTooltip && show)}
+        >
+          <Dropdown.Toggle className='chaise-btn chaise-btn-primary'>
             <span className='chaise-btn-icon fa-solid fa-floppy-disk' />
             <span>Saved searches</span>
           </Dropdown.Toggle>
@@ -600,7 +607,14 @@ const SavedQueryDropdown = ({
           <Dropdown.Item className='saved-query-menu-item' onClick={showSavedQueries}>Show saved search criteria</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-      {tupleForDuplicateSavedQuery && 
+    )
+  }
+
+  // TODO: tooltip stays showing after closing either modal
+  return (
+    <>
+      {renderDropdown()}
+      {tupleForDuplicateSavedQuery &&
         <DuplicateSavedQueryModal
           tuple={tupleForDuplicateSavedQuery}
           onClose={hideDuplicateSavedQueryModal}
