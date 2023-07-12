@@ -819,7 +819,7 @@ const RelatedTableActions = ({
           placement='top'
           tooltip={
             <span>
-              {`${showAllActionsAsDropdown ? 'Click here to view the available actions.' : 'Click here to view the extra available actions.'}`}
+              {`${showAllActionsAsDropdown ? 'View the available actions.' : 'View the extra available actions.'}`}
             </span>
           }
         >
