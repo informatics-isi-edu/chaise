@@ -96,7 +96,9 @@ const FormContainer = (): JSX.Element => {
 };
 
 type FormRowProps = {
-  columnModelIndex: number
+  columnModelIndex: number,
+  activeForm?: any[],
+  clearAllForms?:any
 };
 
 /**
@@ -112,7 +114,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     canUpdateValues, columnPermissionErrors, foreignKeyData, waitingForForeignKeyData,
     getRecordeditLogStack, getRecordeditLogAction,
   } = useRecordedit();
-
+  const [activeForm, setActiveForm] = useState<number[]>([]);
   /**
    * which columns should show the permission error.
    * if a user cannot edit a column in one of the rows, we cannot allow them
@@ -165,6 +167,27 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     });
   };
 
+  /**
+   * callback to handle form click.
+   * It sets the forms selected in the state variable on select and remove it on deselect
+   */
+  const handleFormClick = (formNumber: number) => {
+    setActiveForm((prevActiveForms: number[]) => {
+      if (prevActiveForms.includes(formNumber)) {
+        return prevActiveForms.filter((prevFormNumber) => prevFormNumber !== formNumber);
+      } else {
+        return [...prevActiveForms, formNumber];
+      }
+    });
+  };
+
+  /**
+   * callback to clear all active states on Apply All and Clear All
+   */
+  const clearAllForms = () => {
+    setActiveForm([]);
+  };
+
   // -------------------------- render logic ---------------------- //
 
   const showSelectAll = activeSelectAll === columnModelIndex;
@@ -197,7 +220,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
 
     return false;
   }
-
+  
   const renderInput = (formNumber: number, formIndex?: number) => {
 
     const colName = columnModel.column.name;
@@ -259,13 +282,20 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   return (
     <div className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`} ref={container}>
       <div className='inputs-row'>
-        {forms.map((formNumber: number, formIndex: number) => (
-          <div key={`form-${formNumber}-input-${columnModelIndex}`} className='entity-value'>
-            {renderInput(formNumber, formIndex)}
-          </div>
-        ))}
+      {forms.map((formNumber: number, formIndex: number) => (
+        <div
+          key={`form-${formNumber}-input-${columnModelIndex}`}
+          /**
+            * This is added to show the form is selected to apply the change when it is in edit mode
+          */
+          className={`entity-value ${activeForm.includes(formNumber) && showSelectAll ? 'entity-active' : ''}`}
+          onClick={() => handleFormClick(formNumber)}
+        >
+          {renderInput(formNumber, formIndex)}
       </div>
-      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} />}
+      ))}
+      </div>
+      {showSelectAll && <SelectAllRow clearAllForms={clearAllForms} activeForm={activeForm} columnModelIndex={columnModelIndex} />}
     </div>
   )
 
@@ -275,7 +305,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
  * shows the select all row
  * NOTE this is its own component to avoid rerendering the whole row on each change.
  */
-const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
+const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowProps) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
     canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
@@ -284,6 +314,7 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
 
   const [isEmpty, setIsEmpty] = useState(true);
+  
 
   /**
    * if the selected value is empty, we should disable the apply-all
@@ -351,6 +382,8 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
     );
 
     toggleActiveSelectAll(columnModelIndex);
+    // Clear the selection.
+    clearAllForms();
   };
 
   /**
@@ -367,8 +400,26 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
       }
       reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue));
     });
+    // Clear the selection.
+    clearAllForms();
   };
 
+  /**
+   * The callback used by functions above to set the selected values of the row.
+   * Loop for the selected forms instead of all forms.
+   */
+  const applyValueToSome = () => {
+    const cm = columnModels[columnModelIndex];
+
+    activeForm?.forEach((formValue: number) => {
+      // ignore the ones that cannot be updated
+      if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
+        return;
+      }
+      reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE));
+    });
+  };
+ 
   // -------------------------- render logic ---------------------- //
 
   const columnModel = columnModels[columnModelIndex];
@@ -400,6 +451,17 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
         />
       </div>
       <div className='chaise-btn-group select-all-buttons'>
+        <ChaiseTooltip tooltip='Click to apply the value to selected records.' placement='bottom'>
+          <button
+            type='button' className={`select-all-apply-${btnClass}`} onClick={applyValueToSome}
+            // we should disable it when its empty or has error or when there are no forms selected to apply the change.
+            // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
+            disabled={isEmpty || activeForm?.length === 0 || (errors && inputName in errors)}
+          >
+          Apply Some
+        </button>
+      </ChaiseTooltip>
+      
         <ChaiseTooltip tooltip='Click to apply the value to all records.' placement='bottom'>
           <button
             type='button' className={`select-all-apply-${btnClass}`} onClick={applyValueToAll}

@@ -22,6 +22,8 @@
   .chaise-input-control {
     height: auto;
     padding: 0 !important;
+    // Adding this to make the div clickable for apply some feature
+    cursor: pointer;
 
     textarea,
     .disabled-textarea {
@@ -178,6 +180,7 @@
   .chaise-image-preview {
     margin-top: 5px;
   }
+
   .chaise-input-control {
     cursor: text;
   }

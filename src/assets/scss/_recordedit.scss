@@ -114,7 +114,9 @@
         .select-all-row {
           width: 100%;
 
-          .select-all-text, .select-all-input, .select-all-buttons {
+          .select-all-text,
+          .select-all-input,
+          .select-all-buttons {
             float: left;
           }
 
@@ -164,6 +166,7 @@
             background: map-get(variables.$color-map, 'disabled-background');
             opacity: 0.55;
           }
+
           .spinner-border-sm {
             left: 50%;
             top: 15px;
@@ -186,6 +189,13 @@
         border-radius: 0;
         min-height: 47px;
         padding: 8px 10px;
+        // Adding this to make the div clickable for apply some feature
+        cursor: pointer;
+      }
+
+      // This is added to show the form is selected to apply the change
+      .entity-active {
+        border: 2px solid #4674a7;
       }
 
       // only form inputs
@@ -221,6 +231,7 @@
 
       .form-header-buttons-container {
         float: right;
+
         .remove-form-btn {
           padding: 1px 7px 0px 7px;
         }
@@ -265,7 +276,7 @@
   }
 
   @-moz-document url-prefix() {
-    #form-edit > table > tbody > tr > td:first-child {
+    #form-edit>table>tbody>tr>td:first-child {
       margin-top: -1px;
     }
   }
