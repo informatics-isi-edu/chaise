@@ -6,7 +6,7 @@
 
             "record/copy-btn.config.json",
 
-            "recorset/saved-query.config.json",
+            "recordset/saved-query.config.json",
 
             "multi-permissions/config.json",
             "navbar/config.json"
