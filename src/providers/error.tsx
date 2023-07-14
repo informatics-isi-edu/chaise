@@ -100,7 +100,7 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
       // in this case ok is behaving like a dissmiss
       payload.error instanceof windowRef.ERMrest.UnsupportedFilters
     );
-    if (!payload.isDismissible && !payload.error.showContinueBtn && !payload.error.clickOkToDismiss && !canShowOtherErrors) {
+    if (!payload.isDismissible && !payload.error?.showContinueBtn && !payload.error?.clickOkToDismiss && !canShowOtherErrors) {
       setDontAllowOtherErrors(true);
     }
 
