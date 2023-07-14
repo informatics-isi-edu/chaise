@@ -25,7 +25,17 @@ const FormContainer = (): JSX.Element => {
     onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels
   } = useRecordedit();
 
+  const [needsWiderMinWidth, setNeedsWiderMinWidth] = useState<boolean>(false);
+
   const { handleSubmit } = useFormContext();
+
+  useEffect(() => {
+    // set wider width if array_text field is present in form
+    setNeedsWiderMinWidth(columnModels.filter(col => col.inputType === 'array' && col.column.type.baseType.name === 'text').length > 0)
+
+  }, [columnModels])
+
+
 
   const formContainer = useRef<any>(null);
 
@@ -69,7 +79,7 @@ const FormContainer = (): JSX.Element => {
         {/* form header */}
         <div className='form-header-row'>
           {forms.map((formNumber: number, formIndex: number) => (
-            <div key={`form-header-${formNumber}`} className='form-header entity-value'>
+            <div key={`form-header-${formNumber}`} className={`form-header entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`} >
               <span>{formIndex + 1}</span>
               <div className='form-header-buttons-container'>
                 {forms.length > 1 &&
@@ -87,16 +97,19 @@ const FormContainer = (): JSX.Element => {
           ))}
         </div>
         {/* inputs for each column */}
-        {columnModels.map(({ }, idx) => (
-          <FormRow key={`form-row-${idx}`} columnModelIndex={idx} />
-        ))}
-      </form>
-    </div>
+        {
+          columnModels.map(({ }, idx) => (
+            <FormRow key={`form-row-${idx}`} columnModelIndex={idx} needsWiderMinWidth={needsWiderMinWidth} />
+          ))
+        }
+      </form >
+    </div >
   )
 };
 
 type FormRowProps = {
-  columnModelIndex: number
+  columnModelIndex: number,
+  needsWiderMinWidth?: boolean
 };
 
 /**
@@ -105,7 +118,7 @@ type FormRowProps = {
  * components instead of having it in the Form.
  *
  */
-const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
+const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.Element => {
 
   const {
     forms, appMode, reference, columnModels, tuples, activeSelectAll,
@@ -260,7 +273,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     <div className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`} ref={container}>
       <div className='inputs-row'>
         {forms.map((formNumber: number, formIndex: number) => (
-          <div key={`form-${formNumber}-input-${columnModelIndex}`} className='entity-value'>
+          <div key={`form-${formNumber}-input-${columnModelIndex}`} className={`entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`}>
             {renderInput(formNumber, formIndex)}
           </div>
         ))}
@@ -377,6 +390,8 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
 
   const btnClass = `${makeSafeIdAttr(columnModel.column.displayname.value)} chaise-btn chaise-btn-secondary`;
 
+  console.log(columnModel, colName, inputName);
+
   return (
     <div className='select-all-row match-entity-value'>
       <div className='select-all-text'>Set value for all records: </div>
@@ -389,6 +404,7 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
           disableInput={false}
           requiredInput={false}
           name={inputName}
+          // type={columnModel.inputType === 'array' ? columnModel?.column.type.baseType.name : columnModel.inputType}
           type={columnModel.inputType}
           classes='column-cell-input'
           columnModel={columnModel}

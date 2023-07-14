@@ -1,4 +1,5 @@
-.entity-value {
+.entity-value,
+.select-all-input {
     container-type: inline-size;
     container-name: row-container;
     .fieldInputContainer {
@@ -7,13 +8,12 @@
         }
         .input-items {
             width: 100%;
-            margin-top: 2px;
             margin-bottom: 2px;
             display: flex;
             flex-direction: column;
             gap: 7px;
             & *:focus {
-                outline: 1px dotted gray;
+                outline: none;
             }
             li {
                 list-style: none;
@@ -90,16 +90,16 @@
     }
 }
 
-@container row-container (max-width:250px) {
+@container row-container (max-width:300px) {
     .fieldInputContainer {
         .input-items {
             .item {
                 .action-buttons {
-                    margin-right: 1px;
+                    margin-right: 3px;
                 }
                 .action-buttons button {
                     margin-right: -4px !important;
-                    margin-left: 1px;
+                    margin-left: 0px;
                 }
             }
             .timestamp {

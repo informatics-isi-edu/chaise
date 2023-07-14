@@ -129,7 +129,9 @@ export function copyOrClearValue(
   if (clearValue) {
     values[dstKey] = '';
   } else if (srcKey) {
-    values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+    if (columnModel.inputType !== 'array') {
+      values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+    }
   }
 
   if (columnModel.column.type.name.indexOf('timestamp') !== -1) {
