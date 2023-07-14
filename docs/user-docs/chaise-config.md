@@ -622,7 +622,7 @@ system columns:
      ```
 
  #### configRules
- Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`).
+ Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`). 
    - Type: Array
    - General syntax:
      ```
