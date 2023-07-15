@@ -490,16 +490,16 @@ const SavedQueryDropdown = ({
   }
 
   const showSavedQueries = () => {
-    // TODO: when fetching saved queries, column names for table_name column and user_id column are hardcoded
+    // tableName and userId are required, the dropdown isn't created unless the required columns are present for saved queries
     const facetBlob = {
       and: [{
         choices: [reference.table.name],
         // name of column storing table name in saved_query table
-        source: savedQueryConfig?.mapping.columnNameMapping?.tableName || 'table_name'
+        source: savedQueryConfig?.mapping.columnNameMapping?.tableName
       }, {
         choices: [session?.client.id],
         // name of column storing user id in saved_query table
-        source: savedQueryConfig?.mapping.columnNameMapping?.userId || 'user_id'
+        source: savedQueryConfig?.mapping.columnNameMapping?.userId
       }]
     }
 

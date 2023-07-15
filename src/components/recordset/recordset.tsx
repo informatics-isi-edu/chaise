@@ -271,6 +271,7 @@ const RecordsetInner = ({
     if (!facetColumnsReady || !savedQueryConfig?.showUI) return;
 
     const savedQueryReferenceUrl = windowRef.location.origin + savedQueryConfig.ermrestTablePath;
+    // create the reference to the saved query table used for saving queries
     windowRef.ERMrest.resolve(savedQueryReferenceUrl, ConfigService.contextHeaderParams).then((reference: any) => {
       setSavedQueryReference(reference);
     }).catch((error: any) => {

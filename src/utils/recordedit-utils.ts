@@ -186,6 +186,7 @@ export function populateCreateInitialValues(
 ) {
   const values: any = {};
   let initialValues: any = {}
+  // only 1 row in the case of create
   if (prefillRowData) initialValues = prefillRowData[0];
 
   let shouldWaitForForeignKeyData = false;
