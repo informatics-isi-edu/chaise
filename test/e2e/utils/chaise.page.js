@@ -543,6 +543,12 @@ var recordPage = function() {
         return el.element(by.css(".more-results-link"));
     };
 
+    this.getBulkEditLink = function(displayName, isInline) {
+      var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
+      // the link is not a child of the table, rather one of the accordion group
+      return el.element(by.css(".bulk-edit-link"));
+  };
+
     this.getAddRecordLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
@@ -767,7 +773,7 @@ var recordsetPage = function() {
     this.waitForInverseModalSpinner = function () {
         var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };    
+    };
 
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));

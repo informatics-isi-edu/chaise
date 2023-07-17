@@ -101,8 +101,6 @@ const RelatedTableActions = ({
     message: JSX.Element;
   } | null>(null);
 
-  const container = useRef<HTMLDivElement>(null);
-
   const usedRef = relatedModel.initialReference;
   /*
    * This hook is to push the buttons to the dropdown if it exceeds the container width.
@@ -112,15 +110,17 @@ const RelatedTableActions = ({
     if (!containerRef.current) return;
 
     const calculateButtons = () => {
-      
+
       let buttons: any = [];
       if (containerRef.current) {
         const buttonContainer = buttonRef.current;
 
         const containerWidth = buttonContainer.getBoundingClientRect().width;
         buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
-        // 200 is based on the width of the container containing dropdown and last visible button. 
-        // If its less than 200 push it to dropdown.
+        /**
+         * If there aren't any enough space to show even one button, just switch to showing all as dropdown.
+         * 200 is based on the width of the container containing dropdown and last visible button.
+         */
         setShowAllActionsAsDropdown(containerRef.current.getBoundingClientRect().width < 200);
         const tableHeaderButtonsToAddToDropdown: any = [];
         let buttonLeftOffset = 0;
@@ -134,7 +134,7 @@ const RelatedTableActions = ({
           }
           // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
           // is overflowing the container width. If yes, push the button to the dropdown
-          
+
           buttons.forEach((button: any, index: number) => {
             const buttonWidth = button.getBoundingClientRect().width;
             if (index === 0) {
@@ -154,7 +154,7 @@ const RelatedTableActions = ({
             }
           });
           setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
-        }
+      }
     };
     calculateButtons();
 
@@ -213,6 +213,13 @@ const RelatedTableActions = ({
     e.stopPropagation();
   };
 
+  /**
+   * this is to avoid the accordion header to recieve the click
+   */
+  const onBulkEdit = (e: MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+  };
+
   const onToggleDisplayMode = (e: MouseEvent<HTMLElement>) => {
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
@@ -250,8 +257,8 @@ const RelatedTableActions = ({
     // append it to the URL
     const referrer_id = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
 
-    if (!!container.current) {
-      fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, container.current, {
+    if (!!containerRef.current) {
+      fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, containerRef.current, {
         id: referrer_id,
         containerDetails: {
           isInline: relatedModel.isInline,
@@ -518,9 +525,9 @@ const RelatedTableActions = ({
             isDismissible: true,
             closeBtnCallback: () => {
               // ask recordset to update the modal
-              if (!!container.current) {
+              if (!!containerRef.current) {
                 // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
-                fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
+                fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, containerRef.current, {
                   cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
                   pageStates: { updateResult: true, updateCount: true, updateFacets: true },
                   response: response,
@@ -696,26 +703,21 @@ const RelatedTableActions = ({
         style={{ marginRight: `${buttonsInDropdown.length > 0 ? '5px' : '0px'}` }}
       >
         {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`, false)}
-       
 
-        {relatedModel.isPureBinary && relatedModel.canDelete && 
-        renderButton('Unlink records', false)
-        }
+        {relatedModel.isPureBinary && relatedModel.canDelete &&  renderButton('Unlink records', false)}
 
-        {renderCustomModeBtn()}
+        {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
 
-        {relatedModel.canEdit && 
-        renderButton('Bulk Edit', false)
-        }
+        {relatedModel.canEdit && renderButton('Bulk Edit', false)}
 
         {renderButton('Explore', false)}
       </div>
     );
   };
-  /** 
+  /**
    * This function is to render the button in the dropdown with the tooltip.
    * @param  {string}   buttonText title of button
-   * @param  {string}   spanClass classname of inner span        
+   * @param  {string}   spanClass classname of inner span
    * @param  {boolean}   tertiary boolean to differentiate dropdown button and outside button
    * @param  {number} index
   */
@@ -754,11 +756,11 @@ const RelatedTableActions = ({
             }
           >
             <a
-            className={`chaise-btn more-results-link ${
+            className={`chaise-btn bulk-edit-link ${
               tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
             }`}
               href={editLink}
-              onClick={onExplore}
+              onClick={onBulkEdit}
             >
               <span className='chaise-btn-icon fa fa-pencil'></span>
               <span>Bulk Edit</span>
@@ -808,7 +810,7 @@ const RelatedTableActions = ({
         return renderCustomModeBtn(true);
     }
   };
- 
+
   return (
     <>
       <div className={containerClassName} ref={containerRef}>

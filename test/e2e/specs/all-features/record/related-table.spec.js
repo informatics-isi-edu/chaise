@@ -113,6 +113,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true,
         inlineComment: true,
         comment: "booking inline comment",
+        bulkEditLink: [
+          browser.params.url, 'recordedit', `#${browser.params.catalogId}`,
+          'product-unordered-related-tables-links:booking',
+          '*::facets::N4IghgdgJiBcDaoDOB7ArgJwMYFM6JHQBcAjdafEABwxSjSyIFo0IUMocMconuAbMER5MiYEvxxIm-AJYQA1khAAaEADMFAfTIoF8gOZawWLCgC25ukNkoIIALoBfNQCUAkgBFHarAAsUWVxlBBAAJgA5AGFHJ2cgA'
+        ].join('/'),
         viewMore: {
             displayname: "booking",
             filter: "Accommodations\nSuper 8 North Hollywood Motel"

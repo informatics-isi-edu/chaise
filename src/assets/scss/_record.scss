@@ -113,6 +113,8 @@
 
     .related-table-actions {
       float: right;
+      display: flex;
+      align-items: baseline;
 
       // make sure the content is not touching the buttons
       padding-left: 2px;
@@ -125,11 +127,6 @@
       a.chaise-btn {
         text-decoration: none;
       }
-    }
-
-    .related-table-actions {
-      display: flex;
-      align-items: baseline;
 
       .button-wrapper {
         height: 30px;
@@ -175,8 +172,12 @@
       z-index: 1;
     }
 
-    .chaise-table-header {
-      min-width: 250px;
+    /*
+    * This will make sure the Displaying.. text has a preserved space, and
+    * avoids the related action buttons to overlap it.
+    */
+    .entity-value .chaise-table-header {
+      display: inline-block;
     }
 
     .chaise-accordion-header {
