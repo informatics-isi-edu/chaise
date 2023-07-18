@@ -12,7 +12,7 @@ import {
   DraggableStateSnapshot, DraggingStyle, Droppable, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import { EventType, useFormContext } from 'react-hook-form';
-import InputSwitch from './input-switch';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
@@ -123,7 +123,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
    * @param index - index at the which new row needs to be created
    * @param value [optional] specify the placeholder value at the newly created row. Empty if no value provided
    */
-  const addItem = (index: number, value?: number | string) => () => {
+  const addItem = (index: number, value?: string) => () => {
     const elementId = generateId();
     index = typeof index === 'number' && index > -1 ? index + 1 : itemList.length
 
@@ -138,10 +138,10 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     updateFormValue(`${name}-row-${elementId}`, value ? value : '')
   }
 
-  const setDefaultFieldState = (values: (string | number)[]) => {
+  const setDefaultFieldState = (values: (string)[]) => {
 
     setItemList(
-      values.map((defVal: string | number, idx: number): RowItem => {
+      values.map((defVal: string , idx: number): RowItem => {
 
         if (baseArrayType === 'timestamp') {
           const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });

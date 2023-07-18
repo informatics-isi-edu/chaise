@@ -329,3 +329,10 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'timestamptz': timestamptzFieldValidation,
   'color': colorFieldValidation,
 };
+/**
+ * Function to check if there is scrollbar for textarea
+ */
+export const hasVerticalScrollbar = (element: any) => {
+  if (!element) return;
+  return element.scrollHeight > element.clientHeight;
+};
