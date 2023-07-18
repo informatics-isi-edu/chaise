@@ -3,21 +3,21 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+import { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 const FormContainer = (): JSX.Element => {
 
@@ -169,21 +169,21 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
   }, []);
 
 
+  const rowCell = useRef<HTMLDivElement>(null);
+  const selectAllCell = useRef<HTMLDivElement>(null);
+
   // pull the buttons in the array input closer if the cell width is below 300 px
   useEffect(() => {
-    const rowCell = container.current?.getElementsByClassName('entity-value')[0];
-    const selectAllCell = container.current?.getElementsByClassName('select-all-input')[0]
-
-    if (rowCell && rowCell.clientWidth <= 300) {
+    if (rowCell.current && rowCell.current.clientWidth <= 300) {
       container.current?.classList.add('squished-array-buttons')
     } else {
       container.current?.classList.remove('squished-array-buttons')
     }
 
-    if (showSelectAll && selectAllCell && selectAllCell?.clientWidth <= 300) {
-      selectAllCell.classList.add('squished-array-buttons')
+    if (showSelectAll && selectAllCell.current && selectAllCell.current?.clientWidth <= 300) {
+      selectAllCell.current.classList.add('squished-array-buttons')
     } else {
-      selectAllCell?.classList.remove('squished-array-buttons')
+      selectAllCell.current?.classList.remove('squished-array-buttons')
     }
   }, [showSelectAll, windowWidth, forms])
 
@@ -295,12 +295,12 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
     <div className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`} ref={container}>
       <div className='inputs-row'>
         {forms.map((formNumber: number, formIndex: number) => (
-          <div key={`form-${formNumber}-input-${columnModelIndex}`} className={`entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`}>
+          <div key={`form-${formNumber}-input-${columnModelIndex}`} className={`entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`} ref={rowCell}>
             {renderInput(formNumber, formIndex)}
           </div>
         ))}
       </div>
-      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} needsWiderMinWidth={needsWiderMinWidth}/>}
+      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} needsWiderMinWidth={needsWiderMinWidth} selecteAllRef={selectAllCell} />}
     </div>
   )
 
@@ -310,7 +310,7 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
  * shows the select all row
  * NOTE this is its own component to avoid rerendering the whole row on each change.
  */
-const SelectAllRow = ({ columnModelIndex , needsWiderMinWidth}: FormRowProps) => {
+const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: FormRowProps & { selecteAllRef: Ref<HTMLDivElement> }) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
     canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
@@ -412,12 +412,10 @@ const SelectAllRow = ({ columnModelIndex , needsWiderMinWidth}: FormRowProps) =>
 
   const btnClass = `${makeSafeIdAttr(columnModel.column.displayname.value)} chaise-btn chaise-btn-secondary`;
 
-  console.log(columnModel, colName, inputName);
-
   return (
     <div className={`select-all-row match-entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`}>
       <div className='select-all-text'>Set value for all records: </div>
-      <div className='select-all-input'>
+      <div className='select-all-input' ref={selecteAllRef}>
         <InputSwitch
           key={colName}
           displayErrors

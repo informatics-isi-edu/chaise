@@ -67,22 +67,19 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
     const sub = watch((data, options: Options) => {
 
-      // Apply All executed
-      if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
-        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
-
-        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [''])
-      }
-      //-----------------------
-
       // Clear All fields
       if (options.values && options.values[name] === '') {
-
         const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
         keysToClear.push(`-1-${name.split('-')[1]}`)
 
         unregister(keysToClear)
         setDefaultFieldState([''])
+      }
+      // Apply All executed
+      else if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
+        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
+
+        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [''])
       }
       // Update component state as per the changes observed in the individual row values in the form context
       else if (options.name?.startsWith(`${name}-row`)) {
@@ -141,7 +138,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const setDefaultFieldState = (values: (string)[]) => {
 
     setItemList(
-      values.map((defVal: string , idx: number): RowItem => {
+      values.map((defVal: string, idx: number): RowItem => {
 
         if (baseArrayType === 'timestamp') {
           const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });
@@ -206,16 +203,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return <>
       <Draggable key={item.id} draggableId={item.id.toString()} index={index} isDragDisabled={disableInput}>
         {
-          (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-            if (snapshot.isDragging) {
-
-              provided.draggableProps.style = {
-                ...provided.draggableProps.style,
-                left: 5,
-                top: index * (baseArrayType === 'timestamp' ? 111 : 50)
-              } as DraggingStyle
-            }
-
+          (provided: DraggableProvided) => {
             return <>
               <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                 <div className='move-icon'>
