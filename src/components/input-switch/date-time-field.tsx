@@ -13,6 +13,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
+
 type DateTimeFieldProps = InputFieldProps & {
   /**
    * classes for styling the input time element
@@ -56,7 +57,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-    if (!dateVal && !timeVal && !props.requiredInput) {
+    if (!dateVal && !timeVal && !props.requiredInput && !props.requiredInput) {
       if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
       return;
@@ -80,11 +81,16 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
     // if only time is missing, use 00:00:00 for it
     let timeValTemp = '';
-    if (!timeVal && !props.requiredInput) {
+    if (!timeVal && !props.requiredInput && !props.requiredInput) {
       timeValTemp = '00:00:00';
     }
     // otherwise validate the time value
     else {
+          if (!timeVal) {
+            setError(name, { type: 'custom', message: 'Please enter a valid time' });
+            setValue(name, 'invalid-value');
+            return;
+          }
       if (!timeVal) {
         setError(props.name, { type: 'custom', message: 'Please enter a valid time' });
         setValue(props.name, 'invalid-value');
@@ -170,6 +176,8 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const showTimeClear = () => Boolean(timeFieldValue);
 
+
+
   return (
     <InputField {...props}
       // make sure to mark the whole input as "touched" if any of the inputs are touched
@@ -179,7 +187,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
        * (it's basically just validating the watch above and not the user action)
        */
       controllerRules={{
-        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')]
+        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')],
       }}
     >
       {(field) => (
@@ -213,7 +221,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons && <div className='chaise-btn-group'>
+          {!props.disableInput && props.displayExtraDateTimeButtons && <div className={`chaise-btn-group ${getFieldState(props.name)?.invalid ? 'translateY' : ''}`}>
             <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
               Now
             </button>
