@@ -273,7 +273,9 @@ describe('View recordset page and form a query,', () => {
 
         return chaisePage.recordsetPage.getApplySavedQueryButtons();
       }).then((btns) => {
-        return btns[0].click();
+        // queries are in order of their "last_execution_time" which is set to "now" when the query is saved
+        // 2nd saved query should be the first row in the modal
+        return btns[1].click();
       }).then(() => {
         done();
       }).catch((err) => {
