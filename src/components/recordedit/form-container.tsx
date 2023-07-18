@@ -3,9 +3,9 @@ import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+import {useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -34,11 +34,6 @@ const FormContainer = ({
 
   const { handleSubmit } = useFormContext();
 
-  useEffect(() => {
-    // set wider width if array_text field is present in form
-    setNeedsWiderMinWidth(columnModels.filter(col => col.inputType === 'array' && col.column.type.baseType.name === 'text').length > 0)
-
-  }, [columnModels])
 
 
 
