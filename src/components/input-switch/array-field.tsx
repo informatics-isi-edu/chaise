@@ -21,7 +21,7 @@ type ArrayFieldProps = InputFieldProps & {
 
 type RowItem = {
   id: number,
-  value: string | number
+  value: string
 }
 
 type Options = {
@@ -37,7 +37,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [itemList, setItemList] = useState<RowItem[]>([])
   const [counter, setCounter] = useState(0);
   const { disableInput, name, baseArrayType } = props;
-  const { getValues, setValue, watch, reset, register, unregister } = useFormContext();
+  const { getValues, setValue, watch, register, unregister } = useFormContext();
 
 
 
@@ -257,7 +257,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   return (
     <>
-      <div className='fieldInputContainer'>
+      <div className='array-input-field-container'>
         {name.includes('array_disabled') ?
           <InputSwitch
             {...props}

@@ -132,6 +132,7 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
    * to edit that column in other rows.
    */
   const [showPermissionError, setShowPermissionError] = useState<{ [key: string]: boolean }>({});
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
 
   /**
    * reset the state of showing permission errors whenever the errors changed
@@ -141,11 +142,14 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
   }, [columnPermissionErrors]);
 
   const container = useRef<HTMLDivElement>(null);
+  const showSelectAll = activeSelectAll === columnModelIndex;
 
   /**
    * make sure the column names (key-column.tsx) have the same height as FormRow
    */
   useLayoutEffect(() => {
+    window.addEventListener('resize', () => setWindowWidth(window.innerWidth), false);
+
     if (!container || !container.current) return;
 
     let cachedHeight = -1;
@@ -165,6 +169,25 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
   }, []);
 
 
+  // pull the buttons in the array input closer if the cell width is below 300 px
+  useEffect(() => {
+    const rowCell = container.current?.getElementsByClassName('entity-value')[0];
+    const selectAllCell = container.current?.getElementsByClassName('select-all-input')[0]
+
+    if (rowCell && rowCell.clientWidth <= 300) {
+      container.current?.classList.add('squished-array-buttons')
+    } else {
+      container.current?.classList.remove('squished-array-buttons')
+    }
+
+    if (showSelectAll && selectAllCell && selectAllCell?.clientWidth <= 300) {
+      selectAllCell.classList.add('squished-array-buttons')
+    } else {
+      selectAllCell?.classList.remove('squished-array-buttons')
+    }
+  }, [showSelectAll, windowWidth, forms])
+
+
   // ------------------------ callbacks -----------------------------------//
 
   /**
@@ -180,18 +203,17 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
 
   // -------------------------- render logic ---------------------- //
 
-  const showSelectAll = activeSelectAll === columnModelIndex;
   const columnModel = columnModels[columnModelIndex];
 
   /**
- * Returntrue if,
- *  - columnModel is marked as disabled
- *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
- *  - show all
- * @param formNumber
- * @param columnModel
- * @param canUpdateValues
- */
+  * Returntrue if,
+  *  - columnModel is marked as disabled
+  *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
+  *  - show all
+  * @param formNumber
+  * @param columnModel
+  * @param canUpdateValues
+  */
   const getIsDisabled = (formNumber?: number, isSelectAllInput?: boolean): boolean => {
     if (isSelectAllInput) {
       return false;
@@ -278,7 +300,7 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
           </div>
         ))}
       </div>
-      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} />}
+      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} needsWiderMinWidth={needsWiderMinWidth}/>}
     </div>
   )
 
@@ -288,7 +310,7 @@ const FormRow = ({ columnModelIndex, needsWiderMinWidth }: FormRowProps): JSX.El
  * shows the select all row
  * NOTE this is its own component to avoid rerendering the whole row on each change.
  */
-const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
+const SelectAllRow = ({ columnModelIndex , needsWiderMinWidth}: FormRowProps) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
     canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
@@ -393,7 +415,7 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   console.log(columnModel, colName, inputName);
 
   return (
-    <div className='select-all-row match-entity-value'>
+    <div className={`select-all-row match-entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`}>
       <div className='select-all-text'>Set value for all records: </div>
       <div className='select-all-input'>
         <InputSwitch
@@ -404,7 +426,6 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
           disableInput={false}
           requiredInput={false}
           name={inputName}
-          // type={columnModel.inputType === 'array' ? columnModel?.column.type.baseType.name : columnModel.inputType}
           type={columnModel.inputType}
           classes='column-cell-input'
           columnModel={columnModel}

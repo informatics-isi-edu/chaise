@@ -1,8 +1,6 @@
 .entity-value,
 .select-all-input {
-    container-type: inline-size;
-    container-name: row-container;
-    .fieldInputContainer {
+    .array-input-field-container {
         ul {
             padding-left: 0.15rem;
         }
@@ -90,8 +88,8 @@
     }
 }
 
-@container row-container (max-width:300px) {
-    .fieldInputContainer {
+.squished-array-buttons {
+    .array-input-field-container {
         .input-items {
             .item {
                 .action-buttons {
