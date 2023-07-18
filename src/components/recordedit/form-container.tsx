@@ -98,7 +98,8 @@ const FormContainer = (): JSX.Element => {
 type FormRowProps = {
   columnModelIndex: number,
   activeForm?: any[],
-  clearAllForms?:any
+  clearAllForms?:any,
+  setActiveForm?:any
 };
 
 /**
@@ -130,6 +131,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   }, [columnPermissionErrors]);
 
   const container = useRef<HTMLDivElement>(null);
+  const cm = columnModels[columnModelIndex];
 
   /**
    * make sure the column names (key-column.tsx) have the same height as FormRow
@@ -288,14 +290,21 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
           /**
             * This is added to show the form is selected to apply the change when it is in edit mode
           */
-          className={`entity-value ${activeForm.includes(formNumber) && showSelectAll ? 'entity-active' : ''}`}
-          onClick={() => handleFormClick(formNumber)}
+          className={`column-permission-overlay entity-value ${activeForm.includes(formNumber) && showSelectAll ? 'entity-active' : ''}`}
+          
+          onClick={() => {
+            // I couldn’t test that scenario, since on load we’re removing the forms that user cannot edit,
+            if ((appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])) {
+              return;
+            }
+            handleFormClick(formNumber);
+          }}
         >
           {renderInput(formNumber, formIndex)}
       </div>
       ))}
       </div>
-      {showSelectAll && <SelectAllRow clearAllForms={clearAllForms} activeForm={activeForm} columnModelIndex={columnModelIndex} />}
+      {showSelectAll && <SelectAllRow clearAllForms={clearAllForms} activeForm={activeForm} setActiveForm={setActiveForm} columnModelIndex={columnModelIndex} />}
     </div>
   )
 
@@ -305,17 +314,37 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
  * shows the select all row
  * NOTE this is its own component to avoid rerendering the whole row on each change.
  */
-const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowProps) => {
+const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms, setActiveForm }: FormRowProps) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
     canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
   } = useRecordedit();
-
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
-
+  let ref = useRef(null);
   const [isEmpty, setIsEmpty] = useState(true);
-  
+  const [selected, setSelected] = useState(false);
 
+  
+  // This useeffect is to set the first form as active on load
+  useEffect(() => {
+    setActiveForm([forms[0]]);
+  }, [])
+
+  /* This useffect is to set the indeterminate checkbox when forms are individually selected
+  *  and selected forms length is less than total forms length
+  */
+  useEffect(() => {
+    if (ref && ref.current && activeForm && activeForm?.length > 0) {
+      if(activeForm?.length < forms.length) {
+        (ref.current as HTMLInputElement).indeterminate = true;
+      } else if(activeForm?.length === forms.length){
+        (ref.current as HTMLInputElement).indeterminate = false;
+        setSelected(true)
+      }
+      
+    }
+  }, [activeForm]);
+  
   /**
    * if the selected value is empty, we should disable the apply-all
    * useEffect allows us to look for the value and only rerender when we have to.
@@ -386,6 +415,15 @@ const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowPr
     clearAllForms();
   };
 
+  // Call back for select all checkbox to toggle all forms as selected and unselected
+  const onSelectChange = () => {
+    if(!selected) {
+      setActiveForm(forms);
+    } else {
+      setActiveForm([]);
+    }
+    setSelected(!selected)
+  }
   /**
    * The callback used by functions above to set the values of the row.
    * if clearValue is true, it will use emtpy value, otherwise it will copy the select-all input value
@@ -393,33 +431,14 @@ const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowPr
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
 
-    forms.forEach((formValue: number) => {
+    activeForm?.forEach((formValue: number) => {
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
       reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue));
     });
-    // Clear the selection.
-    clearAllForms();
   };
-
-  /**
-   * The callback used by functions above to set the selected values of the row.
-   * Loop for the selected forms instead of all forms.
-   */
-  const applyValueToSome = () => {
-    const cm = columnModels[columnModelIndex];
-
-    activeForm?.forEach((formValue: number) => {
-      // ignore the ones that cannot be updated
-      if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
-        return;
-      }
-      reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE));
-    });
-  };
- 
   // -------------------------- render logic ---------------------- //
 
   const columnModel = columnModels[columnModelIndex];
@@ -451,30 +470,33 @@ const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowPr
         />
       </div>
       <div className='chaise-btn-group select-all-buttons'>
+      <div className='chaise-checkbox select-all-checkbox'>
+            <input
+            ref={ref}
+              className={'checkbox-input' + (selected ? ' checked' : '')}
+              type='checkbox'
+              checked={selected}
+              disabled={false}
+              onChange={onSelectChange}
+            />
+            <span className='checkbox-label'>
+          {activeForm && activeForm?.length > 0 ? `${activeForm?.length} of ${forms.length} selected.`: 'Select All'}</span>
+           </div>
+           
+          <div style={{marginTop: '5px'}}>     
         <ChaiseTooltip tooltip='Click to apply the value to selected records.' placement='bottom'>
-          <button
-            type='button' className={`select-all-apply-${btnClass}`} onClick={applyValueToSome}
-            // we should disable it when its empty or has error or when there are no forms selected to apply the change.
-            // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
-            disabled={isEmpty || activeForm?.length === 0 || (errors && inputName in errors)}
-          >
-          Apply Some
-        </button>
-      </ChaiseTooltip>
-      
-        <ChaiseTooltip tooltip='Click to apply the value to all records.' placement='bottom'>
           <button
             type='button' className={`select-all-apply-${btnClass}`} onClick={applyValueToAll}
             // we should disable it when its empty or has error
             // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
-            disabled={isEmpty || (errors && inputName in errors)}
+            disabled={isEmpty || (errors && inputName in errors) || activeForm?.length === 0}
           >
-            Apply All
+            Apply
           </button>
         </ChaiseTooltip>
-        <ChaiseTooltip tooltip='Click to clear all values for all records.' placement='bottom'>
+        <ChaiseTooltip tooltip='Click to clear all values for selected records.' placement='bottom'>
           <button type='button' className={`select-all-clear-${btnClass}`} onClick={clearAllValues}>
-            Clear All
+            Clear
           </button>
         </ChaiseTooltip>
         <ChaiseTooltip tooltip='Click to close the set all input.' placement='bottom'>
@@ -482,6 +504,7 @@ const SelectAllRow = ({ columnModelIndex, activeForm, clearAllForms }: FormRowPr
             Close
           </button>
         </ChaiseTooltip>
+        </div> 
       </div>
     </div>
   )

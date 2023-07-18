@@ -129,6 +129,24 @@
             width: 250px;
             margin: 0px 5px;
           }
+
+          .select-all-buttons {
+            display: flex;
+            flex-direction: column;
+
+            .select-all-checkbox {
+              display: flex;
+              align-items: center;
+
+              .checkbox-input {
+                position: relative;
+              }
+
+              .checkbox-label {
+                margin-left: 5px;
+              }
+            }
+          }
         }
       }
 
@@ -196,6 +214,8 @@
       // This is added to show the form is selected to apply the change
       .entity-active {
         border: 2px solid #4674a7;
+        transition: border 0.1s ease;
+        will-change: transform;
       }
 
       // only form inputs

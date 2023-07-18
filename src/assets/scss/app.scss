@@ -120,6 +120,7 @@ html {
     color: map-get(variables.$color-map, 'link');
     text-decoration: none;
   }
+
   // the last selector is added to override bootstrap default behavior
   a:focus,
   a:hover,
@@ -135,6 +136,7 @@ html {
     background-color: #f9f2f4;
     border-radius: 4px;
   }
+
   // make sure the pre style is consistent with old bootstrap styles
   pre {
     display: block;
@@ -194,6 +196,7 @@ html {
     // the icon is directly next to the text.
     content: "\00A6";
   }
+
   .chaise-icon-for-tooltip.align-center-icon {
     line-height: 20px;
     vertical-align: middle;
@@ -223,12 +226,14 @@ html {
     max-width: 50%;
     white-space: nowrap;
   }
+
   .tooltip-inner {
     // (this is a predefined class in bootstrap)
     text-align: left;
     max-width: none;
     white-space: pre-wrap;
   }
+
   .tooltip code,
   .tooltip-inner code {
     background: rgba(110, 118, 129);
@@ -286,6 +291,7 @@ html {
     padding: 14px 0;
     border: 1px solid map-get(variables.$color-map, 'border');
     border-radius: 7px;
+
     &:not(.manual-position-spinner) {
       top: 50vh;
       position: absolute;
@@ -294,11 +300,13 @@ html {
       margin-left: -75px;
       z-index: map-get(variables.$z-index-map, 'spinner');
     }
+
     .spinner-message {
       color: map-get(variables.$color-map, 'black');
       margin-top: 15px;
     }
   }
+
   .spinner-container.bottom-left-spinner {
     float: left;
     position: fixed;
@@ -308,6 +316,7 @@ html {
     margin: 5px;
     padding: 5px 20px;
     border: solid #446c73 1.5px;
+
     .spinner-message {
       display: inline-block;
       margin-left: 5px;
@@ -345,7 +354,7 @@ html {
     // background-color: #f1f1f1;
     // box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
 
-    > * {
+    >* {
       display: inline-block;
     }
 
@@ -361,6 +370,7 @@ html {
   .float-right {
     float: right;
   }
+
   // bookmark container end
 
   /* used to replace the margin with padding on h1-4 elements */
@@ -464,7 +474,7 @@ html {
       text-align: right;
 
       // make sure the buttons show in the same line
-      & > * {
+      &>* {
         display: inline-block;
         margin-left: 5px;
       }
@@ -477,7 +487,7 @@ html {
   }
 
   // fix the padding issues related to the main alerts container that is outside of apps
-  .app-header-container > .alerts-container {
+  .app-header-container>.alerts-container {
     padding: variables.$viewport-margin;
 
     /**
@@ -485,9 +495,11 @@ html {
      * to avoid it with the following rules:
      */
     padding-bottom: 10px;
+
     &:empty {
       padding-bottom: 0;
     }
+
     .alert:last-child {
       margin: 0;
     }
@@ -523,7 +535,7 @@ html {
             flex-basis: variables.$left-panel-width-sm;
           }
 
-          & + .top-right-panel {
+          &+.top-right-panel {
             padding-left: variables.$main-alley;
           }
         }
@@ -533,7 +545,7 @@ html {
           flex-basis: 0 !important;
           display: none;
 
-          & + .top-right-panel {
+          &+.top-right-panel {
             // NOTE this is done this way to make sure we're implementing
             // spacing the same way in top and bottom panels.
             // This is becuase we have js code that will look at the
@@ -593,7 +605,7 @@ html {
           flex-basis: variables.$left-panel-width-sm;
         }
 
-        & ~ .main-container {
+        &~.main-container {
           padding-left: variables.$main-alley;
 
           .footer-container:not(.position-absolute) {
@@ -611,7 +623,7 @@ html {
           width: 0;
         }
 
-        & ~ .main-container {
+        &~.main-container {
           // NOTE the padding is here and not on the parent because
           // of the footer behaviour that we want.
           // If we move it up, then the footer won't be displayed properly
@@ -644,7 +656,7 @@ html {
 
   // NOTE general rule that applies to record and recordset
   // TODO duplicate or simplify
-  .side-panel-resizable.close-panel + .divider-hitbox {
+  .side-panel-resizable.close-panel+.divider-hitbox {
     display: none;
   }
 
@@ -668,6 +680,7 @@ html {
       min-height: variables.$chaise-checkbox-height;
       margin-bottom: 0;
     }
+
     &.no-left-padding label {
       padding-left: 0;
     }
@@ -683,6 +696,7 @@ html {
 
       &:disabled {
         cursor: not-allowed;
+
         &:before,
         &:checked:after {
           color: map-get(variables.$color-map, 'disabled');
@@ -709,6 +723,11 @@ html {
         border: 1px solid map-get(variables.$color-map, 'primary');
         border-radius: 3px;
         background-color: map-get(variables.$color-map, 'white');
+      }
+
+      &:indeterminate:before {
+        /* Style for indeterminate state */
+        background: none;
       }
 
       &:checked:after {
@@ -748,7 +767,7 @@ html {
     &.favorite-spinner-container {
       font-size: 1em;
 
-      > .fa-circle-notch {
+      >.fa-circle-notch {
         cursor: not-allowed;
         font-size: 14px;
         padding-right: 0px;
@@ -870,7 +889,8 @@ html {
       box-shadow: none;
       border-radius: 0;
       border: 0;
-      + .chaise-accordion {
+
+      +.chaise-accordion {
         margin-top: $_space-between-accordions;
       }
 
@@ -882,13 +902,13 @@ html {
         margin-right: -$_row-focus-border-width;
         margin-top: $_space-between-accordions - $_row-focus-border-width;
 
-        + .chaise-accordion:not(.row-focus) {
+        +.chaise-accordion:not(.row-focus) {
           margin-top: $_space-between-accordions - $_row-focus-border-width;
         }
 
         // if there are two row-focus on top of each other, we should
         // change the margin to account for both of their borders.
-        + .row-focus {
+        +.row-focus {
           margin-top: $_space-between-accordions - ($_row-focus-border-width * 2);
         }
       }
@@ -1008,6 +1028,7 @@ html {
       background: black;
       opacity: 0.5;
     }
+
     .spinner-container {
       top: 50% !important;
       z-index: map-get(variables.$z-index-map, 'app-blocking-spinner') !important;
@@ -1065,6 +1086,7 @@ html {
        * max-height to the container instead of the img
        */
       max-height: $chaise-image-preview-max-height;
+
       img {
         max-height: unset;
         max-width: unset;
