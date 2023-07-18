@@ -6,6 +6,8 @@ import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+import { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 // models
 import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -13,6 +15,7 @@ import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedi
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 type FormContainerProps = {
   /* the index of column that is showing the select all input */
@@ -33,7 +36,7 @@ const FormContainer = ({
 
   const { handleSubmit } = useFormContext();
 
- 
+
 
 
   const formContainer = useRef<any>(null);

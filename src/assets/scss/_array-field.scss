@@ -1,110 +1,133 @@
-.entity-value,
-.select-all-input {
-    .array-input-field-container {
-        ul {
-            padding-left: 0.15rem;
+.squished-array-buttons {
+  .array-input-field-container {
+    .input-items-new {
+      .item {
+        .action-buttons {
+          margin-right: -1px;
         }
-        .input-items {
-            width: 100%;
-            margin-bottom: 2px;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            & *:focus {
-                outline: none;
-            }
-            li {
-                list-style: none;
-            }
-            .item {
-                border-radius: 3px;
-                min-height: 30px;
-                height: auto;
-                width: 100%;
-                padding-top: 5px;
-                padding-bottom: 5px;
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                gap: 5px;
-                box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-                .move-icon {
-                    display: flex;
-                    padding-left: 3px;
-                    & * {
-                        position: relative;
-                        top: 50%;
-                        transform: translateY(-7px);
-                    }
-                }
-                .input-box,
-                .input-switch {
-                    border: 2px solid transparent;
-                    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
-                    &:focus {
-                        outline: none;
-                    }
-                }
-                button:not(.chaise-btn.chaise-btn-primary) {
-                    background-color: transparent;
-                    height: 100%;
-                    width: auto;
-                    padding: 1px 2px;
-                    font-size: small;
-                }
-                .action-buttons {
-                    height: 100%;
-                    & * {
-                        margin-right: 5px;
-                        font-size: medium;
-                    }
-                }
-                [class*="input-switch-container"] {
-                    flex: 1 1 1px;
-                }
-                [class$="array_date"] {
-                    flex: 1 1 1px;
-                }
-                [class$="array_timestamp"] {
-                    flex: 1 1 1px;
-                }
-            }
-        }
-        .timestamp {
-            position: relative;
-            padding-bottom: 30px !important;
-            .move-icon * {
-                top: 70% !important;
-            }
-            .chaise-btn-group {
-                position: absolute;
-            }
-            .action-buttons {
-                position: absolute;
-                right: -3px;
-                top: 35px
-            }
-        }
+      }
     }
+  }
 }
 
-.squished-array-buttons {
-    .array-input-field-container {
-        .input-items {
-            .item {
-                .action-buttons {
-                    margin-right: 3px;
-                }
-                .action-buttons button {
-                    margin-right: -4px !important;
-                    margin-left: 0px;
-                }
-            }
-            .timestamp {
-                .action-buttons {
-                    right: 4px;
-                }
-            }
-        }
+// New Styles
+.entity-value,
+.select-all-input {
+  .array-input-field-container {
+    ul {
+      padding-left: 0;
     }
+    .add-element-container {
+      display: flex;
+      flex-direction: row;
+      gap: 5px;
+      [class*='input-switch-container'] {
+        width: 100%;
+      }
+      .chaise-btn {
+        height: 30px;
+      }
+      &.timestamp .add-button {
+      }
+    }
+    .input-items-new {
+      width: 100%;
+      margin-bottom: 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+
+      &.add-margin-bottom {
+        margin-bottom: 10px;
+      }
+      & *:focus {
+        outline: none;
+      }
+      li {
+        list-style: none;
+      }
+      .item {
+        border-radius: 3px;
+        min-height: 30px;
+        height: auto;
+        width: 100%;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 5px;
+        &:hover {
+          box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        }
+        .move-icon {
+          display: flex;
+          padding-left: 3px;
+          & * {
+            position: relative;
+            top: 50%;
+            transform: translateY(-7px);
+          }
+        }
+        .input-box,
+        .input-switch {
+          border: 2px solid transparent;
+          box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px,
+            rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+          &:focus {
+            outline: none;
+          }
+        }
+        button:not(.chaise-btn.chaise-btn-primary) {
+          background-color: transparent;
+          height: 100%;
+          width: auto;
+        }
+        .action-buttons {
+          height: 100%;
+          & * {
+            margin-right: 7px;
+            font-size: medium;
+          }
+        }
+        .item-input {
+          width: 100%;
+          padding-right: 5px;
+        }
+        &.date,
+        &.timestamp,
+        &.boolean {
+          .item-input {
+            padding-right: 4px;
+          }
+        }
+        &.timestamp {
+          .item-input .input-switch-datetime .chaise-btn-group.translateY {
+            transform: translateY(18px);
+          }
+        }
+        [class*='input-switch-container'] {
+          flex: 1 1 1px;
+        }
+        [class$='array_date'] {
+          flex: 1 1 1px;
+        }
+        [class$='array_timestamp'] {
+          flex: 1 1 1px;
+        }
+      }
+    }
+    .timestamp {
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-bottom: 30px !important;
+      .move-icon * {
+        transform: translateX(-2px) !important;
+      }
+      .chaise-btn-group {
+        position: absolute;
+      }
+    }
+  }
 }

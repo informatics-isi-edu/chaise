@@ -5,7 +5,7 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 
 // utils
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { formatDatetime, formatFloat, formatInt } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatDatetime, formatFloat, formatInt, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { useEffect, useState } from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided,
@@ -36,21 +36,21 @@ type Options = {
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [itemList, setItemList] = useState<RowItem[]>([])
   const [counter, setCounter] = useState(0);
+  const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { getValues, setValue, watch, register, unregister } = useFormContext();
-
+  const { formState, getValues, setValue, watch, register, unregister, setError, clearErrors, trigger } = useFormContext();
 
 
 
   useEffect(() => {
     let defaultValues = getValues(name);
 
-    defaultValues = typeof defaultValues === 'object' || !defaultValues ? defaultValues : JSON.parse(defaultValues)
+    defaultValues = defaultValues ? JSON.parse(defaultValues) : []
 
     if (defaultValues && defaultValues.length > 0) {// Populate default Values if present
       setDefaultFieldState(defaultValues)
     } else { // create a row with empty value if no default values exist
-      setDefaultFieldState([''])
+      setDefaultFieldState([])
     }
   }, [])
 
@@ -60,35 +60,38 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     // Update the array field in the react-hook-form context
     if (itemList.length) {
       updateFormValue(name, itemList.map(item => formatValue(item.value)).filter(value => value?.toString().trim()))
+    } else {
+      updateFormValue(name, [])
     }
   }, [itemList])
 
   useEffect(() => {
+    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || getValues(`${name}-new-item`) === undefined || getValues(`${name}-new-item`) === '')
+  }, [formState])
 
+  useEffect(() => {
     const sub = watch((data, options: Options) => {
-
-      // Apply All executed
-      if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
-        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
-
-        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [''])
-      }
-      //-----------------------
-
       // Clear All fields
       if (options.values && options.values[name] === '') {
-
         const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
         keysToClear.push(`-1-${name.split('-')[1]}`)
 
         unregister(keysToClear)
-        setDefaultFieldState([''])
+        setDefaultFieldState([])
+      }
+      // Apply All executed
+      else if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
+        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
+
+        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
       }
       // Update component state as per the changes observed in the individual row values in the form context
       else if (options.name?.startsWith(`${name}-row`)) {
         const itemId = parseInt(options.name?.split('-').at(-1) as string)
         onTextEdit(itemId, data[`${name}-row-${itemId}`])
       }
+
+      trigger(`${name}-new-item`);
     })
 
     return () => sub.unsubscribe();
@@ -100,6 +103,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return curr;
   }
 
+  //TODO - verify types
   const formatValue = (value: string) => {
     switch (baseArrayType) {
       case 'int4':
@@ -112,7 +116,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const updateFormValue = (field: string, value: any) => {
-    if (!getValues(field)) {
+    if (getValues(field) === undefined || getValues(field) === '') {
       register(field)
     }
     setValue(field, value)
@@ -121,41 +125,52 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   /***
    * Adds a new row at a specified index with a given value.
    * @param index - index at the which new row needs to be created
-   * @param value [optional] specify the placeholder value at the newly created row. Empty if no value provided
+   * @param formKey ```[optional]``` specify the value that needs to be fetched from the react-hook-form. Empty if no value provided
    */
-  const addItem = (index: number, value?: number | string) => () => {
+  const addItem = (index: number, formKey?: string) => () => {
+
     const elementId = generateId();
     index = typeof index === 'number' && index > -1 ? index + 1 : itemList.length
+    const formVal = formKey ? getValues(formKey) : ''
 
     setItemList([...itemList.slice(0, index),
     {
       id: elementId,
-      value: value ? value : ''
+      value: formVal
     },
     ...itemList.slice(index, itemList.length)
     ])
 
-    updateFormValue(`${name}-row-${elementId}`, value ? value : '')
+    if (baseArrayType === 'timestamp') {
+      const v = formatDatetime(formVal, { outputMomentFormat: dataFormats.timestamp });
+
+      updateFormValue(`${name}-row-${elementId}-date`, formVal === '' ? '' : v?.date)
+      updateFormValue(`${name}-row-${elementId}-time`, formVal === '' ? '' : v?.time)
+    }
+    updateFormValue(`${name}-row-${elementId}`, formVal)
   }
 
   const setDefaultFieldState = (values: (string | number)[]) => {
 
     setItemList(
-      values.map((defVal: string | number, idx: number): RowItem => {
+      values.length ?
+        values.map((defVal: string, idx: number): RowItem => {
 
-        if (baseArrayType === 'timestamp') {
-          const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });
+          if (baseArrayType === 'timestamp') {
+            const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });
 
-          updateFormValue(`${name}-row-${idx}-date`, defVal === '' ? '' : v?.date)
-          updateFormValue(`${name}-row-${idx}-time`, defVal === '' ? '' : v?.time)
-        }
-        updateFormValue(`${name}-row-${idx}`, defVal)
+            updateFormValue(`${name}-row-${idx}-date`, defVal === '' ? '' : v?.date)
+            updateFormValue(`${name}-row-${idx}-time`, defVal === '' ? '' : v?.time)
+          }
+          updateFormValue(`${name}-row-${idx}`, defVal)
 
-        return {
-          id: idx,
-          value: defVal
-        }
-      })
+          return {
+            id: idx,
+            value: defVal
+          }
+        })
+        :
+        []
     )
     setCounter(values.length)
   }
@@ -178,8 +193,11 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     setItemList((prev: RowItem[]) => {
       return [...prev.map((el: RowItem) => {
         if (el.id === id) {
-          el.value = fieldValue;
-          return el;
+          // el.value = fieldValue;
+          return {
+            id: id,
+            value: fieldValue
+          };
         }
         return el;
       })
@@ -206,43 +224,32 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return <>
       <Draggable key={item.id} draggableId={item.id.toString()} index={index} isDragDisabled={disableInput}>
         {
-          (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-            if (snapshot.isDragging) {
-
-              provided.draggableProps.style = {
-                ...provided.draggableProps.style,
-                left: 5,
-                top: index * (baseArrayType === 'timestamp' ? 111 : 50)
-              } as DraggingStyle
-            }
-
+          (provided: DraggableProvided) => {
             return <>
               <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                 <div className='move-icon'>
                   <i className='fa-solid fa-grip-vertical'></i>
                 </div>
 
-                <InputSwitch
-                  {...props}
-                  type={baseArrayType}
-                  // name={`${name}-row-${item.id}`}
-                  {...register(`${name}-row-${item.id}`, { value: item.value ? item.value : '' })}
-
-                  displayExtraDateTimeButtons={true}
-                  displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-                />
+                <div className='item-input'>
+                  <InputSwitch
+                    {...props}
+                    // type={'text'}
+                    type={getInputType({ name: baseArrayType })}
+                    {...register(`${name}-row-${item.id}`, { value: item.value != undefined ? item.value : '' })}
+                    displayExtraDateTimeButtons={true}
+                    displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+                    requiredInput={true}
+                  />
+                </div>
 
                 <div>
                   {
                     !disableInput &&
                     <div className='action-buttons'>
                       <button
-                        type='button' className='fa-solid fa-minus chaise-btn chaise-btn-tertiary chaise-btn-sm'
-                        onClick={() => { deleteItemWithId(item.id) }} disabled={disableInput || itemList.length === 1}
-                      />
-                      <button
-                        type='button' className='fa-solid fa-plus chaise-btn chaise-btn-tertiary chaise-btn-sm'
-                        onClick={addItem(index)} disabled={disableInput}
+                        type='button' className='fa-solid fa-trash chaise-btn chaise-btn-tertiary chaise-btn-sm'
+                        onClick={() => { deleteItemWithId(item.id) }}
                       />
                     </div>
                   }
@@ -265,18 +272,41 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
             name={name}
           />
           :
-          <DragDropContext onDragEnd={handleOnDragEnd}>
-            <Droppable droppableId={'input-items'}>
-              {
-                (provided: DroppableProvided) => (
-                  <ul className='input-items' {...provided.droppableProps} ref={provided.innerRef}>
-                    {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
-                    {provided.placeholder}
-                  </ul>
-                )
-              }
-            </Droppable>
-          </DragDropContext>
+          <>
+            <div className="input-items-container-new">
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId={'input-items-new'}>
+                  {
+                    (provided: DroppableProvided) => (
+                      <ul
+                        className={`input-items-new ${itemList.length ? 'add-margin-bottom' : ''}`}
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
+                        {provided.placeholder}
+                      </ul>
+                    )
+                  }
+                </Droppable>
+              </DragDropContext>
+              <div className={`add-element-container ${baseArrayType}`}>
+                <InputSwitch
+                  {...props}
+                  // type={baseArrayType}
+                  type={getInputType({ name: baseArrayType })}
+                  // name={`${name}-row-${item.id}`}
+                  {...register(`${name}-new-item`)}
+                  displayExtraDateTimeButtons={true}
+                  displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+                />
+                <button
+                  type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
+                  onClick={addItem(-1, `${name}-new-item`)} disabled={disableAddButton}
+                >Add</button>
+              </div>
+            </div>
+          </>
         }
       </div>
     </>
