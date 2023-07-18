@@ -23,7 +23,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
@@ -34,6 +34,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -159,6 +160,8 @@ const RecordsetInner = ({
    */
   const [facetsRegistered, setFacetsRegistered] = useState(false);
 
+  const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
+
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
   const topLeftContainer = useRef<HTMLDivElement>(null);
@@ -250,7 +253,63 @@ const RecordsetInner = ({
         };
         dispatchError({ error: res.issues, closeBtnCallback: cb, okBtnCallback: cb })
       } else {
-        // TODO save query should just return a promise
+        // execute the following if:
+        //   - the savedQuery UI is being shown
+        //   - a savedQuery rid is present in the url on page load
+        //   - the updated flag is not true
+        //     - savedQuery.updated is initialized to true unless there is a proper savedQuery mapping and defined savedQuery rid is set
+        if (savedQueryConfig && savedQueryConfig.showUI && savedQueryConfig.rid && !savedQueryUpdated) {
+          // to prevent the following code and request from triggering more than once
+          // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
+          setSavedQueryUpdated(true);
+
+          const rows: any[] = [];
+
+          const row: any = {}
+          row.RID = savedQueryConfig.rid;
+
+          const lastExecutedColumnName = savedQueryConfig.mapping.columnNameMapping?.lastExecutionTime || 'last_execution_time';
+          row[lastExecutedColumnName] = 'now';
+
+          rows.push(row);
+
+          // create this fake table object so getStackNode works
+          const fauxTable = {
+            name: savedQueryConfig.mapping.table,
+            schema: {
+              name: savedQueryConfig.mapping.schema
+            }
+          }
+
+          const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
+          const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, fauxTable);
+
+          const logObj = {
+            action: LogService.getActionString(LogActions.UPDATE, stackPath),
+            stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), {
+              'num_updated': 1,
+              'updated_keys': {
+                'cols': ['RID'],
+                'vals': [[savedQueryConfig.rid]]
+              }
+            })
+          };
+
+          const config: any = {
+            skipHTTP401Handling: true,
+            headers: {}
+          };
+
+          config.headers[windowRef.ERMrest.contextHeaderName] = logObj;
+          // attributegroup/CFDE:saved_query/RID;last_execution_status
+          const updateSavedQueryUrl = windowRef.location.origin + savedQueryConfig.ermrestAGPath + '/RID;' + lastExecutedColumnName;
+          ConfigService.http.put(updateSavedQueryUrl, rows, config).then(() => {
+            // do nothing
+          }).catch((error: any) => {
+            $log.warn('saved query last executed time could not be updated');
+            $log.warn(error);
+          });
+        }
       }
 
     }).catch((exception: any) => {
@@ -446,7 +505,7 @@ const RecordsetInner = ({
           setSelectedRows([]);
         }
       }
-      update(pageStates, null, { cause});
+      update(pageStates, null, { cause });
     }
   }) as EventListener;
 
@@ -775,7 +834,7 @@ const RecordsetInner = ({
                       <span>Permalink</span>
                     </a>
                   </ChaiseTooltip>
-                  {savedQueryConfig?.showUI && savedQueryReference && 
+                  {savedQueryConfig?.showUI && savedQueryReference &&
                     <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
                   }
 

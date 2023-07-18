@@ -423,7 +423,7 @@ const TableRow = ({
                 placement='bottom'
               >
                 <a className={applySavedQueryBtnClass} href={applySavedQuery as string}>
-                  <span className='chaise-btn-icon fa-solid fa-check'></span>
+                  <span className='chaise-btn-icon fa-regular fa-square-check'></span>
                 </a>
               </ChaiseTooltip>
             }

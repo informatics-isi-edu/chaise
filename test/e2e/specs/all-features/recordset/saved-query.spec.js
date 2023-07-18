@@ -31,7 +31,8 @@ const chaiseConfigAnnotation = {
           queryName: 'name',
           description: 'description',
           facets: 'facets',
-          encodedFacets: 'encoded_facets'
+          encodedFacets: 'encoded_facets',
+          lastExecutionTime: 'last_execution_time'
         }
       }
     }

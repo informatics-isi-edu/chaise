@@ -674,7 +674,8 @@ system columns:
            queryName: <string>,
            description: <string>,
            facets: <string>,
-           encodedFacets: <string>
+           encodedFacets: <string>,
+           lastExecutionTime: <string>
          }
        },
        defaultName: {
@@ -688,7 +689,7 @@ system columns:
      - `catalog`: String - catalog id where the saved query table is
      - `schema`: String - schema name in above catalog where below table is stored
      - `table`: String - table name for saving queries to
-     - `columnNameMapping`: Object - all attributes are required for saved query functionality to work properly. These are the column names in the model that the data will be stored to. The columns require specific types: `description` as `longtext | markdown`, `facets` as `jsonb`, `encodedFacets` as `longtext`, and all others are type `text`
+     - `columnNameMapping`: Object - all attributes are required for saved query functionality to work properly. These are the column names in the model that the data will be stored to. The columns require specific types: `description` as `longtext | markdown`, `facets` as `jsonb`, `encodedFacets` as `longtext`, `lastExecutionTime` as `timestamp[tz]`, and all others are type `text`
    - `defaultName` attributes
      - `facetChoiceLimit`: Set this value to define when to show a compressed facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the compressed syntax.
      - `facetTextLimit`: Set this value to define when to show a compressed facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the compressed syntax.
@@ -709,7 +710,8 @@ system columns:
               queryName: "name",
               description: "description",
               facets: "facets",
-              encodedFacets: "encoded_facets"
+              encodedFacets: "encoded_facets",
+              lastExecutionTime: "last_execution_time"
             }
         },
         defaultName: {

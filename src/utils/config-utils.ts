@@ -2,7 +2,6 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type SavedQuery = {
   defaultNameLimits: {
@@ -25,6 +24,7 @@ export type SavedQuery = {
       description: string;
       encodedFacets: string;
       facets: string;
+      lastExecutionTime: string;
       queryId: string;
       queryName: string;
       schemaName: string;
@@ -59,7 +59,10 @@ export function validateTermsAndConditionsConfig(obj: any) {
 
 // The properties defined in the 
 function validateColumnNameMapping(columnMap: any) {
-  const properties = ['catalog', 'description', 'encodedFacets', 'facets', 'queryId', 'queryName', 'schemaName', 'tableName', 'userId'];
+  const properties = [
+    'catalog', 'description', 'encodedFacets', 'facets', 'queryId', 'queryName', 
+    'schemaName', 'tableName', 'userId', 'lastExecutionTime'
+  ];
 
   let isValid = true;
   for (let i=0; i < properties.length; i++) {

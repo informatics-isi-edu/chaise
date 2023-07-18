@@ -434,12 +434,15 @@ const SavedQueryDropdown = ({
     row[colMap.catalog] = reference.table.schema.catalog.name;
     row[colMap.userId] = session?.client.id;
 
+    row[colMap.lastExecutionTime] = 'now';
+
     rows.push(row);
 
     // check to see if the saved query exists for the given user, table, schema, and selected facets
-    let queryUri = savedQueryReference.uri + '/user_id=' + fixedEncodeURIComponent(row[colMap.userId]);
-    queryUri += '&schema_name=' + fixedEncodeURIComponent(row[colMap.schemaName]);
-    queryUri += '&table_name=' + fixedEncodeURIComponent(row[colMap.tableName]) + '&query_id=' + row[colMap.queryId];
+    let queryUri = savedQueryReference.uri + '/' + colMap.userId + '=' + fixedEncodeURIComponent(row[colMap.userId]);
+    queryUri += '&' + colMap.schemaName + '=' + fixedEncodeURIComponent(row[colMap.schemaName]);
+    queryUri += '&' + colMap.tableName + '=' + fixedEncodeURIComponent(row[colMap.tableName]);
+    queryUri += '&' + colMap.queryId + '=' + row[colMap.queryId];
 
     windowRef.ERMrest.resolve(queryUri, ConfigService.contextHeaderParams).then((response: any) => {
       const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
@@ -503,13 +506,14 @@ const SavedQueryDropdown = ({
       }]
     }
 
-    const uri = savedQueryReference.uri + '/' + facetTxt + windowRef.ERMrest.encodeFacet(facetBlob) + '@sort(last_execution_time::desc::)';
+    const lastExecutedColumnName = savedQueryConfig?.mapping.columnNameMapping?.lastExecutionTime || 'last_Execution_time';
+    const uri = savedQueryReference.uri + '/' + facetTxt + windowRef.ERMrest.encodeFacet(facetBlob) + '@sort(' + lastExecutedColumnName + '::desc::)';
     windowRef.ERMrest.resolve(uri, ConfigService.contextHeaderParams).then((ref: any) => {
       // we don't want to allow faceting in the popup
       const tempSavedQueryReference = ref.contextualize.compactSelectSavedQueries.hideFacets();
 
       const recordsetConfig: RecordsetConfig = {
-        viewable: true,
+        viewable: false,
         editable: true,
         deletable: true,
         sortable: true,

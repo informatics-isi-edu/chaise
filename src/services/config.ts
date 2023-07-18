@@ -420,49 +420,14 @@ export class ConfigService {
     const cc = ConfigService.chaiseConfig;
 
     let mode = null;
-    if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+    if (context.indexOf('compact') !== -1 && cc.systemColumnsDisplayCompact) {
       mode = cc.systemColumnsDisplayCompact;
-    } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+    } else if (context === 'detailed' && cc.systemColumnsDisplayDetailed) {
       mode = cc.systemColumnsDisplayDetailed;
-    } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+    } else if (context.indexOf('entry') !== -1 && cc.systemColumnsDisplayEntry) {
       mode = cc.systemColumnsDisplayEntry;
     }
 
     return mode;
   }
 }
-
-// TODO these functions should be moved somewhere else:
-//
-// function initializeSavingQueries(reference, queryParams) {
-//   var chaiseConfig = getConfigJSON();
-//   // initalize to null as if there is no saved query table
-//   // savedQuery object should be defined with showUI true || false for UI purposes
-//   var savedQuery = {
-//       showUI: reference.display.showSavedQuery
-//   }
-
-//   // NOTE: if this is not set, saved query UI should probably be turned off
-//   if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == 'object') {
-//       var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
-
-//       var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
-
-//       // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
-//       if (validMapping) {
-//           savedQuery.ermrestTablePath = '/ermrest/catalog/' + mapping.catalog + '/entity/' + mapping.schema + ':' + mapping.table
-//           savedQuery.ermrestAGPath = '/ermrest/catalog/' + mapping.catalog + '/attributegroup/' + mapping.schema + ':' + mapping.table
-
-//           // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
-//           if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
-//       } else {
-//           // if mapping is invalid, the config is ill-defined and the feature will be turned off
-//           savedQuery.showUI = false;
-//       }
-//   } else {
-//       // if storage table is not defined, the config is ill-defined and the feature will be turned off
-//       savedQuery.showUI = false;
-//   }
-
-//   return savedQuery;
-// }
