@@ -14,7 +14,7 @@ import {
   RecordsetProviderFetchSecondaryRequests,
   RecordsetProviderUpdateMainEntity, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-
+import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -200,6 +200,9 @@ export const RecordsetContext = createContext<{
    * The parent page's tuple
    */
   parentPageTuple?: any,
+  savedQueryConfig?: SavedQuery,
+  savedQueryReference: any,
+  setSavedQueryReference: (savedQueryReference: any) => void
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -260,7 +263,8 @@ type RecordsetProviderProps = {
    * The parent page's tuple
    */
   parentTuple?: any,
-  initialPage?: any
+  initialPage?: any,
+  savedQueryConfig?: SavedQuery
 }
 
 export default function RecordsetProvider({
@@ -276,7 +280,8 @@ export default function RecordsetProvider({
   onFavoritesChanged,
   parentReference,
   parentTuple,
-  initialPage
+  initialPage,
+  savedQueryConfig,
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -293,6 +298,7 @@ export default function RecordsetProvider({
   const [isLoading, setIsLoading, isLoadingRef] = useStateRef<boolean>(!initialPage);
   const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
   const [page, setPage, pageRef] = useStateRef<any>(initialPage ? initialPage : null);
+  const [savedQueryReference, setSavedQueryReference] = useState(null);
   const [colValues, setColValues] = useState<any>(initialPage ? getColumnValuesFromPage(initialPage) : []);
   /**
    * The columns that should be displayed in the result table
@@ -1125,12 +1131,13 @@ export default function RecordsetProvider({
       updateMainEntity, fetchSecondaryRequests, addUpdateCauses,
       // the following values are not supposed to change
       // but needed by other components
-      parentPageReference, parentPageTuple
+      parentPageReference, parentPageTuple,
+      savedQueryConfig, savedQueryReference, setSavedQueryReference
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
     isInitialized, page, colValues,
-    disabledRows, selectedRows, columnModels, totalRowCount
+    disabledRows, selectedRows, columnModels, totalRowCount, savedQueryReference
   ]);
 
   return (

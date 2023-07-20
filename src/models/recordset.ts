@@ -1,7 +1,8 @@
 // models
-import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 export type RecordsetProps = {
   initialReference: any,
@@ -12,6 +13,7 @@ export type RecordsetProps = {
     logStackPath: string,
     logAppMode?: string
   },
+  savedQueryConfig?: SavedQuery,
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: (

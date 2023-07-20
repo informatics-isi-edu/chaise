@@ -655,28 +655,41 @@ system columns:
      ```
 
  #### savedQueryConfig
- Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 3 properties, `catalog`, `schema`, and `table`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
+ Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 4 properties, `catalog`, `schema`, `table`, and `columnNameMapping`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
    - Type: Object
    - Default behavior: the saved query feature will be turned off
    - General syntax:
      ```
      savedQueryConfig: {
        storageTable: {
-         catalog: <catalog id>
-         schema: <schema name>
-         table: <table name>
+         catalog: <catalog id>,
+         schema: <schema name>,
+         table: <table name>,
+         columnNameMapping: {
+           catalog: <string>,
+           schemaName: <string>,
+           tableName: <string>,
+           userId: <string>,
+           queryId: <string>,
+           queryName: <string>,
+           description: <string>,
+           facets: <string>,
+           encodedFacets: <string>,
+           lastExecutionTime: <string>
+         }
        },
        defaultName: {
            facetChoiceLimit: <int>,
            facetTextLimit: <int>,
            totalTextLimit: <int>,
-       }
+       },
      }
      ```
    - `storageTable` attributes
-     - `catalog`: String - catalog id
-     - `schema`: String - schema name
-     - `table`: String - table name
+     - `catalog`: String - catalog id where the saved query table is
+     - `schema`: String - schema name in above catalog where below table is stored
+     - `table`: String - table name for saving queries to
+     - `columnNameMapping`: Object - all attributes are required for saved query functionality to work properly. These are the column names in the model that the data will be stored to. The columns require specific types: `description` as `longtext | markdown`, `facets` as `jsonb`, `encodedFacets` as `longtext`, `lastExecutionTime` as `timestamp[tz]`, and all others are type `text`
    - `defaultName` attributes
      - `facetChoiceLimit`: Set this value to define when to show a compressed facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the compressed syntax.
      - `facetTextLimit`: Set this value to define when to show a compressed facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the compressed syntax.
@@ -687,7 +700,19 @@ system columns:
         storageTable: {
             catalog: "73448",
             schema: "faceting",
-            table: "saved_query"
+            table: "saved_query",
+            columnNameMapping: {
+              queryId: "query_id",
+              catalog: "catalog",
+              schemaName: "schema_name",
+              tableName: "table_name",
+              userId: "user_id",
+              queryName: "name",
+              description: "description",
+              facets: "facets",
+              encodedFacets: "encoded_facets",
+              lastExecutionTime: "last_execution_time"
+            }
         },
         defaultName: {
             facetChoiceLimit: 2,
