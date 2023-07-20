@@ -18,13 +18,14 @@ const navbarLibSettings = {
  */
 const NAVBAR_SELECTOR = 'navbar';
 
-console.log('waiting for <navbar>')
 waitForElementToLoad(NAVBAR_SELECTOR).then(() => {
-  console.log('<navbar> present');
+  const navbar = document.querySelector(NAVBAR_SELECTOR) as HTMLElement;
 
-  const root = createRoot(document.querySelector(NAVBAR_SELECTOR) as HTMLElement);
-  root.render(
-    <AppWrapper appSettings={navbarLibSettings} includeNavbar ignoreHashChange>
+  createRoot(navbar).render(
+    <AppWrapper
+      appSettings={navbarLibSettings} smallSpinnerContainer={navbar}
+      includeNavbar ignoreHashChange
+    >
       {/* navbar is already included and we don't want anything else */}
       {/* (this comment is needed since appwrapper expects children) */}
     </AppWrapper>
