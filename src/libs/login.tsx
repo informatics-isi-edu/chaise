@@ -9,8 +9,7 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const loginLibSettings = {
-  appName: APP_NAMES.LOGIN,
-  isLib: true
+  appName: APP_NAMES.LOGIN
 };
 
 /**

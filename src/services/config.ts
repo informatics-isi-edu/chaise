@@ -49,9 +49,7 @@ export interface ConfigServiceSettings {
   overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
-  openIframeLinksInTab?: boolean,
-  // TODO isLib can be used for gradually showing content
-  isLib?: boolean
+  openIframeLinksInTab?: boolean
 }
 
 export interface ContextHeaderParams {

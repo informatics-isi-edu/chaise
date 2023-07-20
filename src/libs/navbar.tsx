@@ -8,8 +8,7 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const navbarLibSettings = {
-  appName: APP_NAMES.NAVBAR,
-  isLib: true
+  appName: APP_NAMES.NAVBAR
 };
 
 /**
