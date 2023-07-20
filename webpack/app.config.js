@@ -133,7 +133,9 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       alias: {
         ...options.resolveAliases,
         // the line below will make sure we can include chaise files using the package full name
-        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
+        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..'),
+        // the line below allows profiling on prod servers
+        'react-dom$': 'react-dom/profiling',
       },
     },
     module: {

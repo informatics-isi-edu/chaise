@@ -154,6 +154,29 @@ export type SelectedRow = {
   // cannotBeRemoved?: boolean;
 }
 
-export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => void;
-export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, dontFetchSecondary?: boolean, cb?: Function) => void;
-export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;
+export type RecordsetProviderAddUpdateCauses = (
+  /**
+   * an array of strings that will be logged with the request
+   */
+  causes: any[],
+  /**
+   * manually change the dirtyResult flag
+   */
+  setDirtyResult?: boolean,
+  /**
+   * send a queue object so both recordset and other flow-control use the same queue.
+   */
+  queue?: FlowControlQueueInfo,
+  /**
+   * force the isLoading state to show the spinner right away
+   */
+  forceIsLoading?: boolean
+) => void;
+
+export type RecordsetProviderUpdateMainEntity = (
+  updatePageCB: Function, notTerminal?: boolean, dontFetchSecondary?: boolean, cb?: Function
+) => void;
+
+export type RecordsetProviderFetchSecondaryRequests = (
+  updatePageCB: Function, hideSpinner?: boolean
+) => void;

@@ -21,6 +21,7 @@ import {
 // services
 import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -257,6 +258,8 @@ export default function RecordProvider({
    * @param changedContainers more complicated way of sending causes to signal which part of page chagned
    */
   const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: ChangeContainerDetails[]) => {
+    printDebugMessage('update called');
+
     if (!isUpdate) {
       flowControl.current.queue.counter = 0;
       flowControl.current.queue.occupiedSlots = 0;
@@ -282,8 +285,9 @@ export default function RecordProvider({
     // inline table
     const inlineRequestModels = Object.values(flowControl.current.inlineRelatedRequestModels);
     inlineRequestModels.forEach(function (m) {
-      // the last parameter is making sure we're using the same queue for the main and inline
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
+      // the third parameter is making sure we're using the same queue for the main and inline
+      // the fourth parameter will make sure we're showing the loading spinner right away
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -291,8 +295,9 @@ export default function RecordProvider({
 
     // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
-      // the last parameter is making sure we're using the same queue for the main and related
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
+      // the third parameter is making sure we're using the same queue for the main and related
+      // the fourth parameter will make sure we're showing the loading spinner right away
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -365,6 +370,11 @@ export default function RecordProvider({
   }
 
   // -------------------------- flow control function ---------------------- //
+  const printDebugMessage = (message: string, counter?: number): void => {
+    counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
+    $log.debug(`${Date.now()}, ${counter}: ${message}`);
+  };
+
   /**
    * The function that actually sends the requests
    * @param isUpdate whether it's the initial load or update
@@ -373,6 +383,8 @@ export default function RecordProvider({
     if (!flowControl.current.haveFreeSlot() || pauseProcessingRequests.current) {
       return;
     }
+    printDebugMessage('processing requests');
+
     isUpdate = (typeof isUpdate === 'boolean') ? isUpdate : false;
 
     if (flowControl.current.dirtyMain) {
@@ -424,7 +436,6 @@ export default function RecordProvider({
       const cm = columnModels[i];
       if (cm.relatedModel) {
         const rm = flowControl.current.inlineRelatedRequestModels[cm.index];
-        // TODO does spinner make sense?
         rm.fetchSecondaryRequests(processRequests, false);
       }
     }
