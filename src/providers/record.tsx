@@ -71,7 +71,7 @@ export const RecordContext = createContext<{
   /**
    * Whether to show the spinner for the related section
    */
-  showRelatedSectionSpinner: boolean
+  relatedSectionInitialized: boolean
   /**
    * The related entity models
    */
@@ -149,10 +149,9 @@ export default function RecordProvider({
    */
   const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
   /**
-   * whether we should show the related section spinner or not
-   * if false, you can be sure that the recordsetSet is updated on initial page load
+   * whether the related section has been initialized or not
    */
-  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner] = useState(true);
+  const [relatedSectionInitialized, setRelatedSectionInitialized] = useState(false);
 
   const [modelsInitialized, setModelsInitialized] = useState(false);
   const [modelsRegistered, setModelsRegistered] = useState(false);
@@ -224,11 +223,11 @@ export default function RecordProvider({
    * hide the related spinner if all are initialized
    */
   useEffect(() => {
-    if (!modelsRegistered || !showRelatedSectionSpinner) return;
+    if (!modelsRegistered || relatedSectionInitialized) return;
     // see if there's a related model that has not been initialized yet
     if (relatedModels.some((rm) => !rm.recordsetState.isInitialized || !rm.tableMarkdownContentInitialized)) return;
-    setShowRelatedSectionSpinner(false);
-  }, [modelsRegistered, showRelatedSectionSpinner, relatedModels]);
+    setRelatedSectionInitialized(true);
+  }, [modelsRegistered, relatedSectionInitialized, relatedModels]);
 
   /**
    * hide the main spinner if there aren't any pending requests
@@ -503,8 +502,8 @@ export default function RecordProvider({
         }
 
         // if there aren't any related entities don't show the spinner
-        if (flowControl.current.relatedRequestModels.length === 0 && showRelatedSectionSpinner) {
-          setShowRelatedSectionSpinner(false);
+        if (flowControl.current.relatedRequestModels.length === 0 && !relatedSectionInitialized) {
+          setRelatedSectionInitialized(true);
         }
 
         // Collate tuple.isHTML and tuple.values into an array of objects
@@ -1115,7 +1114,7 @@ export default function RecordProvider({
       getRecordLogAction,
       getRecordLogStack,
       // related section:
-      showRelatedSectionSpinner,
+      relatedSectionInitialized,
       relatedModels,
       updateRelatedRecordsetState,
       registerRelatedModel,
@@ -1127,7 +1126,7 @@ export default function RecordProvider({
     // mix:
     showEmptySections,
     // related entities:
-    showRelatedSectionSpinner, relatedModels,
+    relatedSectionInitialized, relatedModels,
   ]);
 
   return (
