@@ -237,44 +237,50 @@ const AppWrapperInner = ({
         }
       }
     });
-  }
+  };
 
-  /**
-   * in some cases (navbar app), we want to show a small spinner that fits the container
-   */
-  const renderSmallSpinner = () => {
-    const containerHeight = smallSpinnerContainer && smallSpinnerContainer.offsetHeight !== 0 ? smallSpinnerContainer.offsetHeight : 0;
-    if (containerHeight === 0) {
-      return <></>;
-    }
+  const renderSpinner = () => {
+    if (!displaySpinner && !smallSpinnerContainer) return <></>;
 
     /**
-     * the height/width of spinner is half of the container so we have enough padding
-     * above and below.
-     * I added the max and minimum to make sure we're not showing a very small or very
-     * large spinner.
-     * NOTE: we might want to be more smarter about this
+     * in some cases (navbar app), we want to show a small spinner that fits the container
      */
-    const minHeight = 15, maxHeight = 40, minBorderWidth = 2, maxBorderWidth = 5;
-    let height = containerHeight / 2, borderWidth = minBorderWidth;
-    if (height > maxHeight) {
-      height = maxHeight;
-      borderWidth = maxBorderWidth;
-    } else if (height < minHeight) {
-      height = minHeight;
-    }
-    const spinnerStyles = {
-      height: `${height}px`,
-      width: `${height}px`,
-      borderWidth: `${borderWidth}px`
-    }
-    return (
-      <div className='chaise-app-small-spinner-container'>
-        <div className='spinner-border text-light' role='status' style={spinnerStyles}>
-          <span className='sr-only'>Loading...</span>
+    if (smallSpinnerContainer) {
+      const containerHeight = smallSpinnerContainer && smallSpinnerContainer.offsetHeight !== 0 ? smallSpinnerContainer.offsetHeight : 0;
+      if (containerHeight === 0) {
+        return <></>;
+      }
+
+      /**
+       * the height/width of spinner is half of the container so we have enough padding
+       * above and below.
+       * I added the max and minimum to make sure we're not showing a very small or very
+       * large spinner.
+       * NOTE: we might want to be more smarter about this
+       */
+      const minHeight = 15, maxHeight = 40, minBorderWidth = 2, maxBorderWidth = 5;
+      let height = containerHeight / 2, borderWidth = minBorderWidth;
+      if (height > maxHeight) {
+        height = maxHeight;
+        borderWidth = maxBorderWidth;
+      } else if (height < minHeight) {
+        height = minHeight;
+      }
+      const spinnerStyles = {
+        height: `${height}px`,
+        width: `${height}px`,
+        borderWidth: `${borderWidth}px`
+      }
+      return (
+        <div className='chaise-app-small-spinner-container'>
+          <div className='spinner-border text-light' role='status' style={spinnerStyles}>
+            <span className='sr-only'>Loading...</span>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
+    return <ChaiseSpinner />;
   }
 
   return (
@@ -283,8 +289,7 @@ const AppWrapperInner = ({
         FallbackComponent={errorFallback}
       >
         {/* show spinner if we're waiting for configuration and there are no error during configuration */}
-        {(!smallSpinnerContainer && displaySpinner && !configDone && errors.length === 0) && <ChaiseSpinner />}
-        {(smallSpinnerContainer && !configDone && errors.length === 0) && renderSmallSpinner()}
+        {errors.length === 0 && !configDone && renderSpinner()}
         {configDone &&
           <div className='app-container'>
             {(includeNavbar || includeAlerts) &&
