@@ -81,6 +81,12 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
+        /**
+         * in case of libraries (navbar, login), we want to make sure the library
+         * dependencies are blocking the content so the navbar/login shows up
+         * right away instead of being delayed with the rest of the content.
+         */
+        scriptLoading: ac.isLib ? 'blocking' : 'defer',
         chunks: [bundleName],
         template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
