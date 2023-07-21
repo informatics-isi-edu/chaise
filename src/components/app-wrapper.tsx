@@ -252,27 +252,42 @@ const AppWrapperInner = ({
       }
 
       /**
-       * the height/width of spinner is half of the container so we have enough padding
+       * - the height/width of spinner is half of the container so we have enough padding
        * above and below.
-       * I added the max and minimum to make sure we're not showing a very small or very
+       * - I added the max and minimum to make sure we're not showing a very small or very
        * large spinner.
-       * NOTE: we might want to be more smarter about this
+       * - the border-width is calculated by interpolating based on the min and max values.
        */
       const minHeight = 15, maxHeight = 40, minBorderWidth = 2, maxBorderWidth = 5;
-      let height = containerHeight / 2, borderWidth = minBorderWidth;
-      if (height > maxHeight) {
+
+      let height = containerHeight / 2, borderWidth;
+
+      // we don't have enough space to show a proper spinner (do we want to try anyways?)
+      // realisticly this won't happen. the only way that we fall into this case
+      // is if data-modelers chose a very small height which means not preserving
+      // enough space for the text that is going to be displayed on the navbar.
+      if (height < minHeight) {
+        return <></>;
+      }
+
+      // we don't want to show a giant spinner
+      if (height >= maxHeight) {
         height = maxHeight;
         borderWidth = maxBorderWidth;
-      } else if (height < minHeight) {
-        height = minHeight;
       }
+      // bw = ((max_bw-min_bw)/(max_h - min_h)) * (h - min_h)) + min_bw
+      else {
+        borderWidth = ((maxBorderWidth-minBorderWidth)/(maxHeight-minHeight)) * (height-minHeight);
+        borderWidth += minBorderWidth;
+      }
+
       const spinnerStyles = {
         height: `${height}px`,
         width: `${height}px`,
         borderWidth: `${borderWidth}px`
       }
       return (
-        <div className='chaise-app-small-spinner-container'>
+        <div className='chaise-app-wrapper-sm-spinner'>
           <div className='spinner-border text-light' role='status' style={spinnerStyles}>
             <span className='sr-only'>Loading...</span>
           </div>

@@ -23,7 +23,7 @@
  * the spinner that will be showed in some apps/libs (navbar) during configuration
  * these rules are making sure the spinner is displayed in the middle of the container
  */
-.chaise-app-small-spinner-container {
+.chaise-app-wrapper-sm-spinner {
   display: flex;
   height: 100%;
   .spinner-border {
