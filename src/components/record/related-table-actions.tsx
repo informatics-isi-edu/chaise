@@ -633,7 +633,7 @@ const RelatedTableActions = ({
         label = 'Table mode';
       }
     } else {
-      icon = 'fa-solid fa-grip';
+      icon = 'fa-solid fa-layer-group';
       tooltip = 'Switch back to the custom display mode.';
       label = 'Custom mode';
     }
