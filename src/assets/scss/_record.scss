@@ -114,7 +114,7 @@
     .related-table-actions {
       float: right;
       display: flex;
-      align-items: baseline;
+      align-items: center;
 
       // make sure the content is not touching the buttons
       padding-left: 2px;
@@ -148,6 +148,10 @@
         top: -15px;
       }
 
+      .dropdown {
+        min-width: 50px;
+      }
+
       .dropdown-item {
         padding: 0;
 
@@ -166,7 +170,20 @@
     .table-header-actions {
       width: 100%;
       justify-content: end;
+      margin-top: -34px;
     }
+
+    .chaise-accordion-header {
+      display: block !important;
+
+      .chaise-accordion-header-buttons {
+        display: flex;
+        margin-top: auto !important;
+        margin-left: 75px;
+        box-sizing: border-box;
+      }
+    }
+
 
     .chaise-table-top-scroll-wrapper {
       z-index: 1;
@@ -183,7 +200,7 @@
     .chaise-accordion-header {
       .chaise-accordion-displayname {
         white-space: nowrap;
-        min-width: 25%
+        max-width: 25%
       }
 
       white-space: unset !important;

@@ -108,7 +108,7 @@ const RelatedTableActions = ({
    */
   useLayoutEffect(() => {
     if (!containerRef.current) return;
-
+    const mainContainer:any = document.querySelector('.related-section-container');
     const calculateButtons = () => {
 
       let buttons: any = [];
@@ -121,7 +121,7 @@ const RelatedTableActions = ({
          * If there aren't any enough space to show even one button, just switch to showing all as dropdown.
          * 200 is based on the width of the container containing dropdown and last visible button.
          */
-        setShowAllActionsAsDropdown(containerRef.current.getBoundingClientRect().width < 200);
+        setShowAllActionsAsDropdown(mainContainer?.offsetWidth < 320);
         const tableHeaderButtonsToAddToDropdown: any = [];
         let buttonLeftOffset = 0;
         let totalWidth = 0;
