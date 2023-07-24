@@ -139,7 +139,15 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       alias: {
         ...options.resolveAliases,
         // the line below will make sure we can include chaise files using the package full name
-        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
+        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..'),
+        /**
+         * the line below allows profiling on prod servers.
+         *
+         * while adding it won't have a significant performance difference, we should only
+         * uncomment this during development and should not use it for actual deployment.
+         * https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977
+         */
+        // 'react-dom$': 'react-dom/profiling',
       },
     },
     module: {

@@ -441,7 +441,12 @@ export default function RecordsetProvider({
 
   const printDebugMessage = (message: string, counter?: number): void => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
-    $log.debug(`counter ${counter}: ` + message);
+    let dm = `${Date.now()}, ${counter}: `;
+    if (config.containerDetails) {
+      dm += `${config.containerDetails.isInline ? 'inline' : 'related'}(index=${config.containerDetails.index}), `;
+    }
+    dm += `${message}`;
+    $log.debug(dm);
   };
 
   /**
@@ -553,13 +558,22 @@ export default function RecordsetProvider({
     return true;
   };
 
-  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => {
+  /**
+   * can be used to manually change the state of flow-control
+   * used in record flow-control where we want to manipulate the state of each
+   * related entity.
+   */
+  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo, forceIsLoading?: boolean) => {
     if (queue) {
       flowControl.current.queue = queue;
     }
 
     if (setDirtyResult) {
       flowControl.current.dirtyResult = true;
+    }
+
+    if (forceIsLoading) {
+      setIsLoading(true);
     }
 
     flowControl.current.addCauses(causes);
@@ -569,8 +583,6 @@ export default function RecordsetProvider({
     // TODO does this make sense?
     if (initialPage) return;
 
-    printDebugMessage('running update page');
-
     if (!flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -579,6 +591,8 @@ export default function RecordsetProvider({
     // NOTE in related section we don't want the filter info to be captured,
     //      as we're already doing that with 'source'
     if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      printDebugMessage('processing requests');
+
       LogService.updateStackFilterInfo(
         flowControl.current.getLogStack(),
         referenceRef.current.filterLogInfo,
