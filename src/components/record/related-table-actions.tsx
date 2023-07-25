@@ -108,6 +108,13 @@ const RelatedTableActions = ({
    */
   useLayoutEffect(() => {
     if (!containerRef.current) return;
+    /*
+   * We choose main-container for the resize sensor because we we were encountering bugs:
+   * 1) All buttons pushing to dropdown if we have just one button in the table header section
+   * 2) Resize sensor not getting called if there is no change in width of the button container even if we resize
+   * So we should put resize sensor on a container that won’t be affected by the logic inside it.
+   * We are using ResizeSensor to listen to the resize event. 
+   */
     const mainContainer:any = document.querySelector('.main-container');
     const calculateButtons = () => {
 
@@ -119,7 +126,8 @@ const RelatedTableActions = ({
         buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
         /**
          * If there aren't any enough space to show even one button, just switch to showing all as dropdown.
-         * 200 is based on the width of the container containing dropdown and last visible button.
+         * 350 is based on the width of the container containing dropdown and last visible button. We choose 350 
+         * because that is when the space gets more congested and we need to push all buttons to the dropdown
          */
         setShowAllActionsAsDropdown(mainContainer?.offsetWidth < 350);
         const tableHeaderButtonsToAddToDropdown: any = [];
