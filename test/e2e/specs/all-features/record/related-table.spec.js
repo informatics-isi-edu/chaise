@@ -116,7 +116,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
         bulkEditLink: [
           browser.params.url, 'recordedit', `#${browser.params.catalogId}`,
           'product-unordered-related-tables-links:booking',
-          '*::facets::N4IghgdgJiBcDaoDOB7ArgJwMYFM6JHQBcAjdafEABwxSjSyIFo0IUMocMconuAbMER5MiYEvxxIm-AJYQA1khAAaEADMFAfTIoF8gOZawWLCgC25ukNkoIIALoBfNQCUAkgBFHarAAsUWVxlBBAAJgA5AGFHJ2cgA'
+          // we cannot test the actual facet blob since it's based on RID
+          // and we also don't have access to ermrestjs here to encode it for us
+          '*::facets::'
         ].join('/'),
         viewMore: {
             displayname: "booking",
