@@ -131,7 +131,6 @@
       .button-wrapper {
         height: 30px;
         overflow: hidden;
-        position: relative;
         text-align: right;
       }
 
@@ -167,23 +166,14 @@
       }
     }
 
+    .main-section-actions {
+      position: static;
+    }
+
     .table-header-actions {
       width: 100%;
       justify-content: end;
-      margin-top: -34px;
     }
-
-    .chaise-accordion-header {
-      display: block !important;
-
-      .chaise-accordion-header-buttons {
-        display: flex;
-        margin-top: auto !important;
-        margin-left: 75px;
-        box-sizing: border-box;
-      }
-    }
-
 
     .chaise-table-top-scroll-wrapper {
       z-index: 1;
@@ -200,7 +190,6 @@
     .chaise-accordion-header {
       .chaise-accordion-displayname {
         white-space: nowrap;
-        max-width: 25%
       }
 
       white-space: unset !important;
