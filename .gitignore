@@ -35,3 +35,6 @@ common/styles/navbar.css
 
 # sass temporary compiled files
 .sass-cache
+/test-results/
+/playwright-report/
+/playwright/.cache/

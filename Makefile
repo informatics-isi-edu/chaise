@@ -105,6 +105,9 @@ PARALLEL_TESTS=$(FullFeaturesConfirmationParallel) $(DefaultConfigParallel) $(Fu
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
+
+FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features/playwright.config.ts
+
 ALL_MANUAL_TESTS=$(Manualrecordset)
 
 define make_test
@@ -115,8 +118,19 @@ define make_test
 	exit $$rc;
 endef
 
+define make_test_playwright
+	rc=0; \
+	for file in $(1); do \
+		 npx playwright test --config $$file || rc=1; \
+	done; \
+	exit $$rc;
+endef
+
 test-%:
 	$(call make_test, $($*), "0")
+
+playwright-%:
+	$(call make_test_playwright, $($*), "0")
 
 #### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
@@ -150,6 +164,10 @@ testparallel: test-PARALLEL_TESTS
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
 testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeatures-playwright
+testfullfeatures-playwright: playwright-FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeaturesconfirmation

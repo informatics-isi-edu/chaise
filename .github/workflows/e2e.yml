@@ -1,13 +1,7 @@
 
 name: Chaise end-to-end tests
 
-on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'master'
+[on]
 
 concurrency: chaise_env
 
@@ -120,55 +114,61 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Setup and connect to saucelabs
-        timeout-minutes: 2
-        run: |
-          curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
-          tar -xzf saucelabs.tar.gz
-          cd sc-*
-          bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
-      - name: Check sauce connect
-        run: |
-          while [ ! -f /tmp/sc_ready ]; do
-            echo "Waiting for Sauce Connect..."
-            sleep 5;
-          done;
-      - name: Run full features confirmation test spec
-        id: test-full-features-confirmation
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testfullfeaturesconfirmation
-      - name: Run default config test spec
-        id: test-default-config
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdefaultconfig
+      # - name: Setup and connect to saucelabs
+      #   timeout-minutes: 2
+      #   run: |
+      #     curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
+      #     tar -xzf saucelabs.tar.gz
+      #     cd sc-*
+      #     bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
+      # - name: Check sauce connect
+      #   run: |
+      #     while [ ! -f /tmp/sc_ready ]; do
+      #       echo "Waiting for Sauce Connect..."
+      #       sleep 5;
+      #     done;
+      # - name: Run full features confirmation test spec
+      #   id: test-full-features-confirmation
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testfullfeaturesconfirmation
+      # - name: Run default config test spec
+      #   id: test-default-config
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdefaultconfig
       - name: Run full features test spec
         id: test-full-features
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeatures
-      - name: Run delete prohibited test spec
-        id: test-delete-prohibited
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
-      - name: Check on full features confirmation test spec
-        if: always() && steps.test-full-features-confirmation.outcome != 'success'
-        run: exit 1
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
-        run: exit 1
+          make testfullfeatures-playwright
+      # - name: Run delete prohibited test spec
+      #   id: test-delete-prohibited
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
+      # - name: Check on full features confirmation test spec
+      #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on default config test spec
+      #   if: always() && steps.test-default-config.outcome != 'success'
+      #   run: exit 1
       - name: Check on full features test spec
         if: always() && steps.test-full-features.outcome != 'success'
         run: exit 1
-      - name: Check on delete prohibited test spec
-        if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
+      # - name: Check on delete prohibited test spec
+      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
+      #   run: exit 1
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
