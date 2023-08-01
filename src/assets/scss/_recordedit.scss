@@ -104,46 +104,147 @@
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
+          // We add this so that the select-all-row spans across the entire view
+          max-width: none;
+
+          .chaise-btn-toolbar {
+            pointer-events: none;
+          }
         }
 
         .inputs-row {
           display: flex;
           flex-direction: row;
+
+          // adding an overlay on top of form to add the click event
+          .form-overlay {
+            height: 100%;
+            width: 100%;
+            z-index: 2;
+            cursor: pointer;
+          }
         }
 
         .select-all-row {
           width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+          // Making it sticky so that it is fixed in its position and rest of the form conatiner scrolls horizontally
+          position: sticky;
+          top: 0;
+          left: 0;
+          z-index: 2;
 
-          .select-all-text,
-          .select-all-input,
-          .select-all-buttons {
-            float: left;
+          // Adding a div to align the content centre always
+          .centre-align {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            max-width: 100%;
           }
 
-          .select-all-text {
-            padding: 4px;
-            border: 1px solid transparent;
+          .select-upper-row {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+
+            .select-all-text {
+              display: flex;
+              align-items: center;
+              cursor: pointer;
+
+              .select-all-checkbox {
+                display: flex;
+                align-items: center;
+
+                .checkbox-input {
+                  position: relative;
+                  margin: 0 5px 0 0;
+                  width: 16px;
+                  height: 16px;
+
+                  &:before {
+                    width: 16px;
+                    height: 16px;
+                  }
+
+                  &:after {
+                    top: -5px;
+                    left: -1px;
+                  }
+                }
+              }
+            }
+
+            .select-all-buttons {
+              text-align: right;
+
+              .select-all-how-to {
+                border-color: white !important;
+                cursor: default;
+                margin-left: 5px;
+              }
+
+              .select-all-how-to:hover {
+                z-index: auto !important;
+              }
+            }
           }
 
           .select-all-input {
-            width: 250px;
-            margin: 0px 5px;
+            width: 100%;
           }
 
-          .select-all-buttons {
-            display: flex;
-            flex-direction: column;
 
-            .select-all-checkbox {
-              display: flex;
-              align-items: center;
+        }
 
-              .checkbox-input {
-                position: relative;
+        @media (min-width: 1800px) {
+          .select-all-row {
+            .select-all-input {
+              width: 1200px;
+
+              textarea {
+                resize: both;
+                width: 1200px;
+                max-width: 100%;
               }
+            }
 
-              .checkbox-label {
-                margin-left: 5px;
+            .select-all-textarea {
+              width: 100%;
+            }
+          }
+
+        }
+
+        @media (max-width: 1799px) {
+          .select-all-row {
+            .select-all-input {
+              width: 100%;
+
+              textarea {
+                width: 100% !important;
+              }
+            }
+
+            .centre-align {
+              width: 100%;
+            }
+          }
+        }
+
+        @media (max-width: 640px) {
+          .select-all-row {
+            .select-upper-row {
+              flex-direction: column-reverse;
+
+              .select-all-buttons {
+                margin-bottom: 5px;
+                display: block;
               }
             }
           }
@@ -207,15 +308,12 @@
         border-radius: 0;
         min-height: 47px;
         padding: 8px 10px;
-        // Adding this to make the div clickable for apply some feature
-        cursor: pointer;
       }
 
       // This is added to show the form is selected to apply the change
       .entity-active {
-        border: 2px solid #4674a7;
-        transition: border 0.1s ease;
-        will-change: transform;
+        outline: 2px solid #4674a7;
+        outline-offset: -2px;
       }
 
       // only form inputs
@@ -361,4 +459,5 @@
   //   width: 0%;
   //   background-color: #8cacc7 !important;
   // }
+
 }

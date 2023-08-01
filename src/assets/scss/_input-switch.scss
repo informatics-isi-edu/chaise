@@ -22,8 +22,6 @@
   .chaise-input-control {
     height: auto;
     padding: 0 !important;
-    // Adding this to make the div clickable for apply some feature
-    cursor: pointer;
 
     textarea,
     .disabled-textarea {
@@ -46,7 +44,8 @@
     .md-header {
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
-      padding: 6px 4px;
+      // Padding is changed due to the border/padding issue when we add a border to indicate the form is selected/active
+      padding: 4px 2px;
       background: #f5f5f5;
     }
 
