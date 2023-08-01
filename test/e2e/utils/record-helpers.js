@@ -719,6 +719,24 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
             }
         });
 
+        if (typeof params.canEdit === "boolean") {
+          if (params.canEdit) {
+            it ('`Bulk Edit` button should be visible with correct link', function () {
+              const btn = chaisePage.recordPage.getBulkEditLink(params.displayname, params.isInline);
+              expect(btn.isPresent()).toBeTruthy();
+
+              if (params.bulkEditLink) {
+                expect(btn.getAttribute('href')).toContain(params.bulkEditLink);
+              }
+            });
+          } else {
+            it ('`Bulk Edit` button should not be offered.', function () {
+              const btn = chaisePage.recordPage.getBulkEditLink(params.displayname, params.isInline);
+              expect(btn.isPresent()).not.toBeTruthy();
+            });
+          }
+        }
+
         // Display Mode
         describe("view mode and rows, ", function () {
 

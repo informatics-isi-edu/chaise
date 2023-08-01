@@ -13,6 +13,7 @@ import {
   SELECT_ALL_INPUT_FORM_VALUE,
 } from "@isrd-isi-edu/chaise/src/models/recordedit";
 import { LogActions } from "@isrd-isi-edu/chaise/src/models/log";
+import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue } from "@isrd-isi-edu/chaise/src/utils/input-utils";
@@ -23,8 +24,10 @@ import { makeSafeIdAttr } from "@isrd-isi-edu/chaise/src/utils/string-utils";
 import { addTopHorizontalScroll } from "@isrd-isi-edu/chaise/src/utils/ui-utils";
 
 const FormContainer = (): JSX.Element => {
-  const { onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels } =
-    useRecordedit();
+
+  const {
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm, 
+  } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
 
@@ -100,7 +103,8 @@ const FormContainer = (): JSX.Element => {
         ref={formContainer}
       >
         {/* form header */}
-        <div className="form-header-row">
+
+        {config.displayMode !== RecordeditDisplayMode.POPUP && <div className='form-header-row'>
           {forms.map((formNumber: number, formIndex: number) => (
             <div
               key={`form-header-${formNumber}`}
@@ -124,7 +128,7 @@ const FormContainer = (): JSX.Element => {
               </div>
             </div>
           ))}
-        </div>
+        </div>}
         {/* inputs for each column */}
         {columnModels.map(({}, idx) => (
           <FormRow

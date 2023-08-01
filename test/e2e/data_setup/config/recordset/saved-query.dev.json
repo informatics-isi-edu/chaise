@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordset/saved-query.config.json"
+      ],
+      "schema": "saved_query"
+  },
+  "cleanup": true
+}
