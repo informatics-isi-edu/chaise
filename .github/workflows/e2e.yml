@@ -1,7 +1,9 @@
 
 name: Chaise end-to-end tests
 
-[on]
+on:
+  - push
+  - pull_request
 
 concurrency: chaise_env
 
