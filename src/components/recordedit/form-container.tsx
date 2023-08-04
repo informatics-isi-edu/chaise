@@ -1,28 +1,28 @@
 // components
-import InputSwitch from "@isrd-isi-edu/chaise/src/components/input-switch/input-switch";
-import ChaiseTooltip from "@isrd-isi-edu/chaise/src/components/tooltip";
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useFormContext } from "react-hook-form";
-import useRecordedit from "@isrd-isi-edu/chaise/src/hooks/recordedit";
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { LogActions } from "@isrd-isi-edu/chaise/src/models/log";
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getDisabledInputValue } from "@isrd-isi-edu/chaise/src/utils/input-utils";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
-import { isObjectAndKeyDefined } from "@isrd-isi-edu/chaise/src/utils/type-utils";
-import { copyOrClearValue } from "@isrd-isi-edu/chaise/src/utils/recordedit-utils";
-import { makeSafeIdAttr } from "@isrd-isi-edu/chaise/src/utils/string-utils";
-import { addTopHorizontalScroll } from "@isrd-isi-edu/chaise/src/utils/ui-utils";
+import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const FormContainer = (): JSX.Element => {
 
   const {
-    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm, 
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm,
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -48,7 +48,7 @@ const FormContainer = (): JSX.Element => {
        * NOTE: it's a bit hacky as we're looking at the children
        *       of the component. But given that it's useLayoutEffect it should be fine.
        */
-      document.querySelector(".form-inputs-row") as HTMLElement
+      document.querySelector('.form-inputs-row') as HTMLElement
     );
 
     return () => {
@@ -72,12 +72,12 @@ const FormContainer = (): JSX.Element => {
 
   // Callback event for scroll functionality on recordedit-form to set a max-width to select-all-row as width of the visible area
   const handleScroll = () => {
-    const parentContainer: any = document.querySelector(".recordedit-form");
-    const nonScrollableDiv: any = document.querySelector(".select-all-row");
+    const parentContainer: any = document.querySelector('.recordedit-form');
+    const nonScrollableDiv: any = document.querySelector('.select-all-row');
 
     if (parentContainer && nonScrollableDiv) {
       const visibleWidth = parentContainer.offsetWidth; // Width of the visible area
-      nonScrollableDiv.style.maxWidth = visibleWidth + "px"; // Set the max-width to the visible width
+      nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
     }
   };
 
@@ -87,13 +87,13 @@ const FormContainer = (): JSX.Element => {
     removeForm([formIndex]);
   };
   return (
-    <div className="form-container" ref={formContainer}>
-      <div className="chaise-table-top-scroll-wrapper">
-        <div className="chaise-table-top-scroll"></div>
+    <div className='form-container' ref={formContainer}>
+      <div className='chaise-table-top-scroll-wrapper'>
+        <div className='chaise-table-top-scroll'></div>
       </div>
       <form
-        id="recordedit-form"
-        className="recordedit-form chaise-hr-scrollable"
+        id='recordedit-form'
+        className='recordedit-form chaise-hr-scrollable'
         onScroll={handleScroll}
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
         ref={formContainer}
@@ -104,20 +104,20 @@ const FormContainer = (): JSX.Element => {
           {forms.map((formNumber: number, formIndex: number) => (
             <div
               key={`form-header-${formNumber}`}
-              className="form-header entity-value"
+              className='form-header entity-value'
             >
               <span>{formIndex + 1}</span>
-              <div className="form-header-buttons-container">
+              <div className='form-header-buttons-container'>
                 {forms.length > 1 && (
                   <ChaiseTooltip
-                    placement="bottom"
-                    tooltip="Click to remove this record from the form."
+                    placement='bottom'
+                    tooltip='Click to remove this record from the form.'
                   >
                     <button
-                      className="chaise-btn chaise-btn-secondary pull-right remove-form-btn"
+                      className='chaise-btn chaise-btn-secondary pull-right remove-form-btn'
                       onClick={() => deleteForm(formIndex, formNumber)}
                     >
-                      <i className="fa-solid fa-xmark" />
+                      <i className='fa-solid fa-xmark' />
                     </button>
                   </ChaiseTooltip>
                 )}
@@ -126,7 +126,7 @@ const FormContainer = (): JSX.Element => {
           ))}
         </div>}
         {/* inputs for each column */}
-        {columnModels.map(({}, idx) => (
+        {columnModels.map(({ }, idx) => (
           <FormRow
             removeClicked={removeClicked}
             setRemoveClicked={setRemoveClicked}
@@ -298,7 +298,7 @@ const FormRow = ({
       return true;
     }
 
-    if (typeof formNumber === "number") {
+    if (typeof formNumber === 'number') {
       const valName = `${formNumber}-${columnModel.column.name}`;
       if (
         canUpdateValues &&
@@ -320,8 +320,8 @@ const FormRow = ({
       formNumber === SELECT_ALL_INPUT_FORM_VALUE
     );
 
-    let placeholder = "";
-    let permissionError = "";
+    let placeholder = '';
+    let permissionError = '';
     if (isDisabled) {
       placeholder = getDisabledInputValue(columnModel.column);
 
@@ -345,7 +345,7 @@ const FormRow = ({
 
     return (
       <>
-        {permissionError && typeof formIndex === "number" && (
+        {permissionError && typeof formIndex === 'number' && (
           <div
             className={`column-permission-overlay column-permission-overlay-${safeClassNameId}`}
             onClick={() => onPermissionClick(formIndex)}
@@ -360,14 +360,14 @@ const FormRow = ({
           requiredInput={columnModel.isRequired}
           name={`${formNumber}-${colName}`}
           type={columnModel.inputType}
-          classes="column-cell-input"
+          classes='column-cell-input'
           placeholder={placeholder}
           columnModel={columnModel}
           appMode={appMode}
           formNumber={formNumber}
           parentReference={reference}
           parentTuple={
-            appMode === appModes.EDIT && typeof formIndex === "number"
+            appMode === appModes.EDIT && typeof formIndex === 'number'
               ? tuples[formIndex]
               : undefined
           }
@@ -376,7 +376,7 @@ const FormRow = ({
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
         />
-        {typeof formIndex === "number" && formIndex in showPermissionError && (
+        {typeof formIndex === 'number' && formIndex in showPermissionError && (
           <div
             className={`column-permission-warning column-permission-warning-${safeClassNameId}`}
           >
@@ -389,21 +389,20 @@ const FormRow = ({
 
   return (
     <div
-      className={`form-inputs-row ${showSelectAll ? "highlighted-row" : ""}`}
+      className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`}
       ref={container}
     >
-      <div className="inputs-row">
+      <div className='inputs-row'>
         {forms.map((formNumber: number, formIndex: number) => (
           <div
             key={`form-${formNumber}-input-${columnModelIndex}`}
             /**
              * This is added to show the form is selected to apply the change when it is in edit mode
              */
-            className={`form-overlay entity-value ${
-              activeForm.includes(formNumber) && showSelectAll
-                ? "entity-active"
-                : ""
-            }`}
+            className={`form-overlay entity-value ${activeForm.includes(formNumber) && showSelectAll
+                ? 'entity-active'
+                : ''
+              }`}
             onClick={() => {
               // I couldn’t test that scenario, since on load we’re removing the forms that user cannot edit,
               if (
@@ -495,8 +494,8 @@ const SelectAllRow = ({
 
       // see if the input is empty
       let temp = !Boolean(data[n]);
-      if (columnModel.column.type.name === "boolean") {
-        temp = typeof data[n] !== "boolean";
+      if (columnModel.column.type.name === 'boolean') {
+        temp = typeof data[n] !== 'boolean';
       }
 
       if (isEmpty !== temp) {
@@ -601,15 +600,15 @@ const SelectAllRow = ({
 
   const renderHelpTooltip = () => {
     const splitLine1 =
-      "You can click on the form to select it and apply changes to it.";
+      'You can click on the form to select it and apply changes to it.';
     const splitLine2 =
-      "You can use the checkbox to select and deselect all records. " +
-      "By default, if there is no previous selection, the first form will be selected. ";
+      'You can use the checkbox to select and deselect all records. ' +
+      'By default, if there is no previous selection, the first form will be selected. ';
     const splitLine3 =
-      "After the forms are selected, " +
-      "you can click Apply button to apply the changes to selected records.";
+      'After the forms are selected, ' +
+      'you can click Apply button to apply the changes to selected records.';
     const splitLine4 =
-      "You can also clear the values for selected records by clicking on Clear button.";
+      'You can also clear the values for selected records by clicking on Clear button.';
     return (
       <>
         <p>{splitLine1}</p>
@@ -621,59 +620,59 @@ const SelectAllRow = ({
   };
 
   return (
-    <div className="select-all-row match-entity-value">
-      <div className="centre-align">
+    <div className='select-all-row match-entity-value'>
+      <div className='centre-align'>
         <div
-          className="select-upper-row"
-          style={{ display: "flex", justifyContent: "space-between" }}
+          className='select-upper-row'
+          style={{ display: 'flex', justifyContent: 'space-between' }}
         >
-          <div className="select-all-text">
+          <div className='select-all-text'>
             <ChaiseTooltip
-              placement="bottom-start"
+              placement='bottom-start'
               show={showTooltip}
               tooltip={
-                !selected ? "Select all records." : "Clear all selection"
+                !selected ? 'Select all records.' : 'Clear all selection'
               }
               onToggle={(show) => setShowTooltip(show)}
             >
-              <span className="chaise-checkbox select-all-checkbox">
+              <span className='chaise-checkbox select-all-checkbox'>
                 <input
                   ref={ref}
-                  className={"checkbox-input" + (selected ? " checked" : "")}
-                  type="checkbox"
+                  className={'checkbox-input' + (selected ? ' checked' : '')}
+                  type='checkbox'
                   checked={selected}
                   disabled={false}
                   onChange={onSelectChange}
                 />
 
-                <span className="checkbox-label" onClick={onSelectChange}>
+                <span className='checkbox-label' onClick={onSelectChange}>
                   {activeForm && activeForm?.length > 0
                     ? `${activeForm?.length} of ${forms.length} selected records`
-                    : "Select All"}
+                    : 'Select All'}
                 </span>
               </span>
             </ChaiseTooltip>
             <ChaiseTooltip
-              placement="bottom-start"
+              placement='bottom-start'
               tooltip={renderHelpTooltip()}
             >
               <button
-                type="button"
-                className="select-all-how-to chaise-btn chaise-btn-tertiary chaise-btn-sm"
+                type='button'
+                className='select-all-how-to chaise-btn chaise-btn-tertiary chaise-btn-sm'
               >
-                <span className="chaise-icon chaise-info"></span>
+                <span className='chaise-icon chaise-info'></span>
               </button>
             </ChaiseTooltip>
           </div>
 
-          <div className="select-all-buttons">
-            <div className="chaise-btn-group">
+          <div className='select-all-buttons'>
+            <div className='chaise-btn-group'>
               <ChaiseTooltip
-                tooltip="Apply the value to selected records."
-                placement="bottom"
+                tooltip='Apply the value to selected records.'
+                placement='bottom'
               >
                 <button
-                  type="button"
+                  type='button'
                   className={`select-all-apply-${btnClass}`}
                   onClick={applyValueToAll}
                   // we should disable it when its empty or has error
@@ -686,11 +685,11 @@ const SelectAllRow = ({
                 </button>
               </ChaiseTooltip>
               <ChaiseTooltip
-                tooltip="Clear all values for selected records."
-                placement="bottom"
+                tooltip='Clear all values for selected records.'
+                placement='bottom'
               >
                 <button
-                  type="button"
+                  type='button'
                   className={`select-all-clear-${btnClass}`}
                   onClick={clearAllValues}
                   disabled={activeForm?.length === 0}
@@ -699,11 +698,11 @@ const SelectAllRow = ({
                 </button>
               </ChaiseTooltip>
               <ChaiseTooltip
-                tooltip="Close the set multiple inputs."
-                placement="bottom"
+                tooltip='Close the set multiple inputs.'
+                placement='bottom'
               >
                 <button
-                  type="button"
+                  type='button'
                   className={`select-all-close-${btnClass}`}
                   onClick={closeSelectAll}
                 >
@@ -714,12 +713,11 @@ const SelectAllRow = ({
           </div>
         </div>
         <div
-          className={`select-all-input ${
-            columnModel.inputType === "markdown" ||
-            columnModel.inputType === "longtext"
-              ? "select-all-textarea"
-              : ""
-          }`}
+          className={`select-all-input ${columnModel.inputType === 'markdown' ||
+            columnModel.inputType === 'longtext'
+            ? 'select-all-textarea'
+            : ''
+            }`}
         >
           <InputSwitch
             key={colName}
@@ -730,7 +728,7 @@ const SelectAllRow = ({
             requiredInput={false}
             name={inputName}
             type={columnModel.inputType}
-            classes="column-cell-input"
+            classes='column-cell-input'
             columnModel={columnModel}
             appMode={appMode}
             formNumber={SELECT_ALL_INPUT_FORM_VALUE}
