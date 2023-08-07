@@ -107,6 +107,8 @@ ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) 
 
 
 FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features/playwright.config.ts
+FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features-confirmation/playwright.config.ts
+DELETE_PROHIBITED_PARALLEL_TESTS=test/playwright/specs/delete-prohibited/playwright.config.ts
 
 ALL_MANUAL_TESTS=$(Manualrecordset)
 
@@ -173,9 +175,16 @@ testfullfeatures-playwright: playwright-FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT
 .PHONY: testfullfeaturesconfirmation
 testfullfeaturesconfirmation: test-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS
 
+.PHONY: testfullfeaturesconfirmation-playwright
+testfullfeaturesconfirmation-playwright: playwright-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT
+
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited
 testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
+
+.PHONY: testdeleteprohibited-playwright
+testdeleteprohibited-playwright: playwright-DELETE_PROHIBITED_PARALLEL_TESTS
+
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testdefaultconfig

@@ -1,8 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
+import { resolve } from 'path';
 
 
 const getConfig = (options: any) => {
   process.env.PLAYWRIGHT_TEST_OPTIONS = JSON.stringify(options);
+
+  console.log(`running ${process.env.CI ? 'on CI' : 'locally'}.`);
+
+  const testName = options.testName ? options.testName : 'test';
 
   const config = defineConfig({
 
@@ -22,10 +27,17 @@ const getConfig = (options: any) => {
     workers: process.env.CI ? 1 : undefined,
 
     // Reporter to use
-    reporter: process.env.CI ? 'html' : [['list', { printSteps: true }]],
+    reporter: process.env.CI ? [
+      ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
+      ['line']
+    ] : [
+      ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
+      ['list', { printSteps: true }]
+    ],
+
+    // outputDir: resolve(__dirname, './../../../playwright-output'),
 
     globalSetup: require.resolve('./playwright.setup'),
-
     globalTeardown: require.resolve('./playwright.teardown'),
 
     use: {
