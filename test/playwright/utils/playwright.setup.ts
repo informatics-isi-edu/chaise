@@ -2,6 +2,7 @@ import { FullConfig } from '@playwright/test';
 import axios from 'axios';
 import { exec, execSync } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 
 export default async function globalSetup(config: FullConfig) {
   console.log('doing global setup');
@@ -77,6 +78,9 @@ async function checkUserSessions() {
 
         console.log('ERMrest url is ' + process.env.ERMREST_URL);
 
+        console.log(`OS hostname is ${os.hostname()}`);
+        console.log(`exec hostname is ${stdout.trim()}`);
+
         try {
           console.log('getting test1 user info');
           await getSessionByUserPass('test1', 'dummypassword', 'AUTH_COOKIE');
@@ -116,7 +120,7 @@ async function checkUserSessions() {
  * create the catalog and data
  */
 async function setupCatalog(testConfiguration: any) {
-  //
+  // TODO
 }
 
 async function getSessionByCookie(cookie: string, authCookieEnvName: string) {

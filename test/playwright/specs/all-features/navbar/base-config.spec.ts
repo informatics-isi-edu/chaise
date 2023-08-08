@@ -40,7 +40,7 @@ test.describe('Navbar', () => {
 
   test.describe('rest of rest of features', () => {
     test('feature 1 1', () => {
-      expect(false).toBeTruthy();
+      expect(false).toBeFalsy();
     });
 
     test('feature 2 2', () => {

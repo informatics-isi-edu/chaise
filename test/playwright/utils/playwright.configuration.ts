@@ -1,13 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 import { resolve } from 'path';
+import { TestOptions } from '@isrd-isi-edu/e2e-test/utils/playwright.model';
+import os from 'os';
 
+const getConfig = (options: TestOptions) => {
 
-const getConfig = (options: any) => {
+  console.log(`OS hostname in getConfig is ${os.hostname()}`);
+
+  // the only way to pass object to setup/teardown is through env variables
   process.env.PLAYWRIGHT_TEST_OPTIONS = JSON.stringify(options);
 
   console.log(`running ${process.env.CI ? 'on CI' : 'locally'}.`);
-
-  const testName = options.testName ? options.testName : 'test';
 
   const config = defineConfig({
 
@@ -29,7 +32,7 @@ const getConfig = (options: any) => {
     // Reporter to use
     reporter: process.env.CI ? [
       ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
-      ['line']
+      ['github']
     ] : [
       ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
       ['list', { printSteps: true }]
