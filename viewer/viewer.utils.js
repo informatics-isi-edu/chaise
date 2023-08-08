@@ -604,6 +604,7 @@
                 }
 
                 if (ref.canUpdate) {
+                    $rootScope.canUpdateAnnotation = true;
                     annotationEditForm.reference = ref;
                     annotationEditForm.columnModels = [];
                     annotationEditForm.reference.columns.forEach(function (column) {

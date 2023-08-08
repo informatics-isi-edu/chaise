@@ -1,0 +1,14 @@
+$chaise-accordion-spacing-map: (
+  'space-between': 5px,
+  'row-focus-border-width': 2px,
+  'body-padding-left': 40px,
+  /**
+   * 8px is chosen to make sure the chevron icon on the left is
+   * positioned properly and then the header text is exactly
+   * aligned with the body and the rest of the content on left.
+   *
+   * also 8px on the right will make sure the related action buttons
+   * are not too close to the right side.
+   */
+  'header-padding': 8px
+)

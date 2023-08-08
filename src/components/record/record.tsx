@@ -106,7 +106,7 @@ const RecordInner = ({
   const { dispatchError, errors } = useError();
 
   const {
-    showRelatedSectionSpinner, showMainSectionSpinner,
+    relatedSectionInitialized, showMainSectionSpinner,
     showEmptySections,
     toggleShowEmptySections,
     updateRecordPage,
@@ -188,7 +188,7 @@ const RecordInner = ({
       let url = tuple.reference.contextualize.detailed.appLink;
       url = url.substring(0, url.lastIndexOf('?'));
 
-      $log.info([
+      $log.log([
         'Default export template is accessible through `defaultExportTemplate` variable. ',
         'To get the string value of it call `JSON.stringify(defaultExportTemplate)`'
       ].join(''));
@@ -259,25 +259,25 @@ const RecordInner = ({
    */
   const setupAfterPageLoadisDone = useRef(false);
   useEffect(() => {
-    if (setupAfterPageLoadisDone.current || showRelatedSectionSpinner || showMainSectionSpinner) return;
+    if (setupAfterPageLoadisDone.current || !relatedSectionInitialized || showMainSectionSpinner) return;
     setupAfterPageLoadisDone.current = true;
 
     // scroll to section based on query parameter
     if (!!scrollToDisplayname) {
       scrollToSection(scrollToDisplayname, true);
     }
-  }, [showMainSectionSpinner, showRelatedSectionSpinner]);
+  }, [showMainSectionSpinner, relatedSectionInitialized]);
 
   /**
    * disable the side panel if there aren't any visible inline or related tables
    */
   useEffect(() => {
-    if (showMainSectionSpinner || showRelatedSectionSpinner) return;
+    if (showMainSectionSpinner || !relatedSectionInitialized) return;
     setDisablePanel(
       columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
       relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
     );
-  }, [showMainSectionSpinner, showRelatedSectionSpinner, showEmptySections, columnModels, relatedModels]);
+  }, [showMainSectionSpinner, relatedSectionInitialized, showEmptySections, columnModels, relatedModels]);
 
   /**
      * On window focus, remove request and update the page
@@ -628,7 +628,7 @@ const RecordInner = ({
             </li>
             {columnModels.map((cm) => renderTableOfContentsItem(true, cm.index))}
             {relatedModels.map((rm) => renderTableOfContentsItem(false, rm.index))}
-            {errors.length === 0 && showRelatedSectionSpinner &&
+            {errors.length === 0 && !relatedSectionInitialized &&
               <li id='rt-toc-loading' className='loading-text'>
                 <Spinner animation='border' size='sm' />
                 <span> Loading...</span>
@@ -672,8 +672,12 @@ const RecordInner = ({
           </div>
         }
         {/* the related-section-spinner must be inside the main-body to ensure proper positioning */}
-        {errors.length === 0 && showRelatedSectionSpinner &&
-          <ChaiseSpinner className='related-section-spinner bottom-left-spinner' spinnerSize='sm' />
+        {/* we want to show the spinner if there's any update is happening on the page. */}
+        {errors.length === 0 && (showMainSectionSpinner || relatedModels.some((rm) => rm.recordsetState.isLoading)) &&
+          <ChaiseSpinner
+            className='related-section-spinner bottom-left-spinner' spinnerSize='sm'
+            message={relatedSectionInitialized ? 'Updating...' : 'Loading...'}
+          />
         }
         {showScrollToTopBtn &&
           <ChaiseTooltip placement='left' tooltip='Scroll to top of the page.'>
@@ -683,7 +687,7 @@ const RecordInner = ({
           </ChaiseTooltip>
         }
       </div>
-      {initialized && !showRelatedSectionSpinner && <Footer />}
+      {initialized && relatedSectionInitialized && <Footer />}
     </div>
   );
 

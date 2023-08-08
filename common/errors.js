@@ -12,7 +12,8 @@
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
         facetFilterMissing : "No filter or facet was defined.",
-        multipleDataMessage : "There are more than 1 record found for the filters provided."
+        multipleDataMessage : "There are more than 1 record found for the filters provided.",
+        limitedBrowserSupport: 'Limited Browser Support'
     })
     .constant('errorMessages', {
         unauthorized: "Unauthorized",
@@ -421,6 +422,52 @@
         CustomError.prototype = Object.create(Error.prototype);
         CustomError.prototype.constructor = CustomError;
 
+        function LimitedBrowserSupport (message, redirectUrl, clickActionMessage, clickOkToDismiss, subMessage) {
+            /**
+             * @type {string}
+             * @desc Text to display in the Error Modal Header
+             */
+            this.status = errorNames.limitedBrowserSupport;
+
+            /**
+             * @type {string}
+             * @desc Error message that shows in the Error modal body
+             */
+            this.message = message;
+
+            /**
+             * @type {string}
+             * @desc Error message details that will not be displayed in body
+             */
+            this.subMessage = subMessage;
+
+            /**
+             * @type {object}
+             * @desc  custom object to store miscelleneous elements viz. redirectUrl, message for the ok button
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc URL to redirect to when users click the OK button
+             */
+            this.errorData.redirectUrl = redirectUrl;
+
+            /**
+             * @type {string}
+             * @desc Action message to display for click of the OK button
+             */
+            this.errorData.clickActionMessage = clickActionMessage;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = clickOkToDismiss;
+        }
+        LimitedBrowserSupport.prototype = Object.create(CustomError.prototype);
+        LimitedBrowserSupport.prototype.constructor = LimitedBrowserSupport;
+
         return {
             multipleRecordError: multipleRecordError,
             noRecordError: noRecordError,
@@ -430,7 +477,8 @@
             UnauthorizedAssetAccess: UnauthorizedAssetAccess,
             ForbiddenAssetAccess: ForbiddenAssetAccess,
             DifferentUserConflictError: DifferentUserConflictError,
-            CustomError: CustomError
+            CustomError: CustomError,
+            LimitedBrowserSupport: LimitedBrowserSupport
         };
     }])
 
@@ -650,7 +698,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue() && !assetPermissionError) {
+            if (!Session.getSessionValue() && !assetPermissionError && !(exception instanceof Errors.LimitedBrowserSupport)) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError || exception instanceof Errors.NoRecordRidError) {
                     // if no logged in user, change the message

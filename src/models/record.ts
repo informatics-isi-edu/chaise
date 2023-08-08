@@ -62,7 +62,7 @@ export interface RecordRelatedRequestModel {
   registered: boolean,
   updateMainEntity: RecordsetProviderUpdateMainEntity,
   fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
-  addUpdateCauses: RecordsetProviderAddUpdateCauses,
+  addUpdateCauses: RecordsetProviderAddUpdateCauses
 }
 
 export interface RecordRequestModel {

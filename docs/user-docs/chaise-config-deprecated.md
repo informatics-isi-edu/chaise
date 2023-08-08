@@ -6,6 +6,7 @@ This document contains deprecated chaise-config parameters.
 
 ## Table of Contents
 
+* [General Configuration:](#general-configuration)
 * [Login Configuration:](#login-configuration)
    * [profileURL](#profileURL)
 * [Display Configuration:](#display-configuration)
@@ -17,6 +18,34 @@ This document contains deprecated chaise-config parameters.
 * [Viewer Configuration:](#viewer-configuration)
    * [defaultAnnotationColor](#defaultannotationcolor)
    * [userGroups](#usergroups)
+
+
+### General Configuration:
+
+ #### defaultTables
+
+ > Replaced by [`defaultTable`](chaise-config.md#defaulttable) property.
+
+ Use this parameter to specify for each catalog `N`, which table Chaise shows by default.
+   - Type: Object
+   - General syntax:
+     ```
+     defaultTables: {
+       N: {
+         schema: <schema name>,
+         table: <table name>
+       }
+     }
+     ```
+   - Sample syntax:
+     ```
+     defaultTables: {
+       1: {
+         schema: "isa",
+         table: "dataset"
+       }, ...
+     }
+     ```
 
 
 ### Login Configuration:

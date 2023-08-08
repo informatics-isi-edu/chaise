@@ -14,6 +14,7 @@ This documentation focuses on the navbar and how it can be used in external HTML
     - [2.2. Dynamically fetch the dependencies](#22-dynamically-fetch-the-dependencies)
   + [3. Prefetch custom styles (optional)](#3-prefetch-custom-styles-optional)
   + [4. Use navbar](#4-use-navbar)
+  + [5. Avoid manually injecting bootstrap](#5-avoid-manually-including-bootstrap)
 * [How to configure navbar](#how-to-configure-navbar)
 * [How to customize navbar UI](#how-to-customize-navbar-ui)
 * [Migrate from AngularJS](#migrate-from-angularjs)
@@ -113,6 +114,10 @@ The navbar React app expects a `navbar` tag on the page and will populate the ap
 </body>
 ```
 
+### 5. Avoid manually including bootstrap
+
+Chaise uses [Bootstrap version 5.1.9](https://getbootstrap.com/docs/5.1/getting-started/introduction/), so it will be included in pages using Navbar. Therefore there's no reason to include Bootstrap manually. Apart from an extra file that has to be fetched to render the page, the Bootstrap version you have included might be different from the one that Chaises uses, which might have some side effects.
+
 ## How to configure navbar
 
 The navbar app can be customized by defining different properties in the "chaise-config". Please refer to [chaise-config document](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md#navbar-configuration) for complete list of properties that are supported.
@@ -131,12 +136,23 @@ With the current HTML structure, it is possible to apply different styles to cus
 
 1. Preserve space for navbar while its loading (to reduce the page shift):
     ```css
+    /* set a static height for navbar */
     navbar {
-      height: YOUR_VALUE;
-      background-color: YOUR_VALUE;
       display: block;
+      height: YOUR_VALUE;
     }
     ```
+
+    If we detect that you've assigned a height to the `navbar`, we will show a spinner while navbar data is loading. The size of this spinner is calcuated based on the available space. You can modify it by doing the following:
+    ```css
+    /* change the spinner displayed on the navbar during load */
+    .chaise-app-wrapper-sm-spinner .spinner-border {
+      height: YOUR_VALUE !important;
+      width: YOUR_VALUE !important;
+      border-width: YOUR_VALUE !important;
+    }
+    ```
+    > Adding `!important` is necessary to ensure overriding the rules that Chaise is going to add with JavaScript.
 
 2. Change the navbar background color:
 
@@ -214,6 +230,8 @@ The following are the major things that have changed from AngularJS to React:
    - The navbar implementation has been changed, and we're no longer using `ul` or `li` for the menu options. Please refer to the previous section for more information.
    - The default color of links and buttons has been changed (Bootstrap 5 uses a less saturated blue color. Links also show the underline in the new version).
    - Bootstrap rules for `container` width and margin have changed.
+
+4. As mentioned in [here](#5-avoid-manually-including-bootstrap), you should not include bootstrap in your static site and rely on the one that navbar dependencies will include. So if you have `bootstrap.min.css` or `bootstrap.css` on your pages, you should remove them. Otherwise, the clashing rules might have some unwanted consequences.
 
 ## Notes
 

@@ -305,6 +305,13 @@ const RecordsetModal = ({
             <span>Search by </span>
             <Title displayname={displayname} comment={comment} />
           </div>);
+      case RecordsetDisplayMode.SAVED_QUERY_POPUP:
+        return (
+          <div>
+            <span>Saved search criteria for table </span>
+            <Title reference={recordsetProps.parentReference} />
+          </div>
+        );
       default:
         return (
           <div><Title addLink={false} reference={recordsetProps.initialReference} /></div>

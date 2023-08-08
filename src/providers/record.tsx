@@ -21,6 +21,7 @@ import {
 // services
 import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -70,7 +71,7 @@ export const RecordContext = createContext<{
   /**
    * Whether to show the spinner for the related section
    */
-  showRelatedSectionSpinner: boolean
+  relatedSectionInitialized: boolean
   /**
    * The related entity models
    */
@@ -148,10 +149,9 @@ export default function RecordProvider({
    */
   const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
   /**
-   * whether we should show the related section spinner or not
-   * if false, you can be sure that the recordsetSet is updated on initial page load
+   * whether the related section has been initialized or not
    */
-  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner] = useState(true);
+  const [relatedSectionInitialized, setRelatedSectionInitialized] = useState(false);
 
   const [modelsInitialized, setModelsInitialized] = useState(false);
   const [modelsRegistered, setModelsRegistered] = useState(false);
@@ -223,11 +223,11 @@ export default function RecordProvider({
    * hide the related spinner if all are initialized
    */
   useEffect(() => {
-    if (!modelsRegistered || !showRelatedSectionSpinner) return;
+    if (!modelsRegistered || relatedSectionInitialized) return;
     // see if there's a related model that has not been initialized yet
     if (relatedModels.some((rm) => !rm.recordsetState.isInitialized || !rm.tableMarkdownContentInitialized)) return;
-    setShowRelatedSectionSpinner(false);
-  }, [modelsRegistered, showRelatedSectionSpinner, relatedModels]);
+    setRelatedSectionInitialized(true);
+  }, [modelsRegistered, relatedSectionInitialized, relatedModels]);
 
   /**
    * hide the main spinner if there aren't any pending requests
@@ -257,6 +257,8 @@ export default function RecordProvider({
    * @param changedContainers more complicated way of sending causes to signal which part of page chagned
    */
   const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: ChangeContainerDetails[]) => {
+    printDebugMessage('update called');
+
     if (!isUpdate) {
       flowControl.current.queue.counter = 0;
       flowControl.current.queue.occupiedSlots = 0;
@@ -282,8 +284,9 @@ export default function RecordProvider({
     // inline table
     const inlineRequestModels = Object.values(flowControl.current.inlineRelatedRequestModels);
     inlineRequestModels.forEach(function (m) {
-      // the last parameter is making sure we're using the same queue for the main and inline
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
+      // the third parameter is making sure we're using the same queue for the main and inline
+      // the fourth parameter will make sure we're showing the loading spinner right away
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -291,8 +294,9 @@ export default function RecordProvider({
 
     // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
-      // the last parameter is making sure we're using the same queue for the main and related
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
+      // the third parameter is making sure we're using the same queue for the main and related
+      // the fourth parameter will make sure we're showing the loading spinner right away
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -365,6 +369,11 @@ export default function RecordProvider({
   }
 
   // -------------------------- flow control function ---------------------- //
+  const printDebugMessage = (message: string, counter?: number): void => {
+    counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
+    $log.debug(`${Date.now()}, ${counter}: ${message}`);
+  };
+
   /**
    * The function that actually sends the requests
    * @param isUpdate whether it's the initial load or update
@@ -373,6 +382,8 @@ export default function RecordProvider({
     if (!flowControl.current.haveFreeSlot() || pauseProcessingRequests.current) {
       return;
     }
+    printDebugMessage('processing requests');
+
     isUpdate = (typeof isUpdate === 'boolean') ? isUpdate : false;
 
     if (flowControl.current.dirtyMain) {
@@ -424,7 +435,6 @@ export default function RecordProvider({
       const cm = columnModels[i];
       if (cm.relatedModel) {
         const rm = flowControl.current.inlineRelatedRequestModels[cm.index];
-        // TODO does spinner make sense?
         rm.fetchSecondaryRequests(processRequests, false);
       }
     }
@@ -492,8 +502,8 @@ export default function RecordProvider({
         }
 
         // if there aren't any related entities don't show the spinner
-        if (flowControl.current.relatedRequestModels.length === 0 && showRelatedSectionSpinner) {
-          setShowRelatedSectionSpinner(false);
+        if (flowControl.current.relatedRequestModels.length === 0 && !relatedSectionInitialized) {
+          setRelatedSectionInitialized(true);
         }
 
         // Collate tuple.isHTML and tuple.values into an array of objects
@@ -1104,7 +1114,7 @@ export default function RecordProvider({
       getRecordLogAction,
       getRecordLogStack,
       // related section:
-      showRelatedSectionSpinner,
+      relatedSectionInitialized,
       relatedModels,
       updateRelatedRecordsetState,
       registerRelatedModel,
@@ -1116,7 +1126,7 @@ export default function RecordProvider({
     // mix:
     showEmptySections,
     // related entities:
-    showRelatedSectionSpinner, relatedModels,
+    relatedSectionInitialized, relatedModels,
   ]);
 
   return (

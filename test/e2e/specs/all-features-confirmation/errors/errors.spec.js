@@ -216,7 +216,7 @@ describe('Error related test cases,', function() {
                 return errModalClass.getText();
             }).then(function (errorText) {
                 // Added OR case to avoid discrepancy in error message when table is deleted
-                expect(errorText == testParams.conflictRecordEditErrorBooking || errorText == testParams.conflictRecordEditErrorAccommodationImg ).toBe(true, "409 Conflict could not be matched! Check conflict during deletion in RecordEdit.");
+                expect(errorText == testParams.conflictRecordEditErrorBooking || errorText == testParams.conflictRecordEditErrorAccommodationImg ).toBe(true, "Check conflict during deletion in RecordEdit.");
 
                 expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
                 done();
@@ -288,7 +288,7 @@ describe('Error related test cases,', function() {
                 return errModalClass.getText();
             }).then(function (errorText) {
                 // Added OR case to avoid discrepancy in error message when table is deleted
-              expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
+              expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "Check conflict during deletion.");
 
                 closeModal = chaisePage.recordEditPage.getModalCloseBtn();
                 chaisePage.waitForElement(closeModal);

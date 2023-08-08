@@ -81,6 +81,12 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
+        /**
+         * in case of libraries (navbar, login), we want to make sure the library
+         * dependencies are blocking the content so the navbar/login shows up
+         * right away instead of being delayed with the rest of the content.
+         */
+        scriptLoading: ac.isLib ? 'blocking' : 'defer',
         chunks: [bundleName],
         template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
@@ -133,7 +139,15 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       alias: {
         ...options.resolveAliases,
         // the line below will make sure we can include chaise files using the package full name
-        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
+        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..'),
+        /**
+         * the line below allows profiling on prod servers.
+         *
+         * while adding it won't have a significant performance difference, we should only
+         * uncomment this during development and should not use it for actual deployment.
+         * https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977
+         */
+        // 'react-dom$': 'react-dom/profiling',
       },
     },
     module: {

@@ -1,0 +1,1031 @@
+{
+    "schema_name": "saved_query",
+    "tables": {
+        "main": {
+            "kind": "table",
+            "table_name": "main",
+            "schema_name": "saved_query",
+            "comment": "main table for the faceting",
+            "keys": [
+                {
+                    "unique_columns": ["id"],
+                    "names": [["faceting", "main_key1"]]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "main_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_to_f1",
+                            "table_name": "main",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f1",
+                            "schema_name": "saved_query"
+                        }
+                    ]
+                },
+                {
+                    "names": [["faceting", "main_fk2"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_to_f2",
+                            "table_name": "main",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f2",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "to_name": "to_name"
+                        }
+                    }
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "text_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "lgt",
+                    "type": {
+                        "typename": "longtext"
+                    }
+                },
+                {
+                    "name": "markdown_col",
+                    "type": {
+                        "typename": "markdown"
+                    }
+                },
+                {
+                    "name": "int_col",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "float_col",
+                    "type": {
+                        "typename": "float4"
+                    }
+                },
+                {
+                    "name": "date_col",
+                    "type": {
+                        "typename": "date"
+                    }
+                },
+                {
+                    "name": "boolean_col",
+                    "type": {
+                        "typename": "boolean"
+                    }
+                },
+                {
+                    "name": "timestamp_col",
+                    "type": {
+                        "typename": "timestamp"
+                    }
+                },
+                {
+                    "name": "fk_to_f1",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "fk_to_f2",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "text1_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text2_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text3_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text4_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text5_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text6_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text7_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text8_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text9_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text10_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text11_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text12_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text13_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text14_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text15_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "text16_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "entry": ["id", "text_col", "lgt", "markdown_col", "int_col", "float_col", "date_col", "boolean_col", "timestamp_col", "text_col", ["faceting", "main_fk1"], ["faceting", "main_fk2"]],
+                    "compact": [
+                        {"source": "id"},
+                        {"source": "int_col", "aggregate": "array_d"},
+                        {"source": "float_col"},
+                        {"source": "date_col"},
+                        {"source": "boolean_col"},
+                        {"source": "timestamp_col"},
+                        {"source": "shorttext_col"},
+                        {"source": "text_col"},
+                        {"source": "lgt"},
+                        {"source": "markdown_col"},
+                        {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"]},
+                        {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"]}
+                    ],
+                    "detailed": [
+                        {"source": "id"},
+                        {"source": "int_col", "aggregate": "array_d"},
+                        {"source": "float_col"},
+                        {"source": "date_col"},
+                        {"source": "boolean_col"},
+                        {"source": "timestamp_col"},
+                        {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"]},
+                        {"source": "shorttext_col"},
+                        {"source": "text_col"},
+                        {"source": "lgt"},
+                        {"source": "markdown_col"}
+                    ],
+                    "filter": {
+                        "and": [
+                            {"source": "id", "ux_mode": "choices"},
+                            {"source": "int_col", "open": true},
+                            {"source": "float_col"},
+                            {"source": "date_col"},
+                            {"source": "boolean_col"},
+                            {"source": "timestamp_col", "bar_plot": {"n_bins": 100}},
+                            {"source": "shorttext_col"},
+                            {"source": "text_col"},
+                            {"source": "lgt"},
+                            {"source": "markdown_col"},
+                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "*F1*"},
+                            {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"]},
+                            {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
+                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"}
+                        ]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:export": {
+                    "templates": [
+                        {
+                            "outputs": [
+                                {
+                                    "source": {
+                                        "table": "faceting:main",
+                                        "api": "entity"
+                                    },
+                                    "destination": {
+                                        "type": "csv",
+                                        "name": "faceting"
+                                    }
+                                }
+                            ],
+                            "name": "faceting_data",
+                            "format_name": "BDBag",
+                            "format_type": "BAG"
+                        }, {
+                            "outputs": [
+                                {
+                                    "source": {
+                                        "table": "faceting:main",
+                                        "api": "entity"
+                                    },
+                                    "destination": {
+                                        "type": "csv",
+                                        "name": "faceting"
+                                    }
+                                }
+                            ],
+                            "name": "faceting_data_file_csv",
+                            "format_name": "BDBag CSV",
+                            "format_type": "FILE"
+                        }, {
+                            "outputs": [
+                                {
+                                    "source": {
+                                        "table": "faceting:main",
+                                        "api": "entity"
+                                    },
+                                    "destination": {
+                                        "type": "json",
+                                        "name": "faceting"
+                                    }
+                                }
+                            ],
+                            "name": "faceting_data_file_json",
+                            "format_name": "BDBag JSON",
+                            "format_type": "FILE"
+                        }
+                    ]
+                },
+                "tag:isrd.isi.edu,2018:citation" : {
+                    "template_engine": "handlebars",
+                    "author_pattern":  "Joshua Chudy, Aref Shafaei",
+                    "title_pattern":   "{{lgt}}",
+                    "journal_pattern": "Journal of Front End Faceting Test Data",
+                    "year_pattern":    "{{formatDate RCT 'YYYY'}}",
+                    "url_pattern":     "https://dev.isrd.isi.edu/chaise/record/#{{$catalog.snapshot}}/faceting:main/RID={{RID}}"
+                },
+                "tag:misd.isi.edu,2015:display": {
+                    "show_saved_query": true
+                }
+            }
+        },
+        "f1": {
+            "kind": "table",
+            "table_name": "f1",
+            "schema_name": "saved_query",
+            "comment": "main table has fk to this table",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ]
+        },
+        "f2": {
+            "kind": "table",
+            "table_name": "f2",
+            "schema_name": "saved_query",
+            "comment": "has fk to main table + has rowname",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{term}}"
+                    }
+                }
+            }
+        },
+        "main_f3_assoc": {
+            "kind": "table",
+            "table_name": "main_f3_assoc",
+            "schema_name": "saved_query",
+            "comment": "association table between main and f3",
+            "keys": [
+                {"unique_columns": ["id_main", "id_f3"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "main_f3_assoc_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "id_main",
+                            "table_name": "main_f3_assoc",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "main",
+                            "schema_name": "saved_query"
+                        }
+                    ]
+                },
+                {
+                    "names": [["faceting", "main_f3_assoc_fk2"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "id_f3",
+                            "table_name": "main_f3_assoc",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f3",
+                            "schema_name": "saved_query"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id_main",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "id_f3",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                }
+            ]
+        },
+        "f3": {
+            "kind": "table",
+            "table_name": "f3",
+            "schema_name": "saved_query",
+            "comment": "related to main via main_f3_assoc",
+            "keys": [
+                {"unique_columns":["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ]
+        },
+        "f4": {
+            "kind": "table",
+            "table_name": "f4",
+            "schema_name": "saved_query",
+            "comment": "has fk to main table + has rowname",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "f4_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f4",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "main",
+                            "schema_name": "saved_query"
+                        }
+                    ],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "from_name": "from_name"
+                        }
+                    }
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{term}}"
+                    }
+                }
+            }
+        },
+        "saved_query": {
+            "schema_name": "saved_query",
+            "table_name": "saved_query",
+            "rights": {
+                "owner": false,
+                "select": null,
+                "delete": null,
+                "insert": true,
+                "update": null
+            },
+            "column_definitions": [
+                {
+                    "name": "RID",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": false
+                    },
+                    "type": {
+                        "is_domain": true,
+                        "typename": "ermrest_rid",
+                        "base_type": {
+                            "typename": "text"
+                        }
+                    },
+                    "default": "_ermrest.urlb32_encode(nextval('_ermrest.rid_seq'::regclass))",
+                    "nullok": false,
+                    "comment": "Immutable record identifier (system-generated).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {}
+                    }
+                },
+                {
+                    "name": "RCT",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": null
+                    },
+                    "type": {
+                        "is_domain": true,
+                        "typename": "ermrest_rct",
+                        "base_type": {
+                            "typename": "timestamptz"
+                        }
+                    },
+                    "default": "now()",
+                    "nullok": false,
+                    "comment": "Record creation time (system-generated).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "name": "Creation Time"
+                        }
+                    }
+                },
+                {
+                    "name": "RMT",
+                    "rights": {
+                        "select": null,
+                        "insert": false,
+                        "delete": null,
+                        "update": false
+                    },
+                    "type": {
+                        "is_domain": true,
+                        "typename": "ermrest_rmt",
+                        "base_type": {
+                            "typename": "timestamptz"
+                        }
+                    },
+                    "default": "now()",
+                    "nullok": false,
+                    "comment": "Record last-modification time (system-generated).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "name": "Modification Time"
+                        }
+                    }
+                },
+                {
+                    "name": "RCB",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": null
+                    },
+                    "type": {
+                        "is_domain": true,
+                        "typename": "ermrest_rcb",
+                        "base_type": {
+                            "typename": "text"
+                        }
+                    },
+                    "default": "_ermrest.current_client()",
+                    "nullok": true,
+                    "comment": "Record created by (system-generated).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "name": "Created By"
+                        }
+                    }
+                },
+                {
+                    "name": "RMB",
+                    "rights": {
+                        "select": null,
+                        "insert": false,
+                        "delete": null,
+                        "update": false
+                    },
+                    "type": {
+                        "is_domain": true,
+                        "typename": "ermrest_rmb",
+                        "base_type": {
+                            "typename": "text"
+                        }
+                    },
+                    "default": "_ermrest.current_client()",
+                    "nullok": true,
+                    "comment": "Record last-modified by (system-generated).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "name": "Modified By"
+                        }
+                    }
+                },
+                {
+                    "name": "user_id",
+                    "rights": {
+                        "select": true,
+                        "insert": true,
+                        "delete": false,
+                        "update": false
+                    },
+                    "type": {
+                        "typename": "text"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "The authentication system ID for the user who saved the query.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "schema_name",
+                    "rights": {
+                        "select": true,
+                        "insert": true,
+                        "delete": false,
+                        "update": false
+                    },
+                    "type": {
+                        "typename": "text"
+                    },
+                    "default": "saved_query",
+                    "nullok": false,
+                    "comment": "The name of the schema containing the table being queried.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "table_name",
+                    "rights": {
+                        "select": true,
+                        "insert": true,
+                        "delete": false,
+                        "update": false
+                    },
+                    "type": {
+                        "typename": "text"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "The name of the table being queried.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "query_id",
+                    "rights": {
+                        "select": true,
+                        "insert": true,
+                        "delete": false,
+                        "update": false
+                    },
+                    "type": {
+                        "typename": "text"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "The client-generated unique ID for the saved query's filters (i.e. hash).",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "facets",
+                    "rights": {
+                        "select": true,
+                        "insert": true,
+                        "delete": false,
+                        "update": false
+                    },
+                    "type": {
+                        "typename": "jsonb"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "The machine-readable description of the faceted query criteria",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "object",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "name",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": null
+                    },
+                    "type": {
+                        "typename": "text"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "A short, human-readable title for the saved query.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {
+                            "name": "Query Name"
+                        },
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "title": "Query Name",
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "description",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": null
+                    },
+                    "type": {
+                        "typename": "markdown"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "A human-readable summary of the saved query's purpose and/or search criteria.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "string",
+                            "constraints": {}
+                        }
+                    }
+                },
+                {
+                    "name": "last_execution_time",
+                    "rights": {
+                        "select": null,
+                        "insert": true,
+                        "delete": null,
+                        "update": null
+                    },
+                    "type": {
+                        "typename": "timestamptz"
+                    },
+                    "default": null,
+                    "nullok": true,
+                    "comment": "A timestamp for when the saved query was most recently executed by the user.",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "datetime",
+                            "deriva": {},
+                            "format": "any"
+                        }
+                    }
+                },
+                {
+                    "RID": "RYW",
+                    "name": "encoded_facets",
+                    "rights": {
+                        "insert": true,
+                        "delete": false,
+                        "update": false,
+                        "select": true
+                    },
+                    "type": {
+                        "typename": "jsonb"
+                    },
+                    "default": null,
+                    "nullok": false,
+                    "comment": "The URL-encoded, machine-readable JSON version of faceted query criteria",
+                    "annotations": {
+                        "tag:misd.isi.edu,2015:display": {},
+                        "tag:isrd.isi.edu,2016:generated": true,
+                        "tag:isrd.isi.edu,2016:immutable": true,
+                        "tag:isrd.isi.edu,2019:table-schema-leftovers": {
+                            "type": "object",
+                            "deriva": {},
+                            "constraints": {}
+                        }
+                    }
+                }
+            ],
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "user_id",
+                        "schema_name",
+                        "table_name",
+                        "query_id"
+                    ],
+                    "names": [
+                        [
+                            "saved_query_schema",
+                            "saved_query_user_id_schema_name_table_name_query_id_key"
+                        ]
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                
+            ],
+            "kind": "table",
+            "annotations": {
+                "tag:isrd.isi.edu,2016:non-deletable": true,
+                "tag:isrd.isi.edu,2016:immutable": false,
+                "tag:misd.isi.edu,2015:display": {
+                    "name": "Saved Query"
+                },
+                "tag:isrd.isi.edu,2019:table-resource": {
+                    "name": "saved_query",
+                    "title": "Saved Query",
+                    "deriva": {},
+                    "profile": "tabular-data-resource",
+                    "description": "A saved_query_schema query saved by a user."
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": [
+                        "name",
+                        "table_name",
+                        {
+                            "display": {
+                                "template_engine": "handlebars",
+                                "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
+                            },
+                            "markdown_name": "Query Link"
+                        },
+                        "description",
+                        {
+                            "sourcekey": "S_user"
+                        },
+                        "last_execution_time",
+                        "query_id",
+                        "encoded_facets",
+                        "facets"
+                    ],
+                    "filter": {
+                        "and": [
+                            {
+                                "source": "table_name"
+                            },
+                            {
+                                "sourcekey": "S_user"
+                            },
+                            {
+                                "source": "name"
+                            },
+                            {
+                                "source": "RCT",
+                                "markdown_name": "Creation Time"
+                            },
+                            {
+                                "source": "last_execution_time"
+                            }
+                        ]
+                    },
+                    "compact": [
+                        {
+                            "display": {
+                                "template_engine": "handlebars",
+                                "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}savedQueryRid={{{RID}}})"
+                            },
+                            "markdown_name": "Query Name"
+                        },
+                        "table_name",
+                        "description",
+                        {
+                            "sourcekey": "S_user"
+                        },
+                        "last_execution_time"
+                    ],
+                    "entry/create": [
+                        "table_name",
+                        "name",
+                        "description"
+                    ],
+                    "compact/brief": [
+                        {
+                            "display": {
+                                "template_engine": "handlebars",
+                                "markdown_pattern": "[{{{name}}}](/chaise/recordset/#1/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
+                            },
+                            "markdown_name": "Query Name"
+                        },
+                        "table_name",
+                        "description",
+                        "last_execution_time"
+                    ],
+                    "compact/select": [
+                        {
+                            "display": {
+                                "template_engine": "handlebars",
+                                "markdown_pattern": "[{{{name}}}](/chaise/recordset/#{{{$catalog.id}}}/{{{schema_name}}}:{{{table_name}}}/*::facets::{{{_encoded_facets}}}?savedQueryRid={{{RID}}})"
+                            },
+                            "markdown_name": "Query Name"
+                        },
+                        "table_name",
+                        "description",
+                        "last_execution_time"
+                    ]
+                },
+                "tag:isrd.isi.edu,2020:history-capture": true,
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "columns": true,
+                    "sources": {
+                        "S_user": {
+                            "source": [
+                                {
+                                    "outbound": [
+                                        "saved_query_schema",
+                                        "saved_query_user_id_fkey"
+                                    ]
+                                },
+                                "RID"
+                            ],
+                            "markdown_name": "User"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

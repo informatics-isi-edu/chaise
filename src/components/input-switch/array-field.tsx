@@ -1,19 +1,21 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
-
+//hooks
+import { useRef } from 'react';
 // utils
 import { getSimpleColumnType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { arrayFieldPlaceholder } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
   baseArrayType: string,
 };
 
 const ArrayField = (props : ArrayFieldProps): JSX.Element => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const arrayFieldValidation = (value: string) => {
     if (!value) return;
 
@@ -83,11 +85,16 @@ const ArrayField = (props : ArrayFieldProps): JSX.Element => {
         <div className='input-switch-array'>
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <textarea
-              placeholder={placeholder} rows={5} className={`${props.inputClasses} input-switch`}
+              placeholder={placeholder} rows={5} className={`${props.inputClasses} input-switch ${
+                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+              }`}
               {...field} onChange={onChange} disabled={props.disableInput}
+              ref={textAreaRef}
             />
             <ClearInputBtn
-              btnClassName={`${props.clearClasses} input-switch-clear`}
+              btnClassName={`${props.clearClasses} input-switch-clear ${
+                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+              }`}
               clickCallback={clearInput}
               show={showClear && !props.disableInput}
             />

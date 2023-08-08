@@ -34,6 +34,11 @@
           border-top: 0;
           padding: map-get(variables.$record-spacing-map, 'record-table-cell-padding');
 
+          // make sure the inline related content are aligned with the related content
+          // so Explore button in inine related, table in inline related, Explore
+          // button in related, and table in related are all aligned.
+          padding-right: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
+
           &.entity-value {
             overflow-wrap: break-word;
             border-bottom-width: 0px;

@@ -74,7 +74,7 @@ const ResultsetTableHeader = ({
             placement='top'
             tooltip={<span>Edit the {adj} records.</span>}
           >
-            <a className='chaise-btn chaise-btn-secondary more-results-link' href={editLink} onClick={avoidClick}>
+            <a className='chaise-btn chaise-btn-secondary bulk-edit-link' href={editLink} onClick={avoidClick}>
               <span className='chaise-btn-icon fa-solid fa-pen'></span>
               <span>Bulk Edit</span>
             </a>

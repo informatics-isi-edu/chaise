@@ -21,6 +21,7 @@ import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -46,7 +47,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     type = getInputType(column.type);
   }
 
-  const prefillObj = getPrefillObject(queryParams);
+  
+  const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
   if (prefillObj) {
     if (column.isForeignKey) {
@@ -173,14 +175,20 @@ export function copyOrClearValue(
  * @param columnModels
  * @param forms
  * @param prefillQueryParam
+ * @param initialValues
  * --not implemented - used by viewer app @param initialValues
  */
 export function populateCreateInitialValues(
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  queryParams?: any
+  queryParams?: any,
+  prefillRowData?: any[]
 ) {
   const values: any = {};
+  let initialValues: any = {}
+  // only 1 row in the case of create
+  if (prefillRowData) initialValues = prefillRowData[0];
+
   let shouldWaitForForeignKeyData = false;
 
   // get the prefilled values
@@ -209,11 +217,11 @@ export function populateCreateInitialValues(
 
       let defaultValue = column.default;
 
-      // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
-      // TODO: use initialValue if defined (viewer app)
-      // if (DataUtils.isObjectAndNotNull(initialValues) && initialValues[column.name] && !column.isForeignKey) {
-      //     defaultValue = initialValues[column.name];
-      // }
+      // only want to set primitive values in the input fields so make sure it isn't null, undefined, or foreignkey (an object)
+      // used by saved query feature (and maybe viewer in the future?)
+      if (initialValues[column.name] && !column.isForeignKey) {
+        defaultValue = initialValues[column.name];
+      }
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
       if (column.isForeignKey && prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
@@ -493,9 +501,11 @@ export function populateEditInitialValues(
  * @param reference the reference object
  * @param formNumber indicate which form the data belongs to
  * @param formData the data for all the displayed fields
+ * @param initialValues initalValues to submit that don't appear as inputs in the form
+ *    - this happens in the case of saving queries with multiple columns being invisible but required for saving a query
  * @returns
  */
-export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
+export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
   const setSubmission = (col: any, skipEmpty?: boolean) => {
     let v = formData[formNumber + '-' + col.name];
@@ -524,7 +534,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
             break;
         }
       }
-    }
+    } 
 
     const isEmpty = (v === undefined || v === '');
     if (!(skipEmpty && isEmpty)) {
@@ -561,6 +571,16 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       setSubmission(col);
     }
   });
+
+  // used in the case of saving queries with multiple columns being invisible but required for saving a query
+  if (initialValues && initialValues.length > 0) {
+    const row = initialValues[0];
+    Object.keys(row).forEach((columnName) => {
+      if (!submissionRow[columnName]) {
+        submissionRow[columnName] = row[columnName];
+      }
+    })
+  }
 
   return submissionRow;
 }

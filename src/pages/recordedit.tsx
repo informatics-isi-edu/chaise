@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 
 // components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
-import Recordedit, { RecordeditProps } from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
+import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
@@ -12,9 +12,9 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models
+import { appModes, RecordeditDisplayMode, RecordeditProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
@@ -110,7 +110,10 @@ const RecordeditApp = (): JSX.Element => {
 
       const queryParams = res.queryParams || {};
       setRecordeditProps({
-        reference, appMode, queryParams,
+        appMode, 
+        config: {displayMode: RecordeditDisplayMode.FULLSCREEN},
+        queryParams, 
+        reference, 
         logInfo: { logAppMode, logObject, logStack, logStackPath }
       });
 

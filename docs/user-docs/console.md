@@ -49,4 +49,4 @@ As we mentioned in the previous sections, all the ERMrestJS APIs are accessible 
 
 The following are the list of variables that are globally available in different apps in Chaise.
 
-1. `defaultExportTemplate`: This attribute is only available in the record app. It will return the default export template that ERMrestJS is going to generate based on the table models.
+- `defaultExportTemplate`: This attribute is only available in the record app. It will return the default export template that ERMrestJS is going to generate based on the table models. To get the string value of this attribute (so you can copy and modify), navigate to a record page. Open the browser console and type `JSON.stringify(defaultExportTemplate)`. 

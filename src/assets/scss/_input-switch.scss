@@ -7,6 +7,16 @@
     height: auto;
   }
 
+  // This padding is added to prevent overlap of "x" button with the text area if the text is long
+  .has-scrollbar {
+    padding-right: 2rem !important;
+  }
+
+  // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
+  .has-scrollbar-clear {
+    margin-right: 10px;
+  }
+
   .input-switch-clear {
     position: absolute;
     top: 2px;
@@ -25,7 +35,7 @@
 
     textarea,
     .disabled-textarea {
-      padding: 4px 10px !important;
+      padding: 4px 10px;
       min-height: 110px;
       display: flex;
       width: 100%;
@@ -178,6 +188,7 @@
   .chaise-image-preview {
     margin-top: 5px;
   }
+
   .chaise-input-control {
     cursor: text;
   }

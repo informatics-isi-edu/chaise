@@ -187,9 +187,9 @@ const RangeInputs = ({
 
     /**type is either date or timestamp */
     const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FORMAT;
-    const fromDate = windowRef.moment(fromVal, formatString, true);
-    const toDate = windowRef.moment(toVal, formatString, true);
-    return toDate.diff(fromDate) > 0
+    const minDate = windowRef.moment(fromVal, formatString, true);
+    const maxDate = windowRef.moment(toVal, formatString, true); 
+    return !maxDate.isBefore(minDate);
   }
 
   const validateValues = (fromVal: string, toVal: string) => {

@@ -1,15 +1,24 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import React from 'react';
+
+// components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
 import Spinner from 'react-bootstrap/Spinner';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+
+// hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+
+// models
+import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// utils
+import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -433,4 +442,9 @@ const RecordsetTable = ({
   )
 }
 
-export default RecordsetTable;
+/**
+ * this component is very heavy and only relies on the provider variables to update.
+ * so we have to memorize it to avoid unnecessary rerenders.
+ * this was slowing the page down and by adding this we were able to make the page a lot faster.
+ */
+export default React.memo(RecordsetTable);

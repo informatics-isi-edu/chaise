@@ -35,6 +35,12 @@
     }
   }
 
+  // override bootstrap styles
+  &.btn.disabled {
+    opacity: unset;
+    pointer-events: auto;
+  }
+
   &.chaise-btn-primary {
     @include helpers.chaise-btn-primary();
   }
@@ -108,12 +114,13 @@
 }
 
 // override the default behavior of dropdowns in bootstrap
-.show > button.chaise-btn.btn.dropdown-toggle:focus {
-  box-shadow: none;
+.show > button.chaise-btn.btn.dropdown-toggle {
+  @include helpers.chaise-btn-primary();
 }
 
 // export dropdown item
-.dropdown-item.export-menu-item {
+.dropdown-item.export-menu-item,
+.dropdown-item.saved-query-menu-item {
   color: map-get(variables.$color-map, 'black') !important;
 
   &:hover,

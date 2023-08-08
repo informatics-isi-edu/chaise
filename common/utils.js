@@ -6,7 +6,7 @@
     .constant("chaiseConfigPropertyNames", [
         "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
         "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser",
-        "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
+        "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTable",
         "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading",
         "allowErrorDismissal", "footerMarkdown", "showFaceting", "hideTableOfContents",
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
@@ -373,10 +373,10 @@
             // If the hash is empty, check for defaults
             if (hash == '' || hash === null || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
-                    if (chaiseConfig.defaultTables) {
+                    if (chaiseConfig.defaultTable) {
                         catalogId = chaiseConfig.defaultCatalog;
 
-                        var tableConfig = chaiseConfig.defaultTables[catalogId];
+                        var tableConfig = chaiseConfig.defaultTable;
                         if (tableConfig) {
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {
@@ -426,8 +426,8 @@
                 // there is no '/' character (only a catalog id) or a trailing '/' after the id
                 if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
                     // check for default Table
-                    if (chaiseConfig.defaultTables) {
-                        var tableConfig = chaiseConfig.defaultTables[catalogId];
+                    if (chaiseConfig.defaultTable) {
+                        var tableConfig = chaiseConfig.defaultTable;
                         if (tableConfig) {
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {

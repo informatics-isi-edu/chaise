@@ -31,7 +31,7 @@ export interface UploadProgressModalProps {
   /**
    * prop to trigger on cancel
    */
-  onCancel: () => void;
+  onCancel: (exception?: any) => void;
 }
 
 const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgressModalProps) => {
@@ -312,7 +312,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     setErred(true);
     abortUploads(err);
-    onCancel();
+    onCancel(err);
   };
 
   /*=== uploadFile class ===*/
