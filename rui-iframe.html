@@ -18,25 +18,147 @@
   <script>
     const IN_IFRAME = window.self !== window.parent;
 
+    // fields that we are going to send to chaise
     const FIELD_NAMES = {
-      FILE: 'registry_file',
-      ID: 'registry_id',
-      CREATOR: 'registry_creator'
+      FILE: 'hra_file',
+      ID: 'hra_id',
+      CREATOR: 'hra_creator',
+      ORGAN: 'hra_organ',
+      SEX: 'hra_sex',
+      ANNOTATIONS: 'hra_annotations'
     }
 
-    // TODO https://github.com/informatics-isi-edu/atlas-d2k/issues/11
+    // list of organs that we support.
     const ORGAN_LOOKUP = {
-      'http://purl.org/ccf/latest/ccf.owl#VHFRightKidney': {
-        'name': 'kidney',
-        'side': 'right',
-        'sex': 'female'
+      'http://purl.org/ccf/latest/ccf.owl#VHFLeftKidneyV1.1': {
+        'rui': {
+          'name': 'kidney',
+          'side': 'left',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'left kidney',
+          'sex': 'Female'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHMLeftKidney': {
+        'rui': {
+          'name': 'kidney',
+          'side': 'left',
+          'sex': 'male'
+        },
+        'chaise': {
+          'name': 'left kidney',
+          'sex': 'Male'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHFRightKidneyV1.1': {
+        'rui': {
+          'name': 'kidney',
+          'side': 'right',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'right kidney',
+          'sex': 'Female'
+        }
       },
       'http://purl.org/ccf/latest/ccf.owl#VHMRightKidney': {
-        'name': 'kidney',
-        'side': 'right',
-        'sex': 'male'
+        'rui': {
+          'name': 'kidney',
+          'side': 'right',
+          'sex': 'male'
+        },
+        'chaise': {
+          'name': 'right kidney',
+          'sex': 'Male'
+        }
+      },
+      "http://purl.org/ccf/latest/ccf.owl#VHMProstate": {
+        'rui': {
+          'name': 'prostate',
+          'sex': 'male'
+        },
+        'chaise': {
+          'name': 'prostate',
+          'sex': 'Male'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHFLeftUreter': {
+        'rui': {
+          'name': 'ureter',
+          'side': 'left',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'left ureter',
+          'sex': 'Female'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHMLeftUreter': {
+        'rui': {
+          'name': 'ureter',
+          'side': 'left',
+          'sex': 'male'
+        },
+        'chaise': {
+          'name': 'left ureter',
+          'sex': 'Male'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHFRightUreter': {
+        'rui': {
+          'name': 'ureter',
+          'side': 'right',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'right ureter',
+          'sex': 'Female'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHMRightUreter': {
+        'rui': {
+          'name': 'ureter',
+          'side': 'right',
+          'sex': 'Male'
+        },
+        'chaise': {
+          'name': 'right ureter',
+          'sex': 'Male'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHFUterus': {
+        'rui': {
+          'name': 'uterus',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'uterus',
+          'sex': 'Female'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHFUrinaryBladder': {
+        'rui': {
+          'name': 'urinary bladder',
+          'sex': 'female'
+        },
+        'chaise': {
+          'name': 'urinary bladder',
+          'sex': 'Female'
+        }
+      },
+      'http://purl.org/ccf/latest/ccf.owl#VHMUrinaryBladder': {
+        'rui': {
+          'name': 'urinary bladder',
+          'sex': 'male'
+        },
+        'chaise': {
+          'name': 'urinary bladder',
+          'sex': 'Male'
+        }
       }
-    }
+    };
 
     /**
      * expected data structure of content:
@@ -48,84 +170,108 @@
       const rui = document.querySelector('ccf-rui');
 
       let ruiPath = 'dist/rui/';
-      if (!window.location.pathname.endsWith('/')) {
-        ruiPath = '/' + ruiPath;
-      }
-      rui.baseHref = window.location.pathname + ruiPath;
+      // if (!window.location.pathname.endsWith('/')) {
+      //   ruiPath = '/' + ruiPath;
+      // }
+      rui.baseHref = '/~ashafaei/ccf-ui/' + ruiPath;
 
       // hide the default header
       rui.header = false;
 
       rui.useDownload = !IN_IFRAME;
       if (IN_IFRAME) {
-        rui.register = (data) => {
-          const submittedData = {};
-          const dataObject = JSON.parse(data);
-
-          // turn the data into a file blob
-          const blob = new Blob([JSON.stringify(dataObject, null, 2)], { type: 'application/json' });
-
-          const file = new File([blob], 'registry.json', { type: 'application/json' });
-
-          submittedData[FIELD_NAMES.FILE] = file;
-          submittedData[FIELD_NAMES.ID] = dataObject['@id'];
-          submittedData[FIELD_NAMES.CREATOR] = dataObject['creator'];
-
-          // check the organ and make sure we're supporting it.
-          let organID;
-          if (dataObject['placement'] && dataObject['placement']['target']) {
-            organID = dataObject['placement']['target'];
-          }
-
-          if (!(organID in ORGAN_LOOKUP)) {
-            dispatchMessage('show-alert', {type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.'});
-            return;
-          }
-
-          dispatchMessage('submit-data', submittedData);
-        }
+        rui.register = handleRegister;
       }
 
-      /**
-       * if a value is already selected, we should fetch the file and
-       * get the json from it.
-       *
-       */
+
       if (existingValue && typeof existingValue[FIELD_NAMES.FILE] === 'string' && existingValue[FIELD_NAMES.FILE] !== '') {
-        fetch(existingValue[FIELD_NAMES.FILE]).then(response => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            console.log(response.body);
-            throw new Erorr('couldn\'t fetch the file');
-          }
-        }).then(data => {
-          // preselect the user info
-          if (data && data.creator_first_name && data.creator_last_name) {
-            rui.user = { firstName: data.creator_first_name, lastName: data.creator_last_name };
-          }
-
-          // preselect the organ
-          if (data && data.placement && data.placement.target) {
-            const org = ORGAN_LOOKUP[data.placement.target];
-            if (!org) {
-              // TODO what should we say? do we even support this?
-              dispatchMessage('show-alert', {type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.'});
-            } else {
-              rui.organ = org;
-            }
-          }
-
-          rui.editRegistration = data;
-        }).finally(() => {
-          dispatchMessage('iframe-data-ready');
-        }).catch(err => {
-          console.log('couldn\'t fetch the existing file');
-          console.error(err);
-        })
+        fetchExistingData(existingValue[FIELD_NAMES.FILE], rui);
       } else {
         dispatchMessage('iframe-data-ready');
       }
+    }
+
+    /**
+     * this callback is called when users submit the form.
+     * it will take care of verification and sending data to th eparent.
+     */
+    const handleRegister = (data) => {
+      const dataObject = JSON.parse(data);
+
+      // check the organ and make sure we're supporting it.
+      let organID;
+      if (dataObject['placement'] && dataObject['placement']['target']) {
+        organID = dataObject['placement']['target'];
+      }
+
+      if (!(organID in ORGAN_LOOKUP)) {
+        dispatchMessage('show-alert', { type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.' });
+        return;
+      }
+
+      const organObject = ORGAN_LOOKUP[organID].chaise;
+
+      // turn the data into a file blob
+      const blob = new Blob([JSON.stringify(dataObject, null, 2)], { type: 'application/json' });
+      let fileName = 'HRA.json';
+      if (organID.indexOf('#') !== -1) {
+        fileName = 'HRA_' + organID.slice(organID.indexOf('#')+1) + '.json';
+      }
+      const file = new File([blob], fileName, { type: 'application/json' });
+
+      const submittedData = {};
+      submittedData[FIELD_NAMES.FILE] = file;
+      submittedData[FIELD_NAMES.ID] = dataObject['@id'];
+      submittedData[FIELD_NAMES.CREATOR] = dataObject['creator'];
+      submittedData[FIELD_NAMES.SEX] = organObject.sex;
+      submittedData[FIELD_NAMES.ORGAN] = organObject.name;
+
+      // optional
+      if (Array.isArray(dataObject['ccf_annotations']) && dataObject['ccf_annotations'].length > 0) {
+        // chaise expects the value to be a string that will parse to json
+        // TODO test array of text
+        submittedData[FIELD_NAMES.ANNOTATIONS] = dataObject['ccf_annotations'];
+      }
+
+      dispatchMessage('submit-data', submittedData);
+    }
+
+    /**
+     * if a value is already selected, we should fetch the file and
+     * get the json from it.
+     *
+     */
+    const fetchExistingData = (fileURL, rui) => {
+      fetch(fileURL).then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          console.log(response.body);
+          throw new Erorr('couldn\'t fetch the file');
+        }
+      }).then(data => {
+        // preselect the user info
+        if (data && data.creator_first_name && data.creator_last_name) {
+          rui.user = { firstName: data.creator_first_name, lastName: data.creator_last_name };
+        }
+
+        // preselect the organ
+        if (data && data.placement && data.placement.target) {
+          const org = ORGAN_LOOKUP[data.placement.target];
+          if (!org) {
+            dispatchMessage('show-alert', { type: 'error', message: 'Please select another organ. We currently do not support the chosen organ.' });
+          } else {
+            rui.organ = org.rui;
+          }
+        }
+
+        rui.editRegistration = data;
+      }).finally(() => {
+        dispatchMessage('iframe-data-ready');
+      }).catch(err => {
+        console.log('couldn\'t fetch the existing file');
+        console.error(err);
+      })
     }
 
     /**
@@ -135,7 +281,12 @@
      * @returns
      */
     const dispatchMessage = (type, content) => {
-      if (!window.parent) return;
+      if (!window.parent) {
+        if (content.message) {
+          console.log(content.message);
+        }
+        return;
+      }
       window.parent.postMessage({ type: type, content: content }, window.location.origin);
     }
 

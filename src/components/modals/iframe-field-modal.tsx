@@ -104,6 +104,7 @@ const IframeFieldModal = ({
           setShowModalSpinner(false);
           break;
         case 'iframe-ready':
+          // generate the existing value object that should be sent to iframe, so it can show the existing value to users
           const submissionRow = populateSubmissionRow(parentReference, formNumber, formValues);
           const currentValues: any = {};
           for (const k in mapping) {
@@ -121,7 +122,6 @@ const IframeFieldModal = ({
           });
           break;
         case 'show-alert':
-          // TODO adding alert is pushing the content without adding scrollbar
           addAlert(content.message, content.type);
           break;
         case 'submit-data':
@@ -201,6 +201,9 @@ const IframeFieldModal = ({
       className='iframe-input-popup'
       onHide={closeModal}
       show={showModal}
+      // make sure the iframe is taking up the whole width:
+      size={'xl'}
+      // make sure the iframe is taking up the whole height:
       fullscreen={true}
     >
       <Modal.Header>

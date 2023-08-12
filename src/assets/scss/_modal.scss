@@ -127,9 +127,16 @@ div.modal-title {
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
 .chaise-body .modal-dialog.modal-xl {
-  margin: 2.5vh auto;
+  $_margin: 2.5vh;
+
+  margin: $_margin auto;
   width: auto !important;
   max-width: 95vw;
+
+  &.modal-fullscreen {
+    // modal-screen by default has a 100% height, but we should account for the marging that we're adding.
+    height: calc(100% - (2 * $_margin));
+  }
 }
 
 .modal-dialog.modal-lg {
@@ -252,9 +259,9 @@ div.modal-title {
 }
 
 .iframe-input-popup {
-  .modal-body {
-    min-height: 90vh;
-  }
+  // .modal-body {
+  //   min-height: 90vh;
+  // }
 
   .alerts-container {
     // make sure it's consistent with the modal title padding
