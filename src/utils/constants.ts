@@ -206,7 +206,7 @@ export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
 export const RECORDEDIT_MAX_ROWS = 200;
 export const FACET_PANEL_DEFAULT_PAGE_SIZE = 10;
-export const RECORDSET_DEAFULT_PAGE_SIZE = 25;
+export const RECORDSET_DEFAULT_PAGE_SIZE = 25;
 export const RELATED_TABLE_DEFAULT_PAGE_SIZE = 25;
 
 // TODO if chaise is not built how we expect, this value will be undefiend.

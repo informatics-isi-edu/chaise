@@ -72,7 +72,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-boolean'>
           <Dropdown aria-disabled={props.disableInput}>
-            <Dropdown.Toggle as='div' className='chaise-input-group' disabled={props.disableInput} aria-disabled={props.disableInput}>
+            <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
               <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
                 {typeof field?.value === 'boolean' ?
                   displayedOptions[rawOptions.indexOf(field?.value)] :

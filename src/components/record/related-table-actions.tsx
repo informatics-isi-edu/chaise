@@ -29,7 +29,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { allowCustomModeRelated, displayCustomModeRelated, getPrefillCookieObject } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { RECORDSET_DEAFULT_PAGE_SIZE, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEFAULT_PAGE_SIZE, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -269,7 +269,7 @@ const RelatedTableActions = ({
 
     setAddPureBinaryModalProps({
       initialReference: modalReference,
-      initialPageLimit: modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize :  RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize :  RECORDSET_DEFAULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       getDisabledTuples,
@@ -406,7 +406,7 @@ const RelatedTableActions = ({
 
     setUnlinkPureBinaryModalProps({
       initialReference: modalReference,
-      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       parentTuple: recordPage.tuples[0],

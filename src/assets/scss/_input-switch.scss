@@ -171,16 +171,93 @@
   }
 }
 
-.input-switch-boolean {
+// rule for foreignkey dropdown with search input to remove space
+.input-switch-foreignkey.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
+  padding-top: 0px;
+}
+
+.input-switch-boolean,
+.input-switch-foreignkey.fk-dropdown {
 
   // remove the default bootstrap caret
-  .dropdown-toggle::after {
+  .dropdown-toggle.no-caret::after {
     content: none !important;
   }
 
-  // make sure the menu expands the whole row
-  .dropdown-menu {
-    width: 100%;
+  // highlight the recordedit input for visual clarity
+  .dropdown.show {
+
+    >.chaise-input-group,
+    .dropdown-menu {
+      border: 2px solid map-get(variables.$color-map, 'primary');
+      border-radius: 6px;
+    }
+  }
+
+  .responsive-dropdown-menu.dropdown-menu {
+    // make sure the menu expands the whole row
+    width: auto;
+    min-width: 100%;
+    background-color: #eef6ff;
+
+    // dropdown opens down
+    &[data-popper-placement^="bottom"] {
+      margin-top: -4px;
+    }
+
+    // dropdown opens up
+    &[data-popper-placement^="top"] {
+      margin-bottom: -3px;
+    }
+
+    // for making the dropdown list scrollable (keeping the buttons sticky)
+    .dropdown-list {
+      // rules specifically for fk-dropdown list of options
+      max-height: 355px;
+      overflow-y: auto;
+
+      .dropdown-item {
+        cursor: pointer;
+
+        label {
+          padding-left: 31px;
+          cursor: inherit;
+
+          // if we want to wrap text at dropdown width instead of stretching to accomodate
+          // .dropdown-select-value {
+          //   // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
+          //   // text-wrap: balance;
+          //   white-space: normal;
+          // }
+        }
+
+        // check is `14px` wide, reduce the padding when it's visible
+        .fa-check~label {
+          padding-left: 17px;
+        }
+      }
+    }
+
+    .dropdown-item.load-more-row {
+      // same height as chaise-btn-sm
+      height: 24px;
+
+      a {
+        pointer-events: none;
+      }
+    }
+
+    .dropdown-item.no-results {
+      &:active {
+        color: unset;
+      }
+
+      &:hover {
+        // matches the style when no hover event is happening
+        // setting to 'unset' might have unintended consequences
+        background-color: transparent;
+      }
+    }
   }
 }
 
