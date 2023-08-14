@@ -146,7 +146,7 @@ const SearchInput = ({
     return (
       <ChaiseTooltip
         placement='bottom-start'
-        tooltip={<>inner</>}
+        tooltip={<>{inner}</>}
         onToggle={(nextshow: boolean) => {
           if (!placeholderEl.current) return;
 

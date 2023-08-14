@@ -294,7 +294,7 @@ var recordEditPage = function() {
     };
 
     this.getModalCloseBtn = function() {
-        return element(by.css(".modal-close"));x
+        return element(by.css(".modal-close"));
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
@@ -543,6 +543,12 @@ var recordPage = function() {
         return el.element(by.css(".more-results-link"));
     };
 
+    this.getBulkEditLink = function(displayName, isInline) {
+      var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
+      // the link is not a child of the table, rather one of the accordion group
+      return el.element(by.css(".bulk-edit-link"));
+  };
+
     this.getAddRecordLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
@@ -734,6 +740,10 @@ var recordsetPage = function() {
         return element(by.css(".alert-warning"));
     };
 
+    this.getSuccessAlert = () => element(by.css('.alert-success'));
+
+    this.getAlerts = () => element.all(by.css('.alerts-container .alert'));
+
     /* sort selectors */
     this.getColumnSortButton = function(rawColumnName){
         return element(by.css('.c_' + rawColumnName)).element(by.css('.not-sorted-icon'));
@@ -767,7 +777,7 @@ var recordsetPage = function() {
     this.waitForInverseModalSpinner = function () {
         var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };    
+    };
 
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));
@@ -864,7 +874,21 @@ var recordsetPage = function() {
         return element(by.id("delete-confirmation"));
     };
 
-    /* export and other page action selectors */
+    /* saved query, export, and other page action selectors */
+    this.getSavedQueryDropdown = () => element(by.css('.saved-query-menu')).element(by.tagName('button'));
+
+    this.getSavedQueryOptions = () => element.all(by.css('.saved-query-menu-item'));
+
+    this.getSaveQueryOption = () => element(by.partialLinkText('Save current search criteria'));
+
+    this.saveQuerySubmit = () => element(by.id('modal-submit-record-btn'));
+
+    this.getSavedQueriesOption = () => element(by.partialLinkText('Show saved search criteria'));
+
+    this.getApplySavedQueryButtons = () => element.all(by.css('.apply-saved-query-button'));
+
+    this.getDuplicateSavedQueryModal = () => element(by.css('.duplicate-saved-query-modal'));
+
     this.getExportDropdown = function () {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };

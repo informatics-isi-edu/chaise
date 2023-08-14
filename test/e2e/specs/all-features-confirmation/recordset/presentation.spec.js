@@ -1155,8 +1155,8 @@ describe('View recordset,', function () {
                 expect(chaiseConfig.confirmDelete).toBeTruthy();
                 // use "deFAuLtCaTAlog" since we are grabbing the property directly from chaise config. The application will use the right value
                 expect(chaiseConfig.deFAuLtCaTAlog).toBe(1);
-                expect(chaiseConfig.defaultTables['1'].schema).toBe("isa");
-                expect(chaiseConfig.defaultTables['1'].table).toBe("dataset");
+                expect(chaiseConfig.defaultTable.schema).toBe("isa");
+                expect(chaiseConfig.defaultTable.table).toBe("dataset");
             }).catch(function (error) {
                 console.log('ERROR:', error);
                 // Fail the test
@@ -1187,17 +1187,6 @@ describe('View recordset,', function () {
                     });
                 });
 
-                it("should throw a malformed URI error when no default schema:table is set for a catalog.", function () {
-                    chaisePage.navigate(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
-
-                    var modalTitle = chaisePage.recordEditPage.getModalTitle();
-
-                    chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function () {
-                        return modalTitle.getText();
-                    }).then(function (title) {
-                        expect(title).toBe("Invalid URI");
-                    });
-                });
             });
 
             describe("should load chaise-config.js with system columns heuristic properties", function () {

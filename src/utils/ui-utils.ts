@@ -338,3 +338,30 @@ export function clickHref(href: string) {
   downloadLink.click();
   document.body.removeChild(downloadLink);
 }
+
+/**
+ * wait for an element to load
+ * NOTE: this might have some affects on the element, so use it with caution.
+ *
+ * based on https://stackoverflow.com/a/61511955/1662057
+ * @param selector the selector of the element
+ */
+export function waitForElementToLoad(selector: string) {
+  return new Promise(resolve => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector));
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body ? document.body : document, {
+      childList: true,
+      subtree: true
+    });
+  });
+}

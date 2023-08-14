@@ -6,7 +6,10 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { appModes, PrefillObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { 
+  appModes, PrefillObject, RecordeditColumnModel, 
+  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions 
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -44,6 +47,8 @@ type ResultsetProps = {
 export const RecordeditContext = createContext<{
   /* which mode of recordedit we are in */
   appMode: string,
+  config: RecordeditConfig,
+  modalOptions?: RecordeditModalOptions,
   /* the main entity reference */
   reference: any,
   /* the tuples correspondeing to the displayed form */
@@ -109,6 +114,9 @@ export const RecordeditContext = createContext<{
 type RecordeditProviderProps = {
   appMode: string;
   children: JSX.Element;
+  config: RecordeditConfig;
+  modalOptions?: RecordeditModalOptions;
+  prefillRowData?: any[];
   queryParams: any;
   reference: any;
   logInfo: {
@@ -122,9 +130,12 @@ type RecordeditProviderProps = {
 export default function RecordeditProvider({
   appMode,
   children,
+  config,
   logInfo,
+  modalOptions,
+  prefillRowData,
   queryParams,
-  reference
+  reference,
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -366,7 +377,7 @@ export default function RecordeditProvider({
     const submissionRows: any[] = [];
     // f is the number in forms array that is
     forms.forEach((f: number) => {
-      submissionRows.push(populateSubmissionRow(reference, f, data));
+      submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
     });
 
     /**
@@ -436,10 +447,14 @@ export default function RecordeditProvider({
 
           // redirect to record app
           if (forms.length === 1) {
-            // Created a single entity or Updated one
-            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+            if (config.displayMode === RecordeditDisplayMode.POPUP) {
+              modalOptions?.onSubmitSuccess();
+            } else {
+              // Created a single entity or Updated one
+              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-            windowRef.location = page.reference.contextualize.detailed.appLink;
+              windowRef.location = page.reference.contextualize.detailed.appLink;
+            }
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
@@ -670,7 +685,7 @@ export default function RecordeditProvider({
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams);
+      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
@@ -939,14 +954,16 @@ export default function RecordeditProvider({
     return {
       // main entity:
       appMode,
+      canUpdateValues,
+      columnModels,
+      columnPermissionErrors,
+      config,
+      foreignKeyData,
+      initialized,
+      modalOptions,
       reference,
       tuples,
-      foreignKeyData,
-      columnModels,
-      initialized,
       waitingForForeignKeyData,
-      canUpdateValues,
-      columnPermissionErrors,
 
       // form
       forms,

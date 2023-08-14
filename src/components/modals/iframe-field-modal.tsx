@@ -198,7 +198,7 @@ const IframeFieldModal = ({
 
   return (
     <Modal
-      className='iframe-input-popup'
+      className='iframe-field-popup'
       onHide={closeModal}
       show={showModal}
       // make sure the iframe is taking up the whole width:

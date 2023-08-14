@@ -39,7 +39,6 @@ const ChaiseLogin = (): JSX.Element => {
   const [replaceDropdown, setReplaceDropdown]     = useState(false);
   const [showProfile, setShowProfile]             = useState(false);
   const [userTooltip, setUserTooltip]             = useState('');
-  const [enableUserTooltip, setEnableUserTooltip] = useState(false);
   const [showUserTooltip, setShowUserTooltip]     = useState(false);
 
   const dropdownWrapper = useRef<any>(null);
@@ -56,8 +55,7 @@ const ChaiseLogin = (): JSX.Element => {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
         // - display_name should always be defined
-        setEnableUserTooltip(true);
-        // dropdown isn't open on page load so show
+        // dropdown isn't open on page load so allow the tooltip to be shown when OverlayTrigger is triggered
         setShowUserTooltip(true);
         setUserTooltip(session.client.full_name + '\n' + session.client.display_name);
       }
@@ -185,7 +183,7 @@ const ChaiseLogin = (): JSX.Element => {
   const renderDropdownToggle = () => {
     const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
 
-    if (enableUserTooltip && showUserTooltip) {
+    if (showUserTooltip) {
       return (<ChaiseTooltip
         placement='bottom-end'
         tooltip={userTooltip}
