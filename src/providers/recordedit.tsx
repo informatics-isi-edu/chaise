@@ -601,6 +601,7 @@ export default function RecordeditProvider({
         try {
           let column = reference.columns.find((c: any) => { return c.name === k; });
           if (!column) {
+            // the file might be related to one of the columns in the input-iframe column mapping
             reference.columns.forEach((col: any) => {
               if (!col.isInputIframe) return;
               column = col.inputIframeProps.columns.find((c: any) => c.name === k);

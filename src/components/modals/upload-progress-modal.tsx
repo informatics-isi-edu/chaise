@@ -130,6 +130,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         // NOTE: each file object has an hatracObj property which is an hatrac object
         let column = reference.columns.find((c: any) => { return c.name === k; });
         if (!column) {
+          // the file might be related to one of the columns in the input-iframe column mapping
           reference.columns.forEach((col: any) => {
             if (!col.isInputIframe || column) return;
             column = col.inputIframeProps.columns.find((c: any) => c.name === k);
@@ -591,6 +592,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         // then set the url in the corresonding column for the row as its value
         let column = reference.columns.find((c: any) => { return c.name === k; });
         if (!column) {
+          // the file might be related to one of the columns in the input-iframe column mapping
           reference.columns.forEach((col: any) => {
             if (!col.isInputIframe || column) return;
             column = col.inputIframeProps.columns.find((c: any) => c.name === k);

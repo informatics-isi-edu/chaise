@@ -171,6 +171,7 @@ if (clearValue) {
     });
   }
 
+  // copy the columns in the column mapping.
   if (columnModel.column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
       const k = `${destFormValue}-${c.name}`;
@@ -454,7 +455,6 @@ function _setEditValueForColumn(column: any, isDisabled: boolean, usedValue: any
 
   if (column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
-      // TODO isDisabled?
       _setEditValueForColumn(c, isDisabled, tuple.data[c.name], tuple, appMode, formValue, values);
     })
   }
