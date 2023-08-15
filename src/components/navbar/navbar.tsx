@@ -244,7 +244,7 @@ const ChaiseNavbar = (): JSX.Element => {
         err = new NoRecordRidError();
       }
 
-      dispatchError({error: err, isDismissible: true});
+      dispatchError({ error: err, isDismissible: true });
     });
   };
 
@@ -286,7 +286,7 @@ const ChaiseNavbar = (): JSX.Element => {
   }
 
   const renderRidSearchIcon = () => {
-    if (showRidSpinner) return <Spinner size='sm' animation='border'/>;
+    if (showRidSpinner) return <Spinner size='sm' animation='border' />;
 
     return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };
@@ -360,27 +360,29 @@ const ChaiseNavbar = (): JSX.Element => {
 
   return (
     <header id='navheader'>
-      {renderBanners(topBanners)}
       {!ConfigService.appSettings.hideNavbar &&
-        <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
-          <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
-            {renderBrandImage()}
-            {' '}
-            {renderBrandingHTML()}
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
-          <Navbar.Collapse id='chaise-navbar-collapse-btn'>
-            <Nav className='navbar-menu-options nav' id='menubarHeader'>
-              {renderNavbarMenuDropdowns()}
-            </Nav>
-            {/* Since we are using float: right for divs, position for chaise login comes first */}
-            <ChaiseLogin />
-            {renderRidSearch()}
-            {renderLiveButton()}
-          </Navbar.Collapse>
-        </Navbar>
+        <>
+          {renderBanners(topBanners)}
+          <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
+            <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
+              {renderBrandImage()}
+              {' '}
+              {renderBrandingHTML()}
+            </Navbar.Brand>
+            <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
+            <Navbar.Collapse id='chaise-navbar-collapse-btn'>
+              <Nav className='navbar-menu-options nav' id='menubarHeader'>
+                {renderNavbarMenuDropdowns()}
+              </Nav>
+              {/* Since we are using float: right for divs, position for chaise login comes first */}
+              <ChaiseLogin />
+              {renderRidSearch()}
+              {renderLiveButton()}
+            </Navbar.Collapse>
+          </Navbar>
+          {renderBanners(bottomBanners)}
+        </>
       }
-      {renderBanners(bottomBanners)}
     </header>
   );
 };
