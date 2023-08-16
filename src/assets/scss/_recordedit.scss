@@ -3,7 +3,7 @@
 @use 'helpers';
 
 // From _recordedit-app.scss
-.recordedit-container{
+.recordedit-container {
   .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
     padding: 5px 3px;
   }
@@ -139,12 +139,17 @@
 
           // Adding a div to align the content centre always
           .centre-align {
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 5px;
             max-width: 100%;
+          }
+
+          .centre-align-textarea {
+            width: auto;
           }
 
           .select-upper-row {
@@ -197,6 +202,15 @@
 
           .select-all-input {
             width: 100%;
+
+            textarea {
+              resize: both;
+              min-width: 250px;
+            }
+
+            .chaise-btn-toolbar {
+              pointer-events: initial;
+            }
           }
 
 
@@ -204,11 +218,16 @@
 
         @media (min-width: 1800px) {
           .select-all-row {
-            .select-all-input {
+            .centre-align {
               width: 1200px;
+            }
 
+            .centre-align-textarea {
+              width: auto;
+            }
+
+            .select-all-input {
               textarea {
-                resize: both;
                 width: 1200px;
                 max-width: 100%;
               }
@@ -227,24 +246,7 @@
               width: 100%;
 
               textarea {
-                width: 100% !important;
-              }
-            }
-
-            .centre-align {
-              width: 100%;
-            }
-          }
-        }
-
-        @media (max-width: 640px) {
-          .select-all-row {
-            .select-upper-row {
-              flex-direction: column-reverse;
-
-              .select-all-buttons {
-                margin-bottom: 5px;
-                display: block;
+                max-width: 100%;
               }
             }
           }

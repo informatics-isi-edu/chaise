@@ -56,7 +56,7 @@ const FormContainer = (): JSX.Element => {
     };
   }, []);
 
-  // This useffect is added to set a max-width to select-all-row as width of the visible area
+  // This useffect is added to set a max-width to select-all-row as the width of the visible area
   useEffect(() => {
     const mainResizeSensor = new ResizeSensor(
       formContainer.current as Element,
@@ -70,7 +70,8 @@ const FormContainer = (): JSX.Element => {
     };
   }, []);
 
-  // Callback event for scroll functionality on recordedit-form to set a max-width to select-all-row as width of the visible area
+  /* Callback event for scroll functionality on recordedit-form to set a max-width to select-all-row as the
+  width of the visible area */
   const handleScroll = () => {
     const parentContainer: any = document.querySelector('.recordedit-form');
     const nonScrollableDiv: any = document.querySelector('.select-all-row');
@@ -81,6 +82,8 @@ const FormContainer = (): JSX.Element => {
     }
   };
 
+  /* This callback is called when we want to delete the form, we are setting the form index and
+  a boolean to know the remove button is clicked */
   const deleteForm = (formIndex: number, formNumber: number) => {
     setRemoveForm(formNumber);
     setRemoveClicked(true);
@@ -400,8 +403,8 @@ const FormRow = ({
              * This is added to show the form is selected to apply the change when it is in edit mode
              */
             className={`form-overlay entity-value ${activeForm.includes(formNumber) && showSelectAll
-                ? 'entity-active'
-                : ''
+              ? 'entity-active'
+              : ''
               }`}
             onClick={() => {
               // I couldn’t test that scenario, since on load we’re removing the forms that user cannot edit,
@@ -460,6 +463,8 @@ const SelectAllRow = ({
   const [isEmpty, setIsEmpty] = useState(true);
   const [selected, setSelected] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [width, setWidth] = useState(0);
+
   // This useeffect is to set the first form as active on load
   useEffect(() => {
     if (activeForm?.length === 0) {
@@ -481,6 +486,53 @@ const SelectAllRow = ({
       setSelected(activeForm?.length === forms.length);
     }
   }, [activeForm]);
+
+  // useEffect to call update only when there is a change in the width of select-all-row to update textarea width
+  useEffect(() => {
+    updateTextareaWidth();
+  }, [width]);
+
+  // useEffect to have a resize sensor to change the direction of upper-row when width of container is less than 400.
+  useEffect(() => {
+
+    const nonScrollableDiv = document.querySelector('.select-all-input') as HTMLElement;
+
+    const mainResizeSensor = new ResizeSensor(nonScrollableDiv,
+      () => {
+        const upperRow = document.querySelector('.select-upper-row') as HTMLElement;
+        const upperRowWidth = upperRow?.getBoundingClientRect().width;
+        if (upperRow && upperRowWidth < 400 && (columnModel.inputType === 'textarea' || columnModel.inputType === 'markdown')) {
+          upperRow.style.flexDirection = 'column-reverse'
+        } else {
+          upperRow.style.flexDirection = 'row'
+        }
+      }
+    );
+
+    return () => {
+      mainResizeSensor.detach();
+    };
+  }, []);
+
+  // useEffect to have a resize sensor to width of textarea to the the parent container width.
+  useEffect(() => {
+
+    const nonScrollableDiv = document.querySelector('.select-all-row') as HTMLElement;
+    setWidth(nonScrollableDiv.offsetWidth)
+    // Initial update
+    updateTextareaWidth();
+
+    const mainResizeSensor = new ResizeSensor(nonScrollableDiv,
+      () => {
+        const newContainerWidth = nonScrollableDiv.offsetWidth;
+        setWidth(newContainerWidth)
+      }
+    );
+
+    return () => {
+      mainResizeSensor.detach();
+    };
+  }, []);
 
   /**
    * if the selected value is empty, we should disable the apply-all
@@ -506,7 +558,6 @@ const SelectAllRow = ({
   }, [watch, isEmpty]);
 
   // ------------------------ callbacks -----------------------------------//
-
   const applyValueToAll = () => {
     const cm = columnModels[columnModelIndex];
 
@@ -588,6 +639,22 @@ const SelectAllRow = ({
       );
     });
   };
+
+  /* This is to set the width of text area as the width of select-all-row. We have to involve javascript as 
+  the immidiate parent centre-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
+  to the next immediate parent width which is select-all-row */
+  const updateTextareaWidth = () => {
+    const textarea = document.querySelector('.select-some-textarea') as HTMLElement;
+    const nonScrollableDiv = document.querySelector('.select-all-row') as HTMLElement;
+    if (textarea) {
+      if (window.innerWidth < 1800) {
+        const newContainerWidth = nonScrollableDiv.offsetWidth;
+        textarea.style.width = `${newContainerWidth}px`;
+      } else {
+        textarea.style.width = '1200px';
+      }
+    }
+  };
   // -------------------------- render logic ---------------------- //
 
   const columnModel = columnModels[columnModelIndex];
@@ -621,7 +688,8 @@ const SelectAllRow = ({
 
   return (
     <div className='select-all-row match-entity-value'>
-      <div className='centre-align'>
+      <div className={`centre-align ${columnModel.inputType === 'longtext'
+        || columnModel.inputType === 'markdown' ? 'centre-align-textarea' : ''}`}>
         <div
           className='select-upper-row'
           style={{ display: 'flex', justifyContent: 'space-between' }}
@@ -727,6 +795,8 @@ const SelectAllRow = ({
             disableInput={false}
             requiredInput={false}
             name={inputName}
+            inputClasses={`${columnModel.inputType === 'longtext'
+              || columnModel.inputType === 'markdown' ? 'select-some-textarea' : ''}`}
             type={columnModel.inputType}
             classes='column-cell-input'
             columnModel={columnModel}
@@ -738,7 +808,7 @@ const SelectAllRow = ({
           />
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
