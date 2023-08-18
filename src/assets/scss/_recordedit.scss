@@ -120,7 +120,6 @@
           .form-overlay {
             height: 100%;
             width: 100%;
-            z-index: 2;
             cursor: pointer;
           }
         }
@@ -157,7 +156,7 @@
             width: 100%;
             justify-content: space-between;
 
-            .select-all-text {
+            .select-all-checkbox-container {
               display: flex;
               align-items: center;
               cursor: pointer;
@@ -185,13 +184,14 @@
               }
             }
 
-            .select-all-buttons {
+          .select-all-button-container {
               text-align: right;
 
               .select-all-how-to {
                 border-color: white !important;
                 cursor: default;
                 margin-left: 5px;
+                color: #000;
               }
 
               .select-all-how-to:hover {
