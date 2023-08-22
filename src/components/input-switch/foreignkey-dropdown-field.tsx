@@ -93,7 +93,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   // contextualized reference for fetching dropdownRows
   const [dropdownReference, setDropdownReference] = useState<any>(null);
-  const [dropdownPage, setDropdownPage] = useState<any>(null);
   const [currentDropdownPage, setCurrentDropdownPage] = useState<any>(null);
   // array of page.tuples
   const [dropdownRows, setDropdownRows] = useState<any[]>([]);
@@ -172,7 +171,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     // TODO: logging
     ref.read(initialPageLimit).then((page: any) => {
-      setDropdownPage(page);
       setCurrentDropdownPage(page);
 
       setDropdownRows(page.tuples);
@@ -206,7 +204,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     const searchRef = dropdownReference.search(value);
 
     searchRef.read(pageLimit).then((page: any) => {
-      setDropdownPage(page);
       setCurrentDropdownPage(page);
 
       if (page.length === 0) {
@@ -341,11 +338,11 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
               <Spinner animation='border' size='sm' />
             </div>
           }
-          <Dropdown onToggle={onToggle}>
-            <Dropdown.Toggle as='div' className='chaise-input-group no-caret'>
+          <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
+            <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
-                className={`chaise-input-control has-feedback ${props.classes}`}
+                className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
               >
                 {isStringAndNotEmpty(field?.value) ?
                   <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
@@ -367,7 +364,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 </button>
               </div>}
             </Dropdown.Toggle>
-            <Dropdown.Menu className='responsive-dropdown-menu'>
+            {!props.disableInput && <Dropdown.Menu className='responsive-dropdown-menu'>
               <li className='search-row chaise-input-group'>
                 <div className='chaise-input-group-prepend'>
                   <span className='chaise-input-group-text fa-solid fa-magnifying-glass' />
@@ -388,7 +385,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                   </li>
                 </>}
               </div>
-            </Dropdown.Menu>
+            </Dropdown.Menu>}
           </Dropdown>
           <input className={props.inputClasses} {...field} type='hidden' />
         </div>

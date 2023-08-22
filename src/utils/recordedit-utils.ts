@@ -42,11 +42,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   if (column.isAsset) {
     type = 'file'
   } else if (column.isForeignKey) {
-    if (true) {
-      type = 'dropdown-select';
-    } else {
-      type = 'popup-select';
-    }
+    // only 2 types are allowed, 'dropdown' or 'popup'
+    type = (column.display.inputDisplayMode === 'dropdown') ? 'dropdown-select' : 'popup-select';
   } else {
     type = getInputType(column.type);
   }
