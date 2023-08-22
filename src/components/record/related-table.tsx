@@ -18,6 +18,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 // utils
 import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import React from 'react';
 
 type RelatedTableProps = {
   /**
@@ -110,4 +111,4 @@ const RelatedTableInner = ({
   )
 };
 
-export default RelatedTable;
+export default React.memo(RelatedTable);

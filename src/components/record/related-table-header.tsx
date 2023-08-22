@@ -17,12 +17,10 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type RelatedTableHeaderProps = {
-  relatedModel: RecordRelatedModel
+  relatedModel: RecordRelatedModel;
 };
 
-const RelatedTableHeader = ({
-  relatedModel
-}: RelatedTableHeaderProps): JSX.Element => {
+const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Element => {
   /**
    * variable to store ref of header text
    */
@@ -49,7 +47,11 @@ const RelatedTableHeader = ({
 
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
-      return <>{renderedDisplayname}: {usedRef.comment}</>;
+      return (
+        <>
+          {renderedDisplayname}: {usedRef.comment}
+        </>
+      );
     } else if (hasTooltip) {
       return usedRef.comment;
     } else {
@@ -81,17 +83,15 @@ const RelatedTableHeader = ({
 
       <div className='chaise-accordion-header-buttons'>
         <div className='chaise-accordion-header-icons'>
-          {relatedModel.recordsetState.isLoading && !relatedModel.recordsetState.hasTimeoutError &&
-            <Spinner animation='border' size='sm' />
-          }
-          {relatedModel.recordsetState.hasTimeoutError &&
-            <ChaiseTooltip
-              placement='bottom'
-              tooltip={MESSAGE_MAP.queryTimeoutTooltip}
-            >
+          {relatedModel.recordsetState.isLoading &&
+            !relatedModel.recordsetState.hasTimeoutError && (
+              <Spinner animation='border' size='sm' />
+            )}
+          {relatedModel.recordsetState.hasTimeoutError && (
+            <ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.queryTimeoutTooltip}>
               <span className='fa-solid fa-triangle-exclamation'></span>
             </ChaiseTooltip>
-          }
+          )}
         </div>
         <RelatedTableActions relatedModel={relatedModel} />
       </div>

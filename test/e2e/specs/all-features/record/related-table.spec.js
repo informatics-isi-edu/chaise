@@ -113,6 +113,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true,
         inlineComment: true,
         comment: "booking inline comment",
+        bulkEditLink: [
+          browser.params.url, 'recordedit', `#${browser.params.catalogId}`,
+          'product-unordered-related-tables-links:booking',
+          // we cannot test the actual facet blob since it's based on RID
+          // and we also don't have access to ermrestjs here to encode it for us
+          '*::facets::'
+        ].join('/'),
         viewMore: {
             displayname: "booking",
             filter: "Accommodations\nSuper 8 North Hollywood Motel"
