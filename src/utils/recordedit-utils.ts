@@ -54,7 +54,7 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     type = getInputType(column.type);
   }
 
-  
+
   const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
   if (prefillObj) {
@@ -109,6 +109,66 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 }
 
 /**
+ * used by copyOrClearValueForColumn
+ * NOTE this function is immutating the given value
+ * @param columnModel the column that we want to copy its value
+ * @param values the FormContext.getValues()
+ * @param foreignKeyData the foreign key data
+ * @param destFormValue the from where the new data should go
+ * @param srcFormValue if we're copying, the form that the data will be copied from.
+ * @param clearValue signal that we want to clear the inputs.
+ * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
+ * flag to skip doing so.
+ */
+function _copyOrClearValueForColumn(
+  column: any, values: any, foreignKeyData: any,
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+) {
+  const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
+
+  const dstKey = `${destFormValue}-${column.name}`;
+
+
+  if (clearValue) {
+    values[dstKey] = '';
+  } else if (srcKey) {
+    values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+  }
+
+  if (column.type.name.indexOf('timestamp') !== -1) {
+    if (clearValue) {
+      values[`${dstKey}-date`] = '';
+      values[`${dstKey}-time`] = '';
+    } else if (srcKey) {
+      values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
+      values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
+    }
+  }
+
+  if (!skipFkColumns && column.isForeignKey) {
+    // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+    if (clearValue) {
+      foreignKeyData[dstKey] = {};
+    } else if (srcKey) {
+      foreignKeyData[dstKey] = simpleDeepCopy(foreignKeyData[srcKey]);
+    }
+
+    // the code above is just copying the displayed rowname for foreignkey
+    // we still need to copy the raw values
+    column.foreignKey.colset.columns.forEach((col: any) => {
+      let val;
+      if (clearValue) {
+        val = '';
+      } else if (typeof srcFormValue === 'number') {
+        val = values[`${srcFormValue}-${col.name}`];
+      }
+      if (val === null || val === undefined) return;
+      values[`${destFormValue}-${col.name}`] = val;
+    });
+  }
+}
+
+/**
  * sets value for a form by either clearing, or using the existing values
  * of another form.
  *
@@ -121,7 +181,6 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
- * @returns
  */
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
@@ -130,58 +189,12 @@ export function copyOrClearValue(
 
   const column = columnModel.column;
 
-  const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
-
-  const dstKey = `${destFormValue}-${column.name}`;
-
-
-if (clearValue) {
-    values[dstKey] = '';
-  } else if (srcKey) {
-    values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
-  }
-
-  if (columnModel.column.type.name.indexOf('timestamp') !== -1) {
-    if (clearValue) {
-      values[`${dstKey}-date`] = '';
-      values[`${dstKey}-time`] = '';
-    } else if (srcKey) {
-      values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
-      values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
-    }
-  }
-
-  if (!skipFkColumns && columnModel.column.isForeignKey) {
-    // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
-    if (clearValue) {
-      foreignKeyData[dstKey] = {};
-    } else if (srcKey) {
-      foreignKeyData[dstKey] = simpleDeepCopy(foreignKeyData[srcKey]);
-    }
-
-    // the code above is just copying the displayed rowname for foreignkey
-    // we still need to copy the raw values
-    columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-      let val;
-      if (clearValue) {
-        val = '';
-      } else if (typeof srcFormValue === 'number') {
-        val = values[`${srcFormValue}-${col.name}`];
-      }
-      if (val === null || val === undefined) return;
-      values[`${destFormValue}-${col.name}`] = val;
-    });
-  }
+  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
 
   // copy the columns in the column mapping.
-  if (columnModel.column.isInputIframe) {
+  if (column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
-      const k = `${destFormValue}-${c.name}`;
-      if (clearValue) {
-        values[k] = '';
-      } else if (typeof srcFormValue === 'number') {
-        values[k] = replaceNullOrUndefined(values[ `${srcFormValue}-${c.name}`], '');
-      }
+      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
     });
   }
 
@@ -360,7 +373,24 @@ export function populateCreateInitialValues(
   return { values, foreignKeyData, shouldWaitForForeignKeyData }
 }
 
-function _setEditValueForColumn(column: any, isDisabled: boolean, usedValue: any, tuple: any, appMode: string, formValue: any, values: any) {
+/**
+ * Set value for the given column. this function will not return any values, and will
+ * only modify the given `values` prop.
+ *
+ * used by populateEditInitialValues
+ *
+ * @param column the ermrestjs ReferenceColumn object
+ * @param isDisabled wether it's disabled or not
+ * @param usedValue the value that we should set
+ * @param tuple the tuple object
+ * @param appMode app mode
+ * @param formValue form number
+ * @param values the object that we will modify
+ * @returns
+ */
+function _populateEditInitialValueForAColumn(
+  column: any, isDisabled: boolean, usedValue: any, tuple: any, appMode: string, formValue: any, values: any
+) {
   let value;
 
   // stringify the returned array value
@@ -463,7 +493,7 @@ function _setEditValueForColumn(column: any, isDisabled: boolean, usedValue: any
 
   if (column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
-      _setEditValueForColumn(c, isDisabled, tuple.data[c.name], tuple, appMode, formValue, values);
+      _populateEditInitialValueForAColumn(c, isDisabled, tuple.data[c.name], tuple, appMode, formValue, values);
     })
   }
 
@@ -519,7 +549,7 @@ export function populateEditInitialValues(
         isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[colModelIndex]);
       }
 
-      _setEditValueForColumn(column, isDisabled, tupleValues[colModelIndex], tuple, appMode, formValue, values);
+      _populateEditInitialValueForAColumn(column, isDisabled, tupleValues[colModelIndex], tuple, appMode, formValue, values);
     });
   });
 
@@ -565,7 +595,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
             break;
         }
       }
-    } 
+    }
 
     const isEmpty = (v === undefined || v === '');
     if (!(skipEmpty && isEmpty)) {
@@ -630,6 +660,24 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
   }
 
   return submissionRow;
+}
+
+/**
+ * convert the foreignKeyData to something that ermrestjs expects.
+ * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
+ * the following will extract the foreignKeyData of the row that we need.
+ */
+export function pupulateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
+  const linkedData : any = {};
+  if (isObjectAndNotNull(foreignKeyData)) {
+    reference.activeList.allOutBounds.forEach((col: any) => {
+      const k =  `${formNumber}-${col.name}`;
+      if (k in foreignKeyData) {
+        linkedData[col.name] = foreignKeyData[k];
+      }
+    });
+  }
+  return linkedData;
 }
 
 /**

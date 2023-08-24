@@ -1,0 +1,87 @@
+{
+  "schema_name": "input-iframe",
+  "tables": {
+    "main": {
+      "kind": "table",
+      "table_name": "main",
+      "schema_name": "input-iframe",
+      "keys": [{"unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "creator",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "uri",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"/hatrac/js/chaise/{{{_id}}}/{{{_uri.md5_hex}}}",
+              "filename_column" : "filename",
+              "byte_count_column": "bytes",
+              "md5": "md5"
+            }
+          }
+        },
+        {
+          "name": "filename",
+          "nullok": false,
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "bytes",
+          "nullok": false,
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "md5",
+          "nullok": false,
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "notes",
+          "nullok": true,
+          "type": {"typename": "text"}
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns" : {
+          "*": [
+            {"source": "id"},
+            {"source": "creator"},
+            {"source": "notes"}
+          ],
+          "entry": [
+            {"source": "id"},
+            {
+              "source": "creator",
+              "markdown_name": "iframe input",
+              "input_iframe": {
+                "url_pattern": "{{{$location.chaise_path}}}input-iframe-test.html",
+                "field_mapping": {
+                  "creator_iframe_input": "creator",
+                  "file_iframe_input": "uri",
+                  "notes_iframe_input": "notes"
+                },
+                "optional_fields": ["notes_iframe_input"]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

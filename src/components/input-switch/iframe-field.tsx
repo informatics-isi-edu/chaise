@@ -8,15 +8,18 @@ import IframeFieldModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-
 // hooks
 import { useState, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 // models
 import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { populateSubmissionRow, pupulateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 type IframeFieldProps = InputFieldProps & {
   /**
@@ -40,14 +43,25 @@ type IframeFieldProps = InputFieldProps & {
    * Available only in edit mode.
    */
   parentTuple?: any,
+  /**
+   * the ref used to capture the foreignkey data
+   */
+  foreignKeyData?: React.MutableRefObject<any>,
 };
 
 const IframeField = (props: IframeFieldProps): JSX.Element => {
 
+  const { addAlert } = useAlert();
+  const { setValue, clearErrors, getValues } = useFormContext();
+
   const [showModal, setShowModal] = useState(false);
+  const [iframeProps, setIframeProps] = useState<{
+    url: string,
+    submissionRow: any
+  } | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { setValue, clearErrors, getValues } = useFormContext();
+
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
   const isEditMode = props.appMode === appModes.EDIT;
@@ -65,7 +79,19 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   }
 
   const openIframeModal = () => {
-    setShowModal(true);
+    const linkedData = pupulateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData);
+    const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
+    const url = props.columnModel.column.renderInputIframeUrl(submissionRow, linkedData);
+
+    if (isStringAndNotEmpty(url)) {
+      setIframeProps({ url, submissionRow });
+      setShowModal(true);
+    } else {
+      addAlert(
+        'Invalid url template. Please contact your system administrators.',
+        ChaiseAlertType.ERROR
+      );
+    }
   };
 
   return (
@@ -98,29 +124,29 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
           </div>
           <input className={props.inputClasses} {...field} type='hidden' />
           {
-            showModal &&
+            showModal && iframeProps &&
             <AlertsProvider>
               <IframeFieldModal
-                  showModal={showModal}
-                  setShowModal={setShowModal}
-                  title={<>
-                    <span>Select </span>
-                    <Title displayname={props.columnModel.column.displayname} />
-                    {props.parentReference &&
-                      <span>
-                        <span> for {!isEditMode ? 'new ' : ''}</span>
-                        <Title reference={props.parentReference} />
-                        {isEditMode && props.parentTuple &&
-                          <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
-                      </span>}
-                  </>}
-                  fieldName={props.name}
-                  columnModel={props.columnModel}
-                  parentReference={props.parentReference}
-                  formNumber={usedFormNumber}
-                  formValues={getValues()}
-                  clearErrors={clearErrors}
-                  setValue={setValue}
+                iframeLocation={iframeProps.url}
+                showModal={showModal}
+                setShowModal={setShowModal}
+                title={<>
+                  <span>Select </span>
+                  <Title displayname={props.columnModel.column.displayname} />
+                  {props.parentReference &&
+                    <span>
+                      <span> for {!isEditMode ? 'new ' : ''}</span>
+                      <Title reference={props.parentReference} />
+                      {isEditMode && props.parentTuple &&
+                        <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
+                    </span>}
+                </>}
+                fieldName={props.name}
+                columnModel={props.columnModel}
+                submissionRowValues={iframeProps.submissionRow}
+                formNumber={usedFormNumber}
+                clearErrors={clearErrors}
+                setValue={setValue}
               />
             </AlertsProvider>
           }

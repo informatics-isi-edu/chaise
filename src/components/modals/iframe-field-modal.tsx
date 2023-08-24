@@ -16,9 +16,12 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 type IframeFieldModalProps = {
+  /**
+   * the url
+   */
+  iframeLocation: string,
   /**
    * the title of popup
    */
@@ -32,17 +35,9 @@ type IframeFieldModalProps = {
    */
   columnModel: RecordeditColumnModel,
   /**
-   * the reference object of page (props.parentReference)
-   */
-  parentReference: any,
-  /**
    * form number
    */
   formNumber: number,
-  /**
-   * the values in the form (react-hook-form getValues())
-   */
-  formValues: any,
   /**
    * react-hook-form clearErrors
    */
@@ -53,18 +48,19 @@ type IframeFieldModalProps = {
   setValue: any,
   showModal: boolean,
   setShowModal: any,
+  submissionRowValues: any,
 }
 
 /**
  * the popup used by iframe field. the iframe will be displayed in this popup.
  */
 const IframeFieldModal = ({
+  iframeLocation,
   title,
   fieldName,
   columnModel,
-  parentReference,
+  submissionRowValues,
   formNumber,
-  formValues,
   clearErrors,
   setValue,
   showModal,
@@ -72,8 +68,6 @@ const IframeFieldModal = ({
 }: IframeFieldModalProps) => {
 
   const { addAlert } = useAlert();
-
-  const iframeLocation = columnModel.column.inputIframeProps.url;
   const iframeRef = useRef<any>(null);
 
   const [showModalSpinner, setShowModalSpinner] = useState(true);
@@ -105,14 +99,13 @@ const IframeFieldModal = ({
           break;
         case 'iframe-ready':
           // generate the existing value object that should be sent to iframe, so it can show the existing value to users
-          const submissionRow = populateSubmissionRow(parentReference, formNumber, formValues);
           const currentValues: any = {};
           for (const k in mapping) {
-            const val = submissionRow[mapping[k].name];
+            const val = submissionRowValues[mapping[k].name];
             if (mapping[k].isAsset && val && isStringAndNotEmpty(val.url)) {
               currentValues[k] = val.url;
             } else {
-              currentValues[k] = submissionRow[mapping[k].name];
+              currentValues[k] = submissionRowValues[mapping[k].name];
             }
           }
 
@@ -125,20 +118,13 @@ const IframeFieldModal = ({
           addAlert(content.message, content.type);
           break;
         case 'submit-data':
-          // hide the modal
-          setShowModal(false);
-
-          // clear the previous errors on the form
-          clearErrors(fieldName);
-
           // save the data
           for (const k in mapping) {
             const col = mapping[k];
 
             // make sure the column is part of the returned data
             if (!(k in content)) {
-              if (!(k in optionalFieldNames)) {
-                // we should show an error and discard the whole iframe..
+              if (optionalFieldNames.indexOf(k) === -1) {
                 addAlert(
                   `Didn't recieve the expected value for '${k}'. Please contact your system administrators.`,
                   ChaiseAlertType.ERROR
@@ -153,8 +139,6 @@ const IframeFieldModal = ({
 
             if (col.isAsset) {
               if (!(colData instanceof File)) {
-                // TODO what if the returned data is not a file
-
                 if (!(k in optionalFieldNames)) {
                   addAlert(
                     `Didn't recieve the expected file for '${k}'. Please contact your system administrators.`,
@@ -180,6 +164,11 @@ const IframeFieldModal = ({
             }
           }
 
+          // hide the modal
+          setShowModal(false);
+
+          // clear the previous errors on the form
+          clearErrors(fieldName);
           break;
       }
     }
@@ -226,7 +215,7 @@ const IframeFieldModal = ({
       <Alerts />
       <Modal.Body>
         <div className='iframe-container'>
-          {showModalSpinner && <ChaiseSpinner />}
+          {showModalSpinner && <ChaiseSpinner className='iframe-field-modal-spinner' />}
           <iframe ref={iframeRef} src={iframeLocation} />
         </div>
       </Modal.Body>
