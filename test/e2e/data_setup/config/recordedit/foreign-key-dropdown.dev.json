@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordedit/foreign-key-dropdown.config.json"
+      ],
+      "schema": "fk-display-mode"
+  },
+  "cleanup" : true
+}

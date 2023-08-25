@@ -219,8 +219,7 @@ describe("Domain filter pattern support,", function () {
 
         describe("In edit mode, ", function () {
             beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
+                chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
             });
 
@@ -232,6 +231,7 @@ describe("Domain filter pattern support,", function () {
                 it("otherwise it should not be limited.", function (done) {
                     testModalCount(colWFkeys, 7, done);
                 });
+
 
             });
         });
