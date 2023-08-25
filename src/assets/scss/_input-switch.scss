@@ -194,7 +194,7 @@
     }
   }
 
-  .responsive-dropdown-menu.dropdown-menu {
+  .responsive-dropdown-menu, .dropdown-menu {
     // make sure the menu expands the whole row
     width: auto;
     min-width: 100%;

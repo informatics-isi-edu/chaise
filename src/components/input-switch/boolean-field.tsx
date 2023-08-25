@@ -58,6 +58,16 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
     }
   }
 
+  const onToggle = (show: boolean) => {
+    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement
+
+    if (show) {
+      formContainer.classList.add('dropdown-open');
+    } else {
+      formContainer.classList.remove('dropdown-open');
+    }
+  }
+
   // first option is true, and second is false.
   const rawOptions = [true, false];
   const displayedOptions = rawOptions.map((op) => props.columnModel ? formatBoolean(props.columnModel.column, op) : op.toString());
@@ -71,7 +81,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
     >
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-boolean'>
-          <Dropdown aria-disabled={props.disableInput}>
+          <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
             <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
               <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
                 {typeof field?.value === 'boolean' ?
