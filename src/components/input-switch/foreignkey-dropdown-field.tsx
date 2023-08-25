@@ -252,12 +252,14 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   const onToggle = (show: boolean) => {
-    // TODO: manage dropdown being opened when input is clicked on and a search is triggered
+    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement
+
     if (show) {
-      // NOTE: figure out how to focus input since it isn't showing yet when onToggle triggers
-      searchInputEl?.current?.focus();
+      formContainer.classList.add('dropdown-open');
 
       if (!dropdownInitialized) intializeDropdownRows();
+    } else {
+      formContainer.classList.remove('dropdown-open');
     }
   }
 

@@ -86,6 +86,13 @@
       min-width: 250px;
       overflow-x: auto;
 
+      &.dropdown-open {
+        // max height of a dropdown is `395px`
+        // if dropdown is last input row, it won't overflow the parent container's height and be truncated
+        // special case can occur when there are very few values to set (id + 1 foreign key in create mode)
+        padding-bottom: 400px;
+      }
+
       .form-header-row {
         display: flex;
       }
