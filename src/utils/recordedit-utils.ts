@@ -638,10 +638,6 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
           if (c.sha256) setSubmission(c.sha256, true);
         }
 
-        // TODO we should make sure we're doing this even for disabled inputs
-        // but we're always setting submission rows even for disabled inputs
-        // I think this is only working because ermrestjs is ignoring the disabled inputs?
-        // should be tested
         setSubmission(c);
       });
     } else {
@@ -667,7 +663,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
  * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
  * the following will extract the foreignKeyData of the row that we need.
  */
-export function pupulateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
+export function populateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
   const linkedData : any = {};
   if (isObjectAndNotNull(foreignKeyData)) {
     reference.activeList.allOutBounds.forEach((col: any) => {

@@ -501,7 +501,7 @@ const TableRow = ({
           >
             <DisplayValue addClass={true} value={value} />
           </div>
-          {/* when we're not showing the actio buttons, the overflow index should not be shifted */}
+          {/* the overflow index should be shifted only if we're showing the action buttons */}
           {(!disableMaxRowHeightFeature && overflow[colIndex + (showActionButtons ? 1 : 0)]) && <div style={{ 'display': 'inline' }}>
             {' ... '}
             <span

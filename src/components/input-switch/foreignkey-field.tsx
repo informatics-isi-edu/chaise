@@ -23,7 +23,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { populateSubmissionRow, pupulateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { populateSubmissionRow, populateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
@@ -127,7 +127,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       andFilters.push({ source: col.name, hidden: true, not_null: true });
     });
 
-    const linkedData = pupulateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData);
+    const linkedData = populateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData?.current);
     const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
     const ref = props.columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
 

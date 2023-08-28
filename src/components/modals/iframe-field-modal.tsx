@@ -102,9 +102,11 @@ const IframeFieldModal = ({
           const currentValues: any = {};
           for (const k in mapping) {
             const val = submissionRowValues[mapping[k].name];
-            if (mapping[k].isAsset && val && isStringAndNotEmpty(val.url)) {
-              currentValues[k] = val.url;
-            } else {
+            if (mapping[k].isAsset) {
+              if (val && isStringAndNotEmpty(val.url)) {
+                currentValues[k] = val.url;
+              }
+            } else if (submissionRowValues[mapping[k].name] !== undefined) {
               currentValues[k] = submissionRowValues[mapping[k].name];
             }
           }
@@ -118,6 +120,12 @@ const IframeFieldModal = ({
           addAlert(content.message, content.type);
           break;
         case 'submit-data':
+          /**
+           * the data that should be stored
+           * we're capturing it in case there was an issue in the middle, so we're not saving partial data.
+           */
+          const values : any = {};
+
           // save the data
           for (const k in mapping) {
             const col = mapping[k];
@@ -151,20 +159,23 @@ const IframeFieldModal = ({
                 continue;
               }
 
-              const tempFileObject: FileObject = {
+              values[`${formNumber}-${col.name}`] = {
                 file: colData,
                 url: URL.createObjectURL(colData),
                 filename: colData.name,
                 filesize: colData.size
               };
 
-              setValue(`${formNumber}-${col.name}`, tempFileObject);
             } else {
-              setValue(`${formNumber}-${col.name}`, colData);
+              values[`${formNumber}-${col.name}`] = colData;
             }
           }
 
-          // hide the modal
+          /**
+           * if there was any issues in the data, it will not reach here,
+           * so it's safe to save the data and close the modal
+           */
+          Object.keys(values).forEach((k) => setValue(k, values[k]));
           setShowModal(false);
 
           // clear the previous errors on the form

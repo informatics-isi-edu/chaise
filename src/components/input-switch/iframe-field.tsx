@@ -19,7 +19,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { populateSubmissionRow, pupulateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { populateSubmissionRow, populateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 type IframeFieldProps = InputFieldProps & {
   /**
@@ -79,7 +79,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   }
 
   const openIframeModal = () => {
-    const linkedData = pupulateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData);
+    const linkedData = populateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData?.current);
     const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
     const url = props.columnModel.column.renderInputIframeUrl(submissionRow, linkedData);
 
