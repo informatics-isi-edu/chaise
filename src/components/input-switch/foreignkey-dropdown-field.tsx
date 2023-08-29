@@ -1,5 +1,4 @@
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
@@ -13,9 +12,10 @@ import { useFormContext } from 'react-hook-form';
 
 // models
 import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -85,7 +85,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    */
   const showSpinnerOnLoad = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
-  
+
   const searchInputEl = useRef<HTMLInputElement>(null);
   const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 1000;
@@ -97,7 +97,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   // array of page.tuples
   const [dropdownRows, setDropdownRows] = useState<any[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  // TODO: checkedRow should be initialized if a value is preset (add related record, copy, edit)
   const [checkedRow, setCheckedRow] = useState<any>(null);
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
@@ -148,7 +147,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     // since we've already added a not-null hidden filter, the values will be not-null.
     props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
       const referencedCol = props.columnModel.column.foreignKey.mapping.get(col);
-      // TODO maybe we want to formalize this way of naming the fields? like a function or something
+      
       setValue(`${usedFormNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
     });
 
@@ -169,11 +168,30 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       setPageLimit(defaultPageSize);
     }
 
-    // TODO: logging
-    ref.read(initialPageLimit).then((page: any) => {
-      setCurrentDropdownPage(page);
+    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, ref.table);
 
+    const logObj = {
+      action: LogService.getActionString(LogActions.LOAD, stackPath),
+      stack: LogService.getStackObject(currStackNode)
+    };
+
+    ref.read(initialPageLimit, logObj).then((page: any) => {
+      setCurrentDropdownPage(page);
       setDropdownRows(page.tuples);
+      
+      // if we use props.foreignKeyData.current[props.name], we get an object of row values (tuple.data)
+      // we don't know which column value is used for the displayname so it's better to check react-hook-form state
+      const displayedValue = getValues()[props.name];
+
+      // check if we have a value set for the foreign key input
+      if (displayedValue) {
+        // set the checked row if it's present in the page of rows
+        page.tuples.forEach((tuple: any) => {
+          if (tuple.displayname.value === displayedValue) setCheckedRow(tuple);
+        });
+      }
+
       setShowSpinner(false);
       setDropdownInitialized(true);
     }).catch((exception: any) => {
@@ -203,7 +221,17 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const searchCallback = (value: string) => {
     const searchRef = dropdownReference.search(value);
 
-    searchRef.read(pageLimit).then((page: any) => {
+    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, searchRef.table);
+    const newStack = LogService.addCausesToStack(currStackNode, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime());
+
+
+    const logObj = {
+      action: LogService.getActionString(LogActions.RELOAD, stackPath),
+      stack: newStack
+    };
+
+    searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
 
       if (page.length === 0) {
@@ -224,7 +252,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     }).catch((exception: any) => {
       setShowSpinner(false);
 
-      // TODO: what kind of error should happen?
       // alert might be better or a dismissible error that doesn't block continuing app
       dispatchError({ error: exception });
     });
@@ -234,8 +261,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     let value = e.target.value;
     if (value) value = value.trim();
 
-    // TODO: if search changes and dropdown isn't open, open it so user can see the results
-    // setShowDropdown(true);
     setSearchValue(value);
 
     // Cancel previous promise for background search that was queued to be called
@@ -257,9 +282,23 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     if (show) {
       formContainer.classList.add('dropdown-open');
 
-      if (!dropdownInitialized) intializeDropdownRows();
+      if (!dropdownInitialized) {
+        // opening the dropdown the first time reads rows and will log that action
+        intializeDropdownRows();
+      } else {
+        // subsequent openings won't trigger a fetch so log that action
+        LogService.logClientAction({
+          action: LogService.getActionString(LogActions.FOREIGN_KEY_DROPDOWN_OPEN),
+          stack: LogService.getStackObject()
+        }, dropdownReference.defaultLogInfo)
+      }
     } else {
       formContainer.classList.remove('dropdown-open');
+
+      LogService.logClientAction({
+        action: LogService.getActionString(LogActions.FOREIGN_KEY_DROPDOWN_CLOSE),
+        stack: LogService.getStackObject()
+      }, dropdownReference.defaultLogInfo)
     }
   }
 
@@ -275,11 +314,16 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const loadMoreOptions = () => {
     setShowSpinner(true);
-    // const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
-    // const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
+    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, currentDropdownPage.next.table);
+    const newStack = LogService.addCausesToStack(currStackNode, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime());
 
-    // NOTE: should I read a new page each time and 
-    currentDropdownPage.next.read(pageLimit).then((page: any) => {
+    const logObj = {
+      action: LogService.getActionString(LogActions.RELOAD, stackPath),
+      stack: newStack
+    };
+
+    currentDropdownPage.next.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
 
       setDropdownRows((currentRows: any[]) => {
