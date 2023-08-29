@@ -225,11 +225,19 @@
           cursor: inherit;
 
           // if we want to wrap text at dropdown width instead of stretching to accomodate
-          // .dropdown-select-value {
-          //   // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
-          //   // text-wrap: balance;
-          //   white-space: normal;
-          // }
+          .dropdown-select-value {
+            // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
+            //    text-wrap will balance between stretching the dropdown and forcing text to wrap
+            // text-wrap: balance;
+            
+            // force text to wrap at dropdown width
+            white-space: normal;
+          }
+        }
+
+        .fa-check {
+          vertical-align: top;
+          padding-top: 0.25rem;
         }
 
         // check is `14px` wide, reduce the padding when it's visible
