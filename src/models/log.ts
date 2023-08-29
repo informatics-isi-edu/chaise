@@ -91,8 +91,6 @@ export enum LogActions {
   FOREIGN_KEY_DEFAULT= ';default',
 
   // - client=
-  FOREIGN_KEY_DROPDOWN_OPEN= 'fkey-dropdown' + ';open',
-  FOREIGN_KEY_DROPDOWN_CLOSE= 'fkey-dropdown' + ';close',
   FORM_CLONE= ';clone',
   FORM_CLONE_X= ';clone-x',
   FORM_REMOVE= ';remove',

@@ -102,6 +102,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
   const [pageLimit, setPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
 
+  const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+
   // NOTE: same function in foreignkey-field
   const createForeignKeyReference = () => {
     const andFilters: any = [];
@@ -168,13 +170,16 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       setPageLimit(defaultPageSize);
     }
 
-    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, ref.table);
-
     const logObj = {
-      action: LogService.getActionString(LogActions.LOAD, stackPath),
-      stack: LogService.getStackObject(currStackNode)
-    };
+      action: LogService.getActionString(LogActions.OPEN, stackPath),
+      stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+    }
+
+    LogService.logClientAction(logObj, ref.defaultLogInfo);
+
+    // different action for read
+    logObj.action = LogService.getActionString(LogActions.LOAD, stackPath);
 
     ref.read(initialPageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
@@ -221,15 +226,23 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const searchCallback = (value: string) => {
     const searchRef = dropdownReference.search(value);
 
-    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+    // create initial stack
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, searchRef.table);
-    const newStack = LogService.addCausesToStack(currStackNode, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime());
+    const clientStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1, search_str: value })
 
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.SEARCH_BOX_AUTO, stackPath),
+      stack: clientStack
+    }, searchRef.defaultLogInfo);
 
+    const readStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+    // different action for read
+    // add causes to stack only for read request
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack: newStack
-    };
+      stack: LogService.addCausesToStack(readStack, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime())
+    }
+    
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
@@ -277,28 +290,28 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   const onToggle = (show: boolean) => {
-    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement
-
+    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement;
+  
     if (show) {
       formContainer.classList.add('dropdown-open');
 
       if (!dropdownInitialized) {
-        // opening the dropdown the first time reads rows and will log that action
         intializeDropdownRows();
       } else {
-        // subsequent openings won't trigger a fetch so log that action
+        const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
         LogService.logClientAction({
-          action: LogService.getActionString(LogActions.FOREIGN_KEY_DROPDOWN_OPEN),
-          stack: LogService.getStackObject()
-        }, dropdownReference.defaultLogInfo)
+          action: LogService.getActionString(LogActions.OPEN, stackPath),
+          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+        }, dropdownReference.defaultLogInfo);
       }
     } else {
       formContainer.classList.remove('dropdown-open');
 
+      const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
       LogService.logClientAction({
-        action: LogService.getActionString(LogActions.FOREIGN_KEY_DROPDOWN_CLOSE),
-        stack: LogService.getStackObject()
-      }, dropdownReference.defaultLogInfo)
+        action: LogService.getActionString(LogActions.CLOSE, stackPath),
+        stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+      }, dropdownReference.defaultLogInfo);
     }
   }
 
@@ -314,16 +327,24 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const loadMoreOptions = () => {
     setShowSpinner(true);
-    const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
-    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, currentDropdownPage.next.table);
-    const newStack = LogService.addCausesToStack(currStackNode, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime());
 
+    const nextRef = currentDropdownPage.next;
+
+    // create initial stack
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, nextRef.table);
     const logObj = {
-      action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack: newStack
-    };
+      action: LogService.getActionString(LogActions.PAGE_NEXT, stackPath),
+      stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+    }
 
-    currentDropdownPage.next.read(pageLimit, logObj).then((page: any) => {
+    LogService.logClientAction(logObj, nextRef.defaultLogInfo);
+
+    // different action for read
+    logObj.action = LogService.getActionString(LogActions.RELOAD, stackPath);
+    // add causes to stack only for read request
+    logObj.stack = LogService.addCausesToStack(logObj.stack, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime());
+
+    nextRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
 
       setDropdownRows((currentRows: any[]) => {
