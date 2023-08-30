@@ -38,13 +38,9 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   );
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
-  let isRequired = !column.nullok;
-
   let type;
   if (column.isInputIframe) {
     type = 'iframe';
-    // as long as any of the columns in the mapping are required, it should say its required
-    // isRequired
   }
   else if (column.isAsset) {
     type = 'file'
@@ -77,7 +73,7 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   return {
     column: column,
     isDisabled: isInputDisabled || isPrefilled,
-    isRequired: isRequired && !isInputDisabled,
+    isRequired: !column.nullok && !isInputDisabled,
     inputType: type,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string

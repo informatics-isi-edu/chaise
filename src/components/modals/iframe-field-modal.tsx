@@ -124,7 +124,7 @@ const IframeFieldModal = ({
            * the data that should be stored
            * we're capturing it in case there was an issue in the middle, so we're not saving partial data.
            */
-          const values : any = {};
+          const values: any = {};
 
           // save the data
           for (const k in mapping) {
@@ -133,6 +133,7 @@ const IframeFieldModal = ({
             // make sure the column is part of the returned data
             if (!(k in content)) {
               if (optionalFieldNames.indexOf(k) === -1) {
+                // show an error and abort all the changes
                 addAlert(
                   `Didn't recieve the expected value for '${k}'. Please contact your system administrators.`,
                   ChaiseAlertType.ERROR
@@ -140,14 +141,18 @@ const IframeFieldModal = ({
                 return;
               }
 
-              console.log(`iframe didn't return the expected field named '${k}'.`);
+              // set an empty value for missing fields (to clear any existing values based on previous selection)
+              setEmpty(col, values);
+              // go to the next field
               continue;
             }
+
             const colData = content[k];
 
             if (col.isAsset) {
               if (!(colData instanceof File)) {
                 if (!(k in optionalFieldNames)) {
+                  // show an error and abort all the changes
                   addAlert(
                     `Didn't recieve the expected file for '${k}'. Please contact your system administrators.`,
                     ChaiseAlertType.ERROR
@@ -155,7 +160,10 @@ const IframeFieldModal = ({
                   return;
                 }
 
-                console.log(`iframe field named '${k}' must be a file.`);
+                // didn't receive a file, so just set empty value.
+                setEmpty(col, values);
+
+                // go to the next field
                 continue;
               }
 
@@ -182,7 +190,24 @@ const IframeFieldModal = ({
           clearErrors(fieldName);
           break;
       }
-    }
+    };
+
+    /**
+     * used above for clearing the value of a column.
+     * @param col ReferenceColumn object
+     * @param values the object that will be mutated by this function.
+     */
+    const setEmpty = (col: any, values: any) => {
+      if (col.isAsset) {
+        values[`${formNumber}-${col.name}`] = {
+          url: '',
+          filename: '',
+          filesize: 0
+        }
+      } else {
+        values[`${formNumber}-${col.name}`] = '';
+      }
+    };
 
     /**
      * listen for the messages that the iframe will send
