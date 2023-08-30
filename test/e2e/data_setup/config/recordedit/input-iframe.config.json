@@ -1,0 +1,13 @@
+{
+  "catalog": {
+    "annotations": {}
+  },
+  "schema": {
+      "name": "input-iframe",
+      "createNew": true,
+      "path": "test/e2e/data_setup/schema/recordedit/input-iframe.json"
+  },
+  "tables": {
+      "createNew": true
+  }
+}

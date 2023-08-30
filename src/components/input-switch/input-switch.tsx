@@ -12,6 +12,7 @@ import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-fie
 import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
 import NumericField from '@isrd-isi-edu/chaise/src/components/input-switch/numeric-field';
 import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-field';
+import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe-field';
 
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -157,6 +158,28 @@ const InputSwitch = ({
 
   return (() => {
     switch (type) {
+      case 'iframe':
+        if (!columnModel) {
+          throw new Error('columnModel is needed for iframe inputs.');
+        }
+        return <IframeField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+          columnModel={columnModel}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={parentReference}
+          parentTuple={parentTuple}
+        />;
       case 'array':
         return <ArrayField
           baseArrayType={columnModel?.column.type.baseType.name}

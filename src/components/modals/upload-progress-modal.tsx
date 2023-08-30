@@ -128,7 +128,14 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         // Then increment the count for no of files and create an uploadFile Object for it
         // Push this to the tuple array for the row
         // NOTE: each file object has an hatracObj property which is an hatrac object
-        const column = reference.columns.find((c: any) => { return c.name === k; });
+        let column = reference.columns.find((c: any) => { return c.name === k; });
+        if (!column) {
+          // the file might be related to one of the columns in the input-iframe column mapping
+          reference.columns.forEach((col: any) => {
+            if (!col.isInputIframe || column) return;
+            column = col.inputIframeProps.columns.find((c: any) => c.name === k);
+          });
+        }
         if (column && column.isAsset) {
 
           // If the column value of the row contains a file object then add it to the tuple to upload
@@ -583,8 +590,15 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
         // If the column type is object and has a file property inside it
         // then set the url in the corresonding column for the row as its value
-        const column = reference.columns.find((c: any) => { return c.name === k; });
-        if (column && row[k] !== null && (column.isAsset) && typeof row[k] === 'object' && row[k].file) {
+        let column = reference.columns.find((c: any) => { return c.name === k; });
+        if (!column) {
+          // the file might be related to one of the columns in the input-iframe column mapping
+          reference.columns.forEach((col: any) => {
+            if (!col.isInputIframe || column) return;
+            column = col.inputIframeProps.columns.find((c: any) => c.name === k);
+          })
+        }
+        if (column && column.isAsset && row[k] !== null && typeof row[k] === 'object' && row[k].file) {
           row[k] = uploadRowsRef.current[index][rowIndex++].versionedUrl;
         }
       }
