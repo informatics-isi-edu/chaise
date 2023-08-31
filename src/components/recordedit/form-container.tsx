@@ -63,7 +63,10 @@ const FormContainer = (): JSX.Element => {
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(onSubmitValid, onSubmitInvalid)} 
+        }
         ref={formContainer}
       >
         {/* form header */}
