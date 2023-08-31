@@ -243,7 +243,7 @@ var recordEditPage = function() {
     }
 
     this.getDropdownSearch = () => {
-        return element(by.css('.dropdown-menu .search-row .chaise-input-control'));
+        return element(by.css('.dropdown-menu .search-row .chaise-input-control input'));
     }
 
     // boolean dropdown selectors

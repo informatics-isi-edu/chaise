@@ -517,7 +517,7 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:table-display": {
                     "entry": {
-                        "selector_ux_mode": "dropdown"
+                        "selector_ux_mode": "simple-search-dropdown"
                     }
                 }
             }

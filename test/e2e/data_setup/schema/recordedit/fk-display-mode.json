@@ -28,7 +28,7 @@
                     "tag:isrd.isi.edu,2016:foreign-key": {
                       "display": {
                           "entry": {
-                              "selector_ux_mode": "dropdown"
+                              "selector_ux_mode": "simple-search-dropdown"
                           }
                       }
                   }
@@ -136,7 +136,7 @@
                     "source": [{"outbound": ["fk-display-mode", "fk_visible_columns"]}, "id"], 
                     "markdown_name": "fk3 dropdown", 
                     "display": {
-                        "selector_ux_mode": "dropdown"
+                        "selector_ux_mode": "simple-search-dropdown"
                     }
                 }
               ]
@@ -214,7 +214,7 @@
           "annotations": {
             "tag:isrd.isi.edu,2016:table-display": {
                 "entry": {
-                    "selector_ux_mode": "dropdown"
+                    "selector_ux_mode": "simple-search-dropdown"
                 },
                 "row_name": {
                     "row_markdown_pattern": "{{{text}}}"
