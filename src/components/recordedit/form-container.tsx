@@ -63,8 +63,17 @@ const FormContainer = (): JSX.Element => {
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onSubmit={(e) => {
+        onSubmit={(e: React.SyntheticEvent) => {
+          /** 
+           * prevents the form being submitted when "enter" is pressed by not doing the html default behavior
+           * other ways to prevent this include: 
+           *   - adding `type='button'` to each button
+           *   - ensuring each input has an onKeyPress handler that handles onEnter and doesn't propogate the event
+           * 
+           * NOTE: Remove this to allow submission of form on enter, other changes need to be made to full support that functionality
+           */
           e.preventDefault();
+
           handleSubmit(onSubmitValid, onSubmitInvalid)} 
         }
         ref={formContainer}
