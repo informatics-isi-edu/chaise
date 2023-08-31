@@ -248,21 +248,21 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     // create initial stack
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, searchRef.table);
-    const clientStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1, search_str: value })
+    const stack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
 
-    // use the action from retruned from SearchInput component
+    const searchStack = value ? LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1, search_str: value }) : stack;
+
+    // use the action from returned from SearchInput component
     LogService.logClientAction({
       action: LogService.getActionString(action, stackPath),
-      stack: clientStack
+      stack: searchStack
     }, searchRef.defaultLogInfo);
-
-    const readStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
 
     // different action for read
     // add causes to stack only for read request
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack: LogService.addCausesToStack(readStack, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime())
+      stack: LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime())
     }
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
