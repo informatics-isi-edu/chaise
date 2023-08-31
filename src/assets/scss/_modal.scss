@@ -139,9 +139,16 @@ div.modal-title {
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
 .chaise-body .modal-dialog.modal-xl {
-  margin: 2.5vh auto;
+  $_margin: 2.5vh;
+
+  margin: $_margin auto;
   width: auto !important;
   max-width: 95vw;
+
+  &.modal-fullscreen {
+    // modal-screen by default has a 100% height, but we should account for the marging that we're adding.
+    height: calc(100% - (2 * $_margin));
+  }
 }
 
 .modal-dialog.modal-lg {
@@ -271,6 +278,30 @@ div.modal-title {
   }
 }
 
+/******** Popup modal for input iframe ********/
+.iframe-field-popup {
+  // .modal-body {
+  //   min-height: 90vh;
+  // }
+
+  .alerts-container {
+    // make sure it's consistent with the modal title padding
+    margin: 0 1rem;
+  }
+
+  .iframe-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+
+    iframe {
+      height: 100%;
+      width: 100%;
+    }
+  }
+}
+
+
 /******** Popup modal for Saving Queries ********/
 .create-saved-query .modal-content {
   .modal-header {
@@ -304,7 +335,7 @@ div.modal-title {
           border: none;
           border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
         }
-    
+
         .recordedit-form .entity-value {
           border: none;
           border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
@@ -313,6 +344,7 @@ div.modal-title {
     }
   }
 }
+
 /*************** z-index for modal backdrops ***************/
 div.modal-backdrop {
   // override the default bootstrap value

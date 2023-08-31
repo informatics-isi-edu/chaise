@@ -24,7 +24,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { populateLinkedData, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ForeignkeyDropdownFieldProps = InputFieldProps & {
@@ -146,21 +146,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       andFilters.push({ source: col.name, hidden: true, not_null: true });
     });
 
-    /**
-     * convert the foreignKeyData to something that ermrestjs expects.
-     * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
-     * the following will extract the foreignKeyData of the row that we need.
-     */
-    const linkedData: any = {};
-    if (props.foreignKeyData && props.foreignKeyData.current) {
-      props.parentReference.activeList.allOutBounds.forEach((col: any) => {
-        const k = `${usedFormNumber}-${col.name}`;
-        if (k in props.foreignKeyData?.current) {
-          linkedData[col.name] = props.foreignKeyData?.current[k];
-        }
-      });
-    }
-
+    const linkedData = populateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData?.current);
     const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
     return props.columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
   }
@@ -193,6 +179,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const intializeDropdownRows = () => {
     setShowSpinner(true);
     const ref = createForeignKeyReference().contextualize.compactSelectForeignKey;
+
     setDropdownReference(ref);
 
     let initialPageLimit = pageLimit;
