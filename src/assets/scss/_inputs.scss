@@ -15,27 +15,26 @@
   align-items: stretch;
   width: 100%;
 
-  >.chaise-input-control,
-  >.chaise-form-select,
-  >.chaise-form-file {
+  > .chaise-input-control,
+  > .chaise-form-select,
+  > .chaise-form-file {
     position: relative; // For focus state's z-index
     flex: 1 1 0%;
     min-width: 0; // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
     margin-bottom: 0;
 
-    +.chaise-input-control,
-    +.chaise-form-select,
-    +.chaise-form-file {
+    + .chaise-input-control,
+    + .chaise-form-select,
+    + .chaise-form-file {
       margin-left: variables.$btn-border-width * -1;
     }
   }
 
-  >.chaise-input-control,
-  >.chaise-form-select {
+  > .chaise-input-control,
+  > .chaise-form-select {
     &:not(:last-child) {
       @include helpers.border-right-radius(0);
     }
-
     &:not(:first-child) {
       @include helpers.border-left-radius(0);
     }
@@ -43,14 +42,13 @@
 
   // Custom file inputs have more complex markup, thus requiring different
   // border-radius overrides.
-  >.chaise-form-file {
+  > .chaise-form-file {
     display: flex;
     align-items: center;
 
     &:not(:last-child) .chaise-form-file-label {
       @include helpers.border-right-radius(0);
     }
-
     &:not(:first-child) .chaise-form-file-label {
       @include helpers.border-left-radius(0);
     }
@@ -79,10 +77,10 @@
       }
     }
 
-    .chaise-btn+.chaise-btn,
-    .chaise-btn+.chaise-input-group-text,
-    .chaise-input-group-text+.chaise-input-group-text,
-    .chaise-input-group-text+.chaise-btn {
+    .chaise-btn + .chaise-btn,
+    .chaise-btn + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-btn {
       margin-left: variables.$btn-border-width * -1;
     }
   }
@@ -90,7 +88,6 @@
   .chaise-input-group-prepend {
     margin-right: variables.$btn-border-width * -1;
   }
-
   .chaise-input-group-append {
     margin-left: variables.$btn-border-width * -1;
   }
@@ -102,21 +99,21 @@
 // border-radius values when extending. They're more specific than we'd like
 // with the `.chaise-input-group >` part, but without it, we cannot override the sizing.
 
-.chaise-input-group>.chaise-input-group-prepend>.chaise-btn,
-.chaise-input-group>.chaise-input-group-prepend>.chaise-input-group-text,
-.chaise-input-group>.chaise-input-group-append:not(:last-child)>.chaise-btn,
-.chaise-input-group>.chaise-input-group-append:not(:last-child)>.chaise-input-group-text,
-.chaise-input-group>.chaise-input-group-append:last-child>.chaise-btn:not(:last-child):not(.dropdown-toggle),
-.chaise-input-group>.chaise-input-group-append:last-child>.chaise-input-group-text:not(:last-child) {
+.chaise-input-group > .chaise-input-group-prepend > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-btn:not(:last-child):not(.dropdown-toggle),
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-input-group-text:not(:last-child) {
   @include helpers.border-right-radius(0);
 }
 
-.chaise-input-group>.chaise-input-group-append>.chaise-btn,
-.chaise-input-group>.chaise-input-group-append>.chaise-input-group-text,
-.chaise-input-group>.chaise-input-group-prepend:not(:first-child)>.chaise-btn,
-.chaise-input-group>.chaise-input-group-prepend:not(:first-child)>.chaise-input-group-text,
-.chaise-input-group>.chaise-input-group-prepend:first-child>.chaise-btn:not(:first-child),
-.chaise-input-group>.chaise-input-group-prepend:first-child>.chaise-input-group-text:not(:first-child) {
+.chaise-input-group > .chaise-input-group-append > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-btn:not(:first-child),
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-input-group-text:not(:first-child) {
   @include helpers.border-left-radius(0);
 }
 
@@ -185,7 +182,6 @@
   @include helpers.border-radius(variables.$btn-border-radius);
 
   position: relative;
-
   input {
     outline: 0;
     padding: 0;
@@ -241,11 +237,10 @@
     cursor: not-allowed;
     // We are adding this to fix the issue in firefox where the form is not clickable if its disabled
     pointer-events: none;
-
+    
     // make sure the input is taking the input-disabled styles and not the default bootstrap/browser ones
     // (using * so it selects input, textarea, or any other HTML element that we might have
-    *::placeholder,
-    *:disabled {
+    *::placeholder, *:disabled {
       background-color: inherit;
       color: inherit;
       cursor: inherit;
@@ -306,7 +301,7 @@
     -ms-user-select: none;
   }
 
-  &+.chaise-input-group-append>label {
+  & + .chaise-input-group-append > label {
     margin-bottom: 0px;
 
     .button-text {

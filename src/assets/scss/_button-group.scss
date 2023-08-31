@@ -10,10 +10,9 @@
   display: inline-flex;
   vertical-align: middle; // match .chaise-btn alignment given font-size hack above
 
-  >.chaise-btn {
+  > .chaise-btn {
     position: relative;
     flex: 1 1 auto;
-
     // Bring the hover, focused, and "active" buttons to the front to overlay
     // the borders properly
     &.active,
@@ -37,21 +36,19 @@
 }
 
 .chaise-btn-group {
-
   // Prevent double borders when buttons are next to each other
-  >.chaise-btn-group:not(:first-child):not([disabled]),
-  >.chaise-btn:not(:first-child):not([disabled]) {
+  > .chaise-btn-group:not(:first-child):not([disabled]),
+  > .chaise-btn:not(:first-child):not([disabled]) {
     margin-left: variables.$btn-border-width * -1;
   }
-
   // Reset rounded corners
-  >.chaise-btn-group:not(:last-child)>.chaise-btn,
-  >.chaise-btn:not(:last-child):not(.dropdown-toggle) {
+  > .chaise-btn-group:not(:last-child) > .chaise-btn,
+  > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
     @include helpers.border-right-radius(0);
   }
 
-  >.chaise-btn-group:not(:first-child)>.chaise-btn,
-  >.chaise-btn:not(:first-child) {
+  > .chaise-btn-group:not(:first-child) > .chaise-btn,
+  > .chaise-btn:not(:first-child) {
     @include helpers.border-left-radius(0);
   }
 }
@@ -64,24 +61,23 @@
   align-items: flex-start;
   justify-content: center;
 
-  >.chaise-btn-group,
-  >.chaise-btn {
+  > .chaise-btn-group,
+  > .chaise-btn {
     width: 100%;
   }
 
-  >.chaise-btn-group:not(:first-child),
-  >.chaise-btn:not(:first-child) {
+  > .chaise-btn-group:not(:first-child),
+  > .chaise-btn:not(:first-child) {
     margin-top: variables.$btn-border-width * -1;
   }
-
   // Reset rounded corners
-  >.chaise-btn-group:not(:last-child)>.chaise-btn,
-  >.chaise-btn:not(:last-child):not(.dropdown-toggle) {
+  > .chaise-btn-group:not(:last-child) > .chaise-btn,
+  > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
     @include helpers.border-bottom-radius(0);
   }
 
-  >.chaise-btn-group:not(:first-child)>.chaise-btn,
-  >.chaise-btn:not(:first-child) {
+  > .chaise-btn-group:not(:first-child) > .chaise-btn,
+  > .chaise-btn:not(:first-child) {
     @include helpers.border-top-radius(0);
   }
 }

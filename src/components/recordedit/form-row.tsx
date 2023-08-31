@@ -1,6 +1,6 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import SelectAllRow from '@isrd-isi-edu/chaise/src/components/recordedit/select-all-row';
+import SelectAllRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -16,9 +16,21 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type FormRowProps = {
+    /**
+    * The column index.
+    */
     columnModelIndex: number;
+    /**
+    * The deleted form index.
+    */
     removeFormIndex?: number;
+    /**
+    * The boolean to know whether remove form is clicked.
+    */
     removeClicked?: boolean;
+    /**
+    * The function to set remove form is clicked.
+    */
     setRemoveClicked?: any;
 };
 const FormRow = ({
@@ -42,7 +54,7 @@ const FormRow = ({
         getRecordeditLogAction,
     } = useRecordedit();
 
-    // This state variable is to set the form as active when its selected
+    // This state variable is to set the form as active when its selected. We are storing the form number
     const [activeForms, setActiveForm] = useState<number[]>([]);
     /**
      * which columns should show the permission error.
@@ -87,8 +99,9 @@ const FormRow = ({
             sensor.detach();
         };
     }, []);
-    /*
-    * This useffect is to remove the form from the acitve forms if we delete the form
+    /** 
+     * This useffect is to remove the form from the acitve forms if we delete the form.
+     * removeClicked is passed from the parent to communicate that delete form is clicked
     */
     useEffect(() => {
         if (removeFormIndex && activeForms?.length > 0) {
@@ -241,6 +254,18 @@ const FormRow = ({
         );
     };
 
+    /**
+     * function to set classname when form is clicked
+     * @param formNumber - to know which form is clicked
+     * @returns 
+     */
+    const getEntityActive = (formNumber: number) => {
+        if(activeForms.includes(formNumber) && showSelectAll) {
+            return 'entity-active form-overlay';
+        } else {
+            return 'form-overlay';
+        }
+    }
     return (
         <div
             className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`}
@@ -253,10 +278,7 @@ const FormRow = ({
                         /**
                          * This is added to show the form is selected to apply the change when it is in edit mode
                          */
-                        className={`${showSelectAll ? 'form-overlay' : ''} entity-value ${activeForms.includes(formNumber) && showSelectAll
-                            ? 'entity-active'
-                            : ''
-                            }`}
+                        className={`entity-value ${getEntityActive(formNumber)}`}
                         onClick={() => {
                             // I couldn’t test that scenario, since on load we’re removing the forms that user cannot edit,
                             if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`]) {

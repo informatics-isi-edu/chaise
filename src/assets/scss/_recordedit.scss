@@ -104,12 +104,8 @@
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
-          // We add this so that the select-all-row spans across the entire view
+          // We add this so that the multi-form-input-row spans across the entire view
           max-width: none;
-
-          .chaise-btn-toolbar {
-            pointer-events: none;
-          }
         }
 
         .inputs-row {
@@ -121,10 +117,14 @@
             height: 100%;
             width: 100%;
             cursor: pointer;
+            // This rule is to overwrite cursor:not-allowed for toolbar.
+            .chaise-btn-toolbar {
+              pointer-events: none;
+            }
           }
         }
 
-        .select-all-row {
+        .multi-form-input-row {
           width: 100%;
           display: flex;
           flex-direction: column;
@@ -134,7 +134,8 @@
           position: sticky;
           top: 0;
           left: 0;
-          z-index: 2;
+          // we are giving z-index 2, which is lower than the dropdown input values, so that they show up
+          z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
 
           // Adding a div to align the content centre always
           .centre-align {
@@ -151,17 +152,17 @@
             width: auto;
           }
 
-          .select-upper-row {
+          .multi-form-upper-row {
             display: flex;
             width: 100%;
             justify-content: space-between;
 
-            .select-all-checkbox-container {
+            .multi-form-input-checkbox-container {
               display: flex;
               align-items: center;
               cursor: pointer;
 
-              .select-all-checkbox {
+              .multi-form-input-checkbox {
                 display: flex;
                 align-items: center;
 
@@ -171,53 +172,60 @@
                   width: 16px;
                   height: 16px;
 
+                  // We are reducing the width and height to make it consitent with the text
                   &:before {
                     width: 16px;
                     height: 16px;
                   }
 
+                  // adjusting the top and left to make the selection centre aligned in the checkbox
                   &:after {
                     top: -5px;
                     left: -1px;
                   }
                 }
               }
-            }
-
-          .select-all-button-container {
-              text-align: right;
-
-              .select-all-how-to {
-                border-color: white !important;
+              .multi-form-input-how-to {
+                border-color: map-get(variables.$color-map, 'white')!important;
                 cursor: default;
                 margin-left: 5px;
-                color: #000;
+                color: map-get(variables.$color-map, 'how-to-multi-form');
               }
 
-              .select-all-how-to:hover {
+              .multi-form-input-how-to:hover {
                 z-index: auto !important;
               }
             }
+
+          .multi-form-input-button-container {
+            /**
+            * We are aligning the buttons always to the right of the container so that when the width is less it always 
+            * aligns to the top right in the first row
+            */
+              text-align: right;
+            }
           }
 
-          .select-all-input {
+          .multi-form-input {
             width: 100%;
 
+            // We follow the min-width given for multi-form-input-row which is 250px
             textarea {
               resize: both;
               min-width: 250px;
-            }
-
-            .chaise-btn-toolbar {
-              pointer-events: initial;
+              max-width: 100%;
             }
           }
 
 
         }
 
+        /**
+          * We are adding this rule to centre align the input area when the screen resolution is greater than 1800px.
+          * We also give a width to the input area of 1200px.
+        */
         @media (min-width: 1800px) {
-          .select-all-row {
+          .multi-form-input-row {
             .centre-align {
               width: 1200px;
             }
@@ -226,14 +234,14 @@
               width: auto;
             }
 
-            .select-all-input {
+            .multi-form-input {
               textarea {
                 width: 1200px;
                 max-width: 100%;
               }
             }
 
-            .select-all-textarea {
+            .multi-form-input-textarea {
               width: 100%;
             }
           }
@@ -241,8 +249,8 @@
         }
 
         @media (max-width: 1799px) {
-          .select-all-row {
-            .select-all-input {
+          .multi-form-input-row {
+            .multi-form-input-input {
               width: 100%;
 
               textarea {
@@ -314,7 +322,7 @@
 
       // This is added to show the form is selected to apply the change
       .entity-active {
-        outline: 2px solid #4674a7;
+        outline: 2px solid map-get(variables.$color-map, 'primary');
         outline-offset: -2px;
       }
 

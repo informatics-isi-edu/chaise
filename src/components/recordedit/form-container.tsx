@@ -54,7 +54,7 @@ const FormContainer = (): JSX.Element => {
     };
   }, []);
 
-  // This useffect is added to set a max-width to select-all-row as the width of the visible area
+  // This useffect is added to set a max-width to multi-form-input-row as the width of the visible area
   useEffect(() => {
     const mainResizeSensor = new ResizeSensor(
       formContainer.current as Element,
@@ -68,11 +68,13 @@ const FormContainer = (): JSX.Element => {
     };
   }, []);
 
-  /* Callback event for scroll functionality on recordedit-form to set a max-width to select-all-row as the
-  width of the visible area */
+  /** 
+   * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
+   * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
+  */
   const handleScroll = () => {
     const parentContainer: any = document.querySelector('.recordedit-form');
-    const nonScrollableDiv: any = document.querySelector('.select-all-row');
+    const nonScrollableDiv: any = document.querySelector('.multi-form-input-row');
 
     if (parentContainer && nonScrollableDiv) {
       const visibleWidth = parentContainer.offsetWidth; // Width of the visible area
@@ -80,9 +82,11 @@ const FormContainer = (): JSX.Element => {
     }
   };
 
-  /* This callback is called when we want to delete the form, we are setting the form index and
-  a boolean to know the remove button is clicked */
-  const deleteForm = (formIndex: number, formNumber: number) => {
+  /** 
+   * This callback is called when we want to delete the form, we are setting the form index and 
+   * a boolean to know the remove button is clicked
+  */ 
+  const handleRemoveForm = (formIndex: number, formNumber: number) => {
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);
     removeForm([formIndex]);
@@ -116,7 +120,7 @@ const FormContainer = (): JSX.Element => {
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right remove-form-btn'
-                      onClick={() => deleteForm(formIndex, formNumber)}
+                      onClick={() => handleRemoveForm(formIndex, formNumber)}
                     >
                       <i className='fa-solid fa-xmark' />
                     </button>

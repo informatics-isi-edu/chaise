@@ -94,7 +94,7 @@ const KeyColumn = (): JSX.Element => {
         const colDisplay = makeSafeIdAttr(column.displayname.value)
 
         const disableSelectAll = disableSelectAllbtn(cmIndex);
-        let tooltip = cmIndex === activeSelectAll ? 'Close the set multiple inputs.' : 'Set value for multiple records.';
+        let tooltip = cmIndex === activeSelectAll ? 'Close the panel for setting multiple inputs.' : 'Set value for multiple records.';
         if (disableSelectAll) {
           tooltip = 'Cannot perform this action.';
         }

@@ -16,8 +16,17 @@ import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-util
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type FormRowProps = {
+    /**
+    * The column index.
+    */
     columnModelIndex: number;
+    /**
+    * The forms which are active.
+    */
     activeForms?: any[];
+    /**
+    * The state function to set active forms.
+    */
     setActiveForm?: any;
 };
 
@@ -62,9 +71,11 @@ const SelectAllRow = ({
         }
     }, []);
 
-    /* This useffect is to set the indeterminate checkbox when forms are individually selected
-     *  and selected forms length is less than total forms length
-     */
+    /** 
+     * This useffect is to set the indeterminate checkbox when forms are individually selected
+     * and selected forms length is less than total forms length
+    */ 
+    
     useEffect(() => {
         if (ref && ref.current && activeForms) {
             (ref.current as HTMLInputElement).indeterminate =
@@ -77,23 +88,25 @@ const SelectAllRow = ({
         }
     }, [activeForms]);
 
-    // useEffect to call update only when there is a change in the width of select-all-row to update textarea width
+    // useEffect to call update only when there is a change in the width of multi-form-input-row to update textarea width
     useEffect(() => {
         updateTextareaWidth();
     }, [selectAllWidthChanged]);
 
-    /* useEffect to have a resize sensor to change the direction of upper-row when width of container is less than 400.
-       We chose 400, based on manual testing and thats when the buttons and checbox container starts overlapping.
-       Since we want to reduce the width of text area till min-width 250px we are moving the buttons and checbox container
-       to two rows with button container on top.
-    */
+    /** 
+     * We are having a resize sensor on input area. This is to reverse the flex-direction of upper row once it starts overlapping
+     * We chose 400, based on manual testing and thats when the buttons and checkbox container starts overlapping.
+     * Since we want to reduce the width of text area till min-width 250px we are moving the buttons and checkbox container
+     * to two rows with button container on top.
+    */ 
+   
     useEffect(() => {
 
-        const inputDiv = document.querySelector('.select-all-input') as HTMLElement;
+        const inputDiv = document.querySelector('.multi-form-input') as HTMLElement;
 
         const mainResizeSensor = new ResizeSensor(inputDiv,
             () => {
-                const upperRow = document.querySelector('.select-upper-row') as HTMLElement;
+                const upperRow = document.querySelector('.multi-form-upper-row') as HTMLElement;
                 const upperRowWidth = upperRow?.getBoundingClientRect().width;
                 if (upperRow && upperRowWidth < 400) {
                     upperRow.style.flexDirection = 'column-reverse'
@@ -111,7 +124,7 @@ const SelectAllRow = ({
     // useEffect to have a resize sensor to width of textarea to the the parent container width.
     useEffect(() => {
 
-        const selectAllDiv = document.querySelector('.select-all-row') as HTMLElement;
+        const selectAllDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
         setSelectAllWidthChaged(selectAllDiv.offsetWidth)
         // Initial update
         updateTextareaWidth();
@@ -207,7 +220,7 @@ const SelectAllRow = ({
 
     /**
      * The callback used by functions above to set the values of the row.
-     * if clearValue is true, it will use emtpy value, otherwise it will copy the select-all input value
+     * if clearValue is true, it will use emtpy value, otherwise it will copy the multi-form-input input value
      */
     const setValueForAllInputs = (clearValue?: boolean) => {
         const cm = columnModels[columnModelIndex];
@@ -230,12 +243,17 @@ const SelectAllRow = ({
         });
     };
 
-    /* This is to set the width of text area as the width of select-all-row. We have to involve javascript as 
-    the immidiate parent centre-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
-    to the next immediate parent width which is select-all-row */
+    /** 
+     * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as 
+     * the immidiate parent centre-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
+     * to the next immediate parent width which is multi-form-input-row. 
+     * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are 
+     * setting a width for textarea as 1200 and making it centre aligned. We choose 1200 as we dont want input to span
+     * across container for higher resolutions(i.e beyond 1800)
+    */ 
     const updateTextareaWidth = () => {
         const textarea = document.querySelector('.select-some-textarea') as HTMLElement;
-        const nonScrollableDiv = document.querySelector('.select-all-row') as HTMLElement;
+        const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
         if (textarea) {
             if (window.innerWidth < 1800) {
                 const newContainerWidth = nonScrollableDiv.offsetWidth;
@@ -276,15 +294,18 @@ const SelectAllRow = ({
         );
     };
 
+    const isTextArea = () => {
+        return columnModel.inputType === 'markdown' ||
+        columnModel.inputType === 'longtext'
+    }
     return (
-        <div className='select-all-row match-entity-value'>
-            <div className={`centre-align ${columnModel.inputType === 'longtext'
-                || columnModel.inputType === 'markdown' ? 'centre-align-textarea' : ''}`}>
+        <div className='multi-form-input-row match-entity-value'>
+            <div className={`centre-align ${isTextArea() ? 'centre-align-textarea' : ''}`}>
                 <div
-                    className='select-upper-row'
+                    className='multi-form-upper-row'
                     style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                    <div className='select-all-checkbox-container'>
+                    <div className='multi-form-input-checkbox-container'>
                         <ChaiseTooltip
                             placement='bottom-start'
                             show={showTooltip}
@@ -293,7 +314,7 @@ const SelectAllRow = ({
                             }
                             onToggle={(show) => setShowTooltip(show)}
                         >
-                            <span className='chaise-checkbox select-all-checkbox'>
+                            <span className='chaise-checkbox multi-form-input-checkbox'>
                                 <input
                                     ref={ref}
                                     className={'checkbox-input' + (selectAll ? ' checked' : '')}
@@ -316,14 +337,14 @@ const SelectAllRow = ({
                         >
                             <button
                                 type='button'
-                                className='select-all-how-to chaise-btn chaise-btn-tertiary chaise-btn-sm'
+                                className='multi-form-input-how-to chaise-btn chaise-btn-tertiary chaise-btn-sm'
                             >
                                 <span className='chaise-icon chaise-info'></span>
                             </button>
                         </ChaiseTooltip>
                     </div>
 
-                    <div className='select-all-button-container'>
+                    <div className='multi-form-input-button-container'>
                         <div className='chaise-btn-group'>
                             <ChaiseTooltip
                                 tooltip='Apply the value to selected records.'
@@ -331,7 +352,7 @@ const SelectAllRow = ({
                             >
                                 <button
                                     type='button'
-                                    className={`select-all-apply-${btnClass}`}
+                                    className={`multi-form-input-apply-${btnClass}`}
                                     onClick={applyValueToAll}
                                     // we should disable it when its empty or has error
                                     // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
@@ -348,7 +369,7 @@ const SelectAllRow = ({
                             >
                                 <button
                                     type='button'
-                                    className={`select-all-clear-${btnClass}`}
+                                    className={`multi-form-input-clear-${btnClass}`}
                                     onClick={clearAllValues}
                                     disabled={activeForms?.length === 0}
                                 >
@@ -361,7 +382,7 @@ const SelectAllRow = ({
                             >
                                 <button
                                     type='button'
-                                    className={`select-all-close-${btnClass}`}
+                                    className={`multi-form-input-close-${btnClass}`}
                                     onClick={closeSelectAll}
                                 >
                                     Close
@@ -371,9 +392,8 @@ const SelectAllRow = ({
                     </div>
                 </div>
                 <div
-                    className={`select-all-input ${columnModel.inputType === 'markdown' ||
-                        columnModel.inputType === 'longtext'
-                        ? 'select-all-input-textarea'
+                    className={`multi-form-input ${isTextArea()
+                        ? 'multi-form-input-textarea'
                         : ''
                         }`}
                 >
@@ -385,8 +405,7 @@ const SelectAllRow = ({
                         disableInput={false}
                         requiredInput={false}
                         name={inputName}
-                        inputClasses={`${columnModel.inputType === 'longtext'
-                            || columnModel.inputType === 'markdown' ? 'select-some-textarea' : ''}`}
+                        inputClasses={`${isTextArea() ? 'select-some-textarea' : ''}`}
                         type={columnModel.inputType}
                         classes='column-cell-input'
                         columnModel={columnModel}
