@@ -3,11 +3,12 @@ import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
@@ -75,6 +76,7 @@ type ForeignkeyDropdownFieldProps = InputFieldProps & {
 const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
+  const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement;
 
   const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
@@ -86,23 +88,54 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const showSpinnerOnLoad = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
 
-  const searchInputEl = useRef<HTMLInputElement>(null);
-  const inputChangedTimeout = useRef<number | null>(null);
-  const AUTO_SEARCH_TIMEOUT = 1000;
+  const dropdownToggleRef = useRef<HTMLDivElement>(null);
+  const dropdownMenuRef = useRef<HTMLDivElement>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
   // contextualized reference for fetching dropdownRows
   const [dropdownReference, setDropdownReference] = useState<any>(null);
   const [currentDropdownPage, setCurrentDropdownPage] = useState<any>(null);
-  // array of page.tuples
-  const [dropdownRows, setDropdownRows] = useState<any[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [checkedRow, setCheckedRow] = useState<any>(null);
+  const [dropdownRows, setDropdownRows] = useState<any[]>([]); // array of page.tuples
+  const [checkedRow, setCheckedRow] = useState<any>(null); // ERMrest.Tuple
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
   const [pageLimit, setPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
 
   const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
+
+  // when dropdown is opened, set a class so dropdown opens without being pushed inside the table container
+  useLayoutEffect(() => {
+    if (!dropdownOpen || !dropdownMenuRef.current) return;
+
+    // trigger on timeout to ensure this happens after popper calculates what it needs to for dropdownMenuRef.current
+    windowRef.setTimeout(
+      () => {
+        if (!dropdownMenuRef.current) return;
+
+        // the data-popper-placement attribute (and value) that popper adds to the input
+        const popperPlacement = (dropdownMenuRef.current.attributes as any)['data-popper-placement'];
+
+        const dropdownTogglePositionRect = dropdownToggleRef.current?.getBoundingClientRect();
+        const yBottom = dropdownTogglePositionRect?.bottom || 0; // should never be 0
+
+        const inputPositionFromBottomOfForm = formContainer.getBoundingClientRect().bottom - yBottom;
+
+        // if the dropdown is forced to render down and it's near bottom of the form
+        //   - dropdown has max height of 395px
+        //   - "padding-bottom" of ".entity-value" cell = 8px
+        //   - "padding-bottom" of ".main-body" = 40px
+        // to get the max space needed we do:
+        //    395 - (8 + 40) = 347 
+        // use ~350 to give a little extra room
+        if (popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < 350) {
+          formContainer.classList.add('dropdown-open');
+        }
+
+        setDropdownOpen(false);
+      });
+  }, [dropdownOpen]);
 
   // NOTE: same function in foreignkey-field
   const createForeignKeyReference = () => {
@@ -149,7 +182,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     // since we've already added a not-null hidden filter, the values will be not-null.
     props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
       const referencedCol = props.columnModel.column.foreignKey.mapping.get(col);
-      
+
       setValue(`${usedFormNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
     });
 
@@ -184,7 +217,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     ref.read(initialPageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
       setDropdownRows(page.tuples);
-      
+
       // if we use props.foreignKeyData.current[props.name], we get an object of row values (tuple.data)
       // we don't know which column value is used for the displayname so it's better to check react-hook-form state
       const displayedValue = getValues()[props.name];
@@ -223,27 +256,27 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   // function for fetching data in dropdown after a search term
-  const searchCallback = (value: string) => {
+  const searchCallback = (value: string | null, action: LogActions) => {
     const searchRef = dropdownReference.search(value);
 
     // create initial stack
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, searchRef.table);
     const clientStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1, search_str: value })
 
+    // use the action from retruned from SearchInput component
     LogService.logClientAction({
-      action: LogService.getActionString(LogActions.SEARCH_BOX_AUTO, stackPath),
+      action: LogService.getActionString(action, stackPath),
       stack: clientStack
     }, searchRef.defaultLogInfo);
 
     const readStack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
-    
+
     // different action for read
     // add causes to stack only for read request
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
       stack: LogService.addCausesToStack(readStack, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime())
     }
-    
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
@@ -271,30 +304,10 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     });
   }
 
-  const onSearchChange = (e: any) => {
-    let value = e.target.value;
-    if (value) value = value.trim();
-
-    setSearchValue(value);
-
-    // Cancel previous promise for background search that was queued to be called
-    if (inputChangedTimeout.current) clearTimeout(inputChangedTimeout.current);
-
-    inputChangedTimeout.current = windowRef.setTimeout(
-      () => {
-        setShowSpinner(true);
-        inputChangedTimeout.current = null;
-        searchCallback(value);
-      },
-      AUTO_SEARCH_TIMEOUT
-    );
-  }
-
   const onToggle = (show: boolean) => {
-    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement;
-  
     if (show) {
-      formContainer.classList.add('dropdown-open');
+      // triggers useLayoutEffect that handles whether to add the dropdown-open class
+      setDropdownOpen(true);
 
       if (!dropdownInitialized) {
         intializeDropdownRows();
@@ -306,6 +319,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         }, dropdownReference.defaultLogInfo);
       }
     } else {
+      // will remove the class if it's present. no need to check for it
       formContainer.classList.remove('dropdown-open');
 
       const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
@@ -344,7 +358,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     // add causes to stack only for read request
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack:  LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime())
+      stack: LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime())
     }
 
     nextRef.read(pageLimit, logObj).then((page: any) => {
@@ -409,7 +423,13 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
             </div>
           }
           <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
-            <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
+            <Dropdown.Toggle
+              as='div'
+              className='chaise-input-group no-caret'
+              disabled={props.disableInput}
+              aria-disabled={props.disableInput}
+              ref={dropdownToggleRef}
+            >
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
                 className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
@@ -425,7 +445,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 }
                 <ClearInputBtn
                   btnClassName={`${props.clearClasses} input-switch-clear`}
-                  clickCallback={(e: any) => clearDropdownInput(e, clearInput)} show={!props.disableInput && (showClear || Boolean(searchValue))}
+                  clickCallback={(e: any) => clearDropdownInput(e, clearInput)} show={!props.disableInput && showClear}
                 />
               </div>
               {!props.disableInput && <div className='chaise-input-group-append'>
@@ -434,17 +454,15 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 </button>
               </div>}
             </Dropdown.Toggle>
-            {!props.disableInput && <Dropdown.Menu className='responsive-dropdown-menu'>
-              <li className='search-row chaise-input-group'>
-                <div className='chaise-input-group-prepend'>
-                  <span className='chaise-input-group-text fa-solid fa-magnifying-glass' />
-                </div>
-                <input
-                  className='chaise-input-control'
-                  onChange={onSearchChange}
-                  value={searchValue}
-                  type='text'
-                  ref={searchInputEl}
+            {!props.disableInput && dropdownReference && <Dropdown.Menu className='responsive-dropdown-menu' ref={dropdownMenuRef}>
+              <li className='search-row'>
+                <SearchInput
+                  initialSearchTerm=''
+                  searchCallback={searchCallback}
+                  searchColumns={dropdownReference.searchColumns}
+                  disabled={false}
+                  focus={true}
+                  dropdownDisplayMode={true}
                 />
               </li>
               <div className='dropdown-list'>

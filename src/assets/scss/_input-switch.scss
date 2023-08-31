@@ -171,7 +171,7 @@
   }
 }
 
-// rule for foreignkey dropdown with search input to remove space
+// rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
 .input-switch-foreignkey.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
   padding-top: 0px;
 }
@@ -198,7 +198,7 @@
     // make sure the menu expands the whole row
     width: auto;
     min-width: 100%;
-    min-height: 65px;
+    min-height: 75px;
     background-color: #eef6ff;
 
     // dropdown opens down
@@ -211,11 +211,23 @@
       margin-bottom: -3px;
     }
 
+    // remove rounded borders for search input components when in a dropdown
+    .search-row .chaise-search-box {
+      .chaise-input-group-prepend > .chaise-input-group-text {
+        border-bottom-left-radius: 0;
+      } 
+
+      .chaise-input-group-append > .chaise-search-btn {
+        border-bottom-right-radius: 0;
+      } 
+    }
+
     // for making the dropdown list scrollable (keeping the buttons sticky)
     .dropdown-list {
       // rules specifically for fk-dropdown list of options
       max-height: 355px;
       overflow-y: auto;
+      padding-top: 0.5rem;
 
       .dropdown-item {
         cursor: pointer;
