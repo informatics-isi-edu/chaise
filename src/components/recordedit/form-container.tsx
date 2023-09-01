@@ -16,7 +16,7 @@ import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils'
 const FormContainer = (): JSX.Element => {
 
   const {
-    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm,
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -101,6 +101,14 @@ const FormContainer = (): JSX.Element => {
         className='recordedit-form chaise-hr-scrollable'
         onScroll={handleScroll}
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        // onSubmit={
+        //   (e: any) => {
+        //     e.preventDefault();
+        //     // make sure to pass event along too or react-hook-form will silently fail
+        //     // NOTE: event is still triggering even with prevent default
+        //     handleSubmit(onSubmitValid, onSubmitInvalid)(e);
+        //   }
+        // }
         ref={formContainer}
       >
         {/* form header */}

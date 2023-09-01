@@ -315,6 +315,57 @@ var recordEditPage = function() {
         return element.all(by.css(".popup-select-value"));
     };
 
+    this.getInputSwitchContainer = (name, index) => {
+      index = index || 1;
+      const inputName = index + '-' + name;
+      return element(by.className('input-switch-container-' + inputName))
+    }
+
+    this.getIframeInputDisplay = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.chaise-input-control'));
+    };
+
+    this.getIframeInputButton = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.chaise-input-group-append button'));
+    };
+
+    this.getIframeInputClear = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.input-switch-clear'));
+    };
+
+    this.getIframeInputPopupSpinner = () => {
+      return element(by.className('iframe-field-modal-spinner'));
+    };
+
+    this.getIframeInputPopupIframe = () => {
+      return element(by.css('.iframe-field-popup iframe'));
+    };
+
+    this.getIframeInputPopupSubmitBtn = () => {
+      return element(by.id('iframe-submit-btn'));
+    };
+
+    this.getIframeInputPopupAlertBtn = () => {
+      return element(by.id('iframe-alert-btn'));
+    };
+
+    this.getIframeInputPopupInputs = () => {
+      return {
+        creator: element(by.id('creator')),
+        file_content: element(by.id('file-content')),
+        notes: element(by.id('notes'))
+      }
+    }
+
     this.submitForm = function() {
         const defer = Q.defer();
 
@@ -396,16 +447,24 @@ var recordEditPage = function() {
         return browser.executeScript('return document.querySelector(\'.alert-danger\');');
     };
 
-    this.getAlertErrorClose = () => {
-        return element(by.css('.alert-danger button'));
-    }
-
-    this.getAlertErrorLink = function() {
-        return element(by.css('.alert-danger a'));
+    this.getAlertErrorElement = (el) => {
+      const locator = by.css('.alert-danger');
+      return el ? el.element(locator) : element(locator);
     };
 
-    this.getAlertWarning = function() {
-        return element(by.css('.alert-warning'));
+    this.getAlertErrorClose = (el) => {
+      const locator = by.css('.alert-danger button')
+      return el ? el.element(locator) : element(locator);
+    }
+
+    this.getAlertErrorLink = function(el) {
+      const locator = by.css('.alert-danger a');
+      return el ? el.element(locator) : element(locator);
+    };
+
+    this.getAlertWarning = function(el) {
+      const locator = by.css('.alert-warning');
+      return el ? el.element(locator) : element(locator);
     };
 
     this.getRecordSetTable = function() {
