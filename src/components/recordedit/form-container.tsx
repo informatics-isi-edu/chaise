@@ -22,7 +22,7 @@ import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils'
 const FormContainer = (): JSX.Element => {
 
   const {
-    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm, 
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -63,19 +63,15 @@ const FormContainer = (): JSX.Element => {
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onSubmit={(e: React.SyntheticEvent) => {
-          /** 
-           * prevents the form being submitted when "enter" is pressed by not doing the html default behavior
-           * other ways to prevent this include: 
-           *   - adding `type='button'` to each button
-           *   - ensuring each input has an onKeyPress handler that handles onEnter and doesn't propogate the event
-           * 
-           * NOTE: Remove this to allow submission of form on enter, other changes need to be made to full support that functionality
-           */
-          e.preventDefault();
-
-          handleSubmit(onSubmitValid, onSubmitInvalid)} 
-        }
+        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        // onSubmit={
+        //   (e: any) => {
+        //     e.preventDefault();
+        //     // make sure to pass event along too or react-hook-form will silently fail
+        //     // NOTE: event is still triggering even with prevent default
+        //     handleSubmit(onSubmitValid, onSubmitInvalid)(e);
+        //   }
+        // }
         ref={formContainer}
       >
         {/* form header */}
