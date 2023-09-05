@@ -100,6 +100,7 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
+          git checkout default-asset-bytes
           make dist
           sudo make deploy
       - name: Install chaise
