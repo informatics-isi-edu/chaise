@@ -17,8 +17,17 @@ type DisplayValueProps = {
   /**
    * Whether this is something that we're doing internally,
    * or is based on annotation-provided values.
+  */
+  internal?: boolean,
+  /**
+   * set the wrapper element that should be used.
+   * if not defined, we will use a span.
    */
-  internal?: boolean
+  as?: React.ElementType,
+  /**
+   * the extra props that we should add to the element
+   */
+  props?: any,
 };
 
 const DisplayValue = ({
@@ -27,7 +36,11 @@ const DisplayValue = ({
   specialNullEmpty,
   className,
   styles,
+  as = 'span',
+  props
 }: DisplayValueProps): JSX.Element => {
+
+  const Wrapper = as;
 
   // handle tooltips that might be in the value
   const spanRef = useRef<HTMLSpanElement | null>(null);
@@ -38,11 +51,11 @@ const DisplayValue = ({
 
   if (specialNullEmpty) {
     if (value?.value === '') {
-      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }} style={styles}></span>;
+      return <Wrapper dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }} style={styles} {...props}></Wrapper>;
     }
 
     if (value?.value == null) {
-      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }} style={styles}></span>;
+      return <Wrapper dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }} style={styles} {...props}></Wrapper>;
     }
   }
 
@@ -54,18 +67,19 @@ const DisplayValue = ({
 
   if (value?.isHTML && value?.value) {
     return (
-      <span
+      <Wrapper
         ref={spanRef}
         style={styles}
         dangerouslySetInnerHTML={{ __html: value.value }}
         className={usedClassName}
         // for foreign-key inputs display value
         contentEditable={false}
+        {...props}
       >
-      </span>
+      </Wrapper>
     )
   }
-  return <span style={styles} className={usedClassNames.join(' ')}>{value?.value}</span>
+  return <Wrapper style={styles} className={usedClassNames.join(' ')} {...props}>{value?.value}</Wrapper>
 }
 
 export default DisplayValue;

@@ -12,6 +12,7 @@ import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -315,7 +316,7 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderDropdownName = (item: MenuOption) => (<span dangerouslySetInnerHTML={{ __html: renderName(item) }} />);
+  const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{isHTML: true, value: renderName(item)}} />);
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
@@ -325,13 +326,16 @@ const ChaiseNavbar = (): JSX.Element => {
 
       if (!item.children || !canEnable(item, session)) {
         return (
-          <Nav.Link
+          <DisplayValue
             key={index}
-            href={item.url}
-            target={item.newTab ? '_blank' : '_self'}
-            onClick={(event) => handleOnLinkClick(event, item)}
+            as={Nav.Link}
+            value={{isHTML: true, value: renderName(item)}}
             className={'chaise-nav-item ' + menuItemClasses(item, session, false)}
-            dangerouslySetInnerHTML={{ __html: renderName(item) }}
+            props={{
+              href: item.url,
+              target: item.newTab ? '_blank' : '_self',
+              onClick: (event: MouseEvent<HTMLElement>) => handleOnLinkClick(event, item)
+            }}
           />
         );
       }
