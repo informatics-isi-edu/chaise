@@ -325,19 +325,20 @@ export function convertVWToPixel(value: number) {
 /**
  * mimic the same behavior as clicking on a link and opening it in a new tab
  * @param href the link
+ * @param isDownload whether we should add the download attribute
  */
-export function clickHref(href: string) {
+export function clickHref(href: string, isDownload?: boolean) {
   // fetch the file for the user
-  const downloadLink = document.createElement('a');
-  downloadLink.setAttribute('href', href);
-  downloadLink.setAttribute('download', '');
-  downloadLink.setAttribute('visibility', 'hidden');
-  downloadLink.setAttribute('display', 'none');
-  downloadLink.setAttribute('target', '_blank');
+  const dummyLink = document.createElement('a');
+  dummyLink.setAttribute('href', href);
+  if (isDownload) dummyLink.setAttribute('download', '');
+  dummyLink.setAttribute('visibility', 'hidden');
+  dummyLink.setAttribute('display', 'none');
+  dummyLink.setAttribute('target', '_blank');
   // Append to page
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+  document.body.appendChild(dummyLink);
+  dummyLink.click();
+  document.body.removeChild(dummyLink);
 }
 
 /**
