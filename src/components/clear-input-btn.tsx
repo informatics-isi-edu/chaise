@@ -1,7 +1,13 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type ClearInputBtnProps = {
+  /**
+   * the class name attached to the button.
+   */
   btnClassName?: string,
+  /**
+   * the function that is called when users click on the button
+   */
   clickCallback: Function,
   /**
    * the boolean condition to show it or not

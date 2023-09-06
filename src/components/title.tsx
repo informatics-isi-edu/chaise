@@ -8,14 +8,32 @@ import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/
 
 
 type TitleProps = {
+  /**
+   * The reference object.
+   */
   reference?: any,
+  /**
+   * the displayname that should be used
+   * - can be used to override the reference.displayname
+   */
   displayname?: DisplaynameType,
   /**
-   * use `false` to suppress adding the comment
+   * if defined, we will use this instead of getting it from the reference
+   * - use `false` to suppress adding the comment
    */
   comment?: string | false,
+  /**
+   * whether we should add a link or not.
+   * - if `link` is passed, we will add the link regardless of this property.
+   */
   addLink?: boolean,
+  /**
+   * if defined, we will use this instead of getting it from the reference
+   */
   link?: string,
+  /**
+   * the class added to the title element.
+   */
   className?: string
 }
 

@@ -9,14 +9,29 @@ import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { createChaiseTooltips } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type DisplayValueProps = {
+  /**
+   * The value that should be displayed.
+   */
   value?: Displayname,
+  /**
+   * whether the component should return a special value for null and empty
+   */
   specialNullEmpty?: boolean,
+  /**
+   * whether we should add the `markdown-container` class
+   */
   addClass?: boolean,
+  /**
+   * class names that should be added
+   */
   className?: string,
+  /**
+   * styels that should be added
+   */
   styles?: object,
   /**
    * Whether this is something that we're doing internally,
-   * or is based on annotation-provided values.
+   * or is based on annotation or user provided values.
   */
   internal?: boolean,
   /**
