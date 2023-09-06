@@ -362,7 +362,7 @@ const RecordsetModal = ({
                   }
                   <ChaiseTooltip
                     placement='bottom'
-                    tooltip='Close the dialog'
+                    tooltip='Close this popup.'
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
