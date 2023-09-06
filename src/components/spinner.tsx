@@ -1,8 +1,19 @@
 import Spinner from 'react-bootstrap/Spinner';
 
 interface SpinnerProps {
+  /**
+   * displayed message
+   * default: Loading...
+   */
   message?: string;
+  /**
+   * added class name to the element.
+   */
   className?: string;
+  /**
+   * size of the spinner
+   * (if missing we will use the default size. use `sm` to make the spinner smaller)
+   */
   spinnerSize?: 'sm';
 }
 
