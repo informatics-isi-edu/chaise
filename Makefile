@@ -442,10 +442,13 @@ npm-install-modules:
 	@npm clean-install
 
 # install packages needed for production and development (including testing)
+# also run patch-package to patch all the issues in dependencies (currently only webdriver-manager.)
+# if we decided to patch other prod dependencies, we should move `patch-package` command to the `postinstall` of package.json.
 # --include=dev makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
+	@npx patch-package
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
