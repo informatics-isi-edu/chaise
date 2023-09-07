@@ -76,21 +76,6 @@ jobs:
           sudo bash ./test/ubuntu-travis-setup.sh
           sudo a2enmod webauthn
           sudo service apache2 restart
-      - name: Install hatrac
-        run: |
-          git clone https://github.com/informatics-isi-edu/hatrac.git
-          cd hatrac
-          sudo python3 ./setup.py install
-          sudo useradd -m -r hatrac
-          sudo -H -u postgres createuser -d hatrac
-          sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
-          sudo -H -u hatrac createdb hatrac
-          sudo cp test/hatrac_config.json ~hatrac/
-          sudo -H -u hatrac hatrac-deploy admin
-          sudo su -c 'python3 -c "import hatrac as m;m.sample_httpd_config()"' - hatrac > ../wsgi_hatrac.conf
-          sudo cp ../wsgi_hatrac.conf /etc/apache2/conf.d/wsgi_hatrac.conf
-          sudo mkdir /var/www/hatrac
-          sudo chown hatrac /var/www/hatrac
       - name: Install ermrest
         run: |
           git clone https://github.com/informatics-isi-edu/ermrest.git
