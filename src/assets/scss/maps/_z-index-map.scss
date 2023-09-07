@@ -6,6 +6,8 @@ $z-index-map: (
   'markdown-container-radio-label': 1,
   // more than input
   'input-group-append-btn': 2,
+  // higher than dropdown
+  'multi-form-input-row': 2,
   // more than the unfocused version
   'input-group-append-btn-focus': 3,
   // more than previous one
@@ -60,8 +62,5 @@ $z-index-map: (
 
   // the highest order
   'modal-error-backdrop-on-search-popup': 1061,
-  'modal-error-on-search-popup': 1066,
-
-  // higher than dropdown
-  'multi-form-input-row': 2
+  'modal-error-on-search-popup': 1066
 )

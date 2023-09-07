@@ -8,7 +8,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
@@ -30,7 +30,7 @@ type FormRowProps = {
     setActiveForm?: any;
 };
 
-const SelectAllRow = ({
+const MultiFormInputRow = ({
     columnModelIndex,
     activeForms,
     setActiveForm,
@@ -43,7 +43,7 @@ const SelectAllRow = ({
         foreignKeyData,
         appMode,
         canUpdateValues,
-        toggleActiveSelectAll,
+        toggleActiveMultiForm,
         logRecordeditClientAction,
     } = useRecordedit();
     const {
@@ -56,13 +56,13 @@ const SelectAllRow = ({
     const [isEmpty, setIsEmpty] = useState(true);
 
     // This is to set select all checkbox state
-    const [selectAll, setSelectAll] = useState(false);
+    const [multiFormInput, setMultiFormInput] = useState(false);
 
     // This is to toggle the visibility of tooltip on checkbox container. The tooltip should disappear once checkbox container is clicked.
     const [showTooltip, setShowTooltip] = useState(false);
 
     // This is to set if there is a change in the width of select all area on resize and zoom
-    const [selectAllWidthChanged, setSelectAllWidthChaged] = useState(0);
+    const [multiFormWidthChanged, setMultiFormRowChanged] = useState(0);
 
     // This useeffect is to set the first form as active on load
     useEffect(() => {
@@ -84,14 +84,14 @@ const SelectAllRow = ({
                         ? true
                         : false
                     : false;
-            setSelectAll(activeForms?.length === forms.length);
+            setMultiFormInput(activeForms?.length === forms.length);
         }
     }, [activeForms]);
 
     // useEffect to call update only when there is a change in the width of multi-form-input-row to update textarea width
     useEffect(() => {
         updateTextareaWidth();
-    }, [selectAllWidthChanged]);
+    }, [multiFormWidthChanged]);
 
     /** 
      * We are having a resize sensor on input area. This is to reverse the flex-direction of upper row once it starts overlapping
@@ -124,15 +124,15 @@ const SelectAllRow = ({
     // useEffect to have a resize sensor to width of textarea to the the parent container width.
     useEffect(() => {
 
-        const selectAllDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
-        setSelectAllWidthChaged(selectAllDiv.offsetWidth)
+        const multiFormRow = document.querySelector('.multi-form-input-row') as HTMLElement;
+        setMultiFormRowChanged(multiFormRow.offsetWidth)
         // Initial update
         updateTextareaWidth();
 
-        const mainResizeSensor = new ResizeSensor(selectAllDiv,
+        const mainResizeSensor = new ResizeSensor(multiFormRow,
             () => {
-                const newContainerWidth = selectAllDiv.offsetWidth;
-                setSelectAllWidthChaged(newContainerWidth)
+                const newContainerWidth = multiFormRow.offsetWidth;
+                setMultiFormRowChanged(newContainerWidth)
             }
         );
 
@@ -147,7 +147,7 @@ const SelectAllRow = ({
      */
     useEffect(() => {
         const subscribe = watch((data, options) => {
-            const n = `${SELECT_ALL_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
+            const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
             const columnModel = columnModels[columnModelIndex];
             if (!options.name || options.name !== n) return;
 
@@ -193,7 +193,7 @@ const SelectAllRow = ({
         setValueForAllInputs(true);
     };
 
-    const closeSelectAll = () => {
+    const closeMultiForm = () => {
         const cm = columnModels[columnModelIndex];
 
         logRecordeditClientAction(
@@ -204,18 +204,18 @@ const SelectAllRow = ({
             cm.column.reference ? cm.column.reference : undefined
         );
 
-        toggleActiveSelectAll(columnModelIndex);
+        toggleActiveMultiForm(columnModelIndex);
     };
 
     // Call back for select all checkbox to toggle all forms as selected and unselected
     const onSelectChange = () => {
         setShowTooltip(false);
-        if (!selectAll) {
+        if (!multiFormInput) {
             setActiveForm(forms);
         } else {
             setActiveForm([]);
         }
-        setSelectAll(!selectAll);
+        setMultiFormInput(!multiFormInput);
     };
 
     /**
@@ -236,7 +236,7 @@ const SelectAllRow = ({
                     getValues(),
                     foreignKeyData.current,
                     formValue,
-                    SELECT_ALL_INPUT_FORM_VALUE,
+                    MULTI_FORM_INPUT_FORM_VALUE,
                     clearValue
                 )
             );
@@ -267,11 +267,10 @@ const SelectAllRow = ({
 
     const columnModel = columnModels[columnModelIndex];
     const colName = columnModel.column.name;
-    const inputName = `${SELECT_ALL_INPUT_FORM_VALUE}-${colName}`;
+    const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
 
-    const btnClass = `${makeSafeIdAttr(
-        columnModel.column.displayname.value
-    )} chaise-btn chaise-btn-secondary`;
+    const btnClass = `${makeSafeIdAttr(columnModel.column.displayname.value)} chaise-btn chaise-btn-secondary`;
+    const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
 
     const renderHelpTooltip = () => {
         const splitLine1 =
@@ -294,32 +293,25 @@ const SelectAllRow = ({
         );
     };
 
-    const isTextArea = () => {
-        return columnModel.inputType === 'markdown' ||
-        columnModel.inputType === 'longtext'
-    }
     return (
         <div className='multi-form-input-row match-entity-value'>
-            <div className={`centre-align ${isTextArea() ? 'centre-align-textarea' : ''}`}>
-                <div
-                    className='multi-form-upper-row'
-                    style={{ display: 'flex', justifyContent: 'space-between' }}
-                >
+            <div className={`centre-align ${isTextArea ? 'centre-align-textarea' : ''}`}>
+                <div className='multi-form-upper-row'>
                     <div className='multi-form-input-checkbox-container'>
                         <ChaiseTooltip
                             placement='bottom-start'
                             show={showTooltip}
                             tooltip={
-                                !selectAll ? 'Select all records.' : 'Clear all selection'
+                                !multiFormInput ? 'Select all records.' : 'Clear all selection'
                             }
                             onToggle={(show) => setShowTooltip(show)}
                         >
                             <span className='chaise-checkbox multi-form-input-checkbox'>
                                 <input
                                     ref={ref}
-                                    className={'checkbox-input' + (selectAll ? ' checked' : '')}
+                                    className={'checkbox-input' + (multiFormInput ? ' checked' : '')}
                                     type='checkbox'
-                                    checked={selectAll}
+                                    checked={multiFormInput}
                                     disabled={false}
                                     onChange={onSelectChange}
                                 />
@@ -383,7 +375,7 @@ const SelectAllRow = ({
                                 <button
                                     type='button'
                                     className={`multi-form-input-close-${btnClass}`}
-                                    onClick={closeSelectAll}
+                                    onClick={closeMultiForm}
                                 >
                                     Close
                                 </button>
@@ -392,11 +384,7 @@ const SelectAllRow = ({
                     </div>
                 </div>
                 <div
-                    className={`multi-form-input ${isTextArea()
-                        ? 'multi-form-input-textarea'
-                        : ''
-                        }`}
-                >
+                    className={`multi-form-input ${isTextArea ? 'multi-form-input-textarea' : ''}`}>
                     <InputSwitch
                         key={colName}
                         displayErrors
@@ -405,12 +393,12 @@ const SelectAllRow = ({
                         disableInput={false}
                         requiredInput={false}
                         name={inputName}
-                        inputClasses={`${isTextArea() ? 'select-some-textarea' : ''}`}
+                        inputClasses={`${isTextArea ? 'select-some-textarea' : ''}`}
                         type={columnModel.inputType}
                         classes='column-cell-input'
                         columnModel={columnModel}
                         appMode={appMode}
-                        formNumber={SELECT_ALL_INPUT_FORM_VALUE}
+                        formNumber={MULTI_FORM_INPUT_FORM_VALUE}
                         parentReference={reference}
                         foreignKeyData={foreignKeyData}
                         waitingForForeignKeyData={waitingForForeignKeyData}
@@ -421,4 +409,4 @@ const SelectAllRow = ({
     );
 };
 
-export default SelectAllRow;
+export default MultiFormInputRow;

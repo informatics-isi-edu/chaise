@@ -59,7 +59,7 @@ const FormContainer = (): JSX.Element => {
     const mainResizeSensor = new ResizeSensor(
       formContainer.current as Element,
       () => {
-        handleScroll();
+        setMaxWidthMultiForm();
       }
     );
 
@@ -72,7 +72,7 @@ const FormContainer = (): JSX.Element => {
    * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
    * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
   */
-  const handleScroll = () => {
+  const setMaxWidthMultiForm = () => {
     const parentContainer: any = document.querySelector('.recordedit-form');
     const nonScrollableDiv: any = document.querySelector('.multi-form-input-row');
 
@@ -99,7 +99,7 @@ const FormContainer = (): JSX.Element => {
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onScroll={handleScroll}
+        onScroll={setMaxWidthMultiForm}
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
         // onSubmit={
         //   (e: any) => {

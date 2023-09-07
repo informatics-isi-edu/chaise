@@ -1,13 +1,13 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import SelectAllRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input';
+import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -45,7 +45,7 @@ const FormRow = ({
         reference,
         columnModels,
         tuples,
-        activeSelectAll,
+        activeMultiForm,
         canUpdateValues,
         columnPermissionErrors,
         foreignKeyData,
@@ -148,7 +148,7 @@ const FormRow = ({
 
     // -------------------------- render logic ---------------------- //
 
-    const showSelectAll = activeSelectAll === columnModelIndex;
+    const showMultiFormRow = activeMultiForm === columnModelIndex;
     const columnModel = columnModels[columnModelIndex];
 
     /**
@@ -162,13 +162,13 @@ const FormRow = ({
      */
     const getIsDisabled = (
         formNumber?: number,
-        isSelectAllInput?: boolean
+        isMultiFormRow?: boolean
     ): boolean => {
-        if (isSelectAllInput) {
+        if (isMultiFormRow) {
             return false;
         }
 
-        if (columnModel.isDisabled || showSelectAll) {
+        if (columnModel.isDisabled || showMultiFormRow) {
             return true;
         }
 
@@ -187,7 +187,7 @@ const FormRow = ({
 
         const isDisabled = getIsDisabled(
             formNumber,
-            formNumber === SELECT_ALL_INPUT_FORM_VALUE
+            formNumber === MULTI_FORM_INPUT_FORM_VALUE
         );
 
         let placeholder = '';
@@ -260,15 +260,15 @@ const FormRow = ({
      * @returns 
      */
     const getEntityActive = (formNumber: number) => {
-        if(activeForms.includes(formNumber) && showSelectAll) {
+        if(activeForms.includes(formNumber) && showMultiFormRow) {
             return 'entity-active form-overlay';
         } else {
-            return 'form-overlay';
+            return '';
         }
     }
     return (
         <div
-            className={`form-inputs-row ${showSelectAll ? 'highlighted-row' : ''}`}
+            className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`}
             ref={container}
         >
             <div className='inputs-row'>
@@ -284,7 +284,7 @@ const FormRow = ({
                             if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`]) {
                                 return;
                             }
-                            if (showSelectAll) {
+                            if (showMultiFormRow) {
                                 handleFormClick(formNumber);
                             }
                         }}
@@ -293,8 +293,8 @@ const FormRow = ({
                     </div>
                 ))}
             </div>
-            {showSelectAll && (
-                <SelectAllRow
+            {showMultiFormRow && (
+                <MultiFormInputRow
                     activeForms={activeForms}
                     setActiveForm={setActiveForm}
                     columnModelIndex={columnModelIndex}

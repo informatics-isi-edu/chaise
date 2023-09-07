@@ -128,7 +128,7 @@ export interface UploadProgressProps {
 }
 
 /**
- * so we can get the select-all input value for a column by doing:
- * getValues()[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}]
+ * so we can get the multi form input value for a column by doing:
+ * getValues()[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}]
  */
-export const SELECT_ALL_INPUT_FORM_VALUE = -1;
+export const MULTI_FORM_INPUT_FORM_VALUE = -1;

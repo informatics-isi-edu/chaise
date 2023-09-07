@@ -79,9 +79,9 @@ export const RecordeditContext = createContext<{
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
   /* the index of column that is showing the select all input */
-  activeSelectAll: number,
+  activeMultiForm: number,
   /* change the active select all */
-  toggleActiveSelectAll: (colIndex: number) => void,
+  toggleActiveMultiForm: (colIndex: number) => void,
   /* callback for react-hook-form to call when forms are valid */
   onSubmitValid: (data: any) => void,
   /* callback for react-hook-form to call when forms are NOT valid */
@@ -148,7 +148,7 @@ export default function RecordeditProvider({
   const [canUpdateValues, setCanUpdateValues] = useState<any>({});
   const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
 
-  const [activeSelectAll, setActiveSelectAll] = useState<number>(-1);
+  const [activeMultiForm, setActiveMultiForm] = useState<number>(-1);
 
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
@@ -364,8 +364,8 @@ export default function RecordeditProvider({
     };
   }, [loginModal, errors]);
 
-  const toggleActiveSelectAll = (colIndex: number) => {
-    setActiveSelectAll((prev) => {
+  const toggleActiveMultiForm = (colIndex: number) => {
+    setActiveMultiForm((prev) => {
       return colIndex === prev ? -1 : colIndex;
     });
   };
@@ -971,8 +971,8 @@ export default function RecordeditProvider({
       removeForm,
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
-      activeSelectAll,
-      toggleActiveSelectAll,
+      activeMultiForm,
+      toggleActiveMultiForm,
 
       onSubmitValid,
       onSubmitInvalid,
@@ -989,7 +989,7 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     reference, tuples, columnModels, initialized, waitingForForeignKeyData,
-    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeSelectAll
+    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeMultiForm
   ]);
 
   return (

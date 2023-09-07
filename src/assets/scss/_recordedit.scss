@@ -55,11 +55,11 @@
         flex: none;
         position: relative;
 
-        &.with-select-all-toggle {
+        &.with-multi-form-toggle {
           padding-right: 45px;
         }
 
-        .toggle-select-all-btn {
+        .toggle-multi-form-btn {
           position: absolute;
           right: 5px;
           top: 8px;
@@ -146,12 +146,10 @@
             align-items: center;
             gap: 5px;
             max-width: 100%;
+            &.centre-align-textarea {
+              width: auto;
+            }
           }
-
-          .centre-align-textarea {
-            width: auto;
-          }
-
           .multi-form-upper-row {
             display: flex;
             width: 100%;
