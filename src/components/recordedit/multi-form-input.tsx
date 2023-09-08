@@ -245,10 +245,10 @@ const MultiFormInputRow = ({
 
     /** 
      * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as 
-     * the immidiate parent centre-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
+     * the immidiate parent center-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
      * to the next immediate parent width which is multi-form-input-row. 
      * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are 
-     * setting a width for textarea as 1200 and making it centre aligned. We choose 1200 as we dont want input to span
+     * setting a width for textarea as 1200 and making it center aligned. We choose 1200 as we dont want input to span
      * across container for higher resolutions(i.e beyond 1800)
     */ 
     const updateTextareaWidth = () => {
@@ -295,7 +295,7 @@ const MultiFormInputRow = ({
 
     return (
         <div className='multi-form-input-row match-entity-value'>
-            <div className={`centre-align ${isTextArea ? 'centre-align-textarea' : ''}`}>
+            <div className={`center-align ${isTextArea ? 'center-align-textarea' : ''}`}>
                 <div className='multi-form-upper-row'>
                     <div className='multi-form-input-checkbox-container'>
                         <ChaiseTooltip
