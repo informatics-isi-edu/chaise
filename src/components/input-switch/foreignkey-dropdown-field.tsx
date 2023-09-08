@@ -8,7 +8,7 @@ import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
@@ -102,6 +102,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
   const [pageLimit, setPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
+  const [pagingPageLimit, setPagingPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
 
   const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FOREIGN_KEY_DROPDOWN);
 
@@ -136,6 +137,12 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         setDropdownOpen(false);
       });
   }, [dropdownOpen]);
+
+  useEffect(() => {
+    // NOTE: compare props.columnModel.column.reference with dropdownReference
+    // recreate the reference for the dropdowns since the reference from the column model changed
+    setDropdownInitialized(false);
+  }, [props.columnModel])
 
   // NOTE: same function in foreignkey-field
   const createForeignKeyReference = () => {
@@ -188,6 +195,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       // update value used in read request
       initialPageLimit = defaultPageSize;
       setPageLimit(defaultPageSize);
+      setPagingPageLimit(defaultPageSize);
     }
 
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, ref.table);
@@ -244,7 +252,12 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   // function for fetching data in dropdown after a search term
   const searchCallback = (value: string | null, action: LogActions) => {
+    setShowSpinner(true);
+    // reset the page limit used for "... load more" function
+    setPagingPageLimit(pageLimit)
+
     const searchRef = dropdownReference.search(value);
+    setDropdownReference(searchRef);
 
     // create initial stack
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, searchRef.table);
@@ -267,20 +280,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
-
-      if (page.length === 0) {
-        const fakeTuple = {
-          rowName: {
-            value: '<i>No Results</i>',
-            isHTML: true
-          },
-          uniqueId: 'no_results_row'
-        }
-
-        setDropdownRows([fakeTuple]);
-      } else {
-        setDropdownRows(page.tuples);
-      }
+      setDropdownRows(page.tuples);
 
       setShowSpinner(false);
     }).catch((exception: any) => {
@@ -330,16 +330,17 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const loadMoreOptions = () => {
     setShowSpinner(true);
 
-    const nextRef = currentDropdownPage.next;
+    const newPageLimit = pagingPageLimit + pageLimit;
+    setPagingPageLimit(newPageLimit);
 
     // create initial stack
-    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, nextRef.table);
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
     const stack = LogService.getStackObject(currStackNode);
 
     LogService.logClientAction({
       action: LogService.getActionString(LogActions.PAGE_NEXT, stackPath),
       stack: LogService.addExtraInfoToStack(stack, { dropdown: 1 })
-    }, nextRef.defaultLogInfo);
+    }, dropdownReference.defaultLogInfo);
 
     // different action for read
     // add causes to stack only for read request
@@ -348,12 +349,11 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       stack: LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime())
     }
 
-    nextRef.read(pageLimit, logObj).then((page: any) => {
+    dropdownReference.read(newPageLimit, logObj).then((page: any) => {
+      console.log(page)
       setCurrentDropdownPage(page);
 
-      setDropdownRows((currentRows: any[]) => {
-        return [...currentRows, ...page.tuples]
-      });
+      setDropdownRows(page.tuples);
 
       setShowSpinner(false);
     }).catch((exception: any) => {
@@ -363,24 +363,23 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   const renderDropdownOptions = (onChange: any) => {
+    if (dropdownInitialized && dropdownRows.length === 0) {
+      // return a special row that doesn't use Dropdown.Item so it won't be selectable
+      return (
+        <li
+          key='fk-no_results_row'
+          className='dropdown-item no-results'
+        >
+          <label>
+            <DisplayValue
+              className='dropdown-select-value'
+              value={{ value: '<i>No Results</i>', isHTML: true }}
+            />
+          </label>
+        </li>
+      )
+    }
     return dropdownRows.map((tuple: any) => {
-      if (tuple.uniqueId === 'no_results_row') {
-        // return a special row that doesn't use Dropdown.Item so it won't be selectable
-        return (
-          <li
-            key={`fk-${tuple.uniqueId}`}
-            className='dropdown-item no-results'
-          >
-            <label>
-              <DisplayValue
-                className='dropdown-select-value'
-                value={{ value: tuple.rowName.value, isHTML: tuple.rowName.isHTML }}
-              />
-            </label>
-          </li>
-        )
-      }
-
       return (
         <Dropdown.Item
           key={`fk-val-${tuple.uniqueId}`}

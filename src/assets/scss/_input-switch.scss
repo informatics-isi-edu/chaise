@@ -261,7 +261,7 @@
 
     .dropdown-item.load-more-row {
       // same height as chaise-btn-sm
-      height: 24px;
+      height: variables.$btn-height-sm;
 
       a {
         pointer-events: none;

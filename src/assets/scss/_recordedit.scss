@@ -87,7 +87,8 @@
       overflow-x: auto;
 
       &.dropdown-open {
-        // max height of a dropdown is `395px`
+        // max height of a dropdown is `399px` 
+        //    <search-row.height> + <dropdown-list.padding-top> + <dropdown-list.height> + <dropdown-menu.padding-bottom>
         // if dropdown is last input row, it won't overflow the parent container's height and be truncated
         // special case can occur when there are very few values to set (id + 1 foreign key in create mode)
         padding-bottom: 400px;
@@ -133,6 +134,9 @@
           .select-all-input {
             width: 250px;
             margin: 0px 5px;
+            // added so the spinner and backdrop only cover the input. 
+            // if we want to cover the whole select all row, move this to .select-all-row
+            position: relative;
           }
         }
       }
@@ -158,6 +162,21 @@
           padding: 5px;
           color: map-get(variables.$color-map, 'recordedit-column-permission-warning');
         }
+      }
+
+      .entity-value,
+      .match-entity-value {
+        word-wrap: break-word;
+        min-width: 250px;
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+
+        // border-left: none;
+        // border-top: none;
+
+        border-radius: 0;
+        min-height: 47px;
+        padding: 8px 10px;
 
         // displayed while loading the fk data
         .column-cell-spinner-container {
@@ -180,19 +199,9 @@
         }
       }
 
-      .entity-value,
-      .match-entity-value {
-        word-wrap: break-word;
-        min-width: 250px;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-
-        // border-left: none;
-        // border-top: none;
-
-        border-radius: 0;
-        min-height: 47px;
-        padding: 8px 10px;
+      // change top specifically in select all row since the spinner only covers the input and not the whole cell
+      .match-entity-value .column-cell-spinner-container .spinner-border-sm {
+        top: 10px;
       }
 
       // only form inputs
