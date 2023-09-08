@@ -139,6 +139,18 @@ The rules that should be followed while writing code.
   import Button from 'react-bootstrap/Button';
   ```
 
+- Before implementing your special component take a look at `components` folder and see if any of the existing reusable components can satisfy your case. The following are list of more common components that we have:
+ - `AppWrapper`: Wrapper for all the chaise-like application. Refer to [this section](#structure-of-an-app) for more information.
+ - `DisplayValue`: This component can be used to inject HTML content into the DOM. Use this component instead of `dangerouslySetInnerHTML`.
+ - `ChaiseTooltip`: Display toolips for elements.
+ - `ClearInputBtn`: A clear button that should be attached to all inputs on the page.
+ - `CondWrapper`: Can be used to conditionally add wrappers to another component.
+ - `InputSwitch`: Display appropriate input for a given column.
+ - `SearchInput`: Display a search input.
+ - `Spinner`: A spinner to show progress on the page.
+ - `SplitView`: Adds a resizable side panel to the page.
+ - `Title`: Given a `displayname` object will return the proper title to be displayed on the page.
+
 ### Lint
 - Make sure the `ESLint` extension is installed for Visual Studio Code.
 

@@ -4,8 +4,17 @@ import { convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 
 type LeftPaneProps = {
+  /**
+   * The elements displayed on the left side of the page
+   */
   children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
+  /**
+   * default width of the left panel
+   */
   leftWidth: number | undefined,
+  /**
+   * the elements that we should update while updating the width of the left panel.
+   */
   leftPartners?: HTMLElement[]
 };
 

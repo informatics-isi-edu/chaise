@@ -383,6 +383,15 @@ var recordEditPage = function() {
       }
     }
 
+    this.getIframeInputCancelPopup = () => {
+      const modal = element(by.css('.confirm-iframe-close-modal'));
+      return {
+        element: modal,
+        body: modal.element(by.css('.modal-body')),
+        cancelButton: modal.element(by.css('.cancel-button'))
+      };
+    }
+
     this.submitForm = function() {
         const defer = Q.defer();
 

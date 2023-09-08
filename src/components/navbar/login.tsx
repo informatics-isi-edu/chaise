@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ProfileModal from '@isrd-isi-edu/chaise/src/components/modals/profile-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -209,34 +210,45 @@ const ChaiseLogin = (): JSX.Element => {
       switch (oneOption.type) {
         case 'header':
           return (
-            <Nav.Item
+            <DisplayValue
               className='chaise-dropdown-header'
-              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
+              value={{isHTML: true, value: renderName(oneOption)}}
+              as={Nav.Item}
             />
           );
         case 'url':
           return (
-            <Nav.Link
-              href={oneOption.url}
-              target={oneOption.newTab ? '_blank' : '_self'}
-              onClick={(event) => handleOnLinkClick(event, oneOption)}
-              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
+            <DisplayValue
+              className='chaise-dropdown-header'
+              value={{isHTML: true, value: renderName(oneOption)}}
+              as={Nav.Link}
+              props={{
+                href: oneOption.url,
+                target: oneOption.newTab ? '_blank' : '_self',
+                onClick: (event: any) => handleOnLinkClick(event, oneOption)
+              }}
             />
           );
         case 'my_profile':
           return (
-            <Nav.Link
-              id='profile-link'
-              onClick={handleOpenProfileClick}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile' }}
+            <DisplayValue
+              as={Nav.Link}
+              value={{isHTML: true, value: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile'}}
+              props={{
+                onClick: handleOpenProfileClick,
+                id: 'profile-link'
+              }}
             />
           )
         case 'logout':
           return (
-            <Nav.Link
-              id='logout-link'
-              onClick={() => logout(LogActions.LOGOUT_NAVBAR)}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out' }}
+            <DisplayValue
+              as={Nav.Link}
+              value={{isHTML: true, value: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out'}}
+              props={{
+                onClick: () => logout(LogActions.LOGOUT_NAVBAR),
+                id: 'logout-link'
+              }}
             />
           )
         default:

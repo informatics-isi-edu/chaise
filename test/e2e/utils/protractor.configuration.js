@@ -4,7 +4,6 @@ exports.getConfig = function(options) {
     sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
     // specify which chrome driver to use
-    chromeDriver: process.env.PWD + '/node_modules/chromedriver/bin/chromedriver',
     capabilities: {
       commandTimeout: 300,
       // idleTimeout: 90,
