@@ -77,7 +77,6 @@
 @mixin chaise-btn() {
   @include border-radius(variables.$btn-border-radius);
   cursor: pointer;
-  display: inline-block;
   height: variables.$btn-height;
   min-width: variables.$btn-height;
   border: variables.$btn-border-width solid;
@@ -89,6 +88,10 @@
   -moz-user-select: none;
   -ms-user-select: none;
   white-space: nowrap;
+  // ficxing button spacing issue. Fix- center aligning the buttons
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 @mixin chaise-btn-primary() {

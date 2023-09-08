@@ -158,10 +158,9 @@
   }
 
   .action-btns {
+    // removing the padding since the table cell already has a padding of 5px
     text-align: center;
     font-size: 1.2rem;
-    // since we're increasing the size of icons, we should decrease the padding
-    padding: 5px 0 0 0;
 
     .chaise-btn {
       padding: 0;
@@ -172,6 +171,8 @@
 
     .chaise-view-details {
       font-size: 1.1em;
+      // giving a height to make it center aligned
+      height: 22px;
     }
 
     .disabled {
