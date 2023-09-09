@@ -15,6 +15,7 @@ import {
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import {
@@ -725,4 +726,77 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
     // eslint-disable-next-line eqeqeq
     col.name in prefillObj.keys && prefillObj.keys[col.name] != null
   ));
+}
+
+/* The following 3 functions are for foreignkey fields */
+export function createForeignKeyReference(
+  column: any, 
+  parentReference: any, 
+  formNumber: number, 
+  foreignKeyData: any, 
+  getValuesFunction: () => any
+): any {
+  const andFilters: any = [];
+    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+    // this is to ensure the selected row has a value for the foreignkey
+    column.foreignKey.key.colset.columns.forEach((col: any) => {
+      andFilters.push({ source: col.name, hidden: true, not_null: true });
+    });
+
+    const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
+    const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
+    return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
+}
+
+
+export function callOnChangeAfterSelection(
+  selectedRow: any, 
+  onChange: any,
+  name: string,
+  column: any,
+  formNumber: number,
+  foreignKeyData: any,
+  setFunction: (name: string, value: any) => void
+): void {
+  // this is just to hide the ts errors and shouldn't happen
+  if (!selectedRow.data) {
+    $log.error('the selected row doesn\'t have data!');
+    return;
+  }
+
+  // capture the foreignKeyData
+  if (foreignKeyData && foreignKeyData.current) {
+    foreignKeyData.current[name] = selectedRow.data;
+  }
+
+  // find the raw value of the fk columns that correspond to the selected row
+  // since we've already added a not-null hidden filter, the values will be not-null.
+  column.foreignKey.colset.columns.forEach((col: any) => {
+    const referencedCol = column.foreignKey.mapping.get(col);
+
+    setFunction(`${formNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
+  });
+
+  // for now this is just changing the displayed tuple displayname
+  onChange(selectedRow.displayname.value);
+}
+
+export function clearForeignKeyData(
+  name: string,
+  column: any, 
+  formNumber: number,
+  foreignKeyData: any,
+  setFunction: (name: string, value: any) => void
+): void {
+  // clear the raw values
+  column.foreignKey.colset.columns.forEach((col: any) => {
+    setFunction(`${formNumber}-${col.name}`, '');
+  });
+
+  // clear the foreignkey data
+  if (foreignKeyData && foreignKeyData.current) {
+    foreignKeyData.current[name] = {};
+  }
+
+  // the input-field will take care of clearing the displayed rowname.
 }

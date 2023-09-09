@@ -8,7 +8,7 @@ import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
@@ -18,13 +18,16 @@ import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { populateLinkedData, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { 
+  callOnChangeAfterSelection, 
+  clearForeignKeyData,
+  createForeignKeyReference 
+} from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ForeignkeyDropdownFieldProps = InputFieldProps & {
@@ -101,6 +104,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const [checkedRow, setCheckedRow] = useState<any>(null); // ERMrest.Tuple
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<String | null>(null);
   const [pageLimit, setPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
   const [pagingPageLimit, setPagingPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
 
@@ -138,54 +142,19 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       });
   }, [dropdownOpen]);
 
-  useEffect(() => {
-    // NOTE: compare props.columnModel.column.reference with dropdownReference
-    // recreate the reference for the dropdowns since the reference from the column model changed
-    setDropdownInitialized(false);
-  }, [props.columnModel])
-
-  // NOTE: same function in foreignkey-field
-  const createForeignKeyReference = () => {
-    const andFilters: any = [];
-    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-    // this is to ensure the selected row has a value for the foreignkey
-    props.columnModel.column.foreignKey.key.colset.columns.forEach((col: any) => {
-      andFilters.push({ source: col.name, hidden: true, not_null: true });
-    });
-
-    const linkedData = populateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData?.current);
-    const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
-    return props.columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
-  }
-
-  // NOTE: same function in foreignkey-field
-  const callOnChangeAfterSelection = (selectedRow: any, onChange: any) => {
-    // this is just to hide the ts errors and shouldn't happen
-    if (!selectedRow.data) {
-      $log.error('the selected row doesn\'t have data!');
-      return;
-    }
-
-    // capture the foreignKeyData
-    if (props.foreignKeyData && props.foreignKeyData.current) {
-      props.foreignKeyData.current[props.name] = selectedRow.data;
-    }
-
-    // find the raw value of the fk columns that correspond to the selected row
-    // since we've already added a not-null hidden filter, the values will be not-null.
-    props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-      const referencedCol = props.columnModel.column.foreignKey.mapping.get(col);
-
-      setValue(`${usedFormNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
-    });
-
-    // for now this is just changing the displayed tuple displayname
-    onChange(selectedRow.displayname.value);
-  }
-
   const intializeDropdownRows = () => {
     setShowSpinner(true);
-    const ref = createForeignKeyReference().contextualize.compactSelectForeignKey;
+    setDropdownInitialized(false);
+    
+    let ref = createForeignKeyReference(
+      props.columnModel.column, 
+      props.parentReference,
+      usedFormNumber,
+      props.foreignKeyData,
+      getValues
+    ).contextualize.compactSelectForeignKey;
+
+    if (searchTerm) ref = ref.search(searchTerm);
 
     setDropdownReference(ref);
 
@@ -237,22 +206,19 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
-    // clear the raw values
-    props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-      setValue(`${usedFormNumber}-${col.name}`, '');
-    });
-
-    // clear the foreignkey data
-    if (props.foreignKeyData && props.foreignKeyData.current) {
-      props.foreignKeyData.current[props.name] = {};
-    }
-
-    // the input-field will take care of clearing the displayed rowname.
+    clearForeignKeyData(
+      props.name,
+      props.columnModel.column,
+      usedFormNumber,
+      props.foreignKeyData,
+      setValue
+    )
   }
 
   // function for fetching data in dropdown after a search term
   const searchCallback = (value: string | null, action: LogActions) => {
     setShowSpinner(true);
+    setSearchTerm(value);
     // reset the page limit used for "... load more" function
     setPagingPageLimit(pageLimit)
 
@@ -296,15 +262,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       // triggers useLayoutEffect that handles whether to add the dropdown-open class
       setDropdownOpen(true);
 
-      if (!dropdownInitialized) {
-        intializeDropdownRows();
-      } else {
-        const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
-        LogService.logClientAction({
-          action: LogService.getActionString(LogActions.OPEN, stackPath),
-          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
-        }, dropdownReference.defaultLogInfo);
-      }
+      intializeDropdownRows();
     } else {
       // will remove the class if it's present. no need to check for it
       formContainer.classList.remove('dropdown-open');
@@ -324,7 +282,15 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
-    callOnChangeAfterSelection(selectedRow, onChange);
+    callOnChangeAfterSelection(
+      selectedRow, 
+      onChange,
+      props.name,
+      props.columnModel.column,
+      usedFormNumber,
+      props.foreignKeyData,
+      setValue
+    );
   }
 
   const loadMoreOptions = () => {
@@ -363,7 +329,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   const renderDropdownOptions = (onChange: any) => {
-    if (dropdownInitialized && dropdownRows.length === 0) {
+    if (!dropdownInitialized) return;
+
+    if (dropdownRows.length === 0) {
       // return a special row that doesn't use Dropdown.Item so it won't be selectable
       return (
         <li
