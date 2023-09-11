@@ -362,12 +362,22 @@ The following is the overall structure of the project:
 This section will focus on more advanced details related to installation. Please refer to the installation guide in the `user-docs` folder for general information. The build process uses Makefile to simplify what needs to be called from the command line to get started. `Make` will manage dependency installation (through `npm`) and the react build process (using `webpack`).
 
 #### Make targets
-The following are all the Makefile targets related to installation:
+
+The following targers can be used for installing dependencies. Try to avoid directly calling `npm` and use these commands unless you want to add a new module or update the existing ones.
+
+- `npm-install-modules`: Installs the dependencies needed for building the app in production mode.
+- `npm-install-all-modules`: Install all the dependencies including the ones needed during development and testing. Since we had to patch webdriver-manager, this command will also call `patch-package` to apply the patch.
+
+The following targets are designed for building chaise apps:
 
 - `dist`: This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
 - `dist-wo-deps`: Designed for development purposes, will only build and install Chaise.
+
+The following are deploy targets:
+
 - `deploy`: Deployed the built folders into the given location.
 - `deploy-w-config`:  The same as `deploy`, but will also `rsync` the configuration files.
+
 #### NPM
 This section will go over how we think the NPM modules should be managed.
 
@@ -375,13 +385,14 @@ This section will go over how we think the NPM modules should be managed.
 - Use `make npm-install-all-modules` to install all the NPM modules regardless of `NODE_ENV` value.
   - Useful when you first clone the repository, or want to download dependencies from scratch.
   - Use it yo update the installed dependencies based on the changes in `pacakge-lock.json` file.
+  - his command will also call `patch-package` to apply the patches to dependencies. Refer to [patches folder](../../patches/README.md) for more information.
 - Use `make dist-wo-deps` while developing so you don't have to install depenendencies for each build.
 - Avoid using `npm install` (it can have unwanted side effects like updating `package-lock.json`).
   - `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
 - Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
   - Ensure the used node and npm versions are updated and the latest stable.
-  - Run `npm install` to sync `package-lock.json` with `package.json`
-  - Double-check the changes to `pacakge-lock.json`
+  - Run `npm install` to sync `package-lock.json` with `package.json`.
+  - Double-check the changes to `pacakge-lock.json`.
 
 ## Structure of an App
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
