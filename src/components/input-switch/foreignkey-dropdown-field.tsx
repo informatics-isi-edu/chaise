@@ -262,7 +262,16 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       // triggers useLayoutEffect that handles whether to add the dropdown-open class
       setDropdownOpen(true);
 
-      intializeDropdownRows();
+      if (!dropdownInitialized || props.columnModel.hasDomainFilter) {
+        // if there is a domain filter pattern, the dropdown should be reinitialized incase the filtered reference has changed
+        intializeDropdownRows();
+      } else {
+        const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
+        LogService.logClientAction({
+          action: LogService.getActionString(LogActions.OPEN, stackPath),
+          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+        }, dropdownReference.defaultLogInfo);
+      }
     } else {
       // will remove the class if it's present. no need to check for it
       formContainer.classList.remove('dropdown-open');
