@@ -28,7 +28,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { columnToColumnModel } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -538,7 +538,7 @@ const SavedQueryDropdown = ({
       setRecordsetModalProps({
         parentReference: reference,
         initialReference: tempSavedQueryReference,
-        initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+        initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
         config: recordsetConfig,
         logInfo: {
           logStack: logStack,

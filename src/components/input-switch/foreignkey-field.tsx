@@ -1,12 +1,13 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
@@ -15,15 +16,19 @@ import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
-import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { populateSubmissionRow, populateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { 
+  callOnChangeAfterSelection, 
+  clearForeignKeyData,
+  createForeignKeyReference 
+} from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
@@ -92,17 +97,13 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
-    // clear the raw values
-    props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-      setValue(`${usedFormNumber}-${col.name}`, '');
-    });
-
-    // clear the foreignkey data
-    if (props.foreignKeyData && props.foreignKeyData.current) {
-      props.foreignKeyData.current[props.name] = {};
-    }
-
-    // the input-field will take care of clearing the displayed rowname.
+    clearForeignKeyData(
+      props.name,
+      props.columnModel.column,
+      usedFormNumber,
+      props.foreignKeyData,
+      setValue
+    )
   }
 
   const openRecordsetModal = (e: any) => {
@@ -120,22 +121,19 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       displayMode: (props.appMode === appModes.EDIT) ? RecordsetDisplayMode.FK_POPUP_EDIT : RecordsetDisplayMode.FK_POPUP_CREATE,
     };
 
-    const andFilters: any = [];
-    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-    // this is to ensure the selected row has a value for the foreignkey
-    props.columnModel.column.foreignKey.key.colset.columns.forEach((col: any) => {
-      andFilters.push({ source: col.name, hidden: true, not_null: true });
-    });
-
-    const linkedData = populateLinkedData(props.parentReference, usedFormNumber, props.foreignKeyData?.current);
-    const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
-    const ref = props.columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
+    const ref = createForeignKeyReference(
+      props.columnModel.column,
+      props.parentReference,
+      usedFormNumber,
+      props.foreignKeyData,
+      getValues
+    );
 
     setRecordsetModalProps({
       parentReference: props.parentReference,
       parentTuple: props.parentTuple,
       initialReference: ref.contextualize.compactSelectForeignKey,
-      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo: {
         logStack: LogService.addExtraInfoToStack(LogService.getStackObject(props.columnModel.logStackNode, props.parentLogStack), { picker: 1 }),
@@ -155,27 +153,15 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       const selectedRow = selectedRows[0];
 
-      // this is just to hide the ts errors and shouldn't happen
-      if (!selectedRow.data) {
-        $log.error('the selected row doesn\'t have data!');
-        return;
-      }
-
-      // capture the foreignKeyData
-      if (props.foreignKeyData && props.foreignKeyData.current) {
-        props.foreignKeyData.current[props.name] = selectedRow.data;
-      }
-
-      // find the raw value of the fk columns that correspond to the selected row
-      // since we've already added a not-null hidden filter, the values will be not-null.
-      props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-        const referencedCol = props.columnModel.column.foreignKey.mapping.get(col);
-        // TODO maybe we want to formalize this way of naming the fields? like a function or something
-        setValue(`${usedFormNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
-      });
-
-      // for now this is just changing the displayed tuple displayname
-      onChange(selectedRow.displayname.value);
+      callOnChangeAfterSelection(
+        selectedRow, 
+        onChange,
+        props.name,
+        props.columnModel.column,
+        usedFormNumber,
+        props.foreignKeyData,
+        setValue
+      );
     }
   }
 
