@@ -147,6 +147,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                 formNumber={usedFormNumber}
                 clearErrors={clearErrors}
                 setValue={setValue}
+                confirmClose={!field?.value}
               />
             </AlertsProvider>
           }

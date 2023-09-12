@@ -222,14 +222,31 @@ var recordEditPage = function() {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.select-all-close-' + columnDisplayName));
     }
-
-    /* dropdown boolean selectors */
+    /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
 
+    // foreign key dropdown selectors
+    this.getFkeyDropdowns = () => {
+        return element.all(by.css('.fk-dropdown'));
+    }
+
+    this.getDropdownSelectableOptions = () => {
+        return element(by.css('.dropdown-menu.show')).all(by.css('.dropdown-select-value'));
+    }
+
+    this.getDropdownLoadMoreRow = () => {
+        return element(by.css('.dropdown-menu .load-more-row'));
+    }
+
+    this.getDropdownSearch = () => {
+        return element(by.css('.dropdown-menu .search-row .chaise-input-control input'));
+    }
+
+    // boolean dropdown selectors
     this.getDropdownText = (el) => {
         return el.element(by.css('.chaise-input-control'));
     };
@@ -364,6 +381,15 @@ var recordEditPage = function() {
         file_content: element(by.id('file-content')),
         notes: element(by.id('notes'))
       }
+    }
+
+    this.getIframeInputCancelPopup = () => {
+      const modal = element(by.css('.confirm-iframe-close-modal'));
+      return {
+        element: modal,
+        body: modal.element(by.css('.modal-body')),
+        cancelButton: modal.element(by.css('.cancel-button'))
+      };
     }
 
     this.submitForm = function() {

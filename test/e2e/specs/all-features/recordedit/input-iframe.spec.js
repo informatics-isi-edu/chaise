@@ -14,6 +14,11 @@ const testParams = {
   iframeInputName: 'creator',
   create: {
     modalTitle: 'Select iframe input for new main',
+    emptyConfirmText: [
+      'You are about to close the popup without setting any values (i.e. no change will be made to the record). Do you still want to proceed?',
+      'To set the values, first click Cancel to dismiss this confirmation, then click the appropriate submit button in the popup.',
+      'Click OK to close the popup without setting any values.'
+    ].join('\n'),
     id: '1',
     values: {
       creator: 'John Smith',
@@ -103,6 +108,23 @@ describe('input-iframe support in recordedit', () => {
 
         // make sure the spinner is hidden
         chaisePage.waitForElementInverse(recordEditPage.getIframeInputPopupSpinner());
+
+        done();
+      }).catch(chaisePage.catchTestError(done));
+    });
+
+    it('closing the iframe without submitting should show an error.', (done) => {
+      let modalElements;
+      chaisePage.clickButton(chaisePage.recordEditPage.getModalCloseBtn()).then(() => {
+        modalElements = chaisePage.recordEditPage.getIframeInputCancelPopup();
+
+        chaisePage.waitForElement(modalElements.element);
+
+        expect(modalElements.body.getText()).toBe(testParams.create.emptyConfirmText, 'body missmatch');
+
+        return chaisePage.clickButton(modalElements.cancelButton);
+      }).then(() => {
+        chaisePage.waitForElementInverse(modalElements.element);
 
         done();
       }).catch(chaisePage.catchTestError(done));

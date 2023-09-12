@@ -2,6 +2,8 @@
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import IframeFieldCloseConfirmModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-field-close-confirm-modal';
 import Modal from 'react-bootstrap/Modal';
 
 // hooks
@@ -49,6 +51,10 @@ type IframeFieldModalProps = {
   showModal: boolean,
   setShowModal: any,
   submissionRowValues: any,
+  /**
+   * whether we should show a modal when users attempt to close the modal
+   */
+  confirmClose: boolean
 }
 
 /**
@@ -65,12 +71,23 @@ const IframeFieldModal = ({
   setValue,
   showModal,
   setShowModal,
+  confirmClose
 }: IframeFieldModalProps) => {
 
   const { addAlert } = useAlert();
+  const confirmEmptyMessage = columnModel.column.inputIframeProps.emptyFieldConfirmMessage;
+
   const iframeRef = useRef<any>(null);
 
+  /**
+   * whether we are showing the spinner
+   * (displayed on load until we get the `iframe-data-ready` message)
+   */
   const [showModalSpinner, setShowModalSpinner] = useState(true);
+  /**
+   * whether we are showing the close confirm
+   */
+  const [showModalCloseConfirm, setShowModalCloseConfirm] = useState(false);
 
   /**
    * messages:
@@ -219,43 +236,68 @@ const IframeFieldModal = ({
     }
   }, [showModal]);
 
-  const closeModal = () => setShowModal(false);
+  /**
+   * can be used for closing the modal
+   */
+  const closeModal = () => {
+    setShowModalCloseConfirm(false);
+    setShowModal(false);
+  }
+
+  /**
+   * called when user wants to close the modal
+   */
+  const attemptToCloseModal = () => {
+    if (confirmClose) {
+      setShowModalCloseConfirm(true);
+    } else {
+      closeModal();
+    }
+  }
 
   return (
-    <Modal
-      className='iframe-field-popup'
-      onHide={closeModal}
-      show={showModal}
-      // make sure the iframe is taking up the whole width:
-      size={'xl'}
-      // make sure the iframe is taking up the whole height:
-      fullscreen={true}
-    >
-      <Modal.Header>
-        <Modal.Title>
-          {title}
-        </Modal.Title>
-        <ChaiseTooltip
-          placement='bottom'
-          tooltip='Close the dialog'
-        >
-          <button
-            className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
-            onClick={closeModal}
+    <>
+      <IframeFieldCloseConfirmModal
+        show={showModalCloseConfirm}
+        onCancel={() => setShowModalCloseConfirm(false)}
+        onConfirm={closeModal}
+        message={isStringAndNotEmpty(confirmEmptyMessage) ? <DisplayValue value={{ isHTML: true, value: confirmEmptyMessage }} /> : undefined}
+      />
+      <Modal
+        className='iframe-field-popup'
+        onHide={attemptToCloseModal}
+        show={showModal}
+        // make sure the iframe is taking up the whole width:
+        size={'xl'}
+        // make sure the iframe is taking up the whole height:
+        fullscreen={true}
+      >
+        <Modal.Header>
+          <Modal.Title>
+            {title}
+          </Modal.Title>
+          <ChaiseTooltip
+            placement='bottom'
+            tooltip='Close this popup.'
           >
-            <strong className='chaise-btn-icon'>X</strong>
-            <span>Close</span>
-          </button>
-        </ChaiseTooltip>
-      </Modal.Header>
-      <Alerts />
-      <Modal.Body>
-        <div className='iframe-container'>
-          {showModalSpinner && <ChaiseSpinner className='iframe-field-modal-spinner' />}
-          <iframe ref={iframeRef} src={iframeLocation} />
-        </div>
-      </Modal.Body>
-    </Modal>
+            <button
+              className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
+              onClick={attemptToCloseModal}
+            >
+              <strong className='chaise-btn-icon'>X</strong>
+              <span>Close</span>
+            </button>
+          </ChaiseTooltip>
+        </Modal.Header>
+        <Alerts />
+        <Modal.Body>
+          <div className='iframe-container'>
+            {showModalSpinner && <ChaiseSpinner className='iframe-field-modal-spinner' />}
+            <iframe ref={iframeRef} src={iframeLocation} />
+          </div>
+        </Modal.Body>
+      </Modal>
+    </>
   );
 }
 
