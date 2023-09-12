@@ -55,9 +55,10 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
 
   const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
+  if (column.isForeignKey) hasDomainFilter = column.hasDomainFilter;
+
   if (prefillObj) {
     if (column.isForeignKey) {
-      hasDomainFilter = column.hasDomainFilter;
       if (
         // whether the fk is already marked as prefilled
         prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||

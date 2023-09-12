@@ -109,16 +109,16 @@ describe("Domain filter pattern support,", function () {
 
                     constrainedColDropdown.click().then(() => {
                         const dropdownOptions = chaisePage.recordEditPage.getDropdownSelectableOptions();
-    
+
                         // make sure the number of dropdown options load
                         browser.wait(() => {
                             return dropdownOptions.count().then((ct) => {
                                 return ct === 7;
                             });
                         });
-    
+
                         expect(dropdownOptions.count()).toBe(7, 'total rows loaded in constrained col dropdown are incorrect')
-    
+
                         done();
                     }).catch(chaisePage.catchTestError(done));
                 });
@@ -134,6 +134,15 @@ describe("Domain filter pattern support,", function () {
                     }).then(function (text) {
                         expect(text.indexOf("Select")).toBeGreaterThan(-1);
                         rows = chaisePage.recordsetPage.getRows();
+
+                        // make sure the number of displayed rows are correct
+                        browser.wait(() => {
+                            return rows.count().then((ct) => {
+                                return ct === 4;
+                            });
+                        });
+
+
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function (selectButtons) {
 
@@ -155,7 +164,7 @@ describe("Domain filter pattern support,", function () {
 
                         expect(dropdownOptions.count()).toBe(3, "count missmatch");
 
-                        
+
                         // select option 5 (index 4) and close the dropdown
                         return dropdownOptions;
                     }).then((options) => {
