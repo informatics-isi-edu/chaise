@@ -17,9 +17,6 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
-// utils
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-
 export type InputSwitchProps = {
   /**
    * the type of input :
@@ -194,6 +191,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'popup-select':
         if (!columnModel) {
@@ -320,6 +318,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'json':
       case 'jsonb':
@@ -335,6 +334,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'color':
         return <ColorField

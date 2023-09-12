@@ -49,6 +49,11 @@ export type InputFieldProps = {
    * The styles attached to the container
    */
   styles?: any,
+  /**
+   * if true, do not intercept on enter
+   * by default, we are capturing the "enter" key event and stopping it
+   */
+  allowEnter?: boolean
 }
 
 
@@ -97,11 +102,12 @@ const InputField = ({
   displayErrors,
   containerClasses,
   styles,
+  allowEnter = false,
   onClear,
   controllerRules,
   checkHasValue,
   handleChange,
-  checkIsTouched
+  checkIsTouched,
 }: InputFieldCompProps): JSX.Element => {
 
   const { setValue, control, clearErrors } = useFormContext();
@@ -154,6 +160,11 @@ const InputField = ({
     field.onBlur();
   };
 
+  // intercept enter key down event and stop it from submitting the form
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (!allowEnter && event.key === 'Enter') event.preventDefault();
+  }
+
   /**
    * we don't want to show the required error until it's submitted
    */
@@ -167,7 +178,7 @@ const InputField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
