@@ -50,6 +50,24 @@
                             "column_name": "id"
                         }
                     ]
+                }, {
+                    "comment": "Foreign key that represents a dropdown foreign key input.",
+                    "names": [["defaults", "fk_dropdown"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "defaults-table",
+                            "schema_name": "defaults",
+                            "column_name": "foreign_key_dropdown"
+                        }
+                    ],
+                    "annotations": {},
+                    "referenced_columns": [
+                        {
+                            "table_name": "foreign-dropdown-table",
+                            "schema_name": "defaults",
+                            "column_name": "id"
+                        }
+                    ]
                 }
             ],
             "table_name": "defaults-table",
@@ -108,6 +126,13 @@
                 }, {
                     "name": "foreign_key",
                     "default": 2,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    }
+                }, {
+                    "name": "foreign_key_dropdown",
+                    "default": 1,
                     "nullok": true,
                     "type": {
                         "typename": "int4"
@@ -353,7 +378,7 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns": {
                     "entry/create": [
-                        "asset_disabled", "asset_disabled_no_default", "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"],
+                        "asset_disabled", "asset_disabled_no_default", "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_dropdown"], ["defaults", "fk_text_disabled"],
                         "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled",
                          "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default",
                          "asset", "color_rgb_hex", "color_rgb_hex_disabled", "RID", "RCB", "RMB", "RCT", "RMT"
@@ -449,12 +474,60 @@
                     }
                 }
             ]
+        },
+        "foreign-dropdown-table": {
+            "comment": "Table to represent a foreign related entity where the column is disabled.",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "foreign-dropdown-table",
+            "schema_name": "defaults",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "name",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "entry": {
+                        "selector_ux_mode": "simple-search-dropdown"
+                    }
+                }
+            }
         }
     },
     "table_names": [
         "defaults-table",
         "foreign-text-table",
-        "foreign-text-disabled-table"
+        "foreign-text-disabled-table",
+        "foreign-dropdown-table"
     ],
     "comment": null,
     "annotations": {}
