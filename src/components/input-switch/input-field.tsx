@@ -107,7 +107,7 @@ const InputField = ({
   controllerRules,
   checkHasValue,
   handleChange,
-  checkIsTouched,
+  checkIsTouched
 }: InputFieldCompProps): JSX.Element => {
 
   const { setValue, control, clearErrors } = useFormContext();
@@ -161,6 +161,8 @@ const InputField = ({
   };
 
   // intercept enter key down event and stop it from submitting the form
+  // input types that we "allowEnter" include:
+  //   - array, markdown, longtext, json, and jsonb
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (!allowEnter && event.key === 'Enter') event.preventDefault();
   }
