@@ -155,26 +155,32 @@ NOTE: The `max-width` property will also almost always be honored. If the conten
   background: #4674A7;
 }
 ```
-
 NOTE: Depending on the color that the header is changed to, the text color and buttons might need to be modified as well.
 
-To change the text color to black from default (white):
-```css
-#record .chaise-accordions .accordion-button {
-  color: black;
-}
-```
+ - Change the color of 1 sepcific Related Table header:
+ ```css
+ #record .chaise-accordions #rt-heading-header_name .accordion-button {
+   background: #4674A7;
+ }
+ ```
+ NOTE: This uses an `id` selector (`#`) that relies on the `id` attribute of the `.chaise-accordion` element. The id is always in the form of `rt-heading-` + the related table heading text (which includes special characters). For example, since `Authors *` in PDB has a superscript `*` for the related table heading in the `Entry` table, the `id` is being set to `rt-heading-Authors-sup-sup-`.
 
-To change the buttons (by default, the styles are for chaise-btn-secondary):
-```css
-#record .chaise-accordions .chaise-accordion-header-buttons .related-table-actions .chaise-btn {
-  color: black;
-  background-color: #ffffff;
-  border: 1px solid #4674a7;
-}
-```
+ - To change the text color to black from default (white):
+ ```css
+ #record .chaise-accordions .accordion-button {
+   color: black;
+ }
+ ```
 
-NOTE: `color` refers to text color. `background-color` refers to the background. `border` is the "width", "style", and "color".
+ - To change the buttons (by default, the styles are for chaise-btn-secondary):
+ ```css
+ #record .chaise-accordions .chaise-accordion-header-buttons .related-table-actions .chaise-btn {
+   color: black;
+   background-color: #ffffff;
+   border: 1px solid #4674a7;
+ }
+ ```
+ NOTE: `color` refers to text color. `background-color` refers to the background. `border` is the "width", "style", and "color".
 
 
 ### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen))
