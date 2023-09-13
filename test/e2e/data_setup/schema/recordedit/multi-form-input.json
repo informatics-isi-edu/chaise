@@ -1,0 +1,25 @@
+{
+  "schema_name": "multi-form-input",
+  "tables": {
+    "main": {
+      "table_name": "main",
+      "schema_name": "multi-form-input",
+      "kind": "table",
+      "keys": [{"unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": { "typename": "serial4" }
+        },
+        {
+          "name": "text_col",
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    }
+  }
+}

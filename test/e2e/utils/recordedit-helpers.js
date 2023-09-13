@@ -88,7 +88,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
 
         it("should allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeTruthy("Add x rows is not visible in create mode");
+            expect(chaisePage.recordEditPage.getCloneFormInputSubmitButton().isDisplayed()).toBeTruthy("Add x rows is not visible in create mode");
         });
     }
 
@@ -259,7 +259,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         describe(title + ",",function() {
             if (recordIndex > 0) {
                 it("should click add record button", function(done) {
-                    chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
+                    chaisePage.clickButton(chaisePage.recordEditPage.getCloneFormInputSubmitButton()).then(function(button) {
                         return browser.wait(function() {
                             return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                                 return (ct == recordIndex + 1);

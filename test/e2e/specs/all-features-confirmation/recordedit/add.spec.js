@@ -258,7 +258,7 @@ describe('Record Add', function() {
 
                         if (tableParams.files.length == 0) {
                             it("should click and add an extra record.", function(done) {
-                                chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function () {
+                                chaisePage.clickButton(chaisePage.recordEditPage.getCloneFormInputSubmitButton()).then(function () {
                                     done();
                                 }).catch(chaisePage.catchTestError(done));
                             });

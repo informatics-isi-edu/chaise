@@ -47,11 +47,11 @@ var recordEditPage = function() {
         return element.all(by.css('.recordedit-form .form-header'))
     }
 
-    this.getMultiFormInput = function () {
+    this.getCloneFormInput = function () {
         return element(by.id("copy-rows-input"));
     };
 
-    this.getMultiFormInputSubmitButton = function () {
+    this.getCloneFormInputSubmitButton = function () {
         return element(by.id("copy-rows-submit"));
     };
 

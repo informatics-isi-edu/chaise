@@ -259,7 +259,7 @@ describe('Record Add with defaults', function() {
         // Foreign key columns
         it("should initialize foreign key inputs with their default value.", function() {
             // the clone will be disabled while data is loading.
-            browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getMultiFormInputSubmitButton()));
+            browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getCloneFormInputSubmitButton()));
 
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 1);
             foreignKeyDropdownInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_dropdown", 1);
@@ -273,7 +273,7 @@ describe('Record Add with defaults', function() {
         // Asset columns
         it("should initialize asset column inputs with their default value.", function() {
             // the clone btn will be disabled while data is loading.
-            browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getMultiFormInputSubmitButton()));
+            browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getCloneFormInputSubmitButton()));
 
             const assetTextInput = chaisePage.recordEditPage.getTextFileInputForAColumn("asset", 1)
             expect(assetTextInput.getText()).toBe(values.asset_value, "Asset input default is incorrect");
