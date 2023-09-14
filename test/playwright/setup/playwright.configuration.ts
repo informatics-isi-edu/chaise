@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 import { resolve } from 'path';
-import { TestOptions } from '@isrd-isi-edu/e2e-test/utils/playwright.model';
+import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
 import os from 'os';
+
+
+export const STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
 
 const getConfig = (options: TestOptions) => {
 
@@ -10,9 +13,17 @@ const getConfig = (options: TestOptions) => {
   // the only way to pass object to setup/teardown is through env variables
   process.env.PLAYWRIGHT_TEST_OPTIONS = JSON.stringify(options);
 
-  console.log(`running ${process.env.CI ? 'on CI' : 'locally'}.`);
+  if (process.env.CI) {
+    const hostname = os.hostname();
+    process.env.ERMREST_URL = `http://${hostname}/ermrest`;
+    process.env.CHAISE_BASE_URL = `http://${hostname}/chaise`;
+  } else if (!process.env.ERMREST_URL || !process.env.CHAISE_BASE_URL) {
+    throw new Error('ERMREST_URL and CHAISE_BASE_URL env variables are required.');
+  }
 
   const config = defineConfig({
+
+    testMatch: options.testMatch,
 
     // Look for test files in the "tests" directory, relative to this configuration file.
     // testDir: '',
@@ -45,7 +56,7 @@ const getConfig = (options: TestOptions) => {
 
     use: {
       // Base URL to use in actions like `await page.goto('/')`.
-      baseURL: '',
+      baseURL: process.env.CHAISE_BASE_URL,
 
       // Collect trace when retrying the failed test.
       trace: 'on-first-retry',
@@ -53,16 +64,19 @@ const getConfig = (options: TestOptions) => {
     // Configure projects for major browsers.
     projects: [
       {
+        name: 'pretest',
+        testDir: __dirname,
+        testMatch: 'playwright.pretest.ts'
+      },
+      {
         name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
+        dependencies: ['pretest'],
+        use: {
+          ...devices['Desktop Chrome'],
+          storageState: STORAGE_STATE
+        },
       },
     ],
-    // Run your local dev server before starting the tests.
-  // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://127.0.0.1:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
   });
 
 

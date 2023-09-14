@@ -1,4 +1,4 @@
-import getConfig from '@isrd-isi-edu/e2e-test/utils/playwright.configuration';
+import getConfig from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.configuration';
 
 export default getConfig({
   testName: 'all-features-confirmation',

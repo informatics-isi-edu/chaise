@@ -3,6 +3,10 @@ export type TestOptions = {
    * the name of the spec (will be used for the report file)
    */
   testName: string,
+
+  testMatch?: string|RegExp|Array<string|RegExp>,
+
+
   /**
    * location of the .dev.json file
    */
@@ -10,5 +14,8 @@ export type TestOptions = {
   /**
    * location of the chaise config file
    */
-  chaiseConfigFilePath: string
+  chaiseConfigFilePath: string,
+
+  manualTestConfig?: boolean,
+
 }

@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Navbar', () => {
 
-  test('basic features,', async ({ page }) => {
+  test('basic features,', async ({ page, baseURL }) => {
     const navbar = page.locator('#mainnav');
 
     await test.step('navbar should be visible on load.', async () => {
-      await page.goto('https://dev.isrd.isi.edu/~ashafaei/chaise/recordset/#1/isa:dataset');
+      await page.goto(`${baseURL}/recordset/#${process.env.CATALOG_ID!}/isa:dataset`);
 
       await navbar.waitFor({ state: 'visible' });
     })
@@ -15,6 +15,12 @@ test.describe('Navbar', () => {
       // await expect.soft(page.locator('#brand-text').textContent()).toEqual('chaise');
 
       await expect.soft(page.locator('#brand-image')).toHaveAttribute('src', '../images/genetic-data.png');
+    });
+
+    await test.step('should show the "Full Name" of the logged in user in the top right', async () => {
+      const client = JSON.parse(process.env.WEBAUTHN_SESSION!).client;
+      const name = (!process.env.CI ? client.full_name : client.display_name);
+      await expect.soft(page.locator('.username-display')).toHaveText(name);
     });
 
 
@@ -26,26 +32,5 @@ test.describe('Navbar', () => {
       });
     });
   });
+});
 
-
-  test.describe('rest of features', () => {
-    test('feature 1', () => {
-      expect(false).toBeFalsy();
-    });
-
-    test('feature 2', () => {
-      expect(true).toBeTruthy();
-    });
-  });
-
-  test.describe('rest of rest of features', () => {
-    test('feature 1 1', () => {
-      expect(false).toBeFalsy();
-    });
-
-    test('feature 2 2', () => {
-      expect(true).toBeTruthy();
-    });
-  });
-
-})
