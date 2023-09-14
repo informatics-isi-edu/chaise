@@ -189,7 +189,7 @@ const AppWrapperInner = ({
 
         // make a HEAD request to check if the user can fetch the file
         ConfigService.http.head(element.href, config).then(function () {
-          clickHref(element.href);
+          clickHref(element.href, true);
         }).catch(function (exception: any) {
           let ermrestError = ConfigService.ERMrest.responseToError(exception);
           if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {

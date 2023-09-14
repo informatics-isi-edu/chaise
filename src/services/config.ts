@@ -11,7 +11,7 @@ import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-sto
 
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -78,7 +78,7 @@ export class ConfigService {
    * configurations are done before any other components are running.
    * @param settings
    */
-  static async configure(settings: ConfigServiceSettings, session: Session | null ) {
+  static async configure(settings: ConfigServiceSettings, session: Session | null) {
     setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app
@@ -163,7 +163,7 @@ export class ConfigService {
   /**
    * the location of ermrest. can be used for other deriva services too.
    */
-  static get ERMrestLocation () {
+  static get ERMrestLocation() {
     if (isStringAndNotEmpty(ConfigService._ermrestLocation)) {
       return ConfigService._ermrestLocation;
     }
@@ -299,6 +299,17 @@ export class ConfigService {
     // make sure the object has both defined and apply the default if one or the other is missing
     if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
     if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+
+    /**
+     * make sure the current host is part of internalHosts
+     */
+    const currHost = window.location.host;
+    if (!Array.isArray(cc.internalHosts)) {
+      cc.internalHosts = [currHost];
+    }
+    else if (cc.internalHosts.indexOf(currHost) === -1) {
+      cc.internalHosts.push(currHost);
+    }
 
     ConfigService._chaiseConfig = cc;
 

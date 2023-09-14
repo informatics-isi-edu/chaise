@@ -34,7 +34,7 @@ import {
   columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -394,8 +394,8 @@ export default function RecordeditProvider({
 
         // make sure submissionRows has all the data
         for (const key in oldData) {
-            if (key in newData) continue;
-            newData[key] = oldData[key];
+          if (key in newData) continue;
+          newData[key] = oldData[key];
         }
       }
     }
@@ -575,7 +575,8 @@ export default function RecordeditProvider({
 
           // NOTE: This check was being done in angularJS since the modal was closed with a message if the user aborted uploading
           //   - in ReactJS it's handling the case when the modal is closed and no "exception" is returned (undefined)
-          if (typeof exception !== 'string') {
+          //   - when we abort the upload, we're calling onCancel without any parameters
+          if (isObjectAndNotNull(exception)) {
             let message;
             if (exception.message) {
               message = exception.message;
@@ -613,8 +614,15 @@ export default function RecordeditProvider({
         // Push this to the tuple array for the row
         // NOTE: each file object has an hatracObj property which is an hatrac object
         try {
-          const column = reference.columns.find((c: any) => { return c.name === k; });
-          if (column.isAsset) {
+          let column = reference.columns.find((c: any) => { return c.name === k; });
+          if (!column) {
+            // the file might be related to one of the columns in the input-iframe column mapping
+            reference.columns.forEach((col: any) => {
+              if (!col.isInputIframe) return;
+              column = col.inputIframeProps.columns.find((c: any) => c.name === k);
+            })
+          }
+          if (column && column.isAsset) {
             hasAssetColumn = true;
 
             if (row[k].url === '' && !column.nullok) {

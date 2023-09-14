@@ -12,6 +12,7 @@ import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -244,7 +245,7 @@ const ChaiseNavbar = (): JSX.Element => {
         err = new NoRecordRidError();
       }
 
-      dispatchError({error: err, isDismissible: true});
+      dispatchError({ error: err, isDismissible: true });
     });
   };
 
@@ -286,7 +287,7 @@ const ChaiseNavbar = (): JSX.Element => {
   }
 
   const renderRidSearchIcon = () => {
-    if (showRidSpinner) return <Spinner size='sm' animation='border'/>;
+    if (showRidSpinner) return <Spinner size='sm' animation='border' />;
 
     return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };
@@ -315,7 +316,7 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderDropdownName = (item: MenuOption) => (<span dangerouslySetInnerHTML={{ __html: renderName(item) }} />);
+  const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{isHTML: true, value: renderName(item)}} />);
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
@@ -325,13 +326,16 @@ const ChaiseNavbar = (): JSX.Element => {
 
       if (!item.children || !canEnable(item, session)) {
         return (
-          <Nav.Link
+          <DisplayValue
             key={index}
-            href={item.url}
-            target={item.newTab ? '_blank' : '_self'}
-            onClick={(event) => handleOnLinkClick(event, item)}
+            as={Nav.Link}
+            value={{isHTML: true, value: renderName(item)}}
             className={'chaise-nav-item ' + menuItemClasses(item, session, false)}
-            dangerouslySetInnerHTML={{ __html: renderName(item) }}
+            props={{
+              href: item.url,
+              target: item.newTab ? '_blank' : '_self',
+              onClick: (event: MouseEvent<HTMLElement>) => handleOnLinkClick(event, item)
+            }}
           />
         );
       }
@@ -360,27 +364,29 @@ const ChaiseNavbar = (): JSX.Element => {
 
   return (
     <header id='navheader'>
-      {renderBanners(topBanners)}
       {!ConfigService.appSettings.hideNavbar &&
-        <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
-          <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
-            {renderBrandImage()}
-            {' '}
-            {renderBrandingHTML()}
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
-          <Navbar.Collapse id='chaise-navbar-collapse-btn'>
-            <Nav className='navbar-menu-options nav' id='menubarHeader'>
-              {renderNavbarMenuDropdowns()}
-            </Nav>
-            {/* Since we are using float: right for divs, position for chaise login comes first */}
-            <ChaiseLogin />
-            {renderRidSearch()}
-            {renderLiveButton()}
-          </Navbar.Collapse>
-        </Navbar>
+        <>
+          {renderBanners(topBanners)}
+          <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
+            <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
+              {renderBrandImage()}
+              {' '}
+              {renderBrandingHTML()}
+            </Navbar.Brand>
+            <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
+            <Navbar.Collapse id='chaise-navbar-collapse-btn'>
+              <Nav className='navbar-menu-options nav' id='menubarHeader'>
+                {renderNavbarMenuDropdowns()}
+              </Nav>
+              {/* Since we are using float: right for divs, position for chaise login comes first */}
+              <ChaiseLogin />
+              {renderRidSearch()}
+              {renderLiveButton()}
+            </Navbar.Collapse>
+          </Navbar>
+          {renderBanners(bottomBanners)}
+        </>
       }
-      {renderBanners(bottomBanners)}
     </header>
   );
 };

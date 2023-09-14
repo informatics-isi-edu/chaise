@@ -1,0 +1,15 @@
+{
+  "catalog": {},
+  "schema": {
+      "name": "fk-display-mode",
+      "createNew": true,
+      "path": "test/e2e/data_setup/schema/recordedit/fk-display-mode.json"
+  },
+  "tables": {
+      "createNew": true
+  },
+  "entities": {
+      "createNew": true,
+      "path": "test/e2e/data_setup/data/fk-display-mode"
+  }
+}

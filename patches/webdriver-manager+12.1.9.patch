@@ -1,0 +1,86 @@
+diff --git a/node_modules/webdriver-manager/built/lib/binaries/chrome_xml.js b/node_modules/webdriver-manager/built/lib/binaries/chrome_xml.js
+index 6dfbea5..52e2fd9 100644
+--- a/node_modules/webdriver-manager/built/lib/binaries/chrome_xml.js
++++ b/node_modules/webdriver-manager/built/lib/binaries/chrome_xml.js
+@@ -55,13 +55,41 @@ class ChromeXml extends config_source_1.XmlConfigSource {
+             return 'linux';
+         }
+     }
++    /**
++     * Helper method, gets the ostype and osarch to return the platform name
++     */
++    getPlatformName() {
++        const osType = this.getOsTypeName();
++        // mac-x64 or mac-arm64
++        if (osType === 'mac') {
++            return osType + '-' + this.osarch;
++        }
++        // win32 or win64
++        else if (osType === 'win') {
++            return  osType + (this.osarch === 'x64' ? '64' : '32');
++        }
++        else {
++            return 'linux64';
++        }
++
++    }
+     /**
+      * Gets the latest item from the XML.
+      */
+     getLatestChromeDriverVersion() {
+-        const latestReleaseUrl = 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE';
+-        return http_utils_1.requestBody(latestReleaseUrl).then(latestVersion => {
+-            return this.getSpecificChromeDriverVersion(latestVersion);
++        const currPlatform = this.getPlatformName();
++        const lastKnownGoodVersionsWithDownloads_Url = 'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json';
++
++        return http_utils_1.requestBody(lastKnownGoodVersionsWithDownloads_Url).then(body => {
++            const latestVersion_Body = JSON.parse(body)['channels']['Stable']
++
++            const latestVersion = latestVersion_Body['version']
++            const latestVersion_Url = latestVersion_Body['downloads']['chromedriver'].find(obj => obj['platform'] == currPlatform)['url']
++
++            return Promise.resolve({
++                url: latestVersion_Url,
++                version: latestVersion,
++            });
+         });
+     }
+     /**
+diff --git a/node_modules/webdriver-manager/built/lib/cmds/update.js b/node_modules/webdriver-manager/built/lib/cmds/update.js
+index b98cdce..12c2d47 100644
+--- a/node_modules/webdriver-manager/built/lib/cmds/update.js
++++ b/node_modules/webdriver-manager/built/lib/cmds/update.js
+@@ -207,6 +207,19 @@ function updateBinary(binary, outputDir, proxy, ignoreSSL) {
+         }
+     });
+ }
++function getPlatformName() {
++    const osType = config_1.Config.osType();
++    const osArch  = config_1.Config.osArch();
++    if (osType === 'Darwin') {
++        return 'mac' + '-' + osArch;
++    }
++    else if (osType === 'Windows_NT') {
++        return 'win' + (osArch === 'x64' ? '64' : '32');
++    }
++    else {
++        return 'linux64';
++    }
++}
+ function unzip(binary, outputDir, fileName) {
+     // remove the previously saved file and unzip it
+     let osType = config_1.Config.osType();
+@@ -237,7 +250,11 @@ function unzip(binary, outputDir, fileName) {
+         child_process.spawnSync('tar', ['zxvf', path.resolve(outputDir, fileName), '-C', outputDir]);
+     }
+     // rename
+-    fs.renameSync(path.resolve(outputDir, binary.zipContentName()), mv);
++    if (fileName.indexOf('chromedriver_') != -1) {
++        fs.renameSync(path.resolve(outputDir, 'chromedriver-' + getPlatformName(), binary.zipContentName()), mv)
++    } else {
++        fs.renameSync(path.resolve(outputDir, binary.zipContentName()), mv);
++    }
+     // set permissions
+     if (osType !== 'Windows_NT') {
+         logger.info(binary.name + ': setting permissions to 0755 for ' + mv);

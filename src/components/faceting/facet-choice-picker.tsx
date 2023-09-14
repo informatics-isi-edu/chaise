@@ -27,7 +27,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utilities
 import Q from 'q';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 
@@ -487,7 +487,7 @@ const FacetChoicePicker = ({
 
     setRecordsetModalProps({
       initialReference: facetReferenceRef.current,
-      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       initialSelectedRows

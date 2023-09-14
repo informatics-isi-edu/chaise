@@ -1,6 +1,7 @@
 exports.getConfig = function(options) {
   var config = {
     framework: 'jasmine2',
+    // specify which chrome driver to use
     capabilities: {
       commandTimeout: 300,
       // idleTimeout: 90,

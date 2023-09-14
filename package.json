@@ -1,7 +1,7 @@
 {
   "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=14.0.0",
@@ -41,6 +41,7 @@
     "jasmine-spec-reporter": "^2.5.0",
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
+    "patch-package": "^8.0.0",
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",

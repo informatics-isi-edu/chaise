@@ -3,6 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_alerts.scss';
 // components
 import Alert from 'react-bootstrap/Alert';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -14,6 +15,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
 import { toTitlecase } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+
 
 export const Alerts = (): JSX.Element => {
   const { alerts, removeAlert } = useAlert();
@@ -48,7 +50,7 @@ export const Alerts = (): JSX.Element => {
           {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) :
             <>
               <strong className='alert-title'>{toTitlecase(alert.type)}</strong>
-              <span dangerouslySetInnerHTML={{ __html: alert.message }}></span>
+              <DisplayValue internal value={{isHTML: true, value: alert.message}} />
             </>
           }
         </Alert>

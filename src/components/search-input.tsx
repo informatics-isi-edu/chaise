@@ -42,7 +42,12 @@ type SearchInputProps = {
    * A ref that can be used from the parent to clear the search
    * This component is going to register this function when it renders
    */
-  forceClearSearch?: any
+  forceClearSearch?: any,
+  /**
+   * set to true to render the component for display in dropdowns
+   * default is false
+   */
+  dropdownDisplayMode?: boolean
 }
 
 /**
@@ -56,7 +61,8 @@ const SearchInput = ({
   searchColumns,
   focus,
   disabled,
-  forceClearSearch
+  forceClearSearch,
+  dropdownDisplayMode = false
 }: SearchInputProps): JSX.Element => {
 
   const inputEl = useRef<HTMLInputElement>(null);
@@ -101,6 +107,7 @@ const SearchInput = ({
 
   const handleEnterPress = (event: any) => {
     if (disabled || event.key !== 'Enter') return;
+    event.preventDefault();
 
     triggerSearch(false);
   };
@@ -124,6 +131,27 @@ const SearchInput = ({
       AUTO_SEARCH_TIMEOUT
     );
   };
+
+  const renderInput = () => {
+    return (<>
+      <input
+        type='text'
+        ref={inputEl}
+        value={searchTerm ? searchTerm : ''}
+        className={inputClass}
+        disabled={disabled}
+        onChange={handleInputChange}
+        onKeyDown={handleEnterPress}
+        autoFocus={focus === true}
+      />
+      {!searchTerm && renderPlaceHolder()}
+      <ClearInputBtn
+        btnClassName='remove-search-btn'
+        clickCallback={clearSearch}
+        show={searchTerm && !disabled ? true : false}
+      />
+    </>)
+  }
 
   const renderPlaceHolder = () => {
     let inner: string | JSX.Element[] = `Search ${(searchColumns === false ? ' all columns' : '')}`;
@@ -168,46 +196,50 @@ const SearchInput = ({
       </ChaiseTooltip>
     );
   }
+
+
   return (
     <div className={'chaise-search-box chaise-input-group ' + (disabled ? 'disabled-element' : '')}>
+      {dropdownDisplayMode &&
+        <div className='chaise-input-group-prepend'>
+          <span className='chaise-input-group-text fa-solid fa-magnifying-glass' />
+        </div>
+      }
       <div className='chaise-input-control has-feedback'>
-        <input
-          type='text'
-          ref={inputEl}
-          value={searchTerm ? searchTerm : ''}
-          className={inputClass}
-          disabled={disabled}
-          onChange={handleInputChange}
-          onKeyDown={handleEnterPress}
-          autoFocus={focus === true}
-        />
-        {!searchTerm && renderPlaceHolder()}
-        <ClearInputBtn
-          btnClassName='remove-search-btn'
-          clickCallback={clearSearch}
-          show={searchTerm && !disabled ? true : false}
-        />
+        {renderInput()}
       </div>
-      <div className='chaise-input-group-append'>
-        <ChaiseTooltip
-          placement='bottom-start'
-          tooltip={
-            <>
-              <p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p>
-              <p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p>
-              <p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</p>
-              <p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>
-            </>
-          }
-        >
+      {!dropdownDisplayMode ?
+        <div className='chaise-input-group-append'>
+          <ChaiseTooltip
+            placement='bottom-start'
+            tooltip={
+              <>
+                <p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p>
+                <p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p>
+                <p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</p>
+                <p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>
+              </>
+            }
+          >
+            <button
+              className='chaise-search-btn chaise-btn chaise-btn-primary'
+              disabled={disabled} onClick={() => triggerSearch(true)} role='button' type='button'
+            >
+              <span className='chaise-btn-icon fa-solid fa-magnifying-glass' />
+            </button>
+          </ChaiseTooltip>
+        </div> :
+        // change the appended "button"
+        <div className='chaise-input-group-append'>
           <button
             className='chaise-search-btn chaise-btn chaise-btn-primary'
-            disabled={disabled} onClick={() => triggerSearch(true)} role='button'
+            disabled={disabled} onClick={() => triggerSearch(true)} role='button' type='button'
           >
-            <span className='chaise-btn-icon fa-solid fa-magnifying-glass' />
+            <span>Search</span>
           </button>
-        </ChaiseTooltip>
-      </div>
+
+        </div>
+      }
     </div>
   );
 }

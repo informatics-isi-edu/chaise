@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordedit/input-iframe.config.json"
+      ],
+      "schema": "input-iframe"
+  },
+  "cleanup": true
+}

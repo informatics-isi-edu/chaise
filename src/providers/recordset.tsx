@@ -23,7 +23,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 
 // utils
-import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -296,7 +296,7 @@ export default function RecordsetProvider({
    */
   const [isInitialized, setIsInitialized] = useState<boolean>(!!initialPage);
   const [isLoading, setIsLoading, isLoadingRef] = useStateRef<boolean>(!initialPage);
-  const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
+  const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEFAULT_PAGE_SIZE);
   const [page, setPage, pageRef] = useStateRef<any>(initialPage ? initialPage : null);
   const [savedQueryReference, setSavedQueryReference] = useState(null);
   const [colValues, setColValues] = useState<any>(initialPage ? getColumnValuesFromPage(initialPage) : []);

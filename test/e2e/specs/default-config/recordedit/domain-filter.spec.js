@@ -102,11 +102,25 @@ describe("Domain filter pattern support,", function () {
             });
 
             describe("with a domain filter with a dynamic value from a fk selector ", function () {
-                var fkColName = "fk_constrained_col";
+                var fkColName = "PtPzjGmWZiUNMyrIk1LA8g";
 
-                it("that isn't set should have the full set.", function (done) {
-                    testModalCount(fkColName, 7, done);
+                it("that isn't set should have the full set (in a dropdown).", function (done) {
+                    const constrainedColDropdown = chaisePage.recordEditPage.getDropdownElementByName(fkColName);
 
+                    constrainedColDropdown.click().then(() => {
+                        const dropdownOptions = chaisePage.recordEditPage.getDropdownSelectableOptions();
+
+                        // make sure the number of dropdown options load
+                        browser.wait(() => {
+                            return dropdownOptions.count().then((ct) => {
+                                return ct === 7;
+                            });
+                        });
+
+                        expect(dropdownOptions.count()).toBe(7, 'total rows loaded in constrained col dropdown are incorrect')
+
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
                 });
 
                 it("should limit the set.", function (done) {
@@ -120,39 +134,42 @@ describe("Domain filter pattern support,", function () {
                     }).then(function (text) {
                         expect(text.indexOf("Select")).toBeGreaterThan(-1);
                         rows = chaisePage.recordsetPage.getRows();
+
+                        // make sure the number of displayed rows are correct
+                        browser.wait(() => {
+                            return rows.count().then((ct) => {
+                                return ct === 4;
+                            });
+                        });
+
+
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function (selectButtons) {
 
                         return selectButtons[0].click();
                     }).then(function () {
-                        currFk = chaisePage.recordEditPage.getForeignKeyInputButton(fkColName, 1);
-                        browser.wait(EC.elementToBeClickable(currFk));
+                        currFkDropdown = chaisePage.recordEditPage.getDropdownElementByName(fkColName);
+                        browser.wait(EC.elementToBeClickable(currFkDropdown));
 
-                        return currFk.click();
-                    }).then(function () {
-                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-
-                        return modalTitle.getText();
-                    }).then(function (text) {
-                        expect(text.indexOf("Select")).toBeGreaterThan(-1);
+                        return currFkDropdown.click();
+                    }).then(() => {
+                        const dropdownOptions = chaisePage.recordEditPage.getDropdownSelectableOptions();
 
                         // make sure the number of displayed rows are correct
-                        browser.wait(function () {
-                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                        browser.wait(() => {
+                            return dropdownOptions.count().then((ct) => {
                                 return ct === 3;
                             });
                         });
 
-                        rows = chaisePage.recordsetPage.getRows();
+                        expect(dropdownOptions.count()).toBe(3, "count missmatch");
 
-                        return rows.count();
-                    }).then(function (ct) {
-                        expect(ct).toBe(3, "count missmatch");
 
-                        return rows.get(0).all(by.css(".select-action-button"));
-                    }).then(function (selectButtons) {
-                        return selectButtons[0].click();
-                    }).then(function () {
+                        // select option 5 (index 4) and close the dropdown
+                        return dropdownOptions;
+                    }).then((options) => {
+                        return chaisePage.clickButton(options[0]);
+                    }).then(() => {
                         done();
                     }).catch(function (err) {
                         console.log(err);
@@ -219,8 +236,7 @@ describe("Domain filter pattern support,", function () {
 
         describe("In edit mode, ", function () {
             beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
+                chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
             });
 
@@ -232,6 +248,7 @@ describe("Domain filter pattern support,", function () {
                 it("otherwise it should not be limited.", function (done) {
                     testModalCount(colWFkeys, 7, done);
                 });
+
 
             });
         });

@@ -21,7 +21,17 @@ type ChaiseTooltipProps = {
    * (can be used for applying custom styles to the tooltip)
    */
    className?: string,
+   /**
+    * if you want to manually control the tooltip, use
+    * this property in combination with `onToggle`.
+    * You should make sure `show` is set to proper value in that callback.
+    */
    show?: boolean,
+   /**
+    * if you want to manually control the tooltip, use
+    * this property in combination with `show`.
+    * You should make sure `show` is set to proper value in this callback.
+    */
    onToggle?: (nextShow: boolean) => void
 }
 

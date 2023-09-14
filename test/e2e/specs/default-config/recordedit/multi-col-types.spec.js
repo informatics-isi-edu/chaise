@@ -73,7 +73,7 @@ var testParams = {
             json_col: '"89.586"',
             asset_col: {link: "/hatrac/js/chaise/somepath.png", value: "filenamevalue.png"},
             asset_col_filename: "filenamevalue.png",
-            asset_col_bytes: "12,345",
+            asset_col_bytes: "12.3 kB",
             asset_col_md5: "md5value",
             color_rgb_hex_col: "#123456"
         },
@@ -99,7 +99,7 @@ var testParams = {
             timestamp_txt: currentTimestampTime,
             asset_null_col: {ignoreInCI: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
             asset_null_col_filename: {ignoreInCI: true, value: "testfile500kb_nulltest.png"},
-            asset_null_col_bytes: {ignoreInCI: true, value: "512,000"},
+            asset_null_col_bytes: {ignoreInCI: true, value: "512 kB"},
             color_rgb_hex_null_col: "#123456"
         }
     },

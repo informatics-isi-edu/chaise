@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_markdown-container.scss';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import MarkdownPreviewModal from '@isrd-isi-edu/chaise/src/components/modals/markdown-preview-modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -17,7 +18,7 @@ import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils
 const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
- 
+
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [showModalPreview, setShowModalPreview] = useState<boolean>(false);
   const [previewContent, setPreviewContent] = useState<string>('');
@@ -185,7 +186,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 />
               </div>
               : <div className='md-preview chaise-input-control' data-provide='markdown' style={{ 'height': textAreaRef.current?.offsetHeight }}>
-                <div className='disabled-textarea markdown-container' dangerouslySetInnerHTML={{ __html: previewContent }}></div>
+                <div className='disabled-textarea'><DisplayValue addClass value={{value: previewContent, isHTML: true}} /></div>
               </div>
             }
           </div>

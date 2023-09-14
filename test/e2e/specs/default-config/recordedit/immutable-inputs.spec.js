@@ -16,6 +16,7 @@ var testParams = {
         markdown_value: "**bold**",
         markdown_disabled_value: "*italics*",
         foreign_key_value: "Default for foreign_key column", // rowname of the fk
+        foreign_key_dropdown_value: "Default for foreign_key_dropdown column", // rowname of the fk
         foreign_key_disabled_value: "Default for foreign_key_disabled column", // rowname of the disabled fk
         int_value: "25",
         int_disabled_value: "20",
@@ -68,6 +69,8 @@ var testParams = {
         markdown_disabled: "italics",
         // Value of "name" column on foreign (defaults_fk_text) related entity
         "iKS50idGfVCGnnS6lUoZ8Q": "Default for foreign_key column",
+        // Value of "name" column on foreign (defaults_fk_text_dropdown) related entity
+        "2PO3pruPa9O5g7nNztzMjQ": "Default for foreign_key_dropdown column",
         // Value of "name" column on foreign (defaults_fk_text_disabled) related entity
         "WnsyE4pJ1O0IW8zsj6MDHg": "Default for foreign_key_disabled column",
         int: "25",
@@ -134,7 +137,7 @@ describe('Record Add with defaults', function() {
             values = testParams.default_column_values,
             textInput, textDisabledInput,
             markdownInput, markdownDisabledInput,
-            foreignKeyInput, foreignKeyDisabledInput,
+            foreignKeyInput, foreignKeyDropdownInput, foreignKeyDisabledInput,
             intInput, intDisabledInput,
             floatInput, floatDisabledInput,
             booleanTrueInput, booleanFalseInput, booleanDisabledInput,
@@ -259,9 +262,11 @@ describe('Record Add with defaults', function() {
             browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getMultiFormInputSubmitButton()));
 
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 1);
+            foreignKeyDropdownInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_dropdown", 1);
             foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 1);
 
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
+            expect(foreignKeyDropdownInput.getText()).toBe(values.foreign_key_dropdown_value, "Foreign key dropdown input default is incorrect");
             expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
 

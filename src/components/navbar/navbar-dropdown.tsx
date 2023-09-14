@@ -4,6 +4,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 // components
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -127,11 +128,14 @@ const NavbarDropdown = ({
     onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN, item);
   }
 
-  const renderHeader = (item: MenuOption, index: number) => <NavDropdown.Header
-    as='a'
+  const renderHeader = (item: MenuOption, index: number) => <DisplayValue
     key={index}
+    as={NavDropdown.Header}
     className='chaise-dropdown-header'
-    dangerouslySetInnerHTML={{ __html: renderName(item) }}
+    value={{ isHTML: true, value: renderName(item) }}
+    props={{
+      as: 'a'
+    }}
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
@@ -145,11 +149,14 @@ const NavbarDropdown = ({
         onClick={alignDropDown}
         onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
       >
-        <Dropdown.Toggle
-          as='a'
-          variant='dark'
+        <DisplayValue
+          as={Dropdown.Toggle}
+          value={{ isHTML: true, value: renderName(item) }}
           className={menuItemClasses(item, session, true)}
-          dangerouslySetInnerHTML={{ __html: renderName(item) }}
+          props={{
+            as: 'a',
+            variant: 'dark'
+          }}
         />
         <Dropdown.Menu
           // renderOnMount prop is required to get submenu's width that can be
@@ -172,14 +179,18 @@ const NavbarDropdown = ({
       </Dropdown>)
   }
 
-  const renderUrl = (item: MenuOption, index: number) => <NavDropdown.Item
+  const renderUrl = (item: MenuOption, index: number) => <DisplayValue
     key={index}
-    href={item.url}
-    target={item.newTab ? '_blank' : '_self'}
-    onClick={(event) => handleOnLinkClick(event, item)}
+    as={NavDropdown.Item}
     className={menuItemClasses(item, session, true)}
-    dangerouslySetInnerHTML={{ __html: renderName(item) }}
+    value={{ isHTML: true, value: renderName(item) }}
+    props={{
+      href: item.url,
+      target: item.newTab ? '_blank' : '_self',
+      onClick: (event: MouseEvent<HTMLElement>) => handleOnLinkClick(event, item)
+    }}
   />
+
 
   const renderDropdownOptions = () => menu.map((child: MenuOption, index: number) => {
     if (!canShow(child, session) || !child.isValid) return;
@@ -193,20 +204,26 @@ const NavbarDropdown = ({
         return (renderUrl(child, index));
       case 'my_profile':
         return (
-          <NavDropdown.Item
-            id='profile-link'
+          <DisplayValue
             key={index}
-            onClick={openProfileCb}
-            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'My Profile' }}
+            as={NavDropdown.Item}
+            value={{isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'My Profile'}}
+            props={{
+              id: 'profile-link',
+              onClick: openProfileCb
+            }}
           />
         )
       case 'logout':
         return (
-          <NavDropdown.Item
-            id='logout-link'
+          <DisplayValue
             key={index}
-            onClick={() => logout(LogActions.LOGOUT_NAVBAR)}
-            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'Log Out' }}
+            as={NavDropdown.Item}
+            value={{isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'Log Out'}}
+            props={{
+              id: 'logout-link',
+              onClick: () => logout(LogActions.LOGOUT_NAVBAR)
+            }}
           />
         )
       default:

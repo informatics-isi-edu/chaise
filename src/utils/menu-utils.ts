@@ -254,7 +254,10 @@ export function menuItemClasses(option: MenuOption, session: Session | null, che
   return classes;
 }
 
-// make sure to use dangerouslySetInnerHTML when calling renderName
+/**
+ * process markdown pattern defined for a menu option.
+ * use DisplayValue component for rendering it in DOM
+ */
 export function renderName(option: MenuOption): string {
   return ConfigService.ERMrest.renderMarkdown(ConfigService.ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), { inline: true });
 }

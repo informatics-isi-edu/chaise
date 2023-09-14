@@ -1,5 +1,6 @@
 // components
 import Modal from 'react-bootstrap/Modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // utilites
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -42,11 +43,9 @@ const MarkdownPreviewModal = ({
       </Modal.Header>
       <Modal.Body>
       <div className='outer-table'>
-        <div
-          className='markdown-container'
-          style={{'padding': '10px'}}
-          dangerouslySetInnerHTML={{ __html: markdownContent}}
-        />
+        <div style={{'padding': '10px'}}>
+          <DisplayValue addClass value={{value: markdownContent, isHTML: true}} />
+        </div>
       </div>
       </Modal.Body>
     </Modal >

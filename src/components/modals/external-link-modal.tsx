@@ -22,6 +22,8 @@ const ExternalLinkModal = ({
 }: ExternalLinkModalProps): JSX.Element => {
   const [counter, setCounter] = useState(COUNT_DOWN_SECONDS);
 
+  const linkRef = useRef<any>();
+
   const interval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /**
@@ -42,7 +44,7 @@ const ExternalLinkModal = ({
    */
   useEffect(() => {
     if (counter === 0) {
-      clickHref(link);
+      linkRef.current.click();
       onHide();
     }
   }, [counter]);
@@ -74,7 +76,7 @@ const ExternalLinkModal = ({
       </Modal.Header>
       <Modal.Body>
         <p>The link you clicked will be opened in a new tab in {counter} seconds...</p>
-        <p>Click <a href={link} target='_blank' rel='noreferrer' onClick={() => onHide()}>here</a> to open it now.</p>
+        <p>Click <a ref={linkRef} href={link} target='_blank' rel='noreferrer' onClick={() => onHide()}>here</a> to open it now.</p>
       </Modal.Body>
       <Modal.Footer>
         <button

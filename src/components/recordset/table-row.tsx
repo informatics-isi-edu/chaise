@@ -501,7 +501,8 @@ const TableRow = ({
           >
             <DisplayValue addClass={true} value={value} />
           </div>
-          {(!disableMaxRowHeightFeature && overflow[colIndex + 1]) && <div style={{ 'display': 'inline' }}>
+          {/* the overflow index should be shifted only if we're showing the action buttons */}
+          {(!disableMaxRowHeightFeature && overflow[colIndex + (showActionButtons ? 1 : 0)]) && <div style={{ 'display': 'inline' }}>
             {' ... '}
             <span
               className='text-primary readmore'

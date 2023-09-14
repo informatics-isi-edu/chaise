@@ -491,7 +491,7 @@ if (config.displayMode === RecordeditDisplayMode.POPUP) {
    *  - Close button
    *  - title is <h2> instead of <h1>
    *  - bulk delete, clone, reset controls not shown
-   * 
+   *
    * Since there are so many differences, Recordedit when shown in a modal has a very different "top panel"
    */
   return (
@@ -522,7 +522,7 @@ if (config.displayMode === RecordeditDisplayMode.POPUP) {
                       {renderSubmitButton()}
                       <ChaiseTooltip
                         placement='bottom'
-                        tooltip='Close the dialog'
+                        tooltip='Close this popup.'
                       >
                         <button
                           className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'

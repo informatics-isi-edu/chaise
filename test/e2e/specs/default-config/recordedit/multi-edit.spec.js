@@ -86,14 +86,14 @@ var testParams = {
             ],
             results: [
                 [
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512 kB",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512 kB",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512 kB"
                 ],
                 [
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512 kB",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512 kB",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512 kB"
                 ]
             ],
             files: [{
