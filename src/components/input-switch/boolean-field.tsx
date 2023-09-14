@@ -5,6 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 
 
 // utils
+import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
@@ -22,16 +23,66 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
     return (typeof v === 'boolean');
   };
 
+  /**
+   * check if the parameter is empty
+   */
+  const isEmptyValue = (v: any) => {
+    return v === '' || v === null || v === undefined;
+  }
+
+  /**
+   * defining the validators this way, so we can also modify the "required" check.
+   * The default react-hook-forms check is "truthy" which will not allow "false"
+   * values for required inputs.
+   */
+  const booleanFieldValidation = {
+    required: (v: any) => {
+      if (props.requiredInput && isEmptyValue(v)) {
+        return ERROR_MESSAGES.REQUIRED;
+      }
+      return true;
+    },
+    validateBoolean: (v: any) => {
+      // ignore empty values as we're handling them in the "required" validator
+      if (isEmptyValue(v)) {
+        return true;
+      }
+
+      // if it has a boolean value, then it's valid
+      if (typeof v === 'boolean') {
+        return true;
+      }
+
+      // this won't happen through the current UI but added for completeness
+      return ERROR_MESSAGES.INVALID_BOOLEAN;
+    }
+  }
+
+  const onToggle = (show: boolean) => {
+    const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement
+
+    if (show) {
+      formContainer.classList.add('dropdown-open');
+    } else {
+      formContainer.classList.remove('dropdown-open');
+    }
+  }
+
   // first option is true, and second is false.
   const rawOptions = [true, false];
   const displayedOptions = rawOptions.map((op) => props.columnModel ? formatBoolean(props.columnModel.column, op) : op.toString());
 
   return (
-    <InputField {...props} checkHasValue={hasValue}>
+    <InputField {...props}
+      requiredInput={false} checkHasValue={hasValue}
+      controllerRules={{
+        validate: booleanFieldValidation
+      }}
+    >
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-boolean'>
-          <Dropdown aria-disabled={props.disableInput}>
-            <Dropdown.Toggle as='div' className='chaise-input-group' disabled={props.disableInput} aria-disabled={props.disableInput}>
+          <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
+            <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
               <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
                 {typeof field?.value === 'boolean' ?
                   displayedOptions[rawOptions.indexOf(field?.value)] :

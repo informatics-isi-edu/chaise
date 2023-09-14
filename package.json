@@ -1,7 +1,7 @@
 {
   "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=14.0.0",
@@ -42,6 +42,7 @@
     "jasmine-spec-reporter": "^2.5.0",
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
+    "patch-package": "^8.0.0",
     "playwright": "^1.34.2",
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
@@ -80,6 +81,7 @@
     "react-plotly.js": "^2.5.1",
     "sass": "^1.58.3",
     "sass-loader": "^13.2.0",
+    "spark-md5": "^3.0.2",
     "typescript": "~4.4.4",
     "uglify-js": "3.9.2",
     "webpack": "^5.76.2",

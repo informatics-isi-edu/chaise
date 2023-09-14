@@ -99,15 +99,14 @@ const FacetRangePicker = ({
         tickangle: 45,
         // set to "linear" for int/float graphs
         // set to "date" for date/timestamp graphs
+        // when set to `-`, plotly tries to figure out the type of data and automatically set the type
         type: '-'
-        // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
-        // autorange: true // default is true. if range is provided, set to false.
-        // rangemode: "normal"/"tozero"/"nonnegative"
       },
       yaxis: {
         fixedrange: true,
-        zeroline: true,
-        tickformat: ',d'
+        zeroline: true
+        // removed tickformat: ',d' since it would cause small data sets to show [0, 1, 1, 2, 2] 
+        // when the yaxis labels were really [0, 0.5, 1, 1.5, 2] by rounding non whole numbers
       },
       bargap: 0
     }
@@ -460,7 +459,11 @@ const FacetRangePicker = ({
         plotData[0].y = response.y;
 
         const plotLayout = { ...compState.plot.layout };
-        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') plotLayout.xaxis.range = updateHistogramRange(min, max);
+        // set xaxis range
+        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
+          plotLayout.xaxis.range = updateHistogramXRange(min, max);
+          plotLayout.xaxis.fixedrange = disableZoomIn(min, max);
+        }
 
         response.min = requestMin;
         response.max = requestMax;
@@ -476,7 +479,8 @@ const FacetRangePicker = ({
           plot: {
             ...compState.plot,
             data: plotData,
-            layout: plotLayout
+            layout: plotLayout,
+            labels: response.labels
           },
           relayout: shouldRelayout,
           rangeOptions: {
@@ -647,12 +651,28 @@ const FacetRangePicker = ({
     return windowRef.moment(ts).format(format);
   }
 
-  const updateHistogramRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
+  // if the date range is very small, the labels on the plot are repeated and the bars stretch across a few dates
+  // pad either side of min/max with 2 extra labels being shown so the content is centered
+  const updateHistogramXRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     if (isColumnOfType('timestamp')) {
       return [dateTimeToTimestamp(min as TimeStamp), dateTimeToTimestamp(max as TimeStamp)];
-    } else {
-      return [min, max];
+    } else if (isColumnOfType('date')) {
+      const minDate = windowRef.moment(min);
+      const maxDate = windowRef.moment(max);
+      const limitedRange = windowRef.moment.duration((maxDate.diff(minDate))).asDays();
+      
+      if (limitedRange <= 4) {
+        const minDateDisplay = minDate.subtract(2, 'days').format(dataFormats.date);
+        const maxDateDisplay = maxDate.add(2, 'days').format(dataFormats.date);
+        return [minDateDisplay, maxDateDisplay];
+      }
+    } else if (isColumnOfType('int')) {
+      const intMax = max as number;
+      const intMin = min as number;
+      if ((intMax-intMin) <= 4) return [intMin-2, intMax+2];
     }
+
+    return [min, max];
   }
 
 
@@ -752,7 +772,8 @@ const FacetRangePicker = ({
 
     const rangeOptions = updateRangeMinMax(data.min, data.max);
     if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
-      plotLayout.xaxis.range = updateHistogramRange(rangeOptions.absMin, rangeOptions.absMax);
+      plotLayout.xaxis.range = updateHistogramXRange(rangeOptions.absMin, rangeOptions.absMax);
+      plotLayout.xaxis.fixedrange = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax)
     }
 
     setCompState({
@@ -839,7 +860,8 @@ const FacetRangePicker = ({
     } catch (err) {
       const plotLayout = { ...compState.plot.layout }
       if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
-        plotLayout.xaxis.range = updateHistogramRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
+        plotLayout.xaxis.range = updateHistogramXRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
+        plotLayout.xaxis.fixedrange = disableZoomIn(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
       }
 
       setCompState({
@@ -885,6 +907,7 @@ const FacetRangePicker = ({
       config={compState.plot.config}
       data={compState.plot.data}
       layout={compState.plot.layout ? compState.plot.layout : {}}
+      labels={compState.plot.labels}
       onRelayout={(event: any) => plotlyRelayout(event)}
       ref={plotlyRef}
       style={{ 'width': '100%' }}

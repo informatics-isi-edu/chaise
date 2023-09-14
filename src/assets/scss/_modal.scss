@@ -1,26 +1,15 @@
 @use 'sass:map';
 @use 'variables';
 
-// override the default bootstrap
-.modal-backdrop {
-  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
-
-  // allows modal on modal (only two levels)
-  ~ .modal-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
-  }
-}
-.modal {
-  z-index: map-get(variables.$z-index-map, 'modal');
-
-  // allows modal on modal (only two levels)
-  ~ .modal {
-    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
-  }
+// This is added to fix the clashing bootstrap3 rules in static sites.
+// default bootstrap3 rules are setting opacity of fade to 0, which is wrong
+// bootstrap5 is onlu setting the opacity of fade to 0 if it doesn't have .show
+.fade {
+  opacity: unset;
 }
 
 // don't add border to the modal header
-.modal-header {
+div.modal-header {
   border-bottom: none;
 
   &.center-aligned-title {
@@ -29,7 +18,7 @@
   }
 }
 
-.modal-title {
+div.modal-title {
   font-size: variables.$h2-font-size !important;
   font-weight: normal;
 }
@@ -60,11 +49,9 @@
 /******** Popup modal for login instructions ********/
 .modal-login-instruction-backdrop {
   opacity: 0.7 !important;
-  z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
 }
 
 .modal-login-instruction {
-  z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
   .modal-dialog {
     position: absolute;
     top: 50%;
@@ -78,12 +65,15 @@
 
     .modal-header {
       justify-content: space-around;
+
       .modal-title {
         font-size: 22px !important;
       }
     }
+
     .modal-body {
       text-align: center;
+
       button {
         margin-left: 5px;
       }
@@ -94,13 +84,7 @@
 
 
 /******* Popup modal for error ********/
-// NOTE less than the navbar z-index
-.modal-error-backdrop {
-  z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
-}
-
 .modal-error {
-  z-index: map-get(variables.$z-index-map, 'modal-error');
   overflow: hidden;
 
   .no-word-break {
@@ -110,6 +94,7 @@
   .toggle-error-details {
     display: block;
     padding-left: 0;
+
     i {
       padding-right: 3px;
     }
@@ -124,32 +109,9 @@
   }
 }
 
-.search-popup {
-  ~ .modal-error-backdrop,
-  ~ .modal-login-instruction-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
-  }
-
-  ~ .modal-error,
-  ~ .modal-login-instruction {
-    z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
-  }
-
-}
-
 .modal-footer .chaise-btn {
   margin-left: 5px;
 }
-
-/******* Popup modal for export *******/
-.export-progress-backdrop {
-  z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
-}
-
-.export-progress {
-  z-index: map-get(variables.$z-index-map, 'export-progress');
-}
-
 
 /******* Popup modal for share ********/
 .chaise-share-citation-modal {
@@ -158,7 +120,8 @@
     padding-left: 10px;
   }
 
-  h2, h3 {
+  h2,
+  h3 {
     margin-top: 20px;
     margin-bottom: 10px;
   }
@@ -176,12 +139,19 @@
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
 .chaise-body .modal-dialog.modal-xl {
-  margin: 2.5vh auto;
+  $_margin: 2.5vh;
+
+  margin: $_margin auto;
   width: auto !important;
   max-width: 95vw;
+
+  &.modal-fullscreen {
+    // modal-screen by default has a 100% height, but we should account for the marging that we're adding.
+    height: calc(100% - (2 * $_margin));
+  }
 }
 
-.chaise-body .modal-dialog.modal-lg {
+.modal-dialog.modal-lg {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 80vw;
@@ -189,7 +159,7 @@
 
 // NOTE in bootstrap3 this used to be modal-md,
 // but we don't have that notion anymore and therefore this is just the default size
-.chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+.modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -200,6 +170,7 @@
   right: 15px;
   top: 15px;
 }
+
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
   margin: auto;
@@ -207,6 +178,7 @@
   overflow: hidden;
   max-width: 95vw;
 }
+
 /*Sets the maximum height of the modal body to 85% of the screen height*/
 .modal-xl .modal-body {
   max-height: 90vh;
@@ -231,10 +203,12 @@
 
 /************* Profile Card ****************/
 .profile-popup {
+
   // to allow scrolling and showing all content
   .modal-content {
     max-height: unset;
   }
+
   ul li {
     list-style-type: disc;
 
@@ -244,7 +218,7 @@
   }
 
   // remove the last border since it's not needed
-  table tr:last-child > td {
+  table tr:last-child>td {
     border-bottom: none;
   }
 
@@ -257,15 +231,18 @@
 .search-popup {
   .modal-content {
     height: 95vh;
+
     .modal-header {
       padding: 0;
       padding-top: 20px;
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
     }
+
     .modal-body {
       padding: 0;
       height: 90vh;
+
       .top-panel-container {
         padding-top: 0;
       }
@@ -273,13 +250,8 @@
   }
 }
 
-// don't show alerts on modals
-// except facet since it has to show the url length error
-.modal:not(.faceting-show-details-popup) .recordset-container alerts {
-  display: none !important;
-}
-
 .scalar-show-details-popup {
+
   // change width of number of Occurrences
   // we cannot use the class name because the scalar column might be using the same name
   .recordset-table th:nth-child(3) {
@@ -303,5 +275,131 @@
   .progress-bar {
     background-size: 1.75rem 1.75rem;
     background-color: #4674a7;
+  }
+}
+
+/******** Popup modal for input iframe ********/
+.iframe-field-popup {
+  // .modal-body {
+  //   min-height: 90vh;
+  // }
+
+  .alerts-container {
+    // make sure it's consistent with the modal title padding
+    margin: 0 1rem;
+  }
+
+  .iframe-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+
+    iframe {
+      height: 100%;
+      width: 100%;
+    }
+  }
+}
+
+
+/******** Popup modal for Saving Queries ********/
+.create-saved-query .modal-content {
+  .modal-header {
+    // we don't want it to be flex, since we're doing flex ourselves
+    display: block;
+  }
+
+  .top-panel-container {
+    padding-right: 5px;
+
+    .top-flex-panel .top-left-panel.close-panel+.top-right-panel {
+      padding-left: 5px;
+    }
+  }
+
+  .bottom-panel-container {
+    .side-panel-resizable.close-panel~.main-container {
+      padding-left: 5px;
+    }
+
+    .main-container:not(.dynamic-padding) {
+      padding-right: 5px;
+    }
+
+    .main-container {
+      .main-body {
+        padding-top: unset;
+        padding-bottom: 20px;
+
+        .entity-key-column .entity-key {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
+
+        .recordedit-form .entity-value {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
+      }
+    }
+  }
+}
+
+/*************** z-index for modal backdrops ***************/
+div.modal-backdrop {
+  // override the default bootstrap value
+  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
+
+  &.modal-error-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
+  }
+
+  &.export-progress-backdrop {
+    z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
+  }
+
+  &.modal-login-instruction-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
+  }
+
+  // allows modal on modal (only two levels)
+  ~ .modal-backdrop {
+    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
+  }
+}
+
+/*************** z-index for modals ***************/
+div.modal {
+  // override the default bootstrap value
+  z-index: map-get(variables.$z-index-map, 'modal');
+
+  &.modal-error {
+    z-index: map-get(variables.$z-index-map, 'modal-error');
+  }
+
+  &.export-progress {
+    z-index: map-get(variables.$z-index-map, 'export-progress');
+  }
+
+  &.modal-login-instruction {
+    z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
+  }
+
+  // make sure errors show up properly on top of search-popup
+  &.search-popup {
+    ~ .modal-error-backdrop,
+    ~ .modal-login-instruction-backdrop {
+      z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
+    }
+
+    ~ .modal-error,
+    ~ .modal-login-instruction {
+      z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
+    }
+  }
+
+  // allows modal on modal (only two levels)
+  ~ .modal {
+    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
   }
 }

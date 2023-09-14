@@ -6,7 +6,10 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { appModes, PrefillObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { 
+  appModes, PrefillObject, RecordeditColumnModel, 
+  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions 
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -31,7 +34,7 @@ import {
   columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -44,6 +47,8 @@ type ResultsetProps = {
 export const RecordeditContext = createContext<{
   /* which mode of recordedit we are in */
   appMode: string,
+  config: RecordeditConfig,
+  modalOptions?: RecordeditModalOptions,
   /* the main entity reference */
   reference: any,
   /* the tuples correspondeing to the displayed form */
@@ -109,6 +114,9 @@ export const RecordeditContext = createContext<{
 type RecordeditProviderProps = {
   appMode: string;
   children: JSX.Element;
+  config: RecordeditConfig;
+  modalOptions?: RecordeditModalOptions;
+  prefillRowData?: any[];
   queryParams: any;
   reference: any;
   logInfo: {
@@ -122,9 +130,12 @@ type RecordeditProviderProps = {
 export default function RecordeditProvider({
   appMode,
   children,
+  config,
   logInfo,
+  modalOptions,
+  prefillRowData,
   queryParams,
-  reference
+  reference,
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -366,7 +377,7 @@ export default function RecordeditProvider({
     const submissionRows: any[] = [];
     // f is the number in forms array that is
     forms.forEach((f: number) => {
-      submissionRows.push(populateSubmissionRow(reference, f, data));
+      submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
     });
 
     /**
@@ -383,8 +394,8 @@ export default function RecordeditProvider({
 
         // make sure submissionRows has all the data
         for (const key in oldData) {
-            if (key in newData) continue;
-            newData[key] = oldData[key];
+          if (key in newData) continue;
+          newData[key] = oldData[key];
         }
       }
     }
@@ -436,10 +447,14 @@ export default function RecordeditProvider({
 
           // redirect to record app
           if (forms.length === 1) {
-            // Created a single entity or Updated one
-            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+            if (config.displayMode === RecordeditDisplayMode.POPUP) {
+              modalOptions?.onSubmitSuccess();
+            } else {
+              // Created a single entity or Updated one
+              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-            windowRef.location = page.reference.contextualize.detailed.appLink;
+              windowRef.location = page.reference.contextualize.detailed.appLink;
+            }
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
@@ -539,7 +554,8 @@ export default function RecordeditProvider({
 
   // NOTE: most likely not needed
   const onSubmitInvalid = (errors: Object, e?: any) => {
-
+    $log.debug('errors in the form:');
+    $log.debug(errors);
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
   }
@@ -554,17 +570,25 @@ export default function RecordeditProvider({
       setUploadProgressModalProps({
         rows: submissionRowsCopy,
         onSuccess: onSuccess,
-        onCancel: () => {
-        // onCancel: (exception: any) => {
+        onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
 
-          // if (typeof exception !== "string") {
-          //   // happens with an error with code 0 (Timeout Error)
-          //   const message = exception.message || MESSAGE_MAP.errorMessageMissing;
+          // NOTE: This check was being done in angularJS since the modal was closed with a message if the user aborted uploading
+          //   - in ReactJS it's handling the case when the modal is closed and no "exception" is returned (undefined)
+          //   - when we abort the upload, we're calling onCancel without any parameters
+          if (isObjectAndNotNull(exception)) {
+            let message;
+            if (exception.message) {
+              message = exception.message;
+              if (exception.code === 403) message = MESSAGE_MAP.hatracUnauthorizedMessage + ' ' + message;
+            } else {
+              // happens with an error with code 0 (Timeout Error)
+              message = MESSAGE_MAP.errorMessageMissing;
+            }
 
-          //   // if online, we don't know how to handle the error
-          //   if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
-          // }
+            // we don't know how to handle the error in the code, show error to user as alert
+            addAlert(message, ChaiseAlertType.ERROR);
+          }
 
           // close the modal
           setUploadProgressModalProps(undefined);
@@ -590,8 +614,15 @@ export default function RecordeditProvider({
         // Push this to the tuple array for the row
         // NOTE: each file object has an hatracObj property which is an hatrac object
         try {
-          const column = reference.columns.find((c: any) => { return c.name === k; });
-          if (column.isAsset) {
+          let column = reference.columns.find((c: any) => { return c.name === k; });
+          if (!column) {
+            // the file might be related to one of the columns in the input-iframe column mapping
+            reference.columns.forEach((col: any) => {
+              if (!col.isInputIframe) return;
+              column = col.inputIframeProps.columns.find((c: any) => c.name === k);
+            })
+          }
+          if (column && column.isAsset) {
             hasAssetColumn = true;
 
             if (row[k].url === '' && !column.nullok) {
@@ -654,7 +685,7 @@ export default function RecordeditProvider({
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams);
+      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
@@ -923,14 +954,16 @@ export default function RecordeditProvider({
     return {
       // main entity:
       appMode,
+      canUpdateValues,
+      columnModels,
+      columnPermissionErrors,
+      config,
+      foreignKeyData,
+      initialized,
+      modalOptions,
       reference,
       tuples,
-      foreignKeyData,
-      columnModels,
-      initialized,
       waitingForForeignKeyData,
-      canUpdateValues,
-      columnPermissionErrors,
 
       // form
       forms,

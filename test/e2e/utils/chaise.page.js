@@ -222,14 +222,31 @@ var recordEditPage = function() {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.select-all-close-' + columnDisplayName));
     }
-
-    /* dropdown boolean selectors */
+    /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
 
+    // foreign key dropdown selectors
+    this.getFkeyDropdowns = () => {
+        return element.all(by.css('.fk-dropdown'));
+    }
+
+    this.getDropdownSelectableOptions = () => {
+        return element(by.css('.dropdown-menu.show')).all(by.css('.dropdown-select-value'));
+    }
+
+    this.getDropdownLoadMoreRow = () => {
+        return element(by.css('.dropdown-menu .load-more-row'));
+    }
+
+    this.getDropdownSearch = () => {
+        return element(by.css('.dropdown-menu .search-row .chaise-input-control input'));
+    }
+
+    // boolean dropdown selectors
     this.getDropdownText = (el) => {
         return el.element(by.css('.chaise-input-control'));
     };
@@ -294,7 +311,7 @@ var recordEditPage = function() {
     };
 
     this.getModalCloseBtn = function() {
-        return element(by.css(".modal-close"));x
+        return element(by.css(".modal-close"));
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
@@ -314,6 +331,66 @@ var recordEditPage = function() {
     this.getForeignKeyInputs = function() {
         return element.all(by.css(".popup-select-value"));
     };
+
+    this.getInputSwitchContainer = (name, index) => {
+      index = index || 1;
+      const inputName = index + '-' + name;
+      return element(by.className('input-switch-container-' + inputName))
+    }
+
+    this.getIframeInputDisplay = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.chaise-input-control'));
+    };
+
+    this.getIframeInputButton = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.chaise-input-group-append button'));
+    };
+
+    this.getIframeInputClear = (container, name, index) => {
+      if (!container) {
+        container = this.getInputSwitchContainer(name, index);
+      }
+      return container.element(by.css('.input-switch-clear'));
+    };
+
+    this.getIframeInputPopupSpinner = () => {
+      return element(by.className('iframe-field-modal-spinner'));
+    };
+
+    this.getIframeInputPopupIframe = () => {
+      return element(by.css('.iframe-field-popup iframe'));
+    };
+
+    this.getIframeInputPopupSubmitBtn = () => {
+      return element(by.id('iframe-submit-btn'));
+    };
+
+    this.getIframeInputPopupAlertBtn = () => {
+      return element(by.id('iframe-alert-btn'));
+    };
+
+    this.getIframeInputPopupInputs = () => {
+      return {
+        creator: element(by.id('creator')),
+        file_content: element(by.id('file-content')),
+        notes: element(by.id('notes'))
+      }
+    }
+
+    this.getIframeInputCancelPopup = () => {
+      const modal = element(by.css('.confirm-iframe-close-modal'));
+      return {
+        element: modal,
+        body: modal.element(by.css('.modal-body')),
+        cancelButton: modal.element(by.css('.cancel-button'))
+      };
+    }
 
     this.submitForm = function() {
         const defer = Q.defer();
@@ -396,16 +473,24 @@ var recordEditPage = function() {
         return browser.executeScript('return document.querySelector(\'.alert-danger\');');
     };
 
-    this.getAlertErrorClose = () => {
-        return element(by.css('.alert-danger button'));
-    }
-
-    this.getAlertErrorLink = function() {
-        return element(by.css('.alert-danger a'));
+    this.getAlertErrorElement = (el) => {
+      const locator = by.css('.alert-danger');
+      return el ? el.element(locator) : element(locator);
     };
 
-    this.getAlertWarning = function() {
-        return element(by.css('.alert-warning'));
+    this.getAlertErrorClose = (el) => {
+      const locator = by.css('.alert-danger button')
+      return el ? el.element(locator) : element(locator);
+    }
+
+    this.getAlertErrorLink = function(el) {
+      const locator = by.css('.alert-danger a');
+      return el ? el.element(locator) : element(locator);
+    };
+
+    this.getAlertWarning = function(el) {
+      const locator = by.css('.alert-warning');
+      return el ? el.element(locator) : element(locator);
     };
 
     this.getRecordSetTable = function() {
@@ -542,6 +627,12 @@ var recordPage = function() {
         // the link is not a child of the table, rather one of the accordion group
         return el.element(by.css(".more-results-link"));
     };
+
+    this.getBulkEditLink = function(displayName, isInline) {
+      var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
+      // the link is not a child of the table, rather one of the accordion group
+      return el.element(by.css(".bulk-edit-link"));
+  };
 
     this.getAddRecordLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
@@ -734,6 +825,10 @@ var recordsetPage = function() {
         return element(by.css(".alert-warning"));
     };
 
+    this.getSuccessAlert = () => element(by.css('.alert-success'));
+
+    this.getAlerts = () => element.all(by.css('.alerts-container .alert'));
+
     /* sort selectors */
     this.getColumnSortButton = function(rawColumnName){
         return element(by.css('.c_' + rawColumnName)).element(by.css('.not-sorted-icon'));
@@ -767,7 +862,7 @@ var recordsetPage = function() {
     this.waitForInverseModalSpinner = function () {
         var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };    
+    };
 
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));
@@ -864,7 +959,21 @@ var recordsetPage = function() {
         return element(by.id("delete-confirmation"));
     };
 
-    /* export and other page action selectors */
+    /* saved query, export, and other page action selectors */
+    this.getSavedQueryDropdown = () => element(by.css('.saved-query-menu')).element(by.tagName('button'));
+
+    this.getSavedQueryOptions = () => element.all(by.css('.saved-query-menu-item'));
+
+    this.getSaveQueryOption = () => element(by.partialLinkText('Save current search criteria'));
+
+    this.saveQuerySubmit = () => element(by.id('modal-submit-record-btn'));
+
+    this.getSavedQueriesOption = () => element(by.partialLinkText('Show saved search criteria'));
+
+    this.getApplySavedQueryButtons = () => element.all(by.css('.apply-saved-query-button'));
+
+    this.getDuplicateSavedQueryModal = () => element(by.css('.duplicate-saved-query-modal'));
+
     this.getExportDropdown = function () {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };

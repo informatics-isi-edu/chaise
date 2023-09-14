@@ -100,7 +100,7 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
       // in this case ok is behaving like a dissmiss
       payload.error instanceof windowRef.ERMrest.UnsupportedFilters
     );
-    if (!payload.isDismissible && !payload.error.showContinueBtn && !payload.error.clickOkToDismiss && !canShowOtherErrors) {
+    if (!payload.isDismissible && !payload.error?.showContinueBtn && !payload.error?.clickOkToDismiss && !canShowOtherErrors) {
       setDontAllowOtherErrors(true);
     }
 
@@ -120,7 +120,7 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
    */
   const logTerminalError = (error: any) => {
     if (!windowRef.ERMrest) return;
-    const ermrestUri = ConfigService.chaiseConfig.ermrestLocation;
+    const ermrestUri = ConfigService.ERMrestLocation;
     windowRef.ERMrest.logError(error, ermrestUri, ConfigService.contextHeaderParams).then(() => {
       $log.log('logged the error');
     }).catch((err: any) => {

@@ -26,9 +26,10 @@ import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { APP_NAMES, RECORDSET_DEAFULT_PAGE_SIZE, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, RECORDSET_DEFAULT_PAGE_SIZE, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { initializeSavingQueries } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 
 const recordsetSettings = {
@@ -68,9 +69,10 @@ const RecordsetApp = (): JSX.Element => {
       // add schema and table name classes to app-container
       addAppContainerClasses(reference, recordsetSettings.appName);
 
-      updateHeadTitle(getDisplaynameInnerText(reference.displayname));
+      // NOTE: should be intialized here since we have access to the queryParams and they are removed when recordset is initialized
+      const savedQueryObj = initializeSavingQueries(response, res.queryParams);
 
-      // TODO saved query?
+      updateHeadTitle(getDisplaynameInnerText(reference.displayname));
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
@@ -88,7 +90,7 @@ const RecordsetApp = (): JSX.Element => {
       // set the global log stack and log stack path
       LogService.config(logStack, logStackPath);
 
-      let initialPageLimit = RECORDSET_DEAFULT_PAGE_SIZE;
+      let initialPageLimit = RECORDSET_DEFAULT_PAGE_SIZE;
       if (reference.location.queryParams.limit) {
         initialPageLimit = parseInt(reference.location.queryParams.limit, 10);
       } else if (reference.display.defaultPageSize) {
@@ -130,6 +132,7 @@ const RecordsetApp = (): JSX.Element => {
         initialPageLimit,
         config: recordsetConfig,
         logInfo,
+        savedQueryConfig: savedQueryObj
       });
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
@@ -152,9 +155,10 @@ const RecordsetApp = (): JSX.Element => {
   return (
     <Recordset
       initialReference={recordsetProps.initialReference}
+      initialPageLimit={recordsetProps.initialPageLimit}
       config={recordsetProps.config}
       logInfo={recordsetProps.logInfo}
-      initialPageLimit={recordsetProps.initialPageLimit}
+      savedQueryConfig={recordsetProps.savedQueryConfig}
     />
   );
 };

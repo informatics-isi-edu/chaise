@@ -26,7 +26,7 @@ var testParams = {
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" },
+            { name: "luxurious", title: "Is Luxurious", type: "boolean", nullok: false },
             { name: "text_array", title: "text_array", type: "array", baseType: "text" },
             { name: "boolean_array", title: "boolean_array", type: "array", baseType: "boolean" },
             { name: "int4_array", title: "int4_array", type: "array", baseType: "integer" },
@@ -104,8 +104,8 @@ var testParams = {
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1.02 MB"],
+           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512 kB"]
        ],
        files : [{
            name: "testfile1MB.txt",
@@ -152,8 +152,8 @@ var testParams = {
           "fileid", "uri", "filename", "bytes"
       ],
       results: [
-          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/b5dad28809685d9764dbd08fa23600bc:", "value": "testfile10MB_new.txt"}, "testfile10MB_new.txt", "10,240,000"],
-          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/b5dad28809685d9764dbd08fa23600bc:", "value": "testfile10MB_new.txt"}, "testfile10MB_new.txt", "10.2 MB"],
+          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512 kB"]
       ],
       files : [{
           name: "testfile10MB_new.txt", // a new file with new md5
@@ -194,8 +194,8 @@ var testParams = {
           "fileid", "uri", "filename", "bytes"
       ],
       results: [
-          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/.txt/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1.02 MB"],
+          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512 kB"]
       ],
       files : [{
           name: "testfile1MB.txt", // using the same file that has been already uploaded

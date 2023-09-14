@@ -1,7 +1,8 @@
 // models
-import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 export type RecordsetProps = {
   initialReference: any,
@@ -12,6 +13,7 @@ export type RecordsetProps = {
     logStackPath: string,
     logAppMode?: string
   },
+  savedQueryConfig?: SavedQuery,
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: (
@@ -154,6 +156,29 @@ export type SelectedRow = {
   // cannotBeRemoved?: boolean;
 }
 
-export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => void;
-export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, dontFetchSecondary?: boolean, cb?: Function) => void;
-export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;
+export type RecordsetProviderAddUpdateCauses = (
+  /**
+   * an array of strings that will be logged with the request
+   */
+  causes: any[],
+  /**
+   * manually change the dirtyResult flag
+   */
+  setDirtyResult?: boolean,
+  /**
+   * send a queue object so both recordset and other flow-control use the same queue.
+   */
+  queue?: FlowControlQueueInfo,
+  /**
+   * force the isLoading state to show the spinner right away
+   */
+  forceIsLoading?: boolean
+) => void;
+
+export type RecordsetProviderUpdateMainEntity = (
+  updatePageCB: Function, notTerminal?: boolean, dontFetchSecondary?: boolean, cb?: Function
+) => void;
+
+export type RecordsetProviderFetchSecondaryRequests = (
+  updatePageCB: Function, hideSpinner?: boolean
+) => void;

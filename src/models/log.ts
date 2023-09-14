@@ -187,6 +187,7 @@ export enum LogStackPaths {
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
+  FOREIGN_KEY_DROPDOWN= 'fk-dropdown',
   FACET_POPUP= 'facet-picker',
   SAVED_QUERY_CREATE_POPUP= 'saved-query-entity',
   SAVED_QUERY_SELECT_POPUP= 'saved-query-picker',
@@ -225,6 +226,8 @@ export enum LogReloadCauses {
   CLEAR_ALL= 'clear-all', // clear all button
   CLEAR_CFACET= 'clear-cfacet',
   CLEAR_CUSTOM_FILTER= 'clear-custom-filter',
+  DROPDOWN_SEARCH_BOX= 'dropdown-search-box',
+  DROPDOWN_LOAD_MORE= 'dropdown-load-more',
   ENTITY_BATCH_UNLINK= 'entity-batch-unlink', // row(s) in the table has been unlinked
   ENTITY_CREATE= 'entity-create', // new rows has been created in the table
   ENTITY_DELETE= 'entity-delete', // a row in the table has been deleted

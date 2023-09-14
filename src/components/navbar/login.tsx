@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ProfileModal from '@isrd-isi-edu/chaise/src/components/modals/profile-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -39,7 +40,6 @@ const ChaiseLogin = (): JSX.Element => {
   const [replaceDropdown, setReplaceDropdown]     = useState(false);
   const [showProfile, setShowProfile]             = useState(false);
   const [userTooltip, setUserTooltip]             = useState('');
-  const [enableUserTooltip, setEnableUserTooltip] = useState(false);
   const [showUserTooltip, setShowUserTooltip]     = useState(false);
 
   const dropdownWrapper = useRef<any>(null);
@@ -56,8 +56,7 @@ const ChaiseLogin = (): JSX.Element => {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
         // - display_name should always be defined
-        setEnableUserTooltip(true);
-        // dropdown isn't open on page load so show
+        // dropdown isn't open on page load so allow the tooltip to be shown when OverlayTrigger is triggered
         setShowUserTooltip(true);
         setUserTooltip(session.client.full_name + '\n' + session.client.display_name);
       }
@@ -185,7 +184,7 @@ const ChaiseLogin = (): JSX.Element => {
   const renderDropdownToggle = () => {
     const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
 
-    if (enableUserTooltip && showUserTooltip) {
+    if (showUserTooltip) {
       return (<ChaiseTooltip
         placement='bottom-end'
         tooltip={userTooltip}
@@ -211,34 +210,45 @@ const ChaiseLogin = (): JSX.Element => {
       switch (oneOption.type) {
         case 'header':
           return (
-            <Nav.Item
+            <DisplayValue
               className='chaise-dropdown-header'
-              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
+              value={{isHTML: true, value: renderName(oneOption)}}
+              as={Nav.Item}
             />
           );
         case 'url':
           return (
-            <Nav.Link
-              href={oneOption.url}
-              target={oneOption.newTab ? '_blank' : '_self'}
-              onClick={(event) => handleOnLinkClick(event, oneOption)}
-              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
+            <DisplayValue
+              className='chaise-dropdown-header'
+              value={{isHTML: true, value: renderName(oneOption)}}
+              as={Nav.Link}
+              props={{
+                href: oneOption.url,
+                target: oneOption.newTab ? '_blank' : '_self',
+                onClick: (event: any) => handleOnLinkClick(event, oneOption)
+              }}
             />
           );
         case 'my_profile':
           return (
-            <Nav.Link
-              id='profile-link'
-              onClick={handleOpenProfileClick}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile' }}
+            <DisplayValue
+              as={Nav.Link}
+              value={{isHTML: true, value: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile'}}
+              props={{
+                onClick: handleOpenProfileClick,
+                id: 'profile-link'
+              }}
             />
           )
         case 'logout':
           return (
-            <Nav.Link
-              id='logout-link'
-              onClick={() => logout(LogActions.LOGOUT_NAVBAR)}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out' }}
+            <DisplayValue
+              as={Nav.Link}
+              value={{isHTML: true, value: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out'}}
+              props={{
+                onClick: () => logout(LogActions.LOGOUT_NAVBAR),
+                id: 'logout-link'
+              }}
             />
           )
         default:

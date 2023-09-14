@@ -10,6 +10,7 @@ import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
+import SavedQueryDropdown from '@isrd-isi-edu/chaise/src/components/recordset/saved-query-dropdown';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
@@ -22,7 +23,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
@@ -31,7 +32,9 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // services
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -57,7 +60,8 @@ const Recordset = ({
   parentStickyArea,
   onFacetPanelOpenChanged,
   parentReference,
-  parentTuple
+  parentTuple,
+  savedQueryConfig
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -73,6 +77,7 @@ const Recordset = ({
         onFavoritesChanged={onFavoritesChanged}
         parentReference={parentReference}
         parentTuple={parentTuple}
+        savedQueryConfig={savedQueryConfig}
       >
         <RecordsetInner
           initialReference={initialReference}
@@ -127,7 +132,10 @@ const RecordsetInner = ({
     selectedRows,
     setSelectedRows,
     update,
-    forceShowSpinner
+    forceShowSpinner,
+    savedQueryConfig,
+    savedQueryReference,
+    setSavedQueryReference
   } = useRecordset();
 
   /**
@@ -143,8 +151,16 @@ const RecordsetInner = ({
 
   /**
    * We have to validate the facets first, and then we can show them.
+   * This will just start the process of registering the facets and we have
+   * to wait for facetsRegistered and then we can send the requests.
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
+  /**
+   * whether all the facet callbacks are registered and ready to use.
+   */
+  const [facetsRegistered, setFacetsRegistered] = useState(false);
+
+  const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
@@ -204,8 +220,10 @@ const RecordsetInner = ({
       return;
     }
 
-    // NOTE this will affect the reference uri so it must be
-    //      done before initializing recordset
+    /**
+     * this will affect the reference uri so it must be done before initializing recordset.
+     * it includes potentially adding more facets as well as a different way of validating facets.
+     */
     reference.generateFacetColumns().then((res: any) => {
 
       setFacetColumnsReady(true);
@@ -235,7 +253,63 @@ const RecordsetInner = ({
         };
         dispatchError({ error: res.issues, closeBtnCallback: cb, okBtnCallback: cb })
       } else {
-        // TODO save query should just return a promise
+        // execute the following if:
+        //   - the savedQuery UI is being shown
+        //   - a savedQuery rid is present in the url on page load
+        //   - the updated flag is not true
+        //     - savedQuery.updated is initialized to true unless there is a proper savedQuery mapping and defined savedQuery rid is set
+        if (savedQueryConfig && savedQueryConfig.showUI && savedQueryConfig.rid && !savedQueryUpdated) {
+          // to prevent the following code and request from triggering more than once
+          // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
+          setSavedQueryUpdated(true);
+
+          const rows: any[] = [];
+
+          const row: any = {}
+          row.RID = savedQueryConfig.rid;
+
+          const lastExecutedColumnName = savedQueryConfig.mapping.columnNameMapping?.lastExecutionTime || 'last_execution_time';
+          row[lastExecutedColumnName] = 'now';
+
+          rows.push(row);
+
+          // create this fake table object so getStackNode works
+          const fauxTable = {
+            name: savedQueryConfig.mapping.table,
+            schema: {
+              name: savedQueryConfig.mapping.schema
+            }
+          }
+
+          const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
+          const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, fauxTable);
+
+          const logObj = {
+            action: LogService.getActionString(LogActions.UPDATE, stackPath),
+            stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), {
+              'num_updated': 1,
+              'updated_keys': {
+                'cols': ['RID'],
+                'vals': [[savedQueryConfig.rid]]
+              }
+            })
+          };
+
+          const config: any = {
+            skipHTTP401Handling: true,
+            headers: {}
+          };
+
+          config.headers[windowRef.ERMrest.contextHeaderName] = logObj;
+          // attributegroup/CFDE:saved_query/RID;last_execution_status
+          const updateSavedQueryUrl = windowRef.location.origin + savedQueryConfig.ermrestAGPath + '/RID;' + lastExecutedColumnName;
+          ConfigService.http.put(updateSavedQueryUrl, rows, config).then(() => {
+            // do nothing
+          }).catch((error: any) => {
+            $log.warn('saved query last executed time could not be updated');
+            $log.warn(error);
+          });
+        }
       }
 
     }).catch((exception: any) => {
@@ -251,6 +325,30 @@ const RecordsetInner = ({
       }
     };
   }, [isInitialized]);
+
+  useEffect(() => {
+    if (!facetColumnsReady || !savedQueryConfig?.showUI) return;
+
+    const savedQueryReferenceUrl = windowRef.location.origin + savedQueryConfig.ermrestTablePath;
+    // create the reference to the saved query table used for saving queries
+    windowRef.ERMrest.resolve(savedQueryReferenceUrl, ConfigService.contextHeaderParams).then((reference: any) => {
+      setSavedQueryReference(reference);
+    }).catch((error: any) => {
+      // an error here could mean a misconfiguration of the saved query ermrest table path
+      $log.warn(error);
+
+      dispatchError({ error: error });
+    });
+  }, [facetColumnsReady])
+
+  /**
+   * if facet panel is not disabled,
+   * initialize the recordset data only when all facets are ready and registered
+   */
+  useEffect(() => {
+    if (!facetsRegistered) return;
+    initialize();
+  }, [facetsRegistered]);
 
   /**
    * attach the event listener and resize sensors
@@ -316,8 +414,8 @@ const RecordsetInner = ({
       scrollMainContainerToTop();
     }
 
-    // change the url location in fullscreen mode
-    if (config.displayMode.indexOf(RecordsetDisplayMode.FULLSCREEN) === 0) {
+    // change the url location in fullscreen mode (only if there aren't any error)
+    if (errors.length === 0 && config.displayMode.indexOf(RecordsetDisplayMode.FULLSCREEN) === 0) {
       windowRef.history.replaceState({}, '', getRecordsetLink(reference));
     }
 
@@ -407,7 +505,7 @@ const RecordsetInner = ({
           setSelectedRows([]);
         }
       }
-      update(pageStates, null, { cause});
+      update(pageStates, null, { cause });
     }
   }) as EventListener;
 
@@ -497,6 +595,10 @@ const RecordsetInner = ({
       });
     }
   };
+
+  const getRecordsetAppliedFilters = () => {
+    return facetCallbacks.current?.getAppliedFilters();
+  }
 
   //-------------------  render logics:   --------------------//
 
@@ -655,6 +757,9 @@ const RecordsetInner = ({
             facetPanelOpen={facetPanelOpen}
             registerRecordsetCallbacks={registerCallbacksFromFaceting}
             recordsetLogStackPath={logInfo.logStackPath}
+            setReadyToInitialize={() => {
+              setFacetsRegistered(true);
+            }}
           />
         </div>
       }
@@ -729,21 +834,9 @@ const RecordsetInner = ({
                       <span>Permalink</span>
                     </a>
                   </ChaiseTooltip>
-                  {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
-                            <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
-                                <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
-                                    <span className='chaise-btn-icon fa-solid fa-floppy-disk'></span>
-                                    <span>Saved searches</span>
-                                    <span className='caret '></span>
-                                </button>
-                            </div>
-                            <ul className='dropdown-menu dropdown-menu-right' style='min-width:unset; top:20px;'>
-                                <li>
-                                    <a ng-click='::saveQuery()'>Save current search criteria</a>
-                                    <a ng-click='::showSavedQueries()'>Show saved search criteria</a>
-                                </li>
-                            </ul>
-                        </div> */}
+                  {savedQueryConfig?.showUI && savedQueryReference &&
+                    <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
+                  }
 
                 </div>
                 <h1 id='page-title'>
@@ -779,7 +872,7 @@ const RecordsetInner = ({
                 </div>
               </div>
             }
-            {facetColumnsReady && renderSelectedFilterChiclets()}
+            {facetsRegistered && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>

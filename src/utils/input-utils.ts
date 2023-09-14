@@ -164,7 +164,8 @@ export const ERROR_MESSAGES = {
   INVALID_TIME: `Please enter a valid time value in 24-hr ${dataFormats.placeholder.time} format.`,
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
   INVALID_COLOR: 'Please enter a valid color value.',
-  INVALID_JSON: 'Please enter a valid JSON value.'
+  INVALID_JSON: 'Please enter a valid JSON value.',
+  INVALID_BOOLEAN: 'Please enter a valid boolean value.'
 }
 
 export function formatInt(value: string) {
@@ -226,8 +227,8 @@ export function arrayFieldPlaceholder(baseType: string) {
 
 export function humanFileSize(size: number) {
   // Math.log(0) is -Infinity
-  const i = size === 0 ? 0 : Math.floor( Math.log(size) / Math.log(1024) );
-  return Number(( size / Math.pow(1024, i) ).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+  const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return Number((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
 const integer2FieldValidation = (value: string) => {
@@ -325,4 +326,11 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'timestamp': timestampFieldValidation,
   'timestamptz': timestamptzFieldValidation,
   'color': colorFieldValidation,
+};
+/**
+ * Function to check if there is scrollbar for textarea
+ */
+export const hasVerticalScrollbar = (element: any) => {
+  if (!element) return;
+  return element.scrollHeight > element.clientHeight;
 };

@@ -18,7 +18,7 @@ If a property appears in the same configuration twice, the property defined late
  * [General Configuration:](#general-configuration)
    * [ermrestLocation](#ermrestlocation)
    * [defaultCatalog](#defaultcatalog)
-   * [defaultTables](#defaulttables)
+   * [defaultTable](#defaulttable)
  * [Navbar Configuration:](#navbar-configuration)
    * [headTitle](#headtitle)
    * [navbarBanner](#navbarbanner)
@@ -70,6 +70,8 @@ If a property appears in the same configuration twice, the property defined late
 ### General Configuration:
  #### ermrestLocation
  The location of the ERMrest service.
+
+ > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
    - Type: String - URL
    - Default value:	`window.location.protocol + // + window.location.host + /ermrest`
    - Sample syntax:
@@ -78,32 +80,35 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### defaultCatalog
- Use this parameter to specify which catalog Chaise shows by default. When a user navigates to “/chaise/recordset” and omits the rest of the path, the `defaultCatalog` paired with `defaultTables` are used to generate a valid recordset link for the user. It is strongly recommended defining this in your `chaise-config.js` file. This property is used to fetch the catalog annotation information for pages that rely on `chaise-config.js` but don’t have a catalog id in the path. For example, the navbar on static pages uses this property to try to fetch a catalog annotation for configuring the navbar.
+ Use this parameter to specify which catalog Chaise shows by default.
+
+ > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
+
+ It is strongly recommended defining this in your `chaise-config.js` file. This property is used to fetch the catalog annotation information for pages that rely on `chaise-config.js` but don’t have a catalog id in the path. For example, the navbar on static pages uses this property to try to fetch a catalog annotation for configuring the navbar.
+
+ When a user navigates to “/chaise/recordset” and omits the rest of the path, the `defaultCatalog` paired with `defaultTable` are used to generate a valid recordset link for the user.
+
    - Type: String - Catalog ID
    - Sample syntax:
      ```
      defaultCatalog: "1"
      ```
 
- #### defaultTables
- Use this parameter to specify for each catalog `N`, which table Chaise shows by default.
+ #### defaultTable
+ Use this parameter to specify which table Chaise shows by default for the current catalog.
    - Type: Object
    - General syntax:
      ```
-     defaultTables: {
-       N: {
-         schema: <schema name>,
-         table: <table name>
-       }
+     defaultTable: {
+        schema: <schema name>,
+        table: <table name>
      }
      ```
    - Sample syntax:
      ```
-     defaultTables: {
-       1: {
-         schema: "isa",
-         table: "dataset"
-       }, ...
+     defaultTable: {
+        schema: "isa",
+        table: "dataset"
      }
      ```
 
@@ -156,7 +161,7 @@ If a property appears in the same configuration twice, the property defined late
    - Attributes:
      - `markdownPattern`: String - What should be displayed in the banner. If results in an empty string, the banner will be ignored.
      - `dismissible`: Boolean (_optional_) - Whether users should be able to dismiss the banner.
-     - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the banner and using this attribute you can change that.
+     - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the navbar and using this attribute you can change that.
      - `key`: String (_optional_) - Used in the `class` attribute that is attached to the banner using the `chaise-navbar-banner-container-<key>` format. For instance if the `key` is defined as `"feedback"`, you can use `.chaise-navbar-banner-container-feedback` to refer to this banner.
      - `acls`: Object _optional_ - has one attribute array (`show`) used to define lists of globus groups or users that can see the banner.  If missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the banner for everyone.
    - Sample syntax:
@@ -617,7 +622,7 @@ system columns:
      ```
 
  #### configRules
- Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`).
+ Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`). 
    - Type: Array
    - General syntax:
      ```
@@ -650,28 +655,41 @@ system columns:
      ```
 
  #### savedQueryConfig
- Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 3 properties, `catalog`, `schema`, and `table`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
+ Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 4 properties, `catalog`, `schema`, `table`, and `columnNameMapping`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
    - Type: Object
    - Default behavior: the saved query feature will be turned off
    - General syntax:
      ```
      savedQueryConfig: {
        storageTable: {
-         catalog: <catalog id>
-         schema: <schema name>
-         table: <table name>
+         catalog: <catalog id>,
+         schema: <schema name>,
+         table: <table name>,
+         columnNameMapping: {
+           catalog: <string>,
+           schemaName: <string>,
+           tableName: <string>,
+           userId: <string>,
+           queryId: <string>,
+           queryName: <string>,
+           description: <string>,
+           facets: <string>,
+           encodedFacets: <string>,
+           lastExecutionTime: <string>
+         }
        },
        defaultName: {
            facetChoiceLimit: <int>,
            facetTextLimit: <int>,
            totalTextLimit: <int>,
-       }
+       },
      }
      ```
    - `storageTable` attributes
-     - `catalog`: String - catalog id
-     - `schema`: String - schema name
-     - `table`: String - table name
+     - `catalog`: String - catalog id where the saved query table is
+     - `schema`: String - schema name in above catalog where below table is stored
+     - `table`: String - table name for saving queries to
+     - `columnNameMapping`: Object - all attributes are required for saved query functionality to work properly. These are the column names in the model that the data will be stored to. The columns require specific types: `description` as `longtext | markdown`, `facets` as `jsonb`, `encodedFacets` as `longtext`, `lastExecutionTime` as `timestamp[tz]`, and all others are type `text`
    - `defaultName` attributes
      - `facetChoiceLimit`: Set this value to define when to show a compressed facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the compressed syntax.
      - `facetTextLimit`: Set this value to define when to show a compressed facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the compressed syntax.
@@ -682,7 +700,19 @@ system columns:
         storageTable: {
             catalog: "73448",
             schema: "faceting",
-            table: "saved_query"
+            table: "saved_query",
+            columnNameMapping: {
+              queryId: "query_id",
+              catalog: "catalog",
+              schemaName: "schema_name",
+              tableName: "table_name",
+              userId: "user_id",
+              queryName: "name",
+              description: "description",
+              facets: "facets",
+              encodedFacets: "encoded_facets",
+              lastExecutionTime: "last_execution_time"
+            }
         },
         defaultName: {
             facetChoiceLimit: 2,

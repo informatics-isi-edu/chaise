@@ -81,6 +81,12 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
+        /**
+         * in case of libraries (navbar, login), we want to make sure the library
+         * dependencies are blocking the content so the navbar/login shows up
+         * right away instead of being delayed with the rest of the content.
+         */
+        scriptLoading: ac.isLib ? 'blocking' : 'defer',
         chunks: [bundleName],
         template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
@@ -133,7 +139,15 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       alias: {
         ...options.resolveAliases,
         // the line below will make sure we can include chaise files using the package full name
-        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
+        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..'),
+        /**
+         * the line below allows profiling on prod servers.
+         *
+         * while adding it won't have a significant performance difference, we should only
+         * uncomment this during development and should not use it for actual deployment.
+         * https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977
+         */
+        // 'react-dom$': 'react-dom/profiling',
       },
     },
     module: {
@@ -176,7 +190,6 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         // contenthash will help with avoiding to send unchanged files to server
         filename: '[name].[contenthash].css',
         /**
-         * TODO needs more testing
          * given that we're using CSS modules, this shouldn't cause any issues.
          * The input-switch.scss was causing circular dep issue and this has been
          * added to remove the warning.
@@ -189,23 +202,43 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
+        /**
+         * avoid making very small or very large chunks
+         */
+        minSize: 50000,
+        maxSize: 500000,
+        hidePathInfo: true,
         name: 'common',
         cacheGroups: {
+          // this group is useful for deriva-webapps
+          chaiseVendor: {
+            test: /[\\/]node_modules[\\/]\@isrd-isi-edu[\\/]chaise[\\/]/,
+            name: 'vendor-chaise',
+            chunks: 'all',
+            priority: 4
+          },
           reactVendor: {
             test: /[\\/]node_modules[\\/](react|react-dom|react-bootstrap)[\\/]/,
             name: 'vendor-react',
             chunks: 'all',
+            priority: 3
           },
           bootstrapVendor: {
-            test: /[\\/]node_modules[\\/](bootstrap)[\\/]/,
+            test: /[\\/]node_modules[\\/]bootstrap[\\/]/,
             name: 'vendor-bootstrap',
             chunks: 'all',
+            priority: 2
           },
           vendor: {
-            test: /[\\/]node_modules[\\/]((?!(react|react-dom|react-bootstrap|bootstrap)).*)[\\/]/,
+            test: /[\\/]node_modules[\\/]/,
             name: 'vendor-rest',
             chunks: 'all',
-          },
+            /**
+             * we have to make sure priority of this group is less than the rest
+             * so this rule is used when others failed
+             */
+            priority: 1
+          }
         },
       },
     },

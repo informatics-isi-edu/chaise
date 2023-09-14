@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // TODO should be broken up
 export const MESSAGE_MAP = {
   catalogMissing: 'No catalog specified and no Default is set.',
@@ -44,6 +45,7 @@ export const MESSAGE_MAP = {
   maybeNeedLogin: 'You may need to login to see the model or data.',
   maybeUnauthorizedMessage: 'You may not be authorized to view this record (or records).',
   unauthorizedMessage: 'You are not authorized to perform this action.',
+  hatracUnauthorizedMessage: 'You are not authorized to upload or modify the file at this location. Please contact your system administrators.',
   reportErrorToAdmin: ' Please report this problem to your system administrators.',
   noRecordForFilter: 'No matching record found for the given filter or facet.',
   noRecordForRid: 'No matching record found for the given RID.',

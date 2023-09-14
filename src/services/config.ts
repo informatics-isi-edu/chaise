@@ -1,19 +1,24 @@
 import axios from 'axios';
 import Q from 'q';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import 'regenerator-runtime'; // needed for async/await to work
 
-// needed for async/await to work
-import 'regenerator-runtime';
-
+// models
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
-import {
-  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
-} from '@isrd-isi-edu/chaise/src/utils/constants';
-import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+
+//services
 import $log, { LoggerLevels } from '@isrd-isi-edu/chaise/src/services/logger';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+
+// utils
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import {
+  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
+  CHAISE_CONFIG_STATIC_PROPERTIES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
+} from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // this will ensure that we're configuring ermrestjs as soon as this file loads.
 windowRef.ERMrest.configure(axios, Q);
@@ -66,14 +71,14 @@ export class ConfigService {
 
   private static _chaiseConfig: any; // TODO
 
-  private static _user: string;
+  private static _ermrestLocation: string;
 
   /**
    * Should be called in useEffect of the main app, to ensure all the
    * configurations are done before any other components are running.
    * @param settings
    */
-  static async configure(settings: ConfigServiceSettings, session: Session | null ) {
+  static async configure(settings: ConfigServiceSettings, session: Session | null) {
     setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app
@@ -124,15 +129,15 @@ export class ConfigService {
       contextHeaderParams: ConfigService._contextHeaderParams
     };
 
-    // set chaise configuration based on what is in `chaise-config.js` first
-    ConfigService._setChaiseConfig();
-
     // setup ermrest
     const ERMrest = windowRef.ERMrest;
 
     await ERMrest.onload();
-    const cc = ConfigService._setChaiseConfig();
-    const service = cc!.ermrestLocation;
+
+    // this will also populate ConfigService.chaiseConfig based on chaise-config.js
+    // if it already is not populated
+    const service = ConfigService.ERMrestLocation;
+
     const catalogId = getCatalogId();
 
     if (catalogId) {
@@ -153,6 +158,21 @@ export class ConfigService {
 
     ConfigService._setupERMrest(ERMrest, session);
     return setupHead();
+  }
+
+  /**
+   * the location of ermrest. can be used for other deriva services too.
+   */
+  static get ERMrestLocation() {
+    if (isStringAndNotEmpty(ConfigService._ermrestLocation)) {
+      return ConfigService._ermrestLocation;
+    }
+    let loc = ConfigService._setChaiseConfig().ermrestLocation;
+    // if the chaise-config.js removed the default value
+    if (!isStringAndNotEmpty(loc)) {
+      loc = DEFAULT_CHAISE_CONFIG.ermrestLocation;
+    }
+    return ConfigService._ermrestLocation = loc;
   }
 
   /**
@@ -259,14 +279,18 @@ export class ConfigService {
       for (const property in catalogAnnotation) {
         const matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
 
-        // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
-        if (matchedKey.length > 0 && matchedKey[0]) {
+        /**
+         * - if we found a match for the current key in catalogAnnotation,
+         *   use the match from chaiseConfigPropertyNames as the key and set the value.
+         * - ignore the proeprties that are only allowed in chaise-config.js
+         */
+        if (matchedKey.length > 0 && matchedKey[0] && CHAISE_CONFIG_STATIC_PROPERTIES.indexOf(matchedKey[0]) === -1) {
           cc[matchedKey[0]] = catalogAnnotation[property];
         }
       }
 
       // case 3b
-      ConfigService._applyHostConfigRules(catalogAnnotation, cc);
+      ConfigService._applyHostConfigRules(catalogAnnotation, cc, true);
     }
 
     // shareCiteAcls is a nested object, user could define shareCiteAcls:
@@ -275,6 +299,17 @@ export class ConfigService {
     // make sure the object has both defined and apply the default if one or the other is missing
     if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
     if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+
+    /**
+     * make sure the current host is part of internalHosts
+     */
+    const currHost = window.location.host;
+    if (!Array.isArray(cc.internalHosts)) {
+      cc.internalHosts = [currHost];
+    }
+    else if (cc.internalHosts.indexOf(currHost) === -1) {
+      cc.internalHosts.push(currHost);
+    }
 
     ConfigService._chaiseConfig = cc;
 
@@ -288,10 +323,12 @@ export class ConfigService {
   }
 
   /**
-   * @params {Object} config - chaise config with configRules defined
-   * @private
+   *
+   * @param config chaise config with configRules defined
+   * @param resultChaiseConfig the chaiseConfig object that will be manipulated and returned.
+   * @param fromAnnot whether this config is coming from annotation or not (if annotation, static props will be ignored)
    */
-  private static _applyHostConfigRules(config: any, resultChaiseConfig: any) {
+  private static _applyHostConfigRules(config: any, resultChaiseConfig: any, fromAnnot?: boolean) {
     if (Array.isArray(config.configRules)) {
       // loop through each config rule and look for a set that matches the current host
       config.configRules.forEach((ruleset: any) => {
@@ -310,8 +347,12 @@ export class ConfigService {
               for (const property in ruleset.config) {
                 const matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
 
-                // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
-                if (matchedKey.length > 0 && matchedKey[0]) {
+                /**
+                 * - if we found a match for the current key in ruleset.config,
+                 *   use the match from chaiseConfigPropertyNames as the key and set the value
+                 * - if the config is coming from annotation, ignore the properties that are only allowed in chaise-config.js
+                 */
+                if (matchedKey.length > 0 && matchedKey[0] && !(fromAnnot && (CHAISE_CONFIG_STATIC_PROPERTIES.indexOf(matchedKey[0]) !== -1))) {
                   resultChaiseConfig[matchedKey[0]] = ruleset.config[property];
                 }
               }
@@ -390,49 +431,14 @@ export class ConfigService {
     const cc = ConfigService.chaiseConfig;
 
     let mode = null;
-    if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+    if (context.indexOf('compact') !== -1 && cc.systemColumnsDisplayCompact) {
       mode = cc.systemColumnsDisplayCompact;
-    } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+    } else if (context === 'detailed' && cc.systemColumnsDisplayDetailed) {
       mode = cc.systemColumnsDisplayDetailed;
-    } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+    } else if (context.indexOf('entry') !== -1 && cc.systemColumnsDisplayEntry) {
       mode = cc.systemColumnsDisplayEntry;
     }
 
     return mode;
   }
 }
-
-// TODO these functions should be moved somewhere else:
-//
-// function initializeSavingQueries(reference, queryParams) {
-//   var chaiseConfig = getConfigJSON();
-//   // initalize to null as if there is no saved query table
-//   // savedQuery object should be defined with showUI true || false for UI purposes
-//   var savedQuery = {
-//       showUI: reference.display.showSavedQuery
-//   }
-
-//   // NOTE: if this is not set, saved query UI should probably be turned off
-//   if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == 'object') {
-//       var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
-
-//       var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
-
-//       // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
-//       if (validMapping) {
-//           savedQuery.ermrestTablePath = '/ermrest/catalog/' + mapping.catalog + '/entity/' + mapping.schema + ':' + mapping.table
-//           savedQuery.ermrestAGPath = '/ermrest/catalog/' + mapping.catalog + '/attributegroup/' + mapping.schema + ':' + mapping.table
-
-//           // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
-//           if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
-//       } else {
-//           // if mapping is invalid, the config is ill-defined and the feature will be turned off
-//           savedQuery.showUI = false;
-//       }
-//   } else {
-//       // if storage table is not defined, the config is ill-defined and the feature will be turned off
-//       savedQuery.showUI = false;
-//   }
-
-//   return savedQuery;
-// }

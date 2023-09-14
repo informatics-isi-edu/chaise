@@ -4,8 +4,17 @@ import { convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 
 type LeftPaneProps = {
+  /**
+   * The elements displayed on the left side of the page
+   */
   children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
+  /**
+   * default width of the left panel
+   */
   leftWidth: number | undefined,
+  /**
+   * the elements that we should update while updating the width of the left panel.
+   */
   leftPartners?: HTMLElement[]
 };
 
@@ -149,15 +158,27 @@ const SplitView = ({
 
   const onMouseDown = (e: React.MouseEvent) => setLeftState({ ...leftState, xPos: e.clientX, dragging: true });
 
+  /**
+   * This function is called on the parent for any mouse up event,
+   * so the first thing that we're doing is to make sure we're only doing this when user has already started the drag event.
+   */
+  const onMouseUp = () => {
+    if (leftState.dragging) {
+      setLeftState({ ...leftState, dragging: false });
+    }
+  }
+
+  /**
+   * This function is called on the parent for any mouse movement,
+   * so the first thing that we're doing is to make sure we're only doing this when user has already started the drag event.
+   */
   const onMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
-    onMove(e.clientX);
-  };
+    const clientX = e.clientX;
 
-  const onMouseUp = () => setLeftState({ ...leftState, dragging: false });
-
-  const onMove = (clientX: number) => {
     if (leftState.dragging && leftState.leftWidth && leftState.xPos) {
+      // this will avoid selecting text while we're dragging the side spanel
+      e.preventDefault();
+
       const newLeftWidth = leftState.leftWidth + clientX - leftState.xPos;
 
       if (newLeftWidth < convertedMinWidth) {

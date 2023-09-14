@@ -8,16 +8,15 @@ import DateField from '@isrd-isi-edu/chaise/src/components/input-switch/date-fie
 import DateTimeField from '@isrd-isi-edu/chaise/src/components/input-switch/date-time-field';
 import FileField from '@isrd-isi-edu/chaise/src/components/input-switch/file-field';
 import ForeignkeyField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-field';
+import ForeignkeyDropdownField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-dropdown-field';
 import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-field';
 import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
 import NumericField from '@isrd-isi-edu/chaise/src/components/input-switch/numeric-field';
 import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-field';
+import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe-field';
 
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-
-// utils
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 export type InputSwitchProps = {
   /**
@@ -157,6 +156,28 @@ const InputSwitch = ({
 
   return (() => {
     switch (type) {
+      case 'iframe':
+        if (!columnModel) {
+          throw new Error('columnModel is needed for iframe inputs.');
+        }
+        return <IframeField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+          columnModel={columnModel}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={parentReference}
+          parentTuple={parentTuple}
+        />;
       case 'array':
         return <ArrayField
           baseArrayType={columnModel?.column.type.baseType.name}
@@ -171,12 +192,39 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'popup-select':
         if (!columnModel) {
           throw new Error('columnModel is needed for popup-select inputs.');
         }
         return <ForeignkeyField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+          columnModel={columnModel}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={parentReference}
+          parentTuple={parentTuple}
+          parentLogStack={parentLogStack}
+          parentLogStackPath={parentLogStackPath}
+          foreignKeyData={foreignKeyData}
+          waitingForForeignKeyData={waitingForForeignKeyData}
+        />
+      case 'dropdown-select':
+        if (!columnModel) {
+          throw new Error('columnModel is needed for popup-select inputs.');
+        }
+        return <ForeignkeyDropdownField
           type={type}
           name={name}
           classes={classes}
@@ -297,6 +345,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'json':
       case 'jsonb':
@@ -312,6 +361,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          allowEnter={true}
         />;
       case 'color':
         return <ColorField

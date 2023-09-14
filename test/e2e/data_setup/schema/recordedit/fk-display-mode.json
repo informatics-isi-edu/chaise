@@ -1,0 +1,272 @@
+{
+  "schema_name": "fk-display-mode",
+  "tables": {
+      "fkey-dropdown": {
+          "comment": "Table to represent foreign key inputs displayed as a dropdown",
+          "kind": "table",
+          "keys": [
+              {
+                  "comment": null,
+                  "annotations": {},
+                  "unique_columns": [
+                      "id"
+                  ]
+              }
+          ],
+          "foreign_keys": [
+              {
+                  "comment": "Foreign key that has display pattern on the foreign key.",
+                  "names": [["fk-display-mode", "fk_w_fk_annotation"]],
+                  "foreign_key_columns": [
+                      {
+                          "table_name": "fkey-dropdown",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "fk1"
+                      }
+                  ],
+                  "annotations": {
+                    "tag:isrd.isi.edu,2016:foreign-key": {
+                      "display": {
+                          "entry": {
+                              "selector_ux_mode": "simple-search-dropdown"
+                          }
+                      }
+                  }
+                  },
+                  "referenced_columns": [
+                      {
+                          "table_name": "fk-table-1",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "id"
+                      }
+                  ]
+              },
+              {
+                  "comment": "Foreign key that has display pattern on the outbound related table.",
+                  "names": [["fk-display-mode", "fk_w_table_annotation"]],
+                  "foreign_key_columns": [
+                      {
+                          "table_name": "fkey-dropdown",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "fk2"
+                      }
+                  ],
+                  "annotations": {},
+                  "referenced_columns": [
+                      {
+                          "table_name": "fk-table-2",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "id"
+                      }
+                  ]
+              },
+              {
+                  "comment": "Foreign key that has ux mode set in source definition of visible columns.",
+                  "names": [["fk-display-mode", "fk_visible_columns"]],
+                  "foreign_key_columns": [
+                      {
+                          "table_name": "fkey-dropdown",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "fk3"
+                      }
+                  ],
+                  "annotations": {},
+                  "referenced_columns": [
+                      {
+                          "table_name": "fk-table-3",
+                          "schema_name": "fk-display-mode",
+                          "column_name": "id"
+                      }
+                  ]
+              }
+          ],
+          "table_name": "fkey-dropdown",
+          "schema_name": "fk-display-mode",
+          "column_definitions": [
+              {
+                  "name": "id",
+                  "default": null,
+                  "nullok": false,
+                  "type": {
+                      "typename": "serial4"
+                  },
+                  "annotations": {
+                      "comment": [
+                          "hidden"
+                      ],
+                      "tag:isrd.isi.edu,2016:generated": null,
+                      "tag:isrd.isi.edu,2016:immutable": null
+                  }
+              }, {
+                  "comment": "Foreign key column with fkey annotation",
+                  "name": "fk1",
+                  "nullok": true,
+                  "type": {
+                      "typename": "int4"
+                  }
+              }, {
+                  "comment": "Foreign key column with table annotation",
+                  "name": "fk2",
+                  "nullok": true,
+                  "type": {
+                      "typename": "int4"
+                  }
+              }, {
+                  "comment": "Foreign key column with visible columns annotation",
+                  "name": "fk3",
+                  "nullok": true,
+                  "type": {
+                      "typename": "int4"
+                  }
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:visible-columns": {
+              "entry": [
+                "id",
+                {
+                    "source": [{"outbound": ["fk-display-mode", "fk_w_fk_annotation"]}, "id"], 
+                    "markdown_name": "fk1 dropdown"
+                },
+                {
+                    "source": [{"outbound": ["fk-display-mode", "fk_w_table_annotation"]}, "id"], 
+                    "markdown_name": "fk2 dropdown"
+                },
+                {
+                    "source": [{"outbound": ["fk-display-mode", "fk_visible_columns"]}, "id"], 
+                    "markdown_name": "fk3 dropdown", 
+                    "display": {
+                        "selector_ux_mode": "simple-search-dropdown"
+                    }
+                }
+              ]
+            }
+          }
+      },
+      "fk-table-1": {
+          "kind": "table",
+          "keys": [
+              {
+                  "comment": null,
+                  "annotations": {},
+                  "unique_columns": [
+                      "id"
+                  ]
+              }
+          ],
+          "foreign_keys": [],
+          "table_name": "fk-table-1",
+          "schema_name": "fk-display-mode",
+          "column_definitions": [
+              {
+                  "name": "id",
+                  "default": null,
+                  "nullok": false,
+                  "type": {
+                      "typename": "serial4"
+                  }
+              }, {
+                  "name": "text",
+                  "nullok": true,
+                  "type": {
+                      "typename": "text"
+                  }
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:table-display": {
+                "row_name": {
+                    "row_markdown_pattern": "{{{text}}}"
+                }
+            }
+          }
+      },
+      "fk-table-2": {
+          "kind": "table",
+          "keys": [
+              {
+                  "comment": null,
+                  "annotations": {},
+                  "unique_columns": [
+                      "id"
+                  ]
+              }
+          ],
+          "foreign_keys": [],
+          "table_name": "fk-table-2",
+          "schema_name": "fk-display-mode",
+          "column_definitions": [
+              {
+                  "name": "id",
+                  "default": null,
+                  "nullok": false,
+                  "type": {
+                      "typename": "serial4"
+                  }
+              }, {
+                  "name": "text",
+                  "nullok": true,
+                  "type": {
+                      "typename": "text"
+                  }
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:table-display": {
+                "entry": {
+                    "selector_ux_mode": "simple-search-dropdown"
+                },
+                "row_name": {
+                    "row_markdown_pattern": "{{{text}}}"
+                }
+            }
+        }
+      },
+      "fk-table-3": {
+          "kind": "table",
+          "keys": [
+              {
+                  "comment": null,
+                  "annotations": {},
+                  "unique_columns": [
+                      "id"
+                  ]
+              }
+          ],
+          "foreign_keys": [],
+          "table_name": "fk-table-3",
+          "schema_name": "fk-display-mode",
+          "column_definitions": [
+              {
+                  "name": "id",
+                  "default": null,
+                  "nullok": false,
+                  "type": {
+                      "typename": "serial4"
+                  }
+              }, {
+                  "name": "text",
+                  "nullok": true,
+                  "type": {
+                      "typename": "text"
+                  }
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:table-display": {
+                "row_name": {
+                    "row_markdown_pattern": "{{{text}}}"
+                }
+            }
+          }
+      }
+  },
+  "table_names": [
+      "fkey-dropdown",
+      "fk-table-1",
+      "fk-table-2",
+      "fk-table-3"
+  ],
+  "comment": null,
+  "annotations": {}
+}

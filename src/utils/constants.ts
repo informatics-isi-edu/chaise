@@ -21,7 +21,7 @@ export const APP_CONTEXT_MAPPING = {
 export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'ermrestLocation', 'showAllAttributes', 'headTitle', 'customCSS', 'navbarBrand', 'navbarBrandText',
   'navbarBrandImage', 'logoutURL', 'maxRecordsetRowHeight', 'dataBrowser', 'defaultAnnotationColor',
-  'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTables',
+  'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTable',
   'signUpURL', 'navbarBanner', 'navbarMenu', 'sidebarPosition', 'attributesSidebarHeading', 'userGroups',
   'allowErrorDismissal', 'footerMarkdown', 'showFaceting', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
@@ -29,6 +29,13 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
   'debug', 'templating', 'hideRecordeditLeaveAlert'
+];
+
+/**
+ * The properties that are only allowed in chaise-config.js file
+ */
+export const CHAISE_CONFIG_STATIC_PROPERTIES = [
+  'ermrestLocation', 'defaultCatalog'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -199,7 +206,7 @@ export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
 export const RECORDEDIT_MAX_ROWS = 200;
 export const FACET_PANEL_DEFAULT_PAGE_SIZE = 10;
-export const RECORDSET_DEAFULT_PAGE_SIZE = 25;
+export const RECORDSET_DEFAULT_PAGE_SIZE = 25;
 export const RELATED_TABLE_DEFAULT_PAGE_SIZE = 25;
 
 // TODO if chaise is not built how we expect, this value will be undefiend.

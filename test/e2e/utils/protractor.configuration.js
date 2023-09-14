@@ -3,6 +3,7 @@ exports.getConfig = function(options) {
     sauceUser: process.env.SAUCE_USERNAME,
     sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
+    // specify which chrome driver to use
     capabilities: {
       commandTimeout: 300,
       // idleTimeout: 90,

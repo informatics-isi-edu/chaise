@@ -8,7 +8,7 @@ import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
@@ -22,7 +22,7 @@ import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils'
 const FormContainer = (): JSX.Element => {
 
   const {
-    onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -64,10 +64,18 @@ const FormContainer = (): JSX.Element => {
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        // onSubmit={
+        //   (e: any) => {
+        //     e.preventDefault();
+        //     // make sure to pass event along too or react-hook-form will silently fail
+        //     // NOTE: event is still triggering even with prevent default
+        //     handleSubmit(onSubmitValid, onSubmitInvalid)(e);
+        //   }
+        // }
         ref={formContainer}
       >
         {/* form header */}
-        <div className='form-header-row'>
+        {config.displayMode !== RecordeditDisplayMode.POPUP && <div className='form-header-row'>
           {forms.map((formNumber: number, formIndex: number) => (
             <div key={`form-header-${formNumber}`} className='form-header entity-value'>
               <span>{formIndex + 1}</span>
@@ -85,7 +93,7 @@ const FormContainer = (): JSX.Element => {
               </div>
             </div>
           ))}
-        </div>
+        </div>}
         {/* inputs for each column */}
         {columnModels.map(({ }, idx) => (
           <FormRow key={`form-row-${idx}`} columnModelIndex={idx} />

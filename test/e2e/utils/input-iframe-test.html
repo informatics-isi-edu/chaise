@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Input iframe test</title>
+  <script>
+    const FIELD_NAMES = {
+      FILE: 'file_iframe_input',
+      CREATOR: 'creator_iframe_input',
+      NOTES: 'notes_iframe_input'
+    }
+
+    // ------------------------------- iframe specific functions --------------------------------- //
+
+    /**
+     * if a value is already selected, we should fetch the file and
+     * get the json from it.
+     *
+     */
+    const fetchExistingData = (existingValue) => {
+      const fileURL = existingValue[FIELD_NAMES.FILE];
+      const creator = existingValue[FIELD_NAMES.CREATOR];
+      const notes = existingValue[FIELD_NAMES.NOTES];
+
+      fetch(fileURL).then(response => {
+        if (response.ok) {
+          return response.text();
+        } else {
+          console.log(response.body);
+          dispatchMessage('couldn\'t fetch the existing file');
+        }
+      }).then(data => {
+        document.getElementById("creator").value = creator;
+        document.getElementById("notes").value = notes;
+        document.getElementById("file-content").value = data;
+      }).finally(() => {
+        dataReady();
+      }).catch(err => {
+        showAlert('error', 'couldn\'t fetch the existing file');
+        console.error(err);
+      })
+    }
+
+    const testAlert = () => {
+      showAlert('error', 'This alert should be displayed on the popup.');
+    };
+
+    const submitData = () => {
+      const creator = document.getElementById("creator").value;
+      const notes = document.getElementById("notes").value;
+      const fileContent = document.getElementById("file-content").value;
+
+      if (creator == "" || fileContent == "") {
+        showAlert('error', 'inputs are empty.');
+        return;
+      }
+
+      // turn the data into a file blob
+      const blob = new Blob([fileContent], { type: 'application/json' });
+      const file = new File([blob], 'input_iframe.json', { type: 'application/json' });
+
+      const submittedData = {}
+      submittedData[FIELD_NAMES.FILE] = file;
+      submittedData[FIELD_NAMES.CREATOR] = creator;
+      submittedData[FIELD_NAMES.NOTES] = notes ? notes : '';
+
+      dispatchMessage('submit-data', submittedData);
+    }
+
+    const configureIframe = (existingValue) => {
+      if (existingValue && typeof existingValue[FIELD_NAMES.FILE] === 'string' && existingValue[FIELD_NAMES.FILE] !== '') {
+        fetchExistingData(existingValue);
+      } else {
+        dataReady();
+      }
+    }
+
+    const dataReady = () => {
+      dispatchMessage('iframe-data-ready');
+      document.getElementById('spinner').remove();
+    }
+
+    // ------------------------------- general functions --------------------------------- //
+
+    const showAlert = (type, message) => {
+      dispatchMessage('show-alert', { type: type, message: message });
+    }
+
+    /**
+     *
+     * @param {string} type the message type
+     * @param {object?} data the data (could be undefined)
+     * @returns
+     */
+    const dispatchMessage = (type, content) => {
+      if (!window.parent) {
+        if (content.message) {
+          console.log(content.message);
+        }
+        return;
+      }
+      window.parent.postMessage({ type: type, content: content }, window.location.origin);
+    }
+
+    /**
+     * recieve messages
+     */
+    window.addEventListener('message', (event) => {
+      if (event.origin !== window.location.origin) return;
+      const type = event.data.type;
+      const content = event.data.content;
+
+      switch (type) {
+        case 'initialize-iframe':
+          configureIframe(content);
+          break;
+      }
+
+    });
+
+    // let the parent know that the iframe is loaded and ready to recieve messages
+    window.addEventListener('DOMContentLoaded', () => {
+      dispatchMessage('iframe-ready');
+    });
+
+  </script>
+</head>
+
+<body>
+
+  <h1>Sample iframe used by <code>input_iframe</code></h1>
+
+  <div id="spinner">loading data...</div>
+
+  <div>
+    <label for="creator">Creator:</label><br/><input type="text" id="creator" name="creator">
+    <br/>
+    <label for="file-content">File content:</label><br/><textarea id="file-content" name="file-content" rows="4" cols="50"></textarea>
+    <br/>
+    <label for="notes">Notes:</label><br/><input type="text" id="notes" name="notes">
+    <br/>
+    <button id='iframe-submit-btn' type="button" onclick="submitData()">submit</button>
+  </div>
+
+  <br/>
+  <button id='iframe-alert-btn' onclick="testAlert()">
+    Test alert
+  </button>
+
+ </body>
+
+</html>

@@ -35,7 +35,7 @@ var testParams = {
           value: 'saved_filename.png'
         },
         'asset1_filename': 'saved_filename.png',
-        'asset1_bytes': '512,000'
+        'asset1_bytes': '512 kB'
       }
 
     }

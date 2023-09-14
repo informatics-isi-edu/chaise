@@ -90,7 +90,8 @@ const TableRow = ({
     hideContent: true,
     linkText: 'more',
     maxHeightStyle: defaultMaxHeightStyle
-  })
+  });
+  const [applySavedQuery, setApplySavedQuery] = useState<string | boolean>(false);
 
   /**
    * state variable to open and close delete confirmation modal window
@@ -203,28 +204,26 @@ const TableRow = ({
 
   // apply saved query link
   // show the apply saved query button for (compact/select savedQuery popup)
-  let applySavedQuery: string | false;
   if (isSavedQueryPopup) {
     // NOTE: assume relative to reference the user is viewing
     // encoded_facets column might not be a part of the rowValues so get from tuple.data (prevents formatting being applied as well)
     // some queries might be saved withoug any facets selected meaning this shouldn't break
 
-    // TODO: applySavedQuery most probably must be a state variable
-    // const facetString = tuple.data.encoded_facets ? `/*::facets::${tuple.data.encoded_facets}` : '';
-    // const ermrestPath = parentReference.unfilteredReference.uri + facetString;
-    // ConfigService.ERMrest.resolve(ermrestPath).then((savedQueryRef: any) => {
-    //   const savedQueryLink = savedQueryRef.contextualize.compact.appLink;
-    //   const qCharacter = savedQueryLink.indexOf('?') !== -1 ? '&' : '?';
-    //   // TODO: change from HTML link to refresh page to:
-    //   //    "updateFacets on main entity and add to browser history stack"
-    //   // after update, put last_execution_time as "now"
-    //   applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID + "&paction=" + logService.pactions.APPLY_SAVED_QUERY;
-    // }).catch(function (error: any) {
-    //   $log.warn(error);
-    //   // fail silently and degrade the UX (hide the apply button)
-    //   // show the disabled apply button
-    //   applySavedQuery = false;
-    // });
+    const facetString = tuple.data.encoded_facets ? `/*::facets::${tuple.data.encoded_facets}` : '';
+    const ermrestPath = parentPageReference.unfilteredReference.uri + facetString;
+    ConfigService.ERMrest.resolve(ermrestPath).then((savedQueryRef: any) => {
+      const savedQueryLink = savedQueryRef.contextualize.compact.appLink;
+      const qCharacter = savedQueryLink.indexOf('?') !== -1 ? '&' : '?';
+      // TODO: change from HTML link to refresh page to:
+      //    "updateFacets on main entity and add to browser history stack"
+      // after update, put last_execution_time as "now"
+      setApplySavedQuery(savedQueryLink + qCharacter + 'savedQueryRid=' + tuple.data.RID + '&paction=' + LogParentActions.APPLY_SAVED_QUERY);
+    }).catch((error: any) => {
+      $log.warn(error);
+      // fail silently and degrade the UX (hide the apply button)
+      // show the disabled apply button
+      setApplySavedQuery(false);
+    });
   }
 
   // view link
@@ -418,17 +417,14 @@ const TableRow = ({
 
         return (
           <div className='chaise-btn-group'>
-            {(applySavedQuery || applySavedQuery === false) &&
+            {isSavedQueryPopup && (applySavedQuery || applySavedQuery === false) &&
               <ChaiseTooltip
                 tooltip={applySavedQuery ? 'Apply search criteria' : 'Search criteria cannot be applied'}
                 placement='bottom'
               >
-                <ApplySavedQueryTag
-                  className={applySavedQueryBtnClass}
-                  {...(applySavedQuery && { href: applySavedQuery })}
-                >
-                  <span className='chaise-btn-icon fa-solid fa-check'></span>
-                </ApplySavedQueryTag>
+                <a className={applySavedQueryBtnClass} href={applySavedQuery as string}>
+                  <span className='chaise-btn-icon fa-regular fa-square-check'></span>
+                </a>
               </ChaiseTooltip>
             }
             {viewLink &&
@@ -505,7 +501,8 @@ const TableRow = ({
           >
             <DisplayValue addClass={true} value={value} />
           </div>
-          {(!disableMaxRowHeightFeature && overflow[colIndex + 1]) && <div style={{ 'display': 'inline' }}>
+          {/* the overflow index should be shifted only if we're showing the action buttons */}
+          {(!disableMaxRowHeightFeature && overflow[colIndex + (showActionButtons ? 1 : 0)]) && <div style={{ 'display': 'inline' }}>
             {' ... '}
             <span
               className='text-primary readmore'

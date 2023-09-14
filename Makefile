@@ -37,9 +37,6 @@ PROJ=chaise
 # Node module dependencies
 MODULES=node_modules
 
-# Node bin scripts
-BIN=$(MODULES)/.bin
-
 # ============================================================= #
 #						E2E TESTING RULES						#
 # ============================================================= #
@@ -58,6 +55,8 @@ E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
+E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.conf.js
+E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.conf.js
 # Record tests
 E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
@@ -70,6 +69,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
+E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.js
 
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
@@ -91,9 +91,9 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
-RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2ErecordsetSavedQuery)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)
@@ -115,7 +115,7 @@ ALL_MANUAL_TESTS=$(Manualrecordset)
 define make_test
 	rc=0; \
 	for file in $(1); do \
-		$(BIN)/protractor $$file || rc=1; \
+		npx protractor $$file || rc=1; \
 	done; \
 	exit $$rc;
 endef
@@ -296,8 +296,8 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@$(BIN)/sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@$(BIN)/sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 JS_CONFIG=chaise-config.js
 $(JS_CONFIG): chaise-config-sample.js
@@ -435,7 +435,7 @@ endef
 # given a list of js files, create a minified version
 define bundle_js_files
 	$(info - creating $(1))
-	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
+	@npx uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
 define add_array_to_file
@@ -470,10 +470,13 @@ npm-install-modules:
 	@npm clean-install
 
 # install packages needed for production and development (including testing)
-# --production=false makes sure to ignore NODE_ENV and install everything
+# also run patch-package to patch all the issues in dependencies (currently only webdriver-manager.)
+# if we decided to patch other prod dependencies, we should move `patch-package` command to the `postinstall` of package.json.
+# --include=dev makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
-	@npm clean-install --production=false
+	@npm clean-install --include=dev
+	@npx patch-package
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version

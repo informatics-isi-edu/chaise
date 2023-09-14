@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_markdown-container.scss';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import MarkdownPreviewModal from '@isrd-isi-edu/chaise/src/components/modals/markdown-preview-modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -13,7 +14,7 @@ import { useFormContext, useController } from 'react-hook-form';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -165,18 +166,27 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
             {!showPreview ?
               <div className={`chaise-input-control has-feedback content-box ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
                 <textarea
-                  placeholder={props.placeholder} rows={5} className={`${props.inputClasses} input-switch`} {...field}
+                  placeholder={props.placeholder}
+                  rows={5}
+                  className={`${props.inputClasses} input-switch ${
+                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+                  }`}
+                  {...field}
                   disabled={props.disableInput}
-                  onChange={onChange} ref={textAreaRef} data-provide='markdown'
+                  onChange={onChange}
+                  ref={textAreaRef}
+                  data-provide='markdown'
                 />
                 <ClearInputBtn
-                  btnClassName={`${props.clearClasses} input-switch-clear`}
+                  btnClassName={`${props.clearClasses} input-switch-clear ${
+                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+                  }`}
                   clickCallback={clearInput}
                   show={showClear && !props.disableInput}
                 />
               </div>
               : <div className='md-preview chaise-input-control' data-provide='markdown' style={{ 'height': textAreaRef.current?.offsetHeight }}>
-                <div className='disabled-textarea markdown-container' dangerouslySetInnerHTML={{ __html: previewContent }}></div>
+                <div className='disabled-textarea'><DisplayValue addClass value={{value: previewContent, isHTML: true}} /></div>
               </div>
             }
           </div>
