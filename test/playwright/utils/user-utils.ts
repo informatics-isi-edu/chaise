@@ -22,12 +22,3 @@ export const performLogin = (cookie: any) => {
   });
 
 }
-
-/**
- * return the session object for the main user (catalog owner).
- */
-export const getMainUserSessionObject = () => {
-  const session =  JSON.parse(process.env.WEBAUTHN_SESSION!);
-  expect.soft(session.client).toBeTruthy();
-  return session;
-}

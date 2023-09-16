@@ -186,7 +186,7 @@ testallfeaturesconfirmation-playwright: playwright-ALL_FEATURES_CONFIRMATION_PAR
 testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
 
 .PHONY: testdeleteprohibited-playwright
-testdeleteprohibited-playwright: playwright-DELETE_PROHIBITED_PARALLEL_TESTS
+testdeleteprohibited-playwright: playwright-DELETE_PROHIBITED_PARALLEL_TESTS_PLAYWRIGHT
 
 
 #Rule to run the default chaise configuration tests in parallel

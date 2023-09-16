@@ -174,6 +174,10 @@ TODO
 
 TODO
 
+```
+page.pause();
+```
+
 ## Writing test
 
 Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.

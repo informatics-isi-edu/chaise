@@ -1,10 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import { resolve } from 'path';
-import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
 import os from 'os';
 
-
-export const STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
+import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
+import { STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 const getConfig = (options: TestOptions) => {
 
@@ -18,6 +17,8 @@ const getConfig = (options: TestOptions) => {
   } else if (!process.env.ERMREST_URL || !process.env.CHAISE_BASE_URL) {
     throw new Error('ERMREST_URL and CHAISE_BASE_URL env variables are required.');
   }
+
+  const reporterFolder = resolve(__dirname, `./../../../playwright-report/${options.testName}`);
 
   const config = defineConfig({
 
@@ -40,14 +41,12 @@ const getConfig = (options: TestOptions) => {
 
     // Reporter to use
     reporter: process.env.CI ? [
-      ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
+      ['html', { open: 'never', outputFolder: reporterFolder }],
       ['github']
     ] : [
-      ['html', { open: 'never', outputFolder: resolve(__dirname, `./../../../playwright-report/${options.testName}`) }],
+      ['html', { open: 'never', outputFolder: reporterFolder }],
       ['list', { printSteps: true }]
     ],
-
-    // outputDir: resolve(__dirname, './../../../playwright-output'),
 
     globalSetup: require.resolve('./playwright.setup'),
     globalTeardown: require.resolve('./playwright.teardown'),

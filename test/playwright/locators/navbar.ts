@@ -5,30 +5,30 @@ export default class NavbarLocators {
     return page.locator('#mainnav');
   }
 
-  static getBanner(key: string, page: Page) : Locator {
+  static getBanner(key: string, page: Page): Locator {
     let selector = '.chaise-navbar-banner-container';
     if (key) {
-        selector += '.chaise-navbar-banner-container-' + key;
+      selector += '.chaise-navbar-banner-container-' + key;
     }
     return page.locator(selector);
   }
 
-  static getBannerContent(key: string, page: Page) : Locator {
+  static getBannerContent(key: string, page: Page): Locator {
     const banner = NavbarLocators.getBanner(key, page);
     return banner.locator('.markdown-container');
   }
 
-  static getBannerDismissBtn (key: string, page: Page) {
-    const banner =  NavbarLocators.getBanner(key, page);
+  static getBannerDismissBtn(key: string, page: Page) {
+    const banner = NavbarLocators.getBanner(key, page);
     return banner.locator('.close');
-}
-
-  static getTitle (page: any) {
-    return page.locator('#brand-text');
   }
 
-  static getBrandImage(page: any) {
+  static getBrandImage(page: Page) {
     return page.locator('#brand-image')
+  }
+
+  static getBrandText(page: Page) {
+    return page.locator('#brand-text')
   }
 
   static getUsername(page: Page) {

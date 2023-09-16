@@ -152,12 +152,12 @@ jobs:
         run: |
           cd chaise
           make testallfeatures-playwright
-      # - name: Run delete prohibited test spec
-      #   id: test-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited-playwright
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited-playwright
       - name: Check on all features confirmation test spec
         if: always() && steps.test-all-features-confirmation.outcome != 'success'
         run: exit 1
@@ -167,9 +167,9 @@ jobs:
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
-      # - name: Check on delete prohibited test spec
-      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
       - uses: actions/upload-artifact@v3
         if: always()
         with:

@@ -5,7 +5,7 @@ import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
 import { removeCatalog, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.constant';
+import { ENTITIES_PATH, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 /**
  *
@@ -279,7 +279,7 @@ function registerCallbacks(testConfiguration: any) {
   // If an uncaught exception is caught then simply call cleanup
   // to remove the created schema/catalog/tables if catalogId is not null
   process.on('uncaughtException', function (err) {
-    const catalogId = process.env.CATALOG_ID;
+    const catalogId = getCatalogID();
     console.log(`in error : catalogId ${catalogId}`);
     console.dir(err);
     const cb = () => {

@@ -16,7 +16,17 @@ In this document we try to summarize what are the best practices while writing t
 	- (More applicable in ERMrestJS)Although it's preferable to not modify other schemas and create your very own schema that covers some specific test cases.
 - If you have multiple expect in your `it`, make sure they have their own error message.
 
--
+- Use `expect.soft` if this is one of steps and we should be able to run the next steps even if it fails.
+
+- Common wait-fors:
+
+```
+profileModal.waitFor({ state: 'visible' });
+
+profileModal.waitFor({ state: 'attached' });
+
+profileModal.waitFor({ state: 'detached' });
+```
 
 
 ## Test FAQ

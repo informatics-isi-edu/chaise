@@ -1,11 +1,14 @@
 import { test, expect } from '@playwright/test';
+
+// locators
 import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar';
 import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
-import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/playwright/utils/user-utils';
+
+// utils
+import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 test.describe('Navbar', () => {
-  const CATALOG_ID = process.env.CATALOG_ID;
-  const PAGE_URL = `/recordset/#${CATALOG_ID!}/product-navbar:accommodation`;
+  const PAGE_URL = `/recordset/#${getCatalogID()}/product-navbar:accommodation`;
 
   test.beforeEach(async ({ page, baseURL }) => {
     await page.goto(`${baseURL}${PAGE_URL}`);
@@ -20,7 +23,7 @@ test.describe('Navbar', () => {
 
     await test.step('should display the right title from chaiseConfig.', async () => {
       // default heuristics
-      await expect.soft(NavbarLocators.getTitle(page)).toHaveText('Chaise');
+      await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('Chaise');
     });
 
     await test.step('should include the headTitle from chaiseConfig in the tab title (head > title)', async () => {
@@ -94,7 +97,7 @@ test.describe('Navbar', () => {
 
         const newPage = await PageLocators.clickNewTabLink(searchOption, context);
         await newPage.waitForURL('**/chaise/search/#1/isa:dataset**');
-        newPage.close();
+        await newPage.close();
       });
     }
 
@@ -112,9 +115,8 @@ test.describe('Navbar', () => {
 
       // check that clicking opens the link
       const newPage = await PageLocators.clickNewTabLink(datasetOption, context);
-      page.pause();
-      await newPage.waitForURL(`**/chaise/recordset/#${CATALOG_ID}/isa:dataset**`);
-      newPage.close();
+      await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID()}/isa:dataset**`);
+      await newPage.close();
     });
   });
 
@@ -124,8 +126,9 @@ test.describe('Navbar', () => {
     const loginMenu = NavbarLocators.getLoginMenu(page);
 
     await test.step('should show the "Display Name" of the logged in user in the top right based on chaise-config property', async () => {
-      const name = getMainUserSessionObject().client.display_name;
-      await expect.soft(NavbarLocators.getUsername(page)).toHaveText(name);
+      const session = getMainUserSessionObject();
+      expect.soft(session.client).toBeTruthy();
+      await expect.soft(username).toHaveText(session.client.display_name);
     });
 
     await test.step('clicking on username should open the login dropdown menu.', async () => {

@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
 import { removeCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.constant';
+import { ENTITIES_PATH, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 async function globalTeardown(config: FullConfig) {
   /**
@@ -31,7 +31,7 @@ async function globalTeardown(config: FullConfig) {
   //   promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
   // }
 
-  const catalogId = process.env.CATALOG_ID;
+  const catalogId = getCatalogID();
   if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) {
     await removeCatalog(catalogId);
   }

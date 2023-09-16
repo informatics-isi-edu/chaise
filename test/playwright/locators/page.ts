@@ -1,4 +1,4 @@
-import { Locator, Page, BrowserContext } from '@playwright/test';
+import { Locator, BrowserContext } from '@playwright/test';
 
 export default class PageLocators {
 
