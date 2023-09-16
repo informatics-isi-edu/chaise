@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
-import { STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.configuration';
+import { test } from '@playwright/test';
+
+import { STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 /**
  * go to login page and set the page context.
