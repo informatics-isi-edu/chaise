@@ -47,6 +47,7 @@
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",
+    "ts-node": "^10.9.1",
     "webpack-bundle-analyzer": "^4.5.0"
   },
   "dependencies": {
