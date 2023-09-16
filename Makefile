@@ -106,9 +106,12 @@ PARALLEL_TESTS=$(FullFeaturesConfirmationParallel) $(DefaultConfigParallel) $(Fu
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
 
-FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features/playwright.config.ts
-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features-confirmation/playwright.config.ts
-DELETE_PROHIBITED_PARALLEL_TESTS=test/playwright/specs/delete-prohibited/playwright.config.ts
+DEFAULT_CONFIG_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/default-config/playwright.config.ts
+DELETE_PROHIBITED_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/delete-prohibited/playwright.config.ts
+ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features-confirmation/playwright.config.ts
+ALL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT=test/playwright/specs/all-features/playwright.config.ts
+PARALLEL_TESTS_PLAYWRIGHT=$(DEFAULT_CONFIG_PARALLEL_TESTS_PLAYWRIGHT) $(DELETE_PROHIBITED_PARALLEL_TESTS_PLAYWRIGHT) $(ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT) $(ALL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT)
+
 
 ALL_MANUAL_TESTS=$(Manualrecordset)
 
@@ -169,14 +172,14 @@ testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures-playwright
-testfullfeatures-playwright: playwright-FULL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT
+testallfeatures-playwright: playwright-ALL_FEATURES_PARALLEL_TESTS_PLAYWRIGHT
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeaturesconfirmation
 testfullfeaturesconfirmation: test-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS
 
-.PHONY: testfullfeaturesconfirmation-playwright
-testfullfeaturesconfirmation-playwright: playwright-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT
+.PHONY: testallfeaturesconfirmation-playwright
+testallfeaturesconfirmation-playwright: playwright-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PLAYWRIGHT
 
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited

@@ -8,8 +8,6 @@ export const STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
 
 const getConfig = (options: TestOptions) => {
 
-  console.log(`OS hostname in getConfig is ${os.hostname()}`);
-
   // the only way to pass object to setup/teardown is through env variables
   process.env.PLAYWRIGHT_TEST_OPTIONS = JSON.stringify(options);
 

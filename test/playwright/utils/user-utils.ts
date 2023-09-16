@@ -1,6 +1,10 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.configuration';
 
+/**
+ * go to login page and set the page context.
+ * it will store the browser context in `STORAGE_STATE` location.
+ */
 export const performLogin = (cookie: any) => {
   test('Login user', async ({ page }) => {
 
@@ -17,4 +21,13 @@ export const performLogin = (cookie: any) => {
     await page.context().storageState({ path: STORAGE_STATE });
   });
 
+}
+
+/**
+ * return the session object for the main user (catalog owner).
+ */
+export const getMainUserSessionObject = () => {
+  const session =  JSON.parse(process.env.WEBAUTHN_SESSION!);
+  expect.soft(session.client).toBeTruthy();
+  return session;
 }

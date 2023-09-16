@@ -80,21 +80,26 @@ export async function setupCatalog(schemaConfigurations: any) {
 }
 
 export async function removeCatalog(catalogId: string) {
-  return new Promise((resolve, reject) => {
-    ermrestUtils.tear({
-      // NOTE this setup is needed by ermrest-data-utils
-      // we should refactor ermrest-data-utils to not need this
-      setup: {
-        catalog: {}
-      },
-      url: process.env.ERMREST_URL,
-      catalogId: catalogId,
-      authCookie: process.env.AUTH_COOKIE
-    }).then(() => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('remove catalog called!');
+      await ermrestUtils.tear({
+        // NOTE this setup is needed by ermrest-data-utils
+        // we should refactor ermrest-data-utils to not need this
+        setup: {
+          catalog: {}
+        },
+        url: process.env.ERMREST_URL,
+        catalogId: catalogId,
+        authCookie: process.env.AUTH_COOKIE
+      });
+
+      console.log(`catalog ${catalogId} removed.`);
       resolve(true);
-    }).catch((err: any) => {
-      reject(err)
-    });
+    } catch (exp) {
+      console.log(`Unable to remove catalog ${catalogId}`);
+      reject(exp);
+    }
   });
 }
 

@@ -47,7 +47,7 @@ export default async function globalSetup(config: FullConfig) {
   // see if the user/pass or cookie are valid
   try {
     const result = await checkUserSessions();
-    process.env.WEBAUTHN_SESSION = JSON.stringify(result.session.session);
+    process.env.WEBAUTHN_SESSION = JSON.stringify(result.session);
 
     if (!process.env.AUTH_COOKIE) {
       process.env.AUTH_COOKIE = result.authCookie;
@@ -100,7 +100,7 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
       }
 
       getSessionByCookie(authCookie, 'AUTH_COOKIE').then((res) => {
-        result = { session: res, authCookie };
+        result = res;
         return getSessionByCookie(restrictedAuthCookie, 'RESTRICTED_AUTH_COOKIE');
       }).then(() => {
         resolve(result);
@@ -167,7 +167,7 @@ async function createCatalog(testConfiguration: any, isManual?: boolean) {
 /**
  * send a request with the given cookie to authn and retreive the session object.
  */
-async function getSessionByCookie(cookie: string, authCookieEnvName: string): Promise<{ session: any }> {
+async function getSessionByCookie(cookie: string, authCookieEnvName: string): Promise<{ session: any, authCookie: string }> {
   return new Promise(async (resolve, reject) => {
 
     try {
@@ -179,14 +179,14 @@ async function getSessionByCookie(cookie: string, authCookieEnvName: string): Pr
         }
       });
 
-      console.log(`retrieved session for ${authCookieEnvName}`);
+      console.log(`retrieved session info for ${authCookieEnvName}`);
 
       // populate the _ID env variable that is used during testing
       process.env[authCookieEnvName + '_ID'] = response.data.client.id;
 
-      resolve({ session: response.data });
+      resolve({ session: response.data, authCookie: cookie });
     } catch (exp) {
-      console.log(`Unable to retreive userinfo for ${authCookieEnvName}`);
+      console.log(`Unable to retreive session info for ${authCookieEnvName}`);
       reject(exp);
     }
 
@@ -224,13 +224,13 @@ async function getSessionByUserPass(username: string, password: string, authCook
         // user id
         process.env[authCookieEnvName + '_ID'] = response.data.client.id;
 
-        console.log(`retrieved session for ${username}`);
+        console.log(`retrieved session info for ${username}`);
         resolve({ session: response.data, authCookie });
       } else {
         throw new Error('cookie not found in the response.');
       }
     } catch (exp) {
-      console.log(`Unable to retreive userinfo for ${authCookieEnvName}`);
+      console.log(`Unable to retreive session info for ${authCookieEnvName}`);
       reject(exp);
     }
 
@@ -301,6 +301,7 @@ function registerCallbacks(testConfiguration: any) {
 
     const catalogId = process.env.CATALOG_ID;
     if (!catalogId) {
+      console.log('no catalog id was set.');
       return;
     }
 
@@ -311,6 +312,7 @@ function registerCallbacks(testConfiguration: any) {
         process.exit(1);
       });
     } else {
+      console.log('catalog already deleted.')
       process.exit(1);
     }
   });

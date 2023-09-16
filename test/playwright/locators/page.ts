@@ -1,12 +1,15 @@
-import { Browser } from '@playwright/test';
+import { Locator, Page, BrowserContext } from '@playwright/test';
 
 export default class PageLocators {
-  static async navigate(url: string, browser: Browser) {
-    let page = await browser.newPage();
-    await page.goto(url);
-  }
 
-  static async recordsetPageReady(page: any) {
-    // page.
+  /**
+   * click on the given link and return the opened page instance.
+   */
+  static async clickNewTabLink(locator: Locator, context: BrowserContext) {
+    const pagePromise = context.waitForEvent('page');
+    await locator.click();
+    const newPage = await pagePromise;
+    await newPage.waitForLoadState();
+    return newPage;
   }
 }
