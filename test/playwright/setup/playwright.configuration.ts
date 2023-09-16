@@ -73,6 +73,16 @@ const getConfig = (options: TestOptions) => {
           storageState: STORAGE_STATE
         },
       },
+      {
+        name: 'firefox',
+        dependencies: ['pretest'],
+        use: { ...devices['Desktop Firefox'], storageState: STORAGE_STATE },
+      },
+      {
+        name: 'webkit',
+        dependencies: ['pretest'],
+        use: { ...devices['Desktop Safari'], storageState: STORAGE_STATE },
+      },
     ],
   });
 
