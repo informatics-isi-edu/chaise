@@ -47,7 +47,7 @@ export default async function globalSetup(config: FullConfig) {
   // see if the user/pass or cookie are valid
   try {
     const result = await checkUserSessions();
-    process.env.WEBAUTHN_SESSION = JSON.stringify(result.session);
+    process.env.WEBAUTHN_SESSION = JSON.stringify(result.session.session);
 
     if (!process.env.AUTH_COOKIE) {
       process.env.AUTH_COOKIE = result.authCookie;
