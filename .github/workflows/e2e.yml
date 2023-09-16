@@ -116,6 +116,7 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
+          which chrome
           chrome --version
           make deps-test
           make dist-wo-deps
@@ -151,6 +152,8 @@ jobs:
         continue-on-error: true
         run: |
           cd chaise
+          which chrome
+          chrome --version
           make testfullfeaturesconfirmation
       - name: Run default config test spec
         id: test-default-config
