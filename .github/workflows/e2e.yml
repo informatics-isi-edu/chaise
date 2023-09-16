@@ -65,6 +65,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Install latest chrome
+        uses: browser-actions/setup-chrome@v1
       - name: Install webauthn
         run: |
           sudo useradd -m -r webauthn
@@ -112,6 +114,7 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
+          chrome --version
           make deps-test
           make dist-wo-deps
           sudo make deploy
@@ -126,9 +129,6 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Install latest chrome
-        uses: browser-actions/setup-chrome@v1
-        run: chrome --version
       - name: Setup and connect to saucelabs
         if: env.HEADLESS == 'false'
         timeout-minutes: 2
