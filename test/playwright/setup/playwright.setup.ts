@@ -7,6 +7,15 @@ import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwrig
 import { removeCatalog, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
 import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.constant';
 
+/**
+ *
+ * 1. grab the test configuration based on the given configFileName.
+ * 2. check the user cookies
+ * 3. create the catalog
+ * 4. copy the chaise config
+ * 5. add sigint and other callbacks.
+ *
+ */
 export default async function globalSetup(config: FullConfig) {
   /**
    * the only way to pass config to here is using the env variables
@@ -37,15 +46,18 @@ export default async function globalSetup(config: FullConfig) {
 
   // see if the user/pass or cookie are valid
   try {
-    await checkUserSessions();
+    const result = await checkUserSessions();
+    process.env.WEBAUTHN_SESSION = JSON.stringify(result.session);
+
+    if (!process.env.AUTH_COOKIE) {
+      process.env.AUTH_COOKIE = result.authCookie;
+    }
   } catch (exp) {
     throw exp;
   }
 
-  // set the cookie for the configuration that will be passed to ermrest-data-utils
-  if (process.env.AUTH_COOKIE) {
-    testConfiguration.authCookie = process.env.AUTH_COOKIE;
-  }
+  // make sure ermrest-data-utils has the cookie
+  testConfiguration.authCookie = process.env.AUTH_COOKIE;
 
   // create the catalog
   try {
@@ -68,33 +80,31 @@ export default async function globalSetup(config: FullConfig) {
  *  - make sure AUTH_COOKIE and RESTRICTED_AUTH_COOKIE are valid
  *  - populate the AUTH_COOKIE_ID and RESTRICTED_AUTH_COOKIE_ID
  */
-async function checkUserSessions() {
+async function checkUserSessions(): Promise<{ session: any, authCookie: string }> {
   return new Promise((resolve, reject) => {
+    let result: { session: any, authCookie: string };
     if (process.env.CI) {
-      console.log('getting test1 user info');
-      getSessionByUserPass('test1', 'dummypassword', 'AUTH_COOKIE').then(() => {
-        console.log('getting test2 user info');
+      getSessionByUserPass('test1', 'dummypassword', 'AUTH_COOKIE').then((res) => {
+        result = res;
         return getSessionByUserPass('test2', 'dummypassword', 'RESTRICTED_AUTH_COOKIE');
       }).then(() => {
-        resolve(true);
+        resolve(result);
       }).catch((err) => reject(err));
     } else {
       const authCookie = process.env.AUTH_COOKIE;
       const restrictedAuthCookie = process.env.RESTRICTED_AUTH_COOKIE;
 
       if (!authCookie || !restrictedAuthCookie) {
-        reject('AUTH_COOKIE and RESTRICTED_AUTH_COOKIE env variables are required.');
+        reject(new Error('AUTH_COOKIE and RESTRICTED_AUTH_COOKIE env variables are required.'));
         return;
       }
 
-      console.log('testing AUTH_COOKIE and RESTRICTED_AUTH_COOKIE');
       getSessionByCookie(authCookie, 'AUTH_COOKIE').then((res) => {
+        result = { session: res, authCookie };
         return getSessionByCookie(restrictedAuthCookie, 'RESTRICTED_AUTH_COOKIE');
       }).then(() => {
-        resolve(true);
-      }).catch((err) => {
-        reject(err);
-      });
+        resolve(result);
+      }).catch((err) => reject(err));
     }
   });
 }
@@ -110,7 +120,7 @@ async function createCatalog(testConfiguration: any, isManual?: boolean) {
 
     const schemaConfigurations = testConfiguration.setup.schemaConfigurations;
     if (!Array.isArray(schemaConfigurations) || schemaConfigurations.length === 0) {
-      reject('No schemaConfiguration provided in testConfiguration.setup.');
+      reject(new Error('No schemaConfiguration provided in testConfiguration.setup.'));
       return;
     }
 
@@ -154,8 +164,11 @@ async function createCatalog(testConfiguration: any, isManual?: boolean) {
 
 }
 
-async function getSessionByCookie(cookie: string, authCookieEnvName: string) {
-  new Promise(async (resolve, reject) => {
+/**
+ * send a request with the given cookie to authn and retreive the session object.
+ */
+async function getSessionByCookie(cookie: string, authCookieEnvName: string): Promise<{ session: any }> {
+  return new Promise(async (resolve, reject) => {
 
     try {
       const response = await axios({
@@ -166,16 +179,15 @@ async function getSessionByCookie(cookie: string, authCookieEnvName: string) {
         }
       });
 
-      if (authCookieEnvName === 'AUTH_COOKIE') {
-        // set the session information to be parsed later
-        process.env.WEBAUTHN_SESSION = JSON.stringify(response.data);
-      }
+      console.log(`retrieved session for ${authCookieEnvName}`);
 
+      // populate the _ID env variable that is used during testing
       process.env[authCookieEnvName + '_ID'] = response.data.client.id;
 
-      resolve(response.data);
+      resolve({ session: response.data });
     } catch (exp) {
-      reject(`nable to retreive userinfo for ${authCookieEnvName}`);
+      console.log(`Unable to retreive userinfo for ${authCookieEnvName}`);
+      reject(exp);
     }
 
   });
@@ -191,40 +203,36 @@ async function getSessionByCookie(cookie: string, authCookieEnvName: string) {
  * @param password
  * @param authCookieEnvName
  */
-async function getSessionByUserPass(username: string, password: string, authCookieEnvName: string) {
-  new Promise(async (resolve, reject) => {
+async function getSessionByUserPass(username: string, password: string, authCookieEnvName: string): Promise<{ session: any, authCookie: string }> {
+  return new Promise(async (resolve, reject) => {
 
-    axios({
-      url: process.env.ERMREST_URL!.replace('ermrest', 'authn') + '/session',
-      method: 'POST',
-      data: 'username=' + username + '&password=' + password
-    }).then((response) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const cookies = require('set-cookie-parser').parse(response);
-      cookies.forEach(function (c: any) {
-        // auth cookie env variable
-        if (c.name === 'webauthn') {
-          if (authCookieEnvName === 'AUTH_COOKIE') { // main user
-            process.env.AUTH_COOKIE = c.name + '=' + c.value + ';';
-            // set the session information to be parsed later
-            process.env.WEBAUTHN_SESSION = JSON.stringify(response.data);
-          }
-          // webauthn cookie
-          process.env[authCookieEnvName] = c.name + '=' + c.value + ';';
-        }
+    try {
+      const response = await axios({
+        url: process.env.ERMREST_URL!.replace('ermrest', 'authn') + '/session',
+        method: 'POST',
+        data: 'username=' + username + '&password=' + password
       });
 
-      if (process.env[authCookieEnvName]) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const autnCookieObj = require('set-cookie-parser').parse(response).filter((c: any) => c.name === 'webauthn')[0];
+      if (autnCookieObj) {
+        const authCookie = autnCookieObj.name + '=' + autnCookieObj.value + ';';
+
+        // attach the cookie to env variables
+        process.env[authCookieEnvName] = authCookie;
+
         // user id
         process.env[authCookieEnvName + '_ID'] = response.data.client.id;
-        resolve(true);
+
+        console.log(`retrieved session for ${username}`);
+        resolve({ session: response.data, authCookie });
       } else {
-        reject('Unable to retreive ' + authCookieEnvName);
+        throw new Error('cookie not found in the response.');
       }
-    }).catch((error) => {
-      console.dir('Unable to retreive ' + authCookieEnvName);
-      reject(error);
-    });
+    } catch (exp) {
+      console.log(`Unable to retreive userinfo for ${authCookieEnvName}`);
+      reject(exp);
+    }
 
   });
 }
