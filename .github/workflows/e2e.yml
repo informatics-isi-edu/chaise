@@ -67,6 +67,8 @@ jobs:
           java-version: 1.8
       - name: Install latest chrome
         uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
       - name: Install webauthn
         run: |
           sudo useradd -m -r webauthn
