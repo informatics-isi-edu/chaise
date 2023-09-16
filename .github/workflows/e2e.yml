@@ -126,6 +126,9 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
+      - name: Install latest chrome
+        uses: browser-actions/setup-chrome@v1
+        run: chrome --version
       - name: Setup and connect to saucelabs
         if: env.HEADLESS == 'false'
         timeout-minutes: 2
