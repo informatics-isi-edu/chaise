@@ -40,8 +40,6 @@ jobs:
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
           sudo apt-get -y update
-          sudo apt-get --only-upgrade install google-chrome-stable
-          chrome --version
           sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
           sudo service postgresql stop || true
           sudo service postgresql start 12
@@ -67,6 +65,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Install latest chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
       - name: Install webauthn
         run: |
           sudo useradd -m -r webauthn

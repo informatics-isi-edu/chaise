@@ -1,3 +1,5 @@
+const execSync = require('child_process').execSync;
+
 exports.getConfig = function(options) {
   var config = {
     framework: 'jasmine2',
@@ -76,6 +78,12 @@ exports.getConfig = function(options) {
     if (process.env.HEADLESS == "true") {
       config.capabilities.chromeOptions.args.push('--headless=new');
       config.capabilities.chromeOptions.args.push('--disable-gpu');
+
+      if (process.env.CI) {
+        const chormeBinary = execSync('which chrome').toString().trim();
+        console.log(`chrome binary location is ${chormeBinary}`);
+        config.capabilities.chromeOptions.binary = chormeBinary;
+      }
     }
   }
 
@@ -130,7 +138,6 @@ exports.getConfig = function(options) {
     }
   }
 
-  var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
   var cmd = 'sudo cp ' + chaiseFilePath + " " + ("/var/www/html/chaise/chaise-config.js");
 
@@ -144,7 +151,6 @@ exports.getConfig = function(options) {
 
 
   var code = execSync(cmd);
-  console.log(code);
   if (code == 0) console.log("Copied file " + chaiseFilePath + " successfully to chaise-config.js \n");
   else {
     console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
