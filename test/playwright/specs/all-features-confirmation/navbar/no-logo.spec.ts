@@ -99,25 +99,25 @@ test.describe('Navbar', () => {
         await newPage.waitForURL('**/chaise/search/#1/isa:dataset**');
         await newPage.close();
       });
+
+      await test.step('first level nested link should inherit newTab value from parent and navigate in a new tab', async () => {
+        const recordsetsMenu = menu.locator('.chaise-nav-item').nth(1);
+
+        await expect.soft(recordsetsMenu.locator('.dropdown-toggle'), 'Second top level menu option text missmatch').toHaveText('RecordSets');
+
+        // click the option
+        await recordsetsMenu.click();
+
+        const datasetOption = recordsetsMenu.locator('a').nth(1);
+
+        await expect.soft(datasetOption, 'First 2nd level option for RecordSets missmatch').toHaveText('Dataset');
+
+        // check that clicking opens the link
+        const newPage = await PageLocators.clickNewTabLink(datasetOption, context);
+        await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID()}/isa:dataset**`);
+        await newPage.close();
+      });
     }
-
-    await test.step('first level nested link should inherit newTab value from parent when newTab is undefined and navigate in new tab', async () => {
-      const recordsetsMenu = menu.locator('.chaise-nav-item').nth(1);
-
-      await expect.soft(recordsetsMenu.locator('.dropdown-toggle'), 'Second top level menu option text missmatch').toHaveText('RecordSets');
-
-      // click the option
-      await recordsetsMenu.click();
-
-      const datasetOption = recordsetsMenu.locator('a').nth(1);
-
-      await expect.soft(datasetOption, 'First 2nd level option for RecordSets missmatch').toHaveText('Dataset');
-
-      // check that clicking opens the link
-      const newPage = await PageLocators.clickNewTabLink(datasetOption, context);
-      await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID()}/isa:dataset**`);
-      await newPage.close();
-    });
   });
 
   test('login menu support', async ({ page }) => {
