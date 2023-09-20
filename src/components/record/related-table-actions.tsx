@@ -715,8 +715,12 @@ const RelatedTableActions = ({
         {relatedModel.isPureBinary && relatedModel.canDelete &&  renderButton('Unlink records', false)}
 
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
-
-        {relatedModel.canEdit && renderButton('Bulk Edit', false)}
+        {/* 
+          * if user can edit, also check for create permission
+          *   - if they can't create, allow edit if there are some rows set
+          *   - disable button if can create but no rows
+          */}
+        {relatedModel.canEdit && (relatedModel.canCreate || relatedModel.recordsetState.page?.length > 0) && renderButton('Bulk Edit', false)}
 
         {renderButton('Explore', false)}
       </div>
@@ -754,6 +758,7 @@ const RelatedTableActions = ({
           </ChaiseTooltip>
         );
       case 'Bulk Edit':
+        const disableBulkEdit = relatedModel.recordsetState.page?.length < 1;
         return (
           <ChaiseTooltip
             placement='top'
@@ -764,11 +769,13 @@ const RelatedTableActions = ({
             }
           >
             <a
-            className={`chaise-btn bulk-edit-link ${
-              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-            }`}
+              className={`chaise-btn bulk-edit-link
+                ${tertiary ? ' chaise-btn-tertiary dropdown-button' : ' chaise-btn-secondary'}
+                ${disableBulkEdit ? ' disabled': ''}`
+              }
               href={editLink}
               onClick={onBulkEdit}
+              aria-disabled={disableBulkEdit}
             >
               <span className='chaise-btn-icon fa fa-pencil'></span>
               <span>Bulk Edit</span>

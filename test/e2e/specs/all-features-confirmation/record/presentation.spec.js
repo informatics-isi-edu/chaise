@@ -280,6 +280,18 @@ describe('View existing record,', function() {
                 expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
+
+        it('should have "booking" related table with bulk edit disabled when no rows', () => {
+            const btn = chaisePage.recordPage.getBulkEditLink('booking', true);
+
+            expect(btn.isPresent()).toBeTruthy();
+            expect(btn.getAttribute('class')).toContain('disabled', 'Bulk edit is not disabled');
+        });
+
+        it('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows are present', () => {
+            const btn = chaisePage.recordPage.getBulkEditLink('accommodation_collections', true);
+            expect(btn.isPresent()).not.toBeTruthy();
+        });
     });
 
     describe("For side panel table of contents in Record App", function() {
