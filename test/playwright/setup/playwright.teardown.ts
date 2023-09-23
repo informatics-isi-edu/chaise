@@ -2,8 +2,8 @@ import { FullConfig } from '@playwright/test';
 import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { removeCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { removeAllCatalogs } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
+import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 async function globalTeardown(config: FullConfig) {
   /**
@@ -26,18 +26,20 @@ async function globalTeardown(config: FullConfig) {
     }
   }
 
+  // TODO
   // if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
   //   // cleanup the hatrac namespaces
   //   promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
   // }
 
-  const catalogId = getCatalogID();
-  if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) {
-    await removeCatalog(catalogId);
+  // remove the created catalogs
+  if (testConfiguration.cleanup && testConfiguration.setup) {
+    await removeAllCatalogs();
   }
 
+  // TODO
   // delete the entities file
-  fs.unlinkSync(ENTITIES_PATH);
+  // fs.unlinkSync(ENTITIES_PATH);
 
 }
 

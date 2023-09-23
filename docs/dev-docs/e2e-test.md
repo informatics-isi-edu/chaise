@@ -176,6 +176,8 @@ TODO
 
 ```
 page.pause();
+
+npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
 ```
 
 ## Writing test

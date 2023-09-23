@@ -4,8 +4,8 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { removeCatalog, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
+import { ENTITIES_PATH, PRESET_PROJECT_NAME, setCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 /**
  *
@@ -43,6 +43,12 @@ export default async function globalSetup(config: FullConfig) {
     throw new Error('config file is empty.');
   }
 
+  const projectNames: string[] = [];
+  config.projects.forEach((p) => {
+    if (p.name === PRESET_PROJECT_NAME) return;
+    projectNames.push(p.name);
+  });
+
 
   // see if the user/pass or cookie are valid
   try {
@@ -61,7 +67,7 @@ export default async function globalSetup(config: FullConfig) {
 
   // create the catalog
   try {
-    await createCatalog(testConfiguration, options.manualTestConfig);
+    await createCatalog(testConfiguration, projectNames, options.manualTestConfig);
   } catch (exp) {
     throw exp;
   }
@@ -112,9 +118,9 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
 /**
  * create the catalog and data
  */
-async function createCatalog(testConfiguration: any, isManual?: boolean) {
+async function createCatalog(testConfiguration: any, projectNames: string[], isManual?: boolean) {
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
@@ -136,33 +142,67 @@ async function createCatalog(testConfiguration: any, isManual?: boolean) {
       }
     }
 
-    setupCatalog(schemaConfigurations).then((data: any) => {
-      process.env.CATALOG_ID = data.catalogId;
-      if (data.entities) {
-        const entities = data.entities;
-        fs.writeFile(ENTITIES_PATH, JSON.stringify(entities), 'utf8', function (err) {
-          if (err) {
-            console.log('couldn\'t write entities.');
-            console.log(err);
-            reject(new Error('Unable to import data'));
-          } else {
-            console.log('created entities file for schemas');
-            resolve(true);
-          }
-        });
+    // merge all the schema configurations
+    const catalog: any = {}, schemas: any = {};
 
-      } else {
-        resolve(true);
+    schemaConfigurations.forEach((config: any) => {
+      // copy annotations and ACLs over to the submitted catalog object
+      if (config.catalog && typeof config.catalog === 'object') {
+        if (!('acls' in config.catalog)) {
+          config.catalog['acls'] = { 'select': ['*'] };
+        }
+
+        // if empty object, this loop is skipped
+        for (const prop in config.catalog) {
+          // if property is set already
+          if (catalog[prop]) {
+            console.log(`${prop} is already defined on catalog object, overriding previously set value with new one`);
+          }
+          catalog[prop] = config.catalog[prop];
+        }
       }
 
-    }, function (err) {
-      console.log(err);
-      reject(new Error('Unable to import data'));
+      schemas[config.schema.name] = {
+        path: config.schema.path
+      };
+
+      if (config.entities) {
+        schemas[config.schema.name].entities = config.entities.path;
+      }
     });
+
+    for (const p of projectNames) {
+      try {
+        const res = await setupCatalog({ catalog, schemas });
+        console.log(`catalog with id ${res.catalogId} created for project ${p}`);
+        setCatalogID(p, res.catalogId);
+
+        // TODO capture entities per project
+        // const entities = res.entities;
+        // fs.writeFile(ENTITIES_PATH, JSON.stringify(entities), 'utf8', function (err) {
+        //   if (err) {
+        //     console.log('couldn\'t write entities.');
+        //     console.log(err);
+        //     reject(new Error('Unable to import data'));
+        //   } else {
+        //     console.log('created entities file for schemas');
+        //     resolve(true);
+        //   }
+        // });
+
+      } catch (exp) {
+        console.log(exp);
+        reject(new Error('Unable to import data'));
+        return;
+      }
+    }
+
+    resolve(true);
 
   });
 
 }
+
 
 /**
  * send a request with the given cookie to authn and retreive the session object.
@@ -279,40 +319,38 @@ function registerCallbacks(testConfiguration: any) {
   // If an uncaught exception is caught then simply call cleanup
   // to remove the created schema/catalog/tables if catalogId is not null
   process.on('uncaughtException', function (err) {
-    const catalogId = getCatalogID();
-    console.log(`in error : catalogId ${catalogId}`);
     console.dir(err);
+    console.log('uncaughtException: going to remove all catalogs.');
     const cb = () => {
       console.error((new Date).toUTCString() + ' uncaughtException:', err.message);
       console.error(err.stack);
       process.exit(1)
     };
 
-    if (!catalogDeleted && testConfiguration.cleanup && catalogId != null) {
-      removeCatalog(catalogId).then(cb, cb);
+    if (catalogDeleted) {
+      console.log('catalogs are already deleted');
+      cb();
+      return;
+    }
+
+    if (testConfiguration.cleanup) {
+      catalogDeleted = true;
+      removeAllCatalogs().then(cb, cb);
     } else {
       cb();
     }
 
   });
 
-  process.on('SIGINT', function (code) {
-    console.log('sigint!!!');
-
-    const catalogId = process.env.CATALOG_ID;
-    if (!catalogId) {
-      console.log('no catalog id was set.');
-      return;
-    }
-
+  process.on('SIGINT', function () {
     if (!catalogDeleted) {
       catalogDeleted = true;
-      console.log('About to exit because of SIGINT (ctrl + c)');
-      removeCatalog(catalogId).then(function () {
+      console.log('SIGINT: going to remove all catalogs.');
+      removeAllCatalogs().then(function () {
         process.exit(1);
       });
     } else {
-      console.log('catalog already deleted.')
+      console.log('SIGINT: catalogs are already deleted.');
       process.exit(1);
     }
   });

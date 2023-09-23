@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import os from 'os';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 const getConfig = (options: TestOptions) => {
 
@@ -39,7 +39,7 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    workers: process.env.CI ? 1 : undefined,
+    // workers: process.env.CI ? 1 : undefined,
 
     // Reporter to use
     reporter: process.env.CI ? [
@@ -63,7 +63,7 @@ const getConfig = (options: TestOptions) => {
     // Configure projects for major browsers.
     projects: [
       {
-        name: 'pretest',
+        name: PRESET_PROJECT_NAME,
         testDir: __dirname,
         testMatch: 'playwright.pretest.ts'
       },

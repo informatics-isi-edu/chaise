@@ -8,9 +8,9 @@ import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
 import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 test.describe('Navbar', () => {
-  const PAGE_URL = `/recordset/#${getCatalogID()}/product-navbar:accommodation`;
 
-  test.beforeEach(async ({ page, baseURL }) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
+    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
     await page.goto(`${baseURL}${PAGE_URL}`);
   })
 
@@ -79,7 +79,7 @@ test.describe('Navbar', () => {
     });
   });
 
-  test('menu support', async ({ page, context }) => {
+  test('menu support', async ({ page, context }, testInfo) => {
     const menu = NavbarLocators.getMenu(page);
 
     await test.step('should generate the correct # of list items', async () => {
@@ -114,7 +114,7 @@ test.describe('Navbar', () => {
 
         // check that clicking opens the link
         const newPage = await PageLocators.clickNewTabLink(datasetOption, context);
-        await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID()}/isa:dataset**`);
+        await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`);
         await newPage.close();
       });
     }

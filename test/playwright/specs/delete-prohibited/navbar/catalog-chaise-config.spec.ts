@@ -9,13 +9,13 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/rec
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 test.describe('Navbar', () => {
-  const PAGE_URL = `/recordset/#${getCatalogID()}/catalog-config-navbar:config-table`;
 
-  test('when navbar is visible', async ({ page, baseURL, context }) => {
+  test('when navbar is visible', async ({ page, baseURL, context }, testInfo) => {
     const navbar = NavbarLocators.getContainer(page);
     const loginMenuOption = navbar.locator('.login-menu-options');
 
     await test.step('navbar should be visible on load.', async () => {
+      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
       await page.goto(`${baseURL}${PAGE_URL}`);
       await navbar.waitFor({ state: 'visible' });
     });
@@ -49,7 +49,8 @@ test.describe('Navbar', () => {
     }
   });
 
-  test('should hide the navbar bar if the hideNavbar query parameter is set to true', async ({ page, baseURL }) => {
+  test('should hide the navbar bar if the hideNavbar query parameter is set to true', async ({ page, baseURL }, testInfo) => {
+    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
     await page.goto(`${baseURL}${PAGE_URL}?hideNavbar=true`);
 
     await RecordsetLocators.waitForRecordsetPageReady(page);

@@ -8,9 +8,10 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
 import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 test.describe('Navbar', () => {
-  const PAGE_URL = `/recordset/#${getCatalogID()}/product-navbar:accommodation`;
 
-  test.beforeEach(async ({ page, baseURL }) => {
+
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
+    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
     await page.goto(`${baseURL}${PAGE_URL}`);
   })
 
