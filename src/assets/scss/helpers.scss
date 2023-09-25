@@ -88,10 +88,14 @@
   -moz-user-select: none;
   -ms-user-select: none;
   white-space: nowrap;
-  // ficxing button spacing issue. Fix- center aligning the buttons
-  display: inline-flex !important;
+  /** 
+  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to 
+  * use this property  to override what bootstrap is defining.
+  */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: normal;
 }
 
 @mixin chaise-btn-primary() {

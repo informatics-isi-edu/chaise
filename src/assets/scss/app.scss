@@ -475,9 +475,8 @@ html {
       float: right;
       text-align: right;
 
-      // make sure the buttons show in the same line
+      // removing the display property for the chaise-btn display to act on
       & > * {
-        display: inline-block;
         margin-left: 5px;
       }
 
