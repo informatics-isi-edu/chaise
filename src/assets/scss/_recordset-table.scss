@@ -159,10 +159,22 @@
 
   // Changing the padding and adding line-height for the action button to align with the rest of the columns in the table
   .action-btns {
+    $_space-around-buttons: 3px;
+
     text-align: center;
     font-size: 1.2rem;
-    padding: 3px 0 0 0;
+    padding: $_space-around-buttons 0 0 0;
     line-height: 1.5;
+
+    /**
+     * make sure there's similar space below the buttons in the narrow case (when the content is just one line
+     * I needed to use three different selectors for our three different modes.
+     * the first one is the default mode, the second is single select and third is multi select
+     */
+    .chaise-btn-group, .chaise-btn.select-action-button, .chaise-checkbox {
+      margin-bottom: $_space-around-buttons;
+    }
+
     .chaise-btn {
       padding: 0;
       margin: -3px;

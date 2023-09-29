@@ -43,11 +43,6 @@
               font-size: 1rem;
               padding-top: 7px;
               width: 330px;
-
-              // overriding the title-button class
-              & > * {
-                display: inline-flex;
-              }
             }
           }
 
