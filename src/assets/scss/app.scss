@@ -475,8 +475,8 @@ html {
       float: right;
       text-align: right;
 
-      // removing the display property for the chaise-btn display to act on
       & > * {
+        display: inline-block;
         margin-left: 5px;
       }
 
