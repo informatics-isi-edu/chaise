@@ -475,6 +475,7 @@ html {
       float: right;
       text-align: right;
 
+      // make sure the buttons show in the same line
       & > * {
         display: inline-block;
         margin-left: 5px;
