@@ -2,8 +2,8 @@
 @use 'variables';
 @use 'helpers';
 // From _recordedit-app.scss
-.recordedit-container{
-  .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
+.recordedit-container {
+  .btn-sm[data-handler='bootstrap-markdown-cmdRidLink'] {
     padding: 5px 3px;
   }
   .form-controls {
@@ -76,7 +76,7 @@
       overflow-x: auto;
 
       &.dropdown-open {
-        // max height of a dropdown is `399px` 
+        // max height of a dropdown is `399px`
         //    <search-row.height> + <dropdown-list.padding-top> + <dropdown-list.height> + <dropdown-menu.padding-bottom>
         // if dropdown is last input row, it won't overflow the parent container's height and be truncated
         // special case can occur when there are very few values to set (id + 1 foreign key in create mode)
@@ -118,7 +118,7 @@
           .select-all-input {
             width: 250px;
             margin: 0px 5px;
-            // added so the spinner and backdrop only cover the input. 
+            // added so the spinner and backdrop only cover the input.
             // if we want to cover the whole select all row, move this to .select-all-row
             position: relative;
           }
@@ -149,8 +149,10 @@
       .match-entity-value {
         word-wrap: break-word;
         min-width: 250px;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid
+          map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid
+          map-get(variables.$color-map, 'recordedit-border');
 
         // border-left: none;
         // border-top: none;
