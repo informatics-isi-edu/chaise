@@ -317,11 +317,9 @@ export const VALIDATE_VALUE_BY_TYPE: {
 } = {
   'int': integerFieldValidation,
   'integer2': integer2FieldValidation,
-  'int4': integer4FieldValidation,
   'integer4': integer4FieldValidation,
   'integer8': integer8FieldValidation,
   'float': numericFieldValidation,
-  'float4': numericFieldValidation,
   'number': numericFieldValidation,
   'date': dateFieldValidation,
   'time': timeFieldValidation,

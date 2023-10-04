@@ -1,195 +1,173 @@
 @use 'variables';
-
-
 .chaise-input-control {
-  .input-switch {
-    padding-right: 0;
-    height: auto;
-  }
-
-  // This padding is added to prevent overlap of "x" button with the text area if the text is long
-  .has-scrollbar {
-    padding-right: 2rem !important;
-  }
-
-  // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
-  .has-scrollbar-clear {
-    margin-right: 10px;
-  }
-
-  .input-switch-clear {
-    position: absolute;
-    top: 2px;
-    right: 6px;
-    cursor: pointer;
-  }
+    .input-switch {
+        padding-right: 0;
+        height: auto;
+    }
+    // This padding is added to prevent overlap of "x" button with the text area if the text is long
+    .has-scrollbar {
+        padding-right: 2rem !important;
+    }
+    // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
+    .has-scrollbar-clear {
+        margin-right: 10px;
+    }
+    .input-switch-clear {
+        position: absolute;
+        top: 2px;
+        right: 6px;
+        cursor: pointer;
+    }
 }
 
 // CSS fixes for lontext to override classes from common css file - for Josh to refer to
 .input-switch-longtext,
 .input-switch-json,
 .input-switch-array {
-  .chaise-input-control {
-    height: auto;
-    padding: 0 !important;
-
-    textarea,
-    .disabled-textarea {
-      padding: 4px 10px;
-      min-height: 110px;
-      display: flex;
-      width: 100%;
-      border: none;
-      border-radius: 4px;
-      outline: 0;
+    .chaise-input-control {
+        height: auto;
+        padding: 0 !important;
+        textarea,
+        .disabled-textarea {
+            padding: 4px 10px;
+            min-height: 110px;
+            display: flex;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            outline: 0;
+        }
     }
-  }
 }
 
 .input-switch-longtext {
-  .md-editor {
-    border: 1px solid map-get(variables.$color-map, 'border');
-    border-radius: 4px;
-
-    .md-header {
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      padding: 6px 4px;
-      background: #f5f5f5;
+    .md-editor {
+        border: 1px solid map-get(variables.$color-map, 'border');
+        border-radius: 4px;
+        .md-header {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            padding: 6px 4px;
+            background: #f5f5f5;
+        }
+        .chaise-input-control {
+            border: none !important;
+            textarea,
+            .disabled-textarea {
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        }
+        .md-preview {
+            background: #fff;
+            border-top: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd;
+            min-height: 10px;
+            overflow: auto;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+            font-size: 14px !important;
+            line-height: 1.42857143 !important;
+            color: #333 !important;
+            width: 100% !important;
+            background-color: #d8d8dc !important;
+            resize: vertical;
+        }
     }
-
-    .chaise-input-control {
-      border: none !important;
-
-      textarea,
-      .disabled-textarea {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-      }
-    }
-
-    .md-preview {
-      background: #fff;
-      border-top: 1px dashed #ddd;
-      border-bottom: 1px dashed #ddd;
-      min-height: 10px;
-      overflow: auto;
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-      font-size: 14px !important;
-      line-height: 1.42857143 !important;
-      color: #333 !important;
-
-      width: 100% !important;
-      background-color: #d8d8dc !important;
-      resize: vertical;
-    }
-  }
 }
 
 .input-switch-datetime {
-  .input-switch-time {
-    margin: 3px 0;
-  }
-
-  .chaise-btn-group {
-    float: right;
-  }
+    .input-switch-time {
+        margin-bottom: 1px;
+        .chaise-input-group-text,
+        .chaise-input-control {
+            border-top: none;
+        }
+    }
+    .chaise-btn-group {
+        float: right;
+    }
 }
 
 .chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
 .chaise-firefox .input-switch-time.chaise-input-control.has-feedback {
-  padding-right: variables.$input-remove-width;
+    padding-right: variables.$input-remove-width;
 }
 
 .input-switch-color {
-  position: relative;
-
-  .chaise-input-control {
-    display: inline-flex;
-  }
-
-  .hex-sign {
-    color: map-get(variables.$color-map, 'placeholder');
-  }
-
-  .chaise-color-picker-preview {
-    width: 40px;
-    height: 28px;
-    margin-left: -10px;
-    margin-top: -4px;
-    margin-right: 5px;
-
-    &.no-color {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+    position: relative;
+    .chaise-input-control {
+        display: inline-flex;
     }
-
-    // the one in the popover is using the button styles
-    &:not(.chaise-btn) {
-      border: 0;
-      border-radius: 3px 0 0 3px;
-      cursor: pointer;
+    .hex-sign {
+        color: map-get(variables.$color-map, 'placeholder');
     }
-  }
+    .chaise-color-picker-preview {
+        width: 40px;
+        height: 28px;
+        margin-left: -10px;
+        margin-top: -4px;
+        margin-right: 5px;
+        &.no-color {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+        }
+        // the one in the popover is using the button styles
+        &:not(.chaise-btn) {
+            border: 0;
+            border-radius: 3px 0 0 3px;
+            cursor: pointer;
+        }
+    }
 }
 
 .chaise-color-picker-popup {
-  background-color: white;
-  padding: 10px;
-
-  // change the default spacing of color picker
-  .react-colorful {
-    height: 184px;
-    width: 184px;
-
-    .react-colorful__pointer {
-      height: 16px;
-      width: 16px;
+    background-color: white;
+    padding: 10px;
+    // change the default spacing of color picker
+    .react-colorful {
+        height: 184px;
+        width: 184px;
+        .react-colorful__pointer {
+            height: 16px;
+            width: 16px;
+        }
+        .react-colorful__hue {
+            height: 14px;
+        }
     }
-
-    .react-colorful__hue {
-      height: 14px;
+    .popover-controls {
+        input {
+            width: 100%;
+            margin-top: 5px;
+        }
+        .popover-buttons {
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            .chaise-btn {
+                height: 25px !important;
+                padding: 2px 10px;
+                width: 55px !important;
+            }
+        }
     }
-  }
-
-  .popover-controls {
-    input {
-      width: 100%;
-      margin-top: 5px;
-    }
-
-    .popover-buttons {
-      margin-top: 5px;
-      display: flex;
-      justify-content: space-between;
-
-      .chaise-btn {
-        height: 25px !important;
-        padding: 2px 10px;
-        width: 55px !important;
-      }
-    }
-  }
 }
 
 .input-switch-boolean {
-
-  // remove the default bootstrap caret
-  .dropdown-toggle::after {
-    content: none !important;
-  }
-
-  // make sure the menu expands the whole row
-  .dropdown-menu {
-    width: 100%;
-  }
+    // remove the default bootstrap caret
+    .dropdown-toggle::after {
+        content: none !important;
+    }
+    // make sure the menu expands the whole row
+    .dropdown-menu {
+        width: 100%;
+    }
 }
 
 .input-switch-file {
-  .chaise-image-preview {
-    margin-top: 5px;
-  }
-
-  .chaise-input-control {
-    cursor: text;
-  }
+    .chaise-image-preview {
+        margin-top: 5px;
+    }
+    .chaise-input-control {
+        cursor: text;
+    }
 }

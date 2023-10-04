@@ -49,6 +49,19 @@ export type InputFieldProps = {
    * The styles attached to the container
    */
   styles?: any,
+  /**
+   * `optional`additional controller rules for the input field.
+   *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
+   */
+   additionalControllerRules?: {
+    [key: string]: (string | number | boolean | RegExp | Function | Object) | {
+      value: (boolean | number | RegExp),
+      /**
+       * Error message
+       */
+      message: string
+    }
+  }
 }
 
 
@@ -101,10 +114,11 @@ const InputField = ({
   controllerRules,
   checkHasValue,
   handleChange,
-  checkIsTouched
+  checkIsTouched,
+  additionalControllerRules
 }: InputFieldCompProps): JSX.Element => {
 
-  const { setValue, control, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors ,trigger} = useFormContext();
 
   controllerRules = isObjectAndNotNull(controllerRules) ? controllerRules : {};
   if (requiredInput) {
@@ -114,7 +128,7 @@ const InputField = ({
   const formInput = useController({
     name,
     control,
-    rules: controllerRules,
+    rules: {...controllerRules, ...additionalControllerRules},
   });
 
   const field = formInput?.field;
@@ -136,6 +150,7 @@ const InputField = ({
     e.preventDefault();
     clearErrors(name);
     setValue(name, '');
+    trigger(name);
   }
 
   useEffect(() => {
@@ -160,7 +175,7 @@ const InputField = ({
   let showError = !!error?.message && displayErrors;
   if (showError) {
     if (error?.type === 'required') {
-      showError = formInput.formState.isSubmitted;
+      showError = formInput.formState.isSubmitted || name.includes('row');
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
     }

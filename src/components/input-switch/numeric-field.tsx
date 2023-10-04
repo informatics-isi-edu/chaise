@@ -8,7 +8,7 @@ import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-uti
 
 const NumericField = (props: InputFieldProps): JSX.Element => {
   let rules;
-  if (props.type === 'integer2' || props.type === 'int4' || props.type === 'integer4' || props.type === 'integer8') {
+  if (props.type === 'integer2' || props.type === 'integer4' || props.type === 'integer8') {
     rules = {
       validate: VALIDATE_VALUE_BY_TYPE[props.type]
     }
