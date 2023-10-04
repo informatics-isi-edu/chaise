@@ -159,32 +159,41 @@
 
   // Changing the padding and adding line-height for the action button to align with the rest of the columns in the table
   .action-btns {
-    $_space-around-buttons: 3px;
+    // the whole row min height is 30px, and buttons are 22px.. so we have to have 4px above and below
+    $_space-around-buttons: 4px;
 
     text-align: center;
     font-size: 1.2rem;
     padding: $_space-around-buttons 0 0 0;
     line-height: 1.5;
 
+    // make sure items stay in the center
+    .action-btns-inner-container {
+      display: flex;
+      align-content: center;
+      justify-content: space-around;
+    }
+
     /**
      * make sure there's similar space below the buttons in the narrow case (when the content is just one line
      * I needed to use three different selectors for our three different modes.
-     * the first one is the default mode, the second is single select and third is multi select
+     * the first one is the default mode, the second is single select, and the last one is for multi-select
      */
     .chaise-btn-group, .chaise-btn.select-action-button, .chaise-checkbox {
       margin-bottom: $_space-around-buttons;
     }
 
-    .chaise-btn {
+    // make the button smaller (only visible for primary buttons. for others won't make a difference in UI and that's fine)
+    .chaise-checkbox, .chaise-btn {
       padding: 0;
-      margin: -3px;
-      height: auto; //override the default button height
-      min-height: 25px; // make sure the button has default height
+      height: 22px;
+      min-width: 22px;
+      width: 22px;
     }
 
-    // reducing the font-size to make the alignment of view-details better with other action buttons
     .chaise-view-details {
-      font-size: 1em;
+      // make the view icon bigger so it looks similar size to the rest of icons
+      font-size: 1.1em;
     }
 
     .disabled {
