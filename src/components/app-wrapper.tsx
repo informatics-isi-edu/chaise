@@ -58,6 +58,12 @@ type AppWrapperProps = {
    */
   displaySpinner?: boolean,
   /**
+   * If instead of showing the generic chaise spinner you want to show a
+   * spinner without any text, pass the container that you want to shwo the spinner
+   * inside of.
+   */
+  smallSpinnerContainer?: HTMLElement,
+  /**
    * whether we should ignore hash change, or reload the page on hash change
    */
   ignoreHashChange?: boolean,
@@ -75,7 +81,8 @@ const AppWrapperInner = ({
   includeNavbar,
   displaySpinner,
   ignoreHashChange,
-  dontFetchSession
+  dontFetchSession,
+  smallSpinnerContainer
 }: AppWrapperProps): JSX.Element => {
   const { dispatchError, logTerminalError, errors } = useError();
   const [configDone, setConfigDone] = useState(false);
@@ -182,7 +189,7 @@ const AppWrapperInner = ({
 
         // make a HEAD request to check if the user can fetch the file
         ConfigService.http.head(element.href, config).then(function () {
-          clickHref(element.href);
+          clickHref(element.href, true);
         }).catch(function (exception: any) {
           let ermrestError = ConfigService.ERMrest.responseToError(exception);
           if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
@@ -230,8 +237,66 @@ const AppWrapperInner = ({
         }
       }
     });
-  }
+  };
 
+  const renderSpinner = () => {
+    if (!displaySpinner && !smallSpinnerContainer) return <></>;
+
+    /**
+     * in some cases (navbar app), we want to show a small spinner that fits the container
+     */
+    if (smallSpinnerContainer) {
+      const containerHeight = smallSpinnerContainer && smallSpinnerContainer.offsetHeight !== 0 ? smallSpinnerContainer.offsetHeight : 0;
+      if (containerHeight === 0) {
+        return <></>;
+      }
+
+      /**
+       * - the height/width of spinner is half of the container so we have enough padding
+       * above and below.
+       * - I added the max and minimum to make sure we're not showing a very small or very
+       * large spinner.
+       * - the border-width is calculated by interpolating based on the min and max values.
+       */
+      const minHeight = 15, maxHeight = 40, minBorderWidth = 2, maxBorderWidth = 5;
+
+      let height = containerHeight / 2, borderWidth;
+
+      // we don't have enough space to show a proper spinner (do we want to try anyways?)
+      // realisticly this won't happen. the only way that we fall into this case
+      // is if data-modelers chose a very small height which means not preserving
+      // enough space for the text that is going to be displayed on the navbar.
+      if (height < minHeight) {
+        return <></>;
+      }
+
+      // we don't want to show a giant spinner
+      if (height >= maxHeight) {
+        height = maxHeight;
+        borderWidth = maxBorderWidth;
+      }
+      // bw = ((max_bw-min_bw)/(max_h - min_h)) * (h - min_h)) + min_bw
+      else {
+        borderWidth = ((maxBorderWidth-minBorderWidth)/(maxHeight-minHeight)) * (height-minHeight);
+        borderWidth += minBorderWidth;
+      }
+
+      const spinnerStyles = {
+        height: `${height}px`,
+        width: `${height}px`,
+        borderWidth: `${borderWidth}px`
+      }
+      return (
+        <div className='chaise-app-wrapper-sm-spinner'>
+          <div className='spinner-border text-light' role='status' style={spinnerStyles}>
+            <span className='sr-only'>Loading...</span>
+          </div>
+        </div>
+      )
+    }
+
+    return <ChaiseSpinner />;
+  }
 
   return (
     <StrictMode>
@@ -239,7 +304,7 @@ const AppWrapperInner = ({
         FallbackComponent={errorFallback}
       >
         {/* show spinner if we're waiting for configuration and there are no error during configuration */}
-        {(displaySpinner && !configDone && errors.length === 0) && <ChaiseSpinner />}
+        {errors.length === 0 && !configDone && renderSpinner()}
         {configDone &&
           <div className='app-container'>
             {(includeNavbar || includeAlerts) &&
@@ -282,7 +347,8 @@ const AppWrapper = ({
   includeAlerts,
   displaySpinner,
   ignoreHashChange,
-  dontFetchSession
+  dontFetchSession,
+  smallSpinnerContainer
 }: AppWrapperProps): JSX.Element => {
   return (
     <ErrorProvider>
@@ -302,6 +368,7 @@ const AppWrapper = ({
             displaySpinner={displaySpinner}
             ignoreHashChange={ignoreHashChange}
             dontFetchSession={dontFetchSession}
+            smallSpinnerContainer={smallSpinnerContainer}
           >
             {children}
           </AppWrapperInner>

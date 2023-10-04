@@ -8,8 +8,8 @@ import { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
+import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -22,7 +22,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 const FormContainer = (): JSX.Element => {
 
   const {
-    onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels
+    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
   const [needsWiderMinWidth, setNeedsWiderMinWidth] = useState<boolean>(false);
@@ -74,10 +74,18 @@ const FormContainer = (): JSX.Element => {
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        // onSubmit={
+        //   (e: any) => {
+        //     e.preventDefault();
+        //     // make sure to pass event along too or react-hook-form will silently fail
+        //     // NOTE: event is still triggering even with prevent default
+        //     handleSubmit(onSubmitValid, onSubmitInvalid)(e);
+        //   }
+        // }
         ref={formContainer}
       >
         {/* form header */}
-        <div className='form-header-row'>
+        {config.displayMode !== RecordeditDisplayMode.POPUP && <div className='form-header-row'>
           {forms.map((formNumber: number, formIndex: number) => (
             <div key={`form-header-${formNumber}`} className={`form-header entity-value ${needsWiderMinWidth ? 'wider-min-width' : ''}`} >
               <span>{formIndex + 1}</span>
@@ -95,7 +103,7 @@ const FormContainer = (): JSX.Element => {
               </div>
             </div>
           ))}
-        </div>
+        </div>}
         {/* inputs for each column */}
         {
           columnModels.map(({ }, idx) => (

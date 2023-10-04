@@ -11,7 +11,7 @@ import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-sto
 
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -78,7 +78,7 @@ export class ConfigService {
    * configurations are done before any other components are running.
    * @param settings
    */
-  static async configure(settings: ConfigServiceSettings, session: Session | null ) {
+  static async configure(settings: ConfigServiceSettings, session: Session | null) {
     setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app
@@ -163,7 +163,7 @@ export class ConfigService {
   /**
    * the location of ermrest. can be used for other deriva services too.
    */
-  static get ERMrestLocation () {
+  static get ERMrestLocation() {
     if (isStringAndNotEmpty(ConfigService._ermrestLocation)) {
       return ConfigService._ermrestLocation;
     }
@@ -300,6 +300,17 @@ export class ConfigService {
     if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
     if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
 
+    /**
+     * make sure the current host is part of internalHosts
+     */
+    const currHost = window.location.host;
+    if (!Array.isArray(cc.internalHosts)) {
+      cc.internalHosts = [currHost];
+    }
+    else if (cc.internalHosts.indexOf(currHost) === -1) {
+      cc.internalHosts.push(currHost);
+    }
+
     ConfigService._chaiseConfig = cc;
 
     return cc;
@@ -420,49 +431,14 @@ export class ConfigService {
     const cc = ConfigService.chaiseConfig;
 
     let mode = null;
-    if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+    if (context.indexOf('compact') !== -1 && cc.systemColumnsDisplayCompact) {
       mode = cc.systemColumnsDisplayCompact;
-    } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+    } else if (context === 'detailed' && cc.systemColumnsDisplayDetailed) {
       mode = cc.systemColumnsDisplayDetailed;
-    } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+    } else if (context.indexOf('entry') !== -1 && cc.systemColumnsDisplayEntry) {
       mode = cc.systemColumnsDisplayEntry;
     }
 
     return mode;
   }
 }
-
-// TODO these functions should be moved somewhere else:
-//
-// function initializeSavingQueries(reference, queryParams) {
-//   var chaiseConfig = getConfigJSON();
-//   // initalize to null as if there is no saved query table
-//   // savedQuery object should be defined with showUI true || false for UI purposes
-//   var savedQuery = {
-//       showUI: reference.display.showSavedQuery
-//   }
-
-//   // NOTE: if this is not set, saved query UI should probably be turned off
-//   if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == 'object') {
-//       var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
-
-//       var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
-
-//       // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
-//       if (validMapping) {
-//           savedQuery.ermrestTablePath = '/ermrest/catalog/' + mapping.catalog + '/entity/' + mapping.schema + ':' + mapping.table
-//           savedQuery.ermrestAGPath = '/ermrest/catalog/' + mapping.catalog + '/attributegroup/' + mapping.schema + ':' + mapping.table
-
-//           // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
-//           if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
-//       } else {
-//           // if mapping is invalid, the config is ill-defined and the feature will be turned off
-//           savedQuery.showUI = false;
-//       }
-//   } else {
-//       // if storage table is not defined, the config is ill-defined and the feature will be turned off
-//       savedQuery.showUI = false;
-//   }
-
-//   return savedQuery;
-// }

@@ -6,8 +6,12 @@
 
             "record/copy-btn.config.json",
 
+            "recordset/saved-query.config.json",
+
             "multi-permissions/config.json",
-            "navbar/config.json"
+            "navbar/config.json",
+
+            "recordedit/input-iframe.config.json"
         ]
     },
     "cleanup": true

@@ -65,12 +65,15 @@ div.modal-title {
 
     .modal-header {
       justify-content: space-around;
+
       .modal-title {
         font-size: 22px !important;
       }
     }
+
     .modal-body {
       text-align: center;
+
       button {
         margin-left: 5px;
       }
@@ -91,6 +94,7 @@ div.modal-title {
   .toggle-error-details {
     display: block;
     padding-left: 0;
+
     i {
       padding-right: 3px;
     }
@@ -116,7 +120,8 @@ div.modal-title {
     padding-left: 10px;
   }
 
-  h2, h3 {
+  h2,
+  h3 {
     margin-top: 20px;
     margin-bottom: 10px;
   }
@@ -134,9 +139,16 @@ div.modal-title {
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
 .chaise-body .modal-dialog.modal-xl {
-  margin: 2.5vh auto;
+  $_margin: 2.5vh;
+
+  margin: $_margin auto;
   width: auto !important;
   max-width: 95vw;
+
+  &.modal-fullscreen {
+    // modal-screen by default has a 100% height, but we should account for the marging that we're adding.
+    height: calc(100% - (2 * $_margin));
+  }
 }
 
 .modal-dialog.modal-lg {
@@ -158,6 +170,7 @@ div.modal-title {
   right: 15px;
   top: 15px;
 }
+
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
   margin: auto;
@@ -165,6 +178,7 @@ div.modal-title {
   overflow: hidden;
   max-width: 95vw;
 }
+
 /*Sets the maximum height of the modal body to 85% of the screen height*/
 .modal-xl .modal-body {
   max-height: 90vh;
@@ -189,10 +203,12 @@ div.modal-title {
 
 /************* Profile Card ****************/
 .profile-popup {
+
   // to allow scrolling and showing all content
   .modal-content {
     max-height: unset;
   }
+
   ul li {
     list-style-type: disc;
 
@@ -202,7 +218,7 @@ div.modal-title {
   }
 
   // remove the last border since it's not needed
-  table tr:last-child > td {
+  table tr:last-child>td {
     border-bottom: none;
   }
 
@@ -215,15 +231,18 @@ div.modal-title {
 .search-popup {
   .modal-content {
     height: 95vh;
+
     .modal-header {
       padding: 0;
       padding-top: 20px;
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
     }
+
     .modal-body {
       padding: 0;
       height: 90vh;
+
       .top-panel-container {
         padding-top: 0;
       }
@@ -232,6 +251,7 @@ div.modal-title {
 }
 
 .scalar-show-details-popup {
+
   // change width of number of Occurrences
   // we cannot use the class name because the scalar column might be using the same name
   .recordset-table th:nth-child(3) {
@@ -255,6 +275,73 @@ div.modal-title {
   .progress-bar {
     background-size: 1.75rem 1.75rem;
     background-color: #4674a7;
+  }
+}
+
+/******** Popup modal for input iframe ********/
+.iframe-field-popup {
+  // .modal-body {
+  //   min-height: 90vh;
+  // }
+
+  .alerts-container {
+    // make sure it's consistent with the modal title padding
+    margin: 0 1rem;
+  }
+
+  .iframe-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+
+    iframe {
+      height: 100%;
+      width: 100%;
+    }
+  }
+}
+
+
+/******** Popup modal for Saving Queries ********/
+.create-saved-query .modal-content {
+  .modal-header {
+    // we don't want it to be flex, since we're doing flex ourselves
+    display: block;
+  }
+
+  .top-panel-container {
+    padding-right: 5px;
+
+    .top-flex-panel .top-left-panel.close-panel+.top-right-panel {
+      padding-left: 5px;
+    }
+  }
+
+  .bottom-panel-container {
+    .side-panel-resizable.close-panel~.main-container {
+      padding-left: 5px;
+    }
+
+    .main-container:not(.dynamic-padding) {
+      padding-right: 5px;
+    }
+
+    .main-container {
+      .main-body {
+        padding-top: unset;
+        padding-bottom: 20px;
+
+        .entity-key-column .entity-key {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
+
+        .recordedit-form .entity-value {
+          border: none;
+          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        }
+      }
+    }
   }
 }
 

@@ -6,6 +6,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import Tooltip from 'bootstrap/js/dist/tooltip';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
@@ -324,17 +325,75 @@ export function convertVWToPixel(value: number) {
 /**
  * mimic the same behavior as clicking on a link and opening it in a new tab
  * @param href the link
+ * @param isDownload whether we should add the download attribute
  */
-export function clickHref(href: string) {
+export function clickHref(href: string, isDownload?: boolean) {
   // fetch the file for the user
-  const downloadLink = document.createElement('a');
-  downloadLink.setAttribute('href', href);
-  downloadLink.setAttribute('download', '');
-  downloadLink.setAttribute('visibility', 'hidden');
-  downloadLink.setAttribute('display', 'none');
-  downloadLink.setAttribute('target', '_blank');
+  const dummyLink = document.createElement('a');
+  dummyLink.setAttribute('href', href);
+  if (isDownload) dummyLink.setAttribute('download', '');
+  dummyLink.setAttribute('visibility', 'hidden');
+  dummyLink.setAttribute('display', 'none');
+  dummyLink.setAttribute('target', '_blank');
   // Append to page
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+  document.body.appendChild(dummyLink);
+  dummyLink.click();
+  document.body.removeChild(dummyLink);
+}
+
+/**
+ * wait for an element to load
+ * NOTE: this might have some affects on the element, so use it with caution.
+ *
+ * based on https://stackoverflow.com/a/61511955/1662057
+ * @param selector the selector of the element
+ */
+export function waitForElementToLoad(selector: string) {
+  return new Promise(resolve => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector));
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body ? document.body : document, {
+      childList: true,
+      subtree: true
+    });
+  });
+}
+
+/**
+ * see if there's a data-chaise-tooltip in the chidren of the given element, and turn them into proper tooltips.
+ *
+ * NOTE:
+ * I'm using bootstrap.js for this feature. this has added around 30KB to our bundles. I couldn't find a way to do this
+ * directly with react-bootstrap. but there might be a way and we should investigate later
+ */
+export function createChaiseTooltips(container: Element) {
+  const tooltipTriggerList = container.querySelectorAll('[data-chaise-tooltip]');
+  if (tooltipTriggerList && tooltipTriggerList.length > 0) {
+    tooltipTriggerList.forEach((el) => {
+      const title = el.getAttribute('data-chaise-tooltip');
+      const placement = el.getAttribute('data-chaise-tooltip-placement') || 'bottom';
+      const noIcon = el.hasAttribute('data-chaise-tooltip-no-icon');
+      if (!title) return;
+      if (!noIcon) {
+        // adding space between content and the icon is how we're making sure spacing between the two is correct.
+        // should we come up with a better solution instead?
+        el.innerHTML = el.innerHTML + ' ';
+        el.classList.add('chaise-icon-for-tooltip');
+      }
+      new Tooltip(el, {
+        title,
+        // @ts-ignore ts doesn't understand that we're actually sanitizing the value.
+        placement: ['auto', 'top', 'bottom', 'left', 'right'].indexOf(placement) !== -1 ? placement : 'bottom'
+      })
+    });
+  }
 }

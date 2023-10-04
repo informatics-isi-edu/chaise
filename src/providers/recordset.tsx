@@ -14,7 +14,7 @@ import {
   RecordsetProviderFetchSecondaryRequests,
   RecordsetProviderUpdateMainEntity, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-
+import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -23,7 +23,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 
 // utils
-import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -200,6 +200,9 @@ export const RecordsetContext = createContext<{
    * The parent page's tuple
    */
   parentPageTuple?: any,
+  savedQueryConfig?: SavedQuery,
+  savedQueryReference: any,
+  setSavedQueryReference: (savedQueryReference: any) => void
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -260,7 +263,8 @@ type RecordsetProviderProps = {
    * The parent page's tuple
    */
   parentTuple?: any,
-  initialPage?: any
+  initialPage?: any,
+  savedQueryConfig?: SavedQuery
 }
 
 export default function RecordsetProvider({
@@ -276,7 +280,8 @@ export default function RecordsetProvider({
   onFavoritesChanged,
   parentReference,
   parentTuple,
-  initialPage
+  initialPage,
+  savedQueryConfig,
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -291,8 +296,9 @@ export default function RecordsetProvider({
    */
   const [isInitialized, setIsInitialized] = useState<boolean>(!!initialPage);
   const [isLoading, setIsLoading, isLoadingRef] = useStateRef<boolean>(!initialPage);
-  const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
+  const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEFAULT_PAGE_SIZE);
   const [page, setPage, pageRef] = useStateRef<any>(initialPage ? initialPage : null);
+  const [savedQueryReference, setSavedQueryReference] = useState(null);
   const [colValues, setColValues] = useState<any>(initialPage ? getColumnValuesFromPage(initialPage) : []);
   /**
    * The columns that should be displayed in the result table
@@ -435,7 +441,12 @@ export default function RecordsetProvider({
 
   const printDebugMessage = (message: string, counter?: number): void => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
-    $log.debug(`counter ${counter}: ` + message);
+    let dm = `${Date.now()}, ${counter}: `;
+    if (config.containerDetails) {
+      dm += `${config.containerDetails.isInline ? 'inline' : 'related'}(index=${config.containerDetails.index}), `;
+    }
+    dm += `${message}`;
+    $log.debug(dm);
   };
 
   /**
@@ -547,13 +558,22 @@ export default function RecordsetProvider({
     return true;
   };
 
-  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => {
+  /**
+   * can be used to manually change the state of flow-control
+   * used in record flow-control where we want to manipulate the state of each
+   * related entity.
+   */
+  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo, forceIsLoading?: boolean) => {
     if (queue) {
       flowControl.current.queue = queue;
     }
 
     if (setDirtyResult) {
       flowControl.current.dirtyResult = true;
+    }
+
+    if (forceIsLoading) {
+      setIsLoading(true);
     }
 
     flowControl.current.addCauses(causes);
@@ -563,8 +583,6 @@ export default function RecordsetProvider({
     // TODO does this make sense?
     if (initialPage) return;
 
-    printDebugMessage('running update page');
-
     if (!flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -573,6 +591,8 @@ export default function RecordsetProvider({
     // NOTE in related section we don't want the filter info to be captured,
     //      as we're already doing that with 'source'
     if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      printDebugMessage('processing requests');
+
       LogService.updateStackFilterInfo(
         flowControl.current.getLogStack(),
         referenceRef.current.filterLogInfo,
@@ -1125,12 +1145,13 @@ export default function RecordsetProvider({
       updateMainEntity, fetchSecondaryRequests, addUpdateCauses,
       // the following values are not supposed to change
       // but needed by other components
-      parentPageReference, parentPageTuple
+      parentPageReference, parentPageTuple,
+      savedQueryConfig, savedQueryReference, setSavedQueryReference
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
     isInitialized, page, colValues,
-    disabledRows, selectedRows, columnModels, totalRowCount
+    disabledRows, selectedRows, columnModels, totalRowCount, savedQueryReference
   ]);
 
   return (

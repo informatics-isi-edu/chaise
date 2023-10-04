@@ -47,14 +47,19 @@ jobs:
           sudo a2enmod ssl
           sudo a2ensite default-ssl
           sudo groupadd -o -g $(id -g www-data) apache
+          sudo apt-get install -y python3-setuptools python3-ply
           sudo python3 --version
           sudo pip3 --version
-          sudo apt-get install -y python3-setuptools python3-ply
+          sudo su -c 'echo /usr/lib/python3.8/site-packages > /usr/local/lib/python3.8/dist-packages/sys-site-packages.pth'
           sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
           sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
+          : # the line below will make sure pyopenssl and cryptography have compatible versions
+          sudo pip3 install -U pyopenssl cryptography
+          sudo pip3 install flask
           sudo pip3 install requests
+          sudo pip3 install globus_sdk
           sudo pip3 install psycopg2-binary
-          sudo pip3 install git+https://github.com/informatics-isi-edu/webpy.git
+          sudo pip3 install oauth2client
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:

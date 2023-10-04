@@ -15,12 +15,14 @@ import {
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -38,19 +40,25 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
-  if (column.isAsset) {
+  if (column.isInputIframe) {
+    type = 'iframe';
+  }
+  else if (column.isAsset) {
     type = 'file'
   } else if (column.isForeignKey) {
-    type = 'popup-select';
+    // only 2 types are allowed, 'simple-search-dropdown' or 'facet-search-popup'
+    type = (column.display.inputDisplayMode === 'simple-search-dropdown') ? 'dropdown-select' : 'popup-select';
   } else {
     type = getInputType(column.type);
   }
 
-  const prefillObj = getPrefillObject(queryParams);
+
+  const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
+  if (column.isForeignKey) hasDomainFilter = column.hasDomainFilter;
+
   if (prefillObj) {
     if (column.isForeignKey) {
-      hasDomainFilter = column.hasDomainFilter;
       if (
         // whether the fk is already marked as prefilled
         prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||
@@ -100,9 +108,7 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 }
 
 /**
- * sets value for a form by either clearing, or using the existing values
- * of another form.
- *
+ * used by copyOrClearValueForColumn
  * NOTE this function is immutating the given value
  * @param columnModel the column that we want to copy its value
  * @param values the FormContext.getValues()
@@ -112,15 +118,11 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
- * @returns
  */
-export function copyOrClearValue(
-  columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
+function _copyOrClearValueForColumn(
+  column: any, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
 ) {
-
-  const column = columnModel.column;
-
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
 
   const dstKey = `${destFormValue}-${column.name}`;
@@ -134,7 +136,7 @@ export function copyOrClearValue(
     }
   }
 
-  if (columnModel.column.type.name.indexOf('timestamp') !== -1) {
+  if (column.type.name.indexOf('timestamp') !== -1) {
     if (clearValue) {
       values[`${dstKey}-date`] = '';
       values[`${dstKey}-time`] = '';
@@ -144,7 +146,7 @@ export function copyOrClearValue(
     }
   }
 
-  if (!skipFkColumns && columnModel.column.isForeignKey) {
+  if (!skipFkColumns && column.isForeignKey) {
     // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
     if (clearValue) {
       foreignKeyData[dstKey] = {};
@@ -154,7 +156,7 @@ export function copyOrClearValue(
 
     // the code above is just copying the displayed rowname for foreignkey
     // we still need to copy the raw values
-    columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
+    column.foreignKey.colset.columns.forEach((col: any) => {
       let val;
       if (clearValue) {
         val = '';
@@ -163,6 +165,37 @@ export function copyOrClearValue(
       }
       if (val === null || val === undefined) return;
       values[`${destFormValue}-${col.name}`] = val;
+    });
+  }
+}
+
+/**
+ * sets value for a form by either clearing, or using the existing values
+ * of another form.
+ *
+ * NOTE this function is immutating the given value
+ * @param columnModel the column that we want to copy its value
+ * @param values the FormContext.getValues()
+ * @param foreignKeyData the foreign key data
+ * @param destFormValue the from where the new data should go
+ * @param srcFormValue if we're copying, the form that the data will be copied from.
+ * @param clearValue signal that we want to clear the inputs.
+ * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
+ * flag to skip doing so.
+ */
+export function copyOrClearValue(
+  columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+) {
+
+  const column = columnModel.column;
+
+  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
+
+  // copy the columns in the column mapping.
+  if (column.isInputIframe) {
+    column.inputIframeProps.columns.forEach((c: any) => {
+      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
     });
   }
 
@@ -175,14 +208,20 @@ export function copyOrClearValue(
  * @param columnModels
  * @param forms
  * @param prefillQueryParam
+ * @param initialValues
  * --not implemented - used by viewer app @param initialValues
  */
 export function populateCreateInitialValues(
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  queryParams?: any
+  queryParams?: any,
+  prefillRowData?: any[]
 ) {
   const values: any = {};
+  let initialValues: any = {}
+  // only 1 row in the case of create
+  if (prefillRowData) initialValues = prefillRowData[0];
+
   let shouldWaitForForeignKeyData = false;
 
   // get the prefilled values
@@ -211,11 +250,11 @@ export function populateCreateInitialValues(
 
       let defaultValue = column.default;
 
-      // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
-      // TODO: use initialValue if defined (viewer app)
-      // if (DataUtils.isObjectAndNotNull(initialValues) && initialValues[column.name] && !column.isForeignKey) {
-      //     defaultValue = initialValues[column.name];
-      // }
+      // only want to set primitive values in the input fields so make sure it isn't null, undefined, or foreignkey (an object)
+      // used by saved query feature (and maybe viewer in the future?)
+      if (initialValues[column.name] && !column.isForeignKey) {
+        defaultValue = initialValues[column.name];
+      }
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
       if (column.isForeignKey && prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
@@ -335,6 +374,132 @@ export function populateCreateInitialValues(
   return { values, foreignKeyData, shouldWaitForForeignKeyData }
 }
 
+/**
+ * Set value for the given column. this function will not return any values, and will
+ * only modify the given `values` prop.
+ *
+ * used by populateEditInitialValues
+ *
+ * @param column the ermrestjs ReferenceColumn object
+ * @param isDisabled wether it's disabled or not
+ * @param usedValue the value that we should set
+ * @param tuple the tuple object
+ * @param appMode app mode
+ * @param formValue form number
+ * @param values the object that we will modify
+ * @returns
+ */
+function _populateEditInitialValueForAColumn(
+  column: any, isDisabled: boolean, usedValue: any, tuple: any, appMode: string, formValue: any, values: any
+) {
+  let value;
+
+  // stringify the returned array value
+  if (column.type.isArray) {
+    if (usedValue !== null) {
+      values[`${formValue}-${column.name}`] = JSON.stringify(usedValue, undefined, 2);
+    }
+    return;
+  }
+
+  // Transform column values for use in view model
+  const options: TimestampOptions = { outputMomentFormat: '' };
+  let isTimestamp = false
+  // we're using rootName so we can properly handle system columns
+  switch (column.type.rootName) {
+    case 'timestamp':
+      // this is only going to change the underlying raw value
+      options.outputMomentFormat = dataFormats.timestamp;
+      value = formatDatetime(usedValue, options);
+      isTimestamp = true;
+      break;
+    case 'timestamptz':
+      // this is only going to change the underlying raw value
+      options.outputMomentFormat = dataFormats.datetime.return;
+      value = formatDatetime(usedValue, options);
+      isTimestamp = true;
+      break;
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      // If input is disabled, there's no need to transform the column value.
+      value = isDisabled ? usedValue : formatInt(usedValue);
+      break;
+    case 'float4':
+    case 'float8':
+    case 'numeric':
+      // If input is disabled, there's no need to transform the column value.
+      value = isDisabled ? usedValue : formatFloat(usedValue);
+      break;
+    default:
+      // the structure for asset type columns is an object with a 'url' property
+      let metadata;
+      if (column.isAsset) {
+        metadata = column.getMetadata(tuple.data);
+        value = {
+          url: usedValue || '',
+          filename: metadata.filename || metadata.caption,
+          filesize: metadata.byteCount
+        };
+
+        /**
+         * make sure we're also copying the metadata values.
+         *
+         * we don't need to do this in edit mode as we're not showing any of these values
+         * and won't need to submit any of these values in update mode.
+         * if user selects a new file, these values will be populated by ermrest.js based
+         * on the new file.
+         */
+        if (appMode === appModes.COPY) {
+          if (metadata.filename) {
+            values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+          }
+          if (metadata.byteCount) {
+            values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+          }
+          if (metadata.md5) {
+            values[`${formValue}-${column.md5.name}`] = metadata.md5;
+          }
+          if (metadata.sha256) {
+            values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+          }
+        }
+
+      } else {
+        value = usedValue;
+      }
+
+      break;
+  }
+
+  // no need to check for copy here because the case above guards against the negative case for copy
+  if (isTimestamp) {
+    values[`${formValue}-${column.name}`] = value?.datetime || '';
+    values[`${formValue}-${column.name}-date`] = value?.date || '';
+    values[`${formValue}-${column.name}-time`] = value?.time || '';
+  } else {
+    values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
+  }
+
+  // capture the raw values of the columns that create the fk relationship
+  // the `value` above is what users sees and not the raw value that we will
+  // send to the database.
+  if (column.isForeignKey) {
+    if (value !== null || value !== undefined) {
+      column.foreignKey.colset.columns.forEach((col: any) => {
+        values[`${formValue}-${col.name}`] = tuple.data[col.name];
+      });
+    }
+  }
+
+  if (column.isInputIframe) {
+    column.inputIframeProps.columns.forEach((c: any) => {
+      _populateEditInitialValueForAColumn(c, isDisabled, tuple.data[c.name], tuple, appMode, formValue, values);
+    })
+  }
+
+}
+
 export function populateEditInitialValues(
   reference: any,
   columnModels: RecordeditColumnModel[],
@@ -362,9 +527,8 @@ export function populateEditInitialValues(
       foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
     });
 
-    columnModels.forEach((colModel: RecordeditColumnModel, i: number) => {
+    columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
       const column = colModel.column;
-      let value;
 
       // add the select-all input values
       if (formIndex === 0) {
@@ -379,111 +543,14 @@ export function populateEditInitialValues(
 
       if (appMode !== appModes.COPY) {
         // whether certain columns are disabled or not
-        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[i];
+        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[colModelIndex];
 
         // while we cannot change the isDisabled state, this will be
         // taken care of by calling getInputTypeOrDisabled in other places
-        isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
+        isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[colModelIndex]);
       }
 
-      // stringify the returned array value
-      if (column.type.isArray) {
-        if (tupleValues[i] !== null) {
-          values[`${formValue}-${column.name}`] = JSON.stringify(tupleValues[i], undefined, 2);
-        }
-        return;
-      }
-
-      // Transform column values for use in view model
-      const options: TimestampOptions = { outputMomentFormat: '' }
-      let isTimestamp = false
-      // we're using rootName so we can properly handle system columns
-      switch (column.type.rootName) {
-        case 'timestamp':
-          // this is only going to change the underlying raw value
-          options.outputMomentFormat = dataFormats.timestamp;
-          value = formatDatetime(tupleValues[i], options);
-          isTimestamp = true;
-          break;
-        case 'timestamptz':
-          // this is only going to change the underlying raw value
-          options.outputMomentFormat = dataFormats.datetime.return;
-          value = formatDatetime(tupleValues[i], options);
-          isTimestamp = true;
-          break;
-        case 'int2':
-        case 'int4':
-        case 'int8':
-          // If input is disabled, there's no need to transform the column value.
-          value = isDisabled ? tupleValues[i] : formatInt(tupleValues[i]);
-          break;
-        case 'float4':
-        case 'float8':
-        case 'numeric':
-          // If input is disabled, there's no need to transform the column value.
-          value = isDisabled ? tupleValues[i] : formatFloat(tupleValues[i]);
-          break;
-        default:
-          // the structure for asset type columns is an object with a 'url' property
-          let metadata;
-          if (column.isAsset) {
-            metadata = column.getMetadata(tuple.data);
-            value = {
-              url: tupleValues[i] || '',
-              filename: metadata.filename || metadata.caption,
-              filesize: metadata.byteCount
-            };
-
-            /**
-             * make sure we're also copying the metadata values.
-             *
-             * we don't need to do this in edit mode as we're not showing any of these values
-             * and won't need to submit any of these values in update mode.
-             * if user selects a new file, these values will be populated by ermrest.js based
-             * on the new file.
-             */
-            if (appMode === appModes.COPY) {
-              if (metadata.filename) {
-                values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
-              }
-              if (metadata.byteCount) {
-                values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
-              }
-              if (metadata.md5) {
-                values[`${formValue}-${column.md5.name}`] = metadata.md5;
-              }
-              if (metadata.sha256) {
-                values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
-              }
-            }
-
-          } else {
-            value = tupleValues[i];
-          }
-
-          break;
-      }
-
-      // no need to check for copy here because the case above guards against the negative case for copy
-      if (isTimestamp) {
-        values[`${formValue}-${column.name}`] = value?.datetime || '';
-        values[`${formValue}-${column.name}-date`] = value?.date || '';
-        values[`${formValue}-${column.name}-time`] = value?.time || '';
-      } else {
-        values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
-      }
-
-      // capture the raw values of the columns that create the fk relationship
-      // the `value` above is what users sees and not the raw value that we will
-      // send to the database.
-      if (column.isForeignKey) {
-        if (value !== null || value !== undefined) {
-          column.foreignKey.colset.columns.forEach((col: any) => {
-            values[`${formValue}-${col.name}`] = tuple.data[col.name];
-          });
-        }
-      }
-
+      _populateEditInitialValueForAColumn(column, isDisabled, tupleValues[colModelIndex], tuple, appMode, formValue, values);
     });
   });
 
@@ -495,13 +562,16 @@ export function populateEditInitialValues(
  * @param reference the reference object
  * @param formNumber indicate which form the data belongs to
  * @param formData the data for all the displayed fields
+ * @param initialValues initalValues to submit that don't appear as inputs in the form
+ *    - this happens in the case of saving queries with multiple columns being invisible but required for saving a query
  * @returns
  */
-export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
+export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
-  const setSubmission = (col: any, skipEmpty?: boolean) => {
+  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
     let v = formData[formNumber + '-' + col.name];
 
+    // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
       if (col.isAsset) {
         // dereference formData so we aren't modifying content in react-hook-form
@@ -555,14 +625,54 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       if (col.byteCountColumn) setSubmission(col.byteCountColumn, true);
       if (col.md5) setSubmission(col.md5, true);
       if (col.sha256) setSubmission(col.sha256, true);
-
       setSubmission(col);
+    } else if (col.isInputIframe) {
+      setSubmission(col);
+      col.inputIframeProps.columns.forEach((c: any) => {
+        if (c.isAsset) {
+          // if due to copy the metadata values are set, use them
+          if (c.filenameColumn) setSubmission(c.filenameColumn, true);
+          if (c.byteCountColumn) setSubmission(c.byteCountColumn, true);
+          if (c.md5) setSubmission(c.md5, true);
+          if (c.sha256) setSubmission(c.sha256, true);
+        }
+
+        setSubmission(c);
+      });
     } else {
       setSubmission(col);
     }
   });
 
+  // used in the case of saving queries with multiple columns being invisible but required for saving a query
+  if (initialValues && initialValues.length > 0) {
+    const row = initialValues[0];
+    Object.keys(row).forEach((columnName) => {
+      if (!submissionRow[columnName]) {
+        submissionRow[columnName] = row[columnName];
+      }
+    })
+  }
+
   return submissionRow;
+}
+
+/**
+ * convert the foreignKeyData to something that ermrestjs expects.
+ * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
+ * the following will extract the foreignKeyData of the row that we need.
+ */
+export function populateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
+  const linkedData : any = {};
+  if (isObjectAndNotNull(foreignKeyData)) {
+    reference.activeList.allOutBounds.forEach((col: any) => {
+      const k =  `${formNumber}-${col.name}`;
+      if (k in foreignKeyData) {
+        linkedData[col.name] = foreignKeyData[k];
+      }
+    });
+  }
+  return linkedData;
 }
 
 /**
@@ -617,4 +727,77 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
     // eslint-disable-next-line eqeqeq
     col.name in prefillObj.keys && prefillObj.keys[col.name] != null
   ));
+}
+
+/* The following 3 functions are for foreignkey fields */
+export function createForeignKeyReference(
+  column: any, 
+  parentReference: any, 
+  formNumber: number, 
+  foreignKeyData: any, 
+  getValuesFunction: () => any
+): any {
+  const andFilters: any = [];
+    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+    // this is to ensure the selected row has a value for the foreignkey
+    column.foreignKey.key.colset.columns.forEach((col: any) => {
+      andFilters.push({ source: col.name, hidden: true, not_null: true });
+    });
+
+    const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
+    const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
+    return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
+}
+
+
+export function callOnChangeAfterSelection(
+  selectedRow: any, 
+  onChange: any,
+  name: string,
+  column: any,
+  formNumber: number,
+  foreignKeyData: any,
+  setFunction: (name: string, value: any) => void
+): void {
+  // this is just to hide the ts errors and shouldn't happen
+  if (!selectedRow.data) {
+    $log.error('the selected row doesn\'t have data!');
+    return;
+  }
+
+  // capture the foreignKeyData
+  if (foreignKeyData && foreignKeyData.current) {
+    foreignKeyData.current[name] = selectedRow.data;
+  }
+
+  // find the raw value of the fk columns that correspond to the selected row
+  // since we've already added a not-null hidden filter, the values will be not-null.
+  column.foreignKey.colset.columns.forEach((col: any) => {
+    const referencedCol = column.foreignKey.mapping.get(col);
+
+    setFunction(`${formNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
+  });
+
+  // for now this is just changing the displayed tuple displayname
+  onChange(selectedRow.displayname.value);
+}
+
+export function clearForeignKeyData(
+  name: string,
+  column: any, 
+  formNumber: number,
+  foreignKeyData: any,
+  setFunction: (name: string, value: any) => void
+): void {
+  // clear the raw values
+  column.foreignKey.colset.columns.forEach((col: any) => {
+    setFunction(`${formNumber}-${col.name}`, '');
+  });
+
+  // clear the foreignkey data
+  if (foreignKeyData && foreignKeyData.current) {
+    foreignKeyData.current[name] = {};
+  }
+
+  // the input-field will take care of clearing the displayed rowname.
 }

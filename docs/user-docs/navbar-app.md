@@ -136,12 +136,23 @@ With the current HTML structure, it is possible to apply different styles to cus
 
 1. Preserve space for navbar while its loading (to reduce the page shift):
     ```css
+    /* set a static height for navbar */
     navbar {
-      height: YOUR_VALUE;
-      background-color: YOUR_VALUE;
       display: block;
+      height: YOUR_VALUE;
     }
     ```
+
+    If we detect that you've assigned a height to the `navbar`, we will show a spinner while navbar data is loading. The size of this spinner is calcuated based on the available space. You can modify it by doing the following:
+    ```css
+    /* change the spinner displayed on the navbar during load */
+    .chaise-app-wrapper-sm-spinner .spinner-border {
+      height: YOUR_VALUE !important;
+      width: YOUR_VALUE !important;
+      border-width: YOUR_VALUE !important;
+    }
+    ```
+    > Adding `!important` is necessary to ensure overriding the rules that Chaise is going to add with JavaScript.
 
 2. Change the navbar background color:
 

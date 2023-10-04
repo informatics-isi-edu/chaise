@@ -50,6 +50,11 @@ export type InputFieldProps = {
    */
   styles?: any,
   /**
+   * if true, do not intercept on enter
+   * by default, we are capturing the "enter" key event and stopping it
+   */
+  allowEnter?: boolean
+  /**
    * `optional`additional controller rules for the input field.
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
    */
@@ -110,6 +115,7 @@ const InputField = ({
   displayErrors,
   containerClasses,
   styles,
+  allowEnter = false,
   onClear,
   controllerRules,
   checkHasValue,
@@ -169,6 +175,13 @@ const InputField = ({
     field.onBlur();
   };
 
+  // intercept enter key down event and stop it from submitting the form
+  // input types that we "allowEnter" include:
+  //   - array, markdown, longtext, json, and jsonb
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (!allowEnter && event.key === 'Enter') event.preventDefault();
+  }
+
   /**
    * we don't want to show the required error until it's submitted
    */
@@ -182,7 +195,7 @@ const InputField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>

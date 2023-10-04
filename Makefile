@@ -55,6 +55,8 @@ E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
+E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.conf.js
+E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.conf.js
 # Record tests
 E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
@@ -67,6 +69,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
+E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.js
 
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
@@ -88,9 +91,9 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
-RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2ErecordsetSavedQuery)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)
@@ -440,10 +443,13 @@ npm-install-modules:
 	@npm clean-install
 
 # install packages needed for production and development (including testing)
+# also run patch-package to patch all the issues in dependencies (currently only webdriver-manager.)
+# if we decided to patch other prod dependencies, we should move `patch-package` command to the `postinstall` of package.json.
 # --include=dev makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
+	@npx patch-package
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
@@ -516,6 +522,18 @@ deploy-w-config: dont_deploy_in_root .make-rsync-list-w-config $(JS_CONFIG) $(VI
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
+# run dist and deploy with proper uesrs (GNU). only works with root user
+.PHONY: root-install
+root-install:
+	su $(shell stat -c "%U" Makefile) -c "make dist"
+	make deploy
+
+# run dist and deploy with proper uesrs (FreeBSD and MAC OS X). only works with root user
+.PHONY: root-install-alt
+root-install-alt:
+	su $(shell stat -f '%Su' Makefile) -c "make dist"
+	make deploy
+
 # Rule to create version.txt
 .PHONY: gitversion
 gitversion:
@@ -553,6 +571,8 @@ usage:
 	@echo "  updeps                         local update  of node dependencies"
 	@echo "  update-webdriver               update the protractor's webdriver"
 	@echo "  deps-test                      local install of dev node dependencies and update protractor's webdriver"
+	@echo "  root-install                   should only be used as root. will use dist with proper user and then deploy, for GNU systems"
+	@echo "  root-install-alt               should only be used as root. will use dist with proper user and then deploy, for FreeBSD and MAC OS X"
 	@echo "  test                           run e2e tests"
 	@echo "  testrecordadd                  run data entry app add e2e tests"
 	@echo "  testrecordedit                 run data entry app edit e2e tests"

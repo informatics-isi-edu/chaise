@@ -1,4 +1,10 @@
+// components
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+
+// hooks
 import { useState } from 'react';
+
+// utils
 import { NavbarBanner } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 interface BannerProps {
@@ -15,7 +21,7 @@ const ChaiseBanner = ({
   const classString = `chaise-navbar-banner-container ${banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''}`;
   return (<div className={classString}>
     {banner.dismissible && <button className='close' onClick={() => setHide(true)}><span aria-hidden='true'>×</span></button>}
-    <div className='markdown-container' dangerouslySetInnerHTML={{ __html: banner.html }} />
+    <DisplayValue value={{isHTML: true, value: banner.html}} addClass />
   </div>)
 };
 

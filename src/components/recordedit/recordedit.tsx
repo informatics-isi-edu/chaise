@@ -1,18 +1,18 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordedit.scss';
 
 // components
+import { Accordion, Modal } from 'react-bootstrap';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
-import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
-import Accordion from 'react-bootstrap/Accordion';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -24,6 +24,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  RecordeditConfig, RecordeditDisplayMode,
+  RecordeditModalOptions, RecordeditProps
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -41,31 +45,27 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
-export type RecordeditProps = {
-  appMode: string;
-  parentContainer?: HTMLElement;
-  queryParams?: any;
-  reference: any;
-  /* The log related APIs */
-  logInfo: {
-    logAppMode: string;
-    /* the object that will be logged with the first request */
-    logObject?: any;
-    logStack: any;
-    logStackPath: string;
-  }
-}
-
 const Recordedit = ({
   appMode,
+  config,
+  logInfo,
+  modalOptions,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
+  prefillRowData,
   queryParams,
-  reference,
-  logInfo
+  reference
 }: RecordeditProps): JSX.Element => {
   return (
     <AlertsProvider>
-      <RecordeditProvider reference={reference} logInfo={logInfo} appMode={appMode} queryParams={queryParams}>
+      <RecordeditProvider
+        appMode={appMode}
+        config={config}
+        logInfo={logInfo}
+        modalOptions={modalOptions}
+        queryParams={queryParams}
+        prefillRowData={prefillRowData}
+        reference={reference}
+      >
         <RecordeditInner parentContainer={parentContainer} />
       </RecordeditProvider>
     </AlertsProvider>
@@ -84,9 +84,9 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
-    forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
-    showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction,
+    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
+    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
+    showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -360,6 +360,7 @@ const RecordeditInner = ({
         <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
       </>);
     }
+
     const tableName = <Title addLink reference={reference} />;
     const fnStr = appMode === appModes.EDIT ? 'Edit' : 'Create';
 
@@ -370,189 +371,281 @@ const RecordeditInner = ({
     return (<>{fnStr} {forms.length.toString()} {tableName} {forms.length > 1 ? 'records' : 'record'}</>);
   };
 
-  // if the main data is not initialized, just show spinner
-  if (!initialized) {
-    if (errors.length > 0) {
-      return <></>;
-    }
-    return <ChaiseSpinner />;
+  const renderSubmitButton = () => {
+    const isModal = config.displayMode === RecordeditDisplayMode.POPUP;
+    let tooltip = 'Waiting for some columns to properly load.';
+
+    if (allFormDataLoaded) tooltip = isModal ? 'Save the current search criteria.' : 'Save this data on the server.';
+    return (
+      <ChaiseTooltip
+        placement='bottom'
+        tooltip={tooltip}
+      >
+        <button
+          id={isModal ? 'modal-submit-record-btn' : 'submit-record-button'}
+          className='chaise-btn chaise-btn-primary'
+          type='submit'
+          form='recordedit-form'
+          disabled={!allFormDataLoaded}
+        >
+          <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
+          <span>Save</span>
+        </button>
+      </ChaiseTooltip>
+    )
   }
 
-  return (
-    <div className='recordedit-container app-content-container'>
-      {formProviderInitialized && <FormProvider {...methods}>
-        {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
-          <div className='app-blocking-spinner-container'>
-            <div className='app-blocking-spinner-backdrop'></div>
-            <ChaiseSpinner
-              className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
-              message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
-            />
+  const renderBottomPanel = () => {
+    return (<div className='bottom-panel-container'>
+      {/* This is here so the spacing can be done in one place for all the apps */}
+      <div className='side-panel-resizable close-panel'></div>
+      {/* <!-- Form section --> */}
+      <div className='main-container' ref={mainContainer}>
+        {columnModels.length > 0 && !resultsetProps &&
+          <div className='main-body'>
+            <KeyColumn />
+            <FormContainer />
           </div>
         }
-        <div className='top-panel-container'>
-          {/* recordset level alerts */}
-          <Alerts />
-          <div className='top-flex-panel'>
-            {/* This is here so the spacing can be done in one place for all the apps */}
-            <div className='top-left-panel close-panel'></div>
-            <div className='top-right-panel'>
-              <div className='recordedit-title-container title-container meta-icons'>
-                {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
-                  <ChaiseTooltip
-                    placement='bottom'
-                    tooltip={
-                      allFormDataLoaded ?
-                        'Save this data on the server.' :
-                        'Waiting for some columns to properly load.'
-                    }
-                  >
-                    <button
-                      id='submit-record-button'
-                      className='chaise-btn chaise-btn-primary'
-                      type='submit'
-                      form='recordedit-form'
-                      disabled={!allFormDataLoaded}
-                    >
-                      <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
-                      <span>Save</span>
-                    </button>
-                  </ChaiseTooltip>
-                  {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-                    <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
-                      <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
-                      <span>Delete</span>
-                    </button>
-                  </ChaiseTooltip>}
-                </div>}
-                <h1 id='page-title'>{renderTitle()}</h1>
-              </div>
-              {!resultsetProps && <div className='form-controls'>
-                {/* required-info used in testing for reseting cursor position when testing tooltips */}
-                <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
-                <div className='add-forms chaise-input-group'>
-                  {appMode === appModes.EDIT ?
-                    <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
-                      <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
-                        <span className='chaise-btn-icon fa-solid fa-undo'></span>
-                        <span>Reset</span>
-                      </button>
-                    </ChaiseTooltip>
-                    :
-                    <div className='chaise-input-group'>
-                      <span className='chaise-input-group-prepend'>
-                        <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
-                      </span>
-                      <input
-                        id='copy-rows-input'
-                        ref={copyFormRef}
-                        type='number'
-                        className='chaise-input-control chaise-input-control-sm add-rows-input'
-                        placeholder='1'
-                        min='1'
-                      />
-                      <span className='chaise-input-group-append'>
-                        <ChaiseTooltip
-                          tooltip={
-                            allFormDataLoaded ?
-                              'Duplicate rightmost form the specified number of times.' :
-                              'Waiting for some columns to properly load.'
-                          }
-                          placement='bottom-end'
-                        >
-                          <button
-                            id='copy-rows-submit'
-                            className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                            onClick={callAddForm}
-                            type='button'
-                            disabled={!allFormDataLoaded}
-                          >
-                            <span>Clone</span>
-                          </button>
-                        </ChaiseTooltip>
-                      </span>
+        {resultsetProps &&
+          <div className='resultset-tables chaise-accordions'>
+            <Accordion alwaysOpen defaultActiveKey={['0', '1']} className='panel-group'>
+              <Accordion.Item eventKey='0' className='chaise-accordion'>
+                <Accordion.Button as='div'>
+                  <ResultsetTableHeader
+                    appMode={appMode} header={resultsetProps.success.header}
+                    exploreLink={resultsetProps.success.exploreLink}
+                    editLink={resultsetProps.success.editLink}
+                  />
+                </Accordion.Button>
+                <Accordion.Body>
+                  {resultsetProps.success.exploreLink &&
+                    <div className='inline-tooltip'>
+                      <p>
+                        This table content displays user submitted values.
+                        Use the <a href={resultsetProps.success.editLink}>Bulk Edit</a> button
+                        to continue making changes to these entries,
+                        or <a href={resultsetProps.success.exploreLink}>Explore</a> button
+                        to navigate to the <code><Title reference={reference} comment={false} /></code> search page with these entries selected.
+                      </p>
                     </div>
                   }
-                </div>
-              </div>}
-            </div>
+                  <ResultsetTable page={resultsetProps.success.page} />
+                </Accordion.Body>
+              </Accordion.Item>
+              {resultsetProps.failed &&
+                <Accordion.Item eventKey='1' className='chaise-accordion'>
+                  <Accordion.Button as='div'>
+                    <ResultsetTableHeader
+                      appMode={appMode} header={resultsetProps.failed.header}
+                      exploreLink={resultsetProps.failed.exploreLink}
+                    />
+                  </Accordion.Button>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
+                </Accordion.Item>
+              }
+            </Accordion>
           </div>
-        </div>
+        }
+        {config.displayMode !== RecordeditDisplayMode.POPUP && <Footer />}
+      </div>
+    </div>)
+  }
 
-        <div className='bottom-panel-container'>
-          {/* This is here so the spacing can be done in one place for all the apps */}
-          <div className='side-panel-resizable close-panel'></div>
-          {/* <!-- Form section --> */}
-          <div className='main-container' ref={mainContainer}>
-            {columnModels.length > 0 && !resultsetProps &&
-              <div className='main-body'>
-                <KeyColumn />
-                <FormContainer />
+  const renderModals = () => {
+    return (<>
+      { showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={showDeleteConfirmationModal.onCancel}
+        />
+      }
+      { uploadProgressModalProps &&
+        <UploadProgressModal
+          show={!!uploadProgressModalProps}
+          rows={uploadProgressModalProps.rows}
+          onSuccess={uploadProgressModalProps.onSuccess}
+          onCancel={uploadProgressModalProps.onCancel}
+        />
+      }
+    </>);
+  }
+
+// if the main data is not initialized, just show spinner
+if (!initialized) {
+  if (errors.length > 0) {
+    return <></>;
+  }
+  return <ChaiseSpinner />;
+}
+
+if (config.displayMode === RecordeditDisplayMode.POPUP) {
+  /**
+   * Popup differences:
+   *  - <Modal> wraps all of recordedit app
+   *  - <Modal.Header> does NOT include <Alerts>, they are part of modal body
+   *  - <renderSubmitButton> has different tooltip and id
+   *  - Close button
+   *  - title is <h2> instead of <h1>
+   *  - bulk delete, clone, reset controls not shown
+   *
+   * Since there are so many differences, Recordedit when shown in a modal has a very different "top panel"
+   */
+  return (
+    <Modal
+      className='create-saved-query'
+      show={true}
+      onHide={modalOptions?.onClose}
+    >
+      <div className='recordedit-container app-content-container'>
+        {formProviderInitialized && <FormProvider {...methods}>
+          {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
+            <div className='app-blocking-spinner-container'>
+              <div className='app-blocking-spinner-backdrop'></div>
+              <ChaiseSpinner
+                className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
+                message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
+              />
+            </div>
+          }
+          <Modal.Header>
+            <div className='top-panel-container'>
+              <div className='top-flex-panel'>
+                {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
+                <div className='top-left-panel close-panel'></div>
+                <div className='top-right-panel'>
+                  <div className='recordedit-title-container title-container meta-icons'>
+                    <div className='saved-query-controls recordedit-title-buttons title-buttons'>
+                      {renderSubmitButton()}
+                      <ChaiseTooltip
+                        placement='bottom'
+                        tooltip='Close this popup.'
+                      >
+                        <button
+                          className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
+                          onClick={() => modalOptions?.onClose()}
+                        >
+                          <strong className='chaise-btn-icon'>X</strong>
+                          <span>Cancel</span>
+                        </button>
+                      </ChaiseTooltip>
+                    </div>
+                    {/* NOTE: Modal uses h2 */}
+                    <h2 className='modal-title'>
+                      {/* NOTE: currently only used for saved queries. Turn into configuration param if reused */}
+                      <span>Save current search criteria for table </span>
+                      <Title reference={modalOptions?.parentReference} />
+                    </h2>
+                    <div className='form-controls'>
+                      {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
+                      <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            }
-            {resultsetProps &&
-              <div className='resultset-tables chaise-accordions'>
-                <Accordion alwaysOpen defaultActiveKey={['0', '1']} className='panel-group'>
-                  <Accordion.Item eventKey='0' className='chaise-accordion'>
-                    <Accordion.Button as='div'>
-                      <ResultsetTableHeader
-                        appMode={appMode} header={resultsetProps.success.header}
-                        exploreLink={resultsetProps.success.exploreLink}
-                        editLink={resultsetProps.success.editLink}
-                      />
-                    </Accordion.Button>
-                    <Accordion.Body>
-                      {resultsetProps.success.exploreLink &&
-                        <div className='inline-tooltip'>
-                          <p>
-                            This table content displays user submitted values.
-                            Use the <a href={resultsetProps.success.editLink}>Bulk Edit</a> button
-                             to continue making changes to these entries,
-                             or <a href={resultsetProps.success.exploreLink}>Explore</a> button
-                             to navigate to the <code><Title reference={reference} comment={false}/></code> search page with these entries selected.
-                          </p>
-                        </div>
-                      }
-                      <ResultsetTable page={resultsetProps.success.page} />
-                    </Accordion.Body>
-                  </Accordion.Item>
-                  {resultsetProps.failed &&
-                    <Accordion.Item eventKey='1' className='chaise-accordion'>
-                      <Accordion.Button as='div'>
-                        <ResultsetTableHeader
-                          appMode={appMode} header={resultsetProps.failed.header}
-                          exploreLink={resultsetProps.failed.exploreLink}
-                        />
-                      </Accordion.Button>
-                      <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
-                    </Accordion.Item>
-                  }
-                </Accordion>
+            </div>
+          </Modal.Header>
+          <Modal.Body>
+            <Alerts />
+            {renderBottomPanel()}
+          </Modal.Body>
+          {renderModals()}
+        </FormProvider>}
+      </div>
+    </Modal>
+  )
+}
+
+return (
+  <div className='recordedit-container app-content-container'>
+    {formProviderInitialized && <FormProvider {...methods}>
+      {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
+          <ChaiseSpinner
+            className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
+            message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
+          />
+        </div>
+      }
+      <div className='top-panel-container'>
+        {/* recordedit level alerts */}
+        <Alerts />
+        <div className='top-flex-panel'>
+          {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
+          <div className='top-left-panel close-panel'></div>
+          <div className='top-right-panel'>
+            <div className='recordedit-title-container title-container meta-icons'>
+              {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
+                {renderSubmitButton()}
+                {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
+                  <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+                    <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
+                    <span>Delete</span>
+                  </button>
+                </ChaiseTooltip>}
+              </div>}
+              <h1 id='page-title'>{renderTitle()}</h1>
+            </div>
+            {!resultsetProps && <div className='form-controls'>
+              {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
+              <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
+              <div className='add-forms chaise-input-group'>
+                {appMode === appModes.EDIT ?
+                  <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
+                    <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
+                      <span className='chaise-btn-icon fa-solid fa-undo'></span>
+                      <span>Reset</span>
+                    </button>
+                  </ChaiseTooltip>
+                  :
+                  <div className='chaise-input-group'>
+                    <span className='chaise-input-group-prepend'>
+                      <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
+                    </span>
+                    <input
+                      id='copy-rows-input'
+                      ref={copyFormRef}
+                      type='number'
+                      className='chaise-input-control chaise-input-control-sm add-rows-input'
+                      placeholder='1'
+                      min='1'
+                    />
+                    <span className='chaise-input-group-append'>
+                      <ChaiseTooltip
+                        tooltip={
+                          allFormDataLoaded ?
+                            'Duplicate rightmost form the specified number of times.' :
+                            'Waiting for some columns to properly load.'
+                        }
+                        placement='bottom-end'
+                      >
+                        <button
+                          id='copy-rows-submit'
+                          className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
+                          onClick={callAddForm}
+                          type='button'
+                          disabled={!allFormDataLoaded}
+                        >
+                          <span>Clone</span>
+                        </button>
+                      </ChaiseTooltip>
+                    </span>
+                  </div>
+                }
               </div>
-            }
-            <Footer />
+            </div>}
           </div>
         </div>
-        {showDeleteConfirmationModal &&
-          <DeleteConfirmationModal
-            show={!!showDeleteConfirmationModal}
-            message={showDeleteConfirmationModal.message}
-            buttonLabel={showDeleteConfirmationModal.buttonLabel}
-            onConfirm={showDeleteConfirmationModal.onConfirm}
-            onCancel={showDeleteConfirmationModal.onCancel}
-          />
-        }
-        {uploadProgressModalProps &&
-          <UploadProgressModal
-            show={!!uploadProgressModalProps}
-            rows={uploadProgressModalProps.rows}
-            onSuccess={uploadProgressModalProps.onSuccess}
-            onCancel={uploadProgressModalProps.onCancel}
-          />
-        }
-      </FormProvider>}
-    </div>
-  );
+      </div>
+      {renderBottomPanel()}
+      {renderModals()}
+    </FormProvider>}
+  </div>
+);
 }
 
 export default Recordedit;

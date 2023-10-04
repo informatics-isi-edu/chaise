@@ -305,6 +305,13 @@ const RecordsetModal = ({
             <span>Search by </span>
             <Title displayname={displayname} comment={comment} />
           </div>);
+      case RecordsetDisplayMode.SAVED_QUERY_POPUP:
+        return (
+          <div>
+            <span>Saved search criteria for table </span>
+            <Title reference={recordsetProps.parentReference} />
+          </div>
+        );
       default:
         return (
           <div><Title addLink={false} reference={recordsetProps.initialReference} /></div>
@@ -355,7 +362,7 @@ const RecordsetModal = ({
                   }
                   <ChaiseTooltip
                     placement='bottom'
-                    tooltip='Close the dialog'
+                    tooltip='Close this popup.'
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
