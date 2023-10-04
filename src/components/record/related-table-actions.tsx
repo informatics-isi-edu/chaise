@@ -699,6 +699,23 @@ const RelatedTableActions = ({
       </span>
     );
   };
+
+  const renderBulkEditBtnTooltip = () => {
+    if (relatedModel.recordsetState.page?.length < 1) {
+      return(
+        <span>
+          Unable to edit {currentTable} records until some are created.
+        </span>
+      )
+    }
+
+    return(
+      <span>
+        Edit this page of {currentTable} records related to this {mainTable}.
+      </span>
+    )
+  }
+
   /*
     * This function is to render each button. We call the renderButton function with button text,
     * inner element classname and boolean flag to show tertiary class(for the dropdown buttons) or not
@@ -762,11 +779,7 @@ const RelatedTableActions = ({
         return (
           <ChaiseTooltip
             placement='top'
-            tooltip={
-              <span>
-                Edit this page of {currentTable} records related to this {mainTable}.
-              </span>
-            }
+            tooltip={renderBulkEditBtnTooltip()}
           >
             <a
               className={`chaise-btn bulk-edit-link
