@@ -164,8 +164,13 @@
 
   // Changing the padding and adding line-height for the action button to align with the rest of the columns in the table
   .action-btns {
-    // the whole row min height is 30px, and buttons are 22px.. so we have to have 4px above and below
+    /**
+     * the whole row min height is 30px, and buttons are 22px. so the space around the buttons must be 4px.
+     * if we changed the button height, the checkbox-icon-margin should be adjusted as well.
+     */
+    $_button-height: 22px;
     $_space-around-buttons: 4px;
+    $_checkbox-icon-margin: 2px;
 
     text-align: center;
     font-size: 1.2rem;
@@ -191,9 +196,23 @@
     // make the button smaller (only visible for primary buttons. for others won't make a difference in UI and that's fine)
     .chaise-checkbox, .chaise-btn {
       padding: 0;
-      height: 22px;
-      min-width: 22px;
-      width: 22px;
+      height: $_button-height;
+      min-width: $_button-height;
+      width: $_button-height;
+    }
+
+    // make sure the checkbox has the same size as others for consistent spacing.
+    .chaise-checkbox input {
+      width: $_button-height;
+      height: $_button-height;
+      & + label:before {
+        width: $_button-height;
+        height: $_button-height;
+      }
+      &:checked + label:after {
+        top: $_checkbox-icon-margin;
+        left: $_checkbox-icon-margin;
+      }
     }
 
     .chaise-view-details {
