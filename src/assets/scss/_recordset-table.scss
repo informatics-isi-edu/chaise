@@ -10,6 +10,13 @@
   border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
   margin: 0;
 
+  // override the default bootstrap styles as we're going to apply our own styles below
+  --bs-table-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  --bs-table-striped-bg: transparent;
+  --bs-table-active-bg: transparent;
+  --bs-table-hover-bg: transparent;
+
   tbody {
     display: table-row-group;
     vertical-align: middle;
@@ -20,13 +27,11 @@
 
     /* table hover */
     > tr:hover {
-      // background-color: #f7f0cf !important;
-      --bs-table-hover-bg: map-get(variables.$color-map, 'table-highlight-background') !important;
+      background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
 
       /* match color from row highlight for disabled cells */
       > td.disabled-cell {
         background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-        // --bs-table-hover-bg: #f7f0cf !important;;
       }
 
       .hover-show {
