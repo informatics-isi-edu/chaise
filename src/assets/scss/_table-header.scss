@@ -39,6 +39,21 @@
   .chaise-table-header-buttons {
     display: flex;
     justify-content: flex-end;
+    .sort-by {
+      margin: 0;
+    }
+    .popover {
+      max-width: max-content;
+      .popover-body {
+        padding: 0;
+        ul {
+          padding: 0;
+        }
+      }
+      .popover-header {
+        background: none;
+      }
+    }
   }
 
   .chaise-table-header-buttons-span {

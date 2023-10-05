@@ -1,15 +1,17 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
+
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-
+import Overlay from 'react-bootstrap/Overlay';
+import Popover from 'react-bootstrap/Popover';
 // hooks
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-
+import  SortColumns  from '@isrd-isi-edu/chaise/src/components/modals/sort-columns-modal'
 // providers
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
@@ -35,6 +37,9 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   } = useRecordset();
 
   const container = useRef<HTMLDivElement>(null);
+  const [show, setShow] = useState(false);
+  const ref = useRef(null);
+  const buttonRef = useRef<any>(null);
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -129,6 +134,17 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   }
 
   /**
+   * sort
+   */
+  const sortBy = (event: any) => {
+    setShow(!show);
+    // calculatePlacement();
+    // setTarget(event.target);
+  };
+  const handleCloseModal = () => {
+    setShow(!show);
+  };
+  /**
    * on click of create button generate referrer id, construct the link and open in new tab
    */
   const addRecord = () => {
@@ -209,6 +225,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   };
 
   return (
+    <>
     <div className='chaise-table-header row' ref={container}>
       <div
         className={
@@ -234,6 +251,40 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         <div
           className='chaise-table-header-buttons'
         >
+
+              
+            <span  ref={ref}className='chaise-table-header-buttons-span sort-by'>
+              <ChaiseTooltip
+                placement='bottom-end'
+                tooltip={<>Sort the table based on multiple columns</>}
+              >
+                <button
+                  ref={buttonRef}
+                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-create-link`}
+                  onClick={sortBy}
+                >
+                  <span className='chaise-btn-icon fa-solid fa-sort' />
+                  <span>Sort By</span>
+                </button>
+              </ChaiseTooltip>
+              <Overlay
+                show={show}
+                target={ref.current}
+                placement='bottom'
+                container={ref}
+                containerPadding={20}
+                rootClose={true}
+                flip
+                onHide={() => setShow(false)}
+              >
+                <Popover id='popover-contained'>
+                  <Popover.Header as='h4'>Sort By</Popover.Header>
+                  <Popover.Body>
+                    <SortColumns onClose={handleCloseModal} reference={reference} />
+                  </Popover.Body>
+                </Popover>
+              </Overlay>
+            </span>
           {shouldShowCreateButton() && (
             <ChaiseTooltip
               placement='bottom-end'
@@ -272,6 +323,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
