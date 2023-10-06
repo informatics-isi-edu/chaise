@@ -131,3 +131,11 @@
     }
   }
 }
+
+.select-all-row{
+  .array-input-field-container .item.timestamp {
+    .item-input .input-switch-datetime .chaise-btn-group.translateY {
+      transform: translateY(38px) !important;
+    }
+  }
+}
