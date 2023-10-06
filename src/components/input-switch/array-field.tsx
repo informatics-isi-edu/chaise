@@ -4,17 +4,17 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_array-field.scss';
 import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
 // utils
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { formatDatetime, formatFloat, formatInt, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { useEffect, useRef, useState } from 'react';
 import {
-  DragDropContext, Draggable, DraggableProvided,
-  DraggableStateSnapshot, DraggingStyle, Droppable, DroppableProps, DroppableProvided, DropResult
+  DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProps, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import { EventType, useFormContext } from 'react-hook-form';
-import InputSwitch from './input-switch';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
-// since we're using strict mode, react-dnd-beautiful misbehaves due to multiple renders caused by strict mode
+// since we're using strict mode, react-beautiful-dnd misbehaves due to multiple renders caused by strict mode
 // this is to guard against it
 const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);
@@ -55,7 +55,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [counter, setCounter] = useState(0);
   const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { formState, getValues, setValue, watch, register, unregister, setError, clearErrors, trigger } = useFormContext();
+  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -68,6 +68,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
     let defaultValues = getValues(name);
 
+    // getValues() returns the values as a string. we need to parse the array from its string representation
     defaultValues = defaultValues && typeof defaultValues === 'string' ? JSON.parse(defaultValues) : []
 
     if (defaultValues && defaultValues.length > 0) {// Populate default Values if present
@@ -126,8 +127,9 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return curr;
   }
 
-  //TODO - verify types
+
   const formatValue = (value: string) => {
+
     switch (baseArrayType) {
       case 'int4':
         return formatInt(value);
