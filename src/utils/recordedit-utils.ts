@@ -131,7 +131,7 @@ function _copyOrClearValueForColumn(
   if (clearValue) {
     values[dstKey] = '';
   } else if (srcKey) {
-    if (columnModel.inputType !== 'array') {
+    if (column.inputType !== 'array') {
       values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
     }
   }

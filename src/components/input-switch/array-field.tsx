@@ -6,13 +6,30 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 // utils
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { formatDatetime, formatFloat, formatInt, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided,
-  DraggableStateSnapshot, DraggingStyle, Droppable, DroppableProvided, DropResult
+  DraggableStateSnapshot, DraggingStyle, Droppable, DroppableProps, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import { EventType, useFormContext } from 'react-hook-form';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
+
+// since we're using strict mode, react-dnd-beautiful misbehaves due to multiple renders caused by strict mode
+// this is to guard against it
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    const animation = requestAnimationFrame(() => setEnabled(true));
+    return () => {
+      cancelAnimationFrame(animation);
+      setEnabled(false);
+    };
+  }, []);
+  if (!enabled) {
+    return null;
+  }
+  return <Droppable {...props}>{children}</Droppable>;
+};
 
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
@@ -40,12 +57,18 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const { disableInput, name, baseArrayType } = props;
   const { formState, getValues, setValue, watch, register, unregister, setError, clearErrors, trigger } = useFormContext();
 
-
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
 
   useEffect(() => {
+    // Prevents useEffect from getting invoked twice in dev mode
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     let defaultValues = getValues(name);
 
-    defaultValues = defaultValues ? JSON.parse(defaultValues) : []
+    defaultValues = defaultValues && typeof defaultValues === 'string' ? JSON.parse(defaultValues) : []
 
     if (defaultValues && defaultValues.length > 0) {// Populate default Values if present
       setDefaultFieldState(defaultValues)
@@ -172,6 +195,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
         :
         []
     )
+
     setCounter(values.length)
   }
 
@@ -193,7 +217,6 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     setItemList((prev: RowItem[]) => {
       return [...prev.map((el: RowItem) => {
         if (el.id === id) {
-          // el.value = fieldValue;
           return {
             id: id,
             value: fieldValue
@@ -222,7 +245,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const draggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
 
     return <>
-      <Draggable key={item.id} draggableId={item.id.toString()} index={index} isDragDisabled={disableInput}>
+      <Draggable key={item.id} draggableId={name + "-" + item.id.toString()} index={index} isDragDisabled={disableInput}>
         {
           (provided: DraggableProvided) => {
             return <>
@@ -234,7 +257,6 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <div className='item-input'>
                   <InputSwitch
                     {...props}
-                    // type={'text'}
                     type={getInputType({ name: baseArrayType })}
                     {...register(`${name}-row-${item.id}`, { value: item.value != undefined ? item.value : '' })}
                     displayExtraDateTimeButtons={true}
@@ -275,7 +297,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
           <>
             <div className="input-items-container-new">
               <DragDropContext onDragEnd={handleOnDragEnd}>
-                <Droppable droppableId={'input-items-new'}>
+                <StrictModeDroppable droppableId={`${name}-input-items-new`}>
                   {
                     (provided: DroppableProvided) => (
                       <ul
@@ -288,14 +310,12 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                       </ul>
                     )
                   }
-                </Droppable>
+                </StrictModeDroppable>
               </DragDropContext>
               <div className={`add-element-container ${baseArrayType}`}>
                 <InputSwitch
                   {...props}
-                  // type={baseArrayType}
                   type={getInputType({ name: baseArrayType })}
-                  // name={`${name}-row-${item.id}`}
                   {...register(`${name}-new-item`)}
                   displayExtraDateTimeButtons={true}
                   displayDateTimeLabels={baseArrayType === 'date' ? false : true}
