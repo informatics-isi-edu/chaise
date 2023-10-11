@@ -288,7 +288,7 @@ describe('View existing record,', function() {
             expect(btn.getAttribute('class')).toContain('disabled', 'Bulk edit is not disabled');
         });
 
-        it('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows are present', () => {
+        it('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows present', () => {
             const btn = chaisePage.recordPage.getBulkEditLink('accommodation_collections', true);
             expect(btn.isPresent()).not.toBeTruthy();
         });
