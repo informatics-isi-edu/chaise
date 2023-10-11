@@ -1,0 +1,38 @@
+name: Detect version change and publish to npmjs
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Check if version has been updated
+        id: version-check
+        uses: EndBug/version-check@v2
+      - name: Publish new version
+        if: steps.version-check.outputs.changed == 'true'
+        run: |
+          : # these messages are duplicated in case npm publish failed
+          echo "Version change found in commit ${{ steps.version-check.outputs.commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "New version: ${{ steps.version-check.outputs.version }} (${{ steps.version-check.outputs.type }})" >> $GITHUB_STEP_SUMMARY
+          npm ci --include=dev
+          npm publish
+          echo "Successfully published the new version! :rocket:" > $GITHUB_STEP_SUMMARY
+          echo "[Link to npm package](https://www.npmjs.com/package/@isrd-isi-edu/chaise)" >> $GITHUB_STEP_SUMMARY
+          echo "Version change found in commit ${{ steps.version-check.outputs.commit }}" >> $GITHUB_STEP_SUMMARY
+          echo "New version: ${{ steps.version-check.outputs.version }} (${{ steps.version-check.outputs.type }})" >> $GITHUB_STEP_SUMMARY
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      - name: Skip publishing
+        if: steps.version-check.outputs.changed == 'false'
+        run: echo "No version change detected!" >> $GITHUB_STEP_SUMMARY
