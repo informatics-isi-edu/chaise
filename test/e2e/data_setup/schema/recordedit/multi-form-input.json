@@ -13,13 +13,18 @@
           "type": { "typename": "serial4" }
         },
         {
-          "name": "text_col",
+          "name": "markdown_col",
           "nullok": true,
           "type": {
-            "typename": "text"
+            "typename": "markdown"
           }
         }
-      ]
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "markdown_col"]
+        }
+      }
     }
   }
 }
