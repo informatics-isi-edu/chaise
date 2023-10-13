@@ -243,26 +243,19 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   return sensors;
 }
 
-export function copyToClipboard(text: string) {
-  if (document.execCommand) {
-    const dummy = document.createElement('input');
-    dummy.setAttribute('visibility', 'hidden');
-    dummy.setAttribute('display', 'none');
-
-    document.body.appendChild(dummy);
-    dummy.setAttribute('id', 'permalink_copy');
-    dummy.value = text;
-    dummy.select();
-    document.execCommand('copy');
-
-    document.body.removeChild(dummy);
-  }
-  else if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(text).catch((err) => {
-      $log.warn('failed to copy with the following error:')
-      $log.warn(err);
+/**
+ * add the given text to clipboard
+ * @param text the text that should be copied to clipboard
+ */
+export function copyToClipboard(text: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    navigator.clipboard.writeText(text).then(() => {
+      resolve();
+    }).catch((err) => {
+      reject(err);
     });
-  }
+  });
+
 }
 
 /**
