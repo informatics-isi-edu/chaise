@@ -252,7 +252,7 @@ const MultiFormInputRow = ({
      * across container for higher resolutions(i.e beyond 1800)
     */ 
     const updateTextareaWidth = () => {
-        const textarea = document.querySelector('.select-some-textarea') as HTMLElement;
+        const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
         const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
         if (textarea) {
             if (window.innerWidth < 1800) {
@@ -311,12 +311,13 @@ const MultiFormInputRow = ({
                                     ref={ref}
                                     className={'checkbox-input' + (multiFormInput ? ' checked' : '')}
                                     type='checkbox'
+                                    id='checkbox-input'
                                     checked={multiFormInput}
                                     disabled={false}
                                     onChange={onSelectChange}
                                 />
 
-                                <span className='checkbox-label' onClick={onSelectChange}>
+                                <span className='checkbox-label' id='checkbox-label' onClick={onSelectChange}>
                                     {activeForms && activeForms?.length > 0
                                         ? `${activeForms?.length} of ${forms.length} selected records`
                                         : 'Select All'}
@@ -393,7 +394,7 @@ const MultiFormInputRow = ({
                         disableInput={false}
                         requiredInput={false}
                         name={inputName}
-                        inputClasses={`${isTextArea ? 'select-some-textarea' : ''}`}
+                        inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
                         type={columnModel.inputType}
                         classes='column-cell-input'
                         columnModel={columnModel}

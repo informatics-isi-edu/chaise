@@ -4,10 +4,11 @@ const recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 
 const testParams = {
   schema_table: 'multi-form-input:main',
-  max_input_rows: 200,
+  max_input_rows: 200
 };
 
 describe('Regarding multi form input and clone button', () => {
+  let cloneFormInput, cloneFormSubmitButton,inputSwitch;
   describe('Regarding multi form input,', () => {
     describe('in create mode', () => {
       beforeAll((done) => {
@@ -20,27 +21,121 @@ describe('Regarding multi form input and clone button', () => {
       });
 
       it('it should not be offered in single mode.', () => {
-        // TODO
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+        expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
+      });      
+
+      it('it should not be offered for disabled columns.', (done) => {
+        let input = recordEditPage.getInputForAColumn('id', 1);
+        expect(input.isEnabled()).toBeFalsy("col " + 'id' + " was not disabled.");
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('id');
+        expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
+        done();
+      });
+      it('it should be displayed as soon as users added a new form.', (done) => {
+        chaisePage.clickButton(cloneFormSubmitButton).then(() => {
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+        expect(toggleBtn.isPresent()).toBeTruthy("toggle btn is present");
+        done();
+      });
       });
 
-      it('it should be displayed as soon as users added a new form.', () => {
-        // TODO
+      it('by default only the first form should be selected.', (done) => {
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+        chaisePage.clickButton(toggleBtn).then(() => {
+          inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
+          const parentElement = inputSwitch.element(by.xpath('..'));
+          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+          done();
+        });
       });
 
-      it('it should not be offered for disabled columns.', () => {
-        // TODO
+      it('the newly cloned form should not be selected.', (done) => {
+        chaisePage.clickButton(cloneFormSubmitButton).then(() => {
+          inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
+          const parentElement = inputSwitch.element(by.xpath('..'));
+          expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+          done();
+        });
       });
+      
+      it('the form should work as a toggle when selected', (done) => {
+        inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
+        const parentElement = inputSwitch.element(by.xpath('..'));
+        chaisePage.clickButton(parentElement).then(() => {
+          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+        });
+        chaisePage.clickButton(parentElement).then(() => {
+          expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+          done();
+        });
+      });
+      it('the form should not be clickable', () => {
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+        const parentElement = inputSwitch.element(by.xpath('..'));
+        chaisePage.clickButton(toggleBtn).then(() => {
+          expect(parentElement.getAttribute("class")).not.toContain('form-overlay', 'Form is clickable');
+        });
+      });
+      describe('checkbox functionality',() => {
+        let checkboxLabel, checkboxInput;
+        it('on load the as the first form is selected by default checkbox text should reflect that', (done) => {
+          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+          chaisePage.clickButton(toggleBtn).then(() => {
+            inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
+            const parentElement = inputSwitch.element(by.xpath('..'));
+            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            
+            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
+            
+            elementsWithClass.count().then((count) => {
+              checkboxLabel = element(by.id('checkbox-label'));
+              expect(checkboxLabel.getText()).toBe(`1 of ${count} selected records`);
+              done();
+            });
+          });
+        });
 
-      it('by default only the first form should be selected.', () => {
-        // TODO
-        // check that is selected
-        // check that adding value and clicking on apply only applies to the first one.
-      });
-
-      it('the newly cloned form should not be selected.', () => {
-        // click on clone and see that it's not selected.
-        // check that adding value and clicking on apply only applies to the first one.
-      });
+        it('when we click on clone the checkbox text should reflect', (done) => {
+          chaisePage.clickButton(cloneFormSubmitButton).then(() => {
+            
+            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
+            
+            elementsWithClass.count().then((count) => {
+              expect(checkboxLabel.getText()).toBe(`1 of ${count} selected records`);
+              done();
+            });
+          });
+        });
+        it('click on checkbox then all forms are selected and checkbox text should change', (done) => {
+            
+            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
+            
+            elementsWithClass.count().then((count) => {
+              checkboxInput = element(by.id('checkbox-input'));
+              chaisePage.clickButton(checkboxInput).then(() => {
+              expect(checkboxLabel.getText()).toBe(`${count} of ${count} selected records`);
+              done();
+            });
+          })
+        });
+        it('deselecting the checkbox and checkbox text should change', (done) => {
+            
+            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
+            
+            elementsWithClass.count().then((count) => {
+              chaisePage.clickButton(checkboxInput).then(() => {
+              expect(checkboxLabel.getText()).toBe('Select All');
+              done();
+            });
+          })
+        });
+      })
+      describe('apply functionality for textarea',() => {
+        // apply to all, clear all, apply to some, clear to some
+        // TODO second phase
+      })
+      
 
       /**
        * TODO more test cases should be added here...
@@ -78,6 +173,7 @@ describe('Regarding multi form input and clone button', () => {
           // TODO
           // click on the toggle for that one column, select all, change value, and then submit.
         });
+       
       });
     });
   });

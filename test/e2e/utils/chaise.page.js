@@ -222,6 +222,19 @@ var recordEditPage = function() {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.select-all-close-' + columnDisplayName));
     }
+    /* Multi form selectors*/
+    this.getColumnMultiFormButton = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.css('.multi-form-' + columnDisplayName));
+    };
+    this.getMultiFormClass = function () {
+        return element(by.css('.inputs-row .entity-value entity-active'));
+    };
+    this.getMultiFormActiveRow = function () {
+        const checkboxLabel = element(by.css('.form-inputs-row.highlighted-row.multi-form-input-row .chaise-checkbox.checkbox-label'));
+
+        return checkboxLabel;
+    };
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
