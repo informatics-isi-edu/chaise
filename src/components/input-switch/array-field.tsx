@@ -55,7 +55,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [counter, setCounter] = useState(0);
   const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();
+  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();  
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -318,7 +318,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <InputSwitch
                   {...props}
                   type={getInputType({ name: baseArrayType })}
-                  {...register(`${name}-new-item`)}
+                  {...register(`${name}-new-item`,{value:''})}
                   displayExtraDateTimeButtons={true}
                   displayDateTimeLabels={baseArrayType === 'date' ? false : true}
                 />
