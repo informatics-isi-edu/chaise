@@ -1,5 +1,8 @@
 .squished-array-buttons {
   .array-input-field-container {
+    .add-button{
+      padding-right: 8px;
+    }
     .input-items-new {
       .item {
         .action-buttons {
@@ -13,6 +16,9 @@
 // New Styles
 .entity-value,
 .select-all-input {
+  .add-button{
+    padding-right: 6px;
+  }
   .array-input-field-container {
     ul {
       padding-left: 0;
@@ -26,8 +32,6 @@
       }
       .chaise-btn {
         height: 30px;
-      }
-      &.timestamp .add-button {
       }
     }
     .input-items-new {
