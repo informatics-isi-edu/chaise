@@ -104,11 +104,6 @@
             padding-right: 4px;
           }
         }
-        &.timestamp {
-          .item-input .input-switch-datetime .chaise-btn-group.translateY {
-            transform: translateY(18px);
-          }
-        }
         [class*='input-switch-container'] {
           flex: 1 1 1px;
         }
@@ -130,15 +125,8 @@
       }
       .chaise-btn-group {
         position: absolute;
+        bottom: 0px;
       }
-    }
-  }
-}
-
-.select-all-row{
-  .array-input-field-container .item.timestamp {
-    .item-input .input-switch-datetime .chaise-btn-group.translateY {
-      transform: translateY(38px) !important;
     }
   }
 }
