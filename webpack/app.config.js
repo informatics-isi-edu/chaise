@@ -209,35 +209,40 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         maxSize: 500000,
         hidePathInfo: true,
         name: 'common',
+        /**
+         * the noted priority is also changing the order of include statements in the output html.
+         * we want to make sure chaise is the last css file that is added, that's why it has the lowest priority.
+         * this was mainly an issue in deriva-webapps where the bootstrap rules were overriding our chaise rules.
+         *
+         * TODO we should come up with a better solution. "priority" property is mainly to make sure a rule has
+         * precedence over another one. so if two rules match the given "test", the one with higher priority wins.
+         * but now we're abusing it to dicatet the order of assets.
+         */
         cacheGroups: {
           // this group is useful for deriva-webapps
           chaiseVendor: {
             test: /[\\/]node_modules[\\/]\@isrd-isi-edu[\\/]chaise[\\/]/,
             name: 'vendor-chaise',
             chunks: 'all',
-            priority: 4
+            priority: 1
           },
           reactVendor: {
             test: /[\\/]node_modules[\\/](react|react-dom|react-bootstrap)[\\/]/,
             name: 'vendor-react',
             chunks: 'all',
-            priority: 3
+            priority: 2
           },
           bootstrapVendor: {
             test: /[\\/]node_modules[\\/]bootstrap[\\/]/,
             name: 'vendor-bootstrap',
             chunks: 'all',
-            priority: 2
+            priority: 3
           },
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
+            test: /[\\/]node_modules[\\/](?!(\@isrd-isi-edu[\\/]chaise|bootstrap|react|react-dom|react-bootstrap)[\\/])/,
             name: 'vendor-rest',
             chunks: 'all',
-            /**
-             * we have to make sure priority of this group is less than the rest
-             * so this rule is used when others failed
-             */
-            priority: 1
+            priority: 4
           }
         },
       },
