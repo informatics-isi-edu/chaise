@@ -235,6 +235,23 @@ var recordEditPage = function() {
 
         return checkboxLabel;
     };
+    this.getMultiFormApply = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.css('.multi-form-input-apply-' + columnDisplayName));
+    }
+    this.getParentElement = function (child) {
+        return child.element(by.xpath('..'))
+    }
+    this.getAllElementsWithClass = function (className) {
+        return element.all(by.css(className)).count();
+    }
+    this.getCheckboxInput = function () {
+       return element(by.id('checkbox-input'));
+    }
+    this.getCheckboxLabel = function () {
+        return element(by.id('checkbox-label'));
+     }
+
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;

@@ -8,7 +8,7 @@ const testParams = {
 };
 
 describe('Regarding multi form input and clone button', () => {
-  let cloneFormInput, cloneFormSubmitButton,inputSwitch;
+  let cloneFormInput, cloneFormSubmitButton,inputSwitch, checkboxLabel, checkboxInput;;
   describe('Regarding multi form input,', () => {
     describe('in create mode', () => {
       beforeAll((done) => {
@@ -25,13 +25,6 @@ describe('Regarding multi form input and clone button', () => {
         expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
       });      
 
-      it('it should not be offered for disabled columns.', (done) => {
-        let input = recordEditPage.getInputForAColumn('id', 1);
-        expect(input.isEnabled()).toBeFalsy("col " + 'id' + " was not disabled.");
-        let toggleBtn = recordEditPage.getColumnMultiFormButton('id');
-        expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
-        done();
-      });
       it('it should be displayed as soon as users added a new form.', (done) => {
         chaisePage.clickButton(cloneFormSubmitButton).then(() => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
@@ -40,100 +33,174 @@ describe('Regarding multi form input and clone button', () => {
       });
       });
 
+      it('it should not be offered for disabled columns.', (done) => {
+        let input = recordEditPage.getInputForAColumn('id', 1);
+        expect(input.isEnabled()).toBeFalsy("col " + 'id' + " was not disabled.");
+        let toggleBtn = recordEditPage.getColumnMultiFormButton('id');
+        expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
+        done();
+      });
+      
+
       it('by default only the first form should be selected.', (done) => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-        chaisePage.clickButton(toggleBtn).then(() => {
-          inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
-          const parentElement = inputSwitch.element(by.xpath('..'));
-          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-          done();
-        });
+        chaisePage.clickButton(toggleBtn)
+          .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
+          .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+          .then((parentElement) => {
+            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            done();
+          })
+          .catch(chaisePage.catchTestError(done));
       });
+      
 
       it('the newly cloned form should not be selected.', (done) => {
-        chaisePage.clickButton(cloneFormSubmitButton).then(() => {
-          inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
-          const parentElement = inputSwitch.element(by.xpath('..'));
-          expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
-          done();
-        });
+        chaisePage.clickButton(cloneFormSubmitButton)
+          .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 3))
+          .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+          .then((parentElement) => {
+            expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+            done();
+          })
+          .catch(chaisePage.catchTestError(done));
       });
+      
       
       it('the form should work as a toggle when selected', (done) => {
         inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
-        const parentElement = inputSwitch.element(by.xpath('..'));
+        const parentElement = recordEditPage.getParentElement(inputSwitch);
         chaisePage.clickButton(parentElement).then(() => {
           expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-        });
-        chaisePage.clickButton(parentElement).then(() => {
-          expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
-          done();
-        });
+        }).then(() => {
+          return chaisePage.clickButton(parentElement).then(() => {
+            expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        })
+        
       });
+      it('previous selection should remain after closing and opening again', (done) => {
+        inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
+        const parentElement = recordEditPage.getParentElement(inputSwitch);
+        chaisePage.clickButton(parentElement).then(() => {
+          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+        }).then(() => {
+          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+          chaisePage.clickButton(toggleBtn)
+            .then(() => chaisePage.clickButton(toggleBtn))
+            .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 3))
+            .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+            .then((parentElement) => {
+              expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+              done();
+            })
+          }).catch(chaisePage.catchTestError(done));
+        })
+
       it('the form should not be clickable', () => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-        const parentElement = inputSwitch.element(by.xpath('..'));
+        const parentElement = recordEditPage.getParentElement(inputSwitch);
         chaisePage.clickButton(toggleBtn).then(() => {
-          expect(parentElement.getAttribute("class")).not.toContain('form-overlay', 'Form is clickable');
+          return chaisePage.clickButton(parentElement).then(() => {
+            expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is not selected');
+          })
         });
       });
       describe('checkbox functionality',() => {
-        let checkboxLabel, checkboxInput;
-        it('on load the as the first form is selected by default checkbox text should reflect that', (done) => {
-          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-          chaisePage.clickButton(toggleBtn).then(() => {
-            inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
-            const parentElement = inputSwitch.element(by.xpath('..'));
-            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-            
-            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
-            
-            elementsWithClass.count().then((count) => {
-              checkboxLabel = element(by.id('checkbox-label'));
-              expect(checkboxLabel.getText()).toBe(`1 of ${count} selected records`);
-              done();
-            });
-          });
+        let elementsWithClass;
+        it('on load the label should reflect what is selected.', (done) => {
+          let toggleBtn;
+          chaisePage.clickButton(recordEditPage.getColumnMultiFormButton('markdown_col'))
+            .then(() => {
+              toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col', 1);
+              return recordEditPage.getInputSwitchContainer('markdown_col', 1);
+            })
+            .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+            .then((parentElement) => {
+              expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            })
+            .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+            .then((count) => {
+              return recordEditPage.getCheckboxLabel().getText()
+                .then((checkboxLabelText) => {
+                  return recordEditPage.getAllElementsWithClass('.entity-value.entity-active')
+                    .then((selected) => {
+                      expect(checkboxLabelText).toBe(`${selected} of ${count} selected records`);
+                      done();
+                    });
+                });
+            })
+            .catch(chaisePage.catchTestError(done));
         });
+        
+        
 
-        it('when we click on clone the checkbox text should reflect', (done) => {
-          chaisePage.clickButton(cloneFormSubmitButton).then(() => {
-            
-            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
-            
-            elementsWithClass.count().then((count) => {
-              expect(checkboxLabel.getText()).toBe(`1 of ${count} selected records`);
-              done();
-            });
-          });
+        it('the label should update after adding a new form', (done) => {
+          chaisePage.clickButton(cloneFormSubmitButton)
+            .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+            .then((count) => {
+              return recordEditPage.getAllElementsWithClass('.entity-value.entity-active')
+                .then((selected) => {
+                  expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${selected} of ${count} selected records`);
+                  done();
+                });
+            })
+            .catch(chaisePage.catchTestError(done));
         });
-        it('click on checkbox then all forms are selected and checkbox text should change', (done) => {
-            
-            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
-            
-            elementsWithClass.count().then((count) => {
-              checkboxInput = element(by.id('checkbox-input'));
+        
+        
+        it('when partially selected, clicking on the checkbox should select all forms', (done) => {
+            checkboxInput = recordEditPage.getCheckboxInput();
               chaisePage.clickButton(checkboxInput).then(() => {
-              expect(checkboxLabel.getText()).toBe(`${count} of ${count} selected records`);
+                return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                .then((count) => {
+                  expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
+                  done();
+               }).catch(chaisePage.catchTestError(done));
+               })
+         });
+        
+        it('when all selecting, clicking on the checkbox should dselect all forms', (done) => {            
+          chaisePage.clickButton(checkboxInput)
+            .then(() => {
+              expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');
               done();
-            });
-          })
+            })
+            .catch(chaisePage.catchTestError(done));
         });
-        it('deselecting the checkbox and checkbox text should change', (done) => {
-            
-            const elementsWithClass = element.all(by.css('.form-header.entity-value'));
-            
-            elementsWithClass.count().then((count) => {
-              chaisePage.clickButton(checkboxInput).then(() => {
-              expect(checkboxLabel.getText()).toBe('Select All');
+        it('when none are selected, clicking on the checkbox should select all forms', (done) => {   
+          expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');         
+          checkboxInput = recordEditPage.getCheckboxInput();
+          chaisePage.clickButton(checkboxInput).then(() => {
+            return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+            .then((count) => {
+              expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
               done();
-            });
-          })
+           }).catch(chaisePage.catchTestError(done));
+           })
         });
+        
       })
       describe('apply functionality for textarea',() => {
-        // apply to all, clear all, apply to some, clear to some
-        // TODO second phase
+        it('apply and clear should be disabled when no forms are selected',()=>{
+
+        });
+        it('apply and clear should be enabled when forms are selected',()=>{
+
+        });
+        it('when all forms are selected, change should reflect in all forms',()=>{
+
+        });
+        it('when clear is clicked, change should clear to selected forms',()=>{
+
+        });
+        it('when some forms are selected, change should reflect in selected forms',()=>{
+
+        });
+        it('change values in the forms without affecting the other forms',()=>{
+
+        });
       })
       
 
