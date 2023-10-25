@@ -194,7 +194,7 @@ var testParams = {
     },
     tooltip: {
         exportDropdown: "Click to choose an export format.",
-        permalink: "Click to copy the current url to clipboard.",
+        permalink: "Click to copy the current URL to clipboard.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     },
     activeList: {

@@ -475,9 +475,7 @@ html {
       float: right;
       text-align: right;
 
-      // make sure the buttons show in the same line
       & > * {
-        display: inline-block;
         margin-left: 5px;
       }
 
@@ -676,7 +674,6 @@ html {
       padding-right: 5px;
       font-weight: 400;
       position: relative;
-      vertical-align: middle;
       min-height: variables.$chaise-checkbox-height;
       margin-bottom: 0;
     }
@@ -685,32 +682,38 @@ html {
     }
 
     input {
+      // turn off the default browser appearance as we're showing the checkmark with :before and :after
+      appearance: none;
+
       position: absolute;
       z-index: map-get(variables.$z-index-map, 'checkbox-input');
       cursor: pointer;
       width: variables.$chaise-checkbox-width;
       height: variables.$chaise-checkbox-height;
       top: 0;
-      margin-top: 2px;
 
       &:disabled {
         cursor: not-allowed;
-        &:before,
-        &:checked:after {
+
+        // we have to attach the checkmark to the label otherwise firefox won't show it.
+        & + label:before,
+        &:checked + label:after {
           color: map-get(variables.$color-map, 'disabled');
           border-color: map-get(variables.$color-map, 'disabled');
         }
       }
 
-      &:before,
-      &:checked:after {
+      // we have to attach the checkmark to the label otherwise firefox won't show it.
+      & + label:before,
+      &:checked + label:after {
         color: map-get(variables.$color-map, 'primary');
         -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
       }
 
-      &:before {
+      // we have to change the the checkmark to the label otherwise firefox won't show it.
+      & + label:before {
         content: "";
         display: inline-block;
         position: absolute;
@@ -723,19 +726,27 @@ html {
         background-color: map-get(variables.$color-map, 'white');
       }
 
-      &:indeterminate:before {
-        /* Style for indeterminate state */
-        background: none;
+      &:indeterminate + label:after {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        content: "\f068"; // fa-solid fa-minus"
+        font-size: 1rem; // the visible part of icon is small, so we have to make it properly fit the box
+        line-height: 1; // eventhough we're making it bigger, but make sure the whole icon doesn't go beyond the limit
       }
 
-      &:checked:after {
+      // we have to change the the checkmark to the label otherwise firefox won't show it.
+      &:checked + label:after {
         position: absolute;
-        top: -2px;
-        left: 2px;
+        top: 1px;
+        left: 1px;
         font-family: "Font Awesome 6 Free";
         font-weight: 900;
         content: "\f00c"; // fa-solid fa-check
-        font-size: 1.3rem;
+        font-size: 1.3rem; // the visible part of icon is small, so we have to make it properly fit the box
+        line-height: 1; // eventhough we're making it bigger, but make sure the whole icon doesn't go beyond the limit
       }
     }
   }

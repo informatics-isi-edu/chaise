@@ -71,11 +71,11 @@ const MultiFormInputRow = ({
         }
     }, []);
 
-    /** 
+    /**
      * This useffect is to set the indeterminate checkbox when forms are individually selected
      * and selected forms length is less than total forms length
-    */ 
-    
+    */
+
     useEffect(() => {
         if (ref && ref.current && activeForms) {
             (ref.current as HTMLInputElement).indeterminate =
@@ -93,13 +93,13 @@ const MultiFormInputRow = ({
         updateTextareaWidth();
     }, [multiFormWidthChanged]);
 
-    /** 
+    /**
      * We are having a resize sensor on input area. This is to reverse the flex-direction of upper row once it starts overlapping
      * We chose 400, based on manual testing and thats when the buttons and checkbox container starts overlapping.
      * Since we want to reduce the width of text area till min-width 250px we are moving the buttons and checkbox container
      * to two rows with button container on top.
-    */ 
-   
+    */
+
     useEffect(() => {
 
         const inputDiv = document.querySelector('.multi-form-input') as HTMLElement;
@@ -243,14 +243,14 @@ const MultiFormInputRow = ({
         });
     };
 
-    /** 
-     * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as 
+    /**
+     * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
      * the immidiate parent center-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
-     * to the next immediate parent width which is multi-form-input-row. 
-     * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are 
+     * to the next immediate parent width which is multi-form-input-row.
+     * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are
      * setting a width for textarea as 1200 and making it center aligned. We choose 1200 as we dont want input to span
      * across container for higher resolutions(i.e beyond 1800)
-    */ 
+    */
     const updateTextareaWidth = () => {
         const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
         const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
@@ -316,12 +316,11 @@ const MultiFormInputRow = ({
                                     disabled={false}
                                     onChange={onSelectChange}
                                 />
-
-                                <span className='checkbox-label' id='checkbox-label' onClick={onSelectChange}>
+                                <label className='checkbox-label' id='checkbox-label' onClick={onSelectChange}>
                                     {activeForms && activeForms?.length > 0
                                         ? `${activeForms?.length} of ${forms.length} selected records`
                                         : 'Select All'}
-                                </span>
+                                </label>
                             </span>
                         </ChaiseTooltip>
                         <ChaiseTooltip

@@ -171,31 +171,14 @@
               .multi-form-input-checkbox {
                 display: flex;
                 align-items: center;
-
-                .checkbox-input {
-                  position: relative;
-                  margin: 0 5px 0 0;
-                  width: 16px;
-                  height: 16px;
-
-                  // We are reducing the width and height to make it consitent with the text
-                  &:before {
-                    width: 16px;
-                    height: 16px;
-                  }
-
-                  // adjusting the top and left to make the selection center aligned in the checkbox
-                  &:after {
-                    top: -5px;
-                    left: -1px;
-                  }
+                cursor: pointer;
+                .checkbox-label {
+                  cursor: pointer;
                 }
               }
               .multi-form-input-how-to {
-                border-color: map-get(variables.$color-map, 'white')!important;
                 cursor: default;
-                margin-left: 5px;
-                color: map-get(variables.$color-map, 'how-to-multi-form');
+                color: map-get(variables.$color-map, 'black');
               }
 
               .multi-form-input-how-to:hover {
@@ -203,11 +186,11 @@
               }
             }
 
-          .multi-form-input-button-container {
-            /**
-            * We are aligning the buttons always to the right of the container so that when the width is less it always
-            * aligns to the top right in the first row
-            */
+            .multi-form-input-button-container {
+              /**
+              * We are aligning the buttons always to the right of the container so that when the width is less it always
+              * aligns to the top right in the first row
+              */
               text-align: right;
             }
           }

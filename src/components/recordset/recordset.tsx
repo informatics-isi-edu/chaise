@@ -18,7 +18,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import React, { AnchorHTMLAttributes, useEffect, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
@@ -161,6 +161,8 @@ const RecordsetInner = ({
   const [facetsRegistered, setFacetsRegistered] = useState(false);
 
   const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
+
+  const [permalinkTooltip, setPermalinkTooltip] = useState(MESSAGE_MAP.tooltip.permalink);
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
@@ -529,11 +531,26 @@ const RecordsetInner = ({
 
   const recordsetLink = getRecordsetLink();
 
-  const copyPermalink = () => {
+  /**
+   * the callback for when permalink button is clicked
+   */
+  const copyPermalink = (e: React.MouseEvent) => {
+    // avoid the navigation
+    e.preventDefault();
+
     // log the action
     logRecordsetClientAction(LogActions.PERMALINK_LEFT);
 
-    copyToClipboard(recordsetLink);
+    // copy to the clipboard
+    copyToClipboard(recordsetLink).then(() => {
+      setPermalinkTooltip('Copied!');
+      setTimeout(() => {
+        setPermalinkTooltip(MESSAGE_MAP.tooltip.permalink);
+      }, 1000);
+    }).catch((err) => {
+      $log.warn('failed to copy with the following error:')
+      $log.warn(err);
+    })
   }
 
   /**
@@ -823,7 +840,7 @@ const RecordsetInner = ({
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
                   />
-                  <ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.permalink}>
+                  <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
                     <a
                       id='permalink'
                       className='chaise-btn chaise-btn-primary'

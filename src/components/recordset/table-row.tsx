@@ -526,7 +526,9 @@ const TableRow = ({
       >
         {showActionButtons &&
           <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
-            {renderActionButtons()}
+            <div className='action-btns-inner-container'>
+              {renderActionButtons()}
+            </div>
           </td>
         }
         {renderCells()}

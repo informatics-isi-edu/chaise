@@ -9,6 +9,7 @@
   position: relative;
   display: inline-flex;
   vertical-align: middle; // match .chaise-btn alignment given font-size hack above
+  align-items: baseline; // to align it to the same line
 
   > .chaise-btn {
     position: relative;
