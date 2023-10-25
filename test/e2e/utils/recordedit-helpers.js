@@ -1629,10 +1629,26 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 };
 
 /**
- * used for checking the success page
- * @param  {[type]}  tableParams [description]
- * @param  {Boolean} isEditMode  [description]
- * @return {[type]}              [description]
+ * used for checking the success page. can handle both single and multi form cases.
+ *
+ * expected parameters in the tableParams object:
+ *  - table_displayname: The displayname of the table
+ *  - results: An array of arrays. Each array encodes the expected values for each row. The values for each column
+ *             can be:
+ *               - string: the expected getText() of the row
+ *               - an object with `link` and `value` to test the displayed link.
+ *  - result_columns: the column names (an array of string).
+ *  - not_ci: a boolean that can be used if we want to skip test cases for non CI environment. If you want to run test cases
+ *            all the time, pass `true` otherwise pass `!process.env.CI`.
+ *  - files: the files that are used during test (for upload test). if you're not testing upload, pass an empty array.
+ *
+ * only needed for multi-edit (in multi edit mode, the resultset link will link to the original location)
+ *  - keys:  so this should be passed
+ *          for generating the same link. An array of objects with like this: {name: "id", value: "1000", operator: "="}
+ *  - sortColumns: the columns used for sorting
+ *
+ * @param  {Object}  tableParams refer to the description
+ * @param  {Boolean} isEditMode  whether this is in entity mode or not
  */
 exports.testSubmission = function (tableParams, isEditMode) {
     var hasErrors = false;

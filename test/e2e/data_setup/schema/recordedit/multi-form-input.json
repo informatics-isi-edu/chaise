@@ -6,23 +6,151 @@
       "schema_name": "multi-form-input",
       "kind": "table",
       "keys": [{"unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [["multi-form-input", "main_fk1"]],
+          "foreign_key_columns": [
+              {
+                  "column_name": "fk_col",
+                  "table_name": "main",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "referenced_columns": [
+              {
+                  "column_name": "id",
+                  "table_name": "f1",
+                  "schema_name": "multi-form-input"
+              }
+          ]
+        }
+      ],
       "column_definitions": [
         {
           "name": "id",
           "nullok": false,
-          "type": { "typename": "serial4" }
+          "type": {
+            "typename": "serial4"
+          }
         },
         {
           "name": "markdown_col",
-          "nullok": true,
           "type": {
             "typename": "markdown"
+          }
+        },
+        {
+          "name": "text_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "int_col",
+          "type": {
+            "typename": "int"
+          }
+        },
+        {
+          "name": "float_col",
+          "type": {
+            "typename": "float4"
+          }
+        },
+        {
+          "name": "date_col",
+          "type": {
+            "typename": "date"
+          }
+        },
+        {
+          "name": "timestamp_col",
+          "type": {
+            "typename": "timestamp"
+          }
+        },
+        {
+          "name": "boolean_col",
+          "type": {
+            "typename": "boolean"
+          }
+        },
+        {
+          "name": "fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "asset_col",
+          "type": {"typename": "text"},
+          "annotations": {
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"/hatrac/js/chaise/{{{_int_col}}}/multi-form-input/{{{_asset_col.md5_hex}}}",
+              "filename_column" : "asset_col_filename",
+              "byte_count_column": "asset_col_bytes",
+              "md5": "asset_col_md5"
+            }
+          }
+        },
+        {
+          "name": "asset_col_filename",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "asset_col_bytes",
+          "type": {
+            "typename": "int"
+          }
+        },
+        {
+          "name": "asset_col_md5",
+          "type": {
+            "typename": "text"
           }
         }
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", "markdown_col"]
+          "*": [
+            "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
+            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "asset_col_filename"
+          ]
+        }
+      }
+    },
+    "f1": {
+      "kind": "table",
+      "table_name": "f1",
+      "schema_name": "multi-form-input",
+      "comment": "main table has fk to this table",
+      "keys": [
+          {"unique_columns": ["id"]},
+          {"unique_columns": ["name"]}
+      ],
+      "foreign_keys": [],
+      "column_definitions": [
+          {
+              "name": "id",
+              "nullok": false,
+              "type": {
+                  "typename": "text"
+              }
+          },
+          {
+              "name": "name",
+              "type": {
+                  "typename": "text"
+              }
+          }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display" : {
+          "row_name": {
+              "row_markdown_pattern": "{{{name}}}"
+          }
         }
       }
     }
