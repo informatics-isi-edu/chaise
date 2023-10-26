@@ -197,12 +197,12 @@ export function arrayFieldPlaceholder(baseType: string) {
   let placeholder;
   switch (baseType) {
     case 'timestamptz':
-      placeholder = ["2001-01-01T01:01:01-08:00", "2002-02-02T02:02:02-08:00"]
+      placeholder = ['2001-01-01T01:01:01-08:00', '2002-02-02T02:02:02-08:00']
     case 'timestamp':
-      placeholder = ["2001-01-01T01:01:01", "2002-02-02T02:02:02"]
+      placeholder = ['2001-01-01T01:01:01', '2002-02-02T02:02:02']
       break;
     case 'date':
-      placeholder = ["2001-01-01", "2001-02-02"]
+      placeholder = ['2001-01-01', '2001-02-02']
       break;
     case 'numeric':
     case 'float4':
@@ -218,7 +218,7 @@ export function arrayFieldPlaceholder(baseType: string) {
       placeholder = [true, false]
       break;
     default:
-      placeholder = ["value1", "value2"]
+      placeholder = ['value1', 'value2']
       break;
   }
 
