@@ -242,6 +242,20 @@ var recordEditPage = function() {
     this.getParentElement = function (child) {
         return child.element(by.xpath('..'))
     }
+    this.getApplySomeTextArea = function (name) {
+        return this.getMultiFormInput().element(by.css('textarea[name="-1-' + name + '"]'));
+    };
+    this.getMultiFormInput = () => {
+        return element(by.css('.multi-form-input'));
+    }
+    this.getApplyBtnMultiForm = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.css('.multi-form-input-apply-' + columnDisplayName));
+    }
+    this.getClearBtnMultiForm = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.css('.multi-form-input-clear-' + columnDisplayName));
+    }
     this.getAllElementsWithClass = function (className) {
         return element.all(by.css(className)).count();
     }

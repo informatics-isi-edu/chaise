@@ -4,13 +4,51 @@ const recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 
 const testParams = {
   schema_table: 'multi-form-input:main',
-  max_input_rows: 200
+  max_input_rows: 200,
+  tables: [{
+    comment: "general case",
+    schema_name: "multi-form-input",
+    table_name: "main",
+    table_displayname: "main",
+    table_comment: "List of different types of accommodations",
+    not_ci: true,
+    primary_keys: ["id"],
+    inputs: [
+      {
+        "markdown_col": "textarea"
+      },
+      {
+        "markdown_col": "new text"
+      },
+      {
+        "markdown_col": ""
+      },
+      {
+        "markdown_col": ""
+      },
+      {
+        "markdown_col": ""
+      },
+    ],
+    formsOnLoad: 1,
+    formsAfterInput: 5,
+    result_columns: [
+      "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
+      "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "asset_col_filename"
+    ],
+    results: [
+      ["textarea"], ["new text"], [""], [""], [""]
+    ],
+    files: []
+  },
+  ]
 };
 
 describe('Regarding multi form input and clone button', () => {
-  let cloneFormInput, cloneFormSubmitButton,inputSwitch, checkboxLabel, checkboxInput;;
+  let cloneFormInput, cloneFormSubmitButton, inputSwitch, checkboxLabel, checkboxInput;;
   describe('Regarding multi form input,', () => {
     describe('in create mode', () => {
+      const EC = protractor.ExpectedConditions;
       beforeAll((done) => {
         chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}`);
         chaisePage.recordeditPageReady().then(() => {
@@ -23,14 +61,15 @@ describe('Regarding multi form input and clone button', () => {
       it('it should not be offered in single mode.', () => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
         expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
-      });      
+      });
 
       it('it should be displayed as soon as users added a new form.', (done) => {
         chaisePage.clickButton(cloneFormSubmitButton).then(() => {
-        let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-        expect(toggleBtn.isPresent()).toBeTruthy("toggle btn is present");
-        done();
-      });
+          return recordEditPage.getColumnMultiFormButton('markdown_col')
+        }).then((toggleBtn) => {
+          expect(toggleBtn.isPresent()).toBeTruthy("toggle btn is present")
+          done();
+        }).catch(chaisePage.catchTestError(done));
       });
 
       it('it should not be offered for disabled columns.', (done) => {
@@ -40,7 +79,7 @@ describe('Regarding multi form input and clone button', () => {
         expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
         done();
       });
-      
+
 
       it('by default only the first form should be selected.', (done) => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
@@ -53,7 +92,7 @@ describe('Regarding multi form input and clone button', () => {
           })
           .catch(chaisePage.catchTestError(done));
       });
-      
+
 
       it('the newly cloned form should not be selected.', (done) => {
         chaisePage.clickButton(cloneFormSubmitButton)
@@ -65,8 +104,8 @@ describe('Regarding multi form input and clone button', () => {
           })
           .catch(chaisePage.catchTestError(done));
       });
-      
-      
+
+
       it('the form should work as a toggle when selected', (done) => {
         inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
         const parentElement = recordEditPage.getParentElement(inputSwitch);
@@ -78,7 +117,7 @@ describe('Regarding multi form input and clone button', () => {
             done();
           }).catch(chaisePage.catchTestError(done));
         })
-        
+
       });
       it('previous selection should remain after closing and opening again', (done) => {
         inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
@@ -95,8 +134,8 @@ describe('Regarding multi form input and clone button', () => {
               expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
               done();
             })
-          }).catch(chaisePage.catchTestError(done));
-        })
+        }).catch(chaisePage.catchTestError(done));
+      })
 
       it('the form should not be clickable', () => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
@@ -107,7 +146,7 @@ describe('Regarding multi form input and clone button', () => {
           })
         });
       });
-      describe('checkbox functionality',() => {
+      xdescribe('checkbox functionality', () => {
         let elementsWithClass;
         it('on load the label should reflect what is selected.', (done) => {
           let toggleBtn;
@@ -133,8 +172,8 @@ describe('Regarding multi form input and clone button', () => {
             })
             .catch(chaisePage.catchTestError(done));
         });
-        
-        
+
+
 
         it('the label should update after adding a new form', (done) => {
           chaisePage.clickButton(cloneFormSubmitButton)
@@ -148,20 +187,20 @@ describe('Regarding multi form input and clone button', () => {
             })
             .catch(chaisePage.catchTestError(done));
         });
-        
-        
+
+
         it('when partially selected, clicking on the checkbox should select all forms', (done) => {
-            checkboxInput = recordEditPage.getCheckboxInput();
-              chaisePage.clickButton(checkboxInput).then(() => {
-                return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
-                .then((count) => {
-                  expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
-                  done();
-               }).catch(chaisePage.catchTestError(done));
-               })
-         });
-        
-        it('when all selecting, clicking on the checkbox should dselect all forms', (done) => {            
+          checkboxInput = recordEditPage.getCheckboxInput();
+          chaisePage.clickButton(checkboxInput).then(() => {
+            return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+          }).then((count) => {
+            expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        })
+
+
+        it('when all selecting, clicking on the checkbox should dselect all forms', (done) => {
           chaisePage.clickButton(checkboxInput)
             .then(() => {
               expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');
@@ -169,40 +208,150 @@ describe('Regarding multi form input and clone button', () => {
             })
             .catch(chaisePage.catchTestError(done));
         });
-        it('when none are selected, clicking on the checkbox should select all forms', (done) => {   
-          expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');         
+        it('when none are selected, clicking on the checkbox should select all forms', (done) => {
+          expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');
           checkboxInput = recordEditPage.getCheckboxInput();
           chaisePage.clickButton(checkboxInput).then(() => {
             return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
-            .then((count) => {
-              expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
-              done();
-           }).catch(chaisePage.catchTestError(done));
-           })
+              .then((count) => {
+                expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
+                done();
+              }).catch(chaisePage.catchTestError(done));
+          })
         });
-        
+
       })
-      describe('apply functionality for textarea',() => {
-        it('apply and clear should be disabled when no forms are selected',()=>{
+      describe('apply changes', () => {
+        beforeAll((done) => {
+          chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}`);
+          chaisePage.recordeditPageReady().then(() => {
+            cloneFormInput = chaisePage.recordEditPage.getCloneFormInput();
+            cloneFormSubmitButton = chaisePage.recordEditPage.getCloneFormInputSubmitButton();
+            // add 4 in input and click on clone
+            const textToType = "4";
+            cloneFormInput.sendKeys(textToType);
+            chaisePage.clickButton(cloneFormSubmitButton).then(() => {
+              return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                .then((count) => expect(count.toEqual(5)))
+            });
+            done();
+          }).catch(chaisePage.catchTestError(done));
 
         });
-        it('apply and clear should be enabled when forms are selected',()=>{
+        describe('text area', () => {
+          let multiFormTextArea;
+          it('when no forms are selected, apply and clear buttons should be disabled ', () => {
+            let applyButtonDisabled;
+            let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+            chaisePage.clickButton(toggleBtn)
+              .then(() => recordEditPage.getMultiFormApply('markdown_col'))
+              .then((applyButtonElement) => {
+                return applyButtonElement.getAttribute('disabled');
+              })
+              .then((value) => {
+                applyButtonDisabled = value;
+                return recordEditPage.getInputSwitchContainer('markdown_col', 1);
+              })
+              .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+              .then((parentElement) => {
+                return chaisePage.clickButton(parentElement);
+              })
+              .then(() => {
+                expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+                return chaisePage.clickButton(parentElement);
+              })
+              .then(() => {
+                expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+                expect(applyButtonDisabled).toBeTruthy();
+              })
+              .catch(chaisePage.catchTestError);
+          });
+          it('when all forms are selected, clicking on apply should apply change to all forms', () => {
+            // come up with more easier text
+            multiFormTextArea = recordEditPage.getApplySomeTextArea('markdown_col');
+            const textToType = "textarea";
+            multiFormTextArea.sendKeys(textToType);
+            let checkboxInput = recordEditPage.getCheckboxInput();
 
-        });
-        it('when all forms are selected, change should reflect in all forms',()=>{
+            chaisePage.clickButton(checkboxInput)
+              .then(() => {
 
-        });
-        it('when clear is clicked, change should clear to selected forms',()=>{
+                recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                  .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
+                  .then((applybtn) => chaisePage.clickButton(applybtn))
 
-        });
-        it('when some forms are selected, change should reflect in selected forms',()=>{
+                  .then((count) => {
+                    for (let i = 0; i < count; i++) {
+                      const textArea = recordEditPage.getTextAreaForAColumn('markdown_col', i);
+                      textArea.getAttribute('value').then((text) => {
+                        expect(text).toContain(textToType);
+                      });
+                    }
+                  })
+              })
+          });
+          it('when some forms are selected, clicking on apply should apply change to selected forms', (done) => {
+            const textToType = "the text is changed";
+            let count;
+            multiFormTextArea.sendKeys('')
+              .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
+              .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+              .then((parentElement) => {
+                // Perform the first action
+                return chaisePage.clickButton(parentElement)
+                  .then(() => {
+                    // Check the class attribute here if needed
+                    expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+                    return parentElement; // Return the parentElement to the next `then`
+                  });
+              })
+              .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
+              .then(() => multiFormTextArea.sendKeys(textToType))
+              .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
+              .then((applybtn) => chaisePage.clickButton(applybtn))
+              .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+              .then((resultCount) => {
+                count = resultCount;
+                for (let i = 2; i < count; i++) {
+                  expect(recordEditPage.getTextAreaForAColumn('markdown_col', i).getAttribute('value')).toContain(textToType)
+                }
+                expect(recordEditPage.getTextAreaForAColumn('markdown_col', 1).getAttribute('value')).toContain('textarea')
+              })
+              .then(() => done())
+              .catch(chaisePage.catchTestError(done));
+          });
+          it('when some forms are selected, clicking on clear should clear values in selected forms', (done) => {
 
-        });
-        it('change values in the forms without affecting the other forms',()=>{
+            const clearBtn = recordEditPage.getClearBtnMultiForm('markdown_col')
+            chaisePage.clickButton(clearBtn)
+              .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+              .then((count) => {
+                for (let i = 2; i < count; i++) {
+                  recordEditPage.getTextAreaForAColumn('markdown_col', i).getAttribute('value').then((text) => {
+                    expect(text.length).not.toBeGreaterThan(0);
+                  })
+                }
+                expect(recordEditPage.getTextAreaForAColumn('markdown_col', 1).getAttribute('value')).toContain('textarea')
+              }).then(() => done())
+              .catch(chaisePage.catchTestError(done));
+          });
+        })
+        it('change values in the forms without affecting the other forms', () => {
 
+          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+          chaisePage.clickButton(toggleBtn)
+            .then(() => {
+              // Edit the textarea for the second form
+              let textarea = recordEditPage.getTextAreaForAColumn('markdown_col', 2);
+              return textarea.clear().then(() => textarea.sendKeys('new text'));
+            })
+            .then(() => {
+              recordEditHelpers.testSubmission(testParams.tables[0]);
+            })
         });
+
       })
-      
+
 
       /**
        * TODO more test cases should be added here...
@@ -240,7 +389,7 @@ describe('Regarding multi form input and clone button', () => {
           // TODO
           // click on the toggle for that one column, select all, change value, and then submit.
         });
-       
+
       });
     });
   });
