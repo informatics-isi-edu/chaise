@@ -23,6 +23,9 @@ This is a guide for people who develop Chaise.
   * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
 - [Context and provider pattern](#context-and-provider-pattern)
+- [Performance](#performance)
+  * [Debugging](#debugging)
+  * [Memorization](#memorization)
 
 ## Reading Material
 In this section, we've included all the guides and tools that we think are useful
@@ -987,3 +990,26 @@ const CounterDisplayInner = () => {
 
 export default CounterDisplay;
 ```
+
+## Performance
+
+In this section, we should summarize everything related to performance. This includes how to debug performance issues and common practices to fix issues. 
+
+### Debugging
+
+Before jumping into solutions, consider debugging and finding the root of the problem. 
+
+- You should install official [React developer tools](https://react.dev/learn/react-developer-tools). With this, you can look at components and see when/why each rerenders.
+  - By default, the "Profiler" tab only works in development mode. To use this tab in the production mode, you need to uncomment the `'react-dom$': 'react-dom/profiling',` alias in the [app.config.js](https://github.com/informatics-isi-edu/chaise/blob/master/webpack/app.config.js) file.
+- Installing in the `development` mode allows you to add break points in the code. You should also be mindful of the browser console, as React and other dependencies usually print warning/errors only in this mode. That being said, as we mentioned in [here](#development-vs-production), `development` has its downsides.
+
+### Memorization
+
+React always re-renders children when a parent component has to be re-rendered. But since we're using the provider pattern, the immediate relationship is unimportant. So, if we find any performance issues, it is probably related to redundant components rendering because of this. `memo`  lets us skip re-rendering a component when its props are unchanged. You can see how we've used it [here](https://github.com/informatics-isi-edu/chaise/pull/2341/commits/29720eb277faaa6fc768a912ffcf8a8ec4776980), which significantly improved the performance of record page.
+
+That being said, performance-related changes applied incorrectly can even harm performance. Use `React.memo()` wisely. Don't use memoization if you can't quantify the performance gains.
+
+Useful links:
+- https://react.dev/reference/react/memo
+- https://dmitripavlutin.com/use-react-memo-wisely/
+
