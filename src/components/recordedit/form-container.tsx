@@ -408,7 +408,7 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
-      reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue));
+      reset({...copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue), 'updateAllColumn':cm.column['_name']});
     });
   };
 

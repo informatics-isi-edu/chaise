@@ -51,10 +51,10 @@ type Options = {
 
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [itemList, setItemList] = useState<RowItem[]>([])
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = useState(1);
   const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();  
+  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -93,28 +93,35 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }, [formState])
 
   useEffect(() => {
+
     const sub = watch((data, options: Options) => {
-      // Clear All fields
-      if (options.values && options.values[name] === '') {
-        const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
-        keysToClear.push(`-1-${name.split('-')[1]}`)
 
-        unregister(keysToClear)
-        setDefaultFieldState([])
-      }
-      // Apply All executed
-      else if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
-        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
-
-        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
-      }
-      // Update component state as per the changes observed in the individual row values in the form context
-      else if (options.name?.startsWith(`${name}-row`)) {
+      if ((options.name && options.name.includes(name) && options.type === 'change')) {
         const itemId = parseInt(options.name?.split('-').at(-1) as string)
         onTextEdit(itemId, data[`${name}-row-${itemId}`])
+        trigger(`${name}-new-item`);
       }
 
-      trigger(`${name}-new-item`);
+      const updateAllColumn = getValues('updateAllColumn');
+      if (updateAllColumn && name.includes(updateAllColumn) && options.values) {
+
+        // Clear All fields
+        if (options.values[name] === '') {
+          const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
+          keysToClear.push(`-1-${name.split('-')[1]}`)
+
+          unregister(keysToClear)
+          setDefaultFieldState([])
+        }
+        // Apply All executed
+        else if (options.values[`-1-${name.split('-')[1]}`]) {
+          // console.log('Apply All');
+          const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
+
+          setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
+        }
+      }
+      
     })
 
     return () => sub.unsubscribe();
@@ -175,7 +182,6 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const setDefaultFieldState = (values: (string)[]) => {
-
     setItemList(
       values.length ?
         values.map((defVal: string, idx: number): RowItem => {
@@ -197,7 +203,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
         []
     )
 
-    setCounter(values.length)
+    setCounter(values.length + 1)
   }
 
   /**
@@ -244,45 +250,41 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const draggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
+    return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
+      {
+        (provided: DraggableProvided) => {
+          return <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={name + '-' + item.id.toString()}>
+            <div className='move-icon'>
+              <i className='fa-solid fa-grip-vertical'></i>
+            </div>
 
-    return <>
-      <Draggable key={item.id} draggableId={name + "-" + item.id.toString()} index={index} isDragDisabled={disableInput}>
-        {
-          (provided: DraggableProvided) => {
-            return <>
-              <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                <div className='move-icon'>
-                  <i className='fa-solid fa-grip-vertical'></i>
-                </div>
+            <div className='item-input'>
+              <InputSwitch
+                {...props}
+                type={getInputType({ name: baseArrayType })}
+                {...register(`${name}-row-${item.id}`, { value: item.value != undefined ? item.value : '' })}
+                displayExtraDateTimeButtons={true}
+                displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+                requiredInput={true}
+              />
+            </div>
 
-                <div className='item-input'>
-                  <InputSwitch
-                    {...props}
-                    type={getInputType({ name: baseArrayType })}
-                    {...register(`${name}-row-${item.id}`, { value: item.value != undefined ? item.value : '' })}
-                    displayExtraDateTimeButtons={true}
-                    displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-                    requiredInput={true}
+            <div>
+              {
+                !disableInput &&
+                <div className='action-buttons'>
+                  <button
+                    type='button' className='fa-solid fa-trash chaise-btn chaise-btn-tertiary chaise-btn-sm'
+                    onClick={() => { deleteItemWithId(item.id) }}
                   />
                 </div>
-
-                <div>
-                  {
-                    !disableInput &&
-                    <div className='action-buttons'>
-                      <button
-                        type='button' className='fa-solid fa-trash chaise-btn chaise-btn-tertiary chaise-btn-sm'
-                        onClick={() => { deleteItemWithId(item.id) }}
-                      />
-                    </div>
-                  }
-                </div>
-              </li>
-            </>
-          }
+              }
+            </div>
+          </li>
         }
-      </Draggable>
-    </>
+      }
+    </Draggable>
+
   }
 
   return (
@@ -295,39 +297,40 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
             name={name}
           />
           :
-          <>
-            <div className="input-items-container-new">
-              <DragDropContext onDragEnd={handleOnDragEnd}>
-                <StrictModeDroppable droppableId={`${name}-input-items-new`}>
-                  {
-                    (provided: DroppableProvided) => (
-                      <ul
-                        className={`input-items-new ${itemList.length ? 'add-margin-bottom' : ''}`}
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
-                        {provided.placeholder}
-                      </ul>
-                    )
-                  }
-                </StrictModeDroppable>
-              </DragDropContext>
-              <div className={`add-element-container ${baseArrayType}`}>
-                <InputSwitch
-                  {...props}
-                  type={getInputType({ name: baseArrayType })}
-                  {...register(`${name}-new-item`,{value:''})}
-                  displayExtraDateTimeButtons={true}
-                  displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-                />
-                <button
-                  type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
-                  onClick={addItem(-1, `${name}-new-item`)} disabled={disableAddButton}
-                >Add</button>
-              </div>
+
+          <div className='input-items-container-new'>
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <StrictModeDroppable droppableId={`${name}-input-items-new`}>
+                {
+                  (provided: DroppableProvided) => (
+                    <ul
+                      className={`input-items-new ${itemList.length ? 'add-margin-bottom' : ''}`}
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      key={`${name}-list`}
+                    >
+                      {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
+                      {provided.placeholder}
+                    </ul>
+                  )
+                }
+              </StrictModeDroppable>
+            </DragDropContext>
+            <div className={`add-element-container ${baseArrayType}`}>
+              <InputSwitch
+                {...props}
+                type={getInputType({ name: baseArrayType })}
+                {...register(`${name}-new-item`, { value: '' })}
+                displayExtraDateTimeButtons={true}
+                displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+              />
+              <button
+                type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
+                onClick={addItem(-1, `${name}-new-item`)} disabled={disableAddButton}
+              >Add</button>
             </div>
-          </>
+          </div>
+
         }
       </div>
     </>
