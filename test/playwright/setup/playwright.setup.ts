@@ -143,7 +143,7 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
     }
 
     // merge all the schema configurations
-    const catalog: any = {}, schemas: any = {};
+    const catalog: any = {}, schemas: any = {}, entities : any = {};
 
     schemaConfigurations.forEach((config: any) => {
       // copy annotations and ACLs over to the submitted catalog object
@@ -177,25 +177,28 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
         console.log(`catalog with id ${res.catalogId} created for project ${p}`);
         setCatalogID(p, res.catalogId);
 
-        // TODO capture entities per project
-        // const entities = res.entities;
-        // fs.writeFile(ENTITIES_PATH, JSON.stringify(entities), 'utf8', function (err) {
-        //   if (err) {
-        //     console.log('couldn\'t write entities.');
-        //     console.log(err);
-        //     reject(new Error('Unable to import data'));
-        //   } else {
-        //     console.log('created entities file for schemas');
-        //     resolve(true);
-        //   }
-        // });
-
+        if (!(p in entities)) {
+          entities[p] = {};
+        }
+        entities[p] = res.entities;
       } catch (exp) {
         console.log(exp);
         reject(new Error('Unable to import data'));
         return;
       }
     }
+
+    // write to file so it's easier to find.
+    fs.writeFile(ENTITIES_PATH, JSON.stringify(entities), 'utf8', function (err) {
+      if (err) {
+        console.log('couldn\'t write entities.');
+        console.log(err);
+        reject(new Error('Unable to import data'));
+      } else {
+        console.log('created entities file for schemas');
+        resolve(true);
+      }
+    });
 
     resolve(true);
 

@@ -1,10 +1,12 @@
-import { test, expect } from '@playwright/test';
+import moment from 'moment';
+import { test, expect, TestInfo } from '@playwright/test';
 
 // locators
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { CHAISE_BASE_URL, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -51,11 +53,13 @@ const testParams = {
 };
 
 test.describe('Related tables', () => {
+  const keys = [];
+  keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+  const URL_PATH = `${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const keys = [];
-    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
+
+    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${URL_PATH}`;
 
     await page.goto(`${baseURL}${PAGE_URL}`);
 
@@ -63,6 +67,40 @@ test.describe('Related tables', () => {
   });
 
   // TODO
+  test('overal structure of the page', async ({ page }) => {
+    await test.step('table of contents should be displayed properly and in correct order', async () => {
+      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveCount(testParams.tocHeaders.length);
+      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveText(testParams.tocHeaders);
+    });
+
+    await test.step('related entities should show in the expected order', async () => {
+      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveCount(testParams.headers.length);
+      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText(testParams.headers);
+    });
+  });
+
+  test('share popup when the citation annotation has wait_for of all-outbound', async ({ page, baseURL }, testInfo) => {
+    const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
+    const ridValue = getEntityRow(testInfo, testParams.schemaName, testParams.table_name, keyValues).RID;
+    const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/RID=${ridValue}`;
+    await testShareCiteModal(
+      page,
+      {
+        title: 'Share and Cite',
+        link,
+        // the table has history-capture: false
+        hasVersionedLink: false,
+        verifyVersionedLink: false,
+        citation: [
+          'Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two ',
+          'https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests ',
+          `(${moment().format('YYYY')}).`,
+        ].join(''),
+        // we don't need to test this here as well (it has been tested in record presentation)
+        bibtextFile: `accommodation_${ridValue}.bib`,
+      }
+    );
+  });
 
 });
 

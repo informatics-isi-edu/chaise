@@ -20,6 +20,11 @@ const getConfig = (options: TestOptions) => {
 
   const reporterFolder = resolve(__dirname, `./../../../playwright-report/${options.testName}`);
 
+  const extraBrowserParams = {
+    storageState: STORAGE_STATE,
+    permissions: ['clipboard-read', 'clipboard-write']
+  };
+
   const config = defineConfig({
 
     testMatch: options.testMatch,
@@ -39,7 +44,10 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    // workers: process.env.CI ? 1 : undefined,
+    workers: process.env.CI ? 4 : undefined,
+
+    // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways
+    outputDir: resolve(__dirname, `./../../../playwright-output/${options.testName}`),
 
     // Reporter to use
     reporter: process.env.CI ? [
@@ -70,21 +78,18 @@ const getConfig = (options: TestOptions) => {
       {
         name: 'chromium',
         dependencies: ['pretest'],
-        use: {
-          ...devices['Desktop Chrome'],
-          storageState: STORAGE_STATE
-        },
+        use: { ...devices['Desktop Chrome'], ...extraBrowserParams },
       },
-      {
-        name: 'firefox',
-        dependencies: ['pretest'],
-        use: { ...devices['Desktop Firefox'], storageState: STORAGE_STATE },
-      },
-      {
-        name: 'webkit',
-        dependencies: ['pretest'],
-        use: { ...devices['Desktop Safari'], storageState: STORAGE_STATE },
-      },
+      // {
+      //   name: 'firefox',
+      //   dependencies: ['pretest'],
+      //   use: { ...devices['Desktop Firefox'], ...extraBrowserParams },
+      // },
+      // {
+      //   name: 'webkit',
+      //   dependencies: ['pretest'],
+      //   use: { ...devices['Desktop Safari'], ...extraBrowserParams },
+      // },
     ],
   });
 

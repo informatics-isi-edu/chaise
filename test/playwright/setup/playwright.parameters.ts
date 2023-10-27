@@ -1,7 +1,12 @@
+import fs from 'fs';
+
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { resolve } from 'path';
+import { TestInfo } from '@playwright/test';
 
 export const ERMREST_URL = process.env.ERMREST_URL;
+
+export const CHAISE_BASE_URL = process.env.CHAISE_BASE_URL;
 
 /**
  * return the catalog created for tests.
@@ -10,7 +15,7 @@ export const ERMREST_URL = process.env.ERMREST_URL;
  *
  * (populated during setup)
  */
-export const getCatalogID = (projectName?: string, dontLogError?: boolean) : string | any | null => {
+export const getCatalogID = (projectName?: string, dontLogError?: boolean): string | any | null => {
   try {
     const obj = JSON.parse(process.env.CATALOG_ID!);
     if (!isObjectAndNotNull(obj) || (projectName && !obj[projectName])) {
@@ -51,6 +56,44 @@ export const setCatalogID = (projectName: string, catalogId: string) => {
  */
 export const ENTITIES_PATH = 'entities.json';
 
+/**
+ * return the row values based on the given criteria. useful for finding the system generated value of columns.
+ */
+export const getEntityRow = (testInfo: TestInfo, schema: string, table: string, row: { column: string, value: string }[]) => {
+  let match, entities;
+  try {
+    const fileContent = fs.readFileSync(ENTITIES_PATH, { encoding: 'utf8', flag: 'r' });
+    const data = JSON.parse(fileContent);
+    entities = data[testInfo.project.name][schema][table];
+    if (!Array.isArray(entities)) {
+      throw new Error('saved value is not an array.');
+    }
+  } catch (exp) {
+    console.log(`the entities file is eaither missing or doesn't have the proper value. path=${ENTITIES_PATH}`);
+    console.log(exp);
+    return null;
+  }
+
+  for (let i = 0; i < entities.length; i++) {
+    const entity = entities[i];
+    // identifying information for entity could be multiple columns of data
+    // which is the case for assocation tables
+    for (let j = 0; j < row.length; j++) {
+      // eslint-disable-next-line eqeqeq
+      if (entity[row[j].column] == row[j].value) {
+        match = entity;
+      } else {
+        match = null;
+        // move on to next entity
+        break;
+      }
+    }
+    if (match) break;
+  }
+  return match;
+}
+
+
 export const PRESET_PROJECT_NAME = 'pretest';
 
 /**
@@ -58,7 +101,7 @@ export const PRESET_PROJECT_NAME = 'pretest';
  * (populated during setup)
  */
 export const getMainUserSessionObject = () => {
-  return  JSON.parse(process.env.WEBAUTHN_SESSION!);
+  return JSON.parse(process.env.WEBAUTHN_SESSION!);
 }
 
 
@@ -66,3 +109,6 @@ export const getMainUserSessionObject = () => {
  * the file that contains the logged in browser state
  */
 export const STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
+
+
+export const DOWNLOAD_FOLDER = resolve(__dirname, '../.download');

@@ -42,3 +42,4 @@ common/styles/navbar.css
 /playwright-report/
 /playwright/.cache/
 test/playwright/.auth
+test/playwright/.download

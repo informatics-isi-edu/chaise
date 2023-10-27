@@ -18,36 +18,40 @@ export default class NavbarLocators {
     return banner.locator('.markdown-container');
   }
 
-  static getBannerDismissBtn(key: string, page: Page) {
+  static getBannerDismissBtn(key: string, page: Page): Locator {
     const banner = NavbarLocators.getBanner(key, page);
     return banner.locator('.close');
   }
 
-  static getBrandImage(page: Page) {
+  static getBrandImage(page: Page): Locator {
     return page.locator('#brand-image')
   }
 
-  static getBrandText(page: Page) {
+  static getBrandText(page: Page): Locator {
     return page.locator('#brand-text')
   }
 
-  static getUsername(page: Page) {
+  static getUsername(page: Page): Locator {
     return page.locator('.username-display');
   }
 
-  static getMenu(page: Page) {
+  static getMenu(page: Page): Locator {
     return page.locator('.navbar-menu-options');
   }
 
-  static getLoginMenu(page: Page) {
+  static getLoginMenuContainer(page: Page): Locator{
+    return NavbarLocators.getContainer(page).locator('.login-menu-options');
+  }
+
+  static getLoginMenu(page: Page): Locator {
     return page.locator('.username-display > div.dropdown-menu');
   }
 
-  static getProfileLink(page: Page) {
+  static getProfileLink(page: Page): Locator {
     return page.locator('#profile-link');
   }
 
-  static getLogoutLink(page: Page) {
+  static getLogoutLink(page: Page): Locator {
     return page.locator('#logout-link');
   }
 }

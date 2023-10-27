@@ -12,7 +12,7 @@ test.describe('Navbar', () => {
 
   test('when navbar is visible', async ({ page, baseURL, context }, testInfo) => {
     const navbar = NavbarLocators.getContainer(page);
-    const loginMenuOption = navbar.locator('.login-menu-options');
+    const loginMenuOption = NavbarLocators.getLoginMenuContainer(page);
 
     await test.step('navbar should be visible on load.', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
