@@ -553,6 +553,18 @@ deploy-w-config: dont_deploy_in_root .make-rsync-list-w-config $(JS_CONFIG) $(VI
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
+# run dist and deploy with proper uesrs (GNU). only works with root user
+.PHONY: root-install
+root-install:
+	su $(shell stat -c "%U" Makefile) -c "make dist"
+	make deploy
+
+# run dist and deploy with proper uesrs (FreeBSD and MAC OS X). only works with root user
+.PHONY: root-install-alt
+root-install-alt:
+	su $(shell stat -f '%Su' Makefile) -c "make dist"
+	make deploy
+
 # Rule to create version.txt
 .PHONY: gitversion
 gitversion:
@@ -590,6 +602,8 @@ usage:
 	@echo "  updeps                         local update  of node dependencies"
 	@echo "  update-webdriver               update the protractor's webdriver"
 	@echo "  deps-test                      local install of dev node dependencies and update protractor's webdriver"
+	@echo "  root-install                   should only be used as root. will use dist with proper user and then deploy, for GNU systems"
+	@echo "  root-install-alt               should only be used as root. will use dist with proper user and then deploy, for FreeBSD and MAC OS X"
 	@echo "  test                           run e2e tests"
 	@echo "  testrecordadd                  run data entry app add e2e tests"
 	@echo "  testrecordedit                 run data entry app edit e2e tests"

@@ -50,6 +50,15 @@
             margin-right: 5px;
             margin-bottom: 5px;
 
+            /**
+             * override the default behavior of button and button group
+             * without these the buttons would become misaligned and ellipsis logic won't work
+             */
+            align-items: unset;
+            .chaise-btn {
+              display: inline-block;
+            }
+
             .chaise-btn:focus {
               background-color: map-get(variables.$color-map, 'white');
             }

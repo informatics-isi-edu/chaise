@@ -40,6 +40,7 @@ profileModal.waitFor({ state: 'detached' });
 
 Make sure `await` is consistently everywhere. It's needed for step, outside of it, and expects
 
+7b8f4775b390d09ea8f8548425e47ac2e
 ```
 test.describe('feature', () => {
   const PAGE_URL = `/recordset/#${process.env.CATALOG_ID!}/product-navbar:accommodation`;

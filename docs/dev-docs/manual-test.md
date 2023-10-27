@@ -22,11 +22,7 @@
 ### Auto placement of tooltips
 - By default, the tooltips on column headers should appear on top-center
 - For the rightmost column if the tooltip text(comment) is too long then the tooltip should be placed on top-right
-[(Right-most-column-tooltip)](https://dev.isrd.isi.edu/~dsingh/wiki-images/right-most-column-tooltip.png)
 - Similarly, for other columns too if the tooltip text is long and they appear on the left or right edge of the window then their tooltip should be placed on top-left or top-right respectively
-([Default tooltip](https://dev.isrd.isi.edu/~dsingh/wiki-images/top-center-arrow.png),
-[Long text on the leftmost column](https://dev.isrd.isi.edu/~dsingh/wiki-images/top-left-arrow.png),
-[Long text on the rightmost column](https://dev.isrd.isi.edu/~dsingh/wiki-images/top-right-arrow.png))
 
 - Make sure the tooltip does not flicker or overlap the header text if the text is too long.
 
@@ -103,7 +99,7 @@ This means that we will only update the "total count", if we got the updated dat
 
 1. For testing this feature, make sure that you have `debug:true` in your `chaise-config.js` to be able to look at the logs that we generate (You can also use the `network` tab in browsers to look at the actual ermrest requests).
 
-    - If you're using chrome make sure that it's showing [verbose](https://dev.isrd.isi.edu/~ashafaei/wiki-images/verbose.png) logs.
+    - If you're using chrome make sure that it's showing all the logs, including the "verbose" ones. More information [here](https://developer.chrome.com/docs/devtools/console/log/#browser).
 
 2. It's better if you throttle your network speed ([chrome](https://developers.google.com/web/tools/chrome-devtools/network-performance/network-conditions)/[firefox](https://blog.nightly.mozilla.org/2016/11/07/simulate-slow-connections-with-the-network-throttling-tool/)) to simulate slower networks and make the flow-control more visible.
 
@@ -132,16 +128,16 @@ In [ErmrestDataUtils](https://github.com/informatics-isi-edu/ErmrestDataUtils), 
 ## Test priviledges
  - Verify that files uploaded by another user that you don't have permission to read, will properly create a new version of that file in hatrac.
    1. Need to have 2 user accounts. One cannot be a part of any of the globus groups that we rely on to set blanket permissions (`isrd-staff`, `isrd-testers`).
-      - `curl -H 'cookie: webauthn=<admin-cookie-here>' -X PUT -H "Content-Type: application/json" -d '[<user-2-globus-id>]' -i "https://dev.isrd.isi.edu/hatrac/js;acl/subtree-create"`
+      - `curl -H 'cookie: webauthn=<admin-cookie-here>' -X PUT -H "Content-Type: application/json" -d '[<user-2-globus-id>]' -i "https://dev.derivacloud.org/hatrac/js;acl/subtree-create"`
    2. User 1 creates file1 in hatrac
    3. user 2 doesn't have permission to update that object in hatrac
    4. user 2 tries to upload the same exact file to the same namespace in hatrac
       - should get 403
    5. change permissions on hatrac obj to include update for user 2
-      - `curl -H 'cookie: webauthn=<admin-cookie-here>' -X PUT -H "Content-Type: application/json" -d '[<user-2-globus-id>]' -i "https://dev.isrd.isi.edu/hatrac/js/chaise/<timestamp_txt-value>/<id-value>/<object-id>;acl/update"`
+      - `curl -H 'cookie: webauthn=<admin-cookie-here>' -X PUT -H "Content-Type: application/json" -d '[<user-2-globus-id>]' -i "https://dev.derivacloud.org/hatrac/js/chaise/<timestamp_txt-value>/<id-value>/<object-id>;acl/update"`
    6. user 2 tries to upload same exact file to the same namespace again
    7. navigate to hatrac folder and verify a new version was created
-      - ssh to `dev.isrd.isi.edu`
+      - ssh to `dev.derivacloud.org`
       - `cd /var/www/hatrac/js/chaise/<timestamp_txt-value>/<id-value>/`
       - `ls -al` to list all contents and file sizes
 
