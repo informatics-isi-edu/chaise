@@ -12,8 +12,8 @@ const getConfig = (options: TestOptions) => {
 
   if (process.env.CI) {
     const hostname = os.hostname();
-    process.env.ERMREST_URL = `http://${hostname}/ermrest`;
-    process.env.CHAISE_BASE_URL = `http://${hostname}/chaise`;
+    process.env.ERMREST_URL = `https://${hostname}/ermrest`;
+    process.env.CHAISE_BASE_URL = `https://${hostname}/chaise`;
   } else if (!process.env.ERMREST_URL || !process.env.CHAISE_BASE_URL) {
     throw new Error('ERMREST_URL and CHAISE_BASE_URL env variables are required.');
   }
