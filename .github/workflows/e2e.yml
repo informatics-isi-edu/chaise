@@ -56,6 +56,9 @@ jobs:
           sudo pip3 install globus_sdk
           sudo pip3 install psycopg2-binary
           sudo pip3 install oauth2client
+          sudo pip3 uninstall crypto
+          sudo pip3 uninstall pycrypto
+          sudo pip3 install pycryptodome
       - name: Install webauthn
         run: |
           sudo useradd -m -r webauthn
