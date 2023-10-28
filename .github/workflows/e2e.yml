@@ -17,7 +17,6 @@ jobs:
       SHARDING: true
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
-      SSL_CERT_DIR: /etc/ssl/certs
     timeout-minutes: 120
     steps:
       - name: Checkout repository code
@@ -89,11 +88,12 @@ jobs:
           git clone https://github.com/informatics-isi-edu/ermrest.git
           cd ermrest
           sudo -H make install PLATFORM=ubuntu1604
-          sudo which ermrest-deploy
           sudo -H make deploy PLATFORM=ubuntu1604
+          sudo bash ./test/ubuntu-travis-setup.sh
           cd ../chaise
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
+          sudo service apache2 restart
       - name: Install ermrestjs
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
