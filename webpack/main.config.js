@@ -30,13 +30,21 @@ module.exports = (env) => {
         appTitle: 'Record',
         externalFiles: [
           ...recordsetExtFiles,
-          `${chaisePath}google-dataset-config.js`
+          `${chaisePath}config/google-dataset-config.js`
         ]
       },
       {
         appName: 'recordedit',
         appTitle: 'Recordedit',
         externalFiles: [...recordsetExtFiles]
+      },
+      {
+        appName: 'viewer',
+        appTitle: 'Image Viewer',
+        externalFiles: [
+          ...recordsetExtFiles,
+          `${chaisePath}config/viewer-config.js`
+        ]
       },
       {
         appName: 'help',

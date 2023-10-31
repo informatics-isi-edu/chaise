@@ -71,7 +71,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
       `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
       // chaise-config
-      `${chaisePath}chaise-config.js?v=${buildVersion}`,
+      `${chaisePath}config/chaise-config.js?v=${buildVersion}`,
       // the specific app config file
       ...ac.appConfigLocation ? [`${ac.appConfigLocation}?v=${buildVersion}`] : [],
       // external files that the app might need
