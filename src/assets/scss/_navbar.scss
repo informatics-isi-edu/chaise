@@ -2,194 +2,194 @@
 @use 'variables';
 
 body>.container {
-    min-height: 100%;
-    position: relative;
+  min-height: 100%;
+  position: relative;
 }
 
 .content {
-    min-height: 100%;
-    position: relative;
-    padding-top: 70px;
+  min-height: 100%;
+  position: relative;
+  padding-top: 70px;
 }
 
 // navheader includes navbar as well as banners
 #navheader {
-    z-index: map-get(variables.$z-index-map, 'navbar');
-    position: relative; // for z-index to work, position must be non-static
+  z-index: map-get(variables.$z-index-map, 'navbar');
+  position: relative; // for z-index to work, position must be non-static
 }
 
 .navbar-inverse {
-    background-color: map-get(variables.$color-map, 'navbar-inverse');
-    border-color: map-get(variables.$color-map, 'navbar-inverse');
+  background-color: map-get(variables.$color-map, 'navbar-inverse');
+  border-color: map-get(variables.$color-map, 'navbar-inverse');
 }
 
 .navbar-inverse .navbar-nav>div>a {
-    color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
+  color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
 }
 
 .navbar-inverse .navbar-nav>.show>a {
-    // use #333 for this since navbar is #000 (even darker)
-    background-color: map-get(variables.$color-map, 'black');
+  // use #333 for this since navbar is #000 (even darker)
+  background-color: map-get(variables.$color-map, 'black');
 }
 
 // matches links at top level and dropdowns at top level
 .navbar-inverse .navbar-nav>a:hover,
-.navbar-inverse .navbar-nav>div>a:hover{
-    background-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
+.navbar-inverse .navbar-nav>div>a:hover {
+  background-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
 }
 
 .navbar-inverse .navbar-nav.navbar-right>div>a {
-    color: map-get(variables.$color-map, 'navbar-inverse-link');
+  color: map-get(variables.$color-map, 'navbar-inverse-link');
 }
 
 .navbar-inverse .navbar-brand {
-    color: map-get(variables.$color-map, 'navbar-inverse-link');
-    float: left;
-    height: 50px;
-    padding: 15px 15px;
-    font-size: 18px;
-    line-height: 20px;
-    margin-right: 0px;
+  color: map-get(variables.$color-map, 'navbar-inverse-link');
+  float: left;
+  height: 50px;
+  padding: 15px 15px;
+  font-size: 18px;
+  line-height: 20px;
+  margin-right: 0px;
 }
 
 #live-btn {
-    margin-right: 0px; // offset marging-right: -15px from navbar-right
-    color: map-get(variables.$color-map, 'navbar-inverse-link');
-    padding: 15px;
-    text-decoration: none;
+  margin-right: 0px; // offset marging-right: -15px from navbar-right
+  color: map-get(variables.$color-map, 'navbar-inverse-link');
+  padding: 15px;
+  text-decoration: none;
 
-    &:hover {
-        text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 
 .navbar-inverse .navbar-nav.navbar-right>div>a:hover {
-    color: map-get(variables.$color-map, 'navbar-inverse-menu-link-hover');
+  color: map-get(variables.$color-map, 'navbar-inverse-menu-link-hover');
 }
 
 .navbar-inverse .navbar-collapse,
 .navbar-inverse .navbar-form {
-    border-color: #4D4D4D;
+  border-color: #4D4D4D;
 }
 
 .navbar-inverse .navbar-nav>.active>a,
 .navbar-inverse .navbar-nav>.active>a:hover,
 .navbar-inverse .navbar-nav>.active>a:focus {
-    background-color: #4D4D4D;
+  background-color: #4D4D4D;
 }
 
 .navbar-inverse .navbar-text {
-    color: #FFF;
+  color: #FFF;
 }
 
 .navbar-inverse .navbar-toggle {
-    border-color: #fff;
-    color: #fff;
+  border-color: #fff;
+  color: #fff;
 }
 
 .navbar .navbar-nav .disable-link {
-    pointer-events: none;
-    cursor: default;
-    color: map-get(variables.$color-map, 'disabled');
+  pointer-events: none;
+  cursor: default;
+  color: map-get(variables.$color-map, 'disabled');
 }
 
 // positioning of searh box in navbar
 .rid-search {
-    margin-right: 0px; // offset marging-right: -15px from navbar-right
+  margin-right: 0px; // offset marging-right: -15px from navbar-right
 
-    .chaise-search-box {
-        padding: 13px 15px;
-    }
+  .chaise-search-box {
+    padding: 13px 15px;
+  }
 
-    .chaise-input-control-sm {
-        width: 100px;
-        border-color: map-get(variables.$color-map, 'black');
-        border-radius: 4px 0px 0px 4px;
-    }
+  .chaise-input-control-sm {
+    width: 100px;
+    border-color: map-get(variables.$color-map, 'black');
+    border-radius: 4px 0px 0px 4px;
+  }
 }
 
 #rid-search-input {
-    background-color: map-get(variables.$color-map, 'table-striped-background');
-    overflow-x: auto;
+  background-color: map-get(variables.$color-map, 'table-striped-background');
+  overflow-x: auto;
 }
 
 #mainnav {
-    border-radius: 0;
+  border-radius: 0;
 }
 
 @media (max-width: 992px) {
-    .navbar-collapse {
-        overflow: auto;
-        display: grid;
-    }
+  .navbar-collapse {
+    overflow: auto;
+    display: grid;
+  }
 
-    #rid-search-input {
-        // Setting max-width for search input on smaller screens
-        max-width: 125px;
-    }
+  #rid-search-input {
+    // Setting max-width for search input on smaller screens
+    max-width: 125px;
+  }
 }
 
 .navbar {
-    margin-bottom: 0;
-    padding: 0px 5px 0px 20px;
-    min-height: 50px;
-    flex-wrap: wrap;
+  margin-bottom: 0;
+  padding: 0px 5px 0px 20px;
+  min-height: 50px;
+  flex-wrap: wrap;
 }
 
 // div replaces li, a is the case with no dropdown
 .navbar-menu-options>div,
 .navbar-menu-options>a {
-    position: relative;
-    display: block;
+  position: relative;
+  display: block;
 }
 
 .navbar .navbar-nav .nav-link {
-    position: relative;
-    display: block;
-    padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
-    line-height: 20px;
-    color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
+  position: relative;
+  display: block;
+  padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
+  line-height: 20px;
+  color: map-get(variables.$color-map, 'navbar-inverse-menu-link');
 }
 
 .chaise-navbar-banner-container {
-    margin-bottom: 0;
-    padding: 10px 20px 10px 20px;
-    background-color: map-get(variables.$color-map, 'navbar-banner');
-    text-align: center;
+  margin-bottom: 0;
+  padding: 10px 20px 10px 20px;
+  background-color: map-get(variables.$color-map, 'navbar-banner');
+  text-align: center;
 
-    // use the normal font instead of light and make it bigger
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    letter-spacing: 1px;
-    font-weight: 500;
-    font-size: 16px;
+  // use the normal font instead of light and make it bigger
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 1px;
+  font-weight: 500;
+  font-size: 16px;
 
-    .close {
-        padding-right: 15px;
+  .close {
+    padding-right: 15px;
 
-        // button.close from close.less:32
-        -webkit-appearance: none;
-        padding: 0;
-        cursor: pointer;
-        background: 0 0;
-        border: 0;
+    // button.close from close.less:32
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: 0 0;
+    border: 0;
 
-        // close from close.less:11
-        float: right;
-        font-size: 21px;
-        font-weight: 700;
-        line-height: 1;
-        color: map-get(variables.$color-map, 'black');
-        text-shadow: 0 1px 0 #fff;
-        filter: alpha(opacity=20);
-        opacity: .2;
-    }
+    // close from close.less:11
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    color: map-get(variables.$color-map, 'black');
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+  }
 }
 
 
 /* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
 .navbar-collapse {
-    max-height: 340px;
+  max-height: 340px;
 }
 
 /*
@@ -203,270 +203,270 @@ TODO we should be able to simplify the rules and also investigate whether
 */
 nav.navbar {
 
-    .dropdown-menu>li>a.chaise-dropdown-header,
-    .dropdown-menu>li>div>div>a.chaise-dropdown-header,
-    .chaise-dropdown-header {
-        padding: 3px 15px 3px 15px;
-        cursor: default;
-        font-size: variables.$font-size;
-        color: map-get(variables.$color-map, 'black');
-        font-weight: 600;
+  .dropdown-menu>li>a.chaise-dropdown-header,
+  .dropdown-menu>li>div>div>a.chaise-dropdown-header,
+  .chaise-dropdown-header {
+    padding: 3px 15px 3px 15px;
+    cursor: default;
+    font-size: variables.$font-size;
+    color: map-get(variables.$color-map, 'black');
+    font-weight: 600;
+  }
+
+  .dropdown-submenu {
+    position: relative;
+  }
+
+  .dropdown-submenu>.dropdown-menu,
+  .dropdown-submenu>div>div>.dropdown-menu {
+    // TODO: why is this here? Maybe to fix positioning of menus for scrolling?
+    // position: fixed;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+  }
+
+  .dropdown-submenu>a:after,
+  .dropdown-submenu>div>div>a:after {
+    display: flex;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 6px 0 6px 6px;
+    /* was 5px 0 5px 5px */
+    border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
+    // to center
+    margin: auto;
+    margin-right: -15px;
+    padding-right: 10px;
+    margin-left: 10px;
+  }
+
+  .dropdown-submenu:hover>a:after,
+  .dropdown-submenu:hover>div>div>a:after {
+    border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu');
+  }
+
+  .dropdown-submenu.pull-left {
+    float: none;
+  }
+
+  .dropdown-submenu.pull-left>.dropdown-menu,
+  .dropdown-submenu.pull-left>div>div>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+  }
+
+  // Dummy selector to keep the same amount of space as submenu arrow
+  .dropdown-menu>.dropdown-submenu+li>a::after,
+  .dropdown-menu>.dropdown-submenu+li>div>div>a::after {
+    content: " ";
+    height: 12px;
+    width: 12px;
+    margin-left: 10px;
+  }
+
+  /*Adding the scroll bar to the menu */
+  .navbar-nav div.dropdown-menu {
+    min-height: 30px;
+    // TODO: add scrollbar for y back
+    // overflow-x: hidden;
+    // overflow-y: auto;
+    width: max-content;
+    max-width: 450px;
+
+    // Height is set by JS Code
+    overflow-y: auto;
+  }
+
+  .dropdown .dropdown-toggle,
+  .dropdown a {
+    text-decoration: none;
+  }
+
+  // bootstrap adds css "borders" before element with .dropstart
+  .dropstart .dropdown-toggle::before {
+    content: none;
+  }
+
+  // .dropdown .dropdown-toggle::after {
+  //     border-top: 5px solid;
+  //     border-right: 5px solid transparent;
+  //     border-left: 5px solid transparent;
+
+  //     margin-left: 5px;
+  //     vertical-align: middle;
+  // }
+
+  .dropdown-menu {
+    // To keep it more compact
+    min-width: 100px;
+    padding: 5px 0;
+  }
+
+  // style to override react-bootstrap
+  .dropdown-item {
+    padding: 0;
+  }
+
+  .dropdown-menu>a,
+  .dropdown-menu>div>a {
+    white-space: normal;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    color: map-get(variables.$color-map, 'black');
+    margin-bottom: 2px;
+    padding: 3px 15px 3px 15px;
+    line-height: 1.4;
+
+    &:focus,
+    &:hover {
+      color: lighten(map-get(variables.$color-map, 'black'), 10%);
+      text-decoration: none;
+      background-color: darken(map-get(variables.$color-map, 'white'), 10%);
+    }
+  }
+
+  .dropdown-menu>li.dropdown-header-container~li:not(.dropdown-header-container)>a,
+  .dropdown-menu>li.dropdown-header-container~li:not(.dropdown-header-container)>div>div>a {
+    padding-left: 22px;
+  }
+
+  // override bootstrap rule that didn't include '>' so dropstart alway overrode dropend if both present on different elements
+  .dropstart>.dropdown-menu[data-bs-popper] {
+    top: 0;
+    right: 100%;
+    left: auto;
+    margin: 0px;
+  }
+
+  .dropend>.dropdown-menu[data-bs-popper] {
+    top: 0;
+    right: auto;
+    left: 100%;
+    margin: 0px;
+  }
+
+  .custom-dropdown-submenu {
+    // Position fixed is required to align submenu on big screens
+    // (since top, left works for position:fixed)
+    position: fixed !important;
+    right: unset;
+  }
+
+  @media (max-width: 992px) {
+    .custom-dropdown-submenu {
+      // Unsetting the previous position:fixed for smaller screens (bootstrap takes care of responsiveness)
+      position: unset !important;
+    }
+  }
+
+  // Vertical navbar
+  @media (max-width: 768px) {
+    .child-opened>ul {
+      padding-left: 3%;
     }
 
-    .dropdown-submenu {
-        position: relative;
+    // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
+    .dropdown-menu,
+    .navbar-nav ul.dropdown-menu,
+    .dropdown-menu>li>a,
+    .dropdown-menu>li>div>div>a {
+      max-width: none !important;
+      width: auto !important;
     }
 
-    .dropdown-submenu>.dropdown-menu,
-    .dropdown-submenu>div>div>.dropdown-menu {
-        // TODO: why is this here? Maybe to fix positioning of menus for scrolling?
-        // position: fixed;
-        margin-top: -6px;
-        margin-left: -1px;
-        -webkit-border-radius: 0 6px 6px 6px;
-        -moz-border-radius: 0 6px 6px;
-        border-radius: 0 6px 6px 6px;
+  }
+
+  // Horizontal navbar
+  @media (min-width: 768px) {
+    .child-opened {
+      background-color: map-get(variables.$color-map, 'table-header-background');
     }
 
-    .dropdown-submenu>a:after,
-    .dropdown-submenu>div>div>a:after {
-        display: flex;
-        content: " ";
-        float: right;
-        width: 0;
-        height: 0;
-        border-color: transparent;
-        border-style: solid;
-        border-width: 6px 0 6px 6px;
-        /* was 5px 0 5px 5px */
-        border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
-        // to center
-        margin: auto;
-        margin-right: -15px;
-        padding-right: 10px;
-        margin-left: 10px;
+    .navbar-header {
+      float: left;
     }
 
-    .dropdown-submenu:hover>a:after,
-    .dropdown-submenu:hover>div>div>a:after {
-        border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu');
-    }
+    .navbar-nav {
+      float: right;
+      margin: 0;
 
-    .dropdown-submenu.pull-left {
-        float: none;
-    }
+      &.navbar-menu-options {
+        margin-right: auto;
+        float: left;
+      }
 
-    .dropdown-submenu.pull-left>.dropdown-menu,
-    .dropdown-submenu.pull-left>div>div>.dropdown-menu {
-        left: -100%;
-        margin-left: 10px;
-        -webkit-border-radius: 6px 0 6px 6px;
-        -moz-border-radius: 6px 0 6px 6px;
-        border-radius: 6px 0 6px 6px;
-    }
+      li {
+        float: left;
 
-    // Dummy selector to keep the same amount of space as submenu arrow
-    .dropdown-menu>.dropdown-submenu+li>a::after,
-    .dropdown-menu>.dropdown-submenu+li>div>div>a::after {
-        content: " ";
-        height: 12px;
-        width: 12px;
-        margin-left: 10px;
+        a {
+          padding-top: 15px;
+          padding-bottom: 15px;
+        }
+      }
     }
+  }
 
-    /*Adding the scroll bar to the menu */
+  @media (max-width: 992px) {
     .navbar-nav div.dropdown-menu {
-        min-height: 30px;
-        // TODO: add scrollbar for y back
-        // overflow-x: hidden;
-        // overflow-y: auto;
-        width: max-content;
-        max-width: 450px;
+      // Adding max-height when screen size is small,
+      // Made important to override maxHeight set by JS (which is not relevant in small screens)
+      max-height: unset !important;
+      padding-left: 16px;
 
-        // Height is set by JS Code
-        overflow-y: auto;
-    }
-
-    .dropdown .dropdown-toggle,
-    .dropdown a {
-        text-decoration: none;
-    }
-
-    // bootstrap adds css "borders" before element with .dropstart
-    .dropstart .dropdown-toggle::before {
-        content: none;
-    }
-
-    // .dropdown .dropdown-toggle::after {
-    //     border-top: 5px solid;
-    //     border-right: 5px solid transparent;
-    //     border-left: 5px solid transparent;
-
-    //     margin-left: 5px;
-    //     vertical-align: middle;
-    // }
-
-    .dropdown-menu {
-        // To keep it more compact
-        min-width: 100px;
-        padding: 5px 0;
-    }
-
-    // style to override react-bootstrap
-    .dropdown-item {
-        padding: 0;
+      // Adding min-width and box-shadow so that submenus are differentiable
+      min-width: 250px;
+      background: transparent;
     }
 
     .dropdown-menu>a,
     .dropdown-menu>div>a {
-        white-space: normal;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        color: map-get(variables.$color-map, 'black');
-        margin-bottom: 2px;
-        padding: 3px 15px 3px 15px;
-        line-height: 1.4;
+      color: map-get(variables.$color-map, 'dropdown-menu-anchor');
 
-        &:focus,
-        &:hover {
-            color: lighten(map-get(variables.$color-map, 'black'), 10%);
-            text-decoration: none;
-            background-color: darken(map-get(variables.$color-map, 'white'), 10%);
-        }
+      &:focus,
+      &:hover {
+        color: map-get(variables.$color-map, 'white');
+        background: transparent;
+      }
     }
 
-    .dropdown-menu>li.dropdown-header-container~li:not(.dropdown-header-container)>a,
-    .dropdown-menu>li.dropdown-header-container~li:not(.dropdown-header-container)>div>div>a {
-        padding-left: 22px;
+    // Menu Toggler css in smaller screens
+    .navbar-toggler {
+      border: 1px solid map-get(variables.$color-map, 'white');
+      padding: 8px;
+      margin-right: 16px;
+      color: map-get(variables.$color-map, 'white');
+
+      &:hover {
+        background-color: map-get(variables.$color-map, 'black');
+      }
+
+      &:focus {
+        box-shadow: none;
+        background-color: map-get(variables.$color-map, 'black');
+      }
+    }
+  }
+
+  @media (min-width: 992px) {
+
+    // Display is set to block in bigger screens to align login and search input
+    .navbar-collapse.collapse {
+      display: block !important;
     }
 
-    // override bootstrap rule that didn't include '>' so dropstart alway overrode dropend if both present on different elements
-    .dropstart>.dropdown-menu[data-bs-popper] {
-        top: 0;
-        right: 100%;
-        left: auto;
-        margin: 0px;
+    div.dropdown-submenu.show {
+      background-color: map-get(variables.$color-map, 'navbar-collapsed-submenu');
     }
-
-    .dropend>.dropdown-menu[data-bs-popper] {
-        top: 0;
-        right: auto;
-        left: 100%;
-        margin: 0px;
-    }
-
-    .custom-dropdown-submenu {
-        // Position fixed is required to align submenu on big screens
-        // (since top, left works for position:fixed)
-        position: fixed !important;
-        right: unset;
-    }
-
-    @media (max-width: 992px) {
-        .custom-dropdown-submenu {
-            // Unsetting the previous position:fixed for smaller screens (bootstrap takes care of responsiveness)
-            position: unset !important;
-        }
-    }
-
-    // Vertical navbar
-    @media (max-width: 768px) {
-        .child-opened>ul {
-            padding-left: 3%;
-        }
-
-        // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
-        .dropdown-menu,
-        .navbar-nav ul.dropdown-menu,
-        .dropdown-menu>li>a,
-        .dropdown-menu>li>div>div>a {
-            max-width: none !important;
-            width: auto !important;
-        }
-
-    }
-
-    // Horizontal navbar
-    @media (min-width: 768px) {
-        .child-opened {
-            background-color: map-get(variables.$color-map, 'table-header-background');
-        }
-
-        .navbar-header {
-            float: left;
-        }
-
-        .navbar-nav {
-            float: right;
-            margin: 0;
-
-            &.navbar-menu-options {
-                margin-right: auto;
-                float: left;
-            }
-
-            li {
-                float: left;
-
-                a {
-                    padding-top: 15px;
-                    padding-bottom: 15px;
-                }
-            }
-        }
-    }
-
-    @media (max-width: 992px) {
-        .navbar-nav div.dropdown-menu {
-            // Adding max-height when screen size is small,
-            // Made important to override maxHeight set by JS (which is not relevant in small screens)
-            max-height: unset !important;
-            padding-left: 16px;
-
-            // Adding min-width and box-shadow so that submenus are differentiable
-            min-width: 250px;
-            background: transparent;
-        }
-
-        .dropdown-menu>a,
-        .dropdown-menu>div>a {
-            color: map-get(variables.$color-map, 'dropdown-menu-anchor');
-
-            &:focus,
-            &:hover {
-                color: map-get(variables.$color-map, 'white');
-                background: transparent;
-            }
-        }
-
-        // Menu Toggler css in smaller screens
-        .navbar-toggler {
-            border: 1px solid map-get(variables.$color-map, 'white');
-            padding: 8px;
-            margin-right: 16px;
-            color: map-get(variables.$color-map, 'white');
-
-            &:hover {
-                background-color: map-get(variables.$color-map, 'black');
-            }
-
-            &:focus {
-                box-shadow: none;
-                background-color: map-get(variables.$color-map, 'black');
-            }
-        }
-    }
-
-    @media (min-width: 992px) {
-
-        // Display is set to block in bigger screens to align login and search input
-        .navbar-collapse.collapse {
-            display: block !important;
-        }
-
-        div.dropdown-submenu.show {
-            background-color: map-get(variables.$color-map, 'navbar-collapsed-submenu');
-        }
-    }
+  }
 }
