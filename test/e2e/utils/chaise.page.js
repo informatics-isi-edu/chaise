@@ -245,6 +245,9 @@ var recordEditPage = function() {
     this.getApplySomeTextArea = function (name) {
         return this.getMultiFormInput().element(by.css('textarea[name="-1-' + name + '"]'));
     };
+    this.getApplySomeInput = function (name) {
+        return this.getMultiFormInput().element(by.css('input[name="-1-' + name + '"]'));
+    };
     this.getMultiFormInput = () => {
         return element(by.css('.multi-form-input'));
     }
@@ -266,6 +269,13 @@ var recordEditPage = function() {
         return element(by.id('checkbox-label'));
      }
 
+     this.getElementForColumn = function(type, value, name) {
+        if(type === 'textarea') {
+            return this.getTextAreaForAColumn(name, value)
+        } else {
+            return this.getInputForAColumn(name, value)
+        }
+     }
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;

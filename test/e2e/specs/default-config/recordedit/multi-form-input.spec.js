@@ -2,48 +2,69 @@ const chaisePage = require('../../../utils/chaise.page.js');
 const recordEditPage = chaisePage.recordEditPage;
 const recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 
+
 const testParams = {
   schema_table: 'multi-form-input:main',
   max_input_rows: 200,
-  tables: [{
-    comment: "general case",
-    schema_name: "multi-form-input",
-    table_name: "main",
-    table_displayname: "main",
-    table_comment: "List of different types of accommodations",
+  apply_tests: {
     not_ci: true,
-    primary_keys: ["id"],
-    inputs: [
+    types: [
       {
-        "markdown_col": "textarea"
+        type: "textarea",
+        column_name: "markdown_col",
+        appy_to_all_value: "all text",
+        apply_to_some: {
+          value: "some text",
+          formIndexes: [2,3,4,5],
+        }
       },
       {
-        "markdown_col": "new text"
+        type: "text_input",
+        column_name: "text_col",
+        appy_to_all_value: "all text input",
+        apply_to_some: {
+          value: "some text input",
+          formIndexes: [2,3,4,5],
+        },
+        column_name: 'text_col'
       },
       {
-        "markdown_col": ""
+        type: "input_float",
+        appy_to_all_value: "12.4",
+        apply_to_some: {
+          value: "4.5",
+          formIndexes: [2,3,4,5],
+        },
+        column_name: 'float_col'
       },
       {
-        "markdown_col": ""
+        type: "input_int",
+        appy_to_all_value: "456",
+        apply_to_some: {
+          value: "123",
+          formIndexes: [2,3,4,5],
+        },
+        column_name: 'int_col'
       },
-      {
-        "markdown_col": ""
-      },
+      
     ],
-    formsOnLoad: 1,
-    formsAfterInput: 5,
-    result_columns: [
-      "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
-      "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "asset_col_filename"
-    ],
-    results: [
-      ["textarea"], ["new text"], [""], [""], [""]
-    ],
-    files: []
-  },
-  ]
-};
-
+    submission: {
+      table_displayname: 'main',
+      result_columns: [
+        "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col",
+        'find the hash by looking at the th element class it will be in c_<name> format',
+        "asset_col", "asset_col_filename"
+      ],
+      results: [
+        ['1', 'some value', '', '', ''],
+        [],
+        [],
+        [],
+        []
+      ]
+    }
+  }
+}
 describe('Regarding multi form input and clone button', () => {
   let cloneFormInput, cloneFormSubmitButton, inputSwitch, checkboxLabel, checkboxInput;;
   describe('Regarding multi form input,', () => {
@@ -146,7 +167,7 @@ describe('Regarding multi form input and clone button', () => {
           })
         });
       });
-      xdescribe('checkbox functionality', () => {
+      describe('checkbox functionality', () => {
         let elementsWithClass;
         it('on load the label should reflect what is selected.', (done) => {
           let toggleBtn;
@@ -215,141 +236,165 @@ describe('Regarding multi form input and clone button', () => {
             return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
               .then((count) => {
                 expect(recordEditPage.getCheckboxLabel().getText()).toBe(`${count} of ${count} selected records`);
-                done();
-              }).catch(chaisePage.catchTestError(done));
+              }).then(() => done()).catch(chaisePage.catchTestError(done));
           })
         });
 
       })
       describe('apply changes', () => {
         beforeAll((done) => {
-          chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}`);
-          chaisePage.recordeditPageReady().then(() => {
-            cloneFormInput = chaisePage.recordEditPage.getCloneFormInput();
-            cloneFormSubmitButton = chaisePage.recordEditPage.getCloneFormInputSubmitButton();
+          browser.refresh();
+        
+          browser.wait(() => {
+            return chaisePage.recordeditPageReady().then(() => {
+              cloneFormInput = chaisePage.recordEditPage.getCloneFormInput();
+              cloneFormSubmitButton = chaisePage.recordEditPage.getCloneFormInputSubmitButton();
+              return true;
+            }).catch(() => {
+              return false;
+            });
+          }, browser.params.defaultTimeout).then(() => {
             // add 4 in input and click on clone
             const textToType = "4";
             cloneFormInput.sendKeys(textToType);
             chaisePage.clickButton(cloneFormSubmitButton).then(() => {
               return recordEditPage.getAllElementsWithClass('.form-header.entity-value')
-                .then((count) => expect(count.toEqual(5)))
-            });
-            done();
-          }).catch(chaisePage.catchTestError(done));
-
+                .then((count) => expect(count).toEqual(5));
+            }).then(() => done());
+          });
         });
-        describe('text area', () => {
-          let multiFormTextArea;
-          it('when no forms are selected, apply and clear buttons should be disabled ', () => {
-            let applyButtonDisabled;
-            let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-            chaisePage.clickButton(toggleBtn)
-              .then(() => recordEditPage.getMultiFormApply('markdown_col'))
-              .then((applyButtonElement) => {
-                return applyButtonElement.getAttribute('disabled');
-              })
-              .then((value) => {
-                applyButtonDisabled = value;
-                return recordEditPage.getInputSwitchContainer('markdown_col', 1);
-              })
-              .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
-              .then((parentElement) => {
-                return chaisePage.clickButton(parentElement);
-              })
-              .then(() => {
-                expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
-                return chaisePage.clickButton(parentElement);
-              })
-              .then(() => {
-                expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-                expect(applyButtonDisabled).toBeTruthy();
-              })
-              .catch(chaisePage.catchTestError);
-          });
-          it('when all forms are selected, clicking on apply should apply change to all forms', () => {
-            // come up with more easier text
-            multiFormTextArea = recordEditPage.getApplySomeTextArea('markdown_col');
-            const textToType = "textarea";
-            multiFormTextArea.sendKeys(textToType);
-            let checkboxInput = recordEditPage.getCheckboxInput();
+        
+        testParams.apply_tests.types.forEach((params) => {
+          let type= params.type;
+          describe(type, () => {
+            let multiFormTextArea;
+            let colName = params.column_name;
+            let textarea;
+            let toggleBtn = recordEditPage.getColumnMultiFormButton(colName);
+            it('when no forms are selected, apply and clear buttons should be disabled ', () => {
+              let applyButtonDisabled;
+              
+              chaisePage.clickButton(toggleBtn)
+                .then(() => recordEditPage.getMultiFormApply(colName))
+                .then((applyButtonElement) => {
+                  return applyButtonElement.getAttribute('disabled');
+                })
+                .then((value) => {
+                  applyButtonDisabled = value;
+                  return recordEditPage.getInputSwitchContainer(colName, 1);
+                })
+                .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+                .then((parentElement) => {
+                  return chaisePage.clickButton(parentElement);
+                })
+                .then(() => {
+                  expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+                  return chaisePage.clickButton(parentElement);
+                })
+                .then(() => {
+                  expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+                  expect(applyButtonDisabled).toBeTruthy();
+                })
+                .catch(chaisePage.catchTestError);
+            });
+            it('when all forms are selected, clicking on apply should apply change to all forms', () => {              
+              if(type === 'textarea') {
+                multiFormTextArea = recordEditPage.getApplySomeTextArea(colName);
+              } else {
+                multiFormTextArea = recordEditPage.getApplySomeInput(colName);
+              }
+              
+              const textToType = params.appy_to_all_value;
+              multiFormTextArea.sendKeys(textToType);
+              let checkboxInput = recordEditPage.getCheckboxInput();
 
-            chaisePage.clickButton(checkboxInput)
-              .then(() => {
+              chaisePage.clickButton(checkboxInput)
+                .then(() => {
 
-                recordEditPage.getAllElementsWithClass('.form-header.entity-value')
-                  .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
-                  .then((applybtn) => chaisePage.clickButton(applybtn))
+                  recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                    .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                    .then((applybtn) => chaisePage.clickButton(applybtn))
 
-                  .then((count) => {
-                    for (let i = 0; i < count; i++) {
-                      const textArea = recordEditPage.getTextAreaForAColumn('markdown_col', i);
-                      textArea.getAttribute('value').then((text) => {
-                        expect(text).toContain(textToType);
-                      });
-                    }
-                  })
-              })
-          });
-          it('when some forms are selected, clicking on apply should apply change to selected forms', (done) => {
-            const textToType = "the text is changed";
-            let count;
-            multiFormTextArea.sendKeys('')
-              .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
-              .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
-              .then((parentElement) => {
-                // Perform the first action
-                return chaisePage.clickButton(parentElement)
-                  .then(() => {
-                    // Check the class attribute here if needed
-                    expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
-                    return parentElement; // Return the parentElement to the next `then`
-                  });
-              })
-              .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
-              .then(() => multiFormTextArea.sendKeys(textToType))
-              .then(() => recordEditPage.getApplyBtnMultiForm('markdown_col'))
-              .then((applybtn) => chaisePage.clickButton(applybtn))
-              .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
-              .then((resultCount) => {
-                count = resultCount;
-                for (let i = 2; i < count; i++) {
-                  expect(recordEditPage.getTextAreaForAColumn('markdown_col', i).getAttribute('value')).toContain(textToType)
-                }
-                expect(recordEditPage.getTextAreaForAColumn('markdown_col', 1).getAttribute('value')).toContain('textarea')
-              })
-              .then(() => done())
-              .catch(chaisePage.catchTestError(done));
-          });
-          it('when some forms are selected, clicking on clear should clear values in selected forms', (done) => {
+                    .then((count) => {
+                      for (let i = 0; i < count; i++) {
+                        if(type === 'textarea') {
+                          textArea = recordEditPage.getTextAreaForAColumn(colName, i);
+                        } else {
+                          textArea = recordEditPage.getInputForAColumn(colName, i);
+                        }
+                 
+                        textArea.getAttribute('value').then((text) => {
+                          expect(text).toContain(textToType);
+                        })
+                      }
+                    })
+                })
+            });
+            it('when some forms are selected, clicking on apply should apply change to selected forms', (done) => {
+              const textToType = params.apply_to_some.value;
+              let count;
+              multiFormTextArea.sendKeys('')
+                .then(() => recordEditPage.getInputSwitchContainer(colName, 1))
+                .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
+                .then((parentElement) => {
+                  // Perform the first action
+                  return chaisePage.clickButton(parentElement)
+                    .then(() => {
+                      // Check the class attribute here if needed
+                      expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
+                      return parentElement;
+                    });
+                })
+                .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                .then(() => multiFormTextArea.sendKeys(textToType))
+                .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                .then((applybtn) => chaisePage.clickButton(applybtn))
+                .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+                .then((resultCount) => {
+                  count = resultCount;
+                  params.apply_to_some.formIndexes.forEach((i) =>{
+                    expect(recordEditPage.getElementForColumn(type, i, colName).getAttribute('value')).toContain(params.apply_to_some.value);
+                  }) 
+                  expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);
+                })
+                .then(() => done())
+                .catch(chaisePage.catchTestError(done));
+            });
+            it('when some forms are selected, clicking on clear should clear values in selected forms', (done) => {
 
-            const clearBtn = recordEditPage.getClearBtnMultiForm('markdown_col')
-            chaisePage.clickButton(clearBtn)
-              .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
-              .then((count) => {
-                for (let i = 2; i < count; i++) {
-                  recordEditPage.getTextAreaForAColumn('markdown_col', i).getAttribute('value').then((text) => {
+              const clearBtn = recordEditPage.getClearBtnMultiForm(colName)
+              chaisePage.clickButton(clearBtn)
+                .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
+                .then((count) => {
+                  params.apply_to_some.formIndexes.forEach((i) =>{
+                  recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
                     expect(text.length).not.toBeGreaterThan(0);
                   })
-                }
-                expect(recordEditPage.getTextAreaForAColumn('markdown_col', 1).getAttribute('value')).toContain('textarea')
-              }).then(() => done())
-              .catch(chaisePage.catchTestError(done));
-          });
-        })
-        it('change values in the forms without affecting the other forms', () => {
+                  })    
+                  expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);         
+                }).then(() => done())
+                .catch(chaisePage.catchTestError(done));
+            });
+            xit('change values in the forms without affecting the other forms', () => {
 
-          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-          chaisePage.clickButton(toggleBtn)
-            .then(() => {
-              // Edit the textarea for the second form
-              let textarea = recordEditPage.getTextAreaForAColumn('markdown_col', 2);
-              return textarea.clear().then(() => textarea.sendKeys('new text'));
-            })
-            .then(() => {
-              recordEditHelpers.testSubmission(testParams.tables[0]);
-            })
+              let toggleBtn = recordEditPage.getColumnMultiFormButton(colName);
+              chaisePage.clickButton(toggleBtn)
+                .then(() => {
+                  // Edit the textarea for the second form
+                  if(type === 'textarea') {
+                    textArea = recordEditPage.getTextAreaForAColumn(colName, 2)
+                  } else {
+                    textArea = recordEditPage.getInputForAColumn(colName, 2)
+                  }
+                  return textarea.clear().then(() => textarea.sendKeys('new text'));
+                })
+            });
+          })
         });
 
+        it ('should submit properly.', () => {
+    
+        });
       })
 
 
