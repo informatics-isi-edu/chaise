@@ -411,8 +411,14 @@ This section will go over how we think the NPM modules should be managed.
   - `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
 - Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
   - Ensure the used node and npm versions are updated and the latest stable.
-  - Run `npm install` to sync `package-lock.json` with `package.json`.
-  - Double-check the changes to `pacakge-lock.json`.
+  - Run `npm install --include=dev` to sync `package-lock.json` with `package.json`.
+  - Double-check the changes to `package-lock.json`.
+- Only for main contributors: to publish a new version of chaise to npm, we should,
+  1. Update the `version` property in `package.json`.
+  2. Update the `version` and `packages.version` properties in `package-lock.json`. Or run `npm install --include=dev`.
+    - If you used `npm install` double-check the changes to `package-lock.json`.
+  3. Push the changes to the main branch.
+  4. After pushing the changes, `npm-publish.yml` GitHub workflow will detect the version change and properly publish the new version to npm.
 
 ## Structure of an App
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
