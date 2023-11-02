@@ -29,7 +29,7 @@ import { addAppContainerClasses } from '@isrd-isi-edu/chaise/src/utils/head-inje
 import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
-const recordeditSettings : ConfigServiceSettings = {
+const viewerSettings : ConfigServiceSettings = {
   appName: APP_NAMES.VIEWER,
   appTitle: 'Image Viewer',
   overrideHeadTitle: true,
@@ -39,7 +39,7 @@ const recordeditSettings : ConfigServiceSettings = {
   openIframeLinksInTab: true
 };
 
-const RecordeditApp = (): JSX.Element => {
+const ViewerApp = (): JSX.Element => {
 
   const { addAlert } = useAlert();
   const { session, showPreviousSessionAlert } = useAuthn();
@@ -66,7 +66,7 @@ const RecordeditApp = (): JSX.Element => {
       const location = reference.location;
 
       // add schema and table name classes to app-container
-      addAppContainerClasses(reference, recordeditSettings.appName);
+      addAppContainerClasses(reference, viewerSettings.appName);
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
@@ -115,11 +115,11 @@ const RecordeditApp = (): JSX.Element => {
 const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
   <AppWrapper
-    appSettings={recordeditSettings}
+    appSettings={viewerSettings}
     includeAlerts={true}
     includeNavbar={true}
     displaySpinner={true}
   >
-    <RecordeditApp />
+    <ViewerApp />
   </AppWrapper>
 );

@@ -5,7 +5,7 @@ import { ViewerConfigProps } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { getConfigObject } from '@isrd-isi-edu/chaise/src/utils/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-export class ViewerConfigService {
+export default class ViewerConfigService {
 
   private static _config: ViewerConfigProps;
 

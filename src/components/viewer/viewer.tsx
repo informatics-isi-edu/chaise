@@ -5,6 +5,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -20,6 +21,7 @@ import ViewerProvider from '@isrd-isi-edu/chaise/src/providers/viewer';
 
 // utils
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const Viewer = ({
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
@@ -51,13 +53,12 @@ const ViewerInner = ({
 }: ViewerInnerProps) => {
 
   const { errors } = useError();
-  const { initialized } = useViewer();
+  const {
+    initialized, pageTitle,
+    hideAnnotationSidebar, toggleAnnotationSidebar
+   } = useViewer();
 
 
-  /**
-   * State variable to show or hide side panel
-   */
-  const [showPanel, setShowPanel] = useState<boolean>(true);
   const [displayIframe, setDisplayIframe] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
@@ -68,6 +69,13 @@ const ViewerInner = ({
     if (!initialized) return;
     const resizeSensors = attachContainerHeightSensors(parentContainer);
 
+    /**
+     * fix the size of main-container and sticky areas, and then show the iframe.
+     * these have to be done in a digest cycle after setting the displayReady.
+     * Because this way, we will ensure to run the height logic after the page
+     * content is visible and therefore it can set a correct height for the bottom-container.
+     * otherwise the iframe will be displayed in a small box first.
+     */
     setDisplayIframe(true);
 
     return () => {
@@ -78,35 +86,22 @@ const ViewerInner = ({
 
   //------------------- UI related callbacks: --------------------//
 
-  /**
-   * function to change state to show or hide side panel
-   */
-  const toggleSidePanel = () => {
-    const newState = !showPanel;
-    // logRecordClientAction(newState ? LogActions.TOC_SHOW : LogActions.TOC_HIDE);
-    setShowPanel(newState);
-  };
-
 
 
   //-------------------  render logics:   --------------------//
 
-  // if the main data is not initialized, just show spinner
-  if (!initialized) {
-    if (errors.length > 0) {
-      return <></>;
-    }
-    return <ChaiseSpinner />;
-  }
-
   const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
-      className={`side-panel-resizable resizable ${showPanel ? 'open-panel' : 'close-panel'}`}
+      className={`side-panel-resizable resizable ${hideAnnotationSidebar ? 'open-panel' : 'close-panel'}`}
       ref={leftRef}
     >
       <div className='side-panel-container'>
         <div className='annotation-list-container'>
           Annotation list!
+          {/* TODO stroke slider */}
+          {/* TODO Display all/none */}
+          {/* TODO Search box */}
+          {/* TODO annotation list */}
         </div>
       </div>
     </div>
@@ -115,9 +110,10 @@ const ViewerInner = ({
   const renderMainContainer = () => (
     <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
-        {displayIframe && <iframe src='about:blank' id='osd-viewer-iframe'>
+        <iframe src='about:blank' id='osd-viewer-iframe' className={!displayIframe ? CLASS_NAMES.HIDDEN: ''}>
           &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
-        </iframe>}
+        </iframe>
+        {/* displayIframe */}
       </div>
     </div>
   );
@@ -133,12 +129,14 @@ const ViewerInner = ({
   });
 
   return (
-    <div className='viewer-container app-content-container'>
+    <>
+    {!initialized && <ChaiseSpinner />}
+    <div className={`viewer-container app-content-container ${!initialized ? CLASS_NAMES.HIDDEN: ''}`}>
       <div className='top-panel-container'>
         <Alerts />
         <div className='top-flex-panel'>
           <div
-            className={`top-left-panel small-panel ${showPanel ? 'open-panel' : 'close-panel'
+            className={`top-left-panel small-panel ${hideAnnotationSidebar ? 'open-panel' : 'close-panel'
               }`}
           >
             <div className='panel-header'>
@@ -147,8 +145,17 @@ const ViewerInner = ({
               </div>
             </div>
           </div>
-          <div className='top-right-panel'>
-            TODO TITLE AND BUTTONS
+          <div className={`top-right-panel${!pageTitle ? ' no-title' : ''}`}>
+            {pageTitle &&
+              <div className='title-container'>
+                <DisplayValue
+                  value={{isHTML: true, value: pageTitle}}
+                  as='h1'
+                  props={{'id': 'page-title'}}
+                />
+              </div>
+            }
+            {/* TODO menu buttons */}
           </div>
         </div>
       </div>
@@ -167,6 +174,7 @@ const ViewerInner = ({
         convertInitialWidth
       />
     </div>
+    </>
   )
 
 }

@@ -7,22 +7,29 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
-
 // models
-import { MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { CustomError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// providers
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { ViewerConfigService } from '@isrd-isi-edu/chaise/src/services/viewer-config';
+import ViewerConfigService from '@isrd-isi-edu/chaise/src/services/viewer-config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-annotation';
 
 // utils
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
-import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe, hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
+import { HELP_PAGES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { OSDViewerDeploymentPath, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 export const ViewerContext = createContext<{
   /**
@@ -32,7 +39,28 @@ export const ViewerContext = createContext<{
   /**
    * whether the page is initialized and we can start showing the elements
    */
-  initialized: boolean
+  initialized: boolean,
+  /**
+   * The title of the page
+   */
+  pageTitle: string,
+  /**
+   * whether to show the annotation sidebar or not
+   */
+  hideAnnotationSidebar: boolean,
+  /**
+   * call this function to toggle the annotation sidebar
+   */
+  toggleAnnotationSidebar: () => void,
+  /**
+   * whether the channel list is currently displayed or not.
+   */
+  showChannelList: boolean,
+  /**
+   * call this function to toggle the channel list
+   */
+  toggleChannelList: () => void,
+
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -59,33 +87,51 @@ export default function ViewerProvider({
   /**
    * whether we've initialized the page or not
    */
-  const [initialized, setInitialized] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const [pageTitle, setPageTitle] = useState('Image');
+
+  const [showChannelList, setShowChannelList] = useState(false);
 
   /**
    * whether we're waiting for annotations or not
    */
   const [loadingAnnotations, setLoadingAnnotations] = useState(true);
+
+  const [canCreateAnnotation, setCanCreateAnnotation] = useState(false);
+
   const [hideAnnotationSidebar, setHideAnnotationSidebar] = useState(true);
 
-  const annotationTuples = useRef([]);
-
-  const imageID = useRef();
+  const imageID = useRef<string>();
   /**
    * if default z-index is missing, we're using 0
    */
-  const defaultZIndex = useRef(0);
+  const defaultZIndex = useRef<number>(0);
 
   const osdViewerParameters = useRef<any>();
+  const mainImageLoaded = useRef(false);
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
   useEffect(() => {
-    if (!initialized) return;
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
+    initializeViewerApp();
+
+    windowRef.addEventListener('message', recieveIframeMessage);
+  }, []);
+
+
+  const initializeViewerApp = () => {
+    ViewerConfigService.configure();
+
     const imageConfig = ViewerConfigService.imageConfig;
     const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
 
     let imageTuple: any, imageURI: string;
-    let computedPageTitle : string, headTitleDisplayname : any;
+    let headTitleDisplayname: any;
 
     // if the main image request didnt return any rows
     let noImageData = false;
@@ -99,9 +145,9 @@ export default function ViewerProvider({
       setHideAnnotationSidebar(false);
       setLoadingAnnotations(true);
       hasAnnotationQueryParam = true;
-  }
+    }
 
-
+    // read the image
     reference.contextualize.detailed.read(1, logInfo.logObject, false, true, false, true).then((imagePage: any) => {
 
       const tableDisplayName = imagePage.reference.displayname.value;
@@ -119,7 +165,7 @@ export default function ViewerProvider({
         if (imageConfig.legacy_osd_url_column_name) {
           imageURI = imageTuple.data[imageConfig.legacy_osd_url_column_name];
           if (!imageURI) {
-            console.log(`The ${imageConfig.legacy_osd_url_column_name} value is empty in Image table.`);
+            $log.log(`The ${imageConfig.legacy_osd_url_column_name} value is empty in Image table.`);
           }
         }
 
@@ -234,19 +280,29 @@ export default function ViewerProvider({
         return [];
       }
 
-      return loadImageMetadata(osdViewerParameters);
+      return loadImageMetadata(osdViewerParameters, imageID.current!, defaultZIndex.current);
 
-    }).then(function () {
+    }).then(() => {
       // dont fetch annotation from db if:
       // - we have annotation query params
       // - or main image request didn't return any rows
-      if (hasAnnotationQueryParam || noImageData) {
-        return false;
+      if (hasAnnotationQueryParam || noImageData || !imageID.current) {
+        return {
+          annotationTuples: [],
+          annotationURLs: [],
+          canUpdateAnnotation: false,
+          canCreateAnnotation: false
+        }
       }
 
       // read the annotation reference
-      return readAllAnnotations(true);
-    }).then(function () {
+      return readAllAnnotations(true, imageID.current, defaultZIndex.current);
+    }).then((res: ReadAllAnnotationResultType) => {
+      ViewerAnnotationService.initialize(res.annotationTuples, res.annotationURLs);
+
+      if (res.canCreateAnnotation) {
+        setCanCreateAnnotation(true);
+      }
 
       // view <table displayname>: tuple displayname
       let headTitle = `View ${getDisplaynameInnerText(reference.displayname)}`;
@@ -255,22 +311,202 @@ export default function ViewerProvider({
       }
       updateHeadTitle(headTitle);
 
-      // TODO
+      if (res.annotationTuples.length > 0) {
+        setLoadingAnnotations(true);
+      }
+
+      if (!isObjectAndNotNull(osdViewerParameters.current) || osdViewerParameters.current.mainImage.info.length === 0) {
+        $log.log('there wasn\'t any parameters that we could send to OSD viewer');
+        throw new ConfigService.ERMrest.MalformedURIError('Image information is missing.');
+      }
+
+      /**
+       * Some features are not working properly in safari, so we should let them know
+       *
+       * since the issues are only related to annotaion, we're only showing this error if
+       * there are some annotations, or user can create or edit annotations.
+       */
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const hasOrCanHaveAnnot = (res.annotationTuples.length > 0 || res.canUpdateAnnotation || res.canCreateAnnotation);
+      if (isSafari && hasOrCanHaveAnnot) {
+        const errorMessage = [
+          'You are using a browser that has limited support for this application.',
+          '<br/><br/>',
+          'The following features related to the annotation tool might not work as expected:',
+          '<ul><br/>',
+          '<li style="list-style-type: inherit"><strong>Arrow line</strong>: The arrowheads might not be visible on high-resolution images.</li>',
+          '<li style="list-style-type: inherit"><strong>Text</strong>: The text box cannot be resized during drawing.</li>',
+          '<br/></ul>',
+          'We recommend using <a target="_blank" href="https://www.google.com/chrome/">Google Chrome</a> ',
+          'or <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a> ',
+          'for full annotation support.'
+        ].join('');
+
+        dispatchError({ error: new LimitedBrowserSupport(errorMessage, undefined, true), isDismissible: true });
+      }
+
+      getOSDViewerIframe().setAttribute('src', `${windowRef.location.origin}${OSDViewerDeploymentPath()}mview.html`);
+
+      // NOTE if we move displayReady and displayIframe to be after the osdLoaded,
+      //      the scalebar value doesn't properly display. the viewport must be visible
+      //      before initializing the osd viewer (and its scalebar)
+      // show the page while the image info will be loaded by osd viewer
+      setInitialized(true);
 
     }).catch((error: any) => {
       dispatchError({ error })
     });
+  };
 
-  }, [initialized]);
+  const recieveIframeMessage = (event: any) => {
+    if (event.origin !== windowRef.location.origin) return;
+
+    const data = event.data.content;
+    const messageType = event.data.messageType;
+    const iframe = getOSDViewerIframe().contentWindow!;
+
+    switch (messageType) {
+      case 'osdLoaded':
+        // called when osd iframe has been fully loaded.
+
+        // initialize viewer
+        if (isObjectAndNotNull(osdViewerParameters.current)) {
+          iframe.postMessage({ messageType: 'initializeViewer', content: osdViewerParameters.current }, origin);
+        }
+        break;
+      case 'mainImageLoadFailed':
+        // called if the main image didnt properly load
+
+        addAlert(errorMessages.viewerOSDFailed, ChaiseAlertType.ERROR);
+        break;
+      case 'mainImageLoaded':
+        // TODO
+        ViewerAnnotationService.loadAnnotations();
+        break;
+      case 'updateMainImage':
+        defaultZIndex.current = data.zIndex;
+        // TODO
+
+        break;
+      case 'annotationsLoaded':
+        // TODO
+        break;
+      case 'errorAnnotation':
+        addAlert('Couldn\'t parse the given annotation.', ChaiseAlertType.WARNING);
+        $log.warn(data);
+        break;
+      case 'updateAnnotationList':
+        // TODO
+        break;
+      case 'onClickChangeSelectingAnnotation':
+        // TODO
+        break;
+      case 'onChangeStrokeScale':
+        // TODO
+        break;
+      case 'saveGroupSVGContent':
+        // TODO
+        break;
+      case 'fetchZPlaneList':
+        fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then((res) => {
+          iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
+        }).catch((error: any) => {
+          dispatchError({ error });
+        })
+        break;
+      case 'fetchZPlaneListByZIndex':
+        fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source).then((res) => {
+          iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
+        }).catch((error: any) => {
+          dispatchError({ error });
+        })
+        break;
+      case 'openDrawingHelpPage':
+        windowRef.open(getHelpPageURL(HELP_PAGES.VIEWER_ANNOTATION), '_blank');
+        break
+      case 'hideChannelList':
+        // osd-viewer sends this so we can update the button state
+        setShowChannelList(false);
+        break;
+      case 'showChannelList':
+        // osd-viewer sends this so we can update the button state
+        setShowChannelList(true);
+        break;
+      case 'updateChannelConfig':
+        updateChannelConfig(data, imageID.current!).then((res) => {
+          // the alerts are disaplyed by the updateChannelConfig function
+          // let osd viewer know that the process is done
+          iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: res } }, origin);
+        }).catch((error) => {
+          // let osd viewer know that the process is done
+          iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: false } }, origin);
+
+          // show the error
+          dispatchError({ error })
+        });
+        break;
+      case 'downloadViewDone':
+        // TODO
+        break;
+      case 'downloadViewError':
+        // TODO
+        break;
+      case 'showAlert':
+        addAlert(data.message, data.type);
+        break;
+      case 'showPopupError':
+        const err = new CustomError(data.header, data.message, undefined, data.clickActionMessage, data.isDismissible);
+        dispatchError({ error: err, isDismissible: data.isDismissible });
+        break;
+    }
+  };
 
 
+  // ---------------------- UI callbacks ------------------- //
+  const toggleAnnotationSidebar = () => {
+    setHideAnnotationSidebar((prev: boolean) => {
+      const action = prev ? LogActions.VIEWER_ANNOT_PANEL_SHOW : LogActions.VIEWER_ANNOT_PANEL_HIDE;
+      LogService.logClientAction({
+        action: LogService.getActionString(action, null, ''),
+        stack: LogService.getStackObject()
+      }, reference.defaultLogInfo);
+      return !prev;
+    })
+  };
+
+  const toggleChannelList = () => {
+    setShowChannelList((prev: boolean) => {
+      const action = prev ? LogActions.VIEWER_CHANNEL_HIDE : LogActions.VIEWER_CHANNEL_SHOW;
+
+      getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'toggleChannelList' }, origin);
+
+      // log the click
+      // app mode will change by annotation controller, this one should be independent of that
+      LogService.logClientAction({
+        action: LogService.getActionString(action, null, ''),
+        stack: LogService.getStackObject()
+      }, reference.defaultLogInfo);
+
+      return !prev;
+    });
+  }
 
   const providerValue = useMemo(() => {
     return {
       reference,
-      initialized
+      initialized,
+      pageTitle,
+      hideAnnotationSidebar,
+      toggleAnnotationSidebar,
+      showChannelList,
+      toggleChannelList
     }
-  }, []);
+  }, [
+    initialized,
+    pageTitle,
+    hideAnnotationSidebar,
+    showChannelList
+  ]);
 
   return (
     <ViewerContext.Provider value={providerValue}>

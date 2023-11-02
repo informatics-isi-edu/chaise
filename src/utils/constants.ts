@@ -113,7 +113,8 @@ export const errorNames = {
   multipleDataErrorCode: 'Multiple Records Found',
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
-  invalidHelpPage: 'Help Page Not Found'
+  invalidHelpPage: 'Help Page Not Found',
+  limitedBrowserSupport: 'Limited Browser Support'
 };
 
 export const errorMessages = {
