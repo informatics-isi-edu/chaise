@@ -124,6 +124,23 @@ The rules that should be followed while writing code.
     setCounter(prevCounter => prevCounter + 1);
   };
   ```
+- When to use different React hooks, `useState`, `useRef`, and `useStateRef`
+  - `useState`:
+    - common to both `useState` and `useRef`, remembers it's value after a rerender of the component
+    - used to bind component state with rendering the component
+    - state update is asynchronous, the new state value won't be updated until after rerender
+    - modifying the state will queue a rerender of the component which will have the new state value that was set before rerender
+  - `useRef`:
+    - common to both `useState` and `useRef`, remembers it's value after a rerender of the component
+    - does not trigger rerenders of the component or `useEffect` of component
+    - ref update is synchronous, meaning the new value is immediately available in other functions
+    - better for accessing mutable values that are independent of the React component state
+    - useful when mutating a value that is used in another function later in the stack before a rerender would occur
+      - for instance, in a function used as a callback for a promise
+    - `<ref>.current` is a mutable value 
+  - `useStateRef`:
+    - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
+    - intended to be synchronous
 - List items must have keys, which tell React list item   identity
   - Should be unique per list
   - Ideally, use item IDs
