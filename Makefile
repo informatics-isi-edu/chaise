@@ -197,6 +197,9 @@ SOURCE=src
 
 DIST=dist
 
+# where config files are
+CONFIG=config
+
 # Shared utilities
 COMMON=common
 
@@ -272,10 +275,20 @@ $(SASS): $(shell find $(COMMON)/styles/scss/)
 	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
-JS_CONFIG=chaise-config.js
-$(JS_CONFIG): chaise-config-sample.js
-	cp -n chaise-config-sample.js $(JS_CONFIG) || true
+# should eventually be removed
+DEPRECATED_JS_CONFIG=chaise-config.js
+
+JS_CONFIG_SAMPLE= $(CONFIG)/chaise-config-sample.js
+JS_CONFIG=$(CONFIG)/chaise-config.js
+$(JS_CONFIG): $(JS_CONFIG_SAMPLE)
+	cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
+
+VIEWER_CONFIG_SAMPLE=$(CONFIG)/viewer-config-sample.js
+VIEWER_CONFIG=$(CONFIG)/viewer-config.js
+$(VIEWER_CONFIG): $(VIEWER_CONFIG_SAMPLE)
+	cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
+	touch $(VIEWER_CONFIG)
 
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
@@ -290,7 +303,7 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 	$(info - creating chaise-dependencies.html)
 	@> $(DIST)/chaise-dependencies.html
 	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
-	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
 
 # list of file and folders that will be sent to the given location
@@ -329,10 +342,8 @@ WEBPACK_EXTERNAL_VENDOR_FILES= \
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
 
-VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
-$(VIEWER_CONFIG): $(VIEWER_ROOT)/viewer-config-sample.js
-	cp -n $(VIEWER_ROOT)/viewer-config-sample.js $(VIEWER_CONFIG) || true
-	touch $(VIEWER_CONFIG)
+# should eventually be removed
+DEPRECATED_VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
 
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
 	$(VIEWER_ROOT)/viewer.controller.js \
@@ -363,7 +374,7 @@ VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.
 	@> .make-viewer-includes
 	$(info - creating .make-viewer-includes)
 	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
+	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DEPRECATED_VIEWER_CONFIG) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-viewer-includes)
 
 viewer/index.html: viewer/index.html.in .make-viewer-includes
@@ -509,7 +520,7 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(DEPRECATED_VIEWER_CONFIG)' . $(CHAISEDIR)
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 

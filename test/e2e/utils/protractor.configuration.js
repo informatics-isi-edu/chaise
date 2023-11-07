@@ -128,11 +128,11 @@ exports.getConfig = function(options) {
 
   var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  var cmd = 'sudo cp ' + chaiseFilePath + " " + ("/var/www/html/chaise/chaise-config.js");
+  var cmd = 'sudo cp ' + chaiseFilePath + " " + ("/var/www/html/chaise/config/chaise-config.js");
 
   // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
   if (typeof remoteChaiseDirPath == 'string') {
-    cmd = 'scp ' + chaiseFilePath + ' ' + remoteChaiseDirPath  + '/chaise-config.js';
+    cmd = 'scp ' + chaiseFilePath + ' ' + remoteChaiseDirPath  + '/config/chaise-config.js';
     console.log("Copying using scp");
   } else {
     console.log("Copying using cp");
