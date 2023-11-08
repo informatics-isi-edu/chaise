@@ -2,11 +2,11 @@
 
 **Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL.
 
-A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`.
+A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/config/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`.
 
 Each chaise config property below can be defined in each place that we allow for a chaise configuration with a few exceptions noted below. Chaise config uses a set order for determining which chaise configuration's properties will be used. The order that the properties will be checked and then applied are as follows:
   1. Default values defined in [chaise configuration document](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md).
-  2. Any properties defined at the root of the object returned from [chaise-config.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js).
+  2. Any properties defined at the root of the object returned from [chaise-config.js](https://github.com/informatics-isi-edu/chaise/blob/master/config/chaise-config-sample.js).
   3. Any matching `configRules` in the order they appear in the `configRules` array. Properties in the last matching rule will take precedence
   4. Any properties defined at the root of the object returned from the "tag:isrd.isi.edu,2019:chaise-config" annotation.
   5. Step 3 from above, but with the `configRules` from the "tag:isrd.isi.edu,2019:chaise-config" annotation.
