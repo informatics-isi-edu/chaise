@@ -278,15 +278,13 @@ $(SASS): $(shell find $(COMMON)/styles/scss/)
 # should eventually be removed
 DEPRECATED_JS_CONFIG=chaise-config.js
 
-JS_CONFIG_SAMPLE= $(CONFIG)/chaise-config-sample.js
 JS_CONFIG=$(CONFIG)/chaise-config.js
-$(JS_CONFIG): $(JS_CONFIG_SAMPLE)
+$(JS_CONFIG): $(CONFIG)/chaise-config-sample.js
 	cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
-VIEWER_CONFIG_SAMPLE=$(CONFIG)/viewer-config-sample.js
 VIEWER_CONFIG=$(CONFIG)/viewer-config.js
-$(VIEWER_CONFIG): $(VIEWER_CONFIG_SAMPLE)
+$(VIEWER_CONFIG): $(CONFIG)/viewer-config-sample.js
 	cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
 	touch $(VIEWER_CONFIG)
 
