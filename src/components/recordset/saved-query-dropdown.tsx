@@ -15,7 +15,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogAppModes, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordeditColumnModel, RecordeditDisplayMode, RecordeditProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel, RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProps, RecordsetSelectMode
@@ -64,7 +64,7 @@ const SavedQueryDropdown = ({
   const [showTooltip, setShowTooltip] = useState(false);
   // when the dropdown is open, we should not use the tooltip
   const [useTooltip, setUseTooltip] = useState(true);
-  
+
   const [disableDropdown, setDisableDropdown] = useState<boolean>(true);
 
   const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null)
@@ -97,7 +97,7 @@ const SavedQueryDropdown = ({
     *  ]
     * }
     * NOTE: will return null if there aren't any facets
-    * 
+    *
     * @param facetModels: array of appliedFilter arrays
     */
   function _getStableFacets(facetModels: any[][]) {
@@ -204,10 +204,10 @@ const SavedQueryDropdown = ({
     })[0].inputType;
     const isDescriptionMarkdown = descriptionInputType === 'longtext' || descriptionInputType === 'markdown';
 
-    /** 
+    /**
      * Checks each option.displayname.value and formats it properly for display
      *   - special cases for `null`, `empty string` and `All records with value` options
-     * 
+     *
      * @param options - array of selected facet option objects for 1 facet
      * @returns formatted string to display for 1 facet
      **/
@@ -231,9 +231,9 @@ const SavedQueryDropdown = ({
     }
 
     /**
-     * Appends each facet name to the name string to be returned until the length of 
+     * Appends each facet name to the name string to be returned until the length of
      *   the returned name exceeds `savedQueryConfig.defaultNameLimits.totalTextLimit`
-     * 
+     *
      * @param names - array of facet names with options selected in them
      * @returns formatted string of all facet names appended together
      */
@@ -256,9 +256,9 @@ const SavedQueryDropdown = ({
     }
 
     /**
-     * Creates the description for a single facet to append with other facet descriptions to use as 
+     * Creates the description for a single facet to append with other facet descriptions to use as
      *   a default value for the saved query description field
-     * 
+     *
      * @param facet - string that includes the facet name and total number of selections
      * @param optionsString - formatted string of all selected facet options for the given facet
      * @returns formatted string of the facet name, number selected, and selected facet options rownames
@@ -271,8 +271,8 @@ const SavedQueryDropdown = ({
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param descriptions - array of facet descriptions generated from `facetDescription()`
      * @param initialValue - initial string that facet descriptions will be appended to
      * @returns default description value to fill in for the saved query description field
@@ -280,10 +280,10 @@ const SavedQueryDropdown = ({
     const iterativeDefaultDescription = (descriptions: string[], initialValue: string) => {
       const separator = isDescriptionMarkdown ? '\n' : '';
 
-      /**  
+      /**
        * appends the list of facetDescriptions together and prepends the initial value
        * if the length is over the totalTextLimit, false is returned
-       * 
+       *
        * @param stringArray - array of facet descriptions
        * @returns string | false
        */
@@ -418,7 +418,7 @@ const SavedQueryDropdown = ({
     const facetObj = _getStableFacets(allFilters);
     const query_id = SparkMD5.hash(JSON.stringify(facetObj));
 
-    /**  
+    /**
      * column names come from the configuration
      * ['catalog', 'description', 'encodedFacets', 'facets', 'queryId', 'queryName', 'schemaName', 'tableName', 'userId']
      */
@@ -467,13 +467,13 @@ const SavedQueryDropdown = ({
         };
 
         setRecordeditModalProps({
-          appMode: 'create',
+          appMode: appModes.CREATE,
           config: { displayMode: RecordeditDisplayMode.POPUP },
           modalOptions: {
             parentReference: reference,
-            onSubmitSuccess: onCreateSavedQuerySuccess,
             onClose: hideRecordeditModal
           },
+          onSubmitSuccess: onCreateSavedQuerySuccess,
           // TODO: parentContainer?
           prefillRowData: rows,
           queryParams: {},
@@ -563,7 +563,7 @@ const SavedQueryDropdown = ({
 
   // isOpen is true when the dropdown is open
   const onDropdownToggle = (isOpen: boolean) => {
-    // toggle the tooltip based on dropdown's inverse state 
+    // toggle the tooltip based on dropdown's inverse state
     setUseTooltip(!isOpen);
     if (isOpen === true) setShowTooltip(false);
 
@@ -581,9 +581,9 @@ const SavedQueryDropdown = ({
     if (disableDropdown) {
       // if dropdown is disabled, create a "fake" dropdown element
       return (
-        <ChaiseTooltip 
-          placement='bottom-end' 
-          tooltip={<span>Please login to be able to save searches for <code>{reference.displayname.value}</code>.</span>} 
+        <ChaiseTooltip
+          placement='bottom-end'
+          tooltip={<span>Please login to be able to save searches for <code>{reference.displayname.value}</code>.</span>}
         >
           <div className='chaise-btn chaise-btn-primary disabled dropdown-toggle'>
             <span className='chaise-btn-icon fa-solid fa-floppy-disk' />
@@ -595,8 +595,8 @@ const SavedQueryDropdown = ({
 
     return (
       <Dropdown className='saved-query-menu' onToggle={onDropdownToggle}>
-        <ChaiseTooltip 
-          placement='bottom-end' 
+        <ChaiseTooltip
+          placement='bottom-end'
           tooltip={MESSAGE_MAP.tooltip.saveQuery}
           show={showTooltip}
           onToggle={(show) => setShowTooltip(useTooltip && show)}

@@ -21,6 +21,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { FormProvider, useForm } from 'react-hook-form';
+import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -557,6 +558,10 @@ if (config.displayMode === RecordeditDisplayMode.POPUP) {
       </div>
     </Modal>
   )
+}
+
+else if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
+  return <ViewerAnnotationFormContainer />
 }
 
 return (

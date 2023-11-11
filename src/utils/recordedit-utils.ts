@@ -231,12 +231,6 @@ export function populateCreateInitialValues(
   // the data associated with the foreignkeys
   const foreignKeyData: any = {};
 
-  // TODO: add initialValues to submissionRows (viewer feature)
-  // is this even needed?
-  // if (DataUtils.isObjectAndNotNull(initialValues)) {
-  //     model.submissionRows[0] = initialValues;
-  // }
-
   // populate defaults
   // NOTE: should only be 1 form
   forms.forEach((formValue: number, formIndex: number) => {
@@ -316,14 +310,13 @@ export function populateCreateInitialValues(
             // if all the columns of the foreignkey are prefilled, use that instead of default
             const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
 
-            // TODO viewer feature
             // if all the columns of the foreignkey are initialized, use that instead of default
-            // const allInitialized = column.foreignKey.colset.columns.every((col: any) => {
-            //     return values[col.name] !== null;
-            // });
+            const allInitialized = initialValues && column.foreignKey.colset.columns.every((col: any) => {
+                return initialValues[col.name] !== null;
+            });
 
-            if (allPrefilled) {
-              const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+            if (allPrefilled || allInitialized) {
+              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -731,10 +724,10 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
 
 /* The following 3 functions are for foreignkey fields */
 export function createForeignKeyReference(
-  column: any, 
-  parentReference: any, 
-  formNumber: number, 
-  foreignKeyData: any, 
+  column: any,
+  parentReference: any,
+  formNumber: number,
+  foreignKeyData: any,
   getValuesFunction: () => any
 ): any {
   const andFilters: any = [];
@@ -751,7 +744,7 @@ export function createForeignKeyReference(
 
 
 export function callOnChangeAfterSelection(
-  selectedRow: any, 
+  selectedRow: any,
   onChange: any,
   name: string,
   column: any,
@@ -784,7 +777,7 @@ export function callOnChangeAfterSelection(
 
 export function clearForeignKeyData(
   name: string,
-  column: any, 
+  column: any,
   formNumber: number,
   foreignKeyData: any,
   setFunction: (name: string, value: any) => void

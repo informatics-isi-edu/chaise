@@ -6,9 +6,9 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { 
-  appModes, PrefillObject, RecordeditColumnModel, 
-  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions 
+import {
+  appModes, PrefillObject, RecordeditColumnModel,
+  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
@@ -112,19 +112,51 @@ export const RecordeditContext = createContext<{
 } | null>(null);
 
 type RecordeditProviderProps = {
+  /**
+   * the mode of the app
+   */
   appMode: string;
-  children: JSX.Element;
+  /**
+   * the config object
+   */
   config: RecordeditConfig;
+  /**
+   * parameters for the modal
+   */
   modalOptions?: RecordeditModalOptions;
+  /**
+   * called when form was submitted successfuly
+   */
+  onSubmitSuccess?: () => void,
+  /**
+   * initial data that you want to be displayed (only honored in create mode)
+   */
   prefillRowData?: any[];
+  /**
+   * the tuples that we want to edit (only honored in edit mode)
+   */
+  initialTuples?: any[],
+  /**
+   * the query parameters that the page might have
+   */
   queryParams: any;
+  /**
+   * main reference of the form
+   */
   reference: any;
+  /**
+   * log related properties
+   */
   logInfo: {
     logAppMode: string;
     logObject?: any;
     logStack: any;
     logStackPath: string;
-  }
+  },
+  /**
+   * the element that renderes the form
+   */
+  children: JSX.Element;
 };
 
 export default function RecordeditProvider({
@@ -133,7 +165,9 @@ export default function RecordeditProvider({
   config,
   logInfo,
   modalOptions,
+  onSubmitSuccess,
   prefillRowData,
+  initialTuples,
   queryParams,
   reference,
 }: RecordeditProviderProps): JSX.Element {
@@ -158,7 +192,7 @@ export default function RecordeditProvider({
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
 
-  const [tuples, setTuples, tuplesRef] = useStateRef<any[]>([]);
+  const [tuples, setTuples, tuplesRef] = useStateRef<any[]>(Array.isArray(initialTuples) ? initialTuples : []);
 
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
@@ -189,6 +223,12 @@ export default function RecordeditProvider({
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
+
+    // it's already initialized
+    if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
+      setInitialized(true);
+      return;
+    }
 
     const ERMrest = ConfigService.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
@@ -445,16 +485,15 @@ export default function RecordeditProvider({
           const failedPage = response.failed;
           const disabledPage = response.disabled;
 
+          if (onSubmitSuccess) {
+            onSubmitSuccess();
+          }
           // redirect to record app
-          if (forms.length === 1) {
-            if (config.displayMode === RecordeditDisplayMode.POPUP) {
-              modalOptions?.onSubmitSuccess();
-            } else {
-              // Created a single entity or Updated one
-              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+          else if (forms.length === 1) {
+            // Created a single entity or Updated one
+            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-              windowRef.location = page.reference.contextualize.detailed.appLink;
-            }
+            windowRef.location = page.reference.contextualize.detailed.appLink;
           }
           // see if we can just redirect, or if we need the resultset view.
           else {

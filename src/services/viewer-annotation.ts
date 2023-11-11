@@ -12,10 +12,22 @@ import { getOSDViewerIframe } from '@isrd-isi-edu/chaise/src/utils/viewer-utils'
 export default class ViewerAnnotationService {
   private static _annotationURLs: string[];
   private static _annotationTuples: any[];
+  private static _annotationsRecieved: boolean;
+  private static _annotationEditReference: any;
+  private static _annotationCreateReference: any;
 
-  static initialize(tuples: any[], urls: string[]) {
+  static setAnnotations(tuples: any[], urls: string[], annotationEditReference: any, annotationCreateReference: any) {
     ViewerAnnotationService._annotationTuples = tuples;
     ViewerAnnotationService._annotationURLs = urls;
+    ViewerAnnotationService._annotationEditReference = annotationEditReference;
+    ViewerAnnotationService._annotationCreateReference = annotationCreateReference;
+    ViewerAnnotationService._annotationsRecieved = true;
+  }
+
+  static clearPreviousAnnotations() {
+    ViewerAnnotationService._annotationTuples = [];
+    ViewerAnnotationService._annotationURLs = [];
+    ViewerAnnotationService._annotationsRecieved = false;
   }
 
   static get annotationURLs() {
@@ -24,6 +36,21 @@ export default class ViewerAnnotationService {
 
   static get annotationTuples() {
     return ViewerAnnotationService._annotationTuples;
+  }
+
+  static get annotationEditReference() {
+    return ViewerAnnotationService._annotationEditReference;
+  }
+
+  static get annotationCreateReference() {
+    return ViewerAnnotationService._annotationCreateReference;
+  }
+
+  /**
+   * whether we have the annotation information or not
+   */
+  static get annotationsRecieved() {
+    return ViewerAnnotationService._annotationsRecieved;
   }
 
   /**
@@ -142,7 +169,7 @@ export default class ViewerAnnotationService {
     ViewerAnnotationService._sendMessageToOSDViewer('changeGroupInfo', data);
   }
 
-  static addNewTerm(data: any) {
+  static startAnnotationCreate(data: any) {
     ViewerAnnotationService._sendMessageToOSDViewer('addNewTerm', data);
   }
 

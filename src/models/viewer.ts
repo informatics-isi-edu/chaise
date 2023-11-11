@@ -242,6 +242,8 @@ export type ViewerConfigProps = {
      * in the HTML source code, find the tr containing the column.
      * the visible column name is used in id attribute with the following format:
      * id=row-<visible-column-name>
+     *
+     * the fk must be based on either be to annotated_term_id_column_name or annotated_term_name_column_name
      */
     annotated_term_visible_column_name: string,
     annotated_term_foreign_key_constraint: [string | null, string],
@@ -255,4 +257,65 @@ export type ViewerConfigProps = {
     annotated_term_id_column_name: string,
     annotated_term_name_column_name: string
   }
+}
+
+export type ViewerAnnotationModal = {
+  /**
+   * the identifier to find the annotation (must be unique)
+   */
+  id?: string,
+
+  /**
+   * the name of the annotation
+   */
+  name?: string,
+
+  /**
+   * The url to record page
+   */
+  url: string,
+
+  /**
+   * the tuple object
+   */
+  tuple?: any,
+
+  /**
+   * the colors used for the annotation
+   */
+  colors: string[],
+
+  /**
+   * used internally in osd-viewer to identify the annotation group
+   */
+  groupID: string,
+  /**
+   * used internally in osd-viewer to identify the svg
+   * TODO (why does osd-viewer need two IDs?)
+   */
+  svgID: string,
+  /**
+   * the displayname of the annotated term
+   */
+  anatomy: string,
+  /**
+   * TODO not used in chaise but osd-viewer is passing it
+   */
+  // description: string,
+  /**
+   * whether this is coming from database or file
+   */
+  isStoredInDB: boolean,
+  /**
+   * whether it can be updated or not
+   */
+  canUpdate: boolean,
+  /**
+   * whether it can be deleted or not
+   */
+  canDelete: boolean,
+  /**
+   * the stack node used for logging
+   */
+  logStackNode: any,
 }

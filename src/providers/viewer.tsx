@@ -9,7 +9,9 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { CustomError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -23,12 +25,15 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 
 // utils
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe, hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
+import {
+  ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
+  hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig
+} from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
 import { HELP_PAGES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { OSDViewerDeploymentPath, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { OSDViewerDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 export const ViewerContext = createContext<{
@@ -61,6 +66,17 @@ export const ViewerContext = createContext<{
    */
   toggleChannelList: () => void,
 
+  /**
+   * annotations
+   */
+  annotationModels: ViewerAnnotationModal[],
+  loadingAnnotations: boolean,
+  canCreateAnnotation: boolean,
+
+  switchToCreateMode: (event: any) => void,
+  annotationFormProps: RecordeditProps | null,
+  closeAnnotationForm: () => void,
+
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -82,7 +98,7 @@ export default function ViewerProvider({
 }: ViewerProviderProps): JSX.Element {
   const { addAlert, removeAllAlerts } = useAlert();
   const { validateSessionBeforeMutation } = useAuthn();
-  const { dispatchError, errors } = useError();
+  const { dispatchError } = useError();
 
   /**
    * whether we've initialized the page or not
@@ -101,6 +117,10 @@ export default function ViewerProvider({
   const [canCreateAnnotation, setCanCreateAnnotation] = useState(false);
 
   const [hideAnnotationSidebar, setHideAnnotationSidebar] = useState(true);
+
+  const [annotationModels, setAnnotationModels, annotationModelsRef] = useStateRef<ViewerAnnotationModal[]>([]);
+
+  const [annotationFormProps, setAnnotationFormProps] = useState<RecordeditProps | null>(null)
 
   const imageID = useRef<string>();
   /**
@@ -203,7 +223,7 @@ export default function ViewerProvider({
 
           //attach link if it doesn't have any
           if (!pageTitleCaption.isHTML || !pageTitleCaption.value.match(/<a\b.+href=/)) {
-            setPageTitle('<a href="' + imageTuple.reference.contextualize.detailed.appLink + '">' + pageTitleCaption.value + '</a>');
+            setPageTitle(`<a href='${imageTuple.reference.contextualize.detailed.appLink}'>${pageTitleCaption.value}</a>`);
           } else {
             setPageTitle(pageTitleCaption.value);
           }
@@ -298,7 +318,12 @@ export default function ViewerProvider({
       // read the annotation reference
       return readAllAnnotations(true, imageID.current, defaultZIndex.current);
     }).then((res: ReadAllAnnotationResultType) => {
-      ViewerAnnotationService.initialize(res.annotationTuples, res.annotationURLs);
+      ViewerAnnotationService.setAnnotations(
+        res.annotationTuples,
+        res.annotationURLs,
+        res.annotationEditReference,
+        res.annotationCreateReference
+      );
 
       if (res.canCreateAnnotation) {
         setCanCreateAnnotation(true);
@@ -334,11 +359,11 @@ export default function ViewerProvider({
           '<br/><br/>',
           'The following features related to the annotation tool might not work as expected:',
           '<ul><br/>',
-          '<li style="list-style-type: inherit"><strong>Arrow line</strong>: The arrowheads might not be visible on high-resolution images.</li>',
-          '<li style="list-style-type: inherit"><strong>Text</strong>: The text box cannot be resized during drawing.</li>',
+          '<li style=\'list - style - type: inherit\'><strong>Arrow line</strong>: The arrowheads might not be visible on high-resolution images.</li>',
+          '<li style=\'list - style - type: inherit\'><strong>Text</strong>: The text box cannot be resized during drawing.</li>',
           '<br/></ul>',
-          'We recommend using <a target="_blank" href="https://www.google.com/chrome/">Google Chrome</a> ',
-          'or <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a> ',
+          'We recommend using <a target=\'_blank\' href=\'https://www.google.com/chrome/\'>Google Chrome</a> ',
+          'or <a target=\'_blank\' href=\'https://www.mozilla.org/en-US/firefox/new/\'>Mozilla Firefox</a> ',
           'for full annotation support.'
         ].join('');
 
@@ -380,23 +405,86 @@ export default function ViewerProvider({
         addAlert(errorMessages.viewerOSDFailed, ChaiseAlertType.ERROR);
         break;
       case 'mainImageLoaded':
-        // TODO
-        ViewerAnnotationService.loadAnnotations();
+        mainImageLoaded.current = true;
+
+        /**
+         * called when the main images is loaded. we should now ask osd to load annotations if we already have
+         * fetched the URLs from database or have them based on query parameteres.
+         */
+        if (ViewerAnnotationService.annotationsRecieved) {
+          ViewerAnnotationService.loadAnnotations();
+        }
         break;
       case 'updateMainImage':
+        /**
+         * called when the main image has changed in the multi-z support.
+         * we need to update the information associated with the image.
+         */
+        mainImageLoaded.current = false;
+
+        // change the default z-index
         defaultZIndex.current = data.zIndex;
+
         // TODO
+        // make sure it's not in edit/create mode
+        // if (vm.editingAnatomy != null) {
+        //   vm.closeAnnotationForm();
+        // }
+
+        // clear the annotations
+        setAnnotationModels([]);
+        ViewerAnnotationService.clearPreviousAnnotations();
+
+        // show the loading indicator
+        setLoadingAnnotations(true);
+
+        // read the annotations
+        (function (currZIndex) {
+          readAllAnnotations(false, imageID.current!, currZIndex).then((res) => {
+            // if main image changed while fetching annotations, ignore it
+            if (currZIndex !== defaultZIndex.current) return;
+
+            ViewerAnnotationService.setAnnotations(
+              res.annotationTuples,
+              res.annotationURLs,
+              res.annotationEditReference,
+              res.annotationCreateReference
+            );
+
+            if (res.annotationTuples.length > 0) {
+              // ask osd to load the annotation
+              if (mainImageLoaded.current) {
+                ViewerAnnotationService.loadAnnotations();
+              }
+            } else {
+              setLoadingAnnotations(false);
+            }
+
+          }).catch((err) => {
+            // if main image changed while fetching annotations, ignore it
+            if (currZIndex !== defaultZIndex.current) return;
+
+            setLoadingAnnotations(false);
+
+            // fail silently
+            $log.error('error while updating annotations');
+            $log.error(err);
+          });
+        })(data.zIndex)
 
         break;
       case 'annotationsLoaded':
-        // TODO
+        // called when osd-viewer read all the annotations.
+        // TODO we should technically keep showing the loader until updateAnnotationList is called
+        setLoadingAnnotations(false);
         break;
       case 'errorAnnotation':
         addAlert('Couldn\'t parse the given annotation.', ChaiseAlertType.WARNING);
         $log.warn(data);
         break;
       case 'updateAnnotationList':
-        // TODO
+        // called whens osd-viewer has finished parsing annotaitons files.
+        updateAnnotaionList(data);
         break;
       case 'onClickChangeSelectingAnnotation':
         // TODO
@@ -461,6 +549,73 @@ export default function ViewerProvider({
     }
   };
 
+  const updateAnnotaionList = (items: any) => {
+    let newItems: ViewerAnnotationModal[] = [];
+
+    const annotConfig = ViewerConfigService.annotationConfig;
+
+    items.forEach((item: any) => {
+      const groupID = item.groupID;
+      const svgID = item.svgID;
+
+      // TODO why osd viewer is sending this event?
+      if (svgID === 'NEW_SVG' || groupID === 'NEW_GROUP') {
+        return;
+      }
+
+      // TODO how can this happen? does it makes sense?
+      if (annotationModelsRef.current.find((el) => el.groupID === groupID)) {
+        return;
+      }
+
+      /**
+       * support these cases:
+       * - id,name
+       * - ,name
+       * - id
+       */
+      let anatomyID = groupID, anatomyName = '';
+      if (groupID.indexOf(',') !== -1) {
+        anatomyID = groupID.split(',')[0];
+        if (anatomyID.length === 0) anatomyID = '';
+        anatomyName = groupID.split(',')[1];
+      }
+
+      // TODO improve supporting only anatomyID or anatomyName
+      const tuple = (!anatomyID) ? undefined : ViewerAnnotationService.annotationTuples.find((t: any) => {
+        return (t.data && t.data[annotConfig.annotated_term_column_name] === anatomyID);
+      });
+
+      const encode = fixedEncodeURIComponent;
+      const qParams = `pcid=${ConfigService.contextHeaderParams.cid}&ppid=${ConfigService.contextHeaderParams.pid}`;
+      const url = !anatomyID ? '' : [
+        `chaiseDeploymentPath()/record/#${ConfigService.catalogID}`,
+        encode(annotConfig.annotated_term_table_schema_name) + ':' + encode(annotConfig.annotated_term_table_name),
+        encode(annotConfig.annotated_term_id_column_name) + '=' + anatomyID + '?' + qParams
+      ].join('/');
+
+      newItems.push({
+        id: anatomyID,
+        name: anatomyName,
+        groupID,
+        svgID,
+        tuple,
+        colors: Array.isArray(item.stroke) ? item.stroke : [],
+        isStoredInDB: !!tuple,
+        anatomy: item.anatomy,
+        url,
+        canUpdate: tuple ? tuple.canUpdate : false,
+        canDelete: tuple ? tuple.canDelete : false,
+        logStackNode: LogService.getStackNode(
+          LogStackTypes.ANNOTATION,
+          tuple ? tuple.reference.table : undefined,
+          tuple ? tuple.reference.filterLogInfo : { file: 1 },
+        )
+      });
+    });
+
+    setAnnotationModels((prev) => [...prev, ...newItems]);
+  };
 
   // ---------------------- UI callbacks ------------------- //
   const toggleAnnotationSidebar = () => {
@@ -489,6 +644,43 @@ export default function ViewerProvider({
 
       return !prev;
     });
+  };
+
+  const onSubmitAnnotationSuccess = () => {
+    // TODO
+  }
+
+  const switchToCreateMode = () => {
+    // TODO should be changed and added just for testing
+    setAnnotationFormProps({
+      appMode: appModes.CREATE,
+      config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
+      onSubmitSuccess: onSubmitAnnotationSuccess,
+      reference: ViewerAnnotationService.annotationCreateReference,
+      logInfo: {
+        logAppMode: LogAppModes.CREATE,
+        logStack: ViewerAnnotationService.getAnnotationLogStack(),
+        logStackPath: ViewerAnnotationService.getAnnotationLogStackPath()
+      },
+      queryParams: {}
+    })
+
+
+    // Notify OSD to create a new svg and group for annotations
+    ViewerAnnotationService.startAnnotationCreate({
+      svgID: 'NEW_SVG',
+      groupID: 'NEW_GROUP',
+      anatomy: '',
+      description: ''
+    });
+
+    // log the client action
+    ViewerAnnotationService.logAnnotationClientAction(LogActions.ADD_INTEND);
+  };
+
+  const closeAnnotationForm = () => {
+    // TODO
+    setAnnotationFormProps(null);
   }
 
   const providerValue = useMemo(() => {
@@ -499,13 +691,24 @@ export default function ViewerProvider({
       hideAnnotationSidebar,
       toggleAnnotationSidebar,
       showChannelList,
-      toggleChannelList
+      toggleChannelList,
+      annotationModels,
+      loadingAnnotations,
+      canCreateAnnotation,
+      annotationFormProps,
+      closeAnnotationForm,
+      switchToCreateMode
     }
   }, [
     initialized,
     pageTitle,
     hideAnnotationSidebar,
-    showChannelList
+    showChannelList,
+    annotationModels,
+    loadingAnnotations,
+    canCreateAnnotation,
+    annotationFormProps,
+    closeAnnotationForm
   ]);
 
   return (

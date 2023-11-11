@@ -5,26 +5,57 @@ export enum appModes {
 }
 
 export type RecordeditProps = {
+  /**
+   * the mode of the app
+   */
   appMode: string;
+  /**
+   * the config object
+   */
   config: RecordeditConfig;
-  modalOptions?: RecordeditModalOptions;
-  parentContainer?: HTMLElement;
-  prefillRowData?: any[];
-  queryParams: any;
+  /**
+   * main reference of the form
+   */
   reference: any;
-  /* The log related APIs */
+  /**
+   * log related properties
+   */
   logInfo: {
     logAppMode: string;
-    /* the object that will be logged with the first request */
     logObject?: any;
     logStack: any;
     logStackPath: string;
-  }
+  },
+  /**
+   * the query parameters that the page might have
+   */
+  queryParams: any;
+  /**
+   * parameters for the modal
+   */
+  modalOptions?: RecordeditModalOptions;
+  /**
+   * called when form was submitted successfuly
+   */
+  onSubmitSuccess?: () => void,
+  /**
+   * initial data that you want to be displayed (only honored in create mode)
+   */
+  prefillRowData?: any[];
+  /**
+   * the tuples that we want to edit (only honored in edit mode)
+   */
+  initialTuples?: any[],
+  /**
+   * the container of this recordedit instance.
+   */
+  parentContainer?: HTMLElement;
 }
 
 export enum RecordeditDisplayMode {
   FULLSCREEN = 'fullscreen',
-  POPUP = 'popup'
+  POPUP = 'popup',
+  VIEWER_ANNOTATION = 'viewer-annotation',
 }
 
 export type RecordeditConfig = {
@@ -33,7 +64,6 @@ export type RecordeditConfig = {
 
 export type RecordeditModalOptions = {
   parentReference: any;
-  onSubmitSuccess: () => void;
   onClose: () => void;
 }
 

@@ -20,4 +20,19 @@
     height: 100%;
     width: 100%;
   }
+
+  .side-panel-container {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    padding: 0;
+    height: 100%;
+    overflow-y: auto;
+    margin-top: 8px;
+
+    .annotation-list-container, .annotation-form-container {
+      margin-bottom: 20px;
+      position: relative;
+    }
+  }
 }

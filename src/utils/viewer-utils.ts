@@ -263,6 +263,8 @@ export type ReadAllAnnotationResultType = {
   annotationURLs: string[],
   canUpdateAnnotation: boolean,
   canCreateAnnotation: boolean,
+  annotationEditReference: any,
+  annotationCreateReference: any
 };
 
 /**
@@ -278,7 +280,8 @@ export const readAllAnnotations = (
     annotationURLs: [],
     canUpdateAnnotation: false,
     canCreateAnnotation: false,
-    // annotationEditReference
+    annotationEditReference: null,
+    annotationCreateReference: null
   }
 
   return new Promise((resolve) => {
@@ -310,6 +313,9 @@ export const readAllAnnotations = (
       // res.annotationEditReference = ref;
 
       res.canCreateAnnotation = ref.canCreate;
+
+      res.annotationEditReference = ref;
+      res.annotationCreateReference = ref.contextualize.entryCreate;
 
       // TODO create and edit should be refactored to reuse the same code
       // create the edit and create forms
@@ -347,7 +353,7 @@ export const readAllAnnotations = (
         stack: ViewerAnnotationService.getAnnotationLogStack(null, { 'z_index': defaultZIndex, 'default_z': isDuringInitialization })
       };
 
-      // using edit, because the tuples are used in edit context (for populating edit form)
+      // using edit and attributegroup, because the tuples are used in edit context (for populating edit form)
       // we need dynamic acls for: update/delete of each row, update of columns in edit mode
       // that's why we're asking for tcrs
       return _readPageByPage(
