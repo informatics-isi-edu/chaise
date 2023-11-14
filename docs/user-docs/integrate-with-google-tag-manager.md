@@ -33,18 +33,21 @@ We now need to connect our website to Google Tag Manager. To do so,
 
 2. Copy and paste the following code into a file called `gtm-id.js`
 
+3. Define server specific variables
+  a. Add your GTM container ID on the first uncommented line, `var gtmId = [YOUR CONTAINER ID HERE]`.
+  b. Add each hostname that data should be collected from as a string in the array on the second uncommented line, `var hostnames = ['YOUR HOSTNAME HERE']`.
 
-3. Add your GTM container ID on the first uncommented line, `var gtmId = [YOUR CONTAINER ID HERE]`.
-
-4. Add the `gtm-id.js` file to the deployment server at the same level as the Chaise folder (e.g.,`/var/www/html/gtm-id.js`).
+4. Add the `gtm-id.js` file to the deployment server at the same level as the Chaise folder (e.g.,`/var/www/html/gtm-id.js`). NOTE: It is not suggested to deploy this file to dev or staging servers since google will gather data from those servers and combine it with www analytics data.
 
     ```js
     // When this file is loaded, it will run the 2 Google Tag Manager tags.
     // To use: Supply your Google Tag Manager container ID on the next line.
     var gtmId = null; // Change null to be your GTM ID (e.g. "GTM-XXXXXX")
+    var hostnames = []; // Add hostnames as a string to this array that should have analytics collected from (e.g. "www.XXXXXX.org")
 
     (function(gtmId) {
-        if (!gtmId) {
+        // return if no gtmID or the current location's hostname is not in the list of hostnames
+        if (!gtmId || hostnames.indexOf(window.location.hostname) < 0) {
             return;
         }
         // Run <head> tag.
