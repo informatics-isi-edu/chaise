@@ -1,3 +1,7 @@
+import {
+  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
 export enum appModes {
   COPY = 'copy',
   CREATE = 'create',
@@ -8,7 +12,7 @@ export type RecordeditProps = {
   /**
    * the mode of the app
    */
-  appMode: string;
+  appMode: appModes;
   /**
    * the config object
    */
@@ -37,7 +41,7 @@ export type RecordeditProps = {
   /**
    * called when form was submitted successfuly
    */
-  onSubmitSuccess?: () => void,
+  onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
   /**
    * initial data that you want to be displayed (only honored in create mode)
    */
@@ -50,6 +54,16 @@ export type RecordeditProps = {
    * the container of this recordedit instance.
    */
   parentContainer?: HTMLElement;
+  /**
+   * name of the columns that should be hidden
+   */
+  hiddenColumns?: string[];
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: {
+    getDisabledTuples?: RecordsetProviderGetDisabledTuples
+  }
 }
 
 export enum RecordeditDisplayMode {
@@ -85,6 +99,11 @@ export interface RecordeditColumnModel {
    * if this is true, on load, we have to wait for all the foreignkey values to load.
    */
   hasDomainFilter: boolean;
+  /**
+   * whether we should show the input or not
+   * (used in viewer app to hide the columns)
+   */
+  isHidden: boolean;
 }
 
 export interface TimestampOptions {

@@ -1,5 +1,6 @@
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -56,15 +57,12 @@ export default class ViewerAnnotationService {
   /**
    * Given the action and item, log the client action
    * if item is not passed, it will create the log based on annotation list
-   * @param {String} action - the actions string
-   * @param {Object=}
    */
-  static logAnnotationClientAction(action: string, item?: any, extraInfo?: any) {
-    const commonLogInfo = null;
-    // TODO
-    // if ($rootScope.annotationEditReference) {
-    //   commonLogInfo = $rootScope.annotationEditReference.defaultLogInfo;
-    // }
+  static logAnnotationClientAction(action: string, item?: ViewerAnnotationModal, extraInfo?: any) {
+    let commonLogInfo = null;
+    if (ViewerAnnotationService.annotationEditReference) {
+      commonLogInfo = ViewerAnnotationService.annotationEditReference.defaultLogInfo;
+    }
     LogService.logClientAction({
       action: ViewerAnnotationService.getAnnotationLogAction(action, item),
       stack: ViewerAnnotationService.getAnnotationLogStack(item, extraInfo)
@@ -77,9 +75,8 @@ export default class ViewerAnnotationService {
    * @param {string}
    * @param {Object=}
    */
-  static getAnnotationLogStackPath(item?: any) {
+  static getAnnotationLogStackPath(item?: ViewerAnnotationModal) {
     if (item) {
-      // TODO this doesn't look correct
       return LogService.getStackPath(null, LogStackPaths.ANNOTATION_ENTITY);
     } else {
       return LogService.getStackPath(null, LogStackPaths.ANNOTATION_SET);
@@ -93,7 +90,7 @@ export default class ViewerAnnotationService {
    * @param {string}
    * @param {Object=}
    */
-  static getAnnotationLogAction(action: string, item?: any) {
+  static getAnnotationLogAction(action: string, item?: ViewerAnnotationModal) {
     return LogService.getActionString(action, ViewerAnnotationService.getAnnotationLogStackPath(item));
   }
 
@@ -103,18 +100,17 @@ export default class ViewerAnnotationService {
    * @param {Object=} item any of the annotationModels object
    * @param {Object=} extraInfo - if we want to log extra information
    */
-  static getAnnotationLogStack(item?: any, extraInfo?: any) {
+  static getAnnotationLogStack(item?: ViewerAnnotationModal, extraInfo?: any) {
     let stackNode;
     if (item) {
       stackNode = item.logStackNode;
     } else {
       let table, fileInfo;
-      // TODO
-      // if ($rootScope.annotationEditReference) {
-      //   table = $rootScope.annotationEditReference.table;
-      // } else {
-      //   fileInfo = { "file": 1 }
-      // }
+      if (ViewerAnnotationService.annotationEditReference) {
+        table = ViewerAnnotationService.annotationEditReference.table;
+      } else {
+        fileInfo = { 'file': 1 };
+      }
       stackNode = LogService.getStackNode(LogStackTypes.ANNOTATION, table, fileInfo);
     }
 
@@ -125,7 +121,7 @@ export default class ViewerAnnotationService {
     return obj;
   }
 
-  static removeEntry(item: any): Promise<void> {
+  static removeEntry(item: ViewerAnnotationModal): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!item.tuple || !item.tuple.reference) {
         reject('given item didn\'t have proper tuple');

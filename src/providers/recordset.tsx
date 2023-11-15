@@ -12,6 +12,8 @@ import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
+  RecordsetProviderGetDisabledTuples,
+  RecordsetProviderOnSelectedRowsChanged,
   RecordsetProviderUpdateMainEntity, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
@@ -241,7 +243,7 @@ type RecordsetProviderProps = {
   /**
    * A callback to get the disabeld tuples (used in p&b popup)
    */
-  getDisabledTuples?: Function,
+  getDisabledTuples?: RecordsetProviderGetDisabledTuples,
   /**
    * The initially selected rows (used in facet popup)
    */
@@ -250,7 +252,7 @@ type RecordsetProviderProps = {
    * The callback that should be called when selected rows changes
    * If it returns a false, the selected rows won't change.
    */
-  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onSelectedRowsChanged?: RecordsetProviderOnSelectedRowsChanged,
   /**
    * The callback that should be called when favorites changed
    */

@@ -11,6 +11,7 @@ import {
   appModes, PrefillObject, RecordeditColumnModel,
   SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit'
+import { RecordsetProviderOnSelectedRowsChanged } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -22,7 +23,7 @@ import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isNonEmptyObject, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -30,7 +31,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any, queryParams?: any): RecordeditColumnModel {
+export function columnToColumnModel(column: any, isHidden?: boolean, queryParams?: any): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
   const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
@@ -80,7 +81,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     inputType: type,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
-    hasDomainFilter
+    hasDomainFilter,
+    isHidden: !!isHidden
   };
 }
 
@@ -311,8 +313,8 @@ export function populateCreateInitialValues(
             const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
 
             // if all the columns of the foreignkey are initialized, use that instead of default
-            const allInitialized = initialValues && column.foreignKey.colset.columns.every((col: any) => {
-                return initialValues[col.name] !== null;
+            const allInitialized = isNonEmptyObject(initialValues) && column.foreignKey.colset.columns.every((col: any) => {
+                return initialValues[col.name] !== undefined && initialValues[col.name] !== null;
             });
 
             if (allPrefilled || allInitialized) {
@@ -780,7 +782,7 @@ export function clearForeignKeyData(
   column: any,
   formNumber: number,
   foreignKeyData: any,
-  setFunction: (name: string, value: any) => void
+  setFunction: (name: string, value: any) => void,
 ): void {
   // clear the raw values
   column.foreignKey.colset.columns.forEach((col: any) => {

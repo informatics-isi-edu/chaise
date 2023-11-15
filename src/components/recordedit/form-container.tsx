@@ -118,7 +118,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   const {
     forms, appMode, reference, columnModels, tuples, activeSelectAll,
     canUpdateValues, columnPermissionErrors, foreignKeyData, waitingForForeignKeyData,
-    getRecordeditLogStack, getRecordeditLogAction,
+    getRecordeditLogStack, getRecordeditLogAction, foreignKeyCallbacks
   } = useRecordedit();
 
   /**
@@ -257,6 +257,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
         parentLogStackPath={getRecordeditLogAction(true)}
         foreignKeyData={foreignKeyData}
         waitingForForeignKeyData={waitingForForeignKeyData}
+        foreignKeyCallbacks={foreignKeyCallbacks}
       />
       {typeof formIndex === 'number' && formIndex in showPermissionError &&
         <div className={`column-permission-warning column-permission-warning-${safeClassNameId}`}>{permissionError}</div>
@@ -286,7 +287,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
 const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
-    canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
+    canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction, foreignKeyCallbacks
   } = useRecordedit();
 
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
@@ -405,6 +406,7 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
           parentReference={reference}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       </div>
       <div className='chaise-btn-group select-all-buttons'>

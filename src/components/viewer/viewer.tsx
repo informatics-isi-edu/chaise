@@ -3,12 +3,12 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_viewer.scss';
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import ViewerAnnotationList from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-list';
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -61,7 +61,7 @@ const ViewerInner = ({
   const {
     initialized, pageTitle,
     hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps,
-    closeAnnotationForm
+    displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode
   } = useViewer();
 
 
@@ -70,6 +70,8 @@ const ViewerInner = ({
   const [showCloseConfirmationModal, setShowCloseConfirmationModal] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
+
+  const iframeElement = useRef<HTMLIFrameElement>(null);
 
 
   // properly set scrollable section height
@@ -94,40 +96,13 @@ const ViewerInner = ({
 
   //------------------- UI related callbacks: --------------------//
 
+  const onConfirmCloseAnnotationForm = () => {
+    setShowCloseConfirmationModal(false);
+    closeAnnotationForm();
+  }
+
 
   //-------------------  render logics:   --------------------//
-
-  const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement>) => (
-    <div
-      className={`side-panel-resizable resizable ${hideAnnotationSidebar ? 'open-panel' : 'close-panel'}`}
-      ref={leftRef}
-    >
-      <div className='side-panel-container'>
-        <div className='annotation-container'>
-          {/* TODO stroke slider */}
-          {annotationFormProps &&
-            <div className='annotation-form-container'>
-              {/* TODO toggle drawing btn */}
-              <Recordedit {...annotationFormProps} />
-            </div>
-          }
-          <ViewerAnnotationList />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
-      <div className='main-body'>
-        <iframe src='about:blank' id='osd-viewer-iframe' className={!displayIframe ? CLASS_NAMES.HIDDEN : ''}>
-          &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
-        </iframe>
-        {/* displayIframe */}
-      </div>
-    </div>
-  );
-
   /**
    * The left panels that should be resized together
    * This will take care of the resizing the modal header as well
@@ -138,10 +113,69 @@ const ViewerInner = ({
     leftPartners.push(el as HTMLElement);
   });
 
+  const showAnnotationForm = !!annotationFormProps
+
   let sidePanelTitle = 'Annotations';
-  if (annotationFormProps) {
+  if (showAnnotationForm) {
     sidePanelTitle = annotationFormProps.appMode === appModes.EDIT ? 'Edit annotation' : 'Create annotation';
   }
+
+  let toggleAnnotationSidebarTooltip = hideAnnotationSidebar ? 'Show ' : 'Hide ';
+  toggleAnnotationSidebarTooltip += showAnnotationForm ? 'the annotation entry form' : 'the list of annotations';
+
+  let toggleAnnotationSidebarLabel = hideAnnotationSidebar ? 'Show ' : 'Hide ';
+  toggleAnnotationSidebarLabel += showAnnotationForm ? 'Annotation form' : 'Annotations';
+
+  const panelClassName = !hideAnnotationSidebar ? 'open-panel' : 'close-panel';
+
+  const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement>) => (
+    <div
+      className={`side-panel-resizable resizable ${panelClassName}`}
+      ref={leftRef}
+    >
+      <div className='side-panel-container'>
+        <div className='annotation-container'>
+          {/* TODO stroke slider */}
+          {showAnnotationForm &&
+            <div className='annotation-form-container'>
+              {annotationFormProps.appMode !== appModes.EDIT && <div className='drawing-hint'>Drawing is required.</div>}
+              <div className='annotation-form-row'>
+                <div className='annotation-form-row-header'>
+                  <span className='text-danger'><b>*</b> </span>
+                  <span className='column-displayname'>Annotated Region</span>
+                </div>
+                <div className='annotaion-form-row-input'>
+                  <ChaiseTooltip placement='right' tooltip={isInDrawingMode ? 'Turn off the drawing tool.' : 'Turn on the darwing tool.'}>
+                    <button className='chaise-btn chaise-btn-primary switch-draw-btn' onClick={toggleDrawingMode}>
+                      <span className={`chaise-btn-icon fa-solid ${isInDrawingMode ? 'fa-pencil-ruler' : 'fa-eye'}`}></span>
+                      <span>{isInDrawingMode ? 'Display all annotations' : 'Switch to drawing mode'}</span>
+                    </button>
+                  </ChaiseTooltip>
+
+                  {displayDrawingRequiredError && <div className='text-danger'>
+                    <div>Please draw annotation on the image.</div>
+                  </div>}
+                </div>
+              </div>
+              <Recordedit {...annotationFormProps} />
+            </div>
+          }
+          {!showAnnotationForm && <ViewerAnnotationList />}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderMainContainer = () => (
+    <div className='main-container dynamic-padding' ref={mainContainer}>
+      <div className='main-body'>
+        <iframe src='about:blank' id='osd-viewer-iframe' className={!displayIframe ? CLASS_NAMES.HIDDEN : ''} ref={iframeElement}>
+          &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
+        </iframe>
+        {/* displayIframe */}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -150,19 +184,16 @@ const ViewerInner = ({
         <div className='top-panel-container'>
           <Alerts />
           <div className='top-flex-panel'>
-            <div
-              className={`top-left-panel small-panel ${hideAnnotationSidebar ? 'open-panel' : 'close-panel'
-                }`}
-            >
+            <div className={`top-left-panel ${panelClassName}`}>
               <div className='panel-header'>
                 <div className='pull-left'>
                   <h3 className='side-panel-heading'>{sidePanelTitle}</h3>
                 </div>
                 <div className='pull-right'>
                   {/* TODO disable while loading */}
-                  {annotationFormProps &&
-                    <button className='chaise-btn chaise-btn-tetiary' onClick={() => setShowCloseConfirmationModal(true)}>
-                      <span className='fas fa-arrow-left'></span>
+                  {showAnnotationForm &&
+                    <button className='chaise-btn chaise-btn-tertiary' onClick={() => setShowCloseConfirmationModal(true)}>
+                      <span className='chaise-btn-icon fas fa-arrow-left'></span>
                       <span>Back</span>
                     </button>
                   }
@@ -179,7 +210,15 @@ const ViewerInner = ({
                   />
                 </div>
               }
-              {/* TODO menu buttons */}
+              <div className={'pull-left menu-btn-container'}>
+                <ChaiseTooltip placement='top' tooltip={toggleAnnotationSidebarTooltip}>
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleAnnotationSidebar}>
+                    <span className={`chaise-btn-icon chaise-icon ${hideAnnotationSidebar ? 'chaise-sidebar-open' : 'chaise-sidebar-close'}`}></span>
+                    <span>{toggleAnnotationSidebarLabel}</span>
+                  </button>
+                </ChaiseTooltip>
+                {/* TODO rest of the buttons */}
+              </div>
             </div>
           </div>
         </div>
@@ -196,12 +235,17 @@ const ViewerInner = ({
           className='bottom-panel-container'
           convertMaxWidth
           convertInitialWidth
+          /**
+           * the following is needed to make sure the reize works properly when the mouse goes over the iframe.
+           */
+          onResizeStart={() => { if (iframeElement.current) iframeElement.current.style.pointerEvents = 'none'; }}
+          onResizeEnd={() => { if (iframeElement.current) iframeElement.current.style.pointerEvents = 'inherit'; }}
         />
         {showCloseConfirmationModal &&
           <ConfirmationModal
             show={!!showCloseConfirmationModal}
             message={<>Any unsaved change will be discarded. Do you want to continue?</>}
-            onConfirm={() => closeAnnotationForm()}
+            onConfirm={() => onConfirmCloseAnnotationForm()}
             onCancel={() => setShowCloseConfirmationModal(false)}
           />
         }

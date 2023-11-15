@@ -27,7 +27,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
     forms, appMode, reference, columnModels, tuples,
     canUpdateValues, foreignKeyData, waitingForForeignKeyData,
     getRecordeditLogStack, getRecordeditLogAction,
-    onSubmitValid, onSubmitInvalid
+    onSubmitValid, onSubmitInvalid, foreignKeyCallbacks
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -99,6 +99,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
         parentLogStackPath={getRecordeditLogAction(true)}
         foreignKeyData={foreignKeyData}
         waitingForForeignKeyData={waitingForForeignKeyData}
+        foreignKeyCallbacks={foreignKeyCallbacks}
       />
     )
   }
@@ -109,7 +110,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
       onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
     >
       {columnModels.map((cm, idx) => (
-        <div key={idx} className='annotation-form-row'>
+        (!cm.isHidden && <div key={idx} className='annotation-form-row'>
           <div className='annotation-form-row-header'>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
             {cm.column.comment ?
@@ -125,7 +126,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
           <div className='annotation-form-row-input'>
             {renderInput(cm)}
           </div>
-        </div>
+        </div>)
       ))}
     </form>
   )

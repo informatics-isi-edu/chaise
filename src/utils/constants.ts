@@ -237,6 +237,10 @@ export const VIEWER_CONSTANT = {
       NAME_ATTR: 'name',
       VERSION_ATTR: 'version',
       CONFIG_ATTR: 'config'
+    },
+    NEW_ANNOTATION: {
+      SVG_ID: 'NEW_SVG',
+      GROUP_ID: 'NEW_GROUP'
     }
   },
   ANNOTATIONS: {

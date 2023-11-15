@@ -17,6 +17,9 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 export type InputSwitchProps = {
   /**
@@ -117,6 +120,13 @@ export type InputSwitchProps = {
    */
   waitingForForeignKeyData?: boolean,
   /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: {
+    getDisabledTuples?: RecordsetProviderGetDisabledTuples,
+    onSelectedRowsChanged?: RecordsetProviderOnSelectedRowsChanged
+  },
+  /**
    * whether we should offer the extra now/today buttons
    */
   displayExtraDateTimeButtons?: boolean,
@@ -150,7 +160,8 @@ const InputSwitch = ({
   foreignKeyData,
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
-  displayDateTimeLabels
+  displayDateTimeLabels,
+  foreignKeyCallbacks
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -219,6 +230,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'dropdown-select':
         if (!columnModel) {
@@ -245,6 +257,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'file':
         if (!columnModel) {

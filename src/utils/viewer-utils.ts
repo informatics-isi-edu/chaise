@@ -308,49 +308,14 @@ export const readAllAnnotations = (
       // since we use this for populating edit form, we want this in edit context
       ref = ref.contextualize.entryEdit;
 
-      // TODO how to deal with this?
-      // attach to the $rootScope so it can be used in annotations.controller
-      // res.annotationEditReference = ref;
-
       res.canCreateAnnotation = ref.canCreate;
 
       res.annotationEditReference = ref;
       res.annotationCreateReference = ref.contextualize.entryCreate;
 
-      // TODO create and edit should be refactored to reuse the same code
-      // create the edit and create forms
-      // var invisibleColumns = [
-      //   annotConfig.overlay_column_name,
-      //   annotConfig.reference_image_visible_column_name,
-      //   annotConfig.z_index_column_name,
-      //   annotConfig.channels_column_name
-      // ];
-      // if (ref.canCreate) {
-      //   annotationCreateForm.reference = ref.contextualize.entryCreate;
-      //   annotationCreateForm.columnModels = [];
-      //   annotationCreateForm.reference.columns.forEach(function (column) {
-      //     // remove the invisible (asset, image, z-index, channels) columns
-      //     if (invisibleColumns.indexOf(column.name) !== -1) return;
-
-      //     annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
-      //   });
-      // }
-
-      // if (ref.canUpdate) {
-      //   $rootScope.canUpdateAnnotation = true;
-      //   annotationEditForm.reference = ref;
-      //   annotationEditForm.columnModels = [];
-      //   annotationEditForm.reference.columns.forEach(function (column) {
-      //     // remove the invisible (asset, image, z-index, channels) columns
-      //     if (invisibleColumns.indexOf(column.name) !== -1) return;
-
-      //     annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
-      //   });
-      // }
-
       const logObj = {
         action: ViewerAnnotationService.getAnnotationLogAction(LogActions.LOAD),
-        stack: ViewerAnnotationService.getAnnotationLogStack(null, { 'z_index': defaultZIndex, 'default_z': isDuringInitialization })
+        stack: ViewerAnnotationService.getAnnotationLogStack(undefined, { 'z_index': defaultZIndex, 'default_z': isDuringInitialization })
       };
 
       // using edit and attributegroup, because the tuples are used in edit context (for populating edit form)

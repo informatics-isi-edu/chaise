@@ -10,6 +10,9 @@ import {
   appModes, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -109,6 +112,12 @@ export const RecordeditContext = createContext<{
    * get the appropriate log stack
    */
   getRecordeditLogStack: (childStackElement?: any, extraInfo?: any) => any,
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: {
+    getDisabledTuples?: RecordsetProviderGetDisabledTuples
+  }
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -127,7 +136,7 @@ type RecordeditProviderProps = {
   /**
    * called when form was submitted successfuly
    */
-  onSubmitSuccess?: () => void,
+  onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
   /**
    * initial data that you want to be displayed (only honored in create mode)
    */
@@ -136,6 +145,18 @@ type RecordeditProviderProps = {
    * the tuples that we want to edit (only honored in edit mode)
    */
   initialTuples?: any[],
+  /**
+   * name of the columns that should be hidden
+   * TODO only honored by viewer-annotation-form-container for now
+   * but form-container should also honor it
+   */
+  hiddenColumns?: string[];
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: {
+    getDisabledTuples?: RecordsetProviderGetDisabledTuples
+  }
   /**
    * the query parameters that the page might have
    */
@@ -170,6 +191,8 @@ export default function RecordeditProvider({
   initialTuples,
   queryParams,
   reference,
+  hiddenColumns,
+  foreignKeyCallbacks
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -219,20 +242,21 @@ export default function RecordeditProvider({
 
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
-      const cm = columnToColumnModel(column, queryParams);
+      const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
+      const cm = columnToColumnModel(column, isHidden, queryParams);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
 
-    // it's already initialized
-    if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
-      setInitialized(true);
-      return;
-    }
-
     const ERMrest = ConfigService.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
       if (reference.canUpdate) {
+        if (tuplesRef.current && tuplesRef.current.length > 0) {
+          // it's already initialized (because of initialTuples)
+          setInitialized(true);
+          return;
+        }
+
         let numberRowsToRead = maxRowsToAdd;
         if (queryParams.limit) {
           numberRowsToRead = Number(queryParams.limit);
@@ -284,7 +308,9 @@ export default function RecordeditProvider({
           } else {
             headTitle = 'Create new ' + getDisplaynameInnerText(reference.displayname);
           }
-          updateHeadTitle(headTitle);
+          if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
+            updateHeadTitle(headTitle);
+          }
 
           // if all the rows are disabled, throw an error without marking the recordedit as initialized
           if (usedTuples.length === 0) {
@@ -335,8 +361,9 @@ export default function RecordeditProvider({
       }
     } else if (appMode === appModes.CREATE) {
       if (reference.canCreate) {
-        // TODO this should not be done when we want to have recordedit in modal
-        updateHeadTitle('Create new ' + reference.displayname.value);
+        if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
+          updateHeadTitle('Create new ' + reference.displayname.value);
+        }
 
         setInitialized(true);
       } else if (session) {
@@ -486,7 +513,7 @@ export default function RecordeditProvider({
           const disabledPage = response.disabled;
 
           if (onSubmitSuccess) {
-            onSubmitSuccess();
+            onSubmitSuccess(response);
           }
           // redirect to record app
           else if (forms.length === 1) {
@@ -1003,6 +1030,7 @@ export default function RecordeditProvider({
       reference,
       tuples,
       waitingForForeignKeyData,
+      foreignKeyCallbacks,
 
       // form
       forms,

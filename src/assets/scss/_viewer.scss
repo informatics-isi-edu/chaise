@@ -1,9 +1,13 @@
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
+
 .viewer-container {
   // override the minimum width of side-panel (written the same way as app.scss
   // this is to allocate enough space for annotations
   .top-panel-container .top-flex-panel .top-left-panel.open-panel,
   .bottom-panel-container .side-panel-resizable.open-panel {
-    min-width: 270px;
+    min-width: 300px;
   }
 
   // override the padding that is definde in app.scss
@@ -21,6 +25,20 @@
     width: 100%;
   }
 
+  // align the header with the rest of buttons on top of the page.
+  .top-left-panel .panel-header h3 {
+    padding-bottom: 10px;
+  }
+
+  // add more space when the title is hidden
+  .top-right-panel.no-title {
+    padding-top: 10px;
+  }
+
+  .menu-btn-container {
+    padding: 5px 0px 5px 0px;
+  }
+
   .side-panel-container {
     display: flex;
     flex-direction: column;
@@ -30,9 +48,45 @@
     overflow-y: auto;
     margin-top: 8px;
 
-    .annotation-list-container, .annotation-form-container {
+    .annotation-list-container,
+    .annotation-form-container {
       margin-bottom: 20px;
       position: relative;
+    }
+
+    .annotation-form-container {
+      border: 1px solid map-get(variables.$color-map, 'border');
+      border-radius: 3px;
+      background: map-get(variables.$color-map, 'viewer-annotation-form-background');
+      padding: 10px;
+
+      .drawing-hint {
+        background: map-get(variables.$color-map, 'warning-background');
+        width: 100%;
+        padding: 5px;
+        margin: 5px 0;
+        border-radius: 3px;
+      }
+
+      .switch-draw-btn {
+        width: 100%;
+      }
+
+      .annotation-form-row {
+        border-bottom: 1px solid map-get(variables.$color-map, 'border');
+        padding: 10px 0;
+
+        .annotation-form-row-header {
+          padding-bottom: 5px;
+        }
+      }
+
+      .form-btn-container {
+        padding-top: 10px;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+      }
     }
   }
 }

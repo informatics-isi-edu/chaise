@@ -18,7 +18,7 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ViewerAnnotationList = (): JSX.Element => {
-  const { annotationModels, loadingAnnotations, canCreateAnnotation, switchToCreateMode } = useViewer();
+  const { annotationModels, loadingAnnotations, canCreateAnnotation, startAnnotationEdit, startAnnotationCreate } = useViewer();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -41,7 +41,7 @@ const ViewerAnnotationList = (): JSX.Element => {
       searchTimeout.current = setTimeout(() => {
         ViewerAnnotationService.logAnnotationClientAction(
           LogActions.SEARCH_BOX_AUTO,
-          null,
+          undefined,
           {
             search_str: term
           }
@@ -59,7 +59,7 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   // ----------------------- render functions --------------------- //
 
-  const renderAnnotation = (annot: ViewerAnnotationModal) => {
+  const renderAnnotation = (annot: ViewerAnnotationModal, index: number) => {
     // TODO proper ui elements and styles
     // TODO Aref highlight
     // TODO Aref display/hide
@@ -69,7 +69,11 @@ const ViewerAnnotationList = (): JSX.Element => {
       <div key={annot.name}>
         <span>{annot.name}</span>
         {annot.url && <a href={annot.url} target='_blank' rel='noreferrer' >{annot.id}</a>}
-        <button><i className='fa-solid fa-pencil'></i></button>
+        {annot.canUpdate &&
+          <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm' onClick={(e) => startAnnotationEdit(index, e)}>
+            <i className='fa-solid fa-pencil'></i>
+          </button>
+        }
       </div>
     )
   };
@@ -91,7 +95,7 @@ const ViewerAnnotationList = (): JSX.Element => {
       <>
         <span>{displayingMessage}</span>
         {!loadingAnnotations && renderedAnnots.length === 0 && <div className='no-annotation-message'>No annotation found.</div>}
-        {renderedAnnots.length > 0 && <div>{renderedAnnots.map((ann) => renderAnnotation(ann))}</div>}
+        {renderedAnnots.length > 0 && <div>{renderedAnnots.map((ann, i) => renderAnnotation(ann, i))}</div>}
       </>
     )
 
@@ -115,7 +119,7 @@ const ViewerAnnotationList = (): JSX.Element => {
             </ChaiseTooltip>
           </div>
         </div>
-        {canCreateAnnotation && <button className='btn chaise-btn chaise-btn-primary' onClick={switchToCreateMode}>New</button>}
+        {canCreateAnnotation && <button className='btn chaise-btn chaise-btn-primary' onClick={startAnnotationCreate}>New</button>}
       </div>
       <div>{renderAnnotations()}</div>
     </div>

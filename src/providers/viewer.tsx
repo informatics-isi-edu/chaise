@@ -33,8 +33,7 @@ import { HELP_PAGES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { OSDViewerDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { OSDViewerDeploymentPath, chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export const ViewerContext = createContext<{
   /**
@@ -70,12 +69,46 @@ export const ViewerContext = createContext<{
    * annotations
    */
   annotationModels: ViewerAnnotationModal[],
+  /**
+   * whether we should show the annotation spinner
+   */
   loadingAnnotations: boolean,
+  /**
+   * whether the user can create new annotations
+   */
   canCreateAnnotation: boolean,
 
-  switchToCreateMode: (event: any) => void,
-  annotationFormProps: RecordeditProps | null,
+  /**
+   * callback for closing the annotation form
+   */
   closeAnnotationForm: () => void,
+
+  /**
+   * callback for starting the create mode
+   */
+  startAnnotationCreate: (event: any) => void,
+  /**
+   * callback for starting the edit mode for a given annotation
+   */
+  startAnnotationEdit: (index: number, event: any) => void,
+  /**
+   * if defined, it has the props that should be passed to recordedit to display a form
+   */
+  annotationFormProps: RecordeditProps | null,
+
+  /**
+   * whether we should display the drawing required error or not
+   */
+  displayDrawingRequiredError: boolean,
+
+  /**
+   * toggle drawing mode
+   */
+  toggleDrawingMode: (event?: any) => void,
+  /**
+   * whether we are in drawing mode or not
+   */
+  isInDrawingMode: boolean
 
 } | null>(null);
 
@@ -120,13 +153,22 @@ export default function ViewerProvider({
 
   const [annotationModels, setAnnotationModels, annotationModelsRef] = useStateRef<ViewerAnnotationModal[]>([]);
 
-  const [annotationFormProps, setAnnotationFormProps] = useState<RecordeditProps | null>(null)
+  const [annotationFormProps, setAnnotationFormProps] = useState<RecordeditProps | null>(null);
+
+  const [displayDrawingRequiredError, setDisplayDrawingRequiredError] = useState(false);
+
+  const [isInDrawingMode, setIsInDrawingMode, isInDrawingModeRef] = useStateRef(false);
 
   const imageID = useRef<string>();
   /**
    * if default z-index is missing, we're using 0
    */
   const defaultZIndex = useRef<number>(0);
+
+  const currentAnnotationFormState = useRef<{
+    model: ViewerAnnotationModal,
+    index?: number
+  } | null>(null)
 
   const osdViewerParameters = useRef<any>();
   const mainImageLoaded = useRef(false);
@@ -338,6 +380,7 @@ export default function ViewerProvider({
 
       if (res.annotationTuples.length > 0) {
         setLoadingAnnotations(true);
+        setHideAnnotationSidebar(false);
       }
 
       if (!isObjectAndNotNull(osdViewerParameters.current) || osdViewerParameters.current.mainImage.info.length === 0) {
@@ -559,7 +602,7 @@ export default function ViewerProvider({
       const svgID = item.svgID;
 
       // TODO why osd viewer is sending this event?
-      if (svgID === 'NEW_SVG' || groupID === 'NEW_GROUP') {
+      if (svgID === VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID || groupID === VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.GROUP_ID) {
         return;
       }
 
@@ -589,9 +632,9 @@ export default function ViewerProvider({
       const encode = fixedEncodeURIComponent;
       const qParams = `pcid=${ConfigService.contextHeaderParams.cid}&ppid=${ConfigService.contextHeaderParams.pid}`;
       const url = !anatomyID ? '' : [
-        `chaiseDeploymentPath()/record/#${ConfigService.catalogID}`,
+        `${chaiseDeploymentPath()}/record/#${ConfigService.catalogID}`,
         encode(annotConfig.annotated_term_table_schema_name) + ':' + encode(annotConfig.annotated_term_table_name),
-        encode(annotConfig.annotated_term_id_column_name) + '=' + anatomyID + '?' + qParams
+        encode(annotConfig.annotated_term_id_column_name) + '=' + encode(anatomyID) + '?' + qParams
       ].join('/');
 
       newItems.push({
@@ -616,6 +659,174 @@ export default function ViewerProvider({
 
     setAnnotationModels((prev) => [...prev, ...newItems]);
   };
+
+  /**
+   * the callback passed to recordedit to make sure we're not allowing users
+   * to select terms that already have an annotation.
+   */
+  const getAnnotatedTermDisabledTuples = (
+    page: any, pageLimit: number, logStack: any,
+    logStackPath: string, requestCauses?: any, reloadStartTime?: any
+  ): Promise<{ page: any, disabledRows?: any }> => {
+    return new Promise((resolve, reject) => {
+
+      const annotConfig = ViewerConfigService.annotationConfig;
+      const tableName = annotConfig.annotated_term_table_name;
+      const schemaName = annotConfig.annotated_term_table_schema_name;
+
+      // we only want to do this for the anatomy popup
+      if (!page || page.reference.table.name !== tableName || page.reference.table.schema.name !== schemaName) {
+        resolve({ page });
+        return;
+      }
+
+      // facet will be based on image ID and the default z-index
+      const facet: any = {
+        and: [
+          {
+            source: [{ 'inbound': annotConfig.annotated_term_foreign_key_constraint }, annotConfig.reference_image_column_name],
+            choices: [imageID.current]
+          },
+        ]
+      };
+
+      if (defaultZIndex.current !== null && defaultZIndex.current !== undefined) {
+        facet.and.push({
+          source: [{ 'inbound': annotConfig.annotated_term_foreign_key_constraint }, annotConfig.z_index_column_name],
+          choices: [defaultZIndex.current]
+        })
+      }
+
+      const url = [
+        `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
+        `${fixedEncodeURIComponent(schemaName)}:${fixedEncodeURIComponent(tableName)}`,
+        `*::facets::${ConfigService.ERMrest.encodeFacet(facet)}`
+      ].join('/');
+
+      ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((ref: any) => {
+        let action = LogActions.LOAD, stack = logStack;
+        if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+          action = LogActions.RELOAD;
+          stack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
+        }
+        const logObj = {
+          action: LogService.getActionString(action, logStackPath),
+          stack
+        }
+
+        return ref.contextualize.compactSelect.setSamePaging(page).read(pageLimit, logObj, false, true);
+      }).then((disabeldPage: any) => {
+        const disabledRows: any = [];
+
+        disabeldPage.tuples.forEach((disabledTuple: any) => {
+          // currently selected value should not be disabled
+          // TODO Aref
+          // if (vm.editingAnatomy.id === tuple.data[idColName]) {
+          //     return;
+          // }
+
+          const index = page.tuples.findIndex((tuple: any) => {
+            return tuple.uniqueId === disabledTuple.uniqueId;
+          });
+          if (index > -1) disabledRows.push(page.tuples[index]);
+        });
+
+        resolve({ page, disabledRows });
+
+      }).catch((err: any) => reject(err));
+
+    });
+  };
+
+  /**
+   * this callback will be fired when users try to navigate away from the page
+   * NOTE custom message is not supported by modern browsers anymore, but
+   *      for consistency I've added it.
+   */
+  const annotationFormLeaveAlertEvent = (e: any) => {
+    // make sure annotation panel is open
+    if (currentAnnotationFormState.current !== null) {
+      e.returnValue = 'Any unsaved change will be discarded. Do you want to continue?';
+    }
+  }
+
+  const changeAnnotationFormState = (item?: ViewerAnnotationModal, index?: number, event?: any) => {
+    const annotConfig = ViewerConfigService.annotationConfig;
+
+    // if item is null, we just wanted to switch away from edit/create mode
+    if (!item) {
+      // remove the form props so the form disappears
+      setAnnotationFormProps(null);
+
+      // clear the state
+      currentAnnotationFormState.current = null;
+
+      // we don't need the warning event listener anymore
+      windowRef.removeEventListener('beforeunload', annotationFormLeaveAlertEvent);
+      return;
+    }
+
+    // set the state
+    currentAnnotationFormState.current = { model: { ...item }, index: index }
+
+    // make sure users are warned that data might be lost
+    windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
+
+    // TODO Aref unhighlight the annotations
+
+
+    // why??
+    if (event) {
+      event.stopPropagation();
+    }
+
+    /**
+     *
+     * this is supporting a case when users attempt to edit an annotation
+     * that is not saved in database. which means the annotation is coming
+     * from file. but we don't even allow users to edit an annotation that
+     * is coming from file (and not db).
+     * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
+     */
+    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
+
+    let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
+    if (isObjectAndNotNull(item) && !item.tuple) {
+      logAppMode = LogAppModes.CREATE_PRESELECT;
+      preselectedAnatomy = {};
+      preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
+    }
+
+    // switch to drawing mode
+    toggleDrawingMode(undefined, true);
+
+    // set the form props so it shows up
+    setAnnotationFormProps({
+      appMode: isEditMode ? appModes.EDIT : appModes.CREATE,
+      config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
+      onSubmitSuccess: onSubmitAnnotationSuccess,
+      reference: ViewerAnnotationService.annotationCreateReference,
+      logInfo: {
+        logAppMode: logAppMode,
+        logStack: ViewerAnnotationService.getAnnotationLogStack(isEditMode ? item : undefined),
+        logStackPath: ViewerAnnotationService.getAnnotationLogStackPath(isEditMode ? item : undefined)
+      },
+      queryParams: {},
+      hiddenColumns: [
+        annotConfig.overlay_column_name,
+        annotConfig.reference_image_visible_column_name,
+        annotConfig.z_index_column_name,
+        annotConfig.channels_column_name
+      ],
+      foreignKeyCallbacks: {
+        getDisabledTuples: getAnnotatedTermDisabledTuples
+      },
+      prefillRowData: preselectedAnatomy ? [preselectedAnatomy] : undefined,
+      initialTuples: isEditMode ? [item.tuple] : undefined
+    });
+
+  }
+
 
   // ---------------------- UI callbacks ------------------- //
   const toggleAnnotationSidebar = () => {
@@ -646,41 +857,121 @@ export default function ViewerProvider({
     });
   };
 
-  const onSubmitAnnotationSuccess = () => {
+  const onSubmitAnnotationSuccess = (response: any) => {
     // TODO
+    // since we're just ceate/editting one we can assume it's just succesful
+    const page = response.successful;
+
+    // TODO Aref after mution stuff of the old imp
+    // TOOD Aref read the newly created page to get the fk data
   }
 
-  const switchToCreateMode = () => {
-    // TODO should be changed and added just for testing
-    setAnnotationFormProps({
-      appMode: appModes.CREATE,
-      config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
-      onSubmitSuccess: onSubmitAnnotationSuccess,
-      reference: ViewerAnnotationService.annotationCreateReference,
-      logInfo: {
-        logAppMode: LogAppModes.CREATE,
-        logStack: ViewerAnnotationService.getAnnotationLogStack(),
-        logStackPath: ViewerAnnotationService.getAnnotationLogStackPath()
-      },
-      queryParams: {}
-    })
+  /**
+   * callback when user clicked on the edit button for an annotation
+   * @param index the annotation index
+   * @param event the client event
+   */
+  const startAnnotationEdit = (index: number, event: any) => {
+    const annot = annotationModelsRef.current[index];
+    // if the annotation is coming from file, we're going to technically create it
+    const action = annot.tuple ? LogActions.EDIT_INTEND : LogActions.ADD_INTEND;
+    // log the client action
+    ViewerAnnotationService.logAnnotationClientAction(action, annot);
 
+    // open the form
+    changeAnnotationFormState(annotationModelsRef.current[index], index, event);
+  };
+
+  /**
+   * callback for when users click on the New button for an annotation
+   * @param event the client action
+   */
+  const startAnnotationCreate = (event: any) => {
+    const svgID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID;
+    const groupID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.GROUP_ID;
 
     // Notify OSD to create a new svg and group for annotations
     ViewerAnnotationService.startAnnotationCreate({
-      svgID: 'NEW_SVG',
-      groupID: 'NEW_GROUP',
+      svgID,
+      groupID,
       anatomy: '',
       description: ''
     });
 
     // log the client action
     ViewerAnnotationService.logAnnotationClientAction(LogActions.ADD_INTEND);
+
+    // all of these will be populated in the end
+    const newAnnot: ViewerAnnotationModal = {
+      svgID,
+      groupID,
+      anatomy: '',
+      url: '',
+      isStoredInDB: false,
+      canUpdate: false,
+      canDelete: false,
+      colors: [],
+      logStackNode: undefined
+    };
+
+    // open the form
+    changeAnnotationFormState(newAnnot, undefined, event);
   };
 
+  /**
+   * can be used to switch from create/edit mode to view mode
+   */
   const closeAnnotationForm = () => {
-    // TODO
-    setAnnotationFormProps(null);
+    const formState = currentAnnotationFormState.current;
+    if (!formState) return;
+
+    // if in drawing mode, switch
+    if (isInDrawingModeRef.current) {
+      ViewerAnnotationService.drawAnnotation({
+        svgID: formState.model.svgID,
+        groupID: formState.model.groupID,
+        mode: 'OFF'
+      });
+    }
+
+    /**
+     * if the current annotation is still unsaved, remove the drawing from openseadragon
+     */
+    if (formState.model.svgID === 'NEW_SVG' || formState.model.groupID === 'NEW_GROUP') {
+      // Remove the new created svg and group if not saved
+      ViewerAnnotationService.removeSVG({ svgID: formState.model.svgID });
+    }
+
+    // close the form
+    changeAnnotationFormState();
+  };
+
+  const toggleDrawingMode = (event?: any, changeColor?: boolean) => {
+    setIsInDrawingMode((prev) => {
+      const res = !prev;
+
+      // remove the error since they switched modes
+      setDisplayDrawingRequiredError(false);
+
+      ViewerAnnotationService.drawAnnotation({
+        svgID: currentAnnotationFormState.current?.model?.svgID,
+        groupID: currentAnnotationFormState.current?.model?.groupID,
+        mode: res ? 'ON' : 'OFF',
+        setStroke: (changeColor === true) // change the color that is used in toolbar
+      });
+
+      if (event) {
+        // log the client action
+        ViewerAnnotationService.logAnnotationClientAction(
+          res ? LogActions.VIEWER_ANNOT_DRAW_MODE_SHOW : LogActions.VIEWER_ANNOT_DRAW_MODE_HIDE,
+          currentAnnotationFormState.current?.model
+        );
+
+        event.stopPropagation();
+      }
+
+      return res;
+    })
   }
 
   const providerValue = useMemo(() => {
@@ -697,7 +988,11 @@ export default function ViewerProvider({
       canCreateAnnotation,
       annotationFormProps,
       closeAnnotationForm,
-      switchToCreateMode
+      startAnnotationCreate,
+      startAnnotationEdit,
+      displayDrawingRequiredError,
+      toggleDrawingMode,
+      isInDrawingMode
     }
   }, [
     initialized,
@@ -708,7 +1003,9 @@ export default function ViewerProvider({
     loadingAnnotations,
     canCreateAnnotation,
     annotationFormProps,
-    closeAnnotationForm
+    closeAnnotationForm,
+    displayDrawingRequiredError,
+    isInDrawingMode
   ]);
 
   return (
