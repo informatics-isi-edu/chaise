@@ -58,25 +58,36 @@ const Recordedit = ({
   reference,
   hiddenColumns,
   foreignKeyCallbacks,
+  modifySubmissionRows,
+  onSubmitSuccess,
+  onSubmitError
 }: RecordeditProps): JSX.Element => {
-  return (
-    <AlertsProvider>
-      <RecordeditProvider
-        appMode={appMode}
-        config={config}
-        logInfo={logInfo}
-        modalOptions={modalOptions}
-        queryParams={queryParams}
-        initialTuples={initialTuples}
-        prefillRowData={prefillRowData}
-        reference={reference}
-        hiddenColumns={hiddenColumns}
-        foreignKeyCallbacks={foreignKeyCallbacks}
-      >
-        <RecordeditInner parentContainer={parentContainer} />
-      </RecordeditProvider>
-    </AlertsProvider>
-  )
+  const provider = (
+    <RecordeditProvider
+      appMode={appMode}
+      config={config}
+      logInfo={logInfo}
+      modalOptions={modalOptions}
+      queryParams={queryParams}
+      initialTuples={initialTuples}
+      prefillRowData={prefillRowData}
+      reference={reference}
+      hiddenColumns={hiddenColumns}
+      foreignKeyCallbacks={foreignKeyCallbacks}
+      modifySubmissionRows={modifySubmissionRows}
+      onSubmitSuccess={onSubmitSuccess}
+      onSubmitError={onSubmitError}
+    >
+      <RecordeditInner parentContainer={parentContainer} />
+    </RecordeditProvider>
+  );
+
+  // in viewer-annotation mode, we want the alerts to be handled by the parent
+  if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
+    return provider;
+  }
+
+  return <AlertsProvider>{provider}</AlertsProvider>;
 }
 
 export type RecordeditInnerProps = {
@@ -583,12 +594,14 @@ const RecordeditInner = ({
     return (
       <>
         {formProviderInitialized && <FormProvider {...methods}>
-          {renderSpinner()}
+          {/* the spinners are displayed in place in the viewer.tsx component */}
           <ViewerAnnotationFormContainer />
-          <div className='form-btn-container'>
-            {renderSubmitButton()}
-            {renderBulkDeleteButton()}
-          </div>
+          {/*
+            submit and delete button are added in the viewer.tsx comp
+            - we cannot submit right away and we have to get the annotation file first.
+            - delete expected behavior is different
+          */}
+          {renderModals()}
         </FormProvider>}
       </>
     )

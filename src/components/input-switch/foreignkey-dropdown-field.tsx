@@ -12,9 +12,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -72,9 +71,7 @@ type ForeignkeyDropdownFieldProps = InputFieldProps & {
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples
-  }
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 };
 
 const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Element => {
@@ -85,8 +82,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const formContainer = document.querySelector('.form-container .recordedit-form');
 
   const getDisabledTuples = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined;
+  const onChangeCallback = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.onChange : undefined
 
-  const { setValue, getValues } = useFormContext();
+  const { setValue, getValues, clearErrors, setError } = useFormContext();
   const { dispatchError } = useError();
 
   /**
@@ -156,17 +154,18 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const populateDropdownRows = (page: any, pageLimit: number, logStack: any,
     logStackPath: string, requestCauses?: any, reloadStartTime?: any): Promise<boolean> => {
     return new Promise((resolve, reject) => {
+      type PType = { page: any, disabledRows?: any };
       let p;
       if (getDisabledTuples) {
         p = getDisabledTuples(page, pageLimit, logStack, logStackPath, requestCauses, reloadStartTime);
       } else {
-        p = new Promise<{ page: any, disabledRows?: any }>((innerResolve) => innerResolve({ page }));
+        p = new Promise<PType>((innerResolve) => innerResolve({ page }));
       }
 
-      p.then((result) => {
+      p.then((result: PType) => {
         const disabledTuplesUniqueIDs: any = {};
         if (Array.isArray(result.disabledRows)) {
-          result.disabledRows.forEach((t) => {
+          result.disabledRows.forEach((t: any) => {
             disabledTuplesUniqueIDs[t.uniqueId] = 1;
           })
         }
@@ -337,6 +336,23 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     onClearFun(e);
   }
 
+  // TODO should be changed to be watch or something else
+  // the error is not working at all since we're changing the value after this and it will wipe the error
+  const callOnChangeCallback = (data?: any) => {
+    if (!onChangeCallback) return true;
+
+    if (onChangeCallback) {
+      const res = onChangeCallback(props.columnModel.column, data);
+      if (typeof res !== 'string') {
+        return true;
+      }
+
+      clearErrors(props.name);
+      setError(props.name, { type: 'custom', message: res });
+      return false;
+    }
+  };
+
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
     callOnChangeAfterSelection(
@@ -348,6 +364,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       props.foreignKeyData,
       setValue
     );
+    callOnChangeCallback(selectedRow.data);
   }
 
   const loadMoreOptions = () => {

@@ -11,10 +11,10 @@ import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
-  RecordsetSelectMode, SelectedRow, RecordsetProps, RecordsetProviderGetDisabledTuples,
+  RecordsetSelectMode, SelectedRow, RecordsetProps,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
@@ -73,17 +73,17 @@ type ForeignkeyFieldProps = InputFieldProps & {
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples
-  }
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 };
 
 const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
-  const getDisabledTuples = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined;
 
-  const { setValue, getValues } = useFormContext();
+  const getDisabledTuples = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined;
+  const onChangeCallback = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.onChange : undefined
+
+  const { setValue, getValues, setError, clearErrors } = useFormContext();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
@@ -93,6 +93,24 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    */
   const showSpinner = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
+
+
+  // TODO should be changed to be watch or something else
+  // the error is not working at all since we're changing the value after this and it will wipe the error
+  const callOnChangeCallback = (data?: any) => {
+    if (!onChangeCallback) return true;
+
+    if (onChangeCallback) {
+      const res = onChangeCallback(props.columnModel.column, data);
+      if (typeof res !== 'string') {
+        return true;
+      }
+
+      clearErrors(props.name);
+      setError(props.name, { type: 'custom', message: res });
+      return false;
+    }
+  };
 
   /**
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
@@ -164,6 +182,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
         props.foreignKeyData,
         setValue
       );
+
+      callOnChangeCallback(selectedRow.data);
     }
   }
 

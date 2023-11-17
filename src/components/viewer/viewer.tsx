@@ -60,7 +60,8 @@ const ViewerInner = ({
   const { errors } = useError();
   const {
     initialized, pageTitle,
-    hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps,
+    hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
+    submitAnnotationForm,
     displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode
   } = useViewer();
 
@@ -70,7 +71,6 @@ const ViewerInner = ({
   const [showCloseConfirmationModal, setShowCloseConfirmationModal] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
-
   const iframeElement = useRef<HTMLIFrameElement>(null);
 
 
@@ -100,7 +100,6 @@ const ViewerInner = ({
     setShowCloseConfirmationModal(false);
     closeAnnotationForm();
   }
-
 
   //-------------------  render logics:   --------------------//
   /**
@@ -135,9 +134,28 @@ const ViewerInner = ({
     >
       <div className='side-panel-container'>
         <div className='annotation-container'>
-          {/* TODO stroke slider */}
+          {(showAnnotationFormSpinner || loadingAnnotations) &&
+            <ChaiseSpinner
+              className={`annotation-spinner${showAnnotationFormSpinner ? ' annotation-form-spinner': ''}`}
+              message={showAnnotationFormSpinner ? 'Saving the changes...' : ''}
+            />
+          }
+          <div className='annotation-stroke-slider'>
+            {/* TODO functionality */}
+            <span className='label'>Line Thickness <span className='stroke-value'>3.4</span></span>
+            <input type='range' className='stroke-slider-input' min='1' max='6' step='0.05' />
+            <div className='stroke-slider-ticks'>
+              <span className='stroke-slider-tick'>1</span>
+              <span className='stroke-slider-tick'>2</span>
+              <span className='stroke-slider-tick'>3</span>
+              <span className='stroke-slider-tick'>4</span>
+              <span className='stroke-slider-tick'>5</span>
+              <span className='stroke-slider-tick'>6</span>
+            </div>
+          </div>
           {showAnnotationForm &&
             <div className='annotation-form-container'>
+              {showAnnotationFormSpinner && <div className='annotation-spinner-overlay'></div>}
               {annotationFormProps.appMode !== appModes.EDIT && <div className='drawing-hint'>Drawing is required.</div>}
               <div className='annotation-form-row'>
                 <div className='annotation-form-row-header'>
@@ -158,6 +176,20 @@ const ViewerInner = ({
                 </div>
               </div>
               <Recordedit {...annotationFormProps} />
+              <div className='form-btn-container'>
+                <ChaiseTooltip placement='bottom' tooltip='Save this data on the server.'>
+                  <button className='chaise-btn chaise-btn-primary' onClick={submitAnnotationForm}>
+                    <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
+                    <span>Save</span>
+                  </button>
+                </ChaiseTooltip>
+                <ChaiseTooltip placement='bottom' tooltip='Delete this annotation.'>
+                  <button className='chaise-btn chaise-btn-danger'>
+                    <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
+                    <span>Delete</span>
+                  </button>
+                </ChaiseTooltip>
+              </div>
             </div>
           }
           {!showAnnotationForm && <ViewerAnnotationList />}
@@ -190,9 +222,11 @@ const ViewerInner = ({
                   <h3 className='side-panel-heading'>{sidePanelTitle}</h3>
                 </div>
                 <div className='pull-right'>
-                  {/* TODO disable while loading */}
                   {showAnnotationForm &&
-                    <button className='chaise-btn chaise-btn-tertiary' onClick={() => setShowCloseConfirmationModal(true)}>
+                    <button
+                      className='chaise-btn chaise-btn-tertiary' onClick={() => setShowCloseConfirmationModal(true)}
+                      disabled={showAnnotationFormSpinner}
+                    >
                       <span className='chaise-btn-icon fas fa-arrow-left'></span>
                       <span>Back</span>
                     </button>

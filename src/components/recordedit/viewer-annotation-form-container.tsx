@@ -14,12 +14,6 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-
 
 const ViewerAnnotationFormContainer = (): JSX.Element => {
 
@@ -106,6 +100,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
 
   return (
     <form
+      id='annotation-form'
       className='annotation-form'
       onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
     >

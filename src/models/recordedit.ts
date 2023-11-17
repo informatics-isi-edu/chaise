@@ -39,9 +39,18 @@ export type RecordeditProps = {
    */
   modalOptions?: RecordeditModalOptions;
   /**
+   * modify submission rows prior to submission
+   */
+  modifySubmissionRows?: (submissionRows: any[]) => void,
+  /**
    * called when form was submitted successfuly
    */
   onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
+  /**
+   * called when form submission (create/update request) errored out
+   * return true from this function if you want recordedit to show the alert.
+   */
+  onSubmitError?: (exception: any) => boolean,
   /**
    * initial data that you want to be displayed (only honored in create mode)
    */
@@ -61,9 +70,7 @@ export type RecordeditProps = {
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples
-  }
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 }
 
 export enum RecordeditDisplayMode {
@@ -79,6 +86,15 @@ export type RecordeditConfig = {
 export type RecordeditModalOptions = {
   parentReference: any;
   onClose: () => void;
+}
+
+export type RecordeditForeignkeyCallbacks = {
+  getDisabledTuples?: RecordsetProviderGetDisabledTuples,
+  /**
+   * if defined, we will call this. return `true` if we should
+   * continue with the change. otherwise return a string that will be showed as an error.
+   */
+  onChange?: (column: any, rowData: any) => true | string,
 }
 
 export interface RecordeditColumnModel {

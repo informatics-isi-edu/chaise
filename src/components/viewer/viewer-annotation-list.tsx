@@ -105,7 +105,7 @@ const ViewerAnnotationList = (): JSX.Element => {
     <div className='annotation-list-container'>
       {/* TODO display all/none. */}
       {/* not using SearchInput here because this button and that comp are very different */}
-      <div>
+      <div className='search-box-row'>
         <div className={`chaise-search-box chaise-input-group${loadingAnnotations ? ' disabled-element' : ''}`}>
           <div className='chaise-input-control has-feedback'>
             <input type='text' placeholder='Search in the list' value={searchTerm} onChange={onSearchTermChange} disabled={loadingAnnotations} />

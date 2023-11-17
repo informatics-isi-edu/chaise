@@ -8,11 +8,8 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import {
   appModes, PrefillObject, RecordeditColumnModel,
-  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions
+  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import {
-  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
-} from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -115,9 +112,7 @@ export const RecordeditContext = createContext<{
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples
-  }
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -134,9 +129,18 @@ type RecordeditProviderProps = {
    */
   modalOptions?: RecordeditModalOptions;
   /**
+   * modify submission rows prior to submission
+   */
+  modifySubmissionRows?: (submissionRows: any[]) => void
+  /**
    * called when form was submitted successfuly
    */
   onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
+  /**
+   * called when form submission (create/update request) errored out
+   * return true from this function if you want recordedit to show the alert.
+   */
+  onSubmitError?: (exception: any) => boolean,
   /**
    * initial data that you want to be displayed (only honored in create mode)
    */
@@ -154,9 +158,7 @@ type RecordeditProviderProps = {
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples
-  }
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
   /**
    * the query parameters that the page might have
    */
@@ -187,12 +189,14 @@ export default function RecordeditProvider({
   logInfo,
   modalOptions,
   onSubmitSuccess,
+  onSubmitError,
   prefillRowData,
   initialTuples,
   queryParams,
   reference,
   hiddenColumns,
-  foreignKeyCallbacks
+  foreignKeyCallbacks,
+  modifySubmissionRows
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
@@ -446,6 +450,9 @@ export default function RecordeditProvider({
     forms.forEach((f: number) => {
       submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
     });
+    if (modifySubmissionRows) {
+      modifySubmissionRows(submissionRows);
+    }
 
     /**
      * Add raw values that are not visible to submissionRowsCopy:
@@ -557,6 +564,11 @@ export default function RecordeditProvider({
         };
 
         const submitErrorCB = (exception: any) => {
+          if (onSubmitError) {
+            const res = onSubmitError(exception);
+            if (!res) return;
+          }
+
           /**
            * TODO
            * we used to call Session.validateSession() here before,

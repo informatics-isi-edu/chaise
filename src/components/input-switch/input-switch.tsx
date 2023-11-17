@@ -16,10 +16,7 @@ import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-fie
 import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe-field';
 
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import {
-  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
-} from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 export type InputSwitchProps = {
   /**
@@ -122,10 +119,7 @@ export type InputSwitchProps = {
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: {
-    getDisabledTuples?: RecordsetProviderGetDisabledTuples,
-    onSelectedRowsChanged?: RecordsetProviderOnSelectedRowsChanged
-  },
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
   /**
    * whether we should offer the extra now/today buttons
    */

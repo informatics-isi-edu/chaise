@@ -34,6 +34,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { OSDViewerDeploymentPath, chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
 export const ViewerContext = createContext<{
   /**
@@ -82,7 +83,6 @@ export const ViewerContext = createContext<{
    * callback for closing the annotation form
    */
   closeAnnotationForm: () => void,
-
   /**
    * callback for starting the create mode
    */
@@ -95,7 +95,11 @@ export const ViewerContext = createContext<{
    * if defined, it has the props that should be passed to recordedit to display a form
    */
   annotationFormProps: RecordeditProps | null,
-
+  submitAnnotationForm: () => void,
+  /**
+   * indicator for showing the spinner on top of the form
+   */
+  showAnnotationFormSpinner: boolean,
   /**
    * whether we should display the drawing required error or not
    */
@@ -155,6 +159,8 @@ export default function ViewerProvider({
 
   const [annotationFormProps, setAnnotationFormProps] = useState<RecordeditProps | null>(null);
 
+  const [showAnnotationFormSpinner, setShowAnnotationFormSpinner] = useState(false);
+
   const [displayDrawingRequiredError, setDisplayDrawingRequiredError] = useState(false);
 
   const [isInDrawingMode, setIsInDrawingMode, isInDrawingModeRef] = useStateRef(false);
@@ -167,7 +173,9 @@ export default function ViewerProvider({
 
   const currentAnnotationFormState = useRef<{
     model: ViewerAnnotationModal,
-    index?: number
+    isEditMode: boolean,
+    index?: number,
+    svgAnnotationData?: any
   } | null>(null)
 
   const osdViewerParameters = useRef<any>();
@@ -536,7 +544,19 @@ export default function ViewerProvider({
         // TODO
         break;
       case 'saveGroupSVGContent':
-        // TODO
+        if (!currentAnnotationFormState.current) return;
+        const hasValidSVG = data.length > 0 && data[0].svg !== '' && data[0].numOfAnnotations > 0;
+        if (!hasValidSVG) {
+          setDisplayDrawingRequiredError(true);
+          const invalidMessage = 'Sorry, the data could not be submitted without any drawings. Please draw annotation on the image.';
+          addAlert(invalidMessage, ChaiseAlertType.ERROR);
+          return;
+        }
+        currentAnnotationFormState.current.svgAnnotationData = data;
+
+        // submit the form
+        const formEl = document.querySelector('#annotation-form') as HTMLFormElement;
+        formEl.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
         break;
       case 'fetchZPlaneList':
         fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then((res) => {
@@ -592,6 +612,17 @@ export default function ViewerProvider({
     }
   };
 
+  const getAnnotURL = (id: string) => {
+    const encode = fixedEncodeURIComponent;
+    const annotConfig = ViewerConfigService.annotationConfig;
+    const qParams = `pcid=${ConfigService.contextHeaderParams.cid}&ppid=${ConfigService.contextHeaderParams.pid}`;
+    return [
+      `${chaiseDeploymentPath()}/record/#${ConfigService.catalogID}`,
+      encode(annotConfig.annotated_term_table_schema_name) + ':' + encode(annotConfig.annotated_term_table_name),
+      encode(annotConfig.annotated_term_id_column_name) + '=' + encode(id) + '?' + qParams
+    ].join('/');
+  }
+
   const updateAnnotaionList = (items: any) => {
     let newItems: ViewerAnnotationModal[] = [];
 
@@ -629,13 +660,7 @@ export default function ViewerProvider({
         return (t.data && t.data[annotConfig.annotated_term_column_name] === anatomyID);
       });
 
-      const encode = fixedEncodeURIComponent;
-      const qParams = `pcid=${ConfigService.contextHeaderParams.cid}&ppid=${ConfigService.contextHeaderParams.pid}`;
-      const url = !anatomyID ? '' : [
-        `${chaiseDeploymentPath()}/record/#${ConfigService.catalogID}`,
-        encode(annotConfig.annotated_term_table_schema_name) + ':' + encode(annotConfig.annotated_term_table_name),
-        encode(annotConfig.annotated_term_id_column_name) + '=' + encode(anatomyID) + '?' + qParams
-      ].join('/');
+      const url = !anatomyID ? '' : getAnnotURL(anatomyID);
 
       newItems.push({
         id: anatomyID,
@@ -658,6 +683,56 @@ export default function ViewerProvider({
     });
 
     setAnnotationModels((prev) => [...prev, ...newItems]);
+  };
+
+  const onAnnotatedTermInputChange = (column: any, data: any) => {
+    const annotConfig = ViewerConfigService.annotationConfig;
+
+    const formState = currentAnnotationFormState.current;
+    if (!formState) return true;
+
+    if (column.name !== annotConfig.annotated_term_visible_column_name || !data) {
+      return true;
+    }
+
+    const idColName = annotConfig.annotated_term_id_column_name;
+    const nameColName = annotConfig.annotated_term_name_column_name;
+
+    // allow itself to be selected, but there's no reason to update the info
+    if (data[idColName] === formState.model.id) {
+      return true;
+    }
+
+    // manually make sure the ID doesn't exist in the list,
+    // because some of the annotations might not be stored in the database
+    if (annotationModelsRef.current.find((row) => { return row.id === data[idColName] })) {
+      return 'An annotation already exists for this Anatomy, please select other terms.';
+    }
+
+    // Update the new Anatomy name and ID at openseadragon viewer
+    const newGroupID = data[idColName] + ',' + data[nameColName];
+    const newAnatomy = data[nameColName] + ' (' + data[idColName] + ')';
+
+    // ask osd-viewer to update teh annotation groupID and anatomy
+    ViewerAnnotationService.changeGroupInfo({
+      svgID: formState.model.svgID,
+      groupID: formState.model.groupID,
+      newGroupID,
+      newAnatomy
+    });
+
+    // update the form state props
+    formState.model = {
+      ...formState.model,
+      url: getAnnotURL(data[idColName]),
+      groupID: newGroupID,
+      anatomy: newAnatomy,
+      name: data[nameColName],
+      id: data[idColName]
+    }
+
+
+    return true;
   };
 
   /**
@@ -766,8 +841,18 @@ export default function ViewerProvider({
       return;
     }
 
+    /**
+     *
+     * this is supporting a case when users attempt to edit an annotation
+     * that is not saved in database. which means the annotation is coming
+     * from file. but we don't even allow users to edit an annotation that
+     * is coming from file (and not db).
+     * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
+     */
+    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
+
     // set the state
-    currentAnnotationFormState.current = { model: { ...item }, index: index }
+    currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
 
     // make sure users are warned that data might be lost
     windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
@@ -780,22 +865,14 @@ export default function ViewerProvider({
       event.stopPropagation();
     }
 
-    /**
-     *
-     * this is supporting a case when users attempt to edit an annotation
-     * that is not saved in database. which means the annotation is coming
-     * from file. but we don't even allow users to edit an annotation that
-     * is coming from file (and not db).
-     * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
-     */
-    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
-
     let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
     if (isObjectAndNotNull(item) && !item.tuple) {
       logAppMode = LogAppModes.CREATE_PRESELECT;
       preselectedAnatomy = {};
       preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
     }
+
+    const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
 
     // switch to drawing mode
     toggleDrawingMode(undefined, true);
@@ -804,8 +881,7 @@ export default function ViewerProvider({
     setAnnotationFormProps({
       appMode: isEditMode ? appModes.EDIT : appModes.CREATE,
       config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
-      onSubmitSuccess: onSubmitAnnotationSuccess,
-      reference: ViewerAnnotationService.annotationCreateReference,
+      reference: usedReference,
       logInfo: {
         logAppMode: logAppMode,
         logStack: ViewerAnnotationService.getAnnotationLogStack(isEditMode ? item : undefined),
@@ -819,10 +895,52 @@ export default function ViewerProvider({
         annotConfig.channels_column_name
       ],
       foreignKeyCallbacks: {
-        getDisabledTuples: getAnnotatedTermDisabledTuples
+        getDisabledTuples: getAnnotatedTermDisabledTuples,
+        onChange: onAnnotatedTermInputChange
       },
       prefillRowData: preselectedAnatomy ? [preselectedAnatomy] : undefined,
-      initialTuples: isEditMode ? [item.tuple] : undefined
+      initialTuples: isEditMode ? [item.tuple] : undefined,
+      onSubmitSuccess: onSubmitAnnotationSuccess,
+      onSubmitError: () => {
+        setShowAnnotationFormSpinner(false);
+        return true;
+      },
+      modifySubmissionRows: (submissionRows: any[]) => {
+        const formState = currentAnnotationFormState.current;
+
+        // these are sanity checks to get rid of ts errors and won't happen
+        if (!Array.isArray(submissionRows) || submissionRows.length === 0 || !formState || !formState.svgAnnotationData) return;
+
+        // this is called on the success, so we can just show the
+        setShowAnnotationFormSpinner(true);
+
+        // add the image value
+        submissionRows[0][annotConfig.reference_image_column_name] = imageID.current;
+
+        // add the default z index value
+        if (defaultZIndex.current !== null) {
+          submissionRows[0][annotConfig.z_index_column_name] = defaultZIndex.current;
+        }
+
+        // add the file
+        // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
+        let fileName = `${imageID.current}_${submissionRows[0][annotConfig.annotated_term_column_name]}`;
+        if (defaultZIndex.current != null) {
+          fileName += `_z${defaultZIndex.current}.svg`;
+        }
+        const file = new File([formState.svgAnnotationData[0].svg], fileName, { type: 'image/svg+xml' });
+        submissionRows[0][annotConfig.overlay_column_name] = {
+          uri: fileName,
+          file: file,
+          fileName: fileName,
+          fileSize: file.size,
+          hatracObj: new ConfigService.ERMrest.Upload(file, {
+            column: usedReference.columns.find((column: any) => { return column.name === annotConfig.overlay_column_name }),
+            reference: usedReference
+          })
+        };
+
+      }
     });
 
   }
@@ -858,12 +976,79 @@ export default function ViewerProvider({
   };
 
   const onSubmitAnnotationSuccess = (response: any) => {
+    const formState = currentAnnotationFormState.current;
+    if (!formState) return;
+
     // TODO
     // since we're just ceate/editting one we can assume it's just succesful
-    const page = response.successful;
+    let resultTuple = response.successful.tuples[0];
 
-    // TODO Aref after mution stuff of the old imp
-    // TOOD Aref read the newly created page to get the fk data
+    // update the stackNode
+    formState.model.logStackNode = LogService.getStackNode(
+      LogStackTypes.ANNOTATION,
+      resultTuple.reference.table,
+      resultTuple.reference.filterLogInfo
+    );
+
+    const logObj = {
+      action: ViewerAnnotationService.getAnnotationLogAction(LogActions.VIEWER_ANNOT_FETCH, formState.model),
+      stack: ViewerAnnotationService.getAnnotationLogStack(formState.model)
+    }
+
+    // read the currently saved data, so we can capture the tuple in correct context
+    // arguments that are true:
+    //  - dontCorrect page
+    //  - getTCRS: since we're using this tuple for getting the update/delete permissions and also populating edit form
+    resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, false, true).then((page: any) => {
+      if (page.length !== 1) {
+        $log.log('the currently added row was not visible.');
+      }
+      resultTuple = page.length == 1 ? page.tuples[0] : resultTuple;
+    }).catch((err: any) => {
+      $log.log('error while reading after create/update:', err);
+    }).finally(() => {
+
+      // update SVG ID (NEW_SVG) after successfully created
+      let newSvgID = formState.model.svgID;
+      if (!formState.isEditMode && newSvgID === 'NEW_SVG') {
+        // old logic:
+        // newSvgID = new Date().getTime().toString() + Math.floor(Math.random() * 10000)
+        newSvgID = generateUUID();
+      }
+      if (formState.model.svgID !== newSvgID) {
+        ViewerAnnotationService.changeSVGId({
+          svgID: formState.model.svgID,
+          newSvgID: newSvgID,
+        });
+        formState.model.svgID = newSvgID;
+      }
+
+      // update the tuple
+      formState.model.tuple = resultTuple;
+      formState.model.canUpdate = resultTuple.canUpdate;
+      formState.model.canDelete = resultTuple.canDelete;
+      formState.model.isStoredInDB = true;
+
+      // update the color
+      formState.model.colors = formState.svgAnnotationData[0].stroke;
+
+      // update the annotationModels
+      const rowIndex = formState.index;
+      if (typeof rowIndex === 'number') { // it's part of the form
+        setAnnotationModels((prev) => {
+          return prev.map((annot, i) => {
+            if (i !== rowIndex) return annot;
+            return { ...formState.model };
+          });
+        });
+      } else { // should be added to the form
+        setAnnotationModels((prev) => [...prev, { ...formState.model }]);
+      }
+
+      setShowAnnotationFormSpinner(false);
+      closeAnnotationForm();
+      addAlert('Your data has been saved.', ChaiseAlertType.SUCCESS);
+    });
   }
 
   /**
@@ -941,9 +1126,51 @@ export default function ViewerProvider({
       // Remove the new created svg and group if not saved
       ViewerAnnotationService.removeSVG({ svgID: formState.model.svgID });
     }
+    else if (typeof formState.index === 'number') {
+      const origAnnot = annotationModelsRef.current[formState.index];
+
+      // if anatomy has been changed, change it back
+      if (formState.model.groupID !== origAnnot.groupID) {
+        // signal osd to change the groupID back
+        ViewerAnnotationService.changeGroupInfo({
+          svgID: formState.model.svgID,
+          groupID: formState.model.groupID,
+          newGroupID: origAnnot.groupID,
+          newAnatomy: origAnnot.anatomy
+        });
+      }
+
+      // send a message to osd viewer to discard the changes
+      ViewerAnnotationService.discardAnnotationChange({
+        svgID: formState.model.svgID,
+        groupID: formState.model.groupID
+      });
+
+
+    }
 
     // close the form
     changeAnnotationFormState();
+  };
+
+  /**
+   * will be called when users clicked on the submit button.
+   * calls osd-viewer to get the svg annotation
+   */
+  const submitAnnotationForm = () => {
+    const formState = currentAnnotationFormState.current;
+    if (!formState) {
+      // if this happens, it's a programmatic error
+      // just added for sanity check
+      throw new Error('submitAnnotationForm called when there are no form present.');
+    }
+
+    removeAllAlerts();
+    setDisplayDrawingRequiredError(false);
+    ViewerAnnotationService.saveAnnotationRecord({
+      svgID: formState.model.svgID,
+      groupID: formState.model.groupID
+    })
   };
 
   const toggleDrawingMode = (event?: any, changeColor?: boolean) => {
@@ -987,6 +1214,8 @@ export default function ViewerProvider({
       loadingAnnotations,
       canCreateAnnotation,
       annotationFormProps,
+      submitAnnotationForm,
+      showAnnotationFormSpinner,
       closeAnnotationForm,
       startAnnotationCreate,
       startAnnotationEdit,
@@ -1003,6 +1232,7 @@ export default function ViewerProvider({
     loadingAnnotations,
     canCreateAnnotation,
     annotationFormProps,
+    showAnnotationFormSpinner,
     closeAnnotationForm,
     displayDrawingRequiredError,
     isInDrawingMode
