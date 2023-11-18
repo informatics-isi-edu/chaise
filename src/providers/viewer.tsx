@@ -10,7 +10,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import { CustomError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { ViewerAnnotationModal, ViewerZoomFunction } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
@@ -65,6 +65,9 @@ export const ViewerContext = createContext<{
    * call this function to toggle the channel list
    */
   toggleChannelList: () => void,
+  changeZoom: (zoomFn: ViewerZoomFunction) => void,
+  takeScreenshot: () => void,
+  waitingForScreenshot: boolean,
 
   /**
    * annotations
@@ -164,6 +167,8 @@ export default function ViewerProvider({
   const [displayDrawingRequiredError, setDisplayDrawingRequiredError] = useState(false);
 
   const [isInDrawingMode, setIsInDrawingMode, isInDrawingModeRef] = useStateRef(false);
+
+  const [waitingForScreenshot, setWaitingForScreenshot] = useState(false);
 
   const imageID = useRef<string>();
   /**
@@ -476,11 +481,10 @@ export default function ViewerProvider({
         // change the default z-index
         defaultZIndex.current = data.zIndex;
 
-        // TODO
         // make sure it's not in edit/create mode
-        // if (vm.editingAnatomy != null) {
-        //   vm.closeAnnotationForm();
-        // }
+        if (currentAnnotationFormState.current) {
+          closeAnnotationForm();
+        }
 
         // clear the annotations
         setAnnotationModels([]);
@@ -540,9 +544,6 @@ export default function ViewerProvider({
       case 'onClickChangeSelectingAnnotation':
         // TODO
         break;
-      case 'onChangeStrokeScale':
-        // TODO
-        break;
       case 'saveGroupSVGContent':
         if (!currentAnnotationFormState.current) return;
         const hasValidSVG = data.length > 0 && data[0].svg !== '' && data[0].numOfAnnotations > 0;
@@ -597,10 +598,11 @@ export default function ViewerProvider({
         });
         break;
       case 'downloadViewDone':
-        // TODO
+        setWaitingForScreenshot(false);
         break;
       case 'downloadViewError':
-        // TODO
+        setWaitingForScreenshot(false);
+        addAlert(errorMessages.viewerScreenshotFailed, ChaiseAlertType.WARNING);
         break;
       case 'showAlert':
         addAlert(data.message, data.type);
@@ -663,6 +665,7 @@ export default function ViewerProvider({
       const url = !anatomyID ? '' : getAnnotURL(anatomyID);
 
       newItems.push({
+        isDisplayed: true,
         id: anatomyID,
         name: anatomyName,
         groupID,
@@ -1088,6 +1091,7 @@ export default function ViewerProvider({
 
     // all of these will be populated in the end
     const newAnnot: ViewerAnnotationModal = {
+      isDisplayed: true,
       svgID,
       groupID,
       anatomy: '',
@@ -1201,6 +1205,42 @@ export default function ViewerProvider({
     })
   }
 
+  const changeZoom = (zoomFn: ViewerZoomFunction) => {
+    getOSDViewerIframe().contentWindow!.postMessage({ messageType: zoomFn }, origin);
+
+    let action;
+    switch (zoomFn) {
+      case ViewerZoomFunction.ZOOM_IN:
+        action = LogActions.VIEWER_ZOOM_IN;
+        break;
+      case ViewerZoomFunction.ZOOM_OUT:
+        action = LogActions.VIEWER_ZOOM_OUT;
+        break;
+      default:
+        action = LogActions.VIEWER_ZOOM_RESET;
+        break;
+    }
+
+    // app mode will change by annotation controller, this one should be independent of that
+    LogService.logClientAction({
+      action: LogService.getActionString(action, null, ''),
+      stack: LogService.getStackObject()
+    }, reference.defaultLogInfo);
+  }
+
+  const takeScreenshot = () => {
+    setWaitingForScreenshot(true);
+
+    const filename = imageID.current || 'image';
+    getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'downloadView', content: filename }, origin);
+
+    // app mode will change by annotation controller, this one should be independent of that
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.VIEWER_SCREENSHOT, null, ''),
+      stack: LogService.getStackObject()
+    }, reference.defaultLogInfo);
+  }
+
   const providerValue = useMemo(() => {
     return {
       reference,
@@ -1221,7 +1261,10 @@ export default function ViewerProvider({
       startAnnotationEdit,
       displayDrawingRequiredError,
       toggleDrawingMode,
-      isInDrawingMode
+      isInDrawingMode,
+      changeZoom,
+      takeScreenshot,
+      waitingForScreenshot,
     }
   }, [
     initialized,
@@ -1233,9 +1276,9 @@ export default function ViewerProvider({
     canCreateAnnotation,
     annotationFormProps,
     showAnnotationFormSpinner,
-    closeAnnotationForm,
     displayDrawingRequiredError,
-    isInDrawingMode
+    isInDrawingMode,
+    waitingForScreenshot
   ]);
 
   return (

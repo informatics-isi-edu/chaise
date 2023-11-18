@@ -38,8 +38,7 @@ export type ShareCiteModalProps = {
   reference: any,
   /**
    * the citation object
-   * NOTE hideCitation is not needed, we just need to send null for this
-   * and true for citationReady.
+   * if you don't want to show citation use { isReady: true, value: null } for this prop
    */
   citation: CitationModel,
   /**

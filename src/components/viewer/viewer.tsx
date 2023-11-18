@@ -7,8 +7,10 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import ViewerAnnotationList from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-list';
+import ViewerAnnotationStrokeSlider from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-stroke-slider';
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -16,7 +18,7 @@ import useViewer from '@isrd-isi-edu/chaise/src/hooks/viewer';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { ViewerProps } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { ViewerProps, ViewerZoomFunction } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
@@ -59,7 +61,7 @@ const ViewerInner = ({
 
   const { errors } = useError();
   const {
-    initialized, pageTitle,
+    initialized, pageTitle, showChannelList, toggleChannelList, changeZoom, takeScreenshot, waitingForScreenshot,
     hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
     submitAnnotationForm,
     displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode
@@ -134,28 +136,16 @@ const ViewerInner = ({
     >
       <div className='side-panel-container'>
         <div className='annotation-container'>
+          {showAnnotationFormSpinner && <div className='annotation-spinner-overlay'></div>}
           {(showAnnotationFormSpinner || loadingAnnotations) &&
             <ChaiseSpinner
-              className={`annotation-spinner${showAnnotationFormSpinner ? ' annotation-form-spinner': ''}`}
+              className={`annotation-spinner${showAnnotationFormSpinner ? ' annotation-form-spinner' : ''}`}
               message={showAnnotationFormSpinner ? 'Saving the changes...' : ''}
             />
           }
-          <div className='annotation-stroke-slider'>
-            {/* TODO functionality */}
-            <span className='label'>Line Thickness <span className='stroke-value'>3.4</span></span>
-            <input type='range' className='stroke-slider-input' min='1' max='6' step='0.05' />
-            <div className='stroke-slider-ticks'>
-              <span className='stroke-slider-tick'>1</span>
-              <span className='stroke-slider-tick'>2</span>
-              <span className='stroke-slider-tick'>3</span>
-              <span className='stroke-slider-tick'>4</span>
-              <span className='stroke-slider-tick'>5</span>
-              <span className='stroke-slider-tick'>6</span>
-            </div>
-          </div>
+          <ViewerAnnotationStrokeSlider />
           {showAnnotationForm &&
             <div className='annotation-form-container'>
-              {showAnnotationFormSpinner && <div className='annotation-spinner-overlay'></div>}
               {annotationFormProps.appMode !== appModes.EDIT && <div className='drawing-hint'>Drawing is required.</div>}
               <div className='annotation-form-row'>
                 <div className='annotation-form-row-header'>
@@ -251,7 +241,40 @@ const ViewerInner = ({
                     <span>{toggleAnnotationSidebarLabel}</span>
                   </button>
                 </ChaiseTooltip>
-                {/* TODO rest of the buttons */}
+                <ChaiseTooltip placement='top' tooltip={(showChannelList ? 'Hide' : 'Show') + ' the list of channels'}>
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleChannelList}>
+                    <span className='chaise-btn-icon fa-solid fa-bars-progress'></span>
+                    <span>{(showChannelList ? 'Hide' : 'Show') + ' Channel List'}</span>
+                  </button>
+                </ChaiseTooltip>
+                <ChaiseTooltip placement='top' tooltip='Zoom in'>
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_IN)}>
+                    <span className='chaise-btn-icon fa-solid fa-magnifying-glass-plus'></span>
+                    <span>Zoom in</span>
+                  </button>
+                </ChaiseTooltip>
+                <ChaiseTooltip placement='top' tooltip='Zoom out'>
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_OUT)}>
+                    <span className='chaise-btn-icon fa-solid fa-magnifying-glass-minus'></span>
+                    <span>Zoom Out</span>
+                  </button>
+                </ChaiseTooltip>
+                <ChaiseTooltip placement='top' tooltip='Reset Zoom'>
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.RESET_ZOOM)}>
+                    <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
+                    <span>Reset Zoom</span>
+                  </button>
+                </ChaiseTooltip>
+                <ChaiseTooltip
+                  placement='top'
+                  tooltip={waitingForScreenshot ? 'Processing the screenshot...' : 'Take a snapshot of image and save it'}
+                >
+                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={takeScreenshot} disabled={waitingForScreenshot}>
+                    {!waitingForScreenshot && <span className='chaise-btn-icon fa-solid fa-camera'></span>}
+                    {waitingForScreenshot && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
+                    <span>Take a Screenshot</span>
+                  </button>
+                </ChaiseTooltip>
               </div>
             </div>
           </div>

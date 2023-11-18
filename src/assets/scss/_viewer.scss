@@ -37,6 +37,10 @@
 
   .menu-btn-container {
     padding: 5px 0px 5px 0px;
+
+    .chaise-btn {
+      margin-right: 5px;
+    }
   }
 
   .side-panel-container {
@@ -191,6 +195,113 @@
         display: flex;
         gap: 10px;
       }
+
+      .no-annotation-message {
+        background: map-get(variables.$color-map, 'table-striped-background');
+        padding: 8px 5px;
+        min-height: 39px;
+        text-align: center;
+      }
+
+      .annotation-rows {
+        padding-top: 5px;
+
+        .annotation-row {
+          cursor: pointer;
+          padding: 8px 5px;
+
+          &.highlighted {
+            background: map-get(variables.$color-map, 'primary');
+            color: map-get(variables.$color-map, 'white');
+            a,
+            .chaise-btn {
+              color: map-get(variables.$color-map, 'white');
+            }
+          }
+
+          &:not(.highlighted) {
+            &:hover {
+              background: map-get(variables.$color-map, 'table-highlight-background');
+            }
+
+            &:nth-child(odd) {
+              background-color: map-get(variables.$color-map, 'table-striped-background');
+              &:hover {
+                background: map-get(variables.$color-map, 'table-striped-highlight-background');
+              }
+            }
+          }
+
+          .annotation-row-name {
+            display: inline;
+            padding: 3px;
+          }
+
+          .annotation-row-colors {
+            width: 10px;
+            height: 10px;
+            background-color: transparent;
+            margin-right: 2px;
+            display: inline-block;
+
+            .annotation-row-color {
+              height: 100%;
+              float: right;
+            }
+          }
+
+          .annotation-row-btns {
+            float: right;
+            clear: both; // without this the btns won't go all the way to the edge
+
+            .annotation-row-btn.chaise-btn.chaise-btn-sm {
+              font-size: 12px;
+              height: 21px;
+              width: 21px;
+              min-width: auto;
+
+              &:hover{
+                color: map-get(variables.$color-map, 'primary-hover');
+              }
+            }
+
+            // hide the label
+            .share-btn span:not(.chaise-btn-icon) {
+              display: none;
+            }
+          }
+        }
+      }
     }
+  }
+}
+
+// modify the chaise share citation that is displayed for annotations
+#viewer .chaise-share-citation-modal {
+  li.share-extra-item {
+    h3.share-item-header {
+      display: inline-block;
+      &:after {
+        content: ':';
+      }
+    }
+
+    .share-item-value {
+      padding-left: 5px;
+    }
+  }
+
+  h3.share-item-header {
+    font-size: 1.1em;
+    margin-top: 5px;
+    margin-bottom: 0px;
+  }
+
+  .share-item-value {
+    padding-left: 10px;
+  }
+
+  .share-modal-links {
+    padding-top: 10px;
   }
 }

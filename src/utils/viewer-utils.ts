@@ -530,7 +530,7 @@ export const updateDefaultZIndex = (mainImageReference: any, imageID: string, zI
 * while the Reference.update only allows updating of the visible columns.
 * we should be able to improve this later.
 *
-* TODO the caller should show the success alert and repaint the authn errors
+* NOTE the caller should show the success alert and repaint the authn errors
 *
 */
 export const updateChannelConfig = (data: any, imageID: string): Promise<void> => {

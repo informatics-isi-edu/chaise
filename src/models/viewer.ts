@@ -318,4 +318,14 @@ export type ViewerAnnotationModal = {
    * the stack node used for logging
    */
   logStackNode: any,
+  /**
+   * whether it's displayed or not
+   */
+  isDisplayed: boolean,
+}
+
+export enum ViewerZoomFunction {
+  ZOOM_IN = 'zoomInView',
+  ZOOM_OUT = 'zoomOutView',
+  RESET_ZOOM = 'homeView'
 }
