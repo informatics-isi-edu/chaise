@@ -10,41 +10,65 @@ const testParams = {
     not_ci: true,
     types: [
       {
-        type: "textarea",
+        type: "input_text",
         column_name: "markdown_col",
         appy_to_all_value: "all text",
-        apply_to_some: {
-          value: "some text",
-          formIndexes: [2,3,4,5],
-        }
+        formIndexes: [2,3,4,5],
+        apply_to_some: "some text",
       },
       {
-        type: "text_input",
+        type: "input_text",
         column_name: "text_col",
         appy_to_all_value: "all text input",
-        apply_to_some: {
-          value: "some text input",
-          formIndexes: [2,3,4,5],
-        },
+        formIndexes: [2,3,4,5],
+        apply_to_some: "some text input",
         column_name: 'text_col'
       },
       {
-        type: "input_float",
+        type: "input_text",
         appy_to_all_value: "12.4",
-        apply_to_some: {
-          value: "4.5",
-          formIndexes: [2,3,4,5],
-        },
+        formIndexes: [2,3,4,5],
+        apply_to_some:  "4.5",
         column_name: 'float_col'
       },
       {
-        type: "input_int",
+        type: "input_text",
         appy_to_all_value: "456",
-        apply_to_some: {
-          value: "123",
-          formIndexes: [2,3,4,5],
-        },
+        apply_to_some: "123",
+        formIndexes: [2,3,4,5],
         column_name: 'int_col'
+      },
+      {
+        type: "input_text",
+        appy_to_all_value: '2020-12-11',
+        apply_to_some: "2020-11-18",
+        formIndexes: [2,3,4,5],
+        column_name: 'date_col'
+      },
+      {
+        type: "timestamp_col",
+        appy_to_all_value_time: '12:38:31',
+        formIndexes: [2,3,4,5],
+        apply_to_some_time: '11:28:41',
+       
+        appy_to_all_value_date: '2020-12-11',
+        apply_to_some_date: '2020-11-18',
+        column_name: 'timestamp_col'
+      },
+      {
+        type: "boolean_col",
+        appy_to_all_value: 'false',
+        formIndexes: [2,3,4,5],
+        apply_to_some: 'true',
+        column_name: 'boolean_col',
+        booleanOptions: ["true", "false"]
+      },
+      {
+        type: "fk_col",
+        appy_to_all_value: 'three',
+        formIndexes: [2,3,4,5],
+        apply_to_some: 'two',
+        column_name: 'fk_col'
       },
       
     ],
@@ -260,15 +284,20 @@ describe('Regarding multi form input and clone button', () => {
 
         testParams.apply_tests.types.forEach((params) => {
           let type = params.type;
-          describe(type, () => {
+          let colName = params.column_name;
+          describe(colName, () => {
             let multiFormTextArea;
-            let colName = params.column_name;
+            let dateInput;
+            let timeInput;
+
             let textarea;
             let toggleBtn = recordEditPage.getColumnMultiFormButton(colName);
+            const applybtn = recordEditPage.getApplyBtnMultiForm(colName);
+            const cancelBtn = recordEditPage.getCloseBtnMultiForm(colName);
             it('when no forms are selected, apply and clear buttons should be disabled ', () => {
-              let appyBtn; 
+              let appyBtn;
               let applyButtonDisabled;
-              
+
               const inputSwitch = recordEditPage.getInputSwitchContainer(colName, 1)
               const parentEl = recordEditPage.getParentElement(inputSwitch);
               chaisePage.clickButton(toggleBtn)
@@ -277,7 +306,7 @@ describe('Regarding multi form input and clone button', () => {
                 })
                 .then(() => {
                   appyBtn = recordEditPage.getMultiFormApply(colName)
-                  applyButtonDisabled =appyBtn.getAttribute('disabled');
+                  applyButtonDisabled = appyBtn.getAttribute('disabled');
                   expect(parentEl.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
                   return chaisePage.clickButton(parentEl);
                 })
@@ -288,58 +317,242 @@ describe('Regarding multi form input and clone button', () => {
                 .catch(chaisePage.catchTestError);
             });
             it('when all forms are selected, clicking on apply should apply change to all forms', () => {
-              if (type === 'textarea') {
-                multiFormTextArea = recordEditPage.getApplySomeTextArea(colName);
-              } else {
-                multiFormTextArea = recordEditPage.getApplySomeInput(colName);
-              }
-
-              const textToType = params.appy_to_all_value;
-              multiFormTextArea.sendKeys(textToType);
               let checkboxInput = recordEditPage.getCheckboxInput();
+              chaisePage.clickButton(checkboxInput);
+              if (type === 'input_text') {
+                if (colName === 'markdown_col') {
+                  multiFormTextArea = recordEditPage.getApplySomeTextArea(colName);
+                } else {
+                  multiFormTextArea = recordEditPage.getApplySomeInput(colName);
+                }
+                const textToType = params.appy_to_all_value;
 
-              chaisePage.clickButton(checkboxInput)
-                .then(() => {
+                multiFormTextArea.sendKeys(textToType);
 
-                  recordEditPage.getAllElementsWithClass('.form-header.entity-value')
-                    .then(() => recordEditPage.getApplyBtnMultiForm(colName))
-                    .then((applybtn) => chaisePage.clickButton(applybtn))
+                recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                  .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                  .then((applybtn) => chaisePage.clickButton(applybtn))
 
-                    .then((count) => {
-                      for (let i = 0; i < count; i++) {
-                        recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
-                          expect(text).toContain(textToType);
+                  .then((count) => {
+                    for (let i = 0; i < count; i++) {
+                      recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
+                        expect(text).toContain(textToType);
+                      })
+                    }
+                  })
+              } else if (type === 'timestamp_col') {
+                dateInput = recordEditPage.getMultiFormTimestampDate(colName);
+                timeInput = recordEditPage.getMultiFormTimestampDate(colName);
+                dateInput.sendKeys(params.appy_to_all_value_date);
+                timeInput.sendKeys(params.appy_to_all_value_time);
+                recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                  .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                  .then((applybtn) => chaisePage.clickButton(applybtn))
+
+
+                  .then((count) => {
+                    for (let i = 0; i < count; i++) {
+                      const dateObj = recordEditPage.getTimestampInputsForAColumn(colName, i);
+
+                      dateObj.date.getAttribute('value').then((text) => {
+                        expect(text).toEqual(params.appy_to_all_value_date);
+                      })
+                    }
+                  })
+              } else if (type === 'fk_col') {
+
+                var value = params.appy_to_all_value;
+                chaisePage.recordEditPage.getSelectAllPopupBtn(colName).click()
+                  .then(function () {
+                    // wait for modal rows to load
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getRecordSetTable()), browser.params.defaultTimeout);
+                    return chaisePage.recordsetPage.getRows().get(2).all(by.css(".select-action-button")).click();
+                  }).then(function () {
+                    // wait for modal to close
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+
+                    return applyBtn.click();
+                  }).then(function () {
+                    // verify the values
+                    recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                      .then((count) => {
+                        for (let i = 0; i < count; i++) {
+                          var fkInput1 = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, i);
+                          expect(fkInput1.getText()).toBe(value);
+                        }
+                      })
+
+                    done();
+                  }).catch(chaisePage.catchTestError);
+
+              } else {
+                const EC = protractor.ExpectedConditions;
+                let dropdown = recordEditPage.getDropdownElementByNameMultiForm('boolean_col', 1);
+                expect(dropdown.isPresent()).toBeTruthy();
+                browser.wait(EC.elementToBeClickable(dropdown), 10000).then(() => {
+
+                  return dropdown.click();
+                }).then(() => {
+                  const optionsContainer = chaisePage.recordEditPage.getOpenDropdownOptionsContainer();
+                  return chaisePage.waitForElement(optionsContainer)
+                    .then(() => {
+                      return chaisePage.recordEditPage.getDropdownOptions();
+                    }).then((options) => {
+                      options.forEach(function (opt, idx) {
+                        expect(opt.getAttribute("innerHTML")).toBe(params.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
+                      });
+
+                      return dropdown.click()
+                    }).then(() => {
+                      return chaisePage.recordEditPage.selectDropdownValue(dropdown, 'true');
+                    }).then(() => {
+                      expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe('true', "The truthy option was not selected");
+                      recordEditPage.getAllElementsWithClass('.form-header.entity-value')
+                        .then(() => recordEditPage.getApplyBtnMultiForm(colName))
+                        .then((applybtn) => chaisePage.clickButton(applybtn))
+
+                        .then((count) => {
+                          for (let i = 0; i < count; i++) {
+                            let dropdown1 = recordEditPage.getDropdownElementByName('boolean_col', i);
+                            expect(chaisePage.recordEditPage.getDropdownText(dropdown1).getText()).toBe(option, "The truthy option was not selected");
+                          }
                         })
-                      }
                     })
-                })
+
+                });
+
+
+              }
             });
 
             it('when some forms are selected, clicking on apply should apply change to selected forms', (done) => {
-              const textToType = params.apply_to_some.value;
-              const applybtn = recordEditPage.getApplyBtnMultiForm(colName);
+
+              const applyBtn = recordEditPage.getApplyBtnMultiForm(colName);
               const inputSwitch = recordEditPage.getInputSwitchContainer(colName, 1)
               const parentEl = recordEditPage.getParentElement(inputSwitch);
-              chaisePage.clickButton(parentEl).then(() => {
-                expect(parentEl.getAttribute('class')).not.toContain('entity-active', 'Form is selected');
-              }).then(() => {
-                // multiFormTextArea.clear() is not working hence used the below logic
-                return browser.executeScript('arguments[0].value = "";', multiFormTextArea.getWebElement());
 
-              })
-                .then(() => {
-                  return multiFormTextArea.sendKeys(textToType);
+              if (type === 'input_text') {
+                const textToType = params.apply_to_some;
+
+                chaisePage.clickButton(parentEl).then(() => {
+                  expect(parentEl.getAttribute('class')).not.toContain('entity-active', 'Form is selected');
+                }).then(() => {
+                  multiFormTextArea.clear();
+                  return browser.executeScript('arguments[0].value = "";', multiFormTextArea.getWebElement())
                 })
-                .then(() => chaisePage.clickButton(applybtn))
-                .then(() => {
-                  params.apply_to_some.formIndexes.forEach((i) => {
-                    recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
-                      expect(text).toEqual(textToType);
-                    })
+
+
+                  .then(() => {
+                    return multiFormTextArea.sendKeys(textToType);
                   })
-                  expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);
-                }).then(() => done())
-                .catch(chaisePage.catchTestError(done));
+                  .then(() => chaisePage.clickButton(applybtn))
+                  .then(() => {
+                    params.formIndexes.forEach((i) => {
+                      recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
+                        expect(text).toEqual(textToType);
+                      })
+                    })
+                    expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);
+                  }).then(() => done())
+                  .catch(chaisePage.catchTestError(done));
+
+              } else if (type === 'boolean_col') {
+                const EC = protractor.ExpectedConditions;
+                chaisePage.clickButton(parentEl).then(() => {
+                  expect(parentEl.getAttribute('class')).not.toContain('entity-active', 'Form is selected');
+                });
+                let dropdown = recordEditPage.getDropdownElementByNameMultiForm('boolean_col', 1);
+
+                expect(dropdown.isPresent()).toBeTruthy();
+
+                browser.wait(EC.elementToBeClickable(dropdown), 10000).then(() => {
+
+                  return dropdown.click();
+
+                }).then(() => {
+
+                  const optionsContainer = chaisePage.recordEditPage.getOpenDropdownOptionsContainer();
+                  return chaisePage.waitForElement(optionsContainer)
+
+                    .then(() => {
+                      return chaisePage.recordEditPage.getDropdownOptions();
+                    }).then((options) => {
+                      options.forEach(function (opt, idx) {
+                        expect(opt.getAttribute("innerHTML")).toBe(params.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
+                      });
+
+                      return dropdown.click()
+                    }).then(() => {
+                      return chaisePage.recordEditPage.selectDropdownValue(dropdown, 'false');
+                    }).then(() => {
+                      expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe('false', "The truthy option was not selected");
+                      chaisePage.clickButton(applybtn)
+
+                        .then(() => {
+                          params.formIndexes.forEach((i) => {
+                            let dropdown1 = recordEditPage.getDropdownElementByName(type, i);
+                            expect(chaisePage.recordEditPage.getDropdownText(dropdown1).getText()).toBe('false', "The truthy option was not selected");
+                          })
+                          let dropdown2 = recordEditPage.getDropdownElementByName(type, 1);
+                          expect(chaisePage.recordEditPage.getDropdownText(dropdown2).getText()).toBe('true', "The truthy option was not selected");
+                          done();
+                        })
+                    })
+                })
+              }
+
+              else if (type === 'fk_col') {
+                var value = params.apply_to_some;
+
+                const inputSwitch = recordEditPage.getInputSwitchContainerFK(1)
+                const parentEl = recordEditPage.getParentElement(inputSwitch);
+                chaisePage.clickButton(parentEl).then(() => {
+                  expect(parentEl.getAttribute('class')).not.toContain('entity-active', 'Form is selected');
+                }).then(() => {
+                  chaisePage.recordEditPage.getMultiFormPopupBtn(colName).click()
+                })
+                  .then(function () {
+                    // wait for modal rows to load
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getRecordSetTable()), browser.params.defaultTimeout);
+                    return chaisePage.recordsetPage.getRows().get(1).all(by.css(".select-action-button")).click();
+                  }).then(function () {
+                    // wait for modal to close
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+
+                    return applyBtn.click();
+                  }).then(function () {
+                    // verify the values
+                    params.formIndexes.forEach((i) => {
+                      var fkInput1 = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, i);
+                      expect(fkInput1.getText()).toBe(value);
+                    })
+                  }).then(() => done())
+              } else {
+                chaisePage.clickButton(parentEl).then(() => {
+                  expect(parentEl.getAttribute('class')).not.toContain('entity-active', 'Form is selected');
+                }).then(() => {
+                  dateInput.clear();
+                  timeInput.clear()
+                })
+                  .then(() => {
+                    return dateInput.sendKeys(params.apply_to_some_date);
+                  })
+                  .then(() => {
+                    return timeInput.sendKeys(params.apply_to_some_time);
+                  })
+                  .then(() => chaisePage.clickButton(applybtn))
+                  .then(() => {
+                    params.formIndexes.forEach((i) => {
+                      const dateObj = recordEditPage.getTimestampInputsForAColumn(colName, i);
+
+                      dateObj.date.getAttribute('value').then((text) => {
+                        expect(text).toEqual(params.apply_to_some_date);
+                      })
+                    })
+                    expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value_date);
+                  }).then(() => done())
+                  .catch(chaisePage.catchTestError(done));
+              }
             });
 
             it('when some forms are selected, clicking on clear should clear values in selected forms', (done) => {
@@ -348,12 +561,39 @@ describe('Regarding multi form input and clone button', () => {
               chaisePage.clickButton(clearBtn)
                 .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
                 .then((count) => {
-                  params.apply_to_some.formIndexes.forEach((i) => {
-                    recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
-                      expect(text.length).not.toBeGreaterThan(0);
+                  if (colName === 'timestamp_col') {
+                    params.formIndexes.forEach((i) => {
+                      const dateObj = recordEditPage.getTimestampInputsForAColumn(colName, i);
+
+                      dateObj.date.getAttribute('value').then((text) => {
+                        expect(text.length).not.toBeGreaterThan(0);
+                      })
                     })
-                  })
-                  expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);
+                    const dateObj1 = recordEditPage.getTimestampInputsForAColumn(colName, 1);
+                    expect(dateObj1.date.getAttribute('value')).toContain(params.appy_to_all_value_date);
+                  } else if (type === 'boolean_col') {
+                    params.formIndexes.forEach((i) => {
+                      let dropdown1 = recordEditPage.getDropdownElementByName(type, i);
+                      expect(chaisePage.recordEditPage.getDropdownText(dropdown1).getText()).toBe('Select a value', "The truthy option was not selected");
+                    })
+                    let dropdown2 = recordEditPage.getDropdownElementByName(type, 1);
+                    expect(chaisePage.recordEditPage.getDropdownText(dropdown2).getText()).toBe('true', "The truthy option was not selected");
+                  } else if (type === 'fk_col') {
+                    params.formIndexes.forEach((i) => {
+                      var fkInput1 = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, i);
+                      expect(fkInput1.getText()).toBe('Select a value', "The truthy option was not selected");
+                    })
+                  }
+
+                  else {
+                    params.formIndexes.forEach((i) => {
+                      recordEditPage.getElementForColumn(type, i, colName).getAttribute('value').then((text) => {
+                        expect(text.length).not.toBeGreaterThan(0);
+                      })
+                    })
+                    expect(recordEditPage.getElementForColumn(type, 1, colName).getAttribute('value')).toContain(params.appy_to_all_value);
+                  }
+
                 }).then(() => done())
                 .catch(chaisePage.catchTestError(done));
             });

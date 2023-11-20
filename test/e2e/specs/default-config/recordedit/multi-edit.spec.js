@@ -306,10 +306,10 @@ describe('Edit multiple existing record,', function() {
 
                     it("open the select all form and click 'clear all'", function (done) {
                         const colName = tableParams.fkColumnName;
-                        const cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName),
-                            clearAllBtn = chaisePage.recordEditPage.getSelectAllClear(colName);
+                        const cancelBtn = chaisePage.recordEditPage.getCloseBtnMultiForm(colName),
+                            clearAllBtn = chaisePage.recordEditPage.getClearBtnMultiForm(colName);
 
-                        chaisePage.recordEditPage.getColumnSelectAllButton(colName).click().then(function () {
+                        chaisePage.recordEditPage.getColumnMultiFormButton(colName).click().then(function () {
                             browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                             return clearAllBtn.click();

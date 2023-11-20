@@ -259,6 +259,10 @@ var recordEditPage = function() {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.multi-form-input-clear-' + columnDisplayName));
     }
+    this.getCloseBtnMultiForm = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.css('.multi-form-input-close-' + columnDisplayName));
+    }
     this.getAllElementsWithClass = function (className) {
         return element.all(by.css(className)).count();
     }
@@ -270,12 +274,27 @@ var recordEditPage = function() {
      }
 
      this.getElementForColumn = function(type, value, name) {
-        if(type === 'textarea') {
+        if(name === 'markdown_col') {
             return this.getTextAreaForAColumn(name, value)
         } else {
             return this.getInputForAColumn(name, value)
         }
      }
+     this.getMultiFormTimestampDate = function (name) {
+        return this.getMultiFormInput().element(by.css('input[name="-1-' + name + '-date"]'));
+    }
+
+    this.getMultiFormTimestampTime = function (name) {
+        return this.getMultiFormInput().element(by.css('input[name="-1-' + name + '-time"]'));
+    }
+    this.getDropdownElementByNameMultiForm = (name, index) => {
+        index = index || 1;
+        const inputName = '-' + index + '-' + name;
+        return this.getMultiFormInput().element(by.css('.input-switch-container-' + inputName + ' .dropdown-toggle'));
+    }
+    this.getMultiFormPopupBtn = function (name) {
+        return this.getMultiFormInput().element(by.className("modal-popup-btn"));
+    }
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
@@ -391,6 +410,11 @@ var recordEditPage = function() {
       const inputName = index + '-' + name;
       return element(by.className('input-switch-container-' + inputName))
     }
+    this.getInputSwitchContainerFK = (index) => {
+        index = index || 1;
+        const inputName = index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
+        return element(by.className('input-switch-container-' + inputName))
+      }
 
     this.getIframeInputDisplay = (container, name, index) => {
       if (!container) {
