@@ -211,7 +211,7 @@
           padding: 8px 5px;
 
           &.highlighted {
-            background: map-get(variables.$color-map, 'primary');
+            background: map-get(variables.$color-map, 'primary-hover');
             color: map-get(variables.$color-map, 'white');
             a,
             .chaise-btn {
@@ -222,6 +222,9 @@
           &:not(.highlighted) {
             &:hover {
               background: map-get(variables.$color-map, 'table-highlight-background');
+            }
+            .annotation-row-btn:hover {
+              color: map-get(variables.$color-map, 'primary-hover');
             }
 
             &:nth-child(odd) {
@@ -259,10 +262,6 @@
               height: 21px;
               width: 21px;
               min-width: auto;
-
-              &:hover{
-                color: map-get(variables.$color-map, 'primary-hover');
-              }
             }
 
             // hide the label

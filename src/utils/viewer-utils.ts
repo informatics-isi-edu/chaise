@@ -14,6 +14,7 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { fixedEncodeURIComponent, getAbsoluteURL, getQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // used for log purposes
 // initialized by _createProcessedImageReference

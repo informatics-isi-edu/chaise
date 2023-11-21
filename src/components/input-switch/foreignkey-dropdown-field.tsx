@@ -26,7 +26,8 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import {
   callOnChangeAfterSelection,
   clearForeignKeyData,
-  createForeignKeyReference
+  createForeignKeyReference,
+  validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -81,10 +82,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   // because we're now assuming that this is only available in the recordedit form and nowhere else
   const formContainer = document.querySelector('.form-container .recordedit-form');
 
-  const getDisabledTuples = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined;
-  const onChangeCallback = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.onChange : undefined
-
-  const { setValue, getValues, clearErrors, setError } = useFormContext();
+  const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
 
   /**
@@ -156,8 +154,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     return new Promise((resolve, reject) => {
       type PType = { page: any, disabledRows?: any };
       let p;
-      if (getDisabledTuples) {
-        p = getDisabledTuples(page, pageLimit, logStack, logStackPath, requestCauses, reloadStartTime);
+      if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.getDisabledTuples) {
+        p = props.foreignKeyCallbacks.getDisabledTuples(page, pageLimit, logStack, logStackPath, requestCauses, reloadStartTime);
       } else {
         p = new Promise<PType>((innerResolve) => innerResolve({ page }));
       }
@@ -336,23 +334,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     onClearFun(e);
   }
 
-  // TODO should be changed to be watch or something else
-  // the error is not working at all since we're changing the value after this and it will wipe the error
-  const callOnChangeCallback = (data?: any) => {
-    if (!onChangeCallback) return true;
-
-    if (onChangeCallback) {
-      const res = onChangeCallback(props.columnModel.column, data);
-      if (typeof res !== 'string') {
-        return true;
-      }
-
-      clearErrors(props.name);
-      setError(props.name, { type: 'custom', message: res });
-      return false;
-    }
-  };
-
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
     callOnChangeAfterSelection(
@@ -364,7 +345,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       props.foreignKeyData,
       setValue
     );
-    callOnChangeCallback(selectedRow.data);
   }
 
   const loadMoreOptions = () => {
@@ -443,8 +423,13 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     })
   }
 
+  const rules: any = {};
+  if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onChange) {
+    rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
+  }
+
   return (
-    <InputField {...props} onClear={onClear}>
+    <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey fk-dropdown'>
           {(showSpinnerOnLoad || showSpinner) &&

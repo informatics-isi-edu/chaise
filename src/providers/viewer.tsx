@@ -10,7 +10,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import { CustomError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { ViewerAnnotationModal, ViewerZoomFunction } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
@@ -36,11 +36,18 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { OSDViewerDeploymentPath, chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
+
+type DeleteAnnotationConfirmProps = {
+  onConfirm: () => void,
+  onCancel: () => void,
+  message: JSX.Element
+};
+
 export const ViewerContext = createContext<{
   /**
-   * the reference object of the Image table.
+   * if defined, returns the RID value of image record
    */
-  reference: any,
+  imageID?: string,
   /**
    * whether the page is initialized and we can start showing the elements
    */
@@ -57,18 +64,6 @@ export const ViewerContext = createContext<{
    * call this function to toggle the annotation sidebar
    */
   toggleAnnotationSidebar: () => void,
-  /**
-   * whether the channel list is currently displayed or not.
-   */
-  showChannelList: boolean,
-  /**
-   * call this function to toggle the channel list
-   */
-  toggleChannelList: () => void,
-  changeZoom: (zoomFn: ViewerZoomFunction) => void,
-  takeScreenshot: () => void,
-  waitingForScreenshot: boolean,
-
   /**
    * annotations
    */
@@ -94,6 +89,12 @@ export const ViewerContext = createContext<{
    * callback for starting the edit mode for a given annotation
    */
   startAnnotationEdit: (index: number, event: any) => void,
+
+  deleteAnnotationConfirmProps: DeleteAnnotationConfirmProps | null,
+  /**
+   * -1 in the first parameter means the current annotation form
+   */
+  startAnnotationDelete: (index: number, event: any) => void,
   /**
    * if defined, it has the props that should be passed to recordedit to display a form
    */
@@ -107,7 +108,6 @@ export const ViewerContext = createContext<{
    * whether we should display the drawing required error or not
    */
   displayDrawingRequiredError: boolean,
-
   /**
    * toggle drawing mode
    */
@@ -115,8 +115,26 @@ export const ViewerContext = createContext<{
   /**
    * whether we are in drawing mode or not
    */
-  isInDrawingMode: boolean
-
+  isInDrawingMode: boolean,
+  /**
+   * toggle the visibility of an annotation.
+   *
+   */
+  toggleAnnotationDisplay: (index: number, event?: any) => void,
+  /**
+   * the highlighted annotation.
+   * if -1, we should not highlight any annotations.
+   */
+  highlightedAnnotationIndex: number,
+  /**
+   * toggle the highlight status of an annotation.
+   * (we highlight only one annotation at a time)
+   */
+  toggleHighlightAnnotation: (index: number, event?: any, fromOSD?: boolean) => void,
+  /**
+   * log the client action
+   */
+  logViewerClientAction: (action: LogActions, isAnnotation: boolean, item?: ViewerAnnotationModal, extraInfo?: any) => void,
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -147,8 +165,6 @@ export default function ViewerProvider({
 
   const [pageTitle, setPageTitle] = useState('Image');
 
-  const [showChannelList, setShowChannelList] = useState(false);
-
   /**
    * whether we're waiting for annotations or not
    */
@@ -164,13 +180,15 @@ export default function ViewerProvider({
 
   const [showAnnotationFormSpinner, setShowAnnotationFormSpinner] = useState(false);
 
+  const [deleteAnnotationConfirmProps, setDeleteAnnotationConfirmProps] = useState<DeleteAnnotationConfirmProps | null>(null);
+
   const [displayDrawingRequiredError, setDisplayDrawingRequiredError] = useState(false);
 
   const [isInDrawingMode, setIsInDrawingMode, isInDrawingModeRef] = useStateRef(false);
 
-  const [waitingForScreenshot, setWaitingForScreenshot] = useState(false);
+  const [highlightedAnnotationIndex, setHighlightedAnnotationIndex, highlightedAnnotationIndexRef] = useStateRef(-1);
 
-  const imageID = useRef<string>();
+  const [imageID, setImageID, imageIDRef] = useStateRef<string | undefined>();
   /**
    * if default z-index is missing, we're using 0
    */
@@ -198,14 +216,16 @@ export default function ViewerProvider({
     windowRef.addEventListener('message', recieveIframeMessage);
   }, []);
 
-
+  /**
+   * send the initial requests
+   */
   const initializeViewerApp = () => {
     ViewerConfigService.configure();
 
     const imageConfig = ViewerConfigService.imageConfig;
     const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
 
-    let imageTuple: any, imageURI: string;
+    let imageTuple: any, imageURI: string, mainImageID: string | undefined;
     let headTitleDisplayname: any;
 
     // if the main image request didnt return any rows
@@ -235,7 +255,8 @@ export default function ViewerProvider({
       if (imagePage.length === 1) {
         imageTuple = imagePage.tuples[0];
 
-        imageID.current = imageTuple.data.RID;
+        mainImageID = imageTuple.data.RID;
+        setImageID(imageTuple.data.RID);
 
         if (imageConfig.legacy_osd_url_column_name) {
           imageURI = imageTuple.data[imageConfig.legacy_osd_url_column_name];
@@ -355,13 +376,13 @@ export default function ViewerProvider({
         return [];
       }
 
-      return loadImageMetadata(osdViewerParameters, imageID.current!, defaultZIndex.current);
+      return loadImageMetadata(osdViewerParameters, mainImageID!, defaultZIndex.current);
 
     }).then(() => {
       // dont fetch annotation from db if:
       // - we have annotation query params
       // - or main image request didn't return any rows
-      if (hasAnnotationQueryParam || noImageData || !imageID.current) {
+      if (hasAnnotationQueryParam || noImageData || !mainImageID) {
         return {
           annotationTuples: [],
           annotationURLs: [],
@@ -371,7 +392,7 @@ export default function ViewerProvider({
       }
 
       // read the annotation reference
-      return readAllAnnotations(true, imageID.current, defaultZIndex.current);
+      return readAllAnnotations(true, mainImageID, defaultZIndex.current);
     }).then((res: ReadAllAnnotationResultType) => {
       ViewerAnnotationService.setAnnotations(
         res.annotationTuples,
@@ -495,7 +516,7 @@ export default function ViewerProvider({
 
         // read the annotations
         (function (currZIndex) {
-          readAllAnnotations(false, imageID.current!, currZIndex).then((res) => {
+          readAllAnnotations(false, imageIDRef.current!, currZIndex).then((res) => {
             // if main image changed while fetching annotations, ignore it
             if (currZIndex !== defaultZIndex.current) return;
 
@@ -542,7 +563,17 @@ export default function ViewerProvider({
         updateAnnotaionList(data);
         break;
       case 'onClickChangeSelectingAnnotation':
-        // TODO
+        const index = annotationModelsRef.current.findIndex((item) => item.svgID === data.svgID && item.groupID === data.groupID);
+
+        // if user highlights while drawing
+        if (index === -1) return;
+
+        // make sure the sidebar is displayed
+        setHideAnnotationSidebar(false);
+
+        // TOOD
+        // scrollIntoView(item.svgID + item.groupID);
+        toggleHighlightAnnotation(index, undefined, true);
         break;
       case 'saveGroupSVGContent':
         if (!currentAnnotationFormState.current) return;
@@ -576,16 +607,8 @@ export default function ViewerProvider({
       case 'openDrawingHelpPage':
         windowRef.open(getHelpPageURL(HELP_PAGES.VIEWER_ANNOTATION), '_blank');
         break
-      case 'hideChannelList':
-        // osd-viewer sends this so we can update the button state
-        setShowChannelList(false);
-        break;
-      case 'showChannelList':
-        // osd-viewer sends this so we can update the button state
-        setShowChannelList(true);
-        break;
       case 'updateChannelConfig':
-        updateChannelConfig(data, imageID.current!).then((res) => {
+        updateChannelConfig(data, imageIDRef.current!).then((res) => {
           // the alerts are disaplyed by the updateChannelConfig function
           // let osd viewer know that the process is done
           iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: res } }, origin);
@@ -596,13 +619,6 @@ export default function ViewerProvider({
           // show the error
           dispatchError({ error })
         });
-        break;
-      case 'downloadViewDone':
-        setWaitingForScreenshot(false);
-        break;
-      case 'downloadViewError':
-        setWaitingForScreenshot(false);
-        addAlert(errorMessages.viewerScreenshotFailed, ChaiseAlertType.WARNING);
         break;
       case 'showAlert':
         addAlert(data.message, data.type);
@@ -688,6 +704,11 @@ export default function ViewerProvider({
     setAnnotationModels((prev) => [...prev, ...newItems]);
   };
 
+  /**
+   * when the annotated term changes,
+   *  - call osd-viewer to update the annotated term attached to annotations.
+   *  - make sure it's not the same as one of the existing annotations
+   */
   const onAnnotatedTermInputChange = (column: any, data: any) => {
     const annotConfig = ViewerConfigService.annotationConfig;
 
@@ -709,7 +730,7 @@ export default function ViewerProvider({
     // manually make sure the ID doesn't exist in the list,
     // because some of the annotations might not be stored in the database
     if (annotationModelsRef.current.find((row) => { return row.id === data[idColName] })) {
-      return 'An annotation already exists for this Anatomy, please select other terms.';
+      return `An annotation already exists for this ${ViewerConfigService.annotationConfig.annotated_term_displayname}, please select other terms.`;
     }
 
     // Update the new Anatomy name and ID at openseadragon viewer
@@ -751,6 +772,7 @@ export default function ViewerProvider({
       const annotConfig = ViewerConfigService.annotationConfig;
       const tableName = annotConfig.annotated_term_table_name;
       const schemaName = annotConfig.annotated_term_table_schema_name;
+      const idColName = annotConfig.annotated_term_id_column_name;
 
       // we only want to do this for the anatomy popup
       if (!page || page.reference.table.name !== tableName || page.reference.table.schema.name !== schemaName) {
@@ -763,7 +785,7 @@ export default function ViewerProvider({
         and: [
           {
             source: [{ 'inbound': annotConfig.annotated_term_foreign_key_constraint }, annotConfig.reference_image_column_name],
-            choices: [imageID.current]
+            choices: [imageIDRef.current]
           },
         ]
       };
@@ -798,11 +820,9 @@ export default function ViewerProvider({
 
         disabeldPage.tuples.forEach((disabledTuple: any) => {
           // currently selected value should not be disabled
-          // TODO Aref
-          // if (vm.editingAnatomy.id === tuple.data[idColName]) {
-          //     return;
-          // }
-
+          if (currentAnnotationFormState.current?.model.id === disabledTuple.data[idColName]) {
+            return;
+          }
           const index = page.tuples.findIndex((tuple: any) => {
             return tuple.uniqueId === disabledTuple.uniqueId;
           });
@@ -817,172 +837,12 @@ export default function ViewerProvider({
   };
 
   /**
-   * this callback will be fired when users try to navigate away from the page
-   * NOTE custom message is not supported by modern browsers anymore, but
-   *      for consistency I've added it.
-   */
-  const annotationFormLeaveAlertEvent = (e: any) => {
-    // make sure annotation panel is open
-    if (currentAnnotationFormState.current !== null) {
-      e.returnValue = 'Any unsaved change will be discarded. Do you want to continue?';
-    }
-  }
-
-  const changeAnnotationFormState = (item?: ViewerAnnotationModal, index?: number, event?: any) => {
-    const annotConfig = ViewerConfigService.annotationConfig;
-
-    // if item is null, we just wanted to switch away from edit/create mode
-    if (!item) {
-      // remove the form props so the form disappears
-      setAnnotationFormProps(null);
-
-      // clear the state
-      currentAnnotationFormState.current = null;
-
-      // we don't need the warning event listener anymore
-      windowRef.removeEventListener('beforeunload', annotationFormLeaveAlertEvent);
-      return;
-    }
-
-    /**
-     *
-     * this is supporting a case when users attempt to edit an annotation
-     * that is not saved in database. which means the annotation is coming
-     * from file. but we don't even allow users to edit an annotation that
-     * is coming from file (and not db).
-     * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
-     */
-    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
-
-    // set the state
-    currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
-
-    // make sure users are warned that data might be lost
-    windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
-
-    // TODO Aref unhighlight the annotations
-
-
-    // why??
-    if (event) {
-      event.stopPropagation();
-    }
-
-    let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
-    if (isObjectAndNotNull(item) && !item.tuple) {
-      logAppMode = LogAppModes.CREATE_PRESELECT;
-      preselectedAnatomy = {};
-      preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
-    }
-
-    const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
-
-    // switch to drawing mode
-    toggleDrawingMode(undefined, true);
-
-    // set the form props so it shows up
-    setAnnotationFormProps({
-      appMode: isEditMode ? appModes.EDIT : appModes.CREATE,
-      config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
-      reference: usedReference,
-      logInfo: {
-        logAppMode: logAppMode,
-        logStack: ViewerAnnotationService.getAnnotationLogStack(isEditMode ? item : undefined),
-        logStackPath: ViewerAnnotationService.getAnnotationLogStackPath(isEditMode ? item : undefined)
-      },
-      queryParams: {},
-      hiddenColumns: [
-        annotConfig.overlay_column_name,
-        annotConfig.reference_image_visible_column_name,
-        annotConfig.z_index_column_name,
-        annotConfig.channels_column_name
-      ],
-      foreignKeyCallbacks: {
-        getDisabledTuples: getAnnotatedTermDisabledTuples,
-        onChange: onAnnotatedTermInputChange
-      },
-      prefillRowData: preselectedAnatomy ? [preselectedAnatomy] : undefined,
-      initialTuples: isEditMode ? [item.tuple] : undefined,
-      onSubmitSuccess: onSubmitAnnotationSuccess,
-      onSubmitError: () => {
-        setShowAnnotationFormSpinner(false);
-        return true;
-      },
-      modifySubmissionRows: (submissionRows: any[]) => {
-        const formState = currentAnnotationFormState.current;
-
-        // these are sanity checks to get rid of ts errors and won't happen
-        if (!Array.isArray(submissionRows) || submissionRows.length === 0 || !formState || !formState.svgAnnotationData) return;
-
-        // this is called on the success, so we can just show the
-        setShowAnnotationFormSpinner(true);
-
-        // add the image value
-        submissionRows[0][annotConfig.reference_image_column_name] = imageID.current;
-
-        // add the default z index value
-        if (defaultZIndex.current !== null) {
-          submissionRows[0][annotConfig.z_index_column_name] = defaultZIndex.current;
-        }
-
-        // add the file
-        // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
-        let fileName = `${imageID.current}_${submissionRows[0][annotConfig.annotated_term_column_name]}`;
-        if (defaultZIndex.current != null) {
-          fileName += `_z${defaultZIndex.current}.svg`;
-        }
-        const file = new File([formState.svgAnnotationData[0].svg], fileName, { type: 'image/svg+xml' });
-        submissionRows[0][annotConfig.overlay_column_name] = {
-          uri: fileName,
-          file: file,
-          fileName: fileName,
-          fileSize: file.size,
-          hatracObj: new ConfigService.ERMrest.Upload(file, {
-            column: usedReference.columns.find((column: any) => { return column.name === annotConfig.overlay_column_name }),
-            reference: usedReference
-          })
-        };
-
-      }
-    });
-
-  }
-
-
-  // ---------------------- UI callbacks ------------------- //
-  const toggleAnnotationSidebar = () => {
-    setHideAnnotationSidebar((prev: boolean) => {
-      const action = prev ? LogActions.VIEWER_ANNOT_PANEL_SHOW : LogActions.VIEWER_ANNOT_PANEL_HIDE;
-      LogService.logClientAction({
-        action: LogService.getActionString(action, null, ''),
-        stack: LogService.getStackObject()
-      }, reference.defaultLogInfo);
-      return !prev;
-    })
-  };
-
-  const toggleChannelList = () => {
-    setShowChannelList((prev: boolean) => {
-      const action = prev ? LogActions.VIEWER_CHANNEL_HIDE : LogActions.VIEWER_CHANNEL_SHOW;
-
-      getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'toggleChannelList' }, origin);
-
-      // log the click
-      // app mode will change by annotation controller, this one should be independent of that
-      LogService.logClientAction({
-        action: LogService.getActionString(action, null, ''),
-        stack: LogService.getStackObject()
-      }, reference.defaultLogInfo);
-
-      return !prev;
-    });
-  };
-
+ * called when the anntoation form successfully was submitted and saved in db.
+ */
   const onSubmitAnnotationSuccess = (response: any) => {
     const formState = currentAnnotationFormState.current;
     if (!formState) return;
 
-    // TODO
     // since we're just ceate/editting one we can assume it's just succesful
     let resultTuple = response.successful.tuples[0];
 
@@ -1052,7 +912,210 @@ export default function ViewerProvider({
       closeAnnotationForm();
       addAlert('Your data has been saved.', ChaiseAlertType.SUCCESS);
     });
+  };
+
+  /**
+   * this callback will be fired when users try to navigate away from the page
+   * NOTE custom message is not supported by modern browsers anymore, but
+   *      for consistency I've added it.
+   */
+  const annotationFormLeaveAlertEvent = (e: any) => {
+    // make sure annotation panel is open
+    if (currentAnnotationFormState.current !== null) {
+      e.returnValue = 'Any unsaved change will be discarded. Do you want to continue?';
+    }
   }
+
+  /**
+   * can be used to switch between create, edit, and view mode.
+   */
+  const changeAnnotationFormState = (item?: ViewerAnnotationModal, index?: number, event?: any) => {
+    const annotConfig = ViewerConfigService.annotationConfig;
+
+    // if item is null, we just wanted to switch away from edit/create mode
+    if (!item) {
+      // remove the form props so the form disappears
+      setAnnotationFormProps(null);
+
+      // clear the state
+      currentAnnotationFormState.current = null;
+
+      // we don't need the warning event listener anymore
+      windowRef.removeEventListener('beforeunload', annotationFormLeaveAlertEvent);
+      return;
+    }
+
+    // make sure none of the annotations are highlighted
+    const hIndex = highlightedAnnotationIndexRef.current;
+    if (hIndex !== -1) {
+      const hAnnot = annotationModelsRef.current[hIndex];
+      if (hAnnot) {
+        ViewerAnnotationService.highlightAnnotation({
+          svgID: hAnnot.svgID,
+          groupID: hAnnot.groupID,
+        });
+      }
+      setHighlightedAnnotationIndex(-1);
+    }
+
+    /**
+     *
+     * this is supporting a case when users attempt to edit an annotation
+     * that is not saved in database. which means the annotation is coming
+     * from file. but we don't even allow users to edit an annotation that
+     * is coming from file (and not db).
+     * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
+     */
+    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
+
+    // set the state
+    currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
+
+    // make sure users are warned that data might be lost
+    windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
+
+
+    // avoid calling the parent (highlight) action
+    if (event) {
+      event.stopPropagation();
+    }
+
+    let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
+    if (isObjectAndNotNull(item) && !item.tuple) {
+      logAppMode = LogAppModes.CREATE_PRESELECT;
+      preselectedAnatomy = {};
+      preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
+    }
+
+    const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
+
+    // switch to drawing mode
+    toggleDrawingMode(undefined, true);
+
+    // set the form props so it shows up
+    setAnnotationFormProps({
+      appMode: isEditMode ? appModes.EDIT : appModes.CREATE,
+      config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
+      reference: usedReference,
+      logInfo: {
+        logAppMode: logAppMode,
+        logStack: ViewerAnnotationService.getAnnotationLogStack(isEditMode ? item : undefined),
+        logStackPath: ViewerAnnotationService.getAnnotationLogStackPath(isEditMode ? item : undefined)
+      },
+      queryParams: {},
+      hiddenColumns: [
+        annotConfig.overlay_column_name,
+        annotConfig.reference_image_visible_column_name,
+        annotConfig.z_index_column_name,
+        annotConfig.channels_column_name
+      ],
+      foreignKeyCallbacks: {
+        getDisabledTuples: getAnnotatedTermDisabledTuples,
+        onChange: onAnnotatedTermInputChange
+      },
+      prefillRowData: preselectedAnatomy ? [preselectedAnatomy] : undefined,
+      initialTuples: isEditMode ? [item.tuple] : undefined,
+      onSubmitSuccess: onSubmitAnnotationSuccess,
+      onSubmitError: () => {
+        setShowAnnotationFormSpinner(false);
+        return true;
+      },
+      modifySubmissionRows: (submissionRows: any[]) => {
+        const formState = currentAnnotationFormState.current;
+
+        // these are sanity checks to get rid of ts errors and won't happen
+        if (!Array.isArray(submissionRows) || submissionRows.length === 0 || !formState || !formState.svgAnnotationData) return;
+
+        // this is called on the success, so we can just show the
+        setShowAnnotationFormSpinner(true);
+
+        // add the image value
+        submissionRows[0][annotConfig.reference_image_column_name] = imageIDRef.current;
+
+        // add the default z index value
+        if (defaultZIndex.current !== null) {
+          submissionRows[0][annotConfig.z_index_column_name] = defaultZIndex.current;
+        }
+
+        // add the file
+        // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
+        let fileName = `${imageIDRef.current}_${submissionRows[0][annotConfig.annotated_term_column_name]}`;
+        if (defaultZIndex.current != null) {
+          fileName += `_z${defaultZIndex.current}.svg`;
+        }
+        const file = new File([formState.svgAnnotationData[0].svg], fileName, { type: 'image/svg+xml' });
+        submissionRows[0][annotConfig.overlay_column_name] = {
+          uri: fileName,
+          file: file,
+          fileName: fileName,
+          fileSize: file.size,
+          hatracObj: new ConfigService.ERMrest.Upload(file, {
+            column: usedReference.columns.find((column: any) => { return column.name === annotConfig.overlay_column_name }),
+            reference: usedReference
+          })
+        };
+
+      }
+    });
+
+  };
+
+  /**
+   * sends the delete request
+   */
+  const deleteAnnotation = (index: number) => {
+    const annot = annotationModelsRef.current[index];
+    if (!annot) return;
+
+    setShowAnnotationFormSpinner(true);
+    const logObj = {
+      action: ViewerAnnotationService.getAnnotationLogAction(LogActions.DELETE, annot),
+      stack: ViewerAnnotationService.getAnnotationLogStack(annot)
+    };
+
+    annot.tuple.reference.delete(null, logObj).then(() => {
+      // remove svg object from openseadragon
+      if (annot.svgID) {
+        ViewerAnnotationService.removeSVG({ svgID: annot.svgID });
+      }
+
+      // remove from the list
+      setAnnotationModels((prev) => prev.filter((_, i) => i !== index));
+
+      // close the current panel if it's open
+      closeAnnotationForm();
+
+    }).catch((error: any) => {
+      dispatchError({ error, isDismissible: true });
+    }).finally(() => setShowAnnotationFormSpinner(false))
+  }
+
+  /**
+   * can be used for logging client actions
+   */
+  const logViewerClientAction = (action: LogActions, isAnnotation: boolean, item?: ViewerAnnotationModal, extraInfo?: any) => {
+    if (isAnnotation) {
+      ViewerAnnotationService.logAnnotationClientAction(action, item, extraInfo);
+    } else {
+      const stack = isObjectAndNotNull(extraInfo) ? LogService.addExtraInfoToStack(null, extraInfo) : LogService.getStackObject();
+      LogService.logClientAction({
+        action: LogService.getActionString(action, null, ''),
+        stack
+      }, reference.defaultLogInfo);
+    }
+  };
+
+  // ---------------------- UI callbacks ------------------- //
+  const toggleAnnotationSidebar = () => {
+    setHideAnnotationSidebar((prev: boolean) => {
+      const action = prev ? LogActions.VIEWER_ANNOT_PANEL_SHOW : LogActions.VIEWER_ANNOT_PANEL_HIDE;
+      LogService.logClientAction({
+        action: LogService.getActionString(action, null, ''),
+        stack: LogService.getStackObject()
+      }, reference.defaultLogInfo);
+      return !prev;
+    })
+  };
 
   /**
    * callback when user clicked on the edit button for an annotation
@@ -1064,7 +1127,7 @@ export default function ViewerProvider({
     // if the annotation is coming from file, we're going to technically create it
     const action = annot.tuple ? LogActions.EDIT_INTEND : LogActions.ADD_INTEND;
     // log the client action
-    ViewerAnnotationService.logAnnotationClientAction(action, annot);
+    logViewerClientAction(action, true, annot);
 
     // open the form
     changeAnnotationFormState(annotationModelsRef.current[index], index, event);
@@ -1087,7 +1150,7 @@ export default function ViewerProvider({
     });
 
     // log the client action
-    ViewerAnnotationService.logAnnotationClientAction(LogActions.ADD_INTEND);
+    logViewerClientAction(LogActions.ADD_INTEND, true);
 
     // all of these will be populated in the end
     const newAnnot: ViewerAnnotationModal = {
@@ -1116,11 +1179,7 @@ export default function ViewerProvider({
 
     // if in drawing mode, switch
     if (isInDrawingModeRef.current) {
-      ViewerAnnotationService.drawAnnotation({
-        svgID: formState.model.svgID,
-        groupID: formState.model.groupID,
-        mode: 'OFF'
-      });
+      toggleDrawingMode();
     }
 
     /**
@@ -1177,79 +1236,155 @@ export default function ViewerProvider({
     })
   };
 
-  const toggleDrawingMode = (event?: any, changeColor?: boolean) => {
-    setIsInDrawingMode((prev) => {
-      const res = !prev;
-
-      // remove the error since they switched modes
-      setDisplayDrawingRequiredError(false);
-
-      ViewerAnnotationService.drawAnnotation({
-        svgID: currentAnnotationFormState.current?.model?.svgID,
-        groupID: currentAnnotationFormState.current?.model?.groupID,
-        mode: res ? 'ON' : 'OFF',
-        setStroke: (changeColor === true) // change the color that is used in toolbar
-      });
-
-      if (event) {
-        // log the client action
-        ViewerAnnotationService.logAnnotationClientAction(
-          res ? LogActions.VIEWER_ANNOT_DRAW_MODE_SHOW : LogActions.VIEWER_ANNOT_DRAW_MODE_HIDE,
-          currentAnnotationFormState.current?.model
-        );
-
-        event.stopPropagation();
+  /**
+   * will be called when users click on delete button for an annotation.
+   * if index=-1, then they clicked the delete on the anntoation form.
+   */
+  const startAnnotationDelete = (index: number, event: any) => {
+    let annot: ViewerAnnotationModal;
+    if (index >= 0) {
+      annot = annotationModelsRef.current[index];
+    } else {
+      const formState = currentAnnotationFormState.current;
+      if (!formState || typeof formState.index !== 'number') {
+        // if this happens, it's a programmatic error
+        // just added for sanity check and to remove the typescript errors
+        throw new Error('startAnnotationDelete called without proper index when there are no form present.');
       }
-
-      return res;
-    })
-  }
-
-  const changeZoom = (zoomFn: ViewerZoomFunction) => {
-    getOSDViewerIframe().contentWindow!.postMessage({ messageType: zoomFn }, origin);
-
-    let action;
-    switch (zoomFn) {
-      case ViewerZoomFunction.ZOOM_IN:
-        action = LogActions.VIEWER_ZOOM_IN;
-        break;
-      case ViewerZoomFunction.ZOOM_OUT:
-        action = LogActions.VIEWER_ZOOM_OUT;
-        break;
-      default:
-        action = LogActions.VIEWER_ZOOM_RESET;
-        break;
+      annot = formState.model;
+      index = formState.index;
     }
 
-    // app mode will change by annotation controller, this one should be independent of that
-    LogService.logClientAction({
-      action: LogService.getActionString(action, null, ''),
-      stack: LogService.getStackObject()
-    }, reference.defaultLogInfo);
-  }
+    if (event) {
+      event.stopPropagation();
+    }
 
-  const takeScreenshot = () => {
-    setWaitingForScreenshot(true);
+    validateSessionBeforeMutation(() => {
+      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+        logViewerClientAction(LogActions.DELETE_INTEND, true, annot);
 
-    const filename = imageID.current || 'image';
-    getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'downloadView', content: filename }, origin);
+        setDeleteAnnotationConfirmProps({
+          message: (
+            <>
+              Are you sure you want to delete <code>{annot.name + (annot.id ? ` (${annot.id})` : '')}</code> annotation?
+            </>
+          ),
+          onConfirm: () => {
+            setDeleteAnnotationConfirmProps(null);
+            deleteAnnotation(index);
+          },
+          onCancel: () => {
+            setDeleteAnnotationConfirmProps(null);
+            logViewerClientAction(LogActions.DELETE_CANCEL, true, annot);
+          }
+        })
+      } else {
+        deleteAnnotation(index);
+      }
+    });
+  };
 
-    // app mode will change by annotation controller, this one should be independent of that
-    LogService.logClientAction({
-      action: LogService.getActionString(LogActions.VIEWER_SCREENSHOT, null, ''),
-      stack: LogService.getStackObject()
-    }, reference.defaultLogInfo);
+  /**
+   * toggle the drawing mode
+   */
+  const toggleDrawingMode = (event?: any, changeColor?: boolean) => {
+    const res = !isInDrawingModeRef.current;
+
+    // remove the error since they switched modes
+    setDisplayDrawingRequiredError(false);
+
+    ViewerAnnotationService.drawAnnotation({
+      svgID: currentAnnotationFormState.current?.model?.svgID,
+      groupID: currentAnnotationFormState.current?.model?.groupID,
+      mode: res ? 'ON' : 'OFF',
+      setStroke: (changeColor === true) // change the color that is used in toolbar
+    });
+
+    if (event) {
+      // log the client action
+      logViewerClientAction(
+        res ? LogActions.VIEWER_ANNOT_DRAW_MODE_SHOW : LogActions.VIEWER_ANNOT_DRAW_MODE_HIDE,
+        true,
+        currentAnnotationFormState.current?.model
+      );
+
+      event.stopPropagation();
+    }
+
+    setIsInDrawingMode(prev => !prev);
+  };
+
+  /**
+   * toggle display of annotation
+   */
+  const toggleAnnotationDisplay = (index: number, event?: any) => {
+    setAnnotationModels((prev) => {
+      return prev.map((annot, i) => {
+        if (i !== index) return annot;
+        const isDisplayed = !annot.isDisplayed;
+
+        // notify openseadragon to update the display
+        ViewerAnnotationService.changeAnnotationVisibility({
+          svgID: annot.svgID,
+          groupID: annot.groupID,
+          isDisplay: isDisplayed
+        });
+
+        if (event) {
+          // log the client action
+          const action = isDisplayed ? LogActions.VIEWER_ANNOT_SHOW : LogActions.VIEWER_ANNOT_HIDE;
+          logViewerClientAction(action, true, annot);
+
+          event.stopPropagation();
+        }
+
+        return { ...annot, isDisplayed };
+      });
+    });
+  };
+
+  /**
+   * change the highlighted annotation
+   */
+  const toggleHighlightAnnotation = (index: number, event?: any, fromOSD?: boolean) => {
+    const isHighlighted = highlightedAnnotationIndexRef.current !== index;
+    const annot = annotationModelsRef.current[index];
+
+    if (isHighlighted && !annot.isDisplayed) {
+      toggleAnnotationDisplay(index);
+    }
+
+    // Notify openseadragon to highlight the annotations
+    if (!fromOSD) {
+      ViewerAnnotationService.highlightAnnotation({
+        svgID: annot.svgID,
+        groupID: annot.groupID,
+      });
+    }
+
+    if (event) {
+      // log the client action
+      if (isHighlighted) {
+        logViewerClientAction(LogActions.VIEWER_ANNOT_HIGHLIGHT, true, annot);
+      }
+
+      event.stopPropagation();
+    }
+
+    /**
+     * the updated function will be called twice in dev mode, that's why
+     * the log and calling osd-viewer is done outside of the updater
+     */
+    setHighlightedAnnotationIndex((prev) => (prev !== index) ? index : -1);
   }
 
   const providerValue = useMemo(() => {
     return {
-      reference,
+      imageID,
       initialized,
       pageTitle,
       hideAnnotationSidebar,
       toggleAnnotationSidebar,
-      showChannelList,
-      toggleChannelList,
       annotationModels,
       loadingAnnotations,
       canCreateAnnotation,
@@ -1259,26 +1394,30 @@ export default function ViewerProvider({
       closeAnnotationForm,
       startAnnotationCreate,
       startAnnotationEdit,
+      startAnnotationDelete,
+      deleteAnnotationConfirmProps,
       displayDrawingRequiredError,
       toggleDrawingMode,
       isInDrawingMode,
-      changeZoom,
-      takeScreenshot,
-      waitingForScreenshot,
+      toggleAnnotationDisplay,
+      highlightedAnnotationIndex,
+      toggleHighlightAnnotation,
+      logViewerClientAction
     }
   }, [
+    imageID,
     initialized,
     pageTitle,
     hideAnnotationSidebar,
-    showChannelList,
     annotationModels,
     loadingAnnotations,
     canCreateAnnotation,
     annotationFormProps,
     showAnnotationFormSpinner,
+    deleteAnnotationConfirmProps,
     displayDrawingRequiredError,
     isInDrawingMode,
-    waitingForScreenshot
+    highlightedAnnotationIndex,
   ]);
 
   return (

@@ -91,8 +91,9 @@ export type RecordeditModalOptions = {
 export type RecordeditForeignkeyCallbacks = {
   getDisabledTuples?: RecordsetProviderGetDisabledTuples,
   /**
-   * if defined, we will call this. return `true` if we should
-   * continue with the change. otherwise return a string that will be showed as an error.
+   * if defined, will be used for validating the foreign key value.
+   *
+   * return `true` if the value is valid. otherwise return a string that will be showed as an error.
    */
   onChange?: (column: any, rowData: any) => true | string,
 }

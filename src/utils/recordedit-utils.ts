@@ -9,6 +9,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   appModes, PrefillObject, RecordeditColumnModel,
+  RecordeditForeignkeyCallbacks,
   SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit'
 import { RecordsetProviderOnSelectedRowsChanged } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -314,7 +315,7 @@ export function populateCreateInitialValues(
 
             // if all the columns of the foreignkey are initialized, use that instead of default
             const allInitialized = isNonEmptyObject(initialValues) && column.foreignKey.colset.columns.every((col: any) => {
-                return initialValues[col.name] !== undefined && initialValues[col.name] !== null;
+              return initialValues[col.name] !== undefined && initialValues[col.name] !== null;
             });
 
             if (allPrefilled || allInitialized) {
@@ -658,10 +659,10 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
  * the following will extract the foreignKeyData of the row that we need.
  */
 export function populateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
-  const linkedData : any = {};
+  const linkedData: any = {};
   if (isObjectAndNotNull(foreignKeyData)) {
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const k =  `${formNumber}-${col.name}`;
+      const k = `${formNumber}-${col.name}`;
       if (k in foreignKeyData) {
         linkedData[col.name] = foreignKeyData[k];
       }
@@ -733,15 +734,15 @@ export function createForeignKeyReference(
   getValuesFunction: () => any
 ): any {
   const andFilters: any = [];
-    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-    // this is to ensure the selected row has a value for the foreignkey
-    column.foreignKey.key.colset.columns.forEach((col: any) => {
-      andFilters.push({ source: col.name, hidden: true, not_null: true });
-    });
+  // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+  // this is to ensure the selected row has a value for the foreignkey
+  column.foreignKey.key.colset.columns.forEach((col: any) => {
+    andFilters.push({ source: col.name, hidden: true, not_null: true });
+  });
 
-    const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
-    const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
-    return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
+  const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
+  const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
+  return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
 }
 
 
@@ -795,4 +796,40 @@ export function clearForeignKeyData(
   }
 
   // the input-field will take care of clearing the displayed rowname.
+}
+
+/**
+ * returns a validator function that can be used for foreignkeys.
+ * (handles calling the onChange callback)
+ */
+export function validateForeignkeyValue(
+  /**
+   * the input name
+   */
+  name: string,
+  /**
+   * the ERMrest column object
+   */
+  column: any,
+  /**
+   * the foreignKeyData ref object
+   */
+  foreignKeyData: any,
+  /**
+   * the callbacks defined on the foreignkey input
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
+): Function {
+  return function () {
+    if (!foreignKeyCallbacks || !foreignKeyCallbacks.onChange) {
+      return true;
+    }
+
+    let data: any = {};
+    if (foreignKeyData && foreignKeyData.current) {
+      data = { ...foreignKeyData.current[name] }
+    }
+
+    return foreignKeyCallbacks.onChange(column, data);
+  }
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 // hooks
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+import useViewer from '@isrd-isi-edu/chaise/src/hooks/viewer';
 
 // services
 import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-annotation';
@@ -16,6 +17,8 @@ import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
  * this way it won't trigger the rerender for the rest of the page.
  */
 const ViewerAnnotationStrokeSlider = (): JSX.Element => {
+
+  const { logViewerClientAction } = useViewer();
 
   const [strokeValue, setStrokeValue, strokeValueRef] = useStateRef(1);
 
@@ -54,8 +57,9 @@ const ViewerAnnotationStrokeSlider = (): JSX.Element => {
     // set a timer to log the action
     strokeChangePromise.current = setTimeout(() => {
       if (oldStrokeValue.current !== strokeValueRef.current) {
-        ViewerAnnotationService.logAnnotationClientAction(
+        logViewerClientAction(
           LogActions.VIEWER_ANNOT_LINE_THICKNESS,
+          true,
           undefined,
           {
             old_thickness: oldStrokeValue.current,

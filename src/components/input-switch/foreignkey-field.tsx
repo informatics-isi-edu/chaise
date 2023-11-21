@@ -27,7 +27,8 @@ import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/cons
 import {
   callOnChangeAfterSelection,
   clearForeignKeyData,
-  createForeignKeyReference
+  createForeignKeyReference,
+  validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -80,10 +81,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
 
-  const getDisabledTuples = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined;
-  const onChangeCallback = props.foreignKeyCallbacks ? props.foreignKeyCallbacks.onChange : undefined
-
-  const { setValue, getValues, setError, clearErrors } = useFormContext();
+  const { setValue, getValues } = useFormContext();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
@@ -93,24 +91,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    */
   const showSpinner = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
-
-
-  // TODO should be changed to be watch or something else
-  // the error is not working at all since we're changing the value after this and it will wipe the error
-  const callOnChangeCallback = (data?: any) => {
-    if (!onChangeCallback) return true;
-
-    if (onChangeCallback) {
-      const res = onChangeCallback(props.columnModel.column, data);
-      if (typeof res !== 'string') {
-        return true;
-      }
-
-      clearErrors(props.name);
-      setError(props.name, { type: 'custom', message: res });
-      return false;
-    }
-  };
 
   /**
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
@@ -158,7 +138,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
         logStack: LogService.addExtraInfoToStack(LogService.getStackObject(props.columnModel.logStackNode, props.parentLogStack), { picker: 1 }),
         logStackPath: LogService.getStackPath(props.parentLogStackPath ? props.parentLogStackPath : null, LogStackPaths.FOREIGN_KEY_POPUP)
       },
-      getDisabledTuples
+      getDisabledTuples: props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined
     });
   };
 
@@ -182,13 +162,16 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
         props.foreignKeyData,
         setValue
       );
-
-      callOnChangeCallback(selectedRow.data);
     }
   }
 
+  const rules: any = {};
+  if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onChange) {
+    rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
+  }
+
   return (
-    <InputField {...props} onClear={onClear}>
+    <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey'>
           {showSpinner &&

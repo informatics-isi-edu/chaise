@@ -20,7 +20,10 @@ import ViewerConfigService from '@isrd-isi-edu/chaise/src/services/viewer-config
 import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ViewerAnnotationList = (): JSX.Element => {
-  const { annotationModels, loadingAnnotations, canCreateAnnotation, startAnnotationEdit, startAnnotationCreate } = useViewer();
+  const {
+    annotationModels, loadingAnnotations, toggleAnnotationDisplay, toggleHighlightAnnotation, highlightedAnnotationIndex,
+    canCreateAnnotation, startAnnotationEdit, startAnnotationCreate, logViewerClientAction, startAnnotationDelete
+  } = useViewer();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -41,14 +44,7 @@ const ViewerAnnotationList = (): JSX.Element => {
 
       // create a timeout to log the search
       searchTimeout.current = setTimeout(() => {
-        ViewerAnnotationService.logAnnotationClientAction(
-          LogActions.SEARCH_BOX_AUTO,
-          undefined,
-          {
-            search_str: term
-          }
-        );
-
+        logViewerClientAction(LogActions.SEARCH_BOX_AUTO, true, undefined, { search_str: term });
         searchTimeout.current = null;
       }, VIEWER_CONSTANT.ANNOTATIONS.SEARCH_LOG_TIMEOUT);
     }
@@ -56,24 +52,22 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   const clearSearchTerm = () => {
     setSearchTerm('');
-    ViewerAnnotationService.logAnnotationClientAction(LogActions.SEARCH_BOX_CLEAR);
+    logViewerClientAction(LogActions.SEARCH_BOX_CLEAR, true);
   }
 
   // ----------------------- render functions --------------------- //
 
   const renderAnnotation = (annot: ViewerAnnotationModal, index: number) => {
-    // TODO proper ui elements and styles
-    // TODO Aref highlight
-    // TODO Aref display/hide
-    // TODO Aref edit
-    // TODO share
     const isDisplayed = annot.isDisplayed;
 
     return (
-      <div key={annot.name} className='annotation-row'>
+      <div
+        key={annot.name} className={`annotation-row${highlightedAnnotationIndex === index ? ' highlighted' : ''}`}
+        onClick={(e) => toggleHighlightAnnotation(index, e)}
+      >
         <div className='annotation-row-btns'>
           <ChaiseTooltip placement='bottom' tooltip={isDisplayed ? 'Hide annitation' : 'View annotation'}>
-            <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn'>
+            <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => toggleAnnotationDisplay(index, e)}>
               <i className={`fa-solid ${isDisplayed ? 'fa-eye' : 'fa-eye-slash'}`}></i>
             </button>
           </ChaiseTooltip>
@@ -83,7 +77,7 @@ const ViewerAnnotationList = (): JSX.Element => {
             </button>
           </ChaiseTooltip>}
           {annot.canDelete && annot.isStoredInDB && <ChaiseTooltip placement='bottom' tooltip='Delete annotation'>
-            <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn'>
+            <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => startAnnotationDelete(index, e)}>
               <i className='fa-regular fa-trash-alt'></i>
             </button>
           </ChaiseTooltip>}
@@ -107,7 +101,7 @@ const ViewerAnnotationList = (): JSX.Element => {
                 }
               ]}
               btnClass='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn share-btn'
-              btnTooltip={{ready: 'Share annotation', pending: 'Opening the share links...' }}
+              btnTooltip={{ ready: 'Share annotation', pending: 'Opening the share links...' }}
             />
           }
         </div>

@@ -44,7 +44,6 @@ const ShareCiteButton = ({
   btnClass,
   btnTooltip
 }: ShareCiteButtonProps): JSX.Element => {
-  // TODO viewer app: should be changed so it's also useful in viewer app
   const [waitingForModal, setWaitingForModal] = useState(false);
   const [shareModalProps, setShareModalProps] = useState<ShareCiteModalProps | null>(null);
 

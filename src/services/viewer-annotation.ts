@@ -121,22 +121,6 @@ export default class ViewerAnnotationService {
     return obj;
   }
 
-  static removeEntry(item: ViewerAnnotationModal): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!item.tuple || !item.tuple.reference) {
-        reject('given item didn\'t have proper tuple');
-        return;
-      }
-
-      const logObj = {
-        action: ViewerAnnotationService.getAnnotationLogAction(LogActions.DELETE, item),
-        stack: ViewerAnnotationService.getAnnotationLogStack(item)
-      };
-      item.tuple.reference.delete(null, logObj).then(() => resolve()).catch((err: any) => reject(err));
-    });
-  }
-
-
   static changeSVGId(data: any) {
     ViewerAnnotationService._sendMessageToOSDViewer('changeSVGId', data);
   }

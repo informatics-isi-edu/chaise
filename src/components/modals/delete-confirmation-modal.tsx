@@ -20,7 +20,7 @@ type DeleteConfirmationModalProps = {
   /**
    * button label prop
    */
-  buttonLabel: string;
+  buttonLabel?: string;
   /**
    * The modal title
    */
@@ -33,6 +33,7 @@ type DeleteConfirmationModalProps = {
 const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLabel, title }: DeleteConfirmationModalProps) => {
   const renderedMessage = message ? message : <>Are you sure you want to delete this record?</>;
 
+  const renderedBtnLabel = buttonLabel ? buttonLabel : 'Delete';
 
   return (
     <ConfirmationModal
@@ -42,7 +43,7 @@ const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLab
       onCancel={onCancel}
       title={title ? title : 'Confirm Delete'}
       message={renderedMessage}
-      buttonLabel={buttonLabel}
+      buttonLabel={renderedBtnLabel}
     />
   );
 };

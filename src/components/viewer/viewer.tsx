@@ -10,7 +10,8 @@ import ViewerAnnotationList from '@isrd-isi-edu/chaise/src/components/viewer/vie
 import ViewerAnnotationStrokeSlider from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-stroke-slider';
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import Spinner from 'react-bootstrap/Spinner';
+import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer-menu-buttons';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -59,11 +60,9 @@ const ViewerInner = ({
   parentContainer,
 }: ViewerInnerProps) => {
 
-  const { errors } = useError();
   const {
-    initialized, pageTitle, showChannelList, toggleChannelList, changeZoom, takeScreenshot, waitingForScreenshot,
-    hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
-    submitAnnotationForm,
+    initialized, pageTitle, hideAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
+    submitAnnotationForm, deleteAnnotationConfirmProps, startAnnotationDelete,
     displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode
   } = useViewer();
 
@@ -114,18 +113,12 @@ const ViewerInner = ({
     leftPartners.push(el as HTMLElement);
   });
 
-  const showAnnotationForm = !!annotationFormProps
+  const showAnnotationForm = !!annotationFormProps;
 
   let sidePanelTitle = 'Annotations';
   if (showAnnotationForm) {
     sidePanelTitle = annotationFormProps.appMode === appModes.EDIT ? 'Edit annotation' : 'Create annotation';
   }
-
-  let toggleAnnotationSidebarTooltip = hideAnnotationSidebar ? 'Show ' : 'Hide ';
-  toggleAnnotationSidebarTooltip += showAnnotationForm ? 'the annotation entry form' : 'the list of annotations';
-
-  let toggleAnnotationSidebarLabel = hideAnnotationSidebar ? 'Show ' : 'Hide ';
-  toggleAnnotationSidebarLabel += showAnnotationForm ? 'Annotation form' : 'Annotations';
 
   const panelClassName = !hideAnnotationSidebar ? 'open-panel' : 'close-panel';
 
@@ -174,7 +167,7 @@ const ViewerInner = ({
                   </button>
                 </ChaiseTooltip>
                 <ChaiseTooltip placement='bottom' tooltip='Delete this annotation.'>
-                  <button className='chaise-btn chaise-btn-danger'>
+                  <button className='chaise-btn chaise-btn-danger' onClick={(e) => startAnnotationDelete(-1, e)}>
                     <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
                     <span>Delete</span>
                   </button>
@@ -234,48 +227,7 @@ const ViewerInner = ({
                   />
                 </div>
               }
-              <div className={'pull-left menu-btn-container'}>
-                <ChaiseTooltip placement='top' tooltip={toggleAnnotationSidebarTooltip}>
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleAnnotationSidebar}>
-                    <span className={`chaise-btn-icon chaise-icon ${hideAnnotationSidebar ? 'chaise-sidebar-open' : 'chaise-sidebar-close'}`}></span>
-                    <span>{toggleAnnotationSidebarLabel}</span>
-                  </button>
-                </ChaiseTooltip>
-                <ChaiseTooltip placement='top' tooltip={(showChannelList ? 'Hide' : 'Show') + ' the list of channels'}>
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleChannelList}>
-                    <span className='chaise-btn-icon fa-solid fa-bars-progress'></span>
-                    <span>{(showChannelList ? 'Hide' : 'Show') + ' Channel List'}</span>
-                  </button>
-                </ChaiseTooltip>
-                <ChaiseTooltip placement='top' tooltip='Zoom in'>
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_IN)}>
-                    <span className='chaise-btn-icon fa-solid fa-magnifying-glass-plus'></span>
-                    <span>Zoom in</span>
-                  </button>
-                </ChaiseTooltip>
-                <ChaiseTooltip placement='top' tooltip='Zoom out'>
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_OUT)}>
-                    <span className='chaise-btn-icon fa-solid fa-magnifying-glass-minus'></span>
-                    <span>Zoom Out</span>
-                  </button>
-                </ChaiseTooltip>
-                <ChaiseTooltip placement='top' tooltip='Reset Zoom'>
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.RESET_ZOOM)}>
-                    <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
-                    <span>Reset Zoom</span>
-                  </button>
-                </ChaiseTooltip>
-                <ChaiseTooltip
-                  placement='top'
-                  tooltip={waitingForScreenshot ? 'Processing the screenshot...' : 'Take a snapshot of image and save it'}
-                >
-                  <button className='chaise-btn chaise-btn-primary' type='button' onClick={takeScreenshot} disabled={waitingForScreenshot}>
-                    {!waitingForScreenshot && <span className='chaise-btn-icon fa-solid fa-camera'></span>}
-                    {waitingForScreenshot && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
-                    <span>Take a Screenshot</span>
-                  </button>
-                </ChaiseTooltip>
-              </div>
+              <ViewerMenuButtons />
             </div>
           </div>
         </div>
@@ -306,6 +258,7 @@ const ViewerInner = ({
             onCancel={() => setShowCloseConfirmationModal(false)}
           />
         }
+        {deleteAnnotationConfirmProps && <DeleteConfirmationModal show={!!deleteAnnotationConfirmProps} {...deleteAnnotationConfirmProps} />}
       </div>
     </>
   )
