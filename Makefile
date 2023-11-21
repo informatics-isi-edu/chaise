@@ -272,15 +272,16 @@ $(SASS): $(shell find $(COMMON)/styles/scss/)
 	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
-JS_CONFIG_SAMPLE= $(CONFIG)/chaise-config-sample.js
+# should eventually be removed
+DEPRECATED_JS_CONFIG=chaise-config.js
+
 JS_CONFIG=$(CONFIG)/chaise-config.js
-$(JS_CONFIG): $(JS_CONFIG_SAMPLE)
+$(JS_CONFIG): $(CONFIG)/chaise-config-sample.js
 	cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
-VIEWER_CONFIG_SAMPLE=$(CONFIG)/viewer-config-sample.js
 VIEWER_CONFIG=$(CONFIG)/viewer-config.js
-$(VIEWER_CONFIG): $(VIEWER_CONFIG_SAMPLE)
+$(VIEWER_CONFIG): $(CONFIG)/viewer-config-sample.js
 	cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
 	touch $(VIEWER_CONFIG)
 
@@ -296,7 +297,7 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 	$(info - creating chaise-dependencies.html)
 	@> $(DIST)/chaise-dependencies.html
 	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
-	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
 
 # list of file and folders that will be sent to the given location
@@ -332,7 +333,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
 
 # -------------------------- utility functions -------------------------- #
 
@@ -473,7 +473,7 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' . $(CHAISEDIR)
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 

@@ -35,3 +35,8 @@ common/styles/navbar.css
 
 # config files
 config/*-config.js
+
+# old config files (should be removed when we deprecated these locations
+/chaise-config.js
+/google-dataset-config.js
+viewer/viewer-config.js
