@@ -200,10 +200,10 @@ describe('Regarding multi form input and clone button', () => {
       
       describe('checkbox functionality', () => {
         it('on load the label should reflect what is selected.', (done) => {
+          const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
+          const parentElement = recordEditPage.getParentElement(inputSwitch);
           chaisePage.clickButton(recordEditPage.getColumnMultiFormButton('markdown_col'))
-            .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
-            .then(inputSwitch => recordEditPage.getParentElement(inputSwitch))
-            .then(parentElement => {
+            .then(() => {
               expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
               return recordEditPage.getAllElementsWithClass('.form-header.entity-value');
             })
