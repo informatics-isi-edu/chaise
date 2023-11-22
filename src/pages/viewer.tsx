@@ -62,8 +62,7 @@ const ViewerApp = (): JSX.Element => {
     if (res.isQueryParameter) logObject.cqp = 1;
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
-      let reference = response;
-      const location = reference.location;
+      const reference = response;
 
       // add schema and table name classes to app-container
       addAppContainerClasses(reference, viewerSettings.appName);
@@ -74,12 +73,12 @@ const ViewerApp = (): JSX.Element => {
 
       const logStack = [
         LogService.getStackNode(
-          LogStackTypes.SET,
+          LogStackTypes.ENTITY,
           reference.table,
           reference.filterLogInfo,
         ),
       ];
-      const logStackPath = LogStackTypes.SET;
+      const logStackPath = LogStackTypes.ENTITY;
 
       // set the global log stack, log stack path, and logAppMode
       LogService.config(logStack, logStackPath);

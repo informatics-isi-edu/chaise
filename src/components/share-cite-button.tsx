@@ -25,6 +25,7 @@ type ShareCiteButtonProps = {
     value: string,
     link?: string
   }[],
+  onBtnClick?: (e: any) => void,
   btnClass?: string,
   btnTooltip?: {
     pending: string,
@@ -41,6 +42,7 @@ const ShareCiteButton = ({
   title,
   hideHeaders,
   extraInfo,
+  onBtnClick,
   btnClass,
   btnTooltip
 }: ShareCiteButtonProps): JSX.Element => {
@@ -56,11 +58,15 @@ const ShareCiteButton = ({
       showVersionWarning,
       title,
       hideHeaders,
-      extraInfo
+      extraInfo,
+      logStack,
+      logStackPath,
     });
   }
 
-  const onButtonClick = () => {
+  const onButtonClick = (e: any) => {
+    if (onBtnClick) onBtnClick(e);
+
     if (!reference.table.supportHistory) {
       showShareModal(false);
       return;

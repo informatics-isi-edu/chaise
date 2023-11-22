@@ -4,16 +4,15 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, RecordeditColumnModel, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ViewerAnnotationFormContainer = (): JSX.Element => {
 
@@ -100,13 +99,13 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
 
   return (
     <form
-      id='annotation-form'
-      className='annotation-form'
+      id={ID_NAMES.VIEWER_ANNOTATION_FORM}
+      className='viewer-annotation-form'
       onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
     >
       {columnModels.map((cm, idx) => (
-        (!cm.isHidden && <div key={idx} className='annotation-form-row'>
-          <div className='annotation-form-row-header'>
+        (!cm.isHidden && <div key={idx} className='viewer-annotation-form-row'>
+          <div className='viewer-annotation-form-row-header'>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
             {cm.column.comment ?
               <ChaiseTooltip
@@ -118,7 +117,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
               renderColumnHeader(cm.column)
             }
           </div>
-          <div className='annotation-form-row-input'>
+          <div className='viewer-annotation-form-row-input'>
             {renderInput(cm)}
           </div>
         </div>)

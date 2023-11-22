@@ -167,7 +167,8 @@ export const CLASS_NAMES = {
 };
 
 export const ID_NAMES = {
-  APP_ROOT: 'chaise-app-root'
+  APP_ROOT: 'chaise-app-root',
+  VIEWER_ANNOTATION_FORM: 'viewer-annotation-form'
 };
 
 export const DEFAULT_DISPLAYNAME = {

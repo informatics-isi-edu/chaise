@@ -21,8 +21,9 @@ import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ViewerAnnotationList = (): JSX.Element => {
   const {
-    annotationModels, loadingAnnotations, toggleAnnotationDisplay, toggleHighlightAnnotation, highlightedAnnotationIndex,
-    canCreateAnnotation, startAnnotationEdit, startAnnotationCreate, logViewerClientAction, startAnnotationDelete
+    annotationModels, loadingAnnotations, toggleAnnotationDisplay, changeAllAnnotationVisibility,
+    toggleHighlightAnnotation, highlightedAnnotationIndex, logViewerClientAction,
+    canCreateAnnotation, startAnnotationEdit, startAnnotationCreate, startAnnotationDelete
   } = useViewer();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -66,23 +67,22 @@ const ViewerAnnotationList = (): JSX.Element => {
         onClick={(e) => toggleHighlightAnnotation(index, e)}
       >
         <div className='annotation-row-btns'>
-          <ChaiseTooltip placement='bottom' tooltip={isDisplayed ? 'Hide annitation' : 'View annotation'}>
+          <ChaiseTooltip placement='bottom' tooltip={isDisplayed ? 'Toggle to hide this annitation' : 'Toggle to show this annotation'}>
             <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => toggleAnnotationDisplay(index, e)}>
               <i className={`fa-solid ${isDisplayed ? 'fa-eye' : 'fa-eye-slash'}`}></i>
             </button>
           </ChaiseTooltip>
-          {annot.canUpdate && <ChaiseTooltip placement='bottom' tooltip='Edit annotation'>
+          {annot.canUpdate && <ChaiseTooltip placement='bottom' tooltip='Edit this annotation'>
             <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => startAnnotationEdit(index, e)}>
               <i className='fa-solid fa-pencil'></i>
             </button>
           </ChaiseTooltip>}
-          {annot.canDelete && annot.isStoredInDB && <ChaiseTooltip placement='bottom' tooltip='Delete annotation'>
+          {annot.canDelete && annot.isStoredInDB && <ChaiseTooltip placement='bottom' tooltip='Delete this annotation'>
             <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => startAnnotationDelete(index, e)}>
               <i className='fa-regular fa-trash-alt'></i>
             </button>
           </ChaiseTooltip>}
           {annot.tuple &&
-            // TODO highlight on click
             <ShareCiteButton
               reference={annot.tuple.reference} tuple={annot.tuple} citation={{ isReady: true, value: null }}
               title='Share Annotation'
@@ -101,7 +101,13 @@ const ViewerAnnotationList = (): JSX.Element => {
                 }
               ]}
               btnClass='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn share-btn'
-              btnTooltip={{ ready: 'Share annotation', pending: 'Opening the share links...' }}
+              btnTooltip={{ ready: 'Share this annotation', pending: 'Opening the share links...' }}
+              onBtnClick={e => {
+                // avoid the highlight toggle event
+                e.stopPropagation();
+                // make sure the annotation is highlighted
+                toggleHighlightAnnotation(index, undefined, false, true);
+              }}
             />
           }
         </div>
@@ -126,21 +132,35 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   const renderAnnotations = () => {
     const keyword = searchTerm.toLocaleLowerCase();
-    const renderedAnnots = !keyword ? annotationModels : annotationModels.filter((annot) => {
+    let displayedCount = 0;
+    const renderedAnnots: ViewerAnnotationModal[] = [];
+    annotationModels.forEach((annot) => {
       const id = annot.id ? annot.id.toLocaleLowerCase() : '';
       const name = annot.name ? annot.name.toLocaleLowerCase() : '';
-      return (id.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0);
-    })
+      const isRendered = !keyword || ((id.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0));
 
-    let displayingMessage = `Displaying ${renderedAnnots.length}`;
-    if (!loadingAnnotations) {
-      displayingMessage += ` of ${annotationModels.length} ${keyword ? 'matching annotations' : 'annotations'}`;
-    }
+      if (isRendered && annot.isDisplayed) displayedCount++;
+      if (isRendered) renderedAnnots.push(annot);
+    });
 
     return (
       <>
-        <span>{displayingMessage}</span>
-        {!loadingAnnotations && renderedAnnots.length === 0 && <div className='no-annotation-message'>No annotation found.</div>}
+        <div className='annotation-summary-row'>
+          <span>Found {renderedAnnots.length} of {annotationModels.length} ({displayedCount} Displayed)</span>
+          <div className='chaise-btn-group'>
+            <ChaiseTooltip tooltip='Show all annotations' placement='bottom'>
+              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(true)}>
+                <i className='fa-solid fa-eye'></i>
+              </button>
+            </ChaiseTooltip>
+            <ChaiseTooltip tooltip='Hide all annotations' placement='bottom'>
+              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(false)}>
+                <i className='fa-solid fa-eye-slash'></i>
+              </button>
+            </ChaiseTooltip>
+          </div>
+        </div>
+        {renderedAnnots.length === 0 && <div className='no-annotation-message'>No annotation found.</div>}
         {renderedAnnots.length > 0 && <div className='annotation-rows'>{renderedAnnots.map((ann, i) => renderAnnotation(ann, i))}</div>}
       </>
     )
@@ -149,13 +169,6 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   return (
     <div className='annotation-list-container'>
-      <div className='display-all-none-row'>
-        {/* <ChaiseTooltip tooltip='Show all annotations' placement='bottom'>
-          <button className='chaise-btn chaise-btn-tertiary'>
-            <span className='chaise-btn-icon fa-'></span>
-          </button>
-        </ChaiseTooltip> */}
-      </div>
       {/* not using SearchInput here because this button and that comp are very different */}
       <div className='search-box-row'>
         <div className={`chaise-search-box chaise-input-group${loadingAnnotations ? ' disabled-element' : ''}`}>
@@ -173,7 +186,7 @@ const ViewerAnnotationList = (): JSX.Element => {
         </div>
         {canCreateAnnotation && <button className='btn chaise-btn chaise-btn-primary' onClick={startAnnotationCreate}>New</button>}
       </div>
-      {renderAnnotations()}
+      {!loadingAnnotations && renderAnnotations()}
     </div>
   )
 }

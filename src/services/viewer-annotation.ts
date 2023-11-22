@@ -16,6 +16,13 @@ export default class ViewerAnnotationService {
   private static _annotationsRecieved: boolean;
   private static _annotationEditReference: any;
   private static _annotationCreateReference: any;
+  private static _logStack: any;
+  private static _logStackPath: string;
+
+  static setViewerLogInfo(logStack: any, logStackPath: string) {
+    ViewerAnnotationService._logStack = logStack;
+    ViewerAnnotationService._logStackPath = logStackPath;
+  }
 
   static setAnnotations(tuples: any[], urls: string[], annotationEditReference: any, annotationCreateReference: any) {
     ViewerAnnotationService._annotationTuples = tuples;
@@ -77,9 +84,9 @@ export default class ViewerAnnotationService {
    */
   static getAnnotationLogStackPath(item?: ViewerAnnotationModal) {
     if (item) {
-      return LogService.getStackPath(null, LogStackPaths.ANNOTATION_ENTITY);
+      return LogService.getStackPath(ViewerAnnotationService._logStackPath, LogStackPaths.ANNOTATION_ENTITY);
     } else {
-      return LogService.getStackPath(null, LogStackPaths.ANNOTATION_SET);
+      return LogService.getStackPath(ViewerAnnotationService._logStackPath, LogStackPaths.ANNOTATION_SET);
     }
   }
 
@@ -114,7 +121,7 @@ export default class ViewerAnnotationService {
       stackNode = LogService.getStackNode(LogStackTypes.ANNOTATION, table, fileInfo);
     }
 
-    const obj = LogService.getStackObject(stackNode);
+    const obj = LogService.getStackObject(stackNode, ViewerAnnotationService._logStack);
     if (extraInfo) {
       return LogService.addExtraInfoToStack(obj, extraInfo);
     }

@@ -78,8 +78,14 @@ type ForeignkeyDropdownFieldProps = InputFieldProps & {
 const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
-  // TODO this element most probably should be something that the inputSwitch can customize
-  // because we're now assuming that this is only available in the recordedit form and nowhere else
+  /**
+   * TODO
+   * this element most probably should be something that the inputSwitch can customize
+   * because we're now assuming that this compoennt is only used in the recordedit form.
+   *
+   * that being said this the dropdown alignment wasn't an issue in the viewer app, so
+   * this added padding is not needed there.
+   */
   const formContainer = document.querySelector('.form-container .recordedit-form');
 
   const { setValue, getValues } = useFormContext();

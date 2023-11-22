@@ -167,7 +167,8 @@ const ShareCiteModal = ({
         <Modal.Title>{usedTitle}</Modal.Title>
         <button
           className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
-          onClick={() => onClose()}
+          // prevent the event from propagating to the button that opened it
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
         >
           <strong className='chaise-btn-icon'>X</strong>
           <span>Close</span>

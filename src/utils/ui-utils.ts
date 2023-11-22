@@ -390,3 +390,11 @@ export function createChaiseTooltips(container: Element) {
     });
   }
 }
+
+/**
+ * trigger form submission
+ * borrowed from here: https://github.com/react-hook-form/react-hook-form/issues/566#issuecomment-730077495
+ */
+export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
+  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}

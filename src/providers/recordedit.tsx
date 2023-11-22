@@ -200,7 +200,7 @@ export default function RecordeditProvider({
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
-  const { session, validateSessionBeforeMutation } = useAuthn();
+  const { session, validateSessionBeforeMutation, validateSession } = useAuthn();
   const { dispatchError, errors, loginModal } = useError();
 
   const maxRowsToAdd = 201;
@@ -569,25 +569,24 @@ export default function RecordeditProvider({
             if (!res) return;
           }
 
-          /**
-           * TODO
-           * we used to call Session.validateSession() here before,
-           * but that function doesn't exist anymore. is it needed?
-           */
-          // TODO why? the validateSessionBeforeMutation should have already handled this
-          // if (!session && exception instanceof ConfigService.ERMrest.ConflictError) {
-          //   // login in a modal should show (Session timed out)
-          //   throw new ConfigService.ERMrest.UnauthorizedError();
-          // }
+          validateSession().then((session) => {
+            if (!session && exception instanceof ConfigService.ERMrest.ConflictError) {
+              // login in a modal should show (Session timed out)
+              dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() })
+              return;
+            }
 
-          // append link to end of alert.
-          if (exception instanceof ConfigService.ERMrest.DuplicateConflictError) {
-            const link = exception.duplicateReference.contextualize.detailed.appLink;
-            exception.message += ` Click <a href="${link}" target="_blank">here</a> to see the conflicting record that already exists.`;
-          }
+            // append link to end of alert.
+            if (exception instanceof ConfigService.ERMrest.DuplicateConflictError) {
+              const link = exception.duplicateReference.contextualize.detailed.appLink;
+              exception.message += ` Click <a href="${link}" target="_blank">here</a> to see the conflicting record that already exists.`;
+            }
 
-          const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
-          addAlert(exception.message, alertType);
+            const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
+            addAlert(exception.message, alertType);
+          })
+
+
         };
 
         const submitFinallyCB = () => {

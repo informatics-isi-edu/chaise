@@ -85,7 +85,7 @@
     .annotation-stroke-slider {
       display: flex;
       flex-direction: column;
-      padding: 8px 0;
+      padding: 8px 0 15px 0;
 
       .label {
         display: flex;
@@ -173,11 +173,11 @@
         width: 100%;
       }
 
-      .annotation-form-row {
+      .viewer-annotation-form-row {
         border-bottom: 1px solid map-get(variables.$color-map, 'border');
         padding: 10px 0;
 
-        .annotation-form-row-header {
+        .viewer-annotation-form-row-header {
           padding-bottom: 5px;
         }
       }
@@ -196,6 +196,20 @@
         gap: 10px;
       }
 
+      .annotation-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0 10px 0;
+        align-items: center;
+
+        .chaise-btn {
+          height: 27px;
+          min-width: 27px;
+          font-size: 1rem;
+          padding: 2px 5px;
+        }
+      }
+
       .no-annotation-message {
         background: map-get(variables.$color-map, 'table-striped-background');
         padding: 8px 5px;
@@ -204,8 +218,6 @@
       }
 
       .annotation-rows {
-        padding-top: 5px;
-
         .annotation-row {
           cursor: pointer;
           padding: 8px 5px;

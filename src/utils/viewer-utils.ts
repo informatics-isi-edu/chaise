@@ -91,7 +91,6 @@ export const hasURLQueryParam = (queryParams: any, lookForAnnotation?: boolean, 
 }
 
 /**
- * TODO
  * Using what's in the query parameters and the value of Image.uri,
  * create a queryParams object that will be sent to osd viewer.
  * The logic is as follows:
@@ -193,25 +192,31 @@ export const initializeOSDParams = (pageQueryParams: any, imageURI: string, defa
  * @param defaultZIndex
  * @returns
  */
-export const loadImageMetadata = (osdViewerParameters: React.MutableRefObject<any>, imageID: string, defaultZIndex?: number): Promise<void> => {
+export const loadImageMetadata = (
+  osdViewerParameters: React.MutableRefObject<any>,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+  imageID: string,
+  defaultZIndex?: number,
+): Promise<void> => {
   return new Promise((resolve, reject) => {
     let channelURLs: string[] = [];
 
     // first read the channel info
-    _readImageChannelTable(imageID).then(function (res) {
+    _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath).then(function (res) {
       osdViewerParameters.current.channels = res.channelList;
 
       // backward compatibility
       channelURLs = res.channelURLs;
 
-      return _createProcessedImageReference(imageID);
+      return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath);
     }).then(function () {
 
       // read the main image (processed data)
       return _readProcessedImageTable(processedImageReference, defaultZIndex);
     }).then(function (mainImageInfo) {
       if (mainImageInfo.length === 0) {
-        // TODO backward compatibility
+        // backward compatibility
         if (channelURLs.length > 0) {
           mainImageInfo = channelURLs;
         } else {
@@ -368,7 +373,7 @@ export const fetchZPlaneList = (requestID: any, pageSize: number, beforeValue: a
 
     const ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
 
-    // TODO we don't have queueing mechanism in osd viewer, so we can just set the time here
+    // we don't have queueing mechanism in osd viewer, so we can just set the time here
     let stack = LogService.addCausesToStack(zPlaneLogStack, reloadCauses, ConfigService.ERMrest.getElapsedTime());
 
     const extraInfo = {
@@ -487,7 +492,7 @@ export const updateDefaultZIndex = (mainImageReference: any, imageID: string, zI
 
     const url = [
       `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/attributegroup`,
-      `${fixedEncodeURIComponent(schemaName)}:${fixedEncodeURIComponent(tableName)}'`,
+      `${fixedEncodeURIComponent(schemaName)}:${fixedEncodeURIComponent(tableName)}`,
       `RID;${fixedEncodeURIComponent(zIndexColumnName)}`
     ].join('/');
 
@@ -518,7 +523,7 @@ export const updateDefaultZIndex = (mainImageReference: any, imageID: string, zI
      * we cannot assume that default_z is visible, that's why
      * we're sending a direct put request.
      */
-    ConfigService.http.put(url, [payload], { headers: headers }).then(function () {
+    ConfigService.http.put(url, [payload], { headers: headers }).then(() => {
       resolve();
     }).catch((err: any) => reject(err));
   });
@@ -646,7 +651,7 @@ const _getChannelConfigFormatVersion = () => {
 * }
 *
 */
-const _readImageChannelTable = async (imageID: string): Promise<{
+const _readImageChannelTable = async (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<{
   channelURLs: string[],
   channelList: any[],
 }> => {
@@ -670,13 +675,14 @@ const _readImageChannelTable = async (imageID: string): Promise<{
         return false;
       }
 
-      channelSetLogStackPath = LogService.getStackPath('', LogStackPaths.CHANNEL_SET);
+      channelSetLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.CHANNEL_SET);
       channelSetLogStack = LogService.getStackObject(
         LogService.getStackNode(
           LogStackTypes.CHANNEL,
           ref.table,
           {}
-        )
+        ),
+        viewerLogStack
       );
       const logObj = {
         action: LogService.getActionString(LogActions.LOAD, channelSetLogStackPath),
@@ -833,7 +839,7 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
 /**
  * populate the variables that are used in different places
  */
-const _createProcessedImageReference = (imageID: string): Promise<void> => {
+const _createProcessedImageReference = (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
 
     const pImageConfig = ViewerConfigService.processsedImageConfig;
@@ -851,14 +857,15 @@ const _createProcessedImageReference = (imageID: string): Promise<void> => {
 
       processedImageReference = res.contextualize.compact;
 
-      zPlaneSetLogStackPath = LogService.getStackPath('', LogStackPaths.Z_PLANE_SET);
-      zPlaneEntityLogStackPath = LogService.getStackPath('', LogStackPaths.Z_PLANE_ENTITY);
+      zPlaneSetLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.Z_PLANE_SET);
+      zPlaneEntityLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.Z_PLANE_ENTITY);
       zPlaneLogStack = LogService.getStackObject(
         LogService.getStackNode(
           LogStackTypes.Z_PLANE,
           processedImageReference.table,
           {}
-        )
+        ),
+        viewerLogStack
       );
 
       resolve();

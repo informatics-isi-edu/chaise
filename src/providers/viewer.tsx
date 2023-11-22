@@ -8,7 +8,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { CustomError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { CustomError, DifferentUserConflictError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -27,14 +27,15 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
   ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
-  hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig
+  hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex
 } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
-import { HELP_PAGES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { OSDViewerDeploymentPath, chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { manuallyTriggerFormSubmit } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 
 type DeleteAnnotationConfirmProps = {
@@ -121,6 +122,7 @@ export const ViewerContext = createContext<{
    *
    */
   toggleAnnotationDisplay: (index: number, event?: any) => void,
+  changeAllAnnotationVisibility: (show: boolean) => void,
   /**
    * the highlighted annotation.
    * if -1, we should not highlight any annotations.
@@ -130,7 +132,7 @@ export const ViewerContext = createContext<{
    * toggle the highlight status of an annotation.
    * (we highlight only one annotation at a time)
    */
-  toggleHighlightAnnotation: (index: number, event?: any, fromOSD?: boolean) => void,
+  toggleHighlightAnnotation: (index: number, event?: any, fromOSD?: boolean, forceHighlight?: boolean) => void,
   /**
    * log the client action
    */
@@ -155,7 +157,7 @@ export default function ViewerProvider({
   logInfo
 }: ViewerProviderProps): JSX.Element {
   const { addAlert, removeAllAlerts } = useAlert();
-  const { validateSessionBeforeMutation } = useAuthn();
+  const { validateSessionBeforeMutation, validateSession } = useAuthn();
   const { dispatchError } = useError();
 
   /**
@@ -221,6 +223,7 @@ export default function ViewerProvider({
    */
   const initializeViewerApp = () => {
     ViewerConfigService.configure();
+    ViewerAnnotationService.setViewerLogInfo(logInfo.logStack, logInfo.logStackPath);
 
     const imageConfig = ViewerConfigService.imageConfig;
     const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
@@ -242,8 +245,12 @@ export default function ViewerProvider({
       hasAnnotationQueryParam = true;
     }
 
+    const logParams = logInfo.logObject ? logInfo.logObject : {};
+    logParams.action = LogService.getActionString(LogActions.LOAD, logInfo.logStackPath);
+    logParams.stack = logInfo.logStack;
+
     // read the image
-    reference.contextualize.detailed.read(1, logInfo.logObject, false, true, false, true).then((imagePage: any) => {
+    reference.contextualize.detailed.read(1, logParams, false, true, false, true).then((imagePage: any) => {
 
       const tableDisplayName = imagePage.reference.displayname.value;
 
@@ -376,7 +383,7 @@ export default function ViewerProvider({
         return [];
       }
 
-      return loadImageMetadata(osdViewerParameters, mainImageID!, defaultZIndex.current);
+      return loadImageMetadata(osdViewerParameters, logInfo.logStack, logInfo.logStackPath, mainImageID!, defaultZIndex.current);
 
     }).then(() => {
       // dont fetch annotation from db if:
@@ -556,7 +563,7 @@ export default function ViewerProvider({
         break;
       case 'errorAnnotation':
         addAlert('Couldn\'t parse the given annotation.', ChaiseAlertType.WARNING);
-        $log.warn(data);
+        if (data) $log.warn(data);
         break;
       case 'updateAnnotationList':
         // called whens osd-viewer has finished parsing annotaitons files.
@@ -587,8 +594,7 @@ export default function ViewerProvider({
         currentAnnotationFormState.current.svgAnnotationData = data;
 
         // submit the form
-        const formEl = document.querySelector('#annotation-form') as HTMLFormElement;
-        formEl.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+        manuallyTriggerFormSubmit(document.querySelector(ID_NAMES.VIEWER_ANNOTATION_FORM) as HTMLFormElement);
         break;
       case 'fetchZPlaneList':
         fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then((res) => {
@@ -604,20 +610,64 @@ export default function ViewerProvider({
           dispatchError({ error });
         })
         break;
+      case 'updateDefaultZIndex':
+        validateSessionBeforeMutation(() => {
+          updateDefaultZIndex(reference, imageIDRef.current!, defaultZIndex.current).then(() => {
+            addAlert('Default Z index value has been updated.', ChaiseAlertType.SUCCESS);
+          }).catch((error: any) => {
+            validateSession().then((session) => {
+              if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
+                // login in a modal should show (Session timed out)
+                dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
+                return;
+              }
+
+              if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
+                // TODO should we show a warning or something?
+                // do nothing
+              } else if (error instanceof DifferentUserConflictError) {
+                dispatchError({ error, isDismissible: true });
+              } else {
+                addAlert(error.message, ChaiseAlertType.ERROR);
+              }
+
+            });
+          }).finally(() => {
+            // let osd viewer know that the process is done
+            iframe.postMessage({ messageType: 'updateDefaultZIndexDone', content: { 'zIndex': data.zIndex } }, origin);
+          })
+        })
+        break;
       case 'openDrawingHelpPage':
         windowRef.open(getHelpPageURL(HELP_PAGES.VIEWER_ANNOTATION), '_blank');
         break
       case 'updateChannelConfig':
-        updateChannelConfig(data, imageIDRef.current!).then((res) => {
-          // the alerts are disaplyed by the updateChannelConfig function
-          // let osd viewer know that the process is done
-          iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: res } }, origin);
-        }).catch((error) => {
-          // let osd viewer know that the process is done
-          iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: false } }, origin);
+        validateSessionBeforeMutation(() => {
+          updateChannelConfig(data, imageIDRef.current!).then((res) => {
+            addAlert('Channel settings have been updated.', ChaiseAlertType.SUCCESS);
+            // let osd viewer know that the process is done
+            iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: res } }, origin);
+          }).catch((error) => {
+            // let osd viewer know that the process is done
+            iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: false } }, origin);
 
-          // show the error
-          dispatchError({ error })
+            validateSession().then((session) => {
+              if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
+                // login in a modal should show (Session timed out)
+                dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
+                return;
+              }
+
+              if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
+                // TODO should we show a warning or something?
+                // do nothing
+              } else if (error instanceof DifferentUserConflictError) {
+                dispatchError({ error, isDismissible: true });
+              } else {
+                addAlert(error.message, ChaiseAlertType.ERROR);
+              }
+            });
+          });
         });
         break;
       case 'showAlert':
@@ -625,7 +675,7 @@ export default function ViewerProvider({
         break;
       case 'showPopupError':
         const err = new CustomError(data.header, data.message, undefined, data.clickActionMessage, data.isDismissible);
-        dispatchError({ error: err, isDismissible: data.isDismissible });
+        dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
     }
   };
@@ -1097,7 +1147,7 @@ export default function ViewerProvider({
     if (isAnnotation) {
       ViewerAnnotationService.logAnnotationClientAction(action, item, extraInfo);
     } else {
-      const stack = isObjectAndNotNull(extraInfo) ? LogService.addExtraInfoToStack(null, extraInfo) : LogService.getStackObject();
+      const stack = isObjectAndNotNull(extraInfo) ? LogService.addExtraInfoToStack(logInfo.logStack, extraInfo) : logInfo.logStack;
       LogService.logClientAction({
         action: LogService.getActionString(action, null, ''),
         stack
@@ -1109,10 +1159,7 @@ export default function ViewerProvider({
   const toggleAnnotationSidebar = () => {
     setHideAnnotationSidebar((prev: boolean) => {
       const action = prev ? LogActions.VIEWER_ANNOT_PANEL_SHOW : LogActions.VIEWER_ANNOT_PANEL_HIDE;
-      LogService.logClientAction({
-        action: LogService.getActionString(action, null, ''),
-        stack: LogService.getStackObject()
-      }, reference.defaultLogInfo);
+      logViewerClientAction(action, false);
       return !prev;
     })
   };
@@ -1343,11 +1390,24 @@ export default function ViewerProvider({
     });
   };
 
+  const changeAllAnnotationVisibility = (show: boolean) => {
+    ViewerAnnotationService.changeAllAnnotationVisibility({
+      isDisplay: show
+    });
+
+    const action = show ? LogActions.VIEWER_ANNOT_DISPLAY_ALL : LogActions.VIEWER_ANNOT_DISPLAY_NONE;
+    logViewerClientAction(action, true);
+
+    setAnnotationModels(prev => {
+      return prev.map(annot => ({ ...annot, isDisplayed: show }));
+    });
+  };
+
   /**
    * change the highlighted annotation
    */
-  const toggleHighlightAnnotation = (index: number, event?: any, fromOSD?: boolean) => {
-    const isHighlighted = highlightedAnnotationIndexRef.current !== index;
+  const toggleHighlightAnnotation = (index: number, event?: any, fromOSD?: boolean, forceHighlight?: boolean) => {
+    const isHighlighted = forceHighlight || highlightedAnnotationIndexRef.current !== index;
     const annot = annotationModelsRef.current[index];
 
     if (isHighlighted && !annot.isDisplayed) {
@@ -1375,7 +1435,7 @@ export default function ViewerProvider({
      * the updated function will be called twice in dev mode, that's why
      * the log and calling osd-viewer is done outside of the updater
      */
-    setHighlightedAnnotationIndex((prev) => (prev !== index) ? index : -1);
+    setHighlightedAnnotationIndex((prev) => (prev !== index || forceHighlight) ? index : -1);
   }
 
   const providerValue = useMemo(() => {
@@ -1400,6 +1460,7 @@ export default function ViewerProvider({
       toggleDrawingMode,
       isInDrawingMode,
       toggleAnnotationDisplay,
+      changeAllAnnotationVisibility,
       highlightedAnnotationIndex,
       toggleHighlightAnnotation,
       logViewerClientAction
