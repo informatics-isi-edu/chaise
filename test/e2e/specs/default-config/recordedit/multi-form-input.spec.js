@@ -108,14 +108,14 @@ describe('Regarding multi form input and clone button', () => {
         expect(toggleBtn.isPresent()).toBeFalsy("toggle btn is present");
       });
 
-      it('it should be displayed as soon as users added a new form.', (done) => {
+      it('should be displayed as soon as users added a new form.', (done) => {
         chaisePage.clickButton(cloneFormSubmitButton).then(() => {
-          return recordEditPage.getColumnMultiFormButton('markdown_col')
-        }).then((toggleBtn) => {
-          expect(toggleBtn.isPresent()).toBeTruthy("toggle btn is present")
+          const toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+          expect(toggleBtn.isPresent()).toBeTruthy("toggle btn is present");
           done();
         }).catch(chaisePage.catchTestError(done));
       });
+      
 
       it('it should not be offered for disabled columns.', () => {
         let input = recordEditPage.getInputForAColumn('id', 1);
@@ -127,10 +127,10 @@ describe('Regarding multi form input and clone button', () => {
 
       it('by default only the first form should be selected.', (done) => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1)
+        const parentElement = recordEditPage.getParentElement(inputSwitch);
         chaisePage.clickButton(toggleBtn)
-          .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
-          .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
-          .then((parentElement) => {
+        .then(() => {
             expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
             done();
           })
@@ -150,67 +150,73 @@ describe('Regarding multi form input and clone button', () => {
 
 
       it('the form should work as a toggle when selected', (done) => {
-        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3)
+        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
         const parentElement = recordEditPage.getParentElement(inputSwitch);
-        chaisePage.clickButton(parentElement).then(() => {
-          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-        }).then(() => {
-          return chaisePage.clickButton(parentElement).then(() => {
+      
+        chaisePage.clickButton(parentElement)
+          .then(() => {
+            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            return chaisePage.clickButton(parentElement);
+          })
+          .then(() => {
             expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is selected');
             done();
-          }).catch(chaisePage.catchTestError(done));
-        })
+          })
+          .catch(chaisePage.catchTestError(done));
       });
+      
       it('previous selection should remain after closing and opening again', (done) => {
-        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3)
+        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 3);
         const parentElement = recordEditPage.getParentElement(inputSwitch);
-        chaisePage.clickButton(parentElement).then(() => {
-          expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-        }).then(() => {
-          let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-          chaisePage.clickButton(toggleBtn)
-            .then(() => chaisePage.clickButton(toggleBtn))
-            .then(() => {
-              expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
-              done();
-            })
-        }).catch(chaisePage.catchTestError(done));
-      })
+      
+        chaisePage.clickButton(parentElement)
+          .then(() => {
+            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
+            return chaisePage.clickButton(toggleBtn);
+          })
+          .then(() => chaisePage.clickButton(recordEditPage.getColumnMultiFormButton('markdown_col')))
+          .then(() => {
+            expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+            done();
+          })
+          .catch(chaisePage.catchTestError(done));
+      });
+      
 
       it('the form should not be clickable', (done) => {
         let toggleBtn = recordEditPage.getColumnMultiFormButton('markdown_col');
-        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1)
+        const inputSwitch = recordEditPage.getInputSwitchContainer('markdown_col', 1);
         const parentElement = recordEditPage.getParentElement(inputSwitch);
-        chaisePage.clickButton(toggleBtn).then(() => {
-          return chaisePage.clickButton(parentElement).then(() => {
+      
+        chaisePage.clickButton(toggleBtn)
+          .then(() => chaisePage.clickButton(parentElement))
+          .then(() => {
             expect(parentElement.getAttribute("class")).not.toContain('entity-active', 'Form is not selected');
             done();
           })
-        });
+          .catch(chaisePage.catchTestError(done));
       });
+      
       describe('checkbox functionality', () => {
         it('on load the label should reflect what is selected.', (done) => {
           chaisePage.clickButton(recordEditPage.getColumnMultiFormButton('markdown_col'))
-            .then(() => {
-              return recordEditPage.getInputSwitchContainer('markdown_col', 1);
-            })
-            .then((inputSwitch) => recordEditPage.getParentElement(inputSwitch))
-            .then((parentElement) => {
+            .then(() => recordEditPage.getInputSwitchContainer('markdown_col', 1))
+            .then(inputSwitch => recordEditPage.getParentElement(inputSwitch))
+            .then(parentElement => {
               expect(parentElement.getAttribute("class")).toContain('entity-active', 'Form is not selected');
+              return recordEditPage.getAllElementsWithClass('.form-header.entity-value');
             })
-            .then(() => recordEditPage.getAllElementsWithClass('.form-header.entity-value'))
-            .then((count) => {
-              return recordEditPage.getCheckboxLabel().getText()
-                .then((checkboxLabelText) => {
-                  return recordEditPage.getAllElementsWithClass('.entity-value.entity-active')
-                    .then((selected) => {
-                      expect(checkboxLabelText).toBe(`${selected} of ${count} selected records`);
-                      done();
-                    });
-                });
-            })
+            .then(count => recordEditPage.getCheckboxLabel().getText()
+              .then(checkboxLabelText => [checkboxLabelText, count]))
+            .then(([checkboxLabelText, count]) => recordEditPage.getAllElementsWithClass('.entity-value.entity-active')
+              .then(selected => {
+                expect(checkboxLabelText).toBe(`${selected} of ${count} selected records`);
+                done();
+              }))
             .catch(chaisePage.catchTestError(done));
         });
+        
 
 
 
@@ -247,6 +253,7 @@ describe('Regarding multi form input and clone button', () => {
             })
             .catch(chaisePage.catchTestError(done));
         });
+
         it('when none are selected, clicking on the checkbox should select all forms', (done) => {
           expect(recordEditPage.getCheckboxLabel().getText()).toBe('Select All');
           checkboxInput = recordEditPage.getCheckboxInput();
@@ -302,7 +309,7 @@ describe('Regarding multi form input and clone button', () => {
               const parentEl = recordEditPage.getParentElement(inputSwitch);
               chaisePage.clickButton(toggleBtn)
                 .then(() => {
-                  return chaisePage.clickButton(parentEl);
+                  chaisePage.clickButton(parentEl);
                 })
                 .then(() => {
                   appyBtn = recordEditPage.getMultiFormApply(colName)
@@ -443,7 +450,7 @@ describe('Regarding multi form input and clone button', () => {
 
 
                   .then(() => {
-                    return multiFormTextArea.sendKeys(textToType);
+                     multiFormTextArea.sendKeys(textToType);
                   })
                   .then(() => chaisePage.clickButton(applybtn))
                   .then(() => {
@@ -535,10 +542,10 @@ describe('Regarding multi form input and clone button', () => {
                   timeInput.clear()
                 })
                   .then(() => {
-                    return dateInput.sendKeys(params.apply_to_some_date);
+                    dateInput.sendKeys(params.apply_to_some_date);
                   })
                   .then(() => {
-                    return timeInput.sendKeys(params.apply_to_some_time);
+                    timeInput.sendKeys(params.apply_to_some_time);
                   })
                   .then(() => chaisePage.clickButton(applybtn))
                   .then(() => {
