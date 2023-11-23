@@ -700,7 +700,12 @@ export default function RecordsetProvider({
 
     const reloadCauses = flowControl.current.reloadCauses;
     const hasCauses = Array.isArray(reloadCauses) && reloadCauses.length > 0;
-    const act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
+    let act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
+    // if getDisabledTuples exists, then this read will load everything (domain values) and the
+    // getDisabledTuples is the actual load/reload
+    if (getDisabledTuples) {
+      act = hasCauses ? LogActions.RELOAD_DOMAIN : LogActions.LOAD_DOMAIN;
+    }
 
     // add reloadCauses
     const usedLogStack = hasCauses ?

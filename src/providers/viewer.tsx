@@ -594,7 +594,7 @@ export default function ViewerProvider({
         currentAnnotationFormState.current.svgAnnotationData = data;
 
         // submit the form
-        manuallyTriggerFormSubmit(document.querySelector(ID_NAMES.VIEWER_ANNOTATION_FORM) as HTMLFormElement);
+        manuallyTriggerFormSubmit(document.querySelector(`#${ID_NAMES.VIEWER_ANNOTATION_FORM}`) as HTMLFormElement);
         break;
       case 'fetchZPlaneList':
         fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then((res) => {
@@ -692,7 +692,7 @@ export default function ViewerProvider({
   }
 
   const updateAnnotaionList = (items: any) => {
-    let newItems: ViewerAnnotationModal[] = [];
+    const newItems: ViewerAnnotationModal[] = [];
 
     const annotConfig = ViewerConfigService.annotationConfig;
 
@@ -982,6 +982,11 @@ export default function ViewerProvider({
   const changeAnnotationFormState = (item?: ViewerAnnotationModal, index?: number, event?: any) => {
     const annotConfig = ViewerConfigService.annotationConfig;
 
+    // avoid calling the parent (highlight) action
+    if (event) {
+      event.stopPropagation();
+    }
+
     // if item is null, we just wanted to switch away from edit/create mode
     if (!item) {
       // remove the form props so the form disappears
@@ -992,6 +997,9 @@ export default function ViewerProvider({
 
       // we don't need the warning event listener anymore
       windowRef.removeEventListener('beforeunload', annotationFormLeaveAlertEvent);
+
+      // change back the app mode
+      LogService.changeAppMode(LogAppModes.DEFAULT);
       return;
     }
 
@@ -1016,7 +1024,7 @@ export default function ViewerProvider({
      * is coming from file (and not db).
      * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
      */
-    const isEditMode = isObjectAndNotNull(item) && isObjectAndNotNull(item.tuple);
+    const isEditMode = (typeof index === 'number') && isObjectAndNotNull(item.tuple);
 
     // set the state
     currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
@@ -1024,20 +1032,17 @@ export default function ViewerProvider({
     // make sure users are warned that data might be lost
     windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
 
-
-    // avoid calling the parent (highlight) action
-    if (event) {
-      event.stopPropagation();
-    }
-
     let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
-    if (isObjectAndNotNull(item) && !item.tuple) {
+    if ((typeof index === 'number') && !item.tuple) {
       logAppMode = LogAppModes.CREATE_PRESELECT;
       preselectedAnatomy = {};
       preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
     }
 
     const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
+
+    // change the app mode
+    LogService.changeAppMode(logAppMode);
 
     // switch to drawing mode
     toggleDrawingMode(undefined, true);
@@ -1048,7 +1053,7 @@ export default function ViewerProvider({
       config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
       reference: usedReference,
       logInfo: {
-        logAppMode: logAppMode,
+        logAppMode,
         logStack: ViewerAnnotationService.getAnnotationLogStack(isEditMode ? item : undefined),
         logStackPath: ViewerAnnotationService.getAnnotationLogStackPath(isEditMode ? item : undefined)
       },

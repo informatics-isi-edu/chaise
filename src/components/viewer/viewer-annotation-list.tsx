@@ -148,12 +148,12 @@ const ViewerAnnotationList = (): JSX.Element => {
         <div className='annotation-summary-row'>
           <span>Found {renderedAnnots.length} of {annotationModels.length} ({displayedCount} Displayed)</span>
           <div className='chaise-btn-group'>
-            <ChaiseTooltip tooltip='Show all annotations' placement='bottom'>
+            <ChaiseTooltip tooltip='Show all the annotations' placement='bottom'>
               <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(true)}>
                 <i className='fa-solid fa-eye'></i>
               </button>
             </ChaiseTooltip>
-            <ChaiseTooltip tooltip='Hide all annotations' placement='bottom'>
+            <ChaiseTooltip tooltip='Hide all the annotations' placement='bottom'>
               <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(false)}>
                 <i className='fa-solid fa-eye-slash'></i>
               </button>
@@ -172,7 +172,7 @@ const ViewerAnnotationList = (): JSX.Element => {
       {/* not using SearchInput here because this button and that comp are very different */}
       <div className='search-box-row'>
         <div className={`chaise-search-box chaise-input-group${loadingAnnotations ? ' disabled-element' : ''}`}>
-          <div className='chaise-input-control has-feedback'>
+          <div className={`chaise-input-control has-feedback${loadingAnnotations ? ' input-disabled' : ''}`}>
             <input type='text' placeholder='Search in the list' value={searchTerm} onChange={onSearchTermChange} disabled={loadingAnnotations} />
             <ClearInputBtn btnClassName='remove-search-btn' clickCallback={clearSearchTerm} show={!!searchTerm} />
           </div>
@@ -184,7 +184,11 @@ const ViewerAnnotationList = (): JSX.Element => {
             </ChaiseTooltip>
           </div>
         </div>
-        {canCreateAnnotation && <button className='btn chaise-btn chaise-btn-primary' onClick={startAnnotationCreate}>New</button>}
+        {canCreateAnnotation &&
+          <ChaiseTooltip placement='bottom' tooltip='Create new annotation'>
+            <button className='btn chaise-btn chaise-btn-primary' onClick={startAnnotationCreate} disabled={loadingAnnotations}>New</button>
+          </ChaiseTooltip>
+        }
       </div>
       {!loadingAnnotations && renderAnnotations()}
     </div>
