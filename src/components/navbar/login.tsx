@@ -17,7 +17,6 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import { getCatalogId } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, addLogParams, createMenuList,
   isChaise, isOptionValid,
@@ -27,7 +26,7 @@ import {
 
 
 const ChaiseLogin = (): JSX.Element => {
-  const catalogId = getCatalogId();
+  const catalogId = ConfigService.catalogID;
   const cc = ConfigService.chaiseConfig;
   const settings = ConfigService.appSettings;
 

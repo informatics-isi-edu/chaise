@@ -1,4 +1,4 @@
-  import Modal from 'react-bootstrap/Modal';
+import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 
 type DeleteConfirmationModalProps = {
   /**
@@ -20,7 +20,7 @@ type DeleteConfirmationModalProps = {
   /**
    * button label prop
    */
-  buttonLabel: string;
+  buttonLabel?: string;
   /**
    * The modal title
    */
@@ -33,36 +33,18 @@ type DeleteConfirmationModalProps = {
 const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLabel, title }: DeleteConfirmationModalProps) => {
   const renderedMessage = message ? message : <>Are you sure you want to delete this record?</>;
 
+  const renderedBtnLabel = buttonLabel ? buttonLabel : 'Delete';
+
   return (
-    <Modal
-      className='confirm-delete-modal'
+    <ConfirmationModal
+      modalClassName='confirm-delete-modal'
       show={show}
-      onHide={onCancel}
-    >
-      <Modal.Header>
-        <Modal.Title>{title ? title : 'Confirm Delete'}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div className='modal-text'>{renderedMessage}</div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          id='delete-confirmation'
-          className='chaise-btn chaise-btn-danger'
-          onClick={onConfirm}
-          type='button'
-        >
-          {buttonLabel}
-        </button>
-        <button
-          className='chaise-btn chaise-btn-secondary'
-          onClick={onCancel}
-          type='button'
-        >
-          Cancel
-        </button>
-      </Modal.Footer>
-    </Modal>
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+      title={title ? title : 'Confirm Delete'}
+      message={renderedMessage}
+      buttonLabel={renderedBtnLabel}
+    />
   );
 };
 

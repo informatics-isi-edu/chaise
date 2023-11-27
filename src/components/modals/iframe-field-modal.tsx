@@ -3,7 +3,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import IframeFieldCloseConfirmModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-field-close-confirm-modal';
+import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 import Modal from 'react-bootstrap/Modal';
 
 // hooks
@@ -75,7 +75,6 @@ const IframeFieldModal = ({
 }: IframeFieldModalProps) => {
 
   const { addAlert } = useAlert();
-  const confirmEmptyMessage = columnModel.column.inputIframeProps.emptyFieldConfirmMessage;
 
   const iframeRef = useRef<any>(null);
 
@@ -255,13 +254,28 @@ const IframeFieldModal = ({
     }
   }
 
+
+  const emptyFieldConfirmMessage = columnModel.column.inputIframeProps.emptyFieldConfirmMessage;
+  let confirmCloseMessage;
+  if (isStringAndNotEmpty(emptyFieldConfirmMessage)) {
+    confirmCloseMessage = <DisplayValue value={{ isHTML: true, value: emptyFieldConfirmMessage }} />;
+  } else {
+    confirmCloseMessage = <>
+      <p>You are about to close the popup without setting any values (i.e. no change will be made to the record). Do you still want to proceed?</p>
+      <p>To set the values, first click <b>Cancel</b> to dismiss this confirmation, then click the appropriate submit button in the popup.</p>
+      <p>Click <b>OK</b> to close the popup without setting any values.</p>
+    </>;
+  }
+
   return (
     <>
-      <IframeFieldCloseConfirmModal
+      <ConfirmationModal
+        modalClassName='confirm-iframe-close-modal'
         show={showModalCloseConfirm}
         onCancel={() => setShowModalCloseConfirm(false)}
         onConfirm={closeModal}
-        message={isStringAndNotEmpty(confirmEmptyMessage) ? <DisplayValue value={{ isHTML: true, value: confirmEmptyMessage }} /> : undefined}
+        message={confirmCloseMessage}
+        title='Confirm Close'
       />
       <Modal
         className='iframe-field-popup'

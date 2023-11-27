@@ -184,20 +184,17 @@ test: test-ALL_TESTS
 # ============================================================= #
 
 # HTML files that need to be created
-HTML=viewer/index.html \
-	 $(DIST)/chaise-dependencies.html
+HTML=$(DIST)/chaise-dependencies.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
-	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
-	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
-	$(DIST)/$(VIEWER_JS_SOURCE_MIN)
+	$(DIST)/$(SHARED_JS_SOURCE_MIN)
 
 SOURCE=src
 
 DIST=dist
 
-# where config files are
+# where config files are defined
 CONFIG=config
 
 # Shared utilities
@@ -296,7 +293,6 @@ $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 	@echo 'chaiseBuildVariables.OSDViewerBasePath="$(OSD_VIEWER_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 
-
 $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 	$(info - creating chaise-dependencies.html)
 	@> $(DIST)/chaise-dependencies.html
@@ -313,7 +309,8 @@ RSYNC_FILE_LIST=common \
 	scripts \
 	sitemap \
 	styles \
-	viewer \
+	$(JS_CONFIG_SAMPLE) \
+	$(VIEWER_CONFIG_SAMPLE) \
 	version.txt
 
 # the same list above but also includes the config files
@@ -336,48 +333,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
-# -------------------------- viewer app -------------------------- #
-VIEWER_ROOT=viewer
-
-# should eventually be removed
-DEPRECATED_VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
-
-VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
-	$(VIEWER_ROOT)/viewer.controller.js \
-	$(VIEWER_ROOT)/viewer.utils.js \
-	$(VIEWER_ROOT)/context.js \
-	$(VIEWER_ROOT)/annotations/annotations.js \
-	$(VIEWER_ROOT)/annotations/annotations.service.js \
-	$(VIEWER_ROOT)/annotations/annotations.controller.js
-
-VIEWER_JS_SOURCE_MIN=viewer.min.js
-$(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
-	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
-
-VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
-	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
-	$(COMMON)/vendor/mask.min.js \
-	$(COMMON)/vendor/spectrum/spectrum.min.js
-
-VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-	$(COMMON)/vendor/spectrum/spectrum.min.css
-
-.make-viewer-includes: $(BUILD_VERSION)
-	@> .make-viewer-includes
-	$(info - creating .make-viewer-includes)
-	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DEPRECATED_VIEWER_CONFIG) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-viewer-includes)
-
-viewer/index.html: viewer/index.html.in .make-viewer-includes
-	$(info - creating viewer/index.html)
-	@$(call build_html, .make-viewer-includes, viewer/index.html)
 
 # -------------------------- utility functions -------------------------- #
 
@@ -518,7 +473,7 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(DEPRECATED_VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' . $(CHAISEDIR)
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 

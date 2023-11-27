@@ -2,49 +2,50 @@ import { createRoot } from 'react-dom/client';
 
 // components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
-import Record, { RecordProps } from '@isrd-isi-edu/chaise/src/components/record/record';
+import Viewer from '@isrd-isi-edu/chaise/src/components/viewer/viewer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
+import { ViewerProps } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
-// utilities
+// utils
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { addAppContainerClasses } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { APP_NAMES, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-const recordSettings : ConfigServiceSettings = {
-  appName: APP_NAMES.RECORD,
-  appTitle: 'Record',
+const viewerSettings : ConfigServiceSettings = {
+  appName: APP_NAMES.VIEWER,
+  appTitle: 'Image Viewer',
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
-  overrideExternalLinkBehavior: true
+  overrideExternalLinkBehavior: true,
+  openIframeLinksInTab: true
 };
 
-const RecordApp = (): JSX.Element => {
+const ViewerApp = (): JSX.Element => {
 
   const { addAlert } = useAlert();
-  const { session, showPreviousSessionAlert, popupLogin } = useAuthn();
+  const { session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
 
-  const [recordProps, setRecordProps] = useState<RecordProps | null>(null);
+  const [viewerProps, setViewerProps] = useState<ViewerProps | null>(null);
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -60,24 +61,11 @@ const RecordApp = (): JSX.Element => {
     if (res.ppid) logObject.ppid = res.ppid;
     if (res.isQueryParameter) logObject.cqp = 1;
 
-    // 'promptlogin' query parameter comes from static generated chaise record pages
-    if (res.queryParams && !session && QUERY_PARAMS.PROMPT_LOGIN in res.queryParams) {
-      popupLogin(LogActions.LOGIN_WARNING);
-    }
-
-    // 'scrollTo' query parameter used to automatically scroll to a related section on load
-    let scrollToDisplayname: string;
-    if (res.queryParams && QUERY_PARAMS.SCROLL_TO in res.queryParams) {
-      scrollToDisplayname = res.queryParams[QUERY_PARAMS.SCROLL_TO];
-    }
-
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
-      const reference = response.contextualize.detailed;
+      const reference = response;
 
       // add schema and table name classes to app-container
-      addAppContainerClasses(reference, recordSettings.appName);
-
-      updateHeadTitle(`${getDisplaynameInnerText(reference.displayname)}: pending...`);
+      addAppContainerClasses(reference, viewerSettings.appName);
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
@@ -92,37 +80,45 @@ const RecordApp = (): JSX.Element => {
       ];
       const logStackPath = LogStackTypes.ENTITY;
 
-      // set the global log stack and log stack path
+      // set the global log stack, log stack path, and logAppMode
       LogService.config(logStack, logStackPath);
 
-      // set the record props so it can start bootstraping
-      setRecordProps({ reference, scrollToDisplayname, logInfo: { logObject, logStack, logStackPath } });
+      const queryParams = res.queryParams || {};
+      setViewerProps({
+        queryParams,
+        reference,
+        logInfo: { logObject, logStack, logStackPath }
+      });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
       dispatchError({ error: err });
-    })
+    });
 
   }, []);
 
   // if there was an error during setup, hide the spinner
-  if (!recordProps && errors.length > 0) {
+  if (!viewerProps && errors.length > 0) {
     return <></>;
   }
 
-  if (!recordProps) {
+  if (!viewerProps) {
     return <ChaiseSpinner />;
   }
 
-  return <Record {...recordProps} />;
+  return <Viewer {...viewerProps} />;
 };
 
 const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
-  <AppWrapper appSettings={recordSettings} includeAlerts includeNavbar displaySpinner>
-    <RecordApp />
+  <AppWrapper
+    appSettings={viewerSettings}
+    includeAlerts={true}
+    includeNavbar={true}
+    displaySpinner={true}
+  >
+    <ViewerApp />
   </AppWrapper>
 );
-

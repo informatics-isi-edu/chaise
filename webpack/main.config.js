@@ -40,6 +40,15 @@ module.exports = (env) => {
         externalFiles: [...recordsetExtFiles]
       },
       {
+        appName: 'viewer',
+        appTitle: 'Image Viewer',
+        externalFiles: [
+          ...recordsetExtFiles,
+          `${chaisePath}viewer/viewer-config.js`,
+          `${chaisePath}config/viewer-config.js`
+        ]
+      },
+      {
         appName: 'help',
         appTitle: 'Wiki Pages',
       },

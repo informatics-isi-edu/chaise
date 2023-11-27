@@ -106,7 +106,15 @@ type SplitViewProps = {
    * set this flag in case you pass initialWidth in vw units instead of px units
    * defaults to false
    */
-  convertInitialWidth?: boolean
+  convertInitialWidth?: boolean,
+  /**
+   * will be called when the resize (drag)  event of the sidebar starts.
+   */
+  onResizeStart?: () => void,
+  /**
+   * will be called when the resize (drag) event of the sidebar ends.
+   */
+  onResizeEnd?: () => void
 };
 
 type StateDef = {
@@ -133,7 +141,9 @@ const SplitView = ({
   initialWidth = 270,
   convertMinWidth = false,
   convertMaxWidth = false,
-  convertInitialWidth = false
+  convertInitialWidth = false,
+  onResizeStart,
+  onResizeEnd
 }: SplitViewProps): JSX.Element => {
 
   let convertedMinWidth = minWidth;
@@ -165,6 +175,7 @@ const SplitView = ({
   const onMouseUp = () => {
     if (leftState.dragging) {
       setLeftState({ ...leftState, dragging: false });
+      if (onResizeEnd) onResizeEnd();
     }
   }
 
@@ -192,6 +203,8 @@ const SplitView = ({
       }
 
       setLeftState({ ...leftState, leftWidth: newLeftWidth, xPos: clientX });
+
+      if (onResizeStart) onResizeStart();
     }
   };
 

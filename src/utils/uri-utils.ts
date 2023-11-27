@@ -458,6 +458,17 @@ export function chaiseDeploymentPath(): string {
 }
 
 /**
+ * Returns the path that openseadragon-viewer is installed
+ */
+export function OSDViewerDeploymentPath(): string {
+  if (typeof BUILD_VARIABLES === 'object' && typeof BUILD_VARIABLES.OSD_VIEWER_BASE_PATH === 'string') {
+    return BUILD_VARIABLES.OSD_VIEWER_BASE_PATH;
+  } else {
+    return '/openseadragon-viewer/';
+  }
+}
+
+/**
 * converts the supplied url into a window.location object and compares it with current window.location
 * @param {String} url - the url to be checked if same origin
 * @returns {boolean} true if same origin (or relative path)
@@ -546,7 +557,7 @@ export function transformCustomFilter(filter: string) {
  * @param queryParams
  * @param urlEncode whether we should url encode or not
  */
-export function addQueryParamsToURL(url: string, queryParams: {[key: string]: string}, urlEncode?: boolean) {
+export function addQueryParamsToURL(url: string, queryParams: { [key: string]: string }, urlEncode?: boolean) {
   let qCharacter = url.indexOf('?') !== -1 ? '&' : '?';
   return Object.keys(queryParams).reduce((prev: string, currKey: string, currIndex: number) => {
     if (currIndex > 0) qCharacter = '&';
