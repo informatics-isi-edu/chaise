@@ -77,7 +77,7 @@ const ViewerAnnotationList = (): JSX.Element => {
               <i className='fa-solid fa-pencil'></i>
             </button>
           </ChaiseTooltip>}
-          {annot.canDelete && annot.isStoredInDB && <ChaiseTooltip placement='bottom' tooltip='Delete this annotation'>
+          {(annot.canDelete && annot.isStoredInDB) && <ChaiseTooltip placement='bottom' tooltip='Delete this annotation'>
             <button className='chaise-btn chaise-btn-tertiary chaise-btn-sm annotation-row-btn' onClick={(e) => startAnnotationDelete(index, e)}>
               <i className='fa-regular fa-trash-alt'></i>
             </button>

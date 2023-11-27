@@ -207,7 +207,8 @@ const ShareCiteModal = ({
                   <ChaiseTooltip placement='bottom' tooltip={versionLinkCopyTooltip} dynamicTooltipString>
                     <span
                       className='fa-solid fa-clipboard chaise-copy-to-clipboard-btn'
-                      onClick={() => onCopyToClipboard(true)}
+                      // prevent the event from propagating to the button that opened it
+                      onClick={(e) => { e.stopPropagation(); onCopyToClipboard(true); }}
                     />
                   </ChaiseTooltip>
                 </h3>
@@ -219,7 +220,8 @@ const ShareCiteModal = ({
               <ChaiseTooltip placement='bottom' tooltip={liveLinkCopyTooltip} dynamicTooltipString>
                 <span
                   className='fa-solid fa-clipboard chaise-copy-to-clipboard-btn'
-                  onClick={() => onCopyToClipboard(false)}
+                  // prevent the event from propagating to the button that opened it
+                  onClick={(e) => { e.stopPropagation(); onCopyToClipboard(false); }}
                 />
               </ChaiseTooltip>
             </h3>
@@ -246,7 +248,8 @@ const ShareCiteModal = ({
               <a
                 className='share-item-value chaise-btn chaise-download-btn bibtex-download-btn'
                 download={`${downloadFilename}.bib`} href={bibtexObjectURL}
-                onClick={() => logCitationDownload()}>
+                // prevent the event from propagating to the button that opened it
+                onClick={(e) => { e.stopPropagation(); logCitationDownload(); }}>
                 BibTex
               </a>
             </li>

@@ -131,7 +131,7 @@ export const initializeOSDParams = (pageQueryParams: any, imageURI: string, defa
   }
 
   // both are empty
-  if (!isStringAndNotEmpty(pageQueryParams) && !isStringAndNotEmpty(imageURIQueryParams)) {
+  if (!isObjectAndNotNull(pageQueryParams) && !isStringAndNotEmpty(imageURIQueryParams)) {
     return {
       osdViewerParams: osdViewerParams,
       loadImageMetadata: true

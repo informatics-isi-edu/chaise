@@ -44,6 +44,13 @@ type DeleteAnnotationConfirmProps = {
   message: JSX.Element
 };
 
+type AnnotationFormProps = RecordeditProps & {
+  /**
+   * whether the annotation can be deleted or not.
+   */
+  canDelete: boolean
+};
+
 export const ViewerContext = createContext<{
   /**
    * if defined, returns the RID value of image record
@@ -77,7 +84,6 @@ export const ViewerContext = createContext<{
    * whether the user can create new annotations
    */
   canCreateAnnotation: boolean,
-
   /**
    * callback for closing the annotation form
    */
@@ -99,7 +105,7 @@ export const ViewerContext = createContext<{
   /**
    * if defined, it has the props that should be passed to recordedit to display a form
    */
-  annotationFormProps: RecordeditProps | null,
+  annotationFormProps: AnnotationFormProps | null,
   submitAnnotationForm: () => void,
   /**
    * indicator for showing the spinner on top of the form
@@ -165,37 +171,75 @@ export default function ViewerProvider({
    */
   const [initialized, setInitialized] = useState(false);
 
-  const [pageTitle, setPageTitle] = useState('Image');
+  /**
+   * the title. if empty we shouldn't show any title
+   */
+  const [pageTitle, setPageTitle] = useState('');
 
   /**
    * whether we're waiting for annotations or not
    */
   const [loadingAnnotations, setLoadingAnnotations] = useState(true);
 
+  /**
+   * whether users can create new annotations or not.
+   */
   const [canCreateAnnotation, setCanCreateAnnotation] = useState(false);
 
+  /**
+   * whether to show or hide the sidebar
+   */
   const [hideAnnotationSidebar, setHideAnnotationSidebar] = useState(true);
 
+  /**
+   * the displayed annotaitons
+   */
   const [annotationModels, setAnnotationModels, annotationModelsRef] = useStateRef<ViewerAnnotationModal[]>([]);
 
-  const [annotationFormProps, setAnnotationFormProps] = useState<RecordeditProps | null>(null);
+  /**
+   * the props used for the form.
+   */
+  const [annotationFormProps, setAnnotationFormProps] = useState<AnnotationFormProps | null>(null);
 
+  /**
+   * whether we should show the spinner. used for create/update and delete.
+   */
   const [showAnnotationFormSpinner, setShowAnnotationFormSpinner] = useState(false);
 
+  /**
+   * the confirmation modal props for deleteing an annotaiton. delete is called from multiple places that's why
+   * this is part of the provider
+   */
   const [deleteAnnotationConfirmProps, setDeleteAnnotationConfirmProps] = useState<DeleteAnnotationConfirmProps | null>(null);
 
+  /**
+   * whether we should show the required error or not. used in create mode
+   */
   const [displayDrawingRequiredError, setDisplayDrawingRequiredError] = useState(false);
 
+  /**
+   * whether draw mode is on or off. we need this for the toggle button in annotation form.
+   */
   const [isInDrawingMode, setIsInDrawingMode, isInDrawingModeRef] = useStateRef(false);
 
+  /**
+   * the index of highlighted annotation. -1 should be used if we don't want to highlight any annotations.
+   */
   const [highlightedAnnotationIndex, setHighlightedAnnotationIndex, highlightedAnnotationIndexRef] = useStateRef(-1);
 
+  /**
+   * the RID value of the image. it's mostly used internally, but since it was needed for screenshot filename I had to
+   * add it to the state
+   */
   const [imageID, setImageID, imageIDRef] = useStateRef<string | undefined>();
   /**
    * if default z-index is missing, we're using 0
    */
   const defaultZIndex = useRef<number>(0);
 
+  /**
+   * used throughout the provider to find the current state of the form.
+   */
   const currentAnnotationFormState = useRef<{
     model: ViewerAnnotationModal,
     isEditMode: boolean,
@@ -203,7 +247,14 @@ export default function ViewerProvider({
     svgAnnotationData?: any
   } | null>(null)
 
+  // passed to osd-viewer
   const osdViewerParameters = useRef<any>();
+
+  /**
+   * whether the main image is loaded or not.
+   * when users switch from one image to another (in z-plane), we need to show the new image and fetch the annotations.
+   * this boolean and ViewerAnnotationService.annotationsRecieved are used so we can coordinate these two events.
+   */
   const mainImageLoaded = useRef(false);
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
@@ -265,6 +316,7 @@ export default function ViewerProvider({
         mainImageID = imageTuple.data.RID;
         setImageID(imageTuple.data.RID);
 
+        // TODO added for backwards compatibility and should eventually be removed
         if (imageConfig.legacy_osd_url_column_name) {
           imageURI = imageTuple.data[imageConfig.legacy_osd_url_column_name];
           if (!imageURI) {
@@ -329,11 +381,12 @@ export default function ViewerProvider({
 
       } else {
         noImageData = true;
+        setPageTitle('Image');
       }
 
 
       // properly merge the query parameter and ImageURI
-      const res = initializeOSDParams(queryParams, imageURI);
+      const res = initializeOSDParams(queryParams, imageURI, defaultZIndex.current);
 
       osdViewerParameters.current = res.osdViewerParams;
 
@@ -516,6 +569,7 @@ export default function ViewerProvider({
 
         // clear the annotations
         setAnnotationModels([]);
+        // this will also set the annotationsRecieved to false
         ViewerAnnotationService.clearPreviousAnnotations();
 
         // show the loading indicator
@@ -558,7 +612,8 @@ export default function ViewerProvider({
         break;
       case 'annotationsLoaded':
         // called when osd-viewer read all the annotations.
-        // TODO we should technically keep showing the loader until updateAnnotationList is called
+        // TODO we should technically keep showing the loader until updateAnnotationList is called for all the annotations
+        // but that requires changes in osd-viewer as well.
         setLoadingAnnotations(false);
         break;
       case 'errorAnnotation':
@@ -923,7 +978,7 @@ export default function ViewerProvider({
 
       // update SVG ID (NEW_SVG) after successfully created
       let newSvgID = formState.model.svgID;
-      if (!formState.isEditMode && newSvgID === 'NEW_SVG') {
+      if (!formState.isEditMode && newSvgID === VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID) {
         // old logic:
         // newSvgID = new Date().getTime().toString() + Math.floor(Math.random() * 10000)
         newSvgID = generateUUID();
@@ -1003,6 +1058,9 @@ export default function ViewerProvider({
       return;
     }
 
+    // make sure users are warned that data might be lost
+    windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
+
     // make sure none of the annotations are highlighted
     const hIndex = highlightedAnnotationIndexRef.current;
     if (hIndex !== -1) {
@@ -1024,31 +1082,33 @@ export default function ViewerProvider({
      * is coming from file (and not db).
      * that being said, I left this create-preselect mode here anyways in case we wanted to allow this later.
      */
-    const isEditMode = (typeof index === 'number') && isObjectAndNotNull(item.tuple);
-
-    // set the state
-    currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
-
-    // make sure users are warned that data might be lost
-    windowRef.addEventListener('beforeunload', annotationFormLeaveAlertEvent);
-
+    const hasDrawnAnnotation = typeof index === 'number';
+    const isEditMode = hasDrawnAnnotation && isObjectAndNotNull(item.tuple);
     let preselectedAnatomy: any, logAppMode = isEditMode ? LogAppModes.EDIT : LogAppModes.CREATE;
-    if ((typeof index === 'number') && !item.tuple) {
+    if (hasDrawnAnnotation && !item.tuple) {
       logAppMode = LogAppModes.CREATE_PRESELECT;
       preselectedAnatomy = {};
       preselectedAnatomy[annotConfig.annotated_term_column_name] = item.id;
     }
 
-    const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
+    // set the state
+    currentAnnotationFormState.current = { model: { ...item }, index: index, isEditMode };
 
     // change the app mode
     LogService.changeAppMode(logAppMode);
+
+    // send a message to osd viewer to signal the start of edit (used for discarding changes)
+    if (hasDrawnAnnotation) {
+      ViewerAnnotationService.startAnnotationChange({ svgID: item.svgID, groupID: item.groupID });
+    }
 
     // switch to drawing mode
     toggleDrawingMode(undefined, true);
 
     // set the form props so it shows up
+    const usedReference = isEditMode ? ViewerAnnotationService.annotationEditReference : ViewerAnnotationService.annotationCreateReference;
     setAnnotationFormProps({
+      canDelete: item.canDelete,
       appMode: isEditMode ? appModes.EDIT : appModes.CREATE,
       config: { displayMode: RecordeditDisplayMode.VIEWER_ANNOTATION },
       reference: usedReference,
@@ -1190,19 +1250,11 @@ export default function ViewerProvider({
    * @param event the client action
    */
   const startAnnotationCreate = (event: any) => {
-    const svgID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID;
-    const groupID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.GROUP_ID;
-
-    // Notify OSD to create a new svg and group for annotations
-    ViewerAnnotationService.startAnnotationCreate({
-      svgID,
-      groupID,
-      anatomy: '',
-      description: ''
-    });
-
     // log the client action
     logViewerClientAction(LogActions.ADD_INTEND, true);
+
+    const svgID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID;
+    const groupID = VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.GROUP_ID;
 
     // all of these will be populated in the end
     const newAnnot: ViewerAnnotationModal = {
@@ -1220,6 +1272,20 @@ export default function ViewerProvider({
 
     // open the form
     changeAnnotationFormState(newAnnot, undefined, event);
+
+    /**
+     * NOTE the osd-viewer expect this one to be called after the call to switch the draw mode (done as part of changeAnnotationFormState).
+     * if we call this before switching the draw mode, the default color won't be populated. this is because the
+     * drawAnnotationMode only works if the `NEW_SVG` svg group is not there. otherwise it will just find a match
+     * and won't change the color.
+     */
+    // Notify OSD to create a new svg and group for annotations
+    ViewerAnnotationService.startAnnotationCreate({
+      svgID,
+      groupID,
+      anatomy: '',
+      description: ''
+    });
   };
 
   /**
@@ -1237,7 +1303,10 @@ export default function ViewerProvider({
     /**
      * if the current annotation is still unsaved, remove the drawing from openseadragon
      */
-    if (formState.model.svgID === 'NEW_SVG' || formState.model.groupID === 'NEW_GROUP') {
+    if (
+      formState.model.svgID === VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.SVG_ID ||
+      formState.model.groupID === VIEWER_CONSTANT.OSD_VIEWER.NEW_ANNOTATION.GROUP_ID
+    ) {
       // Remove the new created svg and group if not saved
       ViewerAnnotationService.removeSVG({ svgID: formState.model.svgID });
     }

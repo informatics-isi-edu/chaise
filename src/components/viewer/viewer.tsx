@@ -166,12 +166,12 @@ const ViewerInner = ({
                     <span>Save</span>
                   </button>
                 </ChaiseTooltip>
-                <ChaiseTooltip placement='bottom' tooltip='Delete this annotation.'>
+                {annotationFormProps.canDelete && <ChaiseTooltip placement='bottom' tooltip='Delete this annotation.'>
                   <button className='chaise-btn chaise-btn-danger' onClick={(e) => startAnnotationDelete(-1, e)}>
                     <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
                     <span>Delete</span>
                   </button>
-                </ChaiseTooltip>
+                </ChaiseTooltip>}
               </div>
             </div>
           }
