@@ -8,18 +8,17 @@ import React, { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { formatDatetime, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { cloneDeep } from 'lodash';
-import { dataFormats } from '../../utils/constants';
 
 const FormContainer = (): JSX.Element => {
 
