@@ -44,6 +44,7 @@ module.exports = (env) => {
         appTitle: 'Image Viewer',
         externalFiles: [
           ...recordsetExtFiles,
+          `${chaisePath}viewer/viewer-config.js`,
           `${chaisePath}config/viewer-config.js`
         ]
       },
