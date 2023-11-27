@@ -17,6 +17,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import React from 'react';
 
 export type InputSwitchProps = {
   /**
@@ -419,4 +420,4 @@ const InputSwitch = ({
   })();
 };
 
-export default InputSwitch;
+export default React.memo(InputSwitch);

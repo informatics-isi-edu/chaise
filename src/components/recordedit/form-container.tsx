@@ -4,20 +4,22 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import React, { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 // models
 import { appModes, RecordeditDisplayMode, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
-import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatDatetime, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { cloneDeep } from 'lodash';
+import { dataFormats } from '../../utils/constants';
 
 const FormContainer = (): JSX.Element => {
 
@@ -324,7 +326,9 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
     canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
   } = useRecordedit();
 
-  const { watch, reset, getValues, formState: { errors } } = useFormContext();
+  const { watch, reset, getValues, formState: { errors }, resetField, setValue } = useFormContext();
+
+  const selectAllFieldValue = useWatch({ name: `${SELECT_ALL_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}` });
 
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -332,25 +336,50 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
    * if the selected value is empty, we should disable the apply-all
    * useEffect allows us to look for the value and only rerender when we have to.
    */
+
   useEffect(() => {
-    const subscribe = watch((data, options) => {
-      const n = `${SELECT_ALL_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
-      const columnModel = columnModels[columnModelIndex];
-      if (!options.name || options.name !== n) return;
 
-      // see if the input is empty
-      let temp = !Boolean(data[n]);
-      if (columnModel.column.type.name === 'boolean') {
-        temp = typeof data[n] !== 'boolean';
-      }
+    const columnModel = columnModels[columnModelIndex];
 
-      if (isEmpty !== temp) {
-        setIsEmpty(temp);
-      }
+    // see if the input is empty
+    let temp = !Boolean(selectAllFieldValue);
+    if (columnModel.column.type.name === 'boolean') {
+      temp = typeof selectAllFieldValue !== 'boolean';
+    }
 
-    });
-    return () => subscribe.unsubscribe();
-  }, [watch, isEmpty]);
+    if (isEmpty !== temp) {
+      setIsEmpty(temp);
+    }
+
+  }, [selectAllFieldValue, isEmpty]);
+
+
+  // useEffect(() => {
+  //   const subscribe = watch((data, options) => {
+  //     const n = `${SELECT_ALL_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
+  //     const columnModel = columnModels[columnModelIndex];
+  //     console.log(n);
+
+  //     if (!options.name || options.name !== n) return;
+
+  //     // see if the input is empty
+  //     let temp = !Boolean(data[n]);
+  //     console.log('data[n] ' + data[n]);
+  //     console.log('temp ' + temp);
+  //     if (columnModel.column.type.name === 'boolean') {
+  //       temp = typeof data[n] !== 'boolean';
+  //       console.log('temp ' + temp);
+  //     }
+
+  //     console.log('isEmpty ' + isEmpty);
+
+  //     if (isEmpty !== temp) {
+  //       setIsEmpty(temp);
+  //     }
+
+  //   });
+  //   return () => subscribe.unsubscribe();
+  // }, [watch, isEmpty]);
 
   // ------------------------ callbacks -----------------------------------//
 
@@ -402,13 +431,29 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
+    const updateValues = clearValue ? '' : cloneDeep(selectAllFieldValue); // Using cloneDeep to deep clone object to avoid rerenders.
 
     forms.forEach((formValue: number) => {
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
-      reset({...copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue), 'updateAllColumn':cm.column['_name']});
+
+      // console.log(formValue)
+      // console.log(`${formValue}-${cm.column['_name']}`);
+
+      // Using reset causes unnecessary rerenders 
+      // reset({ ...copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue)});
+      setValue('updateAllField', cm.column['_name'])
+      setValue(`${formValue}-${cm.column['_name']}`, updateValues)
+
+      if (cm.inputType === 'timestamp') {
+        const v = formatDatetime(updateValues, { outputMomentFormat: dataFormats.timestamp });
+
+        setValue(`${formValue}-${cm.column['_name']}-date`, v ? v.date : '')
+        setValue(`${formValue}-${cm.column['_name']}-time`, v ? v.time : '')
+      }
+      // TODO - handle FK column type - need help
     });
   };
 
@@ -468,4 +513,4 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
   )
 }
 
-export default FormContainer;
+export default React.memo(FormContainer);

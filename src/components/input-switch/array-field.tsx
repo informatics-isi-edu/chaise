@@ -7,15 +7,15 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { formatDatetime, formatFloat, formatInt, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProps, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
-import { EventType, useFormContext } from 'react-hook-form';
+import { EventType, useFormContext, useFormState, useWatch } from 'react-hook-form';
 
 // since we're using strict mode, react-beautiful-dnd misbehaves due to multiple renders caused by strict mode
 // this is to guard against it
-const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+const StrictModeDroppable = React.memo(function StrictModeDroppable({ children, ...props }: DroppableProps) {
   const [enabled, setEnabled] = useState(false);
   useEffect(() => {
     const animation = requestAnimationFrame(() => setEnabled(true));
@@ -28,7 +28,7 @@ const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
     return null;
   }
   return <Droppable {...props}>{children}</Droppable>;
-};
+});
 
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
@@ -54,7 +54,18 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const [counter, setCounter] = useState(1);
   const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { formState, getValues, setValue, watch, register, unregister, trigger } = useFormContext();
+  const { getValues, setValue, register, unregister, trigger, getFieldState } = useFormContext();
+  const formState = useFormState({ name: `${name}-new-item` });
+  const addNewValue = useWatch({ name: `${name}-new-item` });
+  const arrayFieldValue = useWatch({ name: 'updateAllField' });
+
+  useEffect(() => {
+
+    if (arrayFieldValue !== name.split('-')[1]) return;
+
+    setDefaultFieldState(getValues(name));
+    setValue('updateAllField', '')
+  }, [arrayFieldValue])
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -77,7 +88,6 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     }
   }, [])
 
-
   useEffect(() => {
 
     // Update the array field in the react-hook-form context
@@ -88,44 +98,46 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     }
   }, [itemList])
 
+
+  // TODO Simplify
   useEffect(() => {
-    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || getValues(`${name}-new-item`) === undefined || getValues(`${name}-new-item`) === '')
-  }, [formState])
+    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || !addNewValue)
+  }, [addNewValue, formState])
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const sub = watch((data, options: Options) => {
+  //   const sub = watch((data, options: Options) => {
 
-      if ((options.name && options.name.includes(name) && options.type === 'change')) {
-        const itemId = parseInt(options.name?.split('-').at(-1) as string)
-        onTextEdit(itemId, data[`${name}-row-${itemId}`])
-        trigger(`${name}-new-item`);
-      }
+  //     if ((options.name && options.name.includes(name) && options.type === 'change')) {
+  //       const itemId = parseInt(options.name?.split('-').at(-1) as string)
+  //       onTextEdit(itemId, data[`${name}-row-${itemId}`])
+  //       trigger(`${name}-new-item`);
+  //     }
 
-      const updateAllColumn = getValues('updateAllColumn');
-      if (updateAllColumn && name.includes(updateAllColumn) && options.values) {
+  //     const updateAllColumn = getValues('updateAllColumn');
+  //     if (updateAllColumn && name.includes(updateAllColumn) && options.values) {
 
-        // Clear All fields
-        if (options.values[name] === '') {
-          const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
-          keysToClear.push(`-1-${name.split('-')[1]}`)
+  //       // Clear All fields
+  //       if (options.values[name] === '') {
+  //         const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
+  //         keysToClear.push(`-1-${name.split('-')[1]}`)
 
-          unregister(keysToClear)
-          setDefaultFieldState([])
-        }
-        // Apply All executed
-        else if (options.values[`-1-${name.split('-')[1]}`]) {
-          // console.log('Apply All');
-          const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
+  //         unregister(keysToClear)
+  //         setDefaultFieldState([])
+  //       }
+  //       // Apply All executed
+  //       else if (options.values[`-1-${name.split('-')[1]}`]) {
+  //         // console.log('Apply All');
+  //         const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
 
-          setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
-        }
-      }
-      
-    })
+  //         setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
+  //       }
+  //     }
 
-    return () => sub.unsubscribe();
-  }, [watch])
+  //   })
+
+  //   return () => sub.unsubscribe();
+  // }, [watch])
 
   const generateId = () => {
     const curr = counter;
@@ -249,7 +261,14 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     setItemList(items);
   }
 
-  const draggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
+  const DraggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
+    // const rowUpdate = useWatch({name:`${name}-row-${item.id}`});
+
+    // useEffect(()=>{
+    //   console.log(rowUpdate);
+
+    // },[rowUpdate])
+
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
@@ -262,7 +281,11 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               <InputSwitch
                 {...props}
                 type={getInputType({ name: baseArrayType })}
-                {...register(`${name}-row-${item.id}`, { value: item.value != undefined ? item.value : '' })}
+                {...register(`${name}-row-${item.id}`, {
+                  value: item.value !== undefined ? item.value : '', onChange: (event) => {
+                    onTextEdit(item.id, event.target.value);
+                  }
+                })}
                 displayExtraDateTimeButtons={true}
                 displayDateTimeLabels={baseArrayType === 'date' ? false : true}
                 requiredInput={true}
@@ -309,7 +332,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                       ref={provided.innerRef}
                       key={`${name}-list`}
                     >
-                      {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
+                      {itemList.map((item: RowItem, index: number) => DraggableItemRenderer(item, index, disableInput))}
                       {provided.placeholder}
                     </ul>
                   )
@@ -320,7 +343,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               <InputSwitch
                 {...props}
                 type={getInputType({ name: baseArrayType })}
-                {...register(`${name}-new-item`, { value: '' })}
+                {...register(`${name}-new-item`, { value: '', onChange: () => trigger(`${name}-new-item`) })}
                 displayExtraDateTimeButtons={true}
                 displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               />
@@ -337,5 +360,5 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   )
 }
 
-export default ArrayField;
+export default React.memo(ArrayField);
 
