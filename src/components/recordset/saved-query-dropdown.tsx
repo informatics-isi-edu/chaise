@@ -594,7 +594,7 @@ const SavedQueryDropdown = ({
     }
 
     return (
-      <Dropdown className='saved-query-menu' onToggle={onDropdownToggle}>
+      <Dropdown className='saved-query-menu chaise-dropdown' onToggle={onDropdownToggle}>
         <ChaiseTooltip
           placement='bottom-end'
           tooltip={MESSAGE_MAP.tooltip.saveQuery}

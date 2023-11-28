@@ -199,7 +199,7 @@ const Export = ({
 
   return (
     <>
-      <Dropdown className='export-menu' onToggle={onDropdownToggle}>
+      <Dropdown className='export-menu chaise-dropdown' onToggle={onDropdownToggle}>
         <ChaiseTooltip
           placement='bottom' tooltip={MESSAGE_MAP.tooltip.export}
           show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
