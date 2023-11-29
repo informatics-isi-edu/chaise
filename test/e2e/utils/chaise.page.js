@@ -227,18 +227,11 @@ var recordEditPage = function() {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.multi-form-' + columnDisplayName));
     };
-    this.getMultiFormClass = function () {
-        return element(by.css('.inputs-row .entity-value entity-active'));
-    };
     this.getMultiFormActiveRow = function () {
         const checkboxLabel = element(by.css('.form-inputs-row.highlighted-row.multi-form-input-row .chaise-checkbox.checkbox-label'));
 
         return checkboxLabel;
     };
-    this.getMultiFormApply = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.css('.multi-form-input-apply-' + columnDisplayName));
-    }
     this.getParentElement = function (child) {
         return child.element(by.xpath('..'))
     }
@@ -251,34 +244,33 @@ var recordEditPage = function() {
     this.getMultiFormInput = () => {
         return element(by.css('.multi-form-input'));
     }
-    this.getApplyBtnMultiForm = function (name) {
+    // getMultiFormApplyBtn
+    this.getMultiFormApplyBtn = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.multi-form-input-apply-' + columnDisplayName));
     }
-    this.getClearBtnMultiForm = function (name) {
+    this.getMultiFormClearBtn = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.multi-form-input-clear-' + columnDisplayName));
     }
-    this.getCloseBtnMultiForm = function (name) {
+    this.getMultiFormCloseBtn = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.css('.multi-form-input-close-' + columnDisplayName));
     }
     this.getAllElementsWithClass = function (className) {
-        return element.all(by.css(className)).count();
+        return element.all(by.css(className));
+    }
+    this.getMultiFormInputCheckbox = function () {
+        return element(by.css('.multi-form-input-checkbox input'));
+    }
+    this.getMultiFormInputCheckboxLabel = function () {
+        return element(by.css('.multi-form-input-checkbox span'));
     }
     this.getCheckboxInput = function () {
        return element(by.id('checkbox-input'));
     }
     this.getCheckboxLabel = function () {
         return element(by.id('checkbox-label'));
-     }
-
-     this.getElementForColumn = function(type, value, name) {
-        if(name === 'markdown_col') {
-            return this.getTextAreaForAColumn(name, value)
-        } else {
-            return this.getInputForAColumn(name, value)
-        }
      }
      this.getMultiFormTimestampDate = function (name) {
         return this.getMultiFormInput().element(by.css('input[name="-1-' + name + '-date"]'));
@@ -287,7 +279,7 @@ var recordEditPage = function() {
     this.getMultiFormTimestampTime = function (name) {
         return this.getMultiFormInput().element(by.css('input[name="-1-' + name + '-time"]'));
     }
-    this.getDropdownElementByNameMultiForm = (name, index) => {
+    this.getMultiFormDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = '-' + index + '-' + name;
         return this.getMultiFormInput().element(by.css('.input-switch-container-' + inputName + ' .dropdown-toggle'));
