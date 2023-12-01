@@ -3,6 +3,8 @@ const recordEditPage = chaisePage.recordEditPage;
 const recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 const EC = protractor.ExpectedConditions;
 
+const MULI_FORM_INPUT_FORM_NUMBER = -1;
+
 const testParams = {
   schema_table: 'multi-form-input:main',
   max_input_rows: 200,
@@ -389,24 +391,24 @@ const testParams = {
         }
       }
     ],
-    submission: {
-      table_name: 'main',
-      schema_name: 'multi-form-input',
-      table_displayname: 'main',
-      result_columns: [
-        'id', 'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'asset_col_filename'
-      ],
-      test_results: true,
-      results: [
-        ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', '', ''],
-        ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', '', ''],
-        ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', '', ''],
-        ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', '', ''],
-        ['5', '', 'manual', '2', '', '', '', 'true', '', '', ''],
-      ],
-      files: []
-    }
+    submission_results: [
+      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', '', ''],
+      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', '', ''],
+      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', '', ''],
+      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', '', ''],
+      ['5', '', 'manual', '2', '', '', '', 'true', '', '', ''],
+    ]
+  },
+  submission: {
+    table_name: 'main',
+    schema_name: 'multi-form-input',
+    table_displayname: 'main',
+    result_columns: [
+      'id', 'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
+      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'asset_col_filename'
+    ],
+    test_results: true,
+    files: []
   }
 };
 
@@ -421,8 +423,7 @@ describe('Regarding multi form input and clone button', () => {
     }
 
     describe('in create mode', () => {
-
-      xdescribe('general features', () => {
+      describe('general features', () => {
         let cloneFormSubmitButton;
 
         beforeAll((done) => {
@@ -442,7 +443,7 @@ describe('Regarding multi form input and clone button', () => {
         it('should be displayed as soon as users added a new form.', (done) => {
           chaisePage.clickButton(cloneFormSubmitButton).then(() => {
             const toggleBtn = recordEditPage.getMultiFormToggleButton('markdown_col');
-            expect(toggleBtn.isPresent()).toBeTruthy('toggle btn is present');
+            expect(toggleBtn.isPresent()).toBeTruthy();
             done();
           }).catch(chaisePage.catchTestError(done));
         });
@@ -627,16 +628,20 @@ describe('Regarding multi form input and clone button', () => {
             });
 
             it('when all forms are selected, clicking on apply should apply change to all forms', (done) => {
-              let checkboxInput = recordEditPage.getMultiFormInputCheckbox();
               // select all
-              chaisePage.clickButton(checkboxInput).then(() => {
+              chaisePage.clickButton(recordEditPage.getMultiFormInputCheckbox()).then(() => {
                 // set the value
-                return recordEditHelpers.setInputValue(-1, params.column_name, params.column_displayname, params.type, params.apply_to_all);
+                return recordEditHelpers.setInputValue(
+                  MULI_FORM_INPUT_FORM_NUMBER,
+                  params.column_name,
+                  params.column_displayname,
+                  params.type,
+                  params.apply_to_all
+                );
               }).then(() => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
               }).then(() => {
-                // TODO create the values
                 return recordEditHelpers.testFormValuesForAColumn(params.column_name, params.column_displayname, params.type, true, params.apply_to_all.column_values_after);
               }).then(() => {
                 done();
@@ -650,7 +655,13 @@ describe('Regarding multi form input and clone button', () => {
                 return chaisePage.clickButton(formInputCell);
               })).then(() => {
                 // set the value
-                return recordEditHelpers.setInputValue(-1, params.column_name, params.column_displayname, params.type, params.apply_to_some);
+                return recordEditHelpers.setInputValue(
+                  MULI_FORM_INPUT_FORM_NUMBER,
+                  params.column_name,
+                  params.column_displayname,
+                  params.type,
+                  params.apply_to_some
+                );
               }).then(() => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
@@ -696,49 +707,93 @@ describe('Regarding multi form input and clone button', () => {
         });
 
         describe('submission', () => {
-          recordEditHelpers.testSubmission(testParams.apply_tests.submission);
+          recordEditHelpers.testSubmission({
+            ...testParams.submission,
+            results: testParams.apply_tests.submission_results
+          });
         });
 
       });
-
     });
 
     /**
      * the tests below are just to make sure edit works as well. the bulk of test cases are added above
      */
-    xdescribe('in edit mode', () => {
-      it('in single edit the toggle button should not be available.', () => {
-        // TODO
-        // go to a single edit page and make sure the button is not available.
+    describe('in edit mode', () => {
+      it('in single edit the toggle button should not be available.', (done) => {
+        chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}/id=9001`).then(() => {
+          return chaisePage.recordeditPageReady();
+        }).then(() => {
+          expect(recordEditPage.getMultiFormToggleButton('markdown_col').isPresent()).toBeFalsy();
+          done();
+        }).catch(chaisePage.catchTestError(done));
       });
 
       describe('in multi edit', () => {
-        beforeAll(() => {
-          // TODO go to a multiedit page
+        beforeAll((done) => {
+          const url = `${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}/id=9001;id=9002@sort(id)`;
+          chaisePage.navigate(url).then(() => {
+            return chaisePage.recordeditPageReady();
+          }).then(() => {
+            done();
+          }).catch(chaisePage.catchTestError(done));
         });
 
-        it('the toggle button should be offered on all non-disabled columns.', () => {
-          // TODO
-          // make sure it's not available for the disabled column
-          // make sure it's available it's availbale for one of the columns
+        it('the toggle button should be offered on all non-disabled columns.', (done) => {
+          expect(recordEditPage.getMultiFormToggleButton('id').isPresent()).toBeFalsy();
+          expect(recordEditPage.getMultiFormToggleButton('markdown_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('text_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('int_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('float_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('date_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('timestamp_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('boolean_col').isPresent()).toBeTruthy();
+          expect(recordEditPage.getMultiFormToggleButton('fk_col').isPresent()).toBeTruthy();
+
+          done();
         });
 
-        it('user should be able to use this control to change all values for a column.', () => {
-          // TODO
-          // click on the toggle for that one column, select all, change value, and then submit.
+        it('user should be able to use this control to change some values for columns.', (done) => {
+          const applyBtn = recordEditPage.getMultiFormApplyBtn();
+
+          // I'm testing only one column here as we're doing all the tests in create mode already
+          // we could add more tests similar to create mode here, but I don't think it's needed.
+          chaisePage.clickButton(recordEditPage.getMultiFormToggleButton('int_col')).then(() => {
+            // wait for multi-form-row to show up
+            return chaisePage.waitForElement(applyBtn);
+          }).then(() => {
+            return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'int_col', 'int_col', 'int', { value: '666' });
+          }).then(() => {
+            chaisePage.waitForElementCondition(EC.elementToBeClickable(applyBtn));
+          }).then(() => {
+            // apply the value
+            return chaisePage.clickButton(applyBtn);
+          }).then(() => {
+            done();
+          }).catch(chaisePage.catchTestError(done));
         });
+
+        describe('submission', () => {
+          recordEditHelpers.testSubmission({
+            ...testParams.submission,
+            results: [
+              ['9001', 'markdown value 9001', 'text value 9001', '666', '', '', '', '', '', '', ''],
+              ['9002', 'markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', '', ''],
+            ]
+          }, true)
+        })
 
       });
     });
   });
 
-  // TODO x should be removed when the tests above are added
-  xdescribe('Regarding clone button, in create mode,', () => {
+  describe('Regarding clone button, in create mode,', () => {
     let cloneFormInput, cloneFormSubmitButton;
 
     beforeAll((done) => {
-      chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}`);
-      chaisePage.recordeditPageReady().then(() => {
+      chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/${testParams.schema_table}`).then(() => {
+        return chaisePage.recordeditPageReady();
+      }).then(() => {
         cloneFormInput = chaisePage.recordEditPage.getCloneFormInput();
         cloneFormSubmitButton = chaisePage.recordEditPage.getCloneFormInputSubmitButton();
         done();

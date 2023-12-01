@@ -1,4 +1,14 @@
 [
-  {"id": 9001},
-  {"id": 9002}
+  {
+    "id": 9001,
+    "markdown_col": "markdown value 9001",
+    "text_col": "text value 9001",
+    "int_col": 9001
+  },
+  {
+    "id": 9002,
+    "markdown_col": "markdown value 9002",
+    "int_col": 9002,
+    "date_col": "2023-11-11"
+  }
 ]

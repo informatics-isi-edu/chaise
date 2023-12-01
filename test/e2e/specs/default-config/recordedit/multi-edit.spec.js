@@ -296,7 +296,7 @@ describe('Edit multiple existing record,', function() {
             });
 
             if (tableParams.testFkClear) {
-                describe("User should be able to clear all foreign key values using select all,", function () {
+                describe("User should be able to clear all foreign key values using multi form input,", function () {
                     beforeAll(function(done) {
                         browser.refresh();
 
@@ -305,22 +305,23 @@ describe('Edit multiple existing record,', function() {
                     });
 
                     it("open the select all form and click 'clear all'", function (done) {
-                        const colName = tableParams.fkColumnName;
-                        const cancelBtn = chaisePage.recordEditPage.getCloseBtnMultiForm(colName),
-                            clearAllBtn = chaisePage.recordEditPage.getClearBtnMultiForm(colName);
+                        const toggleBtn = chaisePage.recordEditPage.getMultiFormToggleButton(tableParams.fkColumnName),
+                              multiFormCheckbox = chaisePage.recordEditPage.getMultiFormInputCheckbox(),
+                              multiFormClear = chaisePage.recordEditPage.getMultiFormClearBtn();
 
-                        chaisePage.recordEditPage.getMultiFormToggleButton(colName).click().then(function () {
-                            browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
-
-                            return clearAllBtn.click();
+                        chaisePage.waitForElementCondition(EC.elementToBeClickable(toggleBtn)).then(() => {
+                            return chaisePage.clickButton(toggleBtn);
+                        }).then(() => {
+                            return chaisePage.waitForElementCondition(EC.elementToBeClickable(multiFormCheckbox));
+                        }).then(() => {
+                            // select all
+                            return chaisePage.clickButton(multiFormCheckbox);
                         }).then(function () {
-                            cancelBtn.click();
-
+                            // clear
+                            return chaisePage.clickButton(multiFormClear);
+                        }).then(() => {
                             done();
-                        }).catch(function (err) {
-                            console.log(err);
-                            done.fail();
-                        });
+                        }).catch(chaisePage.catchTestError(done));
                     });
 
                     it("should submit the form and show " + tableParams.keys.length + " rows updated", function (done) {

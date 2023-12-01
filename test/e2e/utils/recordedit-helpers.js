@@ -1643,11 +1643,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
  *            all the time, pass `true` otherwise pass `!process.env.CI`.
  *  - files: the files that are used during test (for upload test). if you're not testing upload, pass an empty array.
  *
- * only needed for multi-edit (in multi edit mode, the resultset link will link to the original location)
- *  - keys:  so this should be passed
- *          for generating the same link. An array of objects with like this: {name: "id", value: "1000", operator: "="}
- *  - sortColumns: the columns used for sorting
- *
  * @param  {Object}  tableParams refer to the description
  * @param  {Boolean} isEditMode  whether this is in entity mode or not
  */
@@ -1709,17 +1704,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
             });
 
             it('should point to the correct link with caption.', function () {
-                var linkModifier = "";
-                if (isEditMode) {
-                    var keyPairs = [];
-                    tableParams.keys.forEach(function(key) {
-                        keyPairs.push(key.name + key.operator + key.value);
-                    });
-                    linkModifier = "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns.join(",") + ")"
-                }
-
-                var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
-                var titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
+                const expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
+                const titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                 expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
