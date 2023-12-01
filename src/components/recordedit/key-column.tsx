@@ -19,7 +19,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 const KeyColumn = (): JSX.Element => {
 
   const {
-    appMode, activeMultiForm, columnModels, columnPermissionErrors, 
+    appMode, activeMultiForm, columnModels, columnPermissionErrors,
     config, forms, logRecordeditClientAction, toggleActiveMultiForm
   } = useRecordedit();
 

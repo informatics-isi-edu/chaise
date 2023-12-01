@@ -121,12 +121,12 @@
           flex-direction: row;
 
           // adding an overlay on top of form to add the click event
-          .form-overlay {
+          .clickable-form-overlay {
             height: 100%;
             width: 100%;
             cursor: pointer;
             // This rule is to overwrite cursor:not-allowed for toolbar.
-            .chaise-btn-toolbar {
+            .chaise-btn-toolbar, .dropdown {
               pointer-events: none;
             }
           }
@@ -142,7 +142,6 @@
           position: sticky;
           top: 0;
           left: 0;
-          // we are giving z-index 2, which is lower than the dropdown input values, so that they show up
           z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
 
           // Adding a div to align the content center always
@@ -225,7 +224,7 @@
 
             .multi-form-input {
               // added so the spinner and backdrop only cover the input.
-              // if we want to cover the whole select all row, move this to .select-all-row
+              // if we want to cover the whole multi form row, move this to .multi-form-row
               position: relative;
               textarea {
                 width: 1200px;

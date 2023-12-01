@@ -6,12 +6,12 @@ $z-index-map: (
   'markdown-container-radio-label': 1,
   // more than input
   'input-group-append-btn': 2,
-  // higher than dropdown
-  'multi-form-input-row': 2,
   // more than the unfocused version
   'input-group-append-btn-focus': 3,
   // more than previous one
   'input-control-feedback': 4,
+  // higher than the input and feedback buttons
+  'multi-form-input-row': 5,
 
   // make sure it's visible
   'top-horzontal-scroll-wrapper': 5,

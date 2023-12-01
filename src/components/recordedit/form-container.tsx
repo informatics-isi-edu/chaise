@@ -68,7 +68,7 @@ const FormContainer = (): JSX.Element => {
     };
   }, []);
 
-  /** 
+  /**
    * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
    * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
   */
@@ -82,10 +82,10 @@ const FormContainer = (): JSX.Element => {
     }
   };
 
-  /** 
-   * This callback is called when we want to delete the form, we are setting the form index and 
+  /**
+   * This callback is called when we want to delete the form, we are setting the form index and
    * a boolean to know the remove button is clicked
-  */ 
+  */
   const handleRemoveForm = (formIndex: number, formNumber: number) => {
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);

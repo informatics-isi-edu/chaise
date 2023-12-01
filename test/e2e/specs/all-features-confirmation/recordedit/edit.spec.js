@@ -17,7 +17,7 @@ var testParams = {
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
         key: { name: "id", value: "2000", operator: "="},
-        not_ci: true,
+        test_results: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -85,7 +85,7 @@ var testParams = {
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
        table_displayname: "file",
        table_comment: "asset/object",
-       not_ci: !process.env.CI,
+       test_results: !process.env.CI,
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [

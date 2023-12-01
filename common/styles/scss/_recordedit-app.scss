@@ -123,7 +123,7 @@
                                 border-bottom: 1px solid $border-color;
                             }
 
-                            &.entity-key.multi-form-opened {
+                            &.entity-key.select-all-opened {
                                 border-bottom: 0;
                             }
                         }
@@ -136,7 +136,7 @@
                     /**
                      * make sure the table cells have the same width
                      */
-                    .shift-form, .multi-form-input-row {
+                    .shift-form, .select-all-input-row {
                         display: flex;
                         width: 100%;
                     }
@@ -168,7 +168,7 @@
                                 background: white;
                             }
 
-                            &.match-entity-key.multi-form-opened {
+                            &.match-entity-key.select-all-opened {
                                 border-top: none;
                             }
 
@@ -255,7 +255,7 @@
         border-top: 0;
     }
 
-    .multi-form-text {
+    .select-all-text {
         padding: 4px;
         border: 1px solid transparent;
     }

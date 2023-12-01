@@ -1,4 +1,5 @@
 var chaisePage = require('./chaise.page.js');
+const recordEditPage = chaisePage.recordEditPage;
 var moment = require('moment');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var chance = require('chance').Chance();
@@ -1638,7 +1639,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
  *               - string: the expected getText() of the row
  *               - an object with `link` and `value` to test the displayed link.
  *  - result_columns: the column names (an array of string).
- *  - not_ci: a boolean that can be used if we want to skip test cases for non CI environment. If you want to run test cases
+ *  - test_results: a boolean that can be used if we want to skip test cases for non CI environment. If you want to run test cases
  *            all the time, pass `true` otherwise pass `!process.env.CI`.
  *  - files: the files that are used during test (for upload test). if you're not testing upload, pass an empty array.
  *
@@ -1653,25 +1654,29 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 exports.testSubmission = function (tableParams, isEditMode) {
     var hasErrors = false;
 
-    it("should have no errors.", function() {
+    it("should have no errors.", function(done) {
         chaisePage.recordEditPage.submitForm().then(() => {
             return chaisePage.recordEditPage.getAlertError();
         }).then(function(err) {
             if (err) {
                 expect("Page has errors").toBe("No errors", "expected page to have no errors");
                 hasErrors = true;
-            } else {
-                expect(true).toBe(true);
+                done.fail();
+                return;
             }
-        });
 
-        // if there is a file upload
-        if (!process.env.CI && tableParams.files.length > 0) {
-            var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
-            browser.wait(ExpectedConditions.invisibilityOf(element(by.css('.upload-table'))),timeout).catch(function (err) {
-                // if the element is not available (there is no file) it will return error which we should ignore.
-            });
-        }
+            // if there is a file upload
+            if (!process.env.CI && tableParams.files.length > 0) {
+              var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
+              browser.wait(ExpectedConditions.invisibilityOf(element(by.css('.upload-table'))),timeout).catch(function (err) {
+                  // if the element is not available (there is no file) it will return error which we should ignore.
+              });
+            }
+
+            done();
+        }).catch(chaisePage.catchTestError(done));
+
+
     });
 
     if (tableParams.results.length > 1) {  // multi edit/create
@@ -1721,7 +1726,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
             });
 
             //NOTE: in ci we're not uploading the file and therefore this test case will fail
-            if (tableParams.not_ci) {
+            if (tableParams.test_results) {
                 it('table must show correct results.', function() {
 
                     chaisePage.recordsetPage.getTableHeader().all(by.tagName("th")).then(function (headerCells) {
@@ -1942,3 +1947,153 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
         }
     });
 };
+
+
+/**
+ *
+ * expected types: 'timestamp', 'boolean', 'fk', any other string
+ *
+ * expected valueProps:
+ * {
+ *
+ * // general:
+ *  value,
+ *
+ * // time stamp props:
+ *  date_value,
+ *  time_value,
+ *
+ * // fk props:
+ *  modal_num_rows,
+ *  modal_option_index,
+ * }
+ *
+ * @param {string} name input name
+ * @param {string} displayname the displayed name
+ * @param {string} displayType type of the input
+ * @param {Object} valueProps expected values
+ * @returns
+ */
+exports.setInputValue = (formNumber, name, displayname, displayType, valueProps) => {
+  return new Promise((resolve, reject) => {
+    switch (displayType) {
+      case 'boolean':
+        let dropdown = chaisePage.recordEditPage.getDropdownElementByName(name, formNumber);
+        browser.wait(EC.elementToBeClickable(dropdown)).then(() => {
+          return chaisePage.recordEditPage.selectDropdownValue(dropdown, valueProps.value);
+        }).then(() => {
+          expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(valueProps.value);
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'fk':
+        chaisePage.clickButton(recordEditPage.getForeignKeyInputButton(displayname, formNumber)).then(() => {
+          return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+        }).then(() => {
+          return browser.wait(function () {
+            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+              return (ct == valueProps.modal_num_rows);
+            });
+          });
+        }).then(() => {
+          // select the option
+          return chaisePage.recordsetPage.getRows().get(valueProps.modal_option_index).all(by.css('.select-action-button')).click();
+        }).then(() => {
+          // wait for modal to close
+          return browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'timestamp':
+        const inputs = recordEditPage.getTimestampInputsForAColumn(name, formNumber);
+        chaisePage.clickButton(inputs.clearBtn).then(() => {
+          return inputs.date.clear();
+        }).then(() => {
+          return inputs.time.clear();
+        }).then(() => {
+          return inputs.time.sendKeys(valueProps.time_value);
+        }).then(() => {
+          return inputs.date.sendKeys(valueProps.date_value);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      default:
+        let inputEl;
+        if (displayType === 'textarea') {
+          inputEl = recordEditPage.getTextAreaForAColumn(name, formNumber);
+        } else {
+          inputEl = recordEditPage.getInputForAColumn(name, formNumber);
+        }
+
+        recordEditPage.clearInput(inputEl).then(() => {
+         return inputEl.sendKeys(valueProps.value);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+    }
+
+  });
+}
+
+
+exports.testFormValuesForAColumn = (name, displayname, displayType, allDisabled, expectedValues) => {
+  return new Promise((resolve) => {
+    let input, inputControl, formNumber, message;
+
+    expectedValues.forEach((value, i) => {
+      formNumber = i + 1;
+      message = `col ${displayname}, formNumber=${formNumber}`;
+
+      switch (displayType) {
+        case 'boolean':
+          inputControl = recordEditPage.getInputControlForAColumn(name, formNumber);
+          input = recordEditPage.getDropdownElementByName(name, formNumber);
+          if (allDisabled) {
+            expect(inputControl.getAttribute('class')).toContain('input-disabled',`${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        case 'fk':
+          input = recordEditPage.getForeignKeyInputDisplay(displayname, formNumber);
+          if (allDisabled) {
+            expect(input.getAttribute('class')).toContain('input-disabled', `${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        case 'timestamp':
+          input = recordEditPage.getTimestampInputsForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(input.date.isEnabled()).toBeFalsy(`${message}: date was not disabled.`);
+            expect(input.time.isEnabled()).toBeFalsy(`${message}: time was not disabled.`);
+          }
+          expect(input.date.getAttribute('value')).toBe(value.date_value, `${message}: date value missmatch.`);
+          expect(input.time.getAttribute('value')).toBe(value.time_value, `${message}: time value missmatch.`);
+          break;
+        case 'upload':
+          inputControl = recordEditPage.getInputControlForAColumn(name, formNumber);
+          input = recordEditPage.getTextFileInputForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(inputControl.getAttribute('class')).toContain('input-disabled', `${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        default:
+          const isTextArea = displayType === 'textarea';
+          input = isTextArea ? recordEditPage.getTextAreaForAColumn(name, formNumber) : recordEditPage.getInputForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(input.isEnabled()).toBeFalsy(`${message}: was not disabled.`);
+          }
+          expect(input.getAttribute('value')).toBe(value, `${message}: value missmatch.`);
+          break;
+      }
+
+      if (i === expectedValues.length-1) {
+        resolve();
+      }
+    });
+
+  });
+}

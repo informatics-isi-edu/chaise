@@ -309,7 +309,7 @@ describe('Edit multiple existing record,', function() {
                         const cancelBtn = chaisePage.recordEditPage.getCloseBtnMultiForm(colName),
                             clearAllBtn = chaisePage.recordEditPage.getClearBtnMultiForm(colName);
 
-                        chaisePage.recordEditPage.getColumnMultiFormButton(colName).click().then(function () {
+                        chaisePage.recordEditPage.getMultiFormToggleButton(colName).click().then(function () {
                             browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                             return clearAllBtn.click();
