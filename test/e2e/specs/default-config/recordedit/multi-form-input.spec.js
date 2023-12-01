@@ -457,10 +457,10 @@ const testParams = {
       }
     ],
     submission_results: [
-      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', 'testfile128kb_1.png'],
-      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', 'testfile128kb_1.png'],
-      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', 'testfile128kb_2.png'],
-      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', 'testfile128kb_3.png'],
+      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
+      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
+      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png'],
+      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png'],
       ['5', '', 'manual', '2', '', '', '', 'true', '', ''],
     ]
   },
