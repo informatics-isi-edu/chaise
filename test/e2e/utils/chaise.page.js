@@ -668,7 +668,7 @@ var recordPage = function() {
     };
 
     this.getConfirmDeleteButton = function () {
-        return element(by.id("delete-confirmation"));
+        return element(by.css(".confirm-delete-modal .ok-button"));
     }
 
     this.getShowAllRelatedEntitiesButton = function() {
@@ -945,7 +945,7 @@ var recordsetPage = function() {
     };
 
     this.getConfirmDeleteButton = function () {
-        return element(by.id("delete-confirmation"));
+      return element(by.css(".confirm-delete-modal .ok-button"));
     };
 
     /* saved query, export, and other page action selectors */

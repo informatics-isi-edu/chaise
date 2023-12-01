@@ -113,7 +113,8 @@ export const errorNames = {
   multipleDataErrorCode: 'Multiple Records Found',
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
-  invalidHelpPage: 'Help Page Not Found'
+  invalidHelpPage: 'Help Page Not Found',
+  limitedBrowserSupport: 'Limited Browser Support'
 };
 
 export const errorMessages = {
@@ -155,7 +156,8 @@ export const APP_NAMES = {
   NAVBAR: 'navbar',
   RECORD: 'record',
   RECORDEDIT: 'recordedit',
-  RECORDSET: 'recordset'
+  RECORDSET: 'recordset',
+  VIEWER: 'viewer'
 };
 
 export const CLASS_NAMES = {
@@ -165,7 +167,8 @@ export const CLASS_NAMES = {
 };
 
 export const ID_NAMES = {
-  APP_ROOT: 'chaise-app-root'
+  APP_ROOT: 'chaise-app-root',
+  VIEWER_ANNOTATION_FORM: 'viewer-annotation-form'
 };
 
 export const DEFAULT_DISPLAYNAME = {
@@ -208,6 +211,47 @@ export const RECORDEDIT_MAX_ROWS = 200;
 export const FACET_PANEL_DEFAULT_PAGE_SIZE = 10;
 export const RECORDSET_DEFAULT_PAGE_SIZE = 25;
 export const RELATED_TABLE_DEFAULT_PAGE_SIZE = 25;
+
+export const VIEWER_CONSTANT = {
+  DEFAULT_PAGE_SIZE: 25,
+  DEFAULT_IIIF_VERSION: '2',
+  OSD_VIEWER: {
+    IMAGE_URL_QPARAM: 'url',
+    CHANNEL_NUMBER_QPARAM: 'channelNumber',
+    CHANNEL_NAME_QPARAM: 'channelName',
+    PSEUDO_COLOR_QPARAM: 'pseudoColor',
+    PIXEL_PER_METER_QPARAM: 'meterScaleInPixels',
+    WATERMARK_QPARAM: 'waterMark',
+    IS_RGB_QPARAM: 'isRGB',
+    CHANNEL_CONFIG_QPARAM: 'channelConfig',
+    CHANNEL_QPARAMS: [
+      'aliasName', 'channelName', 'pseudoColor', 'isRGB'
+    ],
+    OTHER_QPARAMS: [
+      'waterMark', 'meterScaleInPixels', 'scale', 'x', 'y', 'z',
+      'ignoreReferencePoint', 'ignoreDimension', 'enableSVGStrokeWidth', 'zoomLineThickness',
+      'showHistogram'
+    ],
+    CHANNEL_CONFIG: {
+      FORMAT_NAME: 'channel-parameters',
+      FORMAT_VERSION: '1.0',
+      NAME_ATTR: 'name',
+      VERSION_ATTR: 'version',
+      CONFIG_ATTR: 'config'
+    },
+    NEW_ANNOTATION: {
+      SVG_ID: 'NEW_SVG',
+      GROUP_ID: 'NEW_GROUP'
+    }
+  },
+  ANNOTATIONS: {
+    SEARCH_LOG_TIMEOUT: 2000,
+    LINE_THICKNESS_LOG_TIMEOUT: 1000
+  }
+};
+
+
+
 
 // TODO if chaise is not built how we expect, this value will be undefiend.
 //      we might be able to enforce this during the npm install command of chaise

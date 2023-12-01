@@ -1,3 +1,7 @@
+import {
+  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
 export enum appModes {
   COPY = 'copy',
   CREATE = 'create',
@@ -5,26 +9,74 @@ export enum appModes {
 }
 
 export type RecordeditProps = {
-  appMode: string;
+  /**
+   * the mode of the app
+   */
+  appMode: appModes;
+  /**
+   * the config object
+   */
   config: RecordeditConfig;
-  modalOptions?: RecordeditModalOptions;
-  parentContainer?: HTMLElement;
-  prefillRowData?: any[];
-  queryParams: any;
+  /**
+   * main reference of the form
+   */
   reference: any;
-  /* The log related APIs */
+  /**
+   * log related properties
+   */
   logInfo: {
     logAppMode: string;
-    /* the object that will be logged with the first request */
     logObject?: any;
     logStack: any;
     logStackPath: string;
-  }
+  },
+  /**
+   * the query parameters that the page might have
+   */
+  queryParams: any;
+  /**
+   * parameters for the modal
+   */
+  modalOptions?: RecordeditModalOptions;
+  /**
+   * modify submission rows prior to submission
+   */
+  modifySubmissionRows?: (submissionRows: any[]) => void,
+  /**
+   * called when form was submitted successfuly
+   */
+  onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
+  /**
+   * called when form submission (create/update request) errored out
+   * return true from this function if you want recordedit to show the alert.
+   */
+  onSubmitError?: (exception: any) => boolean,
+  /**
+   * initial data that you want to be displayed (only honored in create mode)
+   */
+  prefillRowData?: any[];
+  /**
+   * the tuples that we want to edit (only honored in edit mode)
+   */
+  initialTuples?: any[],
+  /**
+   * the container of this recordedit instance.
+   */
+  parentContainer?: HTMLElement;
+  /**
+   * name of the columns that should be hidden
+   */
+  hiddenColumns?: string[];
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 }
 
 export enum RecordeditDisplayMode {
   FULLSCREEN = 'fullscreen',
-  POPUP = 'popup'
+  POPUP = 'popup',
+  VIEWER_ANNOTATION = 'viewer-annotation',
 }
 
 export type RecordeditConfig = {
@@ -33,8 +85,17 @@ export type RecordeditConfig = {
 
 export type RecordeditModalOptions = {
   parentReference: any;
-  onSubmitSuccess: () => void;
   onClose: () => void;
+}
+
+export type RecordeditForeignkeyCallbacks = {
+  getDisabledTuples?: RecordsetProviderGetDisabledTuples,
+  /**
+   * if defined, will be used for validating the foreign key value.
+   *
+   * return `true` if the value is valid. otherwise return a string that will be showed as an error.
+   */
+  onChange?: (column: any, rowData: any) => true | string,
 }
 
 export interface RecordeditColumnModel {
@@ -55,6 +116,11 @@ export interface RecordeditColumnModel {
    * if this is true, on load, we have to wait for all the foreignkey values to load.
    */
   hasDomainFilter: boolean;
+  /**
+   * whether we should show the input or not
+   * (used in viewer app to hide the columns)
+   */
+  isHidden: boolean;
 }
 
 export interface TimestampOptions {

@@ -15,7 +15,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
@@ -23,7 +23,7 @@ import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
-const loginSettings = {
+const loginSettings : ConfigServiceSettings = {
   appName: APP_NAMES.LOGIN,
   appTitle: 'Login',
   overrideHeadTitle: true,

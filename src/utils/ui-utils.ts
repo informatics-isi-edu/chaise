@@ -390,3 +390,12 @@ export function createChaiseTooltips(container: Element) {
     });
   }
 }
+
+/**
+ * trigger form submission. should only be used when we don't have access to the handleSubmit function.
+ * for example in viewer annotation form, we're calling this from viewer provider which is outside of recordedit component.
+ * borrowed from here: https://github.com/react-hook-form/react-hook-form/issues/566#issuecomment-730077495
+ */
+export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
+  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}

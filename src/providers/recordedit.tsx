@@ -6,9 +6,9 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { 
-  appModes, PrefillObject, RecordeditColumnModel, 
-  RecordeditConfig, RecordeditDisplayMode, RecordeditModalOptions 
+import {
+  appModes, PrefillObject, RecordeditColumnModel,
+  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
@@ -109,22 +109,77 @@ export const RecordeditContext = createContext<{
    * get the appropriate log stack
    */
   getRecordeditLogStack: (childStackElement?: any, extraInfo?: any) => any,
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 } | null>(null);
 
 type RecordeditProviderProps = {
+  /**
+   * the mode of the app
+   */
   appMode: string;
-  children: JSX.Element;
+  /**
+   * the config object
+   */
   config: RecordeditConfig;
+  /**
+   * parameters for the modal
+   */
   modalOptions?: RecordeditModalOptions;
+  /**
+   * modify submission rows prior to submission
+   */
+  modifySubmissionRows?: (submissionRows: any[]) => void
+  /**
+   * called when form was submitted successfuly
+   */
+  onSubmitSuccess?: (response: { successful: any, failed: any, disabled: any }) => void,
+  /**
+   * called when form submission (create/update request) errored out
+   * return true from this function if you want recordedit to show the alert.
+   */
+  onSubmitError?: (exception: any) => boolean,
+  /**
+   * initial data that you want to be displayed (only honored in create mode)
+   */
   prefillRowData?: any[];
+  /**
+   * the tuples that we want to edit (only honored in edit mode)
+   */
+  initialTuples?: any[],
+  /**
+   * name of the columns that should be hidden
+   * TODO only honored by viewer-annotation-form-container for now
+   * but form-container should also honor it
+   */
+  hiddenColumns?: string[];
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
+  /**
+   * the query parameters that the page might have
+   */
   queryParams: any;
+  /**
+   * main reference of the form
+   */
   reference: any;
+  /**
+   * log related properties
+   */
   logInfo: {
     logAppMode: string;
     logObject?: any;
     logStack: any;
     logStackPath: string;
-  }
+  },
+  /**
+   * the element that renderes the form
+   */
+  children: JSX.Element;
 };
 
 export default function RecordeditProvider({
@@ -133,13 +188,19 @@ export default function RecordeditProvider({
   config,
   logInfo,
   modalOptions,
+  onSubmitSuccess,
+  onSubmitError,
   prefillRowData,
+  initialTuples,
   queryParams,
   reference,
+  hiddenColumns,
+  foreignKeyCallbacks,
+  modifySubmissionRows
 }: RecordeditProviderProps): JSX.Element {
 
   const { addAlert, removeAllAlerts } = useAlert();
-  const { session, validateSessionBeforeMutation } = useAuthn();
+  const { session, validateSessionBeforeMutation, validateSession } = useAuthn();
   const { dispatchError, errors, loginModal } = useError();
 
   const maxRowsToAdd = 201;
@@ -158,7 +219,7 @@ export default function RecordeditProvider({
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
 
-  const [tuples, setTuples, tuplesRef] = useStateRef<any[]>([]);
+  const [tuples, setTuples, tuplesRef] = useStateRef<any[]>(Array.isArray(initialTuples) ? initialTuples : []);
 
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
@@ -185,7 +246,8 @@ export default function RecordeditProvider({
 
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
-      const cm = columnToColumnModel(column, queryParams);
+      const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
+      const cm = columnToColumnModel(column, isHidden, queryParams);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -193,6 +255,12 @@ export default function RecordeditProvider({
     const ERMrest = ConfigService.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
       if (reference.canUpdate) {
+        if (tuplesRef.current && tuplesRef.current.length > 0) {
+          // it's already initialized (because of initialTuples)
+          setInitialized(true);
+          return;
+        }
+
         let numberRowsToRead = maxRowsToAdd;
         if (queryParams.limit) {
           numberRowsToRead = Number(queryParams.limit);
@@ -244,7 +312,9 @@ export default function RecordeditProvider({
           } else {
             headTitle = 'Create new ' + getDisplaynameInnerText(reference.displayname);
           }
-          updateHeadTitle(headTitle);
+          if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
+            updateHeadTitle(headTitle);
+          }
 
           // if all the rows are disabled, throw an error without marking the recordedit as initialized
           if (usedTuples.length === 0) {
@@ -295,8 +365,9 @@ export default function RecordeditProvider({
       }
     } else if (appMode === appModes.CREATE) {
       if (reference.canCreate) {
-        // TODO this should not be done when we want to have recordedit in modal
-        updateHeadTitle('Create new ' + reference.displayname.value);
+        if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
+          updateHeadTitle('Create new ' + reference.displayname.value);
+        }
 
         setInitialized(true);
       } else if (session) {
@@ -379,6 +450,9 @@ export default function RecordeditProvider({
     forms.forEach((f: number) => {
       submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
     });
+    if (modifySubmissionRows) {
+      modifySubmissionRows(submissionRows);
+    }
 
     /**
      * Add raw values that are not visible to submissionRowsCopy:
@@ -445,16 +519,15 @@ export default function RecordeditProvider({
           const failedPage = response.failed;
           const disabledPage = response.disabled;
 
+          if (onSubmitSuccess) {
+            onSubmitSuccess(response);
+          }
           // redirect to record app
-          if (forms.length === 1) {
-            if (config.displayMode === RecordeditDisplayMode.POPUP) {
-              modalOptions?.onSubmitSuccess();
-            } else {
-              // Created a single entity or Updated one
-              addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+          else if (forms.length === 1) {
+            // Created a single entity or Updated one
+            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-              windowRef.location = page.reference.contextualize.detailed.appLink;
-            }
+            windowRef.location = page.reference.contextualize.detailed.appLink;
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
@@ -491,25 +564,29 @@ export default function RecordeditProvider({
         };
 
         const submitErrorCB = (exception: any) => {
-          /**
-           * TODO
-           * we used to call Session.validateSession() here before,
-           * but that function doesn't exist anymore. is it needed?
-           */
-          // TODO why? the validateSessionBeforeMutation should have already handled this
-          // if (!session && exception instanceof ConfigService.ERMrest.ConflictError) {
-          //   // login in a modal should show (Session timed out)
-          //   throw new ConfigService.ERMrest.UnauthorizedError();
-          // }
-
-          // append link to end of alert.
-          if (exception instanceof ConfigService.ERMrest.DuplicateConflictError) {
-            const link = exception.duplicateReference.contextualize.detailed.appLink;
-            exception.message += ` Click <a href="${link}" target="_blank">here</a> to see the conflicting record that already exists.`;
+          if (onSubmitError) {
+            const res = onSubmitError(exception);
+            if (!res) return;
           }
 
-          const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
-          addAlert(exception.message, alertType);
+          validateSession().then((session) => {
+            if (!session && exception instanceof ConfigService.ERMrest.ConflictError) {
+              // login in a modal should show (Session timed out)
+              dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() })
+              return;
+            }
+
+            // append link to end of alert.
+            if (exception instanceof ConfigService.ERMrest.DuplicateConflictError) {
+              const link = exception.duplicateReference.contextualize.detailed.appLink;
+              exception.message += ` Click <a href="${link}" target="_blank">here</a> to see the conflicting record that already exists.`;
+            }
+
+            const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
+            addAlert(exception.message, alertType);
+          })
+
+
         };
 
         const submitFinallyCB = () => {
@@ -964,6 +1041,7 @@ export default function RecordeditProvider({
       reference,
       tuples,
       waitingForForeignKeyData,
+      foreignKeyCallbacks,
 
       // form
       forms,

@@ -18,6 +18,7 @@ $color-map: (
   'navbar-inverse-link': #59C4FF,
   'placeholder': #888888,
   'primary': #4674a7,
+  'primary-hover': #428bca,
   'recordedit-border': #888888,
   'recordedit-highlighted-row': #f7f0cf,
   'recordedit-column-permission-warning': rgb(180, 95, 6),
@@ -32,8 +33,13 @@ $color-map: (
   'table-striped-background': #f1f1f1,
   'table-striped-disabled-background': #ebebeb,
   'table-striped-highlight-background': #efebda,
+  'viewer-annotation-form-background': #f8f8f8,
+  'viewer-annotation-stroke-slider-input': #dcdcdc,
+  'viewer-annotation-stroke-slider-tick': #d3d3d3,
+  'viewer-annotation-stroke-slider-value': #f3f2f2,
   'vocab': darkblue,
   'vocab-background': rgba(220, 220, 220, 0.68),
   'warning': #f0ad4e,
-  'white': #ffffff
+  'warning-background': #ecec7d,
+  'white': #ffffff,
 );

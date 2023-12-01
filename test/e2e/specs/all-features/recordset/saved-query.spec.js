@@ -157,9 +157,7 @@ describe('View recordset page and form a query,', () => {
 
     it('open apply saved queries modal, verify query was saved, and close the modal', (done) => {
       chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueryDropdown()).then(() => {
-        const savedQueriesOption = chaisePage.recordsetPage.getSavedQueriesOption();
-
-        return savedQueriesOption.click();
+        return chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueriesOption());
       }).then(() => {
         browser.wait(() => {
           return chaisePage.recordsetPage.getModalRows().count().then((ct) => {
@@ -189,7 +187,7 @@ describe('View recordset page and form a query,', () => {
 
         expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe('Duplicate Saved Search', 'modal title is incorrect');
         expect(element(by.css('.modal-body')).getText()).toContain('name "' + testParams.firstSavedQueryName + '"', 'modal contains incorrect saved query name text');
-        
+
         return chaisePage.recordsetPage.getModalCloseBtn().click();
       }).then(() => {
         done();
@@ -257,9 +255,7 @@ describe('View recordset page and form a query,', () => {
 
     it('open apply saved query modal, verify 2 queries now, and apply first saved query', (done) => {
       chaisePage.recordsetPage.getSavedQueryDropdown().click().then(() => {
-        const savedQueriesOption = chaisePage.recordsetPage.getSavedQueriesOption();
-
-        return savedQueriesOption.click();
+        return chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueriesOption());
       }).then(() => {
         browser.wait(() => {
           return chaisePage.recordsetPage.getModalRows().count().then((ct) => {
@@ -292,7 +288,7 @@ describe('View recordset page and form a query,', () => {
         }, browser.params.defaultTimeout);
 
         expect(chaisePage.recordsetPage.getRows().count()).toBe(12, 'number of rows is incorrect after applying saved query');
-        
+
         return chaisePage.recordsetPage.getFacetFilters();
       }).then((filters) => {
         expect(filters.length).toBe(1, 'number of filters incorrect on page load');

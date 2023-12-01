@@ -115,7 +115,8 @@ exports.getConfig = function(options) {
       options.setBaseUrl(browser, data);
     }
   }
-  var chaiseFilePath  = "chaise-config-sample.js";
+
+  let chaiseFilePath;
   if (typeof options.chaiseConfigFilePath === 'string') {
     try {
       var fs = require('fs');
@@ -126,25 +127,29 @@ exports.getConfig = function(options) {
     }
   }
 
-  var execSync = require('child_process').execSync;
-  var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  var cmd = 'sudo cp ' + chaiseFilePath + " " + ("/var/www/html/chaise/chaise-config.js");
+  if (chaiseFilePath) {
+    const remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
 
-  // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
-  if (typeof remoteChaiseDirPath == 'string') {
-    cmd = 'scp ' + chaiseFilePath + ' ' + remoteChaiseDirPath  + '/chaise-config.js';
-    console.log("Copying using scp");
-  } else {
-    console.log("Copying using cp");
-  }
+    let cmd;
+    if (typeof remoteChaiseDirPath === 'string') {
+      // since we're copying to a folder which might or might not exist, we have to use rsync and cannot use scp
+      cmd = `rsync -v ${chaiseFilePath} ${remoteChaiseDirPath}/config/`;
+      console.log('Copying using scp');
+    } else {
+      const configFolder = '/var/www/html/chaise/config';
+      // make sure the config folder is defined and then copy the chaise-config.js
+      cmd = `sudo mkdir -p ${configFolder} && sudo cp ${chaiseFilePath} ${configFolder}/chaise-config.js`;
+      console.log('Copying using cp');
+    }
 
-
-  var code = execSync(cmd);
-  console.log(code);
-  if (code == 0) console.log("Copied file " + chaiseFilePath + " successfully to chaise-config.js \n");
-  else {
-    console.log("Unable to copy file " + chaiseFilePath + " to chaise-config.js \n");
-    process.exit(1);
+    try {
+      require('child_process').execSync(cmd);
+      console.log(`Copied file ${chaiseFilePath} successfully to chaise-config.js \n`);
+    } catch (exp) {
+      console.log(exp);
+      console.log(`Unable to copy file ${chaiseFilePath} to chaise-config.js \n`);
+      process.exit(1);
+    }
   }
 
   config.capabilities.shardTestFiles = (process.env.SHARDING == 'false' || process.env.SHARDING == false) ? false : true;

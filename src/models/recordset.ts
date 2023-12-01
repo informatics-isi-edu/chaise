@@ -4,6 +4,14 @@ import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
+export type RecordsetProviderGetDisabledTuples = (
+  page: any, pageLimit: number, logStack: any,
+  logStackPath: string, requestCauses?: any, reloadStartTime?: any
+) => Promise<{ page: any, disabledRows?: any }>;
+
+export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean
+
+
 export type RecordsetProps = {
   initialReference: any,
   config: RecordsetConfig,
@@ -16,13 +24,9 @@ export type RecordsetProps = {
   savedQueryConfig?: SavedQuery,
   initialPageLimit?: number,
   getFavorites?: Function,
-  getDisabledTuples?: (
-    page: any, pageLimit: number, logStack: any,
-    logStackPath: string, requestCauses: any, reloadStartTime: any
-  ) => any
-  ,
+  getDisabledTuples?: RecordsetProviderGetDisabledTuples,
   initialSelectedRows?: SelectedRow[],
-  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onSelectedRowsChanged?: RecordsetProviderOnSelectedRowsChanged,
   onFavoritesChanged?: Function,
   parentReference?: any,
   parentTuple?: any,

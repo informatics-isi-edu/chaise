@@ -2,6 +2,14 @@ The file contains changes made to chaise-config parameters.
 - Refer to [chaise-config.d](chaise-config.md) for currently supported parameters
 - Refer to [chaise-config-deprecated.md](chaise-config-deprecated.md) for deprecated parameters
 
+#### 11/07/2023 ####
+
+###### PR Link
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2375)
+
+###### Added
+  - We are now also fetching the `chaise-config.js` from the `config/chaise-config.js` location. Later we are going to stop trying the old location and only use the new location.
+
 #### 07/14/2023 ####
 
 ###### PR Link

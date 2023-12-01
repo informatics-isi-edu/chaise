@@ -1,6 +1,7 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
+
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -28,8 +29,11 @@ const FormContainer = (): JSX.Element => {
 
   // This state variable is to set the boolean to know if the remove is clicked or not
   const [removeClicked, setRemoveClicked] = useState<boolean>(false);
+
   /**
-   * add the top horizontal scroll if needed
+   * does the following:
+   * 1. add the top horizontal scroll if needed
+   * 2. set a max-width to multi-form-input-row as the width of the visible area
    */
   useLayoutEffect(() => {
     if (!formContainer.current) return;
@@ -49,38 +53,24 @@ const FormContainer = (): JSX.Element => {
       document.querySelector('.form-inputs-row') as HTMLElement
     );
 
+
+    /**
+     * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
+     * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
+     */
+    sensors?.push(new ResizeSensor(formContainer.current, () => {
+      const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
+
+      if (formContainer.current && nonScrollableDiv) {
+        const visibleWidth = formContainer.current.offsetWidth; // Width of the visible area
+        nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
+      }
+    }));
+
     return () => {
       sensors?.forEach((sensor) => sensor.detach());
     };
   }, []);
-
-  // This useffect is added to set a max-width to multi-form-input-row as the width of the visible area
-  useEffect(() => {
-    const mainResizeSensor = new ResizeSensor(
-      formContainer.current as Element,
-      () => {
-        setMaxWidthMultiForm();
-      }
-    );
-
-    return () => {
-      mainResizeSensor.detach();
-    };
-  }, []);
-
-  /**
-   * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
-   * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
-  */
-  const setMaxWidthMultiForm = () => {
-    const parentContainer: any = document.querySelector('.recordedit-form');
-    const nonScrollableDiv: any = document.querySelector('.multi-form-input-row');
-
-    if (parentContainer && nonScrollableDiv) {
-      const visibleWidth = parentContainer.offsetWidth; // Width of the visible area
-      nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
-    }
-  };
 
   /**
    * This callback is called when we want to delete the form, we are setting the form index and
@@ -99,7 +89,6 @@ const FormContainer = (): JSX.Element => {
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onScroll={setMaxWidthMultiForm}
         onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
         // onSubmit={
         //   (e: any) => {

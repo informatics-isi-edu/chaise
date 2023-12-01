@@ -2,7 +2,7 @@
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
@@ -15,7 +15,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
-type FormRowProps = {
+type MultiFormInputRowProps = {
   /**
   * The column index.
   */
@@ -34,7 +34,7 @@ const MultiFormInputRow = ({
   columnModelIndex,
   activeForms,
   setActiveForm,
-}: FormRowProps) => {
+}: MultiFormInputRowProps) => {
   const {
     columnModels,
     forms,
@@ -46,25 +46,70 @@ const MultiFormInputRow = ({
     toggleActiveMultiForm,
     logRecordeditClientAction,
   } = useRecordedit();
-  const {
-    watch,
-    reset,
-    getValues,
-    formState: { errors },
-  } = useFormContext();
-  const ref = useRef(null);
+
+  const columnModel = columnModels[columnModelIndex];
+  const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
+
+  const { watch, reset, getValues, formState: { errors } } = useFormContext();
+
   const [isEmpty, setIsEmpty] = useState(true);
 
-  // This is to set select all checkbox state
-  const [multiFormInput, setMultiFormInput] = useState(false);
+  /**
+   *  This is to set select all checkbox state
+   */
+  const [allFormsAreActive, setAllFormsAreActive] = useState(false);
 
-  // This is to toggle the visibility of tooltip on checkbox container. The tooltip should disappear once checkbox container is clicked.
-  const [showTooltip, setShowTooltip] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const upperRowRef = useRef<HTMLDivElement>(null);
 
-  // This is to set if there is a change in the width of select all area on resize and zoom
-  const [multiFormWidthChanged, setMultiFormRowChanged] = useState(0);
+  /**
+   * This will add two resize sensors:
+   *
+   * 1 We are having a resize sensor on input area. This is to reverse the flex-direction of upper row once it starts overlapping
+   * We chose 400, based on manual testing and thats when the buttons and checkbox container starts overlapping.
+   * Since we want to reduce the width of text area till min-width 250px we are moving the buttons and checkbox container
+   * to two rows with button container on top.
+   *
+   * 2. please refer to the updateTextareaWidth comment. in summary, we have to use JavaScript to set the width of textarea
+   *    to be the same as the parent. 100% won't work. without this the textarea stays small even if there are enough space
+   *    for it to expand.
+  */
+  useLayoutEffect(() => {
+    if (!inputRef.current || !containerRef.current) return;
+    const resizeSensors: ResizeSensor[] = [];
 
-  // This useeffect is to set the first form as active on load
+    resizeSensors.push(new ResizeSensor(inputRef.current, () => {
+      if (!upperRowRef.current) return;
+      const upperRowWidth = upperRowRef.current.getBoundingClientRect().width;
+      if (upperRowWidth < 400) {
+        upperRowRef.current.style.flexDirection = 'column-reverse'
+      } else {
+        upperRowRef.current.style.flexDirection = 'row'
+      }
+    }));
+
+    if (isTextArea) {
+      // Initial update
+      updateTextareaWidth();
+      let cachedMultiRowForm = containerRef.current.offsetWidth;
+      resizeSensors.push(new ResizeSensor(containerRef.current, () => {
+        // only call when the width changes (resizeSensor calls this on height change too
+        if (!containerRef.current || cachedMultiRowForm === containerRef.current.offsetWidth) return;
+
+        cachedMultiRowForm = containerRef.current.offsetWidth;
+        updateTextareaWidth();
+      }));
+    }
+
+    return () => {
+      resizeSensors?.forEach((rs) => !!rs && rs.detach());
+    };
+  }, []);
+
+  /**
+   * set the first form as active on load
+   */
   useEffect(() => {
     if (activeForms?.length === 0) {
       setActiveForm([forms[0]]);
@@ -72,74 +117,20 @@ const MultiFormInputRow = ({
   }, []);
 
   /**
-   * This useffect is to set the indeterminate checkbox when forms are individually selected
+   * set the indeterminate checkbox when forms are individually selected
    * and selected forms length is less than total forms length
   */
-
   useEffect(() => {
-    if (ref && ref.current && activeForms) {
-      (ref.current as HTMLInputElement).indeterminate =
+    if (inputRef && inputRef.current && activeForms) {
+      (inputRef.current as HTMLInputElement).indeterminate =
         activeForms?.length > 0
           ? activeForms?.length < forms.length
             ? true
             : false
           : false;
-      setMultiFormInput(activeForms?.length === forms.length);
+      setAllFormsAreActive(activeForms?.length === forms.length);
     }
   }, [activeForms]);
-
-  // useEffect to call update only when there is a change in the width of multi-form-input-row to update textarea width
-  useEffect(() => {
-    updateTextareaWidth();
-  }, [multiFormWidthChanged]);
-
-  /**
-   * We are having a resize sensor on input area. This is to reverse the flex-direction of upper row once it starts overlapping
-   * We chose 400, based on manual testing and thats when the buttons and checkbox container starts overlapping.
-   * Since we want to reduce the width of text area till min-width 250px we are moving the buttons and checkbox container
-   * to two rows with button container on top.
-  */
-
-  useEffect(() => {
-
-    const inputDiv = document.querySelector('.multi-form-input') as HTMLElement;
-
-    const mainResizeSensor = new ResizeSensor(inputDiv,
-      () => {
-        const upperRow = document.querySelector('.multi-form-upper-row') as HTMLElement;
-        const upperRowWidth = upperRow?.getBoundingClientRect().width;
-        if (upperRow && upperRowWidth < 400) {
-          upperRow.style.flexDirection = 'column-reverse'
-        } else {
-          upperRow.style.flexDirection = 'row'
-        }
-      }
-    );
-
-    return () => {
-      mainResizeSensor.detach();
-    };
-  }, []);
-
-  // useEffect to have a resize sensor to width of textarea to the the parent container width.
-  useEffect(() => {
-
-    const multiFormRow = document.querySelector('.multi-form-input-row') as HTMLElement;
-    setMultiFormRowChanged(multiFormRow.offsetWidth)
-    // Initial update
-    updateTextareaWidth();
-
-    const mainResizeSensor = new ResizeSensor(multiFormRow,
-      () => {
-        const newContainerWidth = multiFormRow.offsetWidth;
-        setMultiFormRowChanged(newContainerWidth)
-      }
-    );
-
-    return () => {
-      mainResizeSensor.detach();
-    };
-  }, []);
 
   /**
    * if the selected value is empty, we should disable the apply-all
@@ -148,7 +139,6 @@ const MultiFormInputRow = ({
   useEffect(() => {
     const subscribe = watch((data, options) => {
       const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
-      const columnModel = columnModels[columnModelIndex];
       if (!options.name || options.name !== n) return;
 
       // see if the input is empty
@@ -165,6 +155,8 @@ const MultiFormInputRow = ({
   }, [watch, isEmpty]);
 
   // ------------------------ callbacks -----------------------------------//
+
+
   const applyValueToAll = () => {
     const cm = columnModels[columnModelIndex];
 
@@ -209,13 +201,13 @@ const MultiFormInputRow = ({
 
   // Call back for select all checkbox to toggle all forms as selected and unselected
   const onSelectChange = () => {
-    setShowTooltip(false);
-    if (!multiFormInput) {
+    // setShowTooltip(false);
+    if (!allFormsAreActive) {
       setActiveForm(forms);
     } else {
       setActiveForm([]);
     }
-    setMultiFormInput(!multiFormInput);
+    setAllFormsAreActive(!allFormsAreActive);
   };
 
   /**
@@ -263,13 +255,11 @@ const MultiFormInputRow = ({
       }
     }
   };
+
   // -------------------------- render logic ---------------------- //
 
-  const columnModel = columnModels[columnModelIndex];
   const colName = columnModel.column.name;
   const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
-
-  const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
 
   const renderHelpTooltip = () => {
     const splitLine1 =
@@ -293,25 +283,22 @@ const MultiFormInputRow = ({
   };
 
   return (
-    <div className='multi-form-input-row match-entity-value'>
+    <div className='multi-form-input-row match-entity-value' ref={containerRef}>
       <div className={`center-align ${isTextArea ? 'center-align-textarea' : ''}`}>
-        <div className='multi-form-upper-row'>
+        <div className='multi-form-upper-row' ref={upperRowRef}>
           <div className='multi-form-input-checkbox-container'>
             <ChaiseTooltip
               placement='bottom-start'
-              show={showTooltip}
-              tooltip={
-                !multiFormInput ? 'Select all records.' : 'Clear all selection'
-              }
-              onToggle={(show) => setShowTooltip(show)}
+              tooltip={!allFormsAreActive ? 'Select all records.' : 'Clear all selection'}
+              dynamicTooltipString
             >
               <span className='chaise-checkbox multi-form-input-checkbox'>
                 <input
-                  ref={ref}
-                  className={'checkbox-input' + (multiFormInput ? ' checked' : '')}
+                  ref={inputRef}
+                  className={'checkbox-input' + (allFormsAreActive ? ' checked' : '')}
                   type='checkbox'
                   id='checkbox-input'
-                  checked={multiFormInput}
+                  checked={allFormsAreActive}
                   disabled={false}
                   onChange={onSelectChange}
                 />

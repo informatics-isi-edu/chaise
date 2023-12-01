@@ -204,8 +204,6 @@
               max-width: 100%;
             }
           }
-
-
         }
 
         /**
@@ -265,7 +263,7 @@
           top: 0;
           height: 100%;
           width: 100%;
-          z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner-backdrop')
+          z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
         }
 
         .column-permission-warning {
@@ -288,32 +286,6 @@
         border-radius: 0;
         min-height: 47px;
         padding: 8px 10px;
-
-        // displayed while loading the fk data
-        .column-cell-spinner-container {
-          .column-cell-spinner-backdrop {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner-backdrop');
-            background: map-get(variables.$color-map, 'disabled-background');
-            opacity: 0.55;
-          }
-
-          .spinner-border-sm {
-            left: 50%;
-            top: 15px;
-            position: absolute;
-            z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner');
-          }
-        }
-      }
-
-      // change top specifically in select all row since the spinner only covers the input and not the whole cell
-      .match-entity-value .column-cell-spinner-container .spinner-border-sm {
-        top: 10px;
       }
 
       // This is added to show the form is selected to apply the change

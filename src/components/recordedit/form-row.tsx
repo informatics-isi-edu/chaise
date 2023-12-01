@@ -1,6 +1,6 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input';
+import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input-row';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -22,14 +22,17 @@ type FormRowProps = {
   columnModelIndex: number;
   /**
   * The deleted form index.
+  * (if removeClicked is true, we expect this to show the index of deleted form)
   */
   removeFormIndex?: number;
   /**
   * The boolean to know whether remove form is clicked.
+  * (when a form is removed, we have to update the activeForms)
   */
   removeClicked?: boolean;
   /**
   * The function to set remove form is clicked.
+  * (change back the removeClicked that is passed to this component)
   */
   setRemoveClicked?: any;
 };
@@ -52,10 +55,15 @@ const FormRow = ({
     waitingForForeignKeyData,
     getRecordeditLogStack,
     getRecordeditLogAction,
+    foreignKeyCallbacks
   } = useRecordedit();
 
-  // This state variable is to set the form as active when its selected. We are storing the form number
+  /**
+   * This state variable is to set the form as active when its selected. We are storing the form number
+   * (used when multi-form-row is displayed)
+   */
   const [activeForms, setActiveForm] = useState<number[]>([]);
+
   /**
    * which columns should show the permission error.
    * if a user cannot edit a column in one of the rows, we cannot allow them
@@ -82,23 +90,22 @@ const FormRow = ({
     if (!container || !container.current) return;
 
     let cachedHeight = -1;
-    const sensor = new ResizeSensor(
-      container.current as Element,
-      (dimension) => {
-        const newHeight = container.current?.getBoundingClientRect().height;
-        if (newHeight === undefined || newHeight === cachedHeight || !container.current) return;
-        cachedHeight = newHeight;
-        const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
-        if (header) {
-          header.style.height = `${cachedHeight}px`;
-        }
+    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+      const newHeight = container.current?.getBoundingClientRect().height;
+      if (newHeight === undefined || newHeight === cachedHeight || !container.current) return;
+      cachedHeight = newHeight;
+      const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
+      if (header) {
+        header.style.height = `${cachedHeight}px`;
       }
+    }
     );
 
     return () => {
       sensor.detach();
     };
   }, []);
+
   /**
    * This useffect is to remove the form from the acitve forms if we delete the form.
    * removeClicked is passed from the parent to communicate that delete form is clicked
@@ -117,6 +124,7 @@ const FormRow = ({
       });
     }
   }, [removeClicked]);
+
   // ------------------------ callbacks -----------------------------------//
 
   /**
@@ -175,10 +183,7 @@ const FormRow = ({
    * @param columnModel
    * @param canUpdateValues
    */
-  const getIsDisabled = (
-    formNumber?: number,
-    isMultiFormRow?: boolean
-  ): boolean => {
+  const getIsDisabled = (formNumber?: number, isMultiFormRow?: boolean): boolean => {
     if (isMultiFormRow) {
       return false;
     }
@@ -197,13 +202,26 @@ const FormRow = ({
     return false;
   };
 
+  /**
+   * add appropriate class names to the cell
+   */
+  const getEntityValueClass = (formNumber: number) => {
+    const classes = [];
+    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
+    if (!cannotBeUpdated && showMultiFormRow) {
+      classes.push('clickable-form-overlay');
+      if (activeForms.includes(formNumber)) {
+        classes.push('entity-active');
+      }
+    }
+
+    return classes.join(' ');
+  };
+
   const renderInput = (formNumber: number, formIndex?: number) => {
     const colName = columnModel.column.name;
 
-    const isDisabled = getIsDisabled(
-      formNumber,
-      formNumber === MULTI_FORM_INPUT_FORM_VALUE
-    );
+    const isDisabled = getIsDisabled(formNumber, formNumber === MULTI_FORM_INPUT_FORM_VALUE);
 
     let placeholder = '';
     let permissionError = '';
@@ -221,9 +239,7 @@ const FormRow = ({
       permissionError = columnPermissionErrors[colName];
     }
 
-    const safeClassNameId = `${formNumber}-${makeSafeIdAttr(
-      columnModel.column.displayname.value
-    )}`;
+    const safeClassNameId = `${formNumber}-${makeSafeIdAttr(columnModel.column.displayname.value)}`;
 
     return (
       <>
@@ -248,50 +264,22 @@ const FormRow = ({
           appMode={appMode}
           formNumber={formNumber}
           parentReference={reference}
-          parentTuple={
-            appMode === appModes.EDIT && typeof formIndex === 'number'
-              ? tuples[formIndex]
-              : undefined
-          }
+          parentTuple={appMode === appModes.EDIT && typeof formIndex === 'number' ? tuples[formIndex] : undefined}
           parentLogStack={getRecordeditLogStack()}
           parentLogStackPath={getRecordeditLogAction(true)}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
-        {typeof formIndex === 'number' && formIndex in showPermissionError && (
-          <div
-            className={`column-permission-warning column-permission-warning-${safeClassNameId}`}
-          >
-            {permissionError}
-          </div>
-        )}
+        {typeof formIndex === 'number' && formIndex in showPermissionError &&
+          <div className={`column-permission-warning column-permission-warning-${safeClassNameId}`}>{permissionError}</div>
+        }
       </>
     );
   };
 
-  /**
-   * function to set classname when form is clicked
-   * @param formNumber - to know which form is clicked
-   * @returns
-   */
-  const getEntityValueClass = (formNumber: number) => {
-    const classes = [];
-    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
-    if (!cannotBeUpdated && showMultiFormRow) {
-      classes.push('clickable-form-overlay');
-      if (activeForms.includes(formNumber)) {
-        classes.push('entity-active');
-      }
-    }
-
-    return classes.join(' ');
-  };
-
   return (
-    <div
-      className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`}
-      ref={container}
-    >
+    <div className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`} ref={container}>
       <div className='inputs-row'>
         {forms.map((formNumber: number, formIndex: number) => (
           <div
@@ -303,13 +291,13 @@ const FormRow = ({
           </div>
         ))}
       </div>
-      {showMultiFormRow && (
+      {showMultiFormRow &&
         <MultiFormInputRow
           activeForms={activeForms}
           setActiveForm={setActiveForm}
           columnModelIndex={columnModelIndex}
         />
-      )}
+      }
     </div>
   );
 };
