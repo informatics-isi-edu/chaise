@@ -5,6 +5,24 @@ const EC = protractor.ExpectedConditions;
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
 
+const testFiles = [
+  {
+    name: "testfile128kb_1.png",
+    size: "12800",
+    path: "testfile128kb_1.png"
+  },
+  {
+    name: "testfile128kb_2.png",
+    size: "12800",
+    path: "testfile128kb_2.png"
+  },
+  {
+    name: "testfile128kb_3.png",
+    size: "12800",
+    path: "testfile128kb_3.png",
+  }
+];
+
 const testParams = {
   schema_table: 'multi-form-input:main',
   max_input_rows: 200,
@@ -389,14 +407,61 @@ const testParams = {
             'Select a value',
           ]
         }
+      },
+      {
+        type: 'upload',
+        column_displayname: 'asset_col',
+        column_name: 'asset_col',
+        apply_to_all: {
+          value: testFiles[0],
+          column_values_after: [
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[0].name,
+          ],
+        },
+        apply_to_some: {
+          deselected_forms: [1, 2],
+          value: testFiles[1],
+          column_values_after: [
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[1].name,
+            testFiles[1].name,
+            testFiles[1].name,
+          ],
+        },
+        clear_some: {
+          deselected_forms: [3, 4],
+          column_values_after: [
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[1].name,
+            testFiles[1].name,
+            'No file Selected'
+          ]
+        },
+        manual_test: {
+          formNumber: 4,
+          value: testFiles[2],
+          column_values_after: [
+            testFiles[0].name,
+            testFiles[0].name,
+            testFiles[1].name,
+            testFiles[2].name,
+            ''
+          ]
+        }
       }
     ],
     submission_results: [
-      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', '', ''],
-      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', '', ''],
-      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', '', ''],
-      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', '', ''],
-      ['5', '', 'manual', '2', '', '', '', 'true', '', '', ''],
+      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', 'testfile128kb_1.png'],
+      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', 'testfile128kb_1.png'],
+      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', 'testfile128kb_2.png'],
+      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', 'testfile128kb_3.png'],
+      ['5', '', 'manual', '2', '', '', '', 'true', '', ''],
     ]
   },
   submission: {
@@ -405,10 +470,10 @@ const testParams = {
     table_displayname: 'main',
     result_columns: [
       'id', 'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'asset_col_filename'
+      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
     ],
     test_results: true,
-    files: []
+    files: testFiles
   }
 };
 
@@ -588,6 +653,11 @@ describe('Regarding multi form input and clone button', () => {
           chaisePage.recordeditPageReady().then(() => {
             cloneFormInput = chaisePage.recordEditPage.getCloneFormInput();
             cloneFormSubmitButton = chaisePage.recordEditPage.getCloneFormInputSubmitButton();
+
+            if (!process.env.CI && testFiles.length > 0) {
+              recordEditHelpers.createFiles(testFiles);
+            }
+
             done();
           }).catch(chaisePage.catchTestError(done));
         });
@@ -603,6 +673,9 @@ describe('Regarding multi form input and clone button', () => {
 
         testParams.apply_tests.types.forEach((params) => {
           const colDisplayname = params.column_displayname;
+
+          // on CI don't run the upload tests
+          if (process.env.CI && params.type === 'upload') return;
 
           describe(colDisplayname, () => {
             let toggleBtn = recordEditPage.getMultiFormToggleButton(colDisplayname);
@@ -666,6 +739,8 @@ describe('Regarding multi form input and clone button', () => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
               }).then(() => {
+                // there isn't any event that we can wait for, so I added browser sleep
+                if (params.type === 'upload') browser.sleep(2000);
                 // check the values
                 return recordEditHelpers.testFormValuesForAColumn(params.column_name, params.column_displayname, params.type, true, params.apply_to_some.column_values_after);
               }).then(() => {
@@ -712,6 +787,13 @@ describe('Regarding multi form input and clone button', () => {
             results: testParams.apply_tests.submission_results
           });
         });
+
+        if (!process.env.CI && testFiles.length > 0) {
+          afterAll(function (done) {
+            recordEditHelpers.deleteFiles(testFiles);
+            done();
+          });
+        }
 
       });
     });
@@ -777,8 +859,8 @@ describe('Regarding multi form input and clone button', () => {
           recordEditHelpers.testSubmission({
             ...testParams.submission,
             results: [
-              ['9001', 'markdown value 9001', 'text value 9001', '666', '', '', '', '', '', '', ''],
-              ['9002', 'markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', '', ''],
+              ['9001', 'markdown value 9001', 'text value 9001', '666', '', '', '', '', '', ''],
+              ['9002', 'markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', ''],
             ]
           }, true)
         })

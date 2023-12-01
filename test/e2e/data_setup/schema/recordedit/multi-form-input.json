@@ -86,7 +86,7 @@
           "type": {"typename": "text"},
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_int_col}}}/multi-form-input/{{{_asset_col.md5_hex}}}",
+              "url_pattern":"/hatrac/js/chaise/multi-form-input/{{{_asset_col.md5_hex}}}",
               "filename_column" : "asset_col_filename",
               "byte_count_column": "asset_col_bytes",
               "md5": "asset_col_md5"
@@ -116,7 +116,7 @@
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": [
             "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
-            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "asset_col_filename"
+            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col"
           ]
         }
       }

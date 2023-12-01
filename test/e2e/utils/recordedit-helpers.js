@@ -1952,6 +1952,7 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
  * // fk props:
  *  modal_num_rows,
  *  modal_option_index,
+ *
  * }
  *
  * @param {string} name input name
@@ -1983,7 +1984,9 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
           });
         }).then(() => {
           // select the option
-          return chaisePage.recordsetPage.getRows().get(valueProps.modal_option_index).all(by.css('.select-action-button')).click();
+          return chaisePage.recordsetPage.getRows().get(valueProps.modal_option_index).element(by.css('.select-action-button'));
+        }).then((el) => {
+          return chaisePage.clickButton(el);
         }).then(() => {
           // wait for modal to close
           return browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
@@ -2005,6 +2008,12 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
           resolve();
         }).catch(err => reject(err));
         break;
+      case 'upload':
+        const fileInput = recordEditPage.getInputForAColumn(name, formNumber);
+        const fileTextInput = recordEditPage.getTextFileInputForAColumn(name, formNumber);
+        exports.selectFile(valueProps.value, fileInput, fileTextInput);
+        resolve();
+        break;
       default:
         let inputEl;
         if (displayType === 'textarea') {
@@ -2025,6 +2034,20 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
 }
 
 
+/**
+ * test the values displayed on the forms for a column
+ *
+ * expectedValues expected type will be different depending on the input type. for all the types expect the following
+ * it should be an array of strings.
+ * - timestamp: array of objects with date_value and time_value props
+ *
+ * @param {string} name the column name
+ * @param {string}} displayname the column displayname
+ * @param {string} displayType the display type (boolean, fk, timestamp, upload, "any other string")
+ * @param {boolean} allDisabled whether we should test that all the inputs are disabled or not
+ * @param {any[]} expectedValues the expected values
+ * @returns
+ */
 exports.testFormValuesForAColumn = (name, displayname, displayType, allDisabled, expectedValues) => {
   return new Promise((resolve) => {
     let input, inputControl, formNumber, message;
