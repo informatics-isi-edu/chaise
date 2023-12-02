@@ -261,3 +261,45 @@ The following is how you can achieve this:
     4. Click "Add dimension" to find the custom dimension you've added.
   
     5. Apply and save your changes.
+
+## 7. Tracking user clicks on hatrac URLs
+
+The instructions above were mostly focused on tracking page load events. If you turn on the "enhanced measurement" for the data stream, it will also follow the download event of common file types, but it won't be able to handle hatrac downloads at all (because hatrac doesn't inject the Google tag). That's why to track the hatrac downloads in the following we're actually tracking clicks on the hatrac links. 
+
+This means that this report will not be accurate and won't track the scenarios where users grabbed the link and opened the hatrac download link in a different tab/window. If you want a more accurate analysis, you should process the deriva logs as we explained [here](logging.md#asset-download--csv-default-export).
+
+The following are instructions to track clicks on hatrac links:
+
+1. We first need to create a trigger in GTM that fires when users click on hatrack links. So, navigate to the GTM page for the deployment.
+2. Click on the "Triggers" on the sidebar. And then the "New" button in the "triggers" page.
+3. We recommend naming the trigger "Click hatrac URLs".
+4. Click "Trigger Configuration" and choose the "Just Links" type.
+5. Change "This trigger fires on" to "Some Link Clicks". This will allow us to limit the links to hatrac.
+6. Add the following conditions:
+    - "Click URL Path", "starts with", "`/hatrac/`"
+    - "Click classes", "does not contain", "asset-permission". As described [here](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#special-classes), after users click on links with this class, chaise will validate whether the user can download the asset and then it will programmatically click on the element.  Without this rule the trigger will be called twice.
+
+7. Save the trigger.
+8. We now should create a tag with this trigger. For this go to the "Tags" page.
+9. On the "Tags" page click on "New".
+10. We recommend naming the tag "Click on hatrac links". 
+11. Click on the "Tag Configuration" and choose "Google Analytics" > "Google Analytics: GA4 Event".
+12. Set the measurement ID to be similar to the other tag that you created.
+13. We recommend naming your event "hatrac_link_click".
+14. Add an "Event Parameters". Use "hatrac_link_url" for its name and "{{Click URL}}" for value.
+15. Click on the "Triggering" section and choose the trigger you created in the previous steps.
+16. Save the tag
+17. All the changes related to GTM are done. So go ahead and "Submit" the changes. We recommend using a name that summarizes the changes that you just made.
+18. We now need to go to Google Analytics and ensure we're correctly collecting this event and its variables.
+19. We first need to create the corresponding event for the trigger we created. So, on the Google Analytics "Admin" page click on "Events". 
+20. On the "Events" page, click on "Create event". It will open the list of existing custom events. Click on "Create" to create a new one.
+21. We suggest using the same event name you chose before to avoid confusion. So "hatrac_link_click".
+22. For the matching conditions, use "event_name equals hatrac_link_click". And leave the "Copy parameters from the source event" on.
+23. Click "Create" on the top right side of the page to create the event.
+24. With this, the new event will show up in your event reports. If you also want to ensure the Hatrac links appear as "Dimensions" in your reports, follow the next steps.
+25. As we mentioned, we know we will create a custom dimension for the hatrack URLs reported with the event. On the Google Analytics "Admin" page click on "Custom definitions". 
+26. Ensure the "evenr parameter" is the same as the parameter you chose in GTM, so "hatrac_link_url".
+27. Name the dimension of anything you want, for example, "hatrac URLs" and save it.
+28. You can now use this new dimension in your reports.
+
+ 
