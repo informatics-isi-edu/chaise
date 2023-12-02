@@ -1873,6 +1873,9 @@ exports.deleteFiles = function(files) {
     });
 };
 
+/**
+ * TODO this should be replaced by selectFileReturnPromise
+ */
 exports.selectFile = function(file, fileInput, txtInput) {
     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
 
@@ -1894,6 +1897,39 @@ exports.selectFile = function(file, fileInput, txtInput) {
         });
     }
 };
+
+/**
+ * TODO this should replace the selectFile function
+ */
+exports.selectFileReturnPromise = (file, fileInput, txtInput) => {
+  return new Promise((resolve, reject) => {
+    const filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
+
+    fileInput.sendKeys(filePath).then(() => {
+      return browser.sleep(100);
+    }).then(() => {
+      expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
+      expect(txtInput.getText()).toBe(file.name, "didn't show the correct file name after selection.");
+
+      if (typeof file.tooltip === "string") {
+        // test the tooltip on hover
+        // move the mouse first to force any other tooltips to hide
+        browser.actions().mouseMove(chaisePage.recordEditPage.getRequiredInfoEl()).perform().then(() => {
+          return chaisePage.waitForElementInverse(chaisePage.getTooltipDiv());
+        }).then(() => {
+          return chaisePage.testTooltipReturnPromise(txtInput, file.tooltip, 'recordedit');
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+
+      } else {
+        resolve();
+      }
+    }).then(() => {
+      resolve();
+    }).catch(err => reject(err));
+  });
+}
 
 /**
  * test a file input with the given column name, and file that we want to test
@@ -2011,8 +2047,9 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
       case 'upload':
         const fileInput = recordEditPage.getInputForAColumn(name, formNumber);
         const fileTextInput = recordEditPage.getTextFileInputForAColumn(name, formNumber);
-        exports.selectFile(valueProps.value, fileInput, fileTextInput);
-        resolve();
+        exports.selectFileReturnPromise(valueProps.value, fileInput, fileTextInput).then(() => {
+          resolve();
+        }).catch(err => reject(err));
         break;
       default:
         let inputEl;

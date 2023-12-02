@@ -739,8 +739,6 @@ describe('Regarding multi form input and clone button', () => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
               }).then(() => {
-                // there isn't any event that we can wait for, so I added browser sleep
-                if (params.type === 'upload') browser.sleep(2000);
                 // check the values
                 return recordEditHelpers.testFormValuesForAColumn(params.column_name, params.column_displayname, params.type, true, params.apply_to_some.column_values_after);
               }).then(() => {

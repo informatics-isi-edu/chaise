@@ -84,22 +84,41 @@ const FormRow = ({
   const cm = columnModels[columnModelIndex];
 
   /**
-   * make sure the column names (key-column.tsx) have the same height as FormRow
+   * 1. make sure the column names (key-column.tsx) have the same height as FormRow
+   *
+   * 2. make sure mulit-form-row-input doesn't go beyond the visible portion of form-container (set max width)
+   *    while we're setting the max-wdith to be the same as form-container, this has to be defined here as we must
+   *    update it when the size of multi-form-input-row changes. if we do this based on form-container size then it won't
+   *    cover the cases where we scroll horziontally and open a new multi-form-input-row
    */
   useLayoutEffect(() => {
     if (!container || !container.current) return;
 
-    let cachedHeight = -1;
+    let cachedHeight = -1, cachedWidth = -1;
     const sensor = new ResizeSensor(container.current as Element, (dimension) => {
-      const newHeight = container.current?.getBoundingClientRect().height;
-      if (newHeight === undefined || newHeight === cachedHeight || !container.current) return;
-      cachedHeight = newHeight;
-      const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
-      if (header) {
-        header.style.height = `${cachedHeight}px`;
+      if (!container.current) return;
+
+      const newHeight = container.current.getBoundingClientRect().height;
+      if (newHeight !== undefined || newHeight !== cachedHeight) {
+        cachedHeight = newHeight;
+        const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
+        if (header) {
+          header.style.height = `${cachedHeight}px`;
+        }
       }
-    }
-    );
+
+      const newWidth = container.current.offsetWidth;
+      if (newWidth !== cachedWidth) {
+        cachedWidth = newWidth;
+        const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
+        const formContainer = document.querySelector('.form-container') as HTMLElement;
+        if (formContainer && nonScrollableDiv) {
+          const visibleWidth = formContainer.offsetWidth; // Width of the visible area
+          nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
+        }
+      }
+
+    });
 
     return () => {
       sensor.detach();

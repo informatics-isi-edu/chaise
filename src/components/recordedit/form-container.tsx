@@ -3,7 +3,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
@@ -53,20 +53,6 @@ const FormContainer = (): JSX.Element => {
       document.querySelector('.form-inputs-row') as HTMLElement
     );
 
-
-    /**
-     * Callback event for scroll functionality on recordedit-form to set a max-width to multi-form-input-row as the
-     * width of the visible area. Its a common function getting called on, onScroll and resizeSensor
-     */
-    sensors?.push(new ResizeSensor(formContainer.current, () => {
-      const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
-
-      if (formContainer.current && nonScrollableDiv) {
-        const visibleWidth = formContainer.current.offsetWidth; // Width of the visible area
-        nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
-      }
-    }));
-
     return () => {
       sensors?.forEach((sensor) => sensor.detach());
     };
@@ -75,12 +61,15 @@ const FormContainer = (): JSX.Element => {
   /**
    * This callback is called when we want to delete the form, we are setting the form index and
    * a boolean to know the remove button is clicked
+   *
+   * TODO this can be improved. we might be able to do this with less state variables
   */
   const handleRemoveForm = (formIndex: number, formNumber: number) => {
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);
     removeForm([formIndex]);
   };
+
   return (
     <div className='form-container' ref={formContainer}>
       <div className='chaise-table-top-scroll-wrapper'>

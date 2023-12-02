@@ -13,7 +13,6 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -154,6 +153,27 @@ const MultiFormInputRow = ({
     return () => subscribe.unsubscribe();
   }, [watch, isEmpty]);
 
+  /**
+   * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
+   * the immidiate parent center-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
+   * to the next immediate parent width which is multi-form-input-row.
+   * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are
+   * setting a width for textarea as 1200 and making it center aligned. We choose 1200 as we dont want input to span
+   * across container for higher resolutions(i.e beyond 1800)
+  */
+  const updateTextareaWidth = () => {
+    const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
+    const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
+    if (textarea) {
+      if (window.innerWidth < 1800) {
+        const newContainerWidth = nonScrollableDiv.offsetWidth;
+        textarea.style.width = `${newContainerWidth}px`;
+      } else {
+        textarea.style.width = '1200px';
+      }
+    }
+  };
+
   // ------------------------ callbacks -----------------------------------//
 
 
@@ -233,27 +253,6 @@ const MultiFormInputRow = ({
         )
       );
     });
-  };
-
-  /**
-   * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
-   * the immidiate parent center-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
-   * to the next immediate parent width which is multi-form-input-row.
-   * We choose 1800 as it matches with css rule given in multi-form-input-row and multi-form-input. Beyond 1800 we are
-   * setting a width for textarea as 1200 and making it center aligned. We choose 1200 as we dont want input to span
-   * across container for higher resolutions(i.e beyond 1800)
-  */
-  const updateTextareaWidth = () => {
-    const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
-    const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
-    if (textarea) {
-      if (window.innerWidth < 1800) {
-        const newContainerWidth = nonScrollableDiv.offsetWidth;
-        textarea.style.width = `${newContainerWidth}px`;
-      } else {
-        textarea.style.width = '1200px';
-      }
-    }
   };
 
   // -------------------------- render logic ---------------------- //
