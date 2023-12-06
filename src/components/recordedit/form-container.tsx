@@ -16,7 +16,6 @@ import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedi
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { cloneDeep } from 'lodash';
 
 type FormContainerProps = {
   /* the index of column that is showing the select all input */
