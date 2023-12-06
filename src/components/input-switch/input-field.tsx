@@ -1,7 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
 // hooks
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils
@@ -156,7 +156,7 @@ const InputField = ({
     e.preventDefault();
     clearErrors(name);
     setValue(name, '');
-    trigger(name);
+    trigger(name); // triggers validation on the form field
   }
 
   useEffect(() => {
@@ -188,7 +188,8 @@ const InputField = ({
   let showError = !!error?.message && displayErrors;
   if (showError) {
     if (error?.type === 'required') {
-      showError = formInput.formState.isSubmitted || name.includes('row');
+      // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
+      showError = formInput.formState.isSubmitted || name.includes('row'); 
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
     }
@@ -203,4 +204,4 @@ const InputField = ({
 };
 
 
-export default InputField;
+export default React.memo(InputField);

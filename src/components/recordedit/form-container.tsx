@@ -18,7 +18,6 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { cloneDeep } from 'lodash';
 
 const FormContainer = (): JSX.Element => {
 
@@ -430,7 +429,7 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
-    const updateValues = clearValue ? '' : cloneDeep(selectAllFieldValue); // Using cloneDeep to deep clone object to avoid rerenders.
+    const updateValues = clearValue ? '' : selectAllFieldValue; 
 
     forms.forEach((formValue: number) => {
       // ignore the ones that cannot be updated

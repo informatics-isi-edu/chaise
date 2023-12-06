@@ -59,6 +59,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const addNewValue = useWatch({ name: `${name}-new-item` });
   const arrayFieldValue = useWatch({ name: 'updateAllField' });
 
+
   useEffect(() => {
 
     if (arrayFieldValue !== name.split('-')[1]) return;
@@ -72,6 +73,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const setupStarted = useRef<boolean>(false);
 
   useEffect(() => {
+    
     // Prevents useEffect from getting invoked twice in dev mode
     if (setupStarted.current) return;
     setupStarted.current = true;
@@ -86,7 +88,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     } else { // create a row with empty value if no default values exist
       setDefaultFieldState([])
     }
-  }, [])
+  }, [arrayFieldValue])
 
   useEffect(() => {
 
@@ -101,44 +103,10 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   // TODO Simplify
   useEffect(() => {
-    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || !addNewValue)
+    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue))
   }, [addNewValue, formState])
 
-  // useEffect(() => {
-
-  //   const sub = watch((data, options: Options) => {
-
-  //     if ((options.name && options.name.includes(name) && options.type === 'change')) {
-  //       const itemId = parseInt(options.name?.split('-').at(-1) as string)
-  //       onTextEdit(itemId, data[`${name}-row-${itemId}`])
-  //       trigger(`${name}-new-item`);
-  //     }
-
-  //     const updateAllColumn = getValues('updateAllColumn');
-  //     if (updateAllColumn && name.includes(updateAllColumn) && options.values) {
-
-  //       // Clear All fields
-  //       if (options.values[name] === '') {
-  //         const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
-  //         keysToClear.push(`-1-${name.split('-')[1]}`)
-
-  //         unregister(keysToClear)
-  //         setDefaultFieldState([])
-  //       }
-  //       // Apply All executed
-  //       else if (options.values[`-1-${name.split('-')[1]}`]) {
-  //         // console.log('Apply All');
-  //         const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
-
-  //         setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [])
-  //       }
-  //     }
-
-  //   })
-
-  //   return () => sub.unsubscribe();
-  // }, [watch])
-
+  
   const generateId = () => {
     const curr = counter;
     setCounter(prev => prev + 1);
@@ -262,12 +230,6 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const DraggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
-    // const rowUpdate = useWatch({name:`${name}-row-${item.id}`});
-
-    // useEffect(()=>{
-    //   console.log(rowUpdate);
-
-    // },[rowUpdate])
 
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {

@@ -28,7 +28,6 @@
   ],
   "devDependencies": {
     "@isrd-isi-edu/ermrest-data-utils": "0.0.2",
-    "@types/lodash": "^4.14.202",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "chance": "x",
@@ -40,7 +39,6 @@
     "eslint-webpack-plugin": "^3.1.1",
     "execSync": "x",
     "jasmine-spec-reporter": "^2.5.0",
-    "lodash": "^4.17.21",
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
