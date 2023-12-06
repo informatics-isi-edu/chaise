@@ -41,6 +41,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const addNewValue = useWatch({ name: `${name}-new-item` });
 
 
+
   const handleOnDragEnd = (result: DropResult) => {
     if (result.destination) {
       move(result.source.index, result.destination.index);
