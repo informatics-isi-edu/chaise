@@ -18,6 +18,7 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { simpleDeepCopy } from '../../utils/data-utils';
 
 const FormContainer = (): JSX.Element => {
 
@@ -429,19 +430,20 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
-    const updateValues = clearValue ? '' : selectAllFieldValue; 
+    const updateValues = clearValue ? '' : selectAllFieldValue;
 
     forms.forEach((formValue: number) => {
+
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
 
-      // console.log(formValue)
-      // console.log(`${formValue}-${cm.column['_name']}`);
-
-      // Using reset causes unnecessary rerenders 
-      // reset({ ...copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue)});
+      /**
+       * The proceeding function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
+       * this function doesn't update the values in place.
+      */ 
+      // Using setValue to prevent unnecessary rerenders 
       setValue('updateAllField', cm.column['_name'])
       setValue(`${formValue}-${cm.column['_name']}`, updateValues)
 
@@ -451,7 +453,22 @@ const SelectAllRow = ({ columnModelIndex, needsWiderMinWidth, selecteAllRef }: F
         setValue(`${formValue}-${cm.column['_name']}-date`, v ? v.date : '')
         setValue(`${formValue}-${cm.column['_name']}-time`, v ? v.time : '')
       }
-      // TODO - handle FK column type - need help
+
+      if (cm.column.isForeignKey) {
+        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+        if (clearValue) {
+          foreignKeyData[formValue] = {};
+        } else if (SELECT_ALL_INPUT_FORM_VALUE) {
+          foreignKeyData[formValue] = simpleDeepCopy(foreignKeyData[SELECT_ALL_INPUT_FORM_VALUE]);
+        }
+
+        // the code above is just copying the displayed rowname for foreignkey
+        // we still need to copy the raw values
+        cm.column.foreignKey.colset.columns.forEach((col: any) => {
+          setValue(`${formValue}-${col.name}`, updateValues);
+        });
+      }
+
     });
   };
 
