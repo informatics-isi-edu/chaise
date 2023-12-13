@@ -12,7 +12,7 @@ var testParams = {
         table_name: "accommodation",
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
-        not_ci: true,
+        test_results: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -86,7 +86,7 @@ var testParams = {
        table_name: "file",
        table_displayname: "file",
        table_comment: "asset/object",
-       not_ci: !process.env.CI,
+       test_results: !process.env.CI,
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -134,7 +134,7 @@ var testParams = {
       table_name: "file",
       table_displayname: "file",
       table_comment: "asset/object",
-      not_ci: !process.env.CI,
+      test_results: !process.env.CI,
       primary_keys: ["id"],
       columns: [
           { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -176,7 +176,7 @@ var testParams = {
       table_name: "file",
       table_displayname: "file",
       table_comment: "asset/object",
-      not_ci: !process.env.CI,
+      test_results: !process.env.CI,
       primary_keys: ["id"],
       columns: [
           { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -258,7 +258,7 @@ describe('Record Add', function() {
 
                         if (tableParams.files.length == 0) {
                             it("should click and add an extra record.", function(done) {
-                                chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function () {
+                                chaisePage.clickButton(chaisePage.recordEditPage.getCloneFormInputSubmitButton()).then(function () {
                                     done();
                                 }).catch(chaisePage.catchTestError(done));
                             });

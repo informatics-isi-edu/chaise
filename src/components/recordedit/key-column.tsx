@@ -19,22 +19,22 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 const KeyColumn = (): JSX.Element => {
 
   const {
-    appMode, activeSelectAll, columnModels, columnPermissionErrors, 
-    config, forms, logRecordeditClientAction, toggleActiveSelectAll
+    appMode, activeMultiForm, columnModels, columnPermissionErrors,
+    config, forms, logRecordeditClientAction, toggleActiveMultiForm
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
     const cm = columnModels[cmIndex];
 
     logRecordeditClientAction(
-      cmIndex === activeSelectAll ? LogActions.SET_ALL_CLOSE : LogActions.SET_ALL_OPEN,
+      cmIndex === activeMultiForm ? LogActions.SET_ALL_CLOSE : LogActions.SET_ALL_OPEN,
       cm.logStackPathChild,
       cm.logStackNode,
       undefined,
       cm.column.reference ? cm.column.reference : undefined
     );
 
-    toggleActiveSelectAll(cmIndex);
+    toggleActiveMultiForm(cmIndex);
   }
 
 
@@ -55,16 +55,16 @@ const KeyColumn = (): JSX.Element => {
    * NOTE: we used to show disabled tuples, if we decided to bring that back,
    * we need to change the logic here.
    */
-  const canShowSelectAllBtn = (columnIndex: number) => {
+  const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    // if we're already showing the select-all UI, then we have to show the button
-    if (activeSelectAll === columnIndex) {
+    // if we're already showing the multi form UI, then we have to show the button
+    if (activeMultiForm === columnIndex) {
       return true;
     }
 
     // in this case we want to show the button and instead disable it
-    if (disableSelectAllbtn(columnIndex)) {
+    if (disableMultiFormbtn(columnIndex)) {
       return true;
     }
 
@@ -81,7 +81,7 @@ const KeyColumn = (): JSX.Element => {
    * if we're going to show column permission errors (one row has disabled a column),
    * then we should disable this button
    */
-  const disableSelectAllbtn = (columnIndex: number) => {
+  const disableMultiFormbtn = (columnIndex: number) => {
     return appMode === appModes.EDIT && isObjectAndKeyDefined(columnPermissionErrors, columnModels[columnIndex].column.name);
   }
 
@@ -93,17 +93,17 @@ const KeyColumn = (): JSX.Element => {
         const colName = column.name;
         const colDisplay = makeSafeIdAttr(column.displayname.value)
 
-        const disableSelectAll = disableSelectAllbtn(cmIndex);
-        let tooltip = cmIndex === activeSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.';
-        if (disableSelectAll) {
+        const disableMultiForm = disableMultiFormbtn(cmIndex);
+        let tooltip = cmIndex === activeMultiForm ? 'Close the panel for setting multiple inputs.' : 'Set value for multiple records.';
+        if (disableMultiForm) {
           tooltip = 'Cannot perform this action.';
         }
 
-        const showSelectAll = canShowSelectAllBtn(cmIndex);
+        const showMultiForm = canShowMultiFormBtn(cmIndex);
 
         let entityKeyClassName = `entity-key entity-key-${cmIndex}`;
-        if (showSelectAll) {
-          entityKeyClassName += ' with-select-all-toggle';
+        if (showMultiForm) {
+          entityKeyClassName += ' with-multi-form-toggle';
         }
 
         return (
@@ -120,14 +120,14 @@ const KeyColumn = (): JSX.Element => {
               </ChaiseTooltip> :
               renderColumnHeader(column)
             }
-            {showSelectAll &&
+            {showMultiForm &&
               <ChaiseTooltip placement='bottom' tooltip={tooltip}>
                 <button
-                  className={`chaise-btn chaise-btn-secondary toggle-select-all-btn toggle-select-all-btn-${cmIndex} select-all-${colDisplay}`}
-                  disabled={disableSelectAll}
+                  className={`chaise-btn chaise-btn-secondary toggle-multi-form-btn toggle-multi-form-btn-${cmIndex} multi-form-${colDisplay}`}
+                  disabled={disableMultiForm}
                   onClick={() => onToggleClick(cmIndex)}
                 >
-                  <span className={`fa-solid ${cmIndex === activeSelectAll ? 'fa-chevron-up' : 'fa-pencil'}`}></span>
+                  <span className={`fa-solid ${cmIndex === activeMultiForm ? 'fa-chevron-up' : 'fa-pencil'}`}></span>
                 </button>
               </ChaiseTooltip>
             }

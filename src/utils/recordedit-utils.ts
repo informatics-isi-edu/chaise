@@ -8,11 +8,10 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 // models
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, PrefillObject, RecordeditColumnModel,
-  RecordeditForeignkeyCallbacks,
-  SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions
+  appModes, PrefillObject, RecordeditColumnModel, RecordeditForeignkeyCallbacks,
+  MULTI_FORM_INPUT_FORM_VALUE, TimestampOptions
+
 } from '@isrd-isi-edu/chaise/src/models/recordedit'
-import { RecordsetProviderOnSelectedRowsChanged } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -348,18 +347,18 @@ export function populateCreateInitialValues(
         values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
         values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
 
-        // add the select-all input value
+        // add the multi form input value
         if (formIndex === 0) {
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-date`] = '';
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-time`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-date`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-time`] = '';
         }
       } else {
         values[`${formValue}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
 
-        // add the select-all input value
+        // add the multi form input value
         if (formIndex === 0) {
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
         }
       }
     }
@@ -524,11 +523,11 @@ export function populateEditInitialValues(
     columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
       const column = colModel.column;
 
-      // add the select-all input values
+      // add the multi form input values
       if (formIndex === 0) {
         // just use empty value (this is to make sure react-hook-forms has this key from the beginning)
         // NOTE if we actually want to show the default values, we should send extra requests.
-        copyOrClearValue(colModel, values, foreignKeyData, SELECT_ALL_INPUT_FORM_VALUE, undefined, true);
+        copyOrClearValue(colModel, values, foreignKeyData, MULTI_FORM_INPUT_FORM_VALUE, undefined, true);
       }
 
       // If input is disabled, and it's copy, we don't want to copy the value

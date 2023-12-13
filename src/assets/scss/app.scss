@@ -726,6 +726,17 @@ html {
         background-color: map-get(variables.$color-map, 'white');
       }
 
+      &:indeterminate + label:after {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        content: "\f068"; // fa-solid fa-minus"
+        font-size: 1rem; // the visible part of icon is small, so we have to make it properly fit the box
+        line-height: 1; // eventhough we're making it bigger, but make sure the whole icon doesn't go beyond the limit
+      }
+
       // we have to change the the checkmark to the label otherwise firefox won't show it.
       &:checked + label:after {
         position: absolute;

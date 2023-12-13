@@ -24,12 +24,12 @@
     }
   }
 }
-// Optional: Group multiple button groups together for a toolbar
+
+// Changing this to grid to set maximum two rows of wrapping buttons if width is less
 .chaise-btn-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
 
   .input-group {
     width: auto;

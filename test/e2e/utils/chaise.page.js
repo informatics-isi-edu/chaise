@@ -47,11 +47,11 @@ var recordEditPage = function() {
         return element.all(by.css('.recordedit-form .form-header'))
     }
 
-    this.getMultiFormInput = function () {
+    this.getCloneFormInput = function () {
         return element(by.id("copy-rows-input"));
     };
 
-    this.getMultiFormInputSubmitButton = function () {
+    this.getCloneFormInputSubmitButton = function () {
         return element(by.id("copy-rows-submit"));
     };
 
@@ -85,7 +85,7 @@ var recordEditPage = function() {
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
-        return element(by.css('.entity-value input[name="' + inputName + '"]'));
+        return element(by.css('input[name="' + inputName + '"]'));
     };
 
     this.getInputById = function (index, displayName) {
@@ -96,14 +96,14 @@ var recordEditPage = function() {
     this.getTextAreaForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
-        return element(by.css('.entity-value textarea[name="' + inputName + '"]'));
+        return element(by.css('textarea[name="' + inputName + '"]'));
     };
 
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
         const inputObj = {};
-        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '"]'));
+        inputObj.date = element(by.css('input[name="' + inputName + '"]'));
         inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
         return inputObj;
     };
@@ -113,8 +113,8 @@ var recordEditPage = function() {
         const inputName = index + '-' + name;
         var inputObj = {};
         const container =  element(by.className(`input-switch-container-${inputName}`));
-        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '-date"]'));
-        inputObj.time = element(by.css('.entity-value input[name="' + inputName + '-time"]'));
+        inputObj.date = element(by.css('input[name="' + inputName + '-date"]'));
+        inputObj.time = element(by.css('input[name="' + inputName + '-time"]'));
         inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
         inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
         return inputObj;
@@ -170,63 +170,37 @@ var recordEditPage = function() {
         return this.getColorInputPopup().element(by.css('.sp-choose'));
     };
 
-    /* select all selectors */
-    this.getColumnSelectAllButton = function (name) {
+    /* Multi form input selectors */
+    this.getMultiFormToggleButton = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.css('.select-all-' + columnDisplayName));
+        return element(by.css('.multi-form-' + columnDisplayName));
     };
 
-    this.getSelectAllInput = () => {
-        return element(by.css('.select-all-input'));
+    this.getMultiFormApplyBtn = function () {
+        return element(by.css('.multi-form-input-apply-btn'));
     }
 
-    this.getSelectAllDate = function (name) {
-        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
+    this.getMultiFormClearBtn = function () {
+        return element(by.css('.multi-form-input-clear-btn'));
     }
 
-    this.getSelectAllTimestampDate = function (name) {
-        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-date"]'));
+    this.getMultiFormCloseBtn = function () {
+        return element(by.css('.multi-form-input-close-btn'));
     }
 
-    this.getSelectAllTimestampTime = function (name) {
-        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-time"]'));
+    this.getMultiFormInputCheckbox = function () {
+        return element(by.css('.multi-form-input-checkbox input'));
     }
 
-    this.getSelectAllPopupBtn = function (name) {
-        return this.getSelectAllInput().element(by.className("modal-popup-btn"));
+    this.getMultiFormInputCheckboxLabel = function () {
+        return element(by.css('.multi-form-input-checkbox label'));
     }
 
-    this.getSelectAllFileInput = function (name) {
-        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
-    }
-
-    this.getSelectAllTextFileInput = function (name) {
-        return this.getSelectAllInput().element(by.className('input-switch-container--1-' + name)).element(by.css('.chaise-input-control > span'));
-    }
-
-    this.getSelectAllTextArea = function (name) {
-        return this.getSelectAllInput().element(by.css('textarea[name="-1-' + name + '"]'));
-    };
-
-    this.getSelectAllApply = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.css('.select-all-apply-' + columnDisplayName));
-    }
-
-    this.getSelectAllClear = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.css('.select-all-clear-' + columnDisplayName));
-    }
-
-    this.getSelectAllCancel = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.css('.select-all-close-' + columnDisplayName));
-    }
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;
-        return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
+        return element(by.css('.input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
 
     // foreign key dropdown selectors
@@ -332,11 +306,26 @@ var recordEditPage = function() {
         return element.all(by.css(".popup-select-value"));
     };
 
+    /**
+     * returns the cell (entity-value).
+     * this is useful if we want to test the extra classes attached to it.
+     */
+    this.getFormInputCell = (name, index) => {
+      index = index || 1;
+      const inputName = index + '-' + name;
+      return element(by.className('input-switch-container-' + inputName)).element(by.xpath('..'));
+    };
+
     this.getInputSwitchContainer = (name, index) => {
       index = index || 1;
       const inputName = index + '-' + name;
       return element(by.className('input-switch-container-' + inputName))
     }
+    this.getInputSwitchContainerFK = (index) => {
+        index = index || 1;
+        const inputName = index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
+        return element(by.className('input-switch-container-' + inputName))
+      }
 
     this.getIframeInputDisplay = (container, name, index) => {
       if (!container) {
@@ -925,7 +914,7 @@ var recordsetPage = function() {
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
-        return element(by.css('.entity-value input[name="' + inputName + '"]'));
+        return element(by.css('input[name="' + inputName + '"]'));
     };
 
     // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead

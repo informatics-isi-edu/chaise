@@ -10,6 +10,8 @@ $z-index-map: (
   'input-group-append-btn-focus': 3,
   // more than previous one
   'input-control-feedback': 4,
+  // higher than the input and feedback buttons
+  'multi-form-input-row': 5,
 
   // make sure it's visible
   'top-horzontal-scroll-wrapper': 5,
@@ -60,6 +62,5 @@ $z-index-map: (
 
   // the highest order
   'modal-error-backdrop-on-search-popup': 1061,
-  'modal-error-on-search-popup': 1066,
-
+  'modal-error-on-search-popup': 1066
 )
