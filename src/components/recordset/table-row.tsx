@@ -146,7 +146,8 @@ const TableRow = ({
       return overflow === true
     });
 
-    if (sensor && justOverflows.length === 0) sensor.detach();
+    // add length check so this only triggers for the reason from the above comment
+    if (sensor && rowValues.length === 1 && justOverflows.length === 0) sensor.detach();
   }
 
   // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
@@ -160,9 +161,10 @@ const TableRow = ({
     if (!rowContainer.current || disableMaxRowHeightFeature) return;
     const tempSensor = new ResizeSensor(
       rowContainer.current,
-      () => {
-        initializeOverflows();
-      }
+      () => setTimeout(() => {
+        initializeOverflows()
+        // images take ~200ms to load so wait at least that long before running
+      }, 200)
     )
 
     setSensor(tempSensor);
