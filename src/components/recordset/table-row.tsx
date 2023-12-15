@@ -122,20 +122,23 @@ const TableRow = ({
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
     const tempOverflow: boolean[] = [];
-    for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
-      let hasOverflow = overflow[i] || false;
 
-      // children is each <td>, span is the cell wrapping the content
-      const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
+    if (rowContainer.current && rowContainer.current.children) {
+      for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
+        let hasOverflow = overflow[i] || false;
 
-      // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
-      if (dataCell && !hasOverflow) {
-        // overflow is true if the content overflows the cell
-        // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
-        hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+        // children is each <td>, span is the cell wrapping the content
+        const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
+
+        // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
+        if (dataCell && !hasOverflow) {
+          // overflow is true if the content overflows the cell
+          // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
+          hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+        }
+
+        tempOverflow[i] = hasOverflow;
       }
-
-      tempOverflow[i] = hasOverflow;
     }
 
     setOverflow(tempOverflow);
