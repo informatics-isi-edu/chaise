@@ -139,6 +139,10 @@ const FormRow = ({
       if (!formsRef || !formsRef.current || !showCloneSpinner) return;
 
       if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
+    // trigger this when number of forms changes
+    // `callAddForm` in /components/recordedit.tsx calls addForm(#_forms_to_add) which will then set the `forms` state variable
+    // once callAddForm finishes, react repaints the UI then will trigger this useEffect because forms was changed
+    // NOTE: it appears this useEffect is triggering after the "full repaint" even if there was a delay
     }, [forms])
   }
 
