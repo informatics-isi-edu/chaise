@@ -104,10 +104,11 @@ const RecordeditInner = ({
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
-    showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
+    showCloneSpinner, setShowCloneSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
-  const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
+  const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
+  const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
   /**
    * the following are used for bulk delete feature
@@ -297,7 +298,15 @@ const RecordeditInner = ({
     }
   }, [formProviderInitialized]);
 
+  useEffect(() => {
+    if (!addFormsEffect) return;
+
+    setAddFormsEffect(false);
+    callAddForm();
+  }, [addFormsEffect])
+
   const callAddForm = () => {
+    setShowCloneSpinner(true);
     // converts to number type. If NaN is returned, 1 is used instead
     const numberFormsToAdd: number = Number(copyFormRef.current?.value) || 1;
 
@@ -314,6 +323,7 @@ const RecordeditInner = ({
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
       const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
       addAlert(alertMessage, ChaiseAlertType.ERROR);
+      setShowCloneSpinner(false);
       return true;
     }
 
@@ -347,17 +357,28 @@ const RecordeditInner = ({
       });
     }
 
-    methods.reset(tempFormValues)
+    methods.reset(tempFormValues);
   };
 
   const renderSpinner = () => {
-    if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner)) {
+    if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner)) {
+      let spinnerClassName = 'submit-spinner';
+      let spinnerMessage = 'Saving...';
+
+      if (showDeleteSpinner) {
+        spinnerClassName = 'delete-spinner';
+        spinnerMessage = 'Deleting...';
+      } else if (showCloneSpinner) {
+        spinnerClassName = 'clone-spinner';
+        spinnerMessage = 'Cloning...';
+      }
+
       return (
         <div className='app-blocking-spinner-container'>
           <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner
-            className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
-            message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
+            className={spinnerClassName}
+            message={spinnerMessage}
           />
         </div>
       )
@@ -661,7 +682,10 @@ const RecordeditInner = ({
                           <button
                             id='copy-rows-submit'
                             className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                            onClick={callAddForm}
+                            onClick={() => {
+                              setShowCloneSpinner(true);
+                              setAddFormsEffect(true);
+                            }}
                             type='button'
                             disabled={!allFormDataLoaded}
                           >

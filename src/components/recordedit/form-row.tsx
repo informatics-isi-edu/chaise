@@ -55,6 +55,8 @@ const FormRow = ({
     waitingForForeignKeyData,
     getRecordeditLogStack,
     getRecordeditLogAction,
+    showCloneSpinner,
+    setShowCloneSpinner,
     foreignKeyCallbacks
   } = useRecordedit();
 
@@ -81,6 +83,7 @@ const FormRow = ({
   }, [columnPermissionErrors]);
 
   const container = useRef<HTMLDivElement>(null);
+  const formsRef = useRef<HTMLDivElement>(null);
   const cm = columnModels[columnModelIndex];
 
   /**
@@ -124,6 +127,20 @@ const FormRow = ({
       sensor.detach();
     };
   }, []);
+
+  if (columnModelIndex === 0) {
+    // only run this useEffect for the first form-row in the recordedit view
+    // disable lint rule since this component's columnModelIndex will never change
+    //   - recordedit table model for which columns are in the form is fixed
+    //   - can only change if permissions of the user change (or the model changes) which requires a reload anyways
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      // only run this on the first form row to keep track of total forms visible
+      if (!formsRef || !formsRef.current || !showCloneSpinner) return;
+
+      if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
+    }, [forms])
+  }
 
   /**
    * This useffect is to remove the form from the acitve forms if we delete the form.
@@ -299,7 +316,7 @@ const FormRow = ({
 
   return (
     <div className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`} ref={container}>
-      <div className='inputs-row'>
+      <div className='inputs-row' ref={formsRef}>
         {forms.map((formNumber: number, formIndex: number) => (
           <div
             key={`form-${formNumber}-input-${columnModelIndex}`}
