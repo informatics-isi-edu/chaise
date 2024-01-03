@@ -552,6 +552,11 @@ export default function RecordsetProvider({
       // after react sets the reference, the useEffect will trigger processRequests
       setReference(newRef);
     } else if (limit && typeof limit === 'number') {
+      if (limit === pageLimitRef.current) {
+        // if the limit has not changed, manually call the processRequests because the useEffect will not be called
+        // (this can happen if users clicked on the currently applied pageLimit in the dropdown)
+        processRequests();
+      }
       setPageLimit(limit);
     } else {
       processRequests();
