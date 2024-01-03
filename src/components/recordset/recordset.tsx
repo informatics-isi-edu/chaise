@@ -18,7 +18,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 
 // hooks
-import React, { AnchorHTMLAttributes, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
@@ -783,17 +783,25 @@ const RecordsetInner = ({
     </div>
   );
 
-  const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
+  const renderMainContainer = () => {
+    const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
+    return <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
-        <RecordsetTable
-          config={config}
-          initialSortObject={initialReference.location.sortObject}
-        />
+        {hasSpinner &&
+          <div className='recordset-main-spinner-container sticky-spinner-outer-container'>
+            <ChaiseSpinner className='recordest-main-spinner manual-position-spinner' />
+          </div>
+        }
+        <div className={`recordset-main-table${hasSpinner ? ' with-spinner' : ''}`}>
+          <RecordsetTable
+            config={config}
+            initialSortObject={initialReference.location.sortObject}
+          />
+        </div>
       </div>
       {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
     </div>
-  );
+  };
 
   /**
    * The left panels that should be resized together
@@ -807,10 +815,6 @@ const RecordsetInner = ({
 
   return (
     <div className='recordset-container app-content-container'>
-      {
-        errors.length === 0 && (isLoading || forceShowSpinner) &&
-        <ChaiseSpinner className='recordest-main-spinner' />
-      }
       <div className='top-panel-container'>
         {/* recordset level alerts */}
         <Alerts />
