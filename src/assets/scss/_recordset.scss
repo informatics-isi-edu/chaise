@@ -181,11 +181,12 @@
     }
 
     // when spinner is displayed, we have to adjust the margin-top
-    .recordset-main-table.with-spinner {
+    .main-body.with-spinner {
       margin-top: variables.$main-spinner-height * -1;
     }
     .recordset-main-spinner-container {
-      top: 70px;
+      // show the tooltip in the middle of the container
+      top: calc(50% - variables.$main-spinner-height);
     }
   }
 }

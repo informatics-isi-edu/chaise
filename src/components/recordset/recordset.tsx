@@ -785,22 +785,22 @@ const RecordsetInner = ({
 
   const renderMainContainer = () => {
     const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
-    return <div className='main-container dynamic-padding' ref={mainContainer}>
-      <div className='main-body'>
+    return (
+      <div className='main-container dynamic-padding' ref={mainContainer}>
         {hasSpinner &&
           <div className='recordset-main-spinner-container sticky-spinner-outer-container'>
             <ChaiseSpinner className='recordest-main-spinner manual-position-spinner' />
           </div>
         }
-        <div className={`recordset-main-table${hasSpinner ? ' with-spinner' : ''}`}>
+        <div className={`main-body${hasSpinner ? ' with-spinner' : ''}`}>
           <RecordsetTable
             config={config}
             initialSortObject={initialReference.location.sortObject}
           />
         </div>
+        {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
       </div>
-      {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
-    </div>
+    )
   };
 
   /**
