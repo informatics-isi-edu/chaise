@@ -734,18 +734,17 @@ export default function RecordeditProvider({
 
   const addForm = (count: number) => {
     const newFormValues: number[] = [];
-    // add 'count' number of forms
-    setForms((previous: number[]) => {
-      const res = [...previous];
-      for (let i = 0; i < count; i++) {
-        // last value in 'forms' incremented by 1
-        const formValue = res[res.length - 1] + 1;
-        res.push(formValue);
-        newFormValues.push(formValue);
-      }
 
-      return [...res];
-    })
+    const tempForms = [...forms];
+    for (let i = 0; i < count; i++) {
+      // last value in 'forms' incremented by 1
+      const formValue = tempForms[tempForms.length - 1] + 1;
+      tempForms.push(formValue);
+      newFormValues.push(formValue);
+    }
+
+    // add 'count' number of forms
+    setForms(tempForms);
 
     return newFormValues;
   };

@@ -141,6 +141,10 @@ The rules that should be followed while writing code.
   - `useStateRef`:
     - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
     - intended to be synchronous
+- Calling functions after `useState` update and browser repaint
+  - When the set function of a `useState` hook is called, a browser repaint is triggered followed by each `useEffect` and `useLayoutEffect` being checked for changes
+  - If a change occurred that triggers a `useEffect` or `useLayoutEffect` hook, the defined function for that hook will run after the browser repaint with the updated values for the `useState` hook.
+  - This is useful for displaying feedback to the user before triggering some functionality that might take some time to process (cloning forms in recordedit or submitting many at once)
 - List items must have keys, which tell React list item   identity
   - Should be unique per list
   - Ideally, use item IDs
