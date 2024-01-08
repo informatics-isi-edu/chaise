@@ -100,7 +100,7 @@ const InputField = ({
   name,
   requiredInput,
   displayErrors,
-  containerClasses,
+  containerClasses = '',
   styles,
   allowEnter = false,
   onClear,
