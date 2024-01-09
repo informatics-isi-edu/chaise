@@ -3,7 +3,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
@@ -12,7 +12,9 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -49,7 +51,8 @@ const MultiFormInputRow = ({
   const columnModel = columnModels[columnModelIndex];
   const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
 
-  const { watch, reset, getValues, formState: { errors } } = useFormContext();
+  const { formState: { errors }, setValue } = useFormContext();
+  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}` });
 
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -136,22 +139,38 @@ const MultiFormInputRow = ({
    * useEffect allows us to look for the value and only rerender when we have to.
    */
   useEffect(() => {
-    const subscribe = watch((data, options) => {
-      const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
-      if (!options.name || options.name !== n) return;
 
-      // see if the input is empty
-      let temp = !Boolean(data[n]);
-      if (columnModel.column.type.name === 'boolean') {
-        temp = typeof data[n] !== 'boolean';
-      }
+    const columnModel = columnModels[columnModelIndex];
 
-      if (isEmpty !== temp) {
-        setIsEmpty(temp);
-      }
-    });
-    return () => subscribe.unsubscribe();
-  }, [watch, isEmpty]);
+    // see if the input is empty
+    let temp = !Boolean(selectAllFieldValue);
+    if (columnModel.column.type.name === 'boolean') {
+      temp = typeof selectAllFieldValue !== 'boolean';
+    }
+
+    if (isEmpty !== temp) {
+      setIsEmpty(temp);
+    }
+
+  }, [selectAllFieldValue, isEmpty]);
+
+  // useEffect(() => {
+  //   const subscribe = watch((data, options) => {
+  //     const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
+  //     if (!options.name || options.name !== n) return;
+
+  //     // see if the input is empty
+  //     let temp = !Boolean(data[n]);
+  //     if (columnModel.column.type.name === 'boolean') {
+  //       temp = typeof data[n] !== 'boolean';
+  //     }
+
+  //     if (isEmpty !== temp) {
+  //       setIsEmpty(temp);
+  //     }
+  //   });
+  //   return () => subscribe.unsubscribe();
+  // }, [watch, isEmpty]);
 
   /**
    * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
@@ -236,22 +255,42 @@ const MultiFormInputRow = ({
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
+    const updateValues = clearValue ? '' : selectAllFieldValue;
 
     activeForms?.forEach((formValue: number) => {
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
-      reset(
-        copyOrClearValue(
-          cm,
-          getValues(),
-          foreignKeyData.current,
-          formValue,
-          MULTI_FORM_INPUT_FORM_VALUE,
-          clearValue
-        )
-      );
+
+      /**
+       * The proceeding function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
+       * this function doesn't update the values in place.
+       */
+      setValue('updateAllField', cm.column['_name'])
+      setValue(`${formValue}-${cm.column['_name']}`, updateValues)
+
+      if (cm.inputType === 'timestamp') {
+        const v = formatDatetime(updateValues, { outputMomentFormat: dataFormats.timestamp });
+
+        setValue(`${formValue}-${cm.column['_name']}-date`, v ? v.date : '')
+        setValue(`${formValue}-${cm.column['_name']}-time`, v ? v.time : '')
+      }
+
+      if (cm.column.isForeignKey) {
+        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+        if (clearValue) {
+          foreignKeyData[formValue] = {};
+        } else if (MULTI_FORM_INPUT_FORM_VALUE) {
+          foreignKeyData[formValue] = simpleDeepCopy(foreignKeyData[MULTI_FORM_INPUT_FORM_VALUE]);
+        }
+
+        // the code above is just copying the displayed rowname for foreignkey
+        // we still need to copy the raw values
+        cm.column.foreignKey.colset.columns.forEach((col: any) => {
+          setValue(`${formValue}-${col.name}`, updateValues);
+        });
+      }
     });
   };
 
