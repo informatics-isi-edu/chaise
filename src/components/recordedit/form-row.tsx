@@ -55,6 +55,8 @@ const FormRow = ({
     waitingForForeignKeyData,
     getRecordeditLogStack,
     getRecordeditLogAction,
+    showCloneSpinner,
+    setShowCloneSpinner,
     foreignKeyCallbacks
   } = useRecordedit();
 
@@ -81,6 +83,7 @@ const FormRow = ({
   }, [columnPermissionErrors]);
 
   const container = useRef<HTMLDivElement>(null);
+  const formsRef = useRef<HTMLDivElement>(null);
   const cm = columnModels[columnModelIndex];
 
   /**
@@ -124,13 +127,11 @@ const FormRow = ({
       sensor.detach();
     };
   }, []);
-
-  /**
-   * This useffect is to remove the form from the acitve forms if we delete the form.
-   * removeClicked is passed from the parent to communicate that delete form is clicked
-  */
+  
   useEffect(() => {
-    if (removeFormIndex && activeForms?.length > 0) {
+    // This condition is to remove the form from the acitve forms if we delete the form.
+    // removeClicked is passed from the parent to communicate that delete form is clicked
+    if (removeClicked && removeFormIndex && activeForms?.length > 0) {
       setRemoveClicked(false);
       setActiveForm((prevActiveForms) => {
         if (prevActiveForms?.includes(removeFormIndex)) {
@@ -142,7 +143,20 @@ const FormRow = ({
         }
       });
     }
-  }, [removeClicked]);
+
+    /**
+     * only run this condition for the first form-row in the recordedit view when number of "forms" changes
+     * `callAddForm` in /components/recordedit.tsx calls addForm(#_forms_to_add) which will then set the `forms` state variable
+     * once callAddForm finishes, react repaints the UI then will trigger this useEffect because forms was changed
+     * NOTE: it appears this useEffect is triggering after the "full repaint" even if there was a delay
+     */
+    if (columnModelIndex === 0) {
+        // only run this on the first form row to keep track of total forms visible
+        if (!formsRef || !formsRef.current || !showCloneSpinner) return;
+  
+        if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
+    }
+  }, [forms, removeClicked]);
 
   // ------------------------ callbacks -----------------------------------//
 
@@ -299,7 +313,7 @@ const FormRow = ({
 
   return (
     <div className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`} ref={container}>
-      <div className='inputs-row'>
+      <div className='inputs-row' ref={formsRef}>
         {forms.map((formNumber: number, formIndex: number) => (
           <div
             key={`form-${formNumber}-input-${columnModelIndex}`}

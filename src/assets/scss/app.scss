@@ -326,6 +326,21 @@ html {
     }
   }
 
+  /**
+   * show a sticky spinner for the container
+   * used in recordset and record pages
+   * NOTE: the container must have a margin-top: variables.$main-spinner-height * -1; when spinner is displayed.
+   */
+  .sticky-spinner-outer-container {
+    position: sticky;
+    position: -webkit-sticky;
+    top: min(50px, 50%);
+    z-index: map-get(variables.$z-index-map, 'spinner');
+    .spinner-container {
+      height: variables.$main-spinner-height;
+    }
+  }
+
 
   .forced-hidden {
     display: none !important;

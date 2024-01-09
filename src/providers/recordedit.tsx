@@ -87,6 +87,11 @@ export const RecordeditContext = createContext<{
   /* callback for react-hook-form to call when forms are NOT valid */
   onSubmitInvalid: (errors: any, e?: any) => void,
   /**
+   * whether we should show the spinner indicating cloning form data
+   */
+  showCloneSpinner: boolean,
+  setShowCloneSpinner: Function,
+  /**
    * whether we should show the spinner indicating submitting data or not
    */
   showSubmitSpinner: boolean,
@@ -215,6 +220,7 @@ export default function RecordeditProvider({
 
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
+  const [showCloneSpinner, setShowCloneSpinner] = useState(false);
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
@@ -728,18 +734,17 @@ export default function RecordeditProvider({
 
   const addForm = (count: number) => {
     const newFormValues: number[] = [];
-    // add 'count' number of forms
-    setForms((previous: number[]) => {
-      const res = [...previous];
-      for (let i = 0; i < count; i++) {
-        // last value in 'forms' incremented by 1
-        const formValue = res[res.length - 1] + 1;
-        res.push(formValue);
-        newFormValues.push(formValue);
-      }
 
-      return [...res];
-    })
+    const tempForms = [...forms];
+    for (let i = 0; i < count; i++) {
+      // last value in 'forms' incremented by 1
+      const formValue = tempForms[tempForms.length - 1] + 1;
+      tempForms.push(formValue);
+      newFormValues.push(formValue);
+    }
+
+    // add 'count' number of forms
+    setForms(tempForms);
 
     return newFormValues;
   };
@@ -1054,6 +1059,8 @@ export default function RecordeditProvider({
 
       onSubmitValid,
       onSubmitInvalid,
+      showCloneSpinner,
+      setShowCloneSpinner,
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
@@ -1066,7 +1073,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    reference, tuples, columnModels, initialized, waitingForForeignKeyData,
+    reference, tuples, columnModels, initialized, waitingForForeignKeyData, showCloneSpinner,
     showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeMultiForm
   ]);
 

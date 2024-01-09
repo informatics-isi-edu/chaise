@@ -142,10 +142,11 @@ const RecordMainSection = (): JSX.Element => {
     });
   };
 
+  const hasSpinner = errors.length === 0 && showMainSectionSpinner;
   return (
-    <div className={`record-main-section ${errors.length === 0 && showMainSectionSpinner ? ' with-spinner' : ''}`}>
-      {errors.length === 0 && showMainSectionSpinner &&
-        <div className='record-main-spinner-container'>
+    <div className={`record-main-section ${hasSpinner ? ' with-spinner' : ''}`}>
+      {hasSpinner &&
+        <div className='sticky-spinner-outer-container'>
           <ChaiseSpinner className='record-main-spinner manual-position-spinner' />
         </div>
       }
