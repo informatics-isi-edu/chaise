@@ -867,8 +867,8 @@ const RecordsetInner = ({
                       <small className='h3-class'>({versionInfo.humanized})</small>
                     </ChaiseTooltip>
                   }
-                  {reference.commentDisplay === 'inline' && reference.comment &&
-                    <span className='inline-tooltip'>{reference.comment}</span>
+                  {reference.comment && reference.comment.displayMode === 'inline' &&
+                    <span className='inline-tooltip'><DisplayValue addClass value={reference.comment} /></span>
                   }
                 </h1>
               </div>

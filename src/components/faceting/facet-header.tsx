@@ -7,7 +7,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { useRef, useState } from 'react';
 
 // models
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 type FacetHeaderProps = {
   /**
@@ -21,7 +21,7 @@ type FacetHeaderProps = {
   /**
    * Optional text to be shown on hover of displayname
    */
-  comment?: string;
+  comment?: CommentType;
   /**
    * whether we should show the spinner or not
    */
@@ -74,9 +74,9 @@ const FacetHeader = ({
    */
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && comment) {
-      return <><DisplayValue value={displayname} />: {comment}</>;
+      return <><DisplayValue value={displayname} />: <DisplayValue addClass value={comment} /></>;
     } else if (comment) {
-      return comment;
+      return <DisplayValue addClass value={comment} />;
     } else {
       return <DisplayValue value={displayname} />;
     }

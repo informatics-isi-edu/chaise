@@ -110,7 +110,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
             {cm.column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={cm.column.comment}
+                tooltip={<DisplayValue addClass value={cm.column.comment} />}
               >
                 {renderColumnHeader(cm.column)}
               </ChaiseTooltip> :

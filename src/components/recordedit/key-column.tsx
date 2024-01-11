@@ -114,7 +114,7 @@ const KeyColumn = (): JSX.Element => {
             {column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={column.comment}
+                tooltip={<DisplayValue addClass value={column.comment} />}
               >
                 {renderColumnHeader(column)}
               </ChaiseTooltip> :

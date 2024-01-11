@@ -9,9 +9,7 @@ import { useRef, useState } from 'react';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-
-// services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -41,19 +39,20 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   };
 
   const usedRef = relatedModel.initialReference;
-  const hasTooltip = usedRef.comment && usedRef.commentDisplay === 'tooltip';
+  const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
 
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
+  const renderedTooltip = hasTooltip ? <DisplayValue addClass value={usedRef.comment} /> : <></>;
 
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
       return (
         <>
-          {renderedDisplayname}: {usedRef.comment}
+          {renderedDisplayname}: renderedTooltip
         </>
       );
     } else if (hasTooltip) {
-      return usedRef.comment;
+      return renderedTooltip;
     } else {
       return renderedDisplayname;
     }

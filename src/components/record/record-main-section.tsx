@@ -14,13 +14,13 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-
 
 /**
  * Returns Main Section of the record page.
@@ -56,7 +56,7 @@ const RecordMainSection = (): JSX.Element => {
     const hideAllHeaders = reference.display.hideColumnHeaders;
     return columnModels.map((cm: RecordColumnModel, index: number) => {
       const hideHeader = hideAllHeaders || cm.column.hideColumnHeader;
-      const hasTooltip = !!cm.column.comment && cm.column.commentDisplay === 'tooltip';
+      const hasTooltip = !!cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.TOOLTIP;
       const hasError = showError(cm);
       const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
         cm.relatedModel.recordsetState.isInitialized;
@@ -98,7 +98,7 @@ const RecordMainSection = (): JSX.Element => {
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
             {hasTooltip ?
-              <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
+              <ChaiseTooltip placement='right' tooltip={<DisplayValue addClass value={cm.column.comment} />}>
                 {columnDisplayname}
               </ChaiseTooltip> : columnDisplayname
             }
@@ -118,8 +118,8 @@ const RecordMainSection = (): JSX.Element => {
               <span id={`entity-${cm.index}-table`}>
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
-                  {cm.column.commentDisplay === 'inline' && cm.column.comment &&
-                    <div className='inline-tooltip'>{cm.column.comment}</div>
+                  {cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
+                    <div className='inline-tooltip'><DisplayValue addClass value={cm.column.comment} /></div>
                   }
                   <RelatedTable
                     relatedModel={cm.relatedModel}

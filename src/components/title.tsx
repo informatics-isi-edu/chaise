@@ -3,7 +3,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
-import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 
 
@@ -21,7 +21,7 @@ type TitleProps = {
    * if defined, we will use this instead of getting it from the reference
    * - use `false` to suppress adding the comment
    */
-  comment?: string | false,
+  comment?: CommentType,
   /**
    * whether we should add a link or not.
    * - if `link` is passed, we will add the link regardless of this property.
@@ -51,7 +51,7 @@ const Title = ({
   if (typeof link === 'string') {
     addLink = true;
   }
-  else if (reference){
+  else if (reference) {
     link = reference.unfilteredReference.contextualize.compact.appLink;
   }
 
@@ -60,13 +60,12 @@ const Title = ({
       displayname = reference.displayname;
     }
 
-    if (comment !== false && !comment && reference.comment) {
+    if (!comment && reference.comment) {
       comment = reference.comment;
     }
 
-    showTooltip = reference.commentDisplay === 'tooltip' && (comment || reference.comment);
+    showTooltip = comment || (reference.comment && reference.comment.displayMode === CommentDisplayModes.TOOLTIP);
   }
-
 
   const renderDisplayname = <DisplayValue value={displayname} />;
 
@@ -86,7 +85,7 @@ const Title = ({
     return (
       <ChaiseTooltip
         placement='bottom-start'
-        tooltip={comment}
+        tooltip={<DisplayValue addClass value={comment} />}
       >
         {renderLinkOrContainer()}
       </ChaiseTooltip>
