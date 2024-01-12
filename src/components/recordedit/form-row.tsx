@@ -17,6 +17,11 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type FormRowProps = {
   /**
+   * The multi form row index that is active
+   * NOTE: this is a prop to prevent every form row from rerendering when this value changes recordedit provider
+   */
+  activeMultiFormIdx: number;
+  /**
   * The column index.
   */
   columnModelIndex: number;
@@ -37,6 +42,7 @@ type FormRowProps = {
   setRemoveClicked?: any;
 };
 const FormRow = ({
+  activeMultiFormIdx,
   columnModelIndex,
   removeFormIndex,
   removeClicked,
@@ -48,7 +54,7 @@ const FormRow = ({
     reference,
     columnModels,
     tuples,
-    activeMultiForm,
+    // activeMultiForm,
     canUpdateValues,
     columnPermissionErrors,
     foreignKeyData,
@@ -204,7 +210,7 @@ const FormRow = ({
 
   // -------------------------- render logic ---------------------- //
 
-  const showMultiFormRow = activeMultiForm === columnModelIndex;
+  const showMultiFormRow = activeMultiFormIdx === columnModelIndex;
   const columnModel = columnModels[columnModelIndex];
 
   /**

@@ -17,7 +17,7 @@ import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils'
 const FormContainer = (): JSX.Element => {
 
   const {
-    columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
+    activeMultiForm, columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -119,6 +119,7 @@ const FormContainer = (): JSX.Element => {
         {/* inputs for each column */}
         {columnModels.map(({ }, idx) => (
           <FormRow
+            activeMultiFormIdx={activeMultiForm}
             removeClicked={removeClicked}
             setRemoveClicked={setRemoveClicked}
             removeFormIndex={removeFormIndex}
