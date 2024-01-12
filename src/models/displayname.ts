@@ -4,6 +4,9 @@ export type Displayname = {
   unformatted?: string
 };
 
+/**
+ * what the comment coming from ermrestjs might look like
+ */
 export type CommentType = {
   value: string,
   isHTML: boolean,

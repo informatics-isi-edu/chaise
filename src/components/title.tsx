@@ -1,6 +1,7 @@
 // components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // models
 import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -85,7 +86,7 @@ const Title = ({
     return (
       <ChaiseTooltip
         placement='bottom-start'
-        tooltip={<DisplayValue addClass value={comment} />}
+        tooltip={<DisplayCommentValue comment={comment} />}
       >
         {renderLinkOrContainer()}
       </ChaiseTooltip>

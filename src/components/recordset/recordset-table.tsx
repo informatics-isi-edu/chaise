@@ -2,10 +2,11 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React from 'react';
 
 // components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
+import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -291,7 +292,7 @@ const RecordsetTable = ({
             // if comment, show tooltip
             <ChaiseTooltip
               placement='top'
-              tooltip={<DisplayValue addClass value={col.column.comment} />}
+              tooltip={<DisplayCommentValue comment={col.column.comment} />}
             >
               {renderDisplayValue(col.column)}
             </ChaiseTooltip> :

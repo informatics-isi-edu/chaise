@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
@@ -869,7 +870,7 @@ const RecordsetInner = ({
                     </ChaiseTooltip>
                   }
                   {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <span className='inline-tooltip'><DisplayValue addClass value={reference.comment} /></span>
+                    <span className='inline-tooltip'><DisplayCommentValue comment={reference.comment} /></span>
                   }
                 </h1>
               </div>

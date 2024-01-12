@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
@@ -87,7 +88,7 @@ const RelatedTableInner = ({
     <div>
       {/* in case of inline, the comments are already handled */}
       {!relatedModel.isInline && usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.INLINE &&
-        <div className='inline-tooltip'><DisplayValue addClass value={usedRef.comment} /></div>
+        <div className='inline-tooltip'><DisplayCommentValue comment={usedRef.comment} /></div>
       }
       {displayCustomMode &&
         <>

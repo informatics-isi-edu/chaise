@@ -2,6 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record-main-section.scss';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
@@ -98,7 +99,7 @@ const RecordMainSection = (): JSX.Element => {
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
             {hasTooltip ?
-              <ChaiseTooltip placement='right' tooltip={<DisplayValue addClass value={cm.column.comment} />}>
+              <ChaiseTooltip placement='right' tooltip={<DisplayCommentValue comment={cm.column.comment} />}>
                 {columnDisplayname}
               </ChaiseTooltip> : columnDisplayname
             }
@@ -112,14 +113,14 @@ const RecordMainSection = (): JSX.Element => {
             id={`entity-${idSafeDisplayname}`}
           >
             {!cm.relatedModel && !hasError &&
-              <DisplayValue addClass={true} value={recordValues[cm.index]} />
+              <DisplayValue addClass value={recordValues[cm.index]} />
             }
             {cm.relatedModel &&
               <span id={`entity-${cm.index}-table`}>
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
                   {cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <div className='inline-tooltip'><DisplayValue addClass value={cm.column.comment} /></div>
+                    <div className='inline-tooltip'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable
                     relatedModel={cm.relatedModel}

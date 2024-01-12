@@ -1,5 +1,6 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import Spinner from 'react-bootstrap/Spinner';
@@ -42,7 +43,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
 
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
-  const renderedTooltip = hasTooltip ? <DisplayValue addClass value={usedRef.comment} /> : <></>;
+  const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;
 
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {

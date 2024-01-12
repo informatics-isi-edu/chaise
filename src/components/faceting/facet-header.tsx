@@ -1,5 +1,6 @@
 // Components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
 
@@ -74,9 +75,9 @@ const FacetHeader = ({
    */
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && comment) {
-      return <><DisplayValue value={displayname} />: <DisplayValue addClass value={comment} /></>;
+      return <><DisplayValue value={displayname} />: <DisplayCommentValue comment={comment} /></>;
     } else if (comment) {
-      return <DisplayValue addClass value={comment} />;
+      return <DisplayCommentValue comment={comment} />;
     } else {
       return <DisplayValue value={displayname} />;
     }
