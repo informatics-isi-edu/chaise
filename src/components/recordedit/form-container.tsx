@@ -119,7 +119,7 @@ const FormContainer = (): JSX.Element => {
         {/* inputs for each column */}
         {columnModels.map(({ }, idx) => (
           <FormRow
-            activeMultiFormIdx={activeMultiForm}
+            isActiveForm={activeMultiForm === idx}
             removeClicked={removeClicked}
             setRemoveClicked={setRemoveClicked}
             removeFormIndex={removeFormIndex}
