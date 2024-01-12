@@ -298,12 +298,12 @@ const RecordeditInner = ({
     }
   }, [formProviderInitialized]);
 
-  /** 
+  /**
    * This useEffect triggers when addFormsEffect is set to true when "clone" is clicked
    * this allows for showCloneSpinner state variable to change separately from callAddForm (which changes the total # of forms)
-   * when showCloneSpinner is changed there is a repaint of the DOM before this useEffect triggers, 
+   * when showCloneSpinner is changed there is a repaint of the DOM before this useEffect triggers,
    *    which shows the spinner before triggering the addForms logic (which can be slow when many forms are added at once)
-   */ 
+   */
   useEffect(() => {
     if (!addFormsEffect) return;
 
@@ -409,7 +409,6 @@ const RecordeditInner = ({
 
       return (<>
         <span>{count} </span>
-        {/* NOTE in Angularjs, in edit mode the link was based on the original link, both now it's always unfiltered */}
         <Title addLink reference={reference}
           link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
         <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>

@@ -9,7 +9,7 @@ export type CommentType = {
   isHTML: boolean,
   unformatted?: string,
   displayMode: CommentDisplayModes
-} | null;
+} | false | null;
 
 export enum CommentDisplayModes {
   INLINE = 'inline',

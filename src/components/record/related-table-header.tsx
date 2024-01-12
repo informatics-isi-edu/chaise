@@ -48,7 +48,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
       return (
         <>
-          {renderedDisplayname}: renderedTooltip
+          {renderedDisplayname}: {renderedTooltip}
         </>
       );
     } else if (hasTooltip) {

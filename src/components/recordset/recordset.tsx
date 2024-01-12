@@ -25,6 +25,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -867,7 +868,7 @@ const RecordsetInner = ({
                       <small className='h3-class'>({versionInfo.humanized})</small>
                     </ChaiseTooltip>
                   }
-                  {reference.comment && reference.comment.displayMode === 'inline' &&
+                  {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
                     <span className='inline-tooltip'><DisplayValue addClass value={reference.comment} /></span>
                   }
                 </h1>

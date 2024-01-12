@@ -99,7 +99,7 @@ const RelatedTableInner = ({
           }
         </>
       }
-      <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
+      <div className={`related-table-content${displayCustomMode ? (' ' + CLASS_NAMES.HIDDEN) : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <div id={tableContainerID}>
           <RecordsetTable
