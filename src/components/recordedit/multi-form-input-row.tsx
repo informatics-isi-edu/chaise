@@ -185,11 +185,16 @@ const MultiFormInputRow = ({
     if (!allValuesEffect) return;
 
     setAllValuesEffect(0);
-    // if 1/true, clear all values
-    // if -1/false, apply the value in the input to all selected forms 
-    allValuesEffect === 1 ?
-      clearAllValues() :
-      applyValueToAll()
+    
+    // without delaying this function call, the spinner would show briefly 
+    // after the app appeared to freeze instead of before the "appeared freeze"
+    setTimeout(() => {
+      // if 1/true, clear all values
+      // if -1/false, apply the value in the input to all selected forms 
+      allValuesEffect === 1 ?
+        clearAllValues() :
+        applyValueToAll()
+    }, 0)
 
   }, [allValuesEffect])
 
