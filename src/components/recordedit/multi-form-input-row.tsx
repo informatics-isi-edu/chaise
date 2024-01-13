@@ -43,6 +43,7 @@ const MultiFormInputRow = ({
     appMode,
     canUpdateValues,
     toggleActiveMultiForm,
+    setShowApplyAllSpinner,
     logRecordeditClientAction,
   } = useRecordedit();
 
@@ -51,12 +52,16 @@ const MultiFormInputRow = ({
 
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
 
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
   /**
    *  This is to set select all checkbox state
    */
-  const [allFormsAreActive, setAllFormsAreActive] = useState(false);
+  const [allFormsAreActive, setAllFormsAreActive] = useState<boolean>(false);
+  // 0 means don't call function
+  // -1 means call applyValueToAll
+  // 1 means call clearAllValues
+  const [allValuesEffect, setAllValuesEffect] = useState<number>(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -176,6 +181,17 @@ const MultiFormInputRow = ({
 
   // ------------------------ callbacks -----------------------------------//
 
+  useEffect(() => {
+    if (!allValuesEffect) return;
+
+    setAllValuesEffect(0);
+    // if 1/true, clear all values
+    // if -1/false, apply the value in the input to all selected forms 
+    allValuesEffect === 1 ?
+      clearAllValues() :
+      applyValueToAll()
+
+  }, [allValuesEffect])
 
   const applyValueToAll = () => {
     const cm = columnModels[columnModelIndex];
@@ -253,6 +269,8 @@ const MultiFormInputRow = ({
         )
       );
     });
+
+    setShowApplyAllSpinner(false);
   };
 
   // -------------------------- render logic ---------------------- //
@@ -330,7 +348,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-apply-btn chaise-btn chaise-btn-secondary'
-                  onClick={applyValueToAll}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(-1);
+                  }}
                   // we should disable it when its empty or has error
                   // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
                   disabled={
@@ -347,7 +368,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-clear-btn chaise-btn chaise-btn-secondary'
-                  onClick={clearAllValues}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(1);
+                  }}
                   disabled={activeForms?.length === 0}
                 >
                   Clear

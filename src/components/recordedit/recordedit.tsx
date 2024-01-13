@@ -104,7 +104,7 @@ const RecordeditInner = ({
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
-    showCloneSpinner, setShowCloneSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
+    showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
@@ -366,7 +366,7 @@ const RecordeditInner = ({
   };
 
   const renderSpinner = () => {
-    if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner)) {
+    if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner || showApplyAllSpinner)) {
       let spinnerClassName = 'submit-spinner';
       let spinnerMessage = 'Saving...';
 
@@ -376,6 +376,9 @@ const RecordeditInner = ({
       } else if (showCloneSpinner) {
         spinnerClassName = 'clone-spinner';
         spinnerMessage = 'Cloning...';
+      } else if (showApplyAllSpinner) {
+        spinnerClassName = 'apply-all-spinner';
+        spinnerMessage = 'Updating Values...';
       }
 
       return (
