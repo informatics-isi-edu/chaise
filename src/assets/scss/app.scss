@@ -241,8 +241,8 @@ html {
     max-width: none;
     // honor any whitespace in the tooltips
     white-space: pre-wrap;
-    // chaise comments could be html and therefore we shouldn't mess with their whitespace rendering
-    .chaise-comment.chaise-comment-html {
+    // when html content is displayed, we shouldn't mess with the whitespace rendering
+    .markdown-container {
       white-space: normal;
     }
   }
