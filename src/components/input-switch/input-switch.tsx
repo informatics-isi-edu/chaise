@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
+import { memo } from 'react';
+
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -403,4 +405,4 @@ const InputSwitch = ({
   })();
 };
 
-export default InputSwitch;
+export default memo(InputSwitch);

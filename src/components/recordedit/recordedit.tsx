@@ -322,7 +322,6 @@ const RecordeditInner = ({
       numberFormsToAdd > 1 ? { clone: numberFormsToAdd } : undefined
     );
 
-    // TODO: need access to # of forms
     // refactor so provider manages the forms
     const numberForms = forms.length;
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
@@ -362,6 +361,18 @@ const RecordeditInner = ({
       });
     }
 
+    /**  
+     * NOTE: This might be able to be optimized to use setValue for each value in the new forms instead of resetting EVERY form in react hook form
+     *   for instance, 4 forms exist and 1 new form is added, this will call "reset" on all 5 forms
+     * 
+     * Is it possible for this change to cause longer scripting time? For instance, iterating over every single cell for each new form 
+     * could end up taking longer using setValue (and whatever happens in react-hook-form) vs no iteration and instead leaving it up to 
+     * react-hook-form and how `methods.reset()` works
+     * 
+     * A contradicting note, since each new form being added needs to render new input fields, form-row component will rerender. This
+     * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change 
+     * rendering performance at all. Maybe to prevent previous input fields from rerendering, the input-switch component should be memoized?
+     */
     methods.reset(tempFormValues);
   };
 

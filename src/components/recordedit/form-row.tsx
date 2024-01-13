@@ -3,7 +3,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input-row';
 
 // hooks
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
@@ -339,4 +339,4 @@ const FormRow = ({
   );
 };
 
-export default React.memo(FormRow);
+export default memo(FormRow);

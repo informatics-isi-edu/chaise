@@ -154,24 +154,6 @@ const MultiFormInputRow = ({
 
   }, [selectAllFieldValue, isEmpty]);
 
-  // useEffect(() => {
-  //   const subscribe = watch((data, options) => {
-  //     const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
-  //     if (!options.name || options.name !== n) return;
-
-  //     // see if the input is empty
-  //     let temp = !Boolean(data[n]);
-  //     if (columnModel.column.type.name === 'boolean') {
-  //       temp = typeof data[n] !== 'boolean';
-  //     }
-
-  //     if (isEmpty !== temp) {
-  //       setIsEmpty(temp);
-  //     }
-  //   });
-  //   return () => subscribe.unsubscribe();
-  // }, [watch, isEmpty]);
-
   /**
    * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
    * the immidiate parent center-align we cant set a width to it as 100%. So we have to involve JS to set the width of textarea
@@ -265,7 +247,10 @@ const MultiFormInputRow = ({
 
       /**
        * The proceeding function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
-       * this function doesn't update the values in place.
+       * the following sets the values in react hook form for each field.
+       * 
+       * NOTE: The `_copyOrClearValueForColumn` function changes the values in an object containing ALL values which is then 
+       *   passed to methods.reset() on the whole form
        */
       setValue('updateAllField', cm.column['_name'])
       setValue(`${formValue}-${cm.column['_name']}`, updateValues)

@@ -177,7 +177,7 @@ function _copyOrClearValueForColumn(
  * @param columnModel the column that we want to copy its value
  * @param values the FormContext.getValues()
  * @param foreignKeyData the foreign key data
- * @param destFormValue the from where the new data should go
+ * @param destFormValue the form where the new data should go
  * @param srcFormValue if we're copying, the form that the data will be copied from.
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
