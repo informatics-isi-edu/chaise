@@ -213,16 +213,14 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons &&
-            <div className={`chaise-btn-group ${getFieldState(props.name)?.error ? 'translateY' : ''}`}>
-              <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
-                Now
-              </button>
-              <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
-                Clear
-              </button>
-            </div>
-          }
+          {!props.disableInput && props.displayExtraDateTimeButtons && <div className='chaise-btn-group'>
+            <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
+              Now
+            </button>
+            <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
+              Clear
+            </button>
+          </div>}
           <input {...field} type='hidden' />
         </div>
       )}
