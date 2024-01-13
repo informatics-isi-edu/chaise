@@ -29,12 +29,15 @@ type MultiFormInputRowProps = {
   * The state function to set active forms.
   */
   setActiveForm?: any;
+  /* change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
 };
 
 const MultiFormInputRow = ({
   columnModelIndex,
   activeForms,
   setActiveForm,
+  toggleActiveMultiForm
 }: MultiFormInputRowProps) => {
   const {
     columnModels,
@@ -44,7 +47,6 @@ const MultiFormInputRow = ({
     foreignKeyData,
     appMode,
     canUpdateValues,
-    toggleActiveMultiForm,
     logRecordeditClientAction,
   } = useRecordedit();
 

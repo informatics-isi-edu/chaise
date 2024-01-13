@@ -40,6 +40,8 @@ type FormRowProps = {
   * (change back the removeClicked that is passed to this component)
   */
   setRemoveClicked?: any;
+  /* change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
 };
 const FormRow = ({
   isActiveForm,
@@ -47,6 +49,7 @@ const FormRow = ({
   removeFormIndex,
   removeClicked,
   setRemoveClicked,
+  toggleActiveMultiForm
 }: FormRowProps): JSX.Element => {
   const {
     forms,
@@ -333,6 +336,7 @@ const FormRow = ({
           activeForms={activeForms}
           setActiveForm={setActiveForm}
           columnModelIndex={columnModelIndex}
+          toggleActiveMultiForm={toggleActiveMultiForm}
         />
       }
     </div>

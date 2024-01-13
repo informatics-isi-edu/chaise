@@ -16,11 +16,21 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
-const KeyColumn = (): JSX.Element => {
+type KeyColumnProps = {
+  /* the index of column that is showing the select all input */
+  activeMultiForm: number;
+  /* function to change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
+}
+
+const KeyColumn = ({
+  activeMultiForm,
+  toggleActiveMultiForm
+}: KeyColumnProps): JSX.Element => {
 
   const {
-    appMode, activeMultiForm, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction, toggleActiveMultiForm
+    appMode, columnModels, columnPermissionErrors,
+    config, forms, logRecordeditClientAction
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
