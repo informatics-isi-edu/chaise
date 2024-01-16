@@ -50,11 +50,14 @@ const MultiFormInputRow = ({
     logRecordeditClientAction,
   } = useRecordedit();
 
-  const columnModel = columnModels[columnModelIndex];
-  const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
+  // NOTE: if columnModels changes, this whole component is rerendered
+  //   only need to get the "column model" once globally using columnModelIndex for the whole component
+  const cm = columnModels[columnModelIndex];
+  const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
 
-  const { formState: { errors }, setValue } = useFormContext();
-  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}` });
+  const { formState: { errors }, getValues, setValue } = useFormContext();
+  // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
+  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
 
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -141,12 +144,9 @@ const MultiFormInputRow = ({
    * useEffect allows us to look for the value and only rerender when we have to.
    */
   useEffect(() => {
-
-    const columnModel = columnModels[columnModelIndex];
-
     // see if the input is empty
     let temp = !Boolean(selectAllFieldValue);
-    if (columnModel.column.type.name === 'boolean') {
+    if (cm.column.type.name === 'boolean') {
       temp = typeof selectAllFieldValue !== 'boolean';
     }
 
@@ -181,8 +181,6 @@ const MultiFormInputRow = ({
 
 
   const applyValueToAll = () => {
-    const cm = columnModels[columnModelIndex];
-
     logRecordeditClientAction(
       LogActions.SET_ALL_APPLY,
       cm.logStackPathChild,
@@ -195,8 +193,6 @@ const MultiFormInputRow = ({
   };
 
   const clearAllValues = () => {
-    const cm = columnModels[columnModelIndex];
-
     logRecordeditClientAction(
       LogActions.SET_ALL_CLEAR,
       cm.logStackPathChild,
@@ -209,8 +205,6 @@ const MultiFormInputRow = ({
   };
 
   const closeMultiForm = () => {
-    const cm = columnModels[columnModelIndex];
-
     logRecordeditClientAction(
       LogActions.SET_ALL_CANCEL,
       cm.logStackPathChild,
@@ -238,7 +232,6 @@ const MultiFormInputRow = ({
    * if clearValue is true, it will use emtpy value, otherwise it will copy the multi-form-input input value
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
-    const cm = columnModels[columnModelIndex];
     const updateValues = clearValue ? '' : selectAllFieldValue;
 
     activeForms?.forEach((formValue: number) => {
@@ -247,21 +240,35 @@ const MultiFormInputRow = ({
         return;
       }
 
+      const colName = cm.column['_name'];
+      // the key for storing values in react hook form;
+      const destKey = `${formValue}-${colName}`;
       /**
-       * The proceeding function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
+       * The following function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
        * the following sets the values in react hook form for each field.
        * 
        * NOTE: The `_copyOrClearValueForColumn` function changes the values in an object containing ALL values which is then 
        *   passed to methods.reset() on the whole form
        */
-      setValue('updateAllField', cm.column['_name'])
-      setValue(`${formValue}-${cm.column['_name']}`, updateValues)
+      setValue('updateAllField', colName)
+      setValue(destKey, updateValues)
 
+      // use getValues to get all form values since the rest aren't part of hooks so useWatch isn't needed
+      // avoids using extra useWatch hooks that can slow performance
+      // this could be used for selectAllFieldValue too but is an unnecessary change
+      const allFormValues = getValues();
       if (cm.inputType === 'timestamp') {
-        const v = formatDatetime(updateValues, { outputMomentFormat: dataFormats.timestamp });
+        if (clearValue) {
+          setValue(`${destKey}-date`, '');
+          setValue(`${destKey}-time`, '');
+        } else {
+          const srcDateValue = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}-date`]
+          const srcTimeValue = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}-time`]
 
-        setValue(`${formValue}-${cm.column['_name']}-date`, v ? v.date : '')
-        setValue(`${formValue}-${cm.column['_name']}-time`, v ? v.time : '')
+          setValue(`${destKey}-date`, srcDateValue);
+          // empty time is still a valid timestamp value
+          setValue(`${destKey}-time`, srcTimeValue ? srcTimeValue : '');
+        }
       }
 
       if (cm.column.isForeignKey) {
@@ -275,7 +282,15 @@ const MultiFormInputRow = ({
         // the code above is just copying the displayed rowname for foreignkey
         // we still need to copy the raw values
         cm.column.foreignKey.colset.columns.forEach((col: any) => {
-          setValue(`${formValue}-${col.name}`, updateValues);
+          let val;
+          if (clearValue) {
+            val = '';
+          } else if (typeof formValue === 'number') {
+            val = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${col.name}`];
+          }
+
+          if (val === null || val === undefined) return;
+          setValue(`${formValue}-${col.name}`, val);
         });
       }
     });
@@ -283,7 +298,7 @@ const MultiFormInputRow = ({
 
   // -------------------------- render logic ---------------------- //
 
-  const colName = columnModel.column.name;
+  const colName = cm.column.name;
   const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
 
   const renderHelpTooltip = () => {
@@ -405,9 +420,9 @@ const MultiFormInputRow = ({
             requiredInput={false}
             name={inputName}
             inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
-            type={columnModel.inputType}
+            type={cm.inputType}
             classes='column-cell-input'
-            columnModel={columnModel}
+            columnModel={cm}
             appMode={appMode}
             formNumber={MULTI_FORM_INPUT_FORM_VALUE}
             parentReference={reference}
