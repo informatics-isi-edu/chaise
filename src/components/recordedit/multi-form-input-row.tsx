@@ -47,8 +47,8 @@ const MultiFormInputRow = ({
     logRecordeditClientAction,
   } = useRecordedit();
 
-  const columnModel = columnModels[columnModelIndex];
-  const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
+  const cm = columnModels[columnModelIndex];
+  const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
 
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
 
@@ -147,7 +147,7 @@ const MultiFormInputRow = ({
 
       // see if the input is empty
       let temp = !Boolean(data[n]);
-      if (columnModel.column.type.name === 'boolean') {
+      if (cm.column.type.name === 'boolean') {
         temp = typeof data[n] !== 'boolean';
       }
 
@@ -182,49 +182,30 @@ const MultiFormInputRow = ({
   // ------------------------ callbacks -----------------------------------//
 
   useEffect(() => {
+    // return if 0, continue if -1 or 1
     if (!allValuesEffect) return;
 
     setAllValuesEffect(0);
-    
+
     // without delaying this function call, the spinner would show briefly 
     // after the app appeared to freeze instead of before the "appeared freeze"
     setTimeout(() => {
       // if 1/true, clear all values
       // if -1/false, apply the value in the input to all selected forms 
-      allValuesEffect === 1 ?
-        clearAllValues() :
-        applyValueToAll()
+      const isClear = (allValuesEffect === 1)
+
+      logRecordeditClientAction(
+        isClear ? LogActions.SET_ALL_CLEAR : LogActions.SET_ALL_APPLY,
+        cm.logStackPathChild,
+        cm.logStackNode,
+        undefined,
+        cm.column.reference ? cm.column.reference : undefined
+      );
+
+      setValueForAllInputs(isClear);
     }, 0)
 
   }, [allValuesEffect])
-
-  const applyValueToAll = () => {
-    const cm = columnModels[columnModelIndex];
-
-    logRecordeditClientAction(
-      LogActions.SET_ALL_APPLY,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
-
-    setValueForAllInputs();
-  };
-
-  const clearAllValues = () => {
-    const cm = columnModels[columnModelIndex];
-
-    logRecordeditClientAction(
-      LogActions.SET_ALL_CLEAR,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
-
-    setValueForAllInputs(true);
-  };
 
   const closeMultiForm = () => {
     const cm = columnModels[columnModelIndex];
@@ -280,7 +261,7 @@ const MultiFormInputRow = ({
 
   // -------------------------- render logic ---------------------- //
 
-  const colName = columnModel.column.name;
+  const colName = cm.column.name;
   const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
 
   const renderHelpTooltip = () => {
@@ -408,9 +389,9 @@ const MultiFormInputRow = ({
             requiredInput={false}
             name={inputName}
             inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
-            type={columnModel.inputType}
+            type={cm.inputType}
             classes='column-cell-input'
-            columnModel={columnModel}
+            columnModel={cm}
             appMode={appMode}
             formNumber={MULTI_FORM_INPUT_FORM_VALUE}
             parentReference={reference}
