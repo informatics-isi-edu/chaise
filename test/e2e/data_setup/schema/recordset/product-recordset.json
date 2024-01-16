@@ -1057,7 +1057,7 @@
       }
     },
     "facilities": {
-      "comment": "Type of facilities ('Luxury/Upscale/Basic')",
+      "comment": "Type of facilities (Luxury/Upscale/Basic)",
       "kind": "table",
       "keys": [
         {
