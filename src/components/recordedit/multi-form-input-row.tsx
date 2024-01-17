@@ -12,9 +12,7 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -240,59 +238,16 @@ const MultiFormInputRow = ({
         return;
       }
 
-      const colName = cm.column['_name'];
-      // the key for storing values in react hook form;
-      const destKey = `${formValue}-${colName}`;
-      /**
-       * The following function mimics `_copyOrClearValueForColumn` function in recordedit-utils.ts. Only difference being that 
-       * the following sets the values in react hook form for each field.
-       * 
-       * NOTE: The `_copyOrClearValueForColumn` function changes the values in an object containing ALL values which is then 
-       *   passed to methods.reset() on the whole form
-       */
-      setValue('updateAllField', colName)
-      setValue(destKey, updateValues)
-
-      // use getValues to get all form values since the rest aren't part of hooks so useWatch isn't needed
-      // avoids using extra useWatch hooks that can slow performance
-      // this could be used for selectAllFieldValue too but is an unnecessary change
-      const allFormValues = getValues();
-      if (cm.inputType === 'timestamp') {
-        if (clearValue) {
-          setValue(`${destKey}-date`, '');
-          setValue(`${destKey}-time`, '');
-        } else {
-          const srcDateValue = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}-date`]
-          const srcTimeValue = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}-time`]
-
-          setValue(`${destKey}-date`, srcDateValue);
-          // empty time is still a valid timestamp value
-          setValue(`${destKey}-time`, srcTimeValue ? srcTimeValue : '');
-        }
-      }
-
-      if (cm.column.isForeignKey) {
-        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
-        if (clearValue) {
-          foreignKeyData[formValue] = {};
-        } else if (MULTI_FORM_INPUT_FORM_VALUE) {
-          foreignKeyData[formValue] = simpleDeepCopy(foreignKeyData[MULTI_FORM_INPUT_FORM_VALUE]);
-        }
-
-        // the code above is just copying the displayed rowname for foreignkey
-        // we still need to copy the raw values
-        cm.column.foreignKey.colset.columns.forEach((col: any) => {
-          let val;
-          if (clearValue) {
-            val = '';
-          } else if (typeof formValue === 'number') {
-            val = allFormValues[`${MULTI_FORM_INPUT_FORM_VALUE}-${col.name}`];
-          }
-
-          if (val === null || val === undefined) return;
-          setValue(`${formValue}-${col.name}`, val);
-        });
-      }
+      copyOrClearValue(
+        cm,
+        getValues(),
+        foreignKeyData.current,
+        formValue,
+        MULTI_FORM_INPUT_FORM_VALUE,
+        clearValue,
+        false,
+        setValue
+      )
     });
   };
 
