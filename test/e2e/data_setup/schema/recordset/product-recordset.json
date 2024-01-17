@@ -152,7 +152,7 @@
           }
         },
         {
-          "comment": "Type of accommodation ('Resort/Hotel/Motel')",
+          "comment": "Type of accommodation (Resort, Hotel, or Motel)",
           "name": "category",
           "default": null,
           "nullok": false,
@@ -1057,7 +1057,7 @@
       }
     },
     "facilities": {
-      "comment": "Type of facilities ('Luxury/Upscale/Basic')",
+      "comment": "Type of facilities (Luxury/Upscale/Basic)",
       "kind": "table",
       "keys": [
         {

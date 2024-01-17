@@ -14,7 +14,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -42,7 +42,7 @@ export type RecordestModalProps = {
   /**
    * The comment used for the title
    */
-  comment?: string,
+  comment?: CommentType,
   /**
    * The function that will be called on each row change.
    * NOTE The actual callback that we're sending to recordset is not this one,

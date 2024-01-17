@@ -522,8 +522,8 @@ var recordPage = function() {
         return el.element(by.css("a"));
     };
 
-    this.getMarkdownContainer = function (el) {
-        return el.all(by.css(".markdown-container")).first();
+    this.getValueMarkdownContainer = function (el) {
+        return el.element(by.css(".markdown-container:not(.chaise-comment)"));
     };
 
     /* related table selectors */

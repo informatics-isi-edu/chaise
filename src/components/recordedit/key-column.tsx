@@ -1,6 +1,7 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
@@ -16,11 +17,21 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
-const KeyColumn = (): JSX.Element => {
+type KeyColumnProps = {
+  /* the index of column that is showing the select all input */
+  activeMultiForm: number;
+  /* function to change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
+}
+
+const KeyColumn = ({
+  activeMultiForm,
+  toggleActiveMultiForm
+}: KeyColumnProps): JSX.Element => {
 
   const {
-    appMode, activeMultiForm, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction, toggleActiveMultiForm
+    appMode, columnModels, columnPermissionErrors,
+    config, forms, logRecordeditClientAction
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -114,7 +125,7 @@ const KeyColumn = (): JSX.Element => {
             {column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={column.comment}
+                tooltip={<DisplayCommentValue comment={column.comment} />}
               >
                 {renderColumnHeader(column)}
               </ChaiseTooltip> :
