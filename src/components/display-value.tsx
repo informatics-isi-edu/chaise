@@ -1,8 +1,9 @@
-// components
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
-
 // hooks
 import { useEffect, useRef } from 'react';
+
+// models
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+
 
 // utils
 import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';

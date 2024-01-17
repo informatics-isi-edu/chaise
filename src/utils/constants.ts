@@ -163,7 +163,9 @@ export const APP_NAMES = {
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden',
   IMAGE_PREVIEW: 'chaise-image-preview',
-  IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in'
+  IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in',
+  COMMENT: 'chaise-comment',
+  COMMENT_IS_HTML: 'chaise-comment-html'
 };
 
 export const ID_NAMES = {
