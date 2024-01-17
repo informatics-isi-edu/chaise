@@ -71,17 +71,17 @@ const TableRow = ({
   } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
-  const CONFIG_MAX_ROW_HEIGH = ConfigService.chaiseConfig.maxRecordsetRowHeight;
+  const CONFIG_MAX_ROW_HEIGHT = ConfigService.chaiseConfig.maxRecordsetRowHeight;
 
   /**
    * if the chaise-config property is set to `false` we should skip the ellipsis logic
    */
-  const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGH === false;
+  const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGHT === false;
 
   // +10 to account for padding on <td>
   const tdPadding = 10;
   const moreButtonHeight = 20;
-  const maxHeight = typeof CONFIG_MAX_ROW_HEIGH === 'number' ? CONFIG_MAX_ROW_HEIGH : 160;
+  const maxHeight = typeof CONFIG_MAX_ROW_HEIGHT === 'number' ? CONFIG_MAX_ROW_HEIGHT : 160;
   const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
   const [numImages, setNumImages] = useState<number>(0);
