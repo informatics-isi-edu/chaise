@@ -3,7 +3,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input-row';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
@@ -16,6 +16,11 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type FormRowProps = {
+  /**
+   * If the current form row has the multi form row open
+   * NOTE: this is a prop to prevent every form row from rerendering when the activeMultiForm changes in the provider
+   */
+  isActiveForm: boolean;
   /**
   * The column index.
   */
@@ -35,12 +40,16 @@ type FormRowProps = {
   * (change back the removeClicked that is passed to this component)
   */
   setRemoveClicked?: any;
+  /* change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
 };
 const FormRow = ({
+  isActiveForm,
   columnModelIndex,
   removeFormIndex,
   removeClicked,
   setRemoveClicked,
+  toggleActiveMultiForm
 }: FormRowProps): JSX.Element => {
   const {
     forms,
@@ -48,7 +57,6 @@ const FormRow = ({
     reference,
     columnModels,
     tuples,
-    activeMultiForm,
     canUpdateValues,
     columnPermissionErrors,
     foreignKeyData,
@@ -182,7 +190,7 @@ const FormRow = ({
     }
 
     // only call when we're actually showing the multi-form-row
-    if (!showMultiFormRow) {
+    if (!isActiveForm) {
       return;
     }
 
@@ -204,7 +212,6 @@ const FormRow = ({
 
   // -------------------------- render logic ---------------------- //
 
-  const showMultiFormRow = activeMultiForm === columnModelIndex;
   const columnModel = columnModels[columnModelIndex];
 
   /**
@@ -221,7 +228,7 @@ const FormRow = ({
       return false;
     }
 
-    if (columnModel.isDisabled || showMultiFormRow) {
+    if (columnModel.isDisabled || isActiveForm) {
       return true;
     }
 
@@ -241,7 +248,7 @@ const FormRow = ({
   const getEntityValueClass = (formNumber: number) => {
     const classes = [];
     const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
-    if (!cannotBeUpdated && showMultiFormRow) {
+    if (!cannotBeUpdated && isActiveForm) {
       classes.push('clickable-form-overlay');
       if (activeForms.includes(formNumber)) {
         classes.push('entity-active');
@@ -312,7 +319,7 @@ const FormRow = ({
   };
 
   return (
-    <div className={`form-inputs-row ${showMultiFormRow ? 'highlighted-row' : ''}`} ref={container}>
+    <div className={`form-inputs-row ${isActiveForm ? 'highlighted-row' : ''}`} ref={container}>
       <div className='inputs-row' ref={formsRef}>
         {forms.map((formNumber: number, formIndex: number) => (
           <div
@@ -324,15 +331,16 @@ const FormRow = ({
           </div>
         ))}
       </div>
-      {showMultiFormRow &&
+      {isActiveForm &&
         <MultiFormInputRow
           activeForms={activeForms}
           setActiveForm={setActiveForm}
           columnModelIndex={columnModelIndex}
+          toggleActiveMultiForm={toggleActiveMultiForm}
         />
       }
     </div>
   );
 };
 
-export default FormRow;
+export default memo(FormRow);

@@ -111,6 +111,26 @@ const RecordeditInner = ({
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
   /**
+   * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason 
+   * stated below from linked article. These properties are passed as props to the components so they only rerender when they need to instead
+   * of when the context changes
+   * 
+   *  - activeMultiForm is used by key-column and form-container
+   *  - toggleActiveMultiForm is used by key-column and multi-form-input-row
+   * 
+   * https://adevnadia.medium.com/react-re-renders-guide-preventing-unnecessary-re-renders-8a3d2acbdba3#:~:text=There%20is%20no%20way%20to
+   * There is no way to prevent a component that uses a portion of Context value from re-rendering, even if the used piece 
+   * of data hasn’t changed, even with useMemo hook. Context selectors, however, could be faked with the use of 
+   * higher-order components and React. memo .
+   */
+  const [activeMultiForm, setActiveMultiForm] = useState<number>(-1);
+  const toggleActiveMultiForm = (colIndex: number) => {
+    setActiveMultiForm((prev) => {
+      return colIndex === prev ? -1 : colIndex;
+    });
+  };
+
+  /**
    * the following are used for bulk delete feature
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
@@ -322,7 +342,6 @@ const RecordeditInner = ({
       numberFormsToAdd > 1 ? { clone: numberFormsToAdd } : undefined
     );
 
-    // TODO: need access to # of forms
     // refactor so provider manages the forms
     const numberForms = forms.length;
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
@@ -362,6 +381,18 @@ const RecordeditInner = ({
       });
     }
 
+    /**  
+     * NOTE: This might be able to be optimized to use setValue for each value in the new forms instead of resetting EVERY form in react hook form
+     *   for instance, 4 forms exist and 1 new form is added, this will call "reset" on all 5 forms
+     * 
+     * Is it possible for this change to cause longer scripting time? For instance, iterating over every single cell for each new form 
+     * could end up taking longer using setValue (and whatever happens in react-hook-form) vs no iteration and instead leaving it up to 
+     * react-hook-form and how `methods.reset()` works
+     * 
+     * A contradicting note, since each new form being added needs to render new input fields, form-row component will rerender. This
+     * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change 
+     * rendering performance at all. Maybe to prevent previous input fields from rerendering, the input-switch component should be memoized?
+     */
     methods.reset(tempFormValues);
   };
 
@@ -467,8 +498,8 @@ const RecordeditInner = ({
       <div className='main-container' ref={mainContainer}>
         {columnModels.length > 0 && !resultsetProps &&
           <div className='main-body'>
-            <KeyColumn />
-            <FormContainer />
+            <KeyColumn activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
+            <FormContainer activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
           </div>
         }
         {resultsetProps &&

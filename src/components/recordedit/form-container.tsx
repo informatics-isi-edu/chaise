@@ -14,7 +14,17 @@ import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedi
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-const FormContainer = (): JSX.Element => {
+type FormContainerProps = {
+  /* the index of column that is showing the select all input */
+  activeMultiForm: number;
+  /* change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
+}
+
+const FormContainer = ({
+  activeMultiForm,
+  toggleActiveMultiForm
+}: FormContainerProps): JSX.Element => {
 
   const {
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
@@ -119,11 +129,13 @@ const FormContainer = (): JSX.Element => {
         {/* inputs for each column */}
         {columnModels.map(({ }, idx) => (
           <FormRow
+            isActiveForm={activeMultiForm === idx}
             removeClicked={removeClicked}
             setRemoveClicked={setRemoveClicked}
             removeFormIndex={removeFormIndex}
             key={`form-row-${idx}`}
             columnModelIndex={idx}
+            toggleActiveMultiForm={toggleActiveMultiForm}
           />
         ))}
       </form>
