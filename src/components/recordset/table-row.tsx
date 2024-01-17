@@ -84,6 +84,9 @@ const TableRow = ({
   const maxHeight = typeof CONFIG_MAX_ROW_HEIGH === 'number' ? CONFIG_MAX_ROW_HEIGH : 160;
   const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
+  const [numImages, setNumImages] = useState<number>(0);
+  const [numImagesLoaded, setNumImagesLoaded] = useState<number>(0);
+
   const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
   const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
@@ -153,29 +156,58 @@ const TableRow = ({
     if (sensor && rowValues.length === 1 && justOverflows.length === 0) sensor.detach();
   }
 
-  // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
+  // This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
   // NOTE: if the tuple changes, the table-row component isn't destroyed so the overflows need to be reset
   useEffect(() => {
     if (disableMaxRowHeightFeature) return;
     setOverflow([]);
   }, [tuple]);
 
+  // attach resize sensor to the table row and an onload event to each <img> tag in the table row
+  // onload will update a state variable to communicate when all images have loaded to trigger overflow logic once more
   useLayoutEffect(() => {
     if (!rowContainer.current || disableMaxRowHeightFeature) return;
     const tempSensor = new ResizeSensor(
       rowContainer.current,
-      () => setTimeout(() => {
-        initializeOverflows()
-        // images take ~200ms to load so wait at least that long before running
-      }, 200)
+      () => initializeOverflows()
     )
 
     setSensor(tempSensor);
+    
+    // fetch all <img> tags with -chaise-post-load class and keep count of the total
+    // attach an onload function that updates how many have loaded
+    const imgTags = rowContainer.current.querySelectorAll('img.-chaise-post-load');
+    setNumImages(imgTags.length);
+    
+    imgTags.forEach((image: HTMLImageElement) => {
+      image.onload = () => {
+        setNumImagesLoaded((prev) => {
+          return prev + 1;
+        });
+
+        // remove the onload once image has loaded
+        image.onload = null;
+      }
+    });
 
     return () => {
       tempSensor.detach();
     }
   }, [rowValues]);
+
+  /**
+   * as images load, check if we have loaded all images before triggering the overflow logic one more time
+   * We can't rely on this useEffect alone since there might not be any images
+   * 
+   * NOTE: images can be a value for a column or part of a aggregate request to fetch multiple images
+   *   the above ResizeSensor doesn't recalculate when images load as part of an aggregate request so this useEffect
+   *   does it one last time when all images have finished loading
+   */
+  useEffect(() => {
+    if (numImagesLoaded === 0) return;
+
+    if (numImagesLoaded === numImages) initializeOverflows()
+  }, [numImagesLoaded]);
 
   const getRowLogAction = (action: LogActions) => {
     return getLogAction(action, LogStackPaths.ENTITY);
