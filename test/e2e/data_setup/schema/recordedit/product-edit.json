@@ -152,7 +152,7 @@
           }
         },
         {
-          "comment": "Type of accommodation ('Resort/Hotel/Motel')",
+          "comment": "Type of accommodation (Resort, Hotel, or Motel)",
           "name": "category",
           "default": null,
           "nullok": false,
@@ -168,7 +168,16 @@
               "2"
             ],
             "tag:misd.isi.edu,2015:display": {
-              "name": "Category"
+              "name": "Category",
+              "comment": {
+                "*": "some other comment",
+                "entry": "_markdown_ comment can be turned off"
+              },
+              "comment_display": {
+                "*": {
+                  "comment_render_markdown": false
+                }
+              }
             }
           }
         },

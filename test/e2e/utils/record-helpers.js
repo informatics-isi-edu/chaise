@@ -200,11 +200,11 @@ exports.testPresentation = function (tableParams) {
             let columnEls;
             if (column.type == 'inline' || column.match === 'html') {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
-                expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toContain(column.value, errMessage);
+                expect(chaisePage.recordPage.getValueMarkdownContainer(columnEls).getAttribute('innerHTML')).toContain(column.value, errMessage);
             }  else {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
                 if (column.presentation) {
-                    if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
+                    if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getValueMarkdownContainer(columnEls);
 
                     const aTag = chaisePage.recordPage.getLinkChild(columnEls);
                     const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
@@ -333,7 +333,7 @@ exports.testPresentation = function (tableParams) {
             // switch the display mode
             return chaisePage.clickButton(chaisePage.recordPage.getToggleDisplayLink(displayname, true));
         }).then(function(){
-            const md = chaisePage.recordPage.getMarkdownContainer(relatedEl);
+            const md = chaisePage.recordPage.getValueMarkdownContainer(relatedEl);
             browser.wait(EC.visibilityOf(md), browser.params.defaultTimeout);
             expect(md.getText()).toBe('None',"Incorrect text for empty markdown!");
             done();
@@ -742,8 +742,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
                 it ("markdown container must be visible.", function (done) {
-                    chaisePage.waitForElement(chaisePage.recordPage.getMarkdownContainer(currentEl)).then(function () {
-                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).isDisplayed()).toBeTruthy("didn't have markdown");
+                    chaisePage.waitForElement(chaisePage.recordPage.getValueMarkdownContainer(currentEl)).then(function () {
+                        expect(chaisePage.recordPage.getValueMarkdownContainer(currentEl).isDisplayed()).toBeTruthy("didn't have markdown");
                         done();
                     })
 
@@ -751,7 +751,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                 if (params.markdownValue) {
                     it ("correct markdown values should be visible.", function (done) {
-                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).getAttribute('innerHTML')).toEqual(params.markdownValue);
+                        expect(chaisePage.recordPage.getValueMarkdownContainer(currentEl).getAttribute('innerHTML')).toEqual(params.markdownValue);
                         done();
                     });
                 }

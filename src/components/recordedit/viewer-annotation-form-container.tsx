@@ -1,7 +1,8 @@
 // components
-import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
 // hooks
 import { useFormContext } from 'react-hook-form';
@@ -110,7 +111,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
             {cm.column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={cm.column.comment}
+                tooltip={<DisplayCommentValue comment={cm.column.comment} />}
               >
                 {renderColumnHeader(cm.column)}
               </ChaiseTooltip> :

@@ -1,6 +1,7 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
@@ -124,7 +125,7 @@ const KeyColumn = ({
             {column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={column.comment}
+                tooltip={<DisplayCommentValue comment={column.comment} />}
               >
                 {renderColumnHeader(column)}
               </ChaiseTooltip> :

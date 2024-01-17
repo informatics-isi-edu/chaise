@@ -2,10 +2,11 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React from 'react';
 
 // components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
+import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -51,7 +52,7 @@ const RecordsetTable = ({
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
 
-  const [ showAllRows, setShowAllRows ] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
+  const [showAllRows, setShowAllRows] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
 
   /**
    * capture the state of selected and disabled of rows in here so
@@ -253,7 +254,7 @@ const RecordsetTable = ({
         break;
     }
     return (
-      <th className={`actions-header${headerClassName ? ` ${headerClassName}`: ''}`}>{inner}</th>
+      <th className={`actions-header${headerClassName ? ` ${headerClassName}` : ''}`}>{inner}</th>
     )
   }
 
@@ -291,7 +292,7 @@ const RecordsetTable = ({
             // if comment, show tooltip
             <ChaiseTooltip
               placement='top'
-              tooltip={col.column.comment}
+              tooltip={<DisplayCommentValue comment={col.column.comment} />}
             >
               {renderDisplayValue(col.column)}
             </ChaiseTooltip> :
@@ -330,7 +331,7 @@ const RecordsetTable = ({
                 placement='bottom'
                 tooltip={MESSAGE_MAP.queryTimeoutTooltip}
               >
-                <span className='fa-solid fa-triangle-exclamation' style={{paddingLeft: '4px'}} />
+                <span className='fa-solid fa-triangle-exclamation' style={{ paddingLeft: '4px' }} />
               </ChaiseTooltip>
             </span>
           </td>
