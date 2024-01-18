@@ -120,29 +120,51 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
+ * @param setValue if defined, use this function to set the value in react hook form instead of updating the `values` object
  */
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, 
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
-
   const dstKey = `${destFormValue}-${column.name}`;
 
-
   if (clearValue) {
-    values[dstKey] = '';
+    if (setValue) {
+      setValue(dstKey, '');
+    } else {
+      values[dstKey] = '';
+    }
   } else if (srcKey) {
-    values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+    const tempVal = replaceNullOrUndefined(values[srcKey], '')
+    if (setValue) {
+      setValue(dstKey, tempVal);
+    } else {
+      values[dstKey] = tempVal;
+    }
   }
 
   if (column.type.name.indexOf('timestamp') !== -1) {
     if (clearValue) {
-      values[`${dstKey}-date`] = '';
-      values[`${dstKey}-time`] = '';
+      if (setValue) {
+        setValue(`${dstKey}-date`, '');
+        setValue(`${dstKey}-time`, ''); 
+      } else {
+        values[`${dstKey}-date`] = '';
+        values[`${dstKey}-time`] = '';
+      }
     } else if (srcKey) {
-      values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
-      values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
+      const tempDateVal = values[`${srcKey}-date`] || '';
+      const tempTimeVal = values[`${srcKey}-time`] || '';
+
+      if (setValue) {
+        setValue(`${dstKey}-date`, tempDateVal);
+        setValue(`${dstKey}-time`, tempTimeVal);
+      } else {
+        values[`${dstKey}-date`] = tempDateVal;
+        values[`${dstKey}-time`] = tempTimeVal;
+      }
     }
   }
 
@@ -164,7 +186,12 @@ function _copyOrClearValueForColumn(
         val = values[`${srcFormValue}-${col.name}`];
       }
       if (val === null || val === undefined) return;
-      values[`${destFormValue}-${col.name}`] = val;
+
+      if (setValue) {
+        setValue(`${destFormValue}-${col.name}`, val);
+      } else {
+        values[`${destFormValue}-${col.name}`] = val;
+      }
     });
   }
 }
@@ -182,20 +209,22 @@ function _copyOrClearValueForColumn(
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
+ * @param setValue if defined, use this function to set the value in react hook form instead of updating the `values` object
  */
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, 
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
 
   const column = columnModel.column;
 
-  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
+  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns, setValue);
 
   // copy the columns in the column mapping.
   if (column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
-      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
+      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns, setValue);
     });
   }
 

@@ -78,10 +78,6 @@ export const RecordeditContext = createContext<{
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
-  /* the index of column that is showing the select all input */
-  activeMultiForm: number,
-  /* change the active select all */
-  toggleActiveMultiForm: (colIndex: number) => void,
   /* callback for react-hook-form to call when forms are valid */
   onSubmitValid: (data: any) => void,
   /* callback for react-hook-form to call when forms are NOT valid */
@@ -90,7 +86,12 @@ export const RecordeditContext = createContext<{
    * whether we should show the spinner indicating cloning form data
    */
   showCloneSpinner: boolean,
-  setShowCloneSpinner: Function,
+  setShowCloneSpinner: (val: boolean) => void,
+  /**
+   * whether we should show the spinner indicating cloning form data
+   */
+  showApplyAllSpinner: boolean,
+  setShowApplyAllSpinner: (val: boolean) => void,
   /**
    * whether we should show the spinner indicating submitting data or not
    */
@@ -214,13 +215,12 @@ export default function RecordeditProvider({
   const [canUpdateValues, setCanUpdateValues] = useState<any>({});
   const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
 
-  const [activeMultiForm, setActiveMultiForm] = useState<number>(-1);
-
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
   const [showCloneSpinner, setShowCloneSpinner] = useState(false);
+  const [showApplyAllSpinner, setShowApplyAllSpinner] = useState(false);
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
@@ -440,12 +440,6 @@ export default function RecordeditProvider({
       window.removeEventListener('beforeunload', avoidLeave);
     };
   }, [loginModal, errors]);
-
-  const toggleActiveMultiForm = (colIndex: number) => {
-    setActiveMultiForm((prev) => {
-      return colIndex === prev ? -1 : colIndex;
-    });
-  };
 
   const onSubmitValid = (data: any) => {
     // remove all existing alerts
@@ -1054,13 +1048,13 @@ export default function RecordeditProvider({
       removeForm,
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
-      activeMultiForm,
-      toggleActiveMultiForm,
 
       onSubmitValid,
       onSubmitInvalid,
       showCloneSpinner,
       setShowCloneSpinner,
+      showApplyAllSpinner,
+      setShowApplyAllSpinner,
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
@@ -1073,8 +1067,8 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    reference, tuples, columnModels, initialized, waitingForForeignKeyData, showCloneSpinner,
-    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeMultiForm
+    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
+    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
   ]);
 
   return (

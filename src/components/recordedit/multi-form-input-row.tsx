@@ -3,7 +3,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
@@ -27,12 +27,15 @@ type MultiFormInputRowProps = {
   * The state function to set active forms.
   */
   setActiveForm?: any;
+  /* change the active select all */
+  toggleActiveMultiForm: (colIndex: number) => void;
 };
 
 const MultiFormInputRow = ({
   columnModelIndex,
   activeForms,
   setActiveForm,
+  toggleActiveMultiForm
 }: MultiFormInputRowProps) => {
   const {
     columnModels,
@@ -42,21 +45,27 @@ const MultiFormInputRow = ({
     foreignKeyData,
     appMode,
     canUpdateValues,
-    toggleActiveMultiForm,
+    setShowApplyAllSpinner,
     logRecordeditClientAction,
   } = useRecordedit();
 
-  const columnModel = columnModels[columnModelIndex];
-  const isTextArea = columnModel.inputType === 'markdown' || columnModel.inputType === 'longtext';
+  const cm = columnModels[columnModelIndex];
+  const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
 
-  const { watch, reset, getValues, formState: { errors } } = useFormContext();
+  const { formState: { errors }, getValues, setValue } = useFormContext();
+  // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
+  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
 
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
   /**
    *  This is to set select all checkbox state
    */
-  const [allFormsAreActive, setAllFormsAreActive] = useState(false);
+  const [allFormsAreActive, setAllFormsAreActive] = useState<boolean>(false);
+  // 0 means don't call function
+  // -1 means call applyValueToAll
+  // 1 means call clearAllValues
+  const [allValuesEffect, setAllValuesEffect] = useState<number>(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -136,22 +145,17 @@ const MultiFormInputRow = ({
    * useEffect allows us to look for the value and only rerender when we have to.
    */
   useEffect(() => {
-    const subscribe = watch((data, options) => {
-      const n = `${MULTI_FORM_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
-      if (!options.name || options.name !== n) return;
+    // see if the input is empty
+    let temp = !Boolean(selectAllFieldValue);
+    if (cm.column.type.name === 'boolean') {
+      temp = typeof selectAllFieldValue !== 'boolean';
+    }
 
-      // see if the input is empty
-      let temp = !Boolean(data[n]);
-      if (columnModel.column.type.name === 'boolean') {
-        temp = typeof data[n] !== 'boolean';
-      }
+    if (isEmpty !== temp) {
+      setIsEmpty(temp);
+    }
 
-      if (isEmpty !== temp) {
-        setIsEmpty(temp);
-      }
-    });
-    return () => subscribe.unsubscribe();
-  }, [watch, isEmpty]);
+  }, [selectAllFieldValue, isEmpty]);
 
   /**
    * This is to set the width of text area as the width of multi-form-input-row. We have to involve javascript as
@@ -176,38 +180,33 @@ const MultiFormInputRow = ({
 
   // ------------------------ callbacks -----------------------------------//
 
+  useEffect(() => {
+    // return if 0, continue if -1 or 1
+    if (!allValuesEffect) return;
 
-  const applyValueToAll = () => {
-    const cm = columnModels[columnModelIndex];
+    setAllValuesEffect(0);
 
-    logRecordeditClientAction(
-      LogActions.SET_ALL_APPLY,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
+    // without delaying this function call, the spinner would show briefly 
+    // after the app appeared to freeze instead of before the "appeared freeze"
+    setTimeout(() => {
+      // if 1/true, clear all values
+      // if -1/false, apply the value in the input to all selected forms 
+      const isClear = (allValuesEffect === 1)
 
-    setValueForAllInputs();
-  };
+      logRecordeditClientAction(
+        isClear ? LogActions.SET_ALL_CLEAR : LogActions.SET_ALL_APPLY,
+        cm.logStackPathChild,
+        cm.logStackNode,
+        undefined,
+        cm.column.reference ? cm.column.reference : undefined
+      );
 
-  const clearAllValues = () => {
-    const cm = columnModels[columnModelIndex];
+      setValueForAllInputs(isClear);
+    }, 0)
 
-    logRecordeditClientAction(
-      LogActions.SET_ALL_CLEAR,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
-
-    setValueForAllInputs(true);
-  };
+  }, [allValuesEffect])
 
   const closeMultiForm = () => {
-    const cm = columnModels[columnModelIndex];
-
     logRecordeditClientAction(
       LogActions.SET_ALL_CANCEL,
       cm.logStackPathChild,
@@ -235,29 +234,32 @@ const MultiFormInputRow = ({
    * if clearValue is true, it will use emtpy value, otherwise it will copy the multi-form-input input value
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
-    const cm = columnModels[columnModelIndex];
+    const updateValues = clearValue ? '' : selectAllFieldValue;
 
     activeForms?.forEach((formValue: number) => {
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
         return;
       }
-      reset(
-        copyOrClearValue(
-          cm,
-          getValues(),
-          foreignKeyData.current,
-          formValue,
-          MULTI_FORM_INPUT_FORM_VALUE,
-          clearValue
-        )
-      );
+
+      copyOrClearValue(
+        cm,
+        getValues(),
+        foreignKeyData.current,
+        formValue,
+        MULTI_FORM_INPUT_FORM_VALUE,
+        clearValue,
+        false,
+        setValue
+      )
     });
+
+    setShowApplyAllSpinner(false);
   };
 
   // -------------------------- render logic ---------------------- //
 
-  const colName = columnModel.column.name;
+  const colName = cm.column.name;
   const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
 
   const renderHelpTooltip = () => {
@@ -330,7 +332,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-apply-btn chaise-btn chaise-btn-secondary'
-                  onClick={applyValueToAll}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(-1);
+                  }}
                   // we should disable it when its empty or has error
                   // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
                   disabled={
@@ -347,7 +352,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-clear-btn chaise-btn chaise-btn-secondary'
-                  onClick={clearAllValues}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(1);
+                  }}
                   disabled={activeForms?.length === 0}
                 >
                   Clear
@@ -379,9 +387,9 @@ const MultiFormInputRow = ({
             requiredInput={false}
             name={inputName}
             inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
-            type={columnModel.inputType}
+            type={cm.inputType}
             classes='column-cell-input'
-            columnModel={columnModel}
+            columnModel={cm}
             appMode={appMode}
             formNumber={MULTI_FORM_INPUT_FORM_VALUE}
             parentReference={reference}
