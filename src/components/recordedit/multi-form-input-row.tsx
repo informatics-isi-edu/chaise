@@ -45,11 +45,10 @@ const MultiFormInputRow = ({
     foreignKeyData,
     appMode,
     canUpdateValues,
+    setShowApplyAllSpinner,
     logRecordeditClientAction,
   } = useRecordedit();
 
-  // NOTE: if columnModels changes, this whole component is rerendered
-  //   only need to get the "column model" once globally using columnModelIndex for the whole component
   const cm = columnModels[columnModelIndex];
   const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
 
@@ -57,12 +56,16 @@ const MultiFormInputRow = ({
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
   const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
 
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
   /**
    *  This is to set select all checkbox state
    */
-  const [allFormsAreActive, setAllFormsAreActive] = useState(false);
+  const [allFormsAreActive, setAllFormsAreActive] = useState<boolean>(false);
+  // 0 means don't call function
+  // -1 means call applyValueToAll
+  // 1 means call clearAllValues
+  const [allValuesEffect, setAllValuesEffect] = useState<number>(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -177,30 +180,31 @@ const MultiFormInputRow = ({
 
   // ------------------------ callbacks -----------------------------------//
 
+  useEffect(() => {
+    // return if 0, continue if -1 or 1
+    if (!allValuesEffect) return;
 
-  const applyValueToAll = () => {
-    logRecordeditClientAction(
-      LogActions.SET_ALL_APPLY,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
+    setAllValuesEffect(0);
 
-    setValueForAllInputs();
-  };
+    // without delaying this function call, the spinner would show briefly 
+    // after the app appeared to freeze instead of before the "appeared freeze"
+    setTimeout(() => {
+      // if 1/true, clear all values
+      // if -1/false, apply the value in the input to all selected forms 
+      const isClear = (allValuesEffect === 1)
 
-  const clearAllValues = () => {
-    logRecordeditClientAction(
-      LogActions.SET_ALL_CLEAR,
-      cm.logStackPathChild,
-      cm.logStackNode,
-      undefined,
-      cm.column.reference ? cm.column.reference : undefined
-    );
+      logRecordeditClientAction(
+        isClear ? LogActions.SET_ALL_CLEAR : LogActions.SET_ALL_APPLY,
+        cm.logStackPathChild,
+        cm.logStackNode,
+        undefined,
+        cm.column.reference ? cm.column.reference : undefined
+      );
 
-    setValueForAllInputs(true);
-  };
+      setValueForAllInputs(isClear);
+    }, 0)
+
+  }, [allValuesEffect])
 
   const closeMultiForm = () => {
     logRecordeditClientAction(
@@ -249,6 +253,8 @@ const MultiFormInputRow = ({
         setValue
       )
     });
+
+    setShowApplyAllSpinner(false);
   };
 
   // -------------------------- render logic ---------------------- //
@@ -326,7 +332,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-apply-btn chaise-btn chaise-btn-secondary'
-                  onClick={applyValueToAll}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(-1);
+                  }}
                   // we should disable it when its empty or has error
                   // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
                   disabled={
@@ -343,7 +352,10 @@ const MultiFormInputRow = ({
                 <button
                   type='button'
                   className='multi-form-input-clear-btn chaise-btn chaise-btn-secondary'
-                  onClick={clearAllValues}
+                  onClick={() => {
+                    setShowApplyAllSpinner(true);
+                    setAllValuesEffect(1);
+                  }}
                   disabled={activeForms?.length === 0}
                 >
                   Clear

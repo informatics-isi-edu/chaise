@@ -86,7 +86,12 @@ export const RecordeditContext = createContext<{
    * whether we should show the spinner indicating cloning form data
    */
   showCloneSpinner: boolean,
-  setShowCloneSpinner: Function,
+  setShowCloneSpinner: (val: boolean) => void,
+  /**
+   * whether we should show the spinner indicating cloning form data
+   */
+  showApplyAllSpinner: boolean,
+  setShowApplyAllSpinner: (val: boolean) => void,
   /**
    * whether we should show the spinner indicating submitting data or not
    */
@@ -215,6 +220,7 @@ export default function RecordeditProvider({
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
   const [showCloneSpinner, setShowCloneSpinner] = useState(false);
+  const [showApplyAllSpinner, setShowApplyAllSpinner] = useState(false);
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
@@ -1047,6 +1053,8 @@ export default function RecordeditProvider({
       onSubmitInvalid,
       showCloneSpinner,
       setShowCloneSpinner,
+      showApplyAllSpinner,
+      setShowApplyAllSpinner,
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
@@ -1059,8 +1067,8 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    reference, tuples, columnModels, initialized, waitingForForeignKeyData, showCloneSpinner,
-    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors
+    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
+    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
   ]);
 
   return (
