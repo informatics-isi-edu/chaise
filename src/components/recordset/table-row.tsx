@@ -26,7 +26,7 @@ import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -84,8 +84,8 @@ const TableRow = ({
   const maxHeight = typeof CONFIG_MAX_ROW_HEIGHT === 'number' ? CONFIG_MAX_ROW_HEIGHT : 160;
   const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
-  const [numImages, setNumImages] = useState<number>(0);
-  const [numImagesLoaded, setNumImagesLoaded] = useState<number>(0);
+  const numImages = useRef<number>(0);
+  const numImagesLoaded = useRef<number>(0);
 
   const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
@@ -176,22 +176,23 @@ const TableRow = ({
     
     // fetch all <img> tags with -chaise-post-load class and keep count of the total
     // attach an onload function that updates how many have loaded
-    const imgTags = rowContainer.current.querySelectorAll('img.-chaise-post-load');
-    setNumImages(imgTags.length);
+    const imgTags = rowContainer.current.querySelectorAll(`img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`);
+    if (imgTags.length > numImages.current) numImages.current = imgTags.length
+
+    const onImageLoad = () => {
+      numImagesLoaded.current++;
+      if (numImagesLoaded.current === numImages.current) initializeOverflows();
+    }
     
     imgTags.forEach((image: HTMLImageElement) => {
-      image.onload = () => {
-        setNumImagesLoaded((prev) => {
-          return prev + 1;
-        });
-
-        // remove the onload once image has loaded
-        image.onload = null;
-      }
+      image.addEventListener('load', onImageLoad);
     });
 
     return () => {
       tempSensor.detach();
+      imgTags.forEach((image: HTMLImageElement) => {
+        image.removeEventListener('load', onImageLoad);
+      });
     }
   }, [rowValues]);
 
@@ -203,11 +204,6 @@ const TableRow = ({
    *   the above ResizeSensor doesn't recalculate when images load as part of an aggregate request so this useEffect
    *   does it one last time when all images have finished loading
    */
-  useEffect(() => {
-    if (numImagesLoaded === 0) return;
-
-    if (numImagesLoaded === numImages) initializeOverflows()
-  }, [numImagesLoaded]);
 
   const getRowLogAction = (action: LogActions) => {
     return getLogAction(action, LogStackPaths.ENTITY);

@@ -141,7 +141,7 @@ export const BODY_CLASS_NAMES = {
   self: 'chaise-body',
   mac: 'chaise-mac',
   firefox: 'chaise-firefox',
-  iframe: 'chaise-iframe',
+  iframe: 'chaise-iframe'
 };
 
 export const QUERY_PARAMS = {
@@ -161,6 +161,7 @@ export const APP_NAMES = {
 };
 
 export const CLASS_NAMES = {
+  CONTENT_LOADED: '-chaise-post-load',
   HIDDEN: 'forced-hidden',
   IMAGE_PREVIEW: 'chaise-image-preview',
   IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in'

@@ -5,6 +5,10 @@
   overflow-y: hidden;
 }
 
+.s_RNASeq.t_Visualization th.c_Bm8HSG9Sti7-33403ocxNQ {
+  min-width: unset !important;
+}
+
 .chaise-table.table {
   border-top: 1px solid map-get(variables.$color-map, 'table-border');
   border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
