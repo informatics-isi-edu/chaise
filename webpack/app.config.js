@@ -13,6 +13,7 @@ const webpack = require('webpack');
  *   - appTitle: (string) Added to the default title tag.
  *   - bundleName: (string) if defined, will be used to name the bundle. Otherwise we will use appName.
  *   - externalFiles: (array of strings) the extra files that we should add script tag for
+ *   - externalStyleFiles: (array of strings) the extra css files that we should add script tag for
  *   - appConfigLocation: (string) the app-specific config file that we should add script tag for
  *   - isLib: (boolean) whether this is a library or an app.
  *
@@ -80,6 +81,10 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       ...Array.isArray(ac.externalFiles) ? ac.externalFiles.map((f) => `${f}?v=${buildVersion}`) : []
     ];
 
+    const externalStyleFiles = [
+      ...Array.isArray(ac.externalStyleFiles) ? ac.externalStyleFiles.map((f) => `${f}?v=${buildVersion}`) : []
+    ]
+
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
@@ -99,6 +104,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         app_name: ac.appName,
         title: ac.appTitle,
         external_files: externalFiles.map((f) => `<script src="${f}"></script>`).join('\n'),
+        external_style_files: externalStyleFiles.map((f) => `<link href="${f}" rel="stylesheet"></script>`).join('\n'),
       })
     );
 
@@ -114,7 +120,8 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
           // we don't want webpack to inject assets automatically
           inject: false,
           // in this mode, we want the string version so we can append the webpack files to it
-          external_files: JSON.stringify(externalFiles)
+          external_files: JSON.stringify(externalFiles),
+          external_style_files: JSON.stringify(externalStyleFiles)
         })
       );
     }
