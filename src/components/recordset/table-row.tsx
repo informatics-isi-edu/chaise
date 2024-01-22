@@ -449,7 +449,7 @@ const TableRow = ({
         }
 
         return (
-          <div className='chaise-btn-group'>
+          <div className='chaise-btn-group chaise-btn-group-no-border'>
             {isSavedQueryPopup && (applySavedQuery || applySavedQuery === false) &&
               <ChaiseTooltip
                 tooltip={applySavedQuery ? 'Apply search criteria' : 'Search criteria cannot be applied'}

@@ -9,7 +9,6 @@
   position: relative;
   display: inline-flex;
   vertical-align: middle; // match .chaise-btn alignment given font-size hack above
-  align-items: baseline; // to align it to the same line
 
   > .chaise-btn {
     position: relative;
@@ -23,6 +22,14 @@
       z-index: map-get(variables.$z-index-map, 'button-active');
     }
   }
+}
+
+/**
+ * this rule will make sure the content are aligned with each other, but as a result the bounding box of each
+ * button might be misaligned with the rest. so this only should be used when we're hiding the borders
+ */
+.chaise-btn-group-no-border {
+  align-items: baseline; // to align it to the same line
 }
 
 // Changing this to grid to set maximum two rows of wrapping buttons if width is less
