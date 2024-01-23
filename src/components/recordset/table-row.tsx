@@ -176,7 +176,9 @@ const TableRow = ({
     
     // fetch all <img> tags with -chaise-post-load class and keep count of the total
     // attach an onload function that updates how many have loaded
-    const imgTags = rowContainer.current.querySelectorAll(`img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`);
+    const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
+      `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
+      )).filter(img => !img.complete);
     if (imgTags.length > numImages.current) numImages.current = imgTags.length
 
     const onImageLoad = () => {
@@ -186,12 +188,14 @@ const TableRow = ({
     
     imgTags.forEach((image: HTMLImageElement) => {
       image.addEventListener('load', onImageLoad);
+      image.addEventListener('error', onImageLoad);
     });
 
     return () => {
       tempSensor.detach();
       imgTags.forEach((image: HTMLImageElement) => {
         image.removeEventListener('load', onImageLoad);
+        image.removeEventListener('error', onImageLoad);
       });
     }
   }, [rowValues]);
