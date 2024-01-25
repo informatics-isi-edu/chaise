@@ -91,7 +91,16 @@ const getConfig = (options: TestOptions) => {
       {
         name: 'firefox',
         dependencies: ['pretest'],
-        use: { ...devices['Desktop Firefox'], ...extraBrowserParams },
+        use: {
+          ...devices['Desktop Firefox'],
+          ...extraBrowserParams,
+          launchOptions: {
+            firefoxUserPrefs: {
+              'dom.events.asyncClipboard.readText': true,
+              'dom.events.testing.asyncClipboard': true,
+            },
+          }
+        },
       },
       {
         name: 'webkit',

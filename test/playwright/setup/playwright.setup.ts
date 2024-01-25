@@ -349,12 +349,11 @@ function registerCallbacks(testConfiguration: any) {
     if (!catalogDeleted) {
       catalogDeleted = true;
       console.log('SIGINT: going to remove all catalogs.');
-      removeAllCatalogs().then(function () {
+      removeAllCatalogs().finally(function () {
         process.exit(1);
       });
     } else {
       console.log('SIGINT: catalogs are already deleted.');
-      process.exit(1);
     }
   });
 }
