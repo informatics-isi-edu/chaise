@@ -26,8 +26,7 @@ const getConfig = (options: TestOptions) => {
   const reporterFolder = resolve(__dirname, `./../../../playwright-report/${options.testName}`);
 
   const extraBrowserParams = {
-    storageState: STORAGE_STATE,
-    permissions: ['clipboard-read', 'clipboard-write']
+    storageState: STORAGE_STATE
   };
 
   const config = defineConfig({
@@ -83,7 +82,11 @@ const getConfig = (options: TestOptions) => {
       {
         name: 'chromium',
         dependencies: ['pretest'],
-        use: { ...devices['Desktop Chrome'], ...extraBrowserParams },
+        use: {
+          ...devices['Desktop Chrome'],
+          ...extraBrowserParams,
+          permissions: ['clipboard-read', 'clipboard-write']
+        },
       },
       {
         name: 'firefox',
