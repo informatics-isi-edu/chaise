@@ -11,6 +11,10 @@ const getConfig = (options: TestOptions) => {
   process.env.PLAYWRIGHT_TEST_OPTIONS = JSON.stringify(options);
 
   if (process.env.CI) {
+    /**
+     * TODO we used to use os.hostname() but I changed it to localhost
+     * because the copy to clipboard wasn't working without https. but it seems to work properly with localhost
+     */
     // const hostname = os.hostname();
     const hostname = 'localhost'
     process.env.ERMREST_URL = `http://${hostname}/ermrest`;
@@ -81,16 +85,16 @@ const getConfig = (options: TestOptions) => {
         dependencies: ['pretest'],
         use: { ...devices['Desktop Chrome'], ...extraBrowserParams },
       },
-      // {
-      //   name: 'firefox',
-      //   dependencies: ['pretest'],
-      //   use: { ...devices['Desktop Firefox'], ...extraBrowserParams },
-      // },
-      // {
-      //   name: 'webkit',
-      //   dependencies: ['pretest'],
-      //   use: { ...devices['Desktop Safari'], ...extraBrowserParams },
-      // },
+      {
+        name: 'firefox',
+        dependencies: ['pretest'],
+        use: { ...devices['Desktop Firefox'], ...extraBrowserParams },
+      },
+      {
+        name: 'webkit',
+        dependencies: ['pretest'],
+        use: { ...devices['Desktop Safari'], ...extraBrowserParams },
+      },
     ],
   });
 
