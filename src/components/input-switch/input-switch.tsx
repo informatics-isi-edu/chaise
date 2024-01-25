@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
+import { memo } from 'react';
+
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -16,7 +18,7 @@ import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-fie
 import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe-field';
 
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 export type InputSwitchProps = {
   /**
@@ -117,6 +119,10 @@ export type InputSwitchProps = {
    */
   waitingForForeignKeyData?: boolean,
   /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
+  /**
    * whether we should offer the extra now/today buttons
    */
   displayExtraDateTimeButtons?: boolean,
@@ -150,7 +156,8 @@ const InputSwitch = ({
   foreignKeyData,
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
-  displayDateTimeLabels
+  displayDateTimeLabels,
+  foreignKeyCallbacks
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -219,6 +226,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'dropdown-select':
         if (!columnModel) {
@@ -245,6 +253,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'file':
         if (!columnModel) {
@@ -396,4 +405,4 @@ const InputSwitch = ({
   })();
 };
 
-export default InputSwitch;
+export default memo(InputSwitch);

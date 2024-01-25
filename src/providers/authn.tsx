@@ -15,6 +15,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import Q from 'q';
 import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -41,6 +42,7 @@ export const AuthnContext = createContext<{
   shouldReloadPageAfterLogin: (serverSession: Session | null) => boolean;
   showPreviousSessionAlert: () => boolean;
   validateSessionBeforeMutation: (cb: () => void) => void;
+  validateSession: () => Promise<Session | null>;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -335,9 +337,9 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       headers: {} as any
     };
 
-    // config.headers[ERMrest.contextHeaderName] = {
-    //   action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
-    // }
+    config.headers[ConfigService.ERMrest.contextHeaderName] = {
+      action: LogService.getActionString(LogActions.SESSION_RETRIEVE, '', '')
+    }
 
     /**
      * NOTE: the following is for future implementation when we decide to verify session against the cookie object
@@ -591,6 +593,34 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   };
 
   /**
+   * Will return a promise that is resolved with the session.
+   * Meant for validating the server session and verify if it's still active or not
+   */
+  const validateSession = (): Promise<Session | null> => {
+    return new Promise((resolve) => {
+      const config = {
+        skipHTTP401Handling: true,
+        headers: {} as any
+      };
+      config.headers[ConfigService.ERMrest.contextHeaderName] = {
+        action: LogService.getActionString(LogActions.SESSION_VALIDATE, '', '')
+      }
+      return ConfigService.http.get(serviceURL + '/authn/session', config).then((response: any) => {
+        if (!session) {
+          // only update _session if no session is set
+          _setSession(response.data)
+        }
+        resolve(response.data);
+      }).catch((err: any) => {
+        $log.warn(ConfigService.ERMrest.responseToError(err));
+
+        _setSession(null);
+        resolve(null);
+      });
+    });
+  }
+
+  /**
    * TODO technically this function should even ask for preauthn in _logInHelper
    * This function opens a modal dialog which has a link for login
    * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
@@ -615,7 +645,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       session,
       shouldReloadPageAfterLogin,
       showPreviousSessionAlert,
-      validateSessionBeforeMutation
+      validateSessionBeforeMutation,
+      validateSession
     }
   }, [session]);
 
@@ -625,33 +656,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     </AuthnContext.Provider>
   )
 } // end provider
-
-
-//   /**
-//    * Will return a promise that is resolved with the session.
-//    * Meant for validating the server session and verify if it's still active or not
-//    */
-//   validateSession: function () {
-//     var config = {
-//       skipHTTP401Handling: true,
-//       headers: {}
-//     };
-//     config.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
-//     }
-//     return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function (response) {
-//       if (!_session) {
-//         // only update session if no session is set
-//         _session = response.data;
-//       }
-//       return _session;
-//     }).catch(function (err) {
-//       $log.warn(ERMrest.responseToError(err));
-
-//       _session = null;
-//       return _session;
-//     });
-//   },
 
 //   subscribeOnChange: function (fn) {
 //     // To avoid same ids for an instance we add counter

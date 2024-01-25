@@ -17,9 +17,6 @@ dist
 deployment-config.json
 .make-*
 index.html
-/chaise-config.js
-/google-dataset-config.js
-viewer/viewer-config.js
 sftp-config.json
 npm-debug.log
 version.txt
@@ -36,10 +33,17 @@ common/styles/navbar.css
 # sass temporary compiled files
 .sass-cache
 
-
 # playwright
 /playwright-output/
 /playwright-report/
 /playwright/.cache/
 test/playwright/.auth
 test/playwright/.download
+
+# config files
+config/*-config.js
+
+# old config files (should be removed when we deprecated these locations
+/chaise-config.js
+/google-dataset-config.js
+viewer/viewer-config.js

@@ -4,7 +4,7 @@
             "record/links.config.json",
 
             "recordedit/immutable-inputs.config.json",
-            "recordedit/add-multi.config.json",
+            "recordedit/multi-form-input.config.json",
             "recordedit/composite-key.config.json",
             "recordedit/domain-filter.config.json",
             "recordedit/foreign-key-dropdown.config.json",

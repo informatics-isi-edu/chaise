@@ -11,10 +11,10 @@ import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
-  RecordsetSelectMode, SelectedRow, RecordsetProps
+  RecordsetSelectMode, SelectedRow, RecordsetProps,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
@@ -24,10 +24,11 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { 
-  callOnChangeAfterSelection, 
+import {
+  callOnChangeAfterSelection,
   clearForeignKeyData,
-  createForeignKeyReference 
+  createForeignKeyReference,
+  validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -70,12 +71,10 @@ type ForeignkeyFieldProps = InputFieldProps & {
    * whether we're still waiting for foreignkey data
    */
   waitingForForeignKeyData?: boolean,
-  // TODO should be used by viewer app
-  // (types should be modified based on viewer app changes)
-  // popupSelectCallbacks?: {
-  //   getDisabledTuples?: any,
-  //   onSelectedRowsChanged?: any
-  // }
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 };
 
 const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
@@ -138,7 +137,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       logInfo: {
         logStack: LogService.addExtraInfoToStack(LogService.getStackObject(props.columnModel.logStackNode, props.parentLogStack), { picker: 1 }),
         logStackPath: LogService.getStackPath(props.parentLogStackPath ? props.parentLogStackPath : null, LogStackPaths.FOREIGN_KEY_POPUP)
-      }
+      },
+      getDisabledTuples: props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined
     });
   };
 
@@ -154,7 +154,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       const selectedRow = selectedRows[0];
 
       callOnChangeAfterSelection(
-        selectedRow, 
+        selectedRow,
         onChange,
         props.name,
         props.columnModel.column,
@@ -165,13 +165,18 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     }
   }
 
+  const rules: any = {};
+  if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onChange) {
+    rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
+  }
+
   return (
-    <InputField {...props} onClear={onClear}>
+    <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey'>
           {showSpinner &&
-            <div className='column-cell-spinner-container'>
-              <div className='column-cell-spinner-backdrop'></div>
+            <div className='foreignkey-input-spinner-container'>
+              <div className='foreignkey-input-spinner-backdrop'></div>
               <Spinner animation='border' size='sm' />
             </div>
           }

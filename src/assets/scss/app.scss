@@ -239,7 +239,12 @@ html {
     // (this is a predefined class in bootstrap)
     text-align: left;
     max-width: none;
+    // honor any whitespace in the tooltips
     white-space: pre-wrap;
+    // when html content is displayed, we shouldn't mess with the whitespace rendering
+    .markdown-container {
+      white-space: normal;
+    }
   }
   .tooltip code,
   .tooltip-inner code {
@@ -323,6 +328,21 @@ html {
     .spinner-message {
       display: inline-block;
       margin-left: 5px;
+    }
+  }
+
+  /**
+   * show a sticky spinner for the container
+   * used in recordset and record pages
+   * NOTE: the container must have a margin-top: variables.$main-spinner-height * -1; when spinner is displayed.
+   */
+  .sticky-spinner-outer-container {
+    position: sticky;
+    position: -webkit-sticky;
+    top: min(50px, 50%);
+    z-index: map-get(variables.$z-index-map, 'spinner');
+    .spinner-container {
+      height: variables.$main-spinner-height;
     }
   }
 
@@ -724,6 +744,17 @@ html {
         border: 1px solid map-get(variables.$color-map, 'primary');
         border-radius: 3px;
         background-color: map-get(variables.$color-map, 'white');
+      }
+
+      &:indeterminate + label:after {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        content: "\f068"; // fa-solid fa-minus"
+        font-size: 1rem; // the visible part of icon is small, so we have to make it properly fit the box
+        line-height: 1; // eventhough we're making it bigger, but make sure the whole icon doesn't go beyond the limit
       }
 
       // we have to change the the checkmark to the label otherwise firefox won't show it.

@@ -29,7 +29,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // utilities
 import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
-import { getCatalogId, splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, NavbarBanner, addLogParams,
   canEnable, canShow, createMenuList, menuItemClasses,
@@ -40,7 +40,7 @@ import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const ChaiseNavbar = (): JSX.Element => {
-  const catalogId: string = getCatalogId();
+  const catalogId: string = ConfigService.catalogID;
   const cc = ConfigService.chaiseConfig; // TODO: chaise-config typing
   const ERMrest = ConfigService.ERMrest; // TODO: ERMrestJS typing
   const settings = ConfigService.appSettings;

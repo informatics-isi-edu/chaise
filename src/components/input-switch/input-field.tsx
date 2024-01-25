@@ -75,7 +75,7 @@ export type InputFieldCompProps = InputFieldProps & {
   */
   onClear?: ((e: any) => void),
   /**
-   * if not
+   * the rules attached to the input. can be used to define a custome validator
    */
   controllerRules?: any,
   /**
@@ -100,7 +100,7 @@ const InputField = ({
   name,
   requiredInput,
   displayErrors,
-  containerClasses,
+  containerClasses = '',
   styles,
   allowEnter = false,
   onClear,

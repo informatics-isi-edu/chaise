@@ -12,7 +12,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -23,10 +23,11 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { 
-  callOnChangeAfterSelection, 
+import {
+  callOnChangeAfterSelection,
   clearForeignKeyData,
-  createForeignKeyReference 
+  createForeignKeyReference,
+  validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -68,18 +69,24 @@ type ForeignkeyDropdownFieldProps = InputFieldProps & {
    * whether we're still waiting for foreignkey data
    */
   waitingForForeignKeyData?: boolean,
-  // TODO should be used by viewer app
-  // (types should be modified based on viewer app changes)
-  // popupSelectCallbacks?: {
-  //   getDisabledTuples?: any,
-  //   onSelectedRowsChanged?: any
-  // }
+  /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
 };
 
 const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
-  const formContainer = document.querySelector('.form-container .recordedit-form') as HTMLElement;
+  /**
+   * TODO
+   * this element most probably should be something that the inputSwitch can customize
+   * because we're now assuming that this compoennt is only used in the recordedit form.
+   *
+   * that being said this the dropdown alignment wasn't an issue in the viewer app, so
+   * this added padding is not needed there.
+   */
+  const formContainer = document.querySelector('.form-container .recordedit-form');
 
   const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
@@ -100,7 +107,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   // contextualized reference for fetching dropdownRows
   const [dropdownReference, setDropdownReference] = useState<any>(null);
   const [currentDropdownPage, setCurrentDropdownPage] = useState<any>(null);
-  const [dropdownRows, setDropdownRows] = useState<any[]>([]); // array of page.tuples
+
+  type DropdownRow = { tuple: any, isDisabled: boolean };
+  const [dropdownRows, setDropdownRows] = useState<DropdownRow[]>([]); // array of page.tuples
   const [checkedRow, setCheckedRow] = useState<any>(null); // ERMrest.Tuple
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
@@ -112,7 +121,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   // when dropdown is opened, set a class so dropdown opens without being pushed inside the table container
   useLayoutEffect(() => {
-    if (!dropdownOpen || !dropdownMenuRef.current) return;
+    if (!dropdownOpen || !dropdownMenuRef.current || !formContainer) return;
 
     // trigger on timeout to ensure this happens after popper calculates what it needs to for dropdownMenuRef.current
     windowRef.setTimeout(
@@ -132,7 +141,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         //   - "padding-bottom" of ".entity-value" cell = 8px
         //   - "padding-bottom" of ".main-body" = 40px
         // to get the max space needed we do:
-        //    395 - (8 + 40) = 347 
+        //    395 - (8 + 40) = 347
         // use ~350 to give a little extra room
         if (popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < 350) {
           formContainer.classList.add('dropdown-open');
@@ -142,12 +151,48 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       });
   }, [dropdownOpen]);
 
+  /**
+   * populate the dropdown rows after a request is done.
+   * this function will take care of calling the getDisabledTuples if it's defined and setting the tuples as disabled
+   */
+  const populateDropdownRows = (page: any, pageLimit: number, logStack: any,
+    logStackPath: string, requestCauses?: any, reloadStartTime?: any): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      type PType = { page: any, disabledRows?: any };
+      let p;
+      if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.getDisabledTuples) {
+        p = props.foreignKeyCallbacks.getDisabledTuples(page, pageLimit, logStack, logStackPath, requestCauses, reloadStartTime);
+      } else {
+        p = new Promise<PType>((innerResolve) => innerResolve({ page }));
+      }
+
+      p.then((result: PType) => {
+        const disabledTuplesUniqueIDs: any = {};
+        if (Array.isArray(result.disabledRows)) {
+          result.disabledRows.forEach((t: any) => {
+            disabledTuplesUniqueIDs[t.uniqueId] = 1;
+          })
+        }
+
+        setDropdownRows(page.tuples.map((tuple: any) => {
+          return { isDisabled: (tuple.uniqueId in disabledTuplesUniqueIDs), tuple };
+        }));
+
+        resolve(true);
+      }).catch((err) => {
+        reject(err);
+      })
+    });
+
+
+  }
+
   const intializeDropdownRows = () => {
     setShowSpinner(true);
     setDropdownInitialized(false);
-    
+
     let ref = createForeignKeyReference(
-      props.columnModel.column, 
+      props.columnModel.column,
       props.parentReference,
       usedFormNumber,
       props.foreignKeyData,
@@ -180,7 +225,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     ref.read(initialPageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
-      setDropdownRows(page.tuples);
 
       // if we use props.foreignKeyData.current[props.name], we get an object of row values (tuple.data)
       // we don't know which column value is used for the displayname so it's better to check react-hook-form state
@@ -193,6 +237,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
           if (tuple.displayname.value === displayedValue) setCheckedRow(tuple);
         });
       }
+
+      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath);
+    }).then(() => {
 
       setShowSpinner(false);
       setDropdownInitialized(true);
@@ -239,15 +286,17 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     // different action for read
     // add causes to stack only for read request
+    const requestCauses = [LogReloadCauses.DROPDOWN_SEARCH_BOX];
+    const reloadStartTime = ConfigService.ERMrest.getElapsedTime();
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack: LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_SEARCH_BOX], ConfigService.ERMrest.getElapsedTime())
+      stack: LogService.addCausesToStack(stack, requestCauses, reloadStartTime)
     }
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
-      setDropdownRows(page.tuples);
-
+      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+    }).then(() => {
       setShowSpinner(false);
     }).catch((exception: any) => {
       setShowSpinner(false);
@@ -274,7 +323,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       }
     } else {
       // will remove the class if it's present. no need to check for it
-      formContainer.classList.remove('dropdown-open');
+      if (formContainer) {
+        formContainer.classList.remove('dropdown-open');
+      }
 
       const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
       LogService.logClientAction({
@@ -292,7 +343,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
     callOnChangeAfterSelection(
-      selectedRow, 
+      selectedRow,
       onChange,
       props.name,
       props.columnModel.column,
@@ -319,16 +370,18 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     // different action for read
     // add causes to stack only for read request
+    const requestCauses = [LogReloadCauses.DROPDOWN_LOAD_MORE];
+    const reloadStartTime = ConfigService.ERMrest.getElapsedTime();
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
-      stack: LogService.addCausesToStack(stack, [LogReloadCauses.DROPDOWN_LOAD_MORE], ConfigService.ERMrest.getElapsedTime())
+      stack: LogService.addCausesToStack(stack, requestCauses, reloadStartTime)
     }
 
     dropdownReference.read(newPageLimit, logObj).then((page: any) => {
-      console.log(page)
       setCurrentDropdownPage(page);
 
-      setDropdownRows(page.tuples);
+      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+    }).then(() => {
 
       setShowSpinner(false);
     }).catch((exception: any) => {
@@ -356,18 +409,19 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         </li>
       )
     }
-    return dropdownRows.map((tuple: any) => {
+    return dropdownRows.map((row: DropdownRow) => {
       return (
         <Dropdown.Item
-          key={`fk-val-${tuple.uniqueId}`}
+          key={`fk-val-${row.tuple.uniqueId}`}
           as='li'
-          onClick={(e) => onRowSelected(tuple, onChange)}
+          onClick={(e) => onRowSelected(row.tuple, onChange)}
+          disabled={row.isDisabled}
         >
-          {tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
+          {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
           <label>
             <DisplayValue
               className='dropdown-select-value'
-              value={{ value: tuple.rowName.value, isHTML: tuple.rowName.isHTML }}
+              value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
             />
           </label>
         </Dropdown.Item>
@@ -375,13 +429,18 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     })
   }
 
+  const rules: any = {};
+  if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onChange) {
+    rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
+  }
+
   return (
-    <InputField {...props} onClear={onClear}>
+    <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey fk-dropdown'>
           {(showSpinnerOnLoad || showSpinner) &&
-            <div className='column-cell-spinner-container'>
-              <div className='column-cell-spinner-backdrop'></div>
+            <div className='foreignkey-input-spinner-container'>
+              <div className='foreignkey-input-spinner-backdrop'></div>
               <Spinner animation='border' size='sm' />
             </div>
           }
@@ -395,7 +454,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
             >
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
-                className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+                className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
               >
                 {isStringAndNotEmpty(field?.value) ?
                   <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :

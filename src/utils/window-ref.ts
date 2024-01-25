@@ -1,3 +1,5 @@
+import { ViewerConfig } from '@isrd-isi-edu/chaise/src/models/viewer';
+
 // exporting so third-party apps can customize this
 export interface ICustomWindow extends Window {
   // WID
@@ -38,7 +40,11 @@ export interface ICustomWindow extends Window {
   /**
    * used in record page to help data-modelers with writing the annotation
    */
-  defaultExportTemplate: any
+  defaultExportTemplate: any,
+  /**
+   * the config file of viewer app
+   */
+  viewerConfigs: ViewerConfig
 }
 
 declare let window: ICustomWindow;

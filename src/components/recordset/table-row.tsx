@@ -26,7 +26,7 @@ import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -71,18 +71,21 @@ const TableRow = ({
   } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
-  const CONFIG_MAX_ROW_HEIGH = ConfigService.chaiseConfig.maxRecordsetRowHeight;
+  const CONFIG_MAX_ROW_HEIGHT = ConfigService.chaiseConfig.maxRecordsetRowHeight;
 
   /**
    * if the chaise-config property is set to `false` we should skip the ellipsis logic
    */
-  const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGH === false;
+  const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGHT === false;
 
   // +10 to account for padding on <td>
   const tdPadding = 10;
   const moreButtonHeight = 20;
-  const maxHeight = typeof CONFIG_MAX_ROW_HEIGH === 'number' ? CONFIG_MAX_ROW_HEIGH : 160;
+  const maxHeight = typeof CONFIG_MAX_ROW_HEIGHT === 'number' ? CONFIG_MAX_ROW_HEIGHT : 160;
   const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
+
+  const numImages = useRef<number>(0);
+  const numImagesLoaded = useRef<number>(0);
 
   const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
@@ -122,20 +125,23 @@ const TableRow = ({
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
     const tempOverflow: boolean[] = [];
-    for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
-      let hasOverflow = overflow[i] || false;
 
-      // children is each <td>, span is the cell wrapping the content
-      const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
+    if (rowContainer.current && rowContainer.current.children) {
+      for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
+        let hasOverflow = overflow[i] || false;
 
-      // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
-      if (dataCell && !hasOverflow) {
-        // overflow is true if the content overflows the cell
-        // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
-        hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+        // children is each <td>, span is the cell wrapping the content
+        const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
+
+        // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
+        if (dataCell && !hasOverflow) {
+          // overflow is true if the content overflows the cell
+          // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
+          hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+        }
+
+        tempOverflow[i] = hasOverflow;
       }
-
-      tempOverflow[i] = hasOverflow;
     }
 
     setOverflow(tempOverflow);
@@ -146,31 +152,62 @@ const TableRow = ({
       return overflow === true
     });
 
-    if (sensor && justOverflows.length === 0) sensor.detach();
+    // add length check so this only triggers for the reason from the above comment
+    if (sensor && rowValues.length === 1 && justOverflows.length === 0) sensor.detach();
   }
 
-  // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
+  // This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
   // NOTE: if the tuple changes, the table-row component isn't destroyed so the overflows need to be reset
   useEffect(() => {
     if (disableMaxRowHeightFeature) return;
     setOverflow([]);
   }, [tuple]);
 
+  // attach resize sensor to the table row and an onload event to each <img> tag in the table row
+  // onload will update a state variable to communicate when all images have loaded to trigger overflow logic once more
   useLayoutEffect(() => {
     if (!rowContainer.current || disableMaxRowHeightFeature) return;
     const tempSensor = new ResizeSensor(
       rowContainer.current,
-      () => {
-        initializeOverflows();
-      }
+      () => initializeOverflows()
     )
 
     setSensor(tempSensor);
+    
+    // fetch all <img> tags with -chaise-post-load class and keep count of the total
+    // attach an onload function that updates how many have loaded
+    const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
+      `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
+      )).filter(img => !img.complete);
+    if (imgTags.length > numImages.current) numImages.current = imgTags.length
+
+    const onImageLoad = () => {
+      numImagesLoaded.current++;
+      if (numImagesLoaded.current === numImages.current) initializeOverflows();
+    }
+    
+    imgTags.forEach((image: HTMLImageElement) => {
+      image.addEventListener('load', onImageLoad);
+      image.addEventListener('error', onImageLoad);
+    });
 
     return () => {
       tempSensor.detach();
+      imgTags.forEach((image: HTMLImageElement) => {
+        image.removeEventListener('load', onImageLoad);
+        image.removeEventListener('error', onImageLoad);
+      });
     }
   }, [rowValues]);
+
+  /**
+   * as images load, check if we have loaded all images before triggering the overflow logic one more time
+   * We can't rely on this useEffect alone since there might not be any images
+   * 
+   * NOTE: images can be a value for a column or part of a aggregate request to fetch multiple images
+   *   the above ResizeSensor doesn't recalculate when images load as part of an aggregate request so this useEffect
+   *   does it one last time when all images have finished loading
+   */
 
   const getRowLogAction = (action: LogActions) => {
     return getLogAction(action, LogStackPaths.ENTITY);
@@ -416,7 +453,7 @@ const TableRow = ({
         }
 
         return (
-          <div className='chaise-btn-group'>
+          <div className='chaise-btn-group chaise-btn-group-no-border'>
             {isSavedQueryPopup && (applySavedQuery || applySavedQuery === false) &&
               <ChaiseTooltip
                 tooltip={applySavedQuery ? 'Apply search criteria' : 'Search criteria cannot be applied'}

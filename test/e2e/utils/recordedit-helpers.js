@@ -1,4 +1,5 @@
 var chaisePage = require('./chaise.page.js');
+const recordEditPage = chaisePage.recordEditPage;
 var moment = require('moment');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var chance = require('chance').Chance();
@@ -88,7 +89,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
 
         it("should allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeTruthy("Add x rows is not visible in create mode");
+            expect(chaisePage.recordEditPage.getCloneFormInputSubmitButton().isDisplayed()).toBeTruthy("Add x rows is not visible in create mode");
         });
     }
 
@@ -259,7 +260,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         describe(title + ",",function() {
             if (recordIndex > 0) {
                 it("should click add record button", function(done) {
-                    chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
+                    chaisePage.clickButton(chaisePage.recordEditPage.getCloneFormInputSubmitButton()).then(function(button) {
                         return browser.wait(function() {
                             return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                                 return (ct == recordIndex + 1);
@@ -1629,33 +1630,48 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 };
 
 /**
- * used for checking the success page
- * @param  {[type]}  tableParams [description]
- * @param  {Boolean} isEditMode  [description]
- * @return {[type]}              [description]
+ * used for checking the success page. can handle both single and multi form cases.
+ *
+ * expected parameters in the tableParams object:
+ *  - table_displayname: The displayname of the table
+ *  - results: An array of arrays. Each array encodes the expected values for each row. The values for each column
+ *             can be:
+ *               - string: the expected getText() of the row
+ *               - an object with `link` and `value` to test the displayed link.
+ *  - result_columns: the column names (an array of string).
+ *  - test_results: a boolean that can be used if we want to skip test cases for non CI environment. If you want to run test cases
+ *            all the time, pass `true` otherwise pass `!process.env.CI`.
+ *  - files: the files that are used during test (for upload test). if you're not testing upload, pass an empty array.
+ *
+ * @param  {Object}  tableParams refer to the description
+ * @param  {Boolean} isEditMode  whether this is in entity mode or not
  */
 exports.testSubmission = function (tableParams, isEditMode) {
     var hasErrors = false;
 
-    it("should have no errors.", function() {
+    it("should have no errors.", function(done) {
         chaisePage.recordEditPage.submitForm().then(() => {
             return chaisePage.recordEditPage.getAlertError();
         }).then(function(err) {
             if (err) {
                 expect("Page has errors").toBe("No errors", "expected page to have no errors");
                 hasErrors = true;
-            } else {
-                expect(true).toBe(true);
+                done.fail();
+                return;
             }
-        });
 
-        // if there is a file upload
-        if (!process.env.CI && tableParams.files.length > 0) {
-            var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
-            browser.wait(ExpectedConditions.invisibilityOf(element(by.css('.upload-table'))),timeout).catch(function (err) {
-                // if the element is not available (there is no file) it will return error which we should ignore.
-            });
-        }
+            // if there is a file upload
+            if (!process.env.CI && tableParams.files.length > 0) {
+              var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
+              browser.wait(ExpectedConditions.invisibilityOf(element(by.css('.upload-table'))),timeout).catch(function (err) {
+                  // if the element is not available (there is no file) it will return error which we should ignore.
+              });
+            }
+
+            done();
+        }).catch(chaisePage.catchTestError(done));
+
+
     });
 
     if (tableParams.results.length > 1) {  // multi edit/create
@@ -1688,24 +1704,15 @@ exports.testSubmission = function (tableParams, isEditMode) {
             });
 
             it('should point to the correct link with caption.', function () {
-                var linkModifier = "";
-                if (isEditMode) {
-                    var keyPairs = [];
-                    tableParams.keys.forEach(function(key) {
-                        keyPairs.push(key.name + key.operator + key.value);
-                    });
-                    linkModifier = "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns.join(",") + ")"
-                }
-
-                var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
-                var titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
+                const expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
+                const titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                 expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
             });
 
             //NOTE: in ci we're not uploading the file and therefore this test case will fail
-            if (tableParams.not_ci) {
+            if (tableParams.test_results) {
                 it('table must show correct results.', function() {
 
                     chaisePage.recordsetPage.getTableHeader().all(by.tagName("th")).then(function (headerCells) {
@@ -1866,6 +1873,9 @@ exports.deleteFiles = function(files) {
     });
 };
 
+/**
+ * TODO this should be replaced by selectFileReturnPromise
+ */
 exports.selectFile = function(file, fileInput, txtInput) {
     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
 
@@ -1887,6 +1897,39 @@ exports.selectFile = function(file, fileInput, txtInput) {
         });
     }
 };
+
+/**
+ * TODO this should replace the selectFile function
+ */
+exports.selectFileReturnPromise = (file, fileInput, txtInput) => {
+  return new Promise((resolve, reject) => {
+    const filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
+
+    fileInput.sendKeys(filePath).then(() => {
+      return browser.sleep(100);
+    }).then(() => {
+      expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
+      expect(txtInput.getText()).toBe(file.name, "didn't show the correct file name after selection.");
+
+      if (typeof file.tooltip === "string") {
+        // test the tooltip on hover
+        // move the mouse first to force any other tooltips to hide
+        browser.actions().mouseMove(chaisePage.recordEditPage.getRequiredInfoEl()).perform().then(() => {
+          return chaisePage.waitForElementInverse(chaisePage.getTooltipDiv());
+        }).then(() => {
+          return chaisePage.testTooltipReturnPromise(txtInput, file.tooltip, 'recordedit');
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+
+      } else {
+        resolve();
+      }
+    }).then(() => {
+      resolve();
+    }).catch(err => reject(err));
+  });
+}
 
 /**
  * test a file input with the given column name, and file that we want to test
@@ -1926,3 +1969,177 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
         }
     });
 };
+
+
+/**
+ *
+ * expected types: 'timestamp', 'boolean', 'fk', any other string
+ *
+ * expected valueProps:
+ * {
+ *
+ * // general:
+ *  value,
+ *
+ * // time stamp props:
+ *  date_value,
+ *  time_value,
+ *
+ * // fk props:
+ *  modal_num_rows,
+ *  modal_option_index,
+ *
+ * }
+ *
+ * @param {string} name input name
+ * @param {string} displayname the displayed name
+ * @param {string} displayType type of the input
+ * @param {Object} valueProps expected values
+ * @returns
+ */
+exports.setInputValue = (formNumber, name, displayname, displayType, valueProps) => {
+  return new Promise((resolve, reject) => {
+    switch (displayType) {
+      case 'boolean':
+        let dropdown = chaisePage.recordEditPage.getDropdownElementByName(name, formNumber);
+        browser.wait(EC.elementToBeClickable(dropdown)).then(() => {
+          return chaisePage.recordEditPage.selectDropdownValue(dropdown, valueProps.value);
+        }).then(() => {
+          expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(valueProps.value);
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'fk':
+        chaisePage.clickButton(recordEditPage.getForeignKeyInputButton(displayname, formNumber)).then(() => {
+          return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+        }).then(() => {
+          return browser.wait(function () {
+            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+              return (ct == valueProps.modal_num_rows);
+            });
+          });
+        }).then(() => {
+          // select the option
+          return chaisePage.recordsetPage.getRows().get(valueProps.modal_option_index).element(by.css('.select-action-button'));
+        }).then((el) => {
+          return chaisePage.clickButton(el);
+        }).then(() => {
+          // wait for modal to close
+          return browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'timestamp':
+        const inputs = recordEditPage.getTimestampInputsForAColumn(name, formNumber);
+        chaisePage.clickButton(inputs.clearBtn).then(() => {
+          return inputs.date.clear();
+        }).then(() => {
+          return inputs.time.clear();
+        }).then(() => {
+          return inputs.time.sendKeys(valueProps.time_value);
+        }).then(() => {
+          return inputs.date.sendKeys(valueProps.date_value);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'upload':
+        const fileInput = recordEditPage.getInputForAColumn(name, formNumber);
+        const fileTextInput = recordEditPage.getTextFileInputForAColumn(name, formNumber);
+        exports.selectFileReturnPromise(valueProps.value, fileInput, fileTextInput).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      default:
+        let inputEl;
+        if (displayType === 'textarea') {
+          inputEl = recordEditPage.getTextAreaForAColumn(name, formNumber);
+        } else {
+          inputEl = recordEditPage.getInputForAColumn(name, formNumber);
+        }
+
+        recordEditPage.clearInput(inputEl).then(() => {
+         return inputEl.sendKeys(valueProps.value);
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+    }
+
+  });
+}
+
+
+/**
+ * test the values displayed on the forms for a column
+ *
+ * expectedValues expected type will be different depending on the input type. for all the types expect the following
+ * it should be an array of strings.
+ * - timestamp: array of objects with date_value and time_value props
+ *
+ * @param {string} name the column name
+ * @param {string}} displayname the column displayname
+ * @param {string} displayType the display type (boolean, fk, timestamp, upload, "any other string")
+ * @param {boolean} allDisabled whether we should test that all the inputs are disabled or not
+ * @param {any[]} expectedValues the expected values
+ * @returns
+ */
+exports.testFormValuesForAColumn = (name, displayname, displayType, allDisabled, expectedValues) => {
+  return new Promise((resolve) => {
+    let input, inputControl, formNumber, message;
+
+    expectedValues.forEach((value, i) => {
+      formNumber = i + 1;
+      message = `col ${displayname}, formNumber=${formNumber}`;
+
+      switch (displayType) {
+        case 'boolean':
+          inputControl = recordEditPage.getInputControlForAColumn(name, formNumber);
+          input = recordEditPage.getDropdownElementByName(name, formNumber);
+          if (allDisabled) {
+            expect(inputControl.getAttribute('class')).toContain('input-disabled',`${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        case 'fk':
+          input = recordEditPage.getForeignKeyInputDisplay(displayname, formNumber);
+          if (allDisabled) {
+            expect(input.getAttribute('class')).toContain('input-disabled', `${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        case 'timestamp':
+          input = recordEditPage.getTimestampInputsForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(input.date.isEnabled()).toBeFalsy(`${message}: date was not disabled.`);
+            expect(input.time.isEnabled()).toBeFalsy(`${message}: time was not disabled.`);
+          }
+          expect(input.date.getAttribute('value')).toBe(value.date_value, `${message}: date value missmatch.`);
+          expect(input.time.getAttribute('value')).toBe(value.time_value, `${message}: time value missmatch.`);
+          break;
+        case 'upload':
+          inputControl = recordEditPage.getInputControlForAColumn(name, formNumber);
+          input = recordEditPage.getTextFileInputForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(inputControl.getAttribute('class')).toContain('input-disabled', `${message}: was not disabled.`);
+          }
+          expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        default:
+          const isTextArea = displayType === 'textarea';
+          input = isTextArea ? recordEditPage.getTextAreaForAColumn(name, formNumber) : recordEditPage.getInputForAColumn(name, formNumber);
+          if (allDisabled) {
+            expect(input.isEnabled()).toBeFalsy(`${message}: was not disabled.`);
+          }
+          expect(input.getAttribute('value')).toBe(value, `${message}: value missmatch.`);
+          break;
+      }
+
+      if (i === expectedValues.length-1) {
+        resolve();
+      }
+    });
+
+  });
+}

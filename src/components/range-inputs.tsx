@@ -97,8 +97,8 @@ const RangeInputs = ({
   const minName = `${name}-min`;
   const maxName = `${name}-max`;
 
-  const timestampOptions = { outputMomentFormat: dataFormats.datetime.return }
-  if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.timestamp;
+  const timestampOptions = { outputMomentFormat: dataFormats.timestamp }
+  if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.datetime.return;
 
   let defVals = {};
   if (type.indexOf('timestamp') !== -1) {

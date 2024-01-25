@@ -12,6 +12,8 @@ import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
+  RecordsetProviderGetDisabledTuples,
+  RecordsetProviderOnSelectedRowsChanged,
   RecordsetProviderUpdateMainEntity, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
@@ -241,7 +243,7 @@ type RecordsetProviderProps = {
   /**
    * A callback to get the disabeld tuples (used in p&b popup)
    */
-  getDisabledTuples?: Function,
+  getDisabledTuples?: RecordsetProviderGetDisabledTuples,
   /**
    * The initially selected rows (used in facet popup)
    */
@@ -250,7 +252,7 @@ type RecordsetProviderProps = {
    * The callback that should be called when selected rows changes
    * If it returns a false, the selected rows won't change.
    */
-  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onSelectedRowsChanged?: RecordsetProviderOnSelectedRowsChanged,
   /**
    * The callback that should be called when favorites changed
    */
@@ -550,6 +552,11 @@ export default function RecordsetProvider({
       // after react sets the reference, the useEffect will trigger processRequests
       setReference(newRef);
     } else if (limit && typeof limit === 'number') {
+      if (limit === pageLimitRef.current) {
+        // if the limit has not changed, manually call the processRequests because the useEffect will not be called
+        // (this can happen if users clicked on the currently applied pageLimit in the dropdown)
+        processRequests();
+      }
       setPageLimit(limit);
     } else {
       processRequests();
@@ -698,7 +705,12 @@ export default function RecordsetProvider({
 
     const reloadCauses = flowControl.current.reloadCauses;
     const hasCauses = Array.isArray(reloadCauses) && reloadCauses.length > 0;
-    const act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
+    let act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
+    // if getDisabledTuples exists, then this read will load everything (domain values) and the
+    // getDisabledTuples is the actual load/reload
+    if (getDisabledTuples) {
+      act = hasCauses ? LogActions.RELOAD_DOMAIN : LogActions.LOAD_DOMAIN;
+    }
 
     // add reloadCauses
     const usedLogStack = hasCauses ?

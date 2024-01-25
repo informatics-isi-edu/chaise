@@ -16,7 +16,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
@@ -29,7 +29,7 @@ import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-uti
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { APP_NAMES, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-const recordSettings = {
+const recordSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORD,
   appTitle: 'Record',
   overrideHeadTitle: true,
