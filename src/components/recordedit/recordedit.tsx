@@ -21,6 +21,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { FormProvider, useForm } from 'react-hook-form';
+import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -51,25 +52,42 @@ const Recordedit = ({
   logInfo,
   modalOptions,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
+  initialTuples,
   prefillRowData,
   queryParams,
-  reference
+  reference,
+  hiddenColumns,
+  foreignKeyCallbacks,
+  modifySubmissionRows,
+  onSubmitSuccess,
+  onSubmitError
 }: RecordeditProps): JSX.Element => {
-  return (
-    <AlertsProvider>
-      <RecordeditProvider
-        appMode={appMode}
-        config={config}
-        logInfo={logInfo}
-        modalOptions={modalOptions}
-        queryParams={queryParams}
-        prefillRowData={prefillRowData}
-        reference={reference}
-      >
-        <RecordeditInner parentContainer={parentContainer} />
-      </RecordeditProvider>
-    </AlertsProvider>
-  )
+  const provider = (
+    <RecordeditProvider
+      appMode={appMode}
+      config={config}
+      logInfo={logInfo}
+      modalOptions={modalOptions}
+      queryParams={queryParams}
+      initialTuples={initialTuples}
+      prefillRowData={prefillRowData}
+      reference={reference}
+      hiddenColumns={hiddenColumns}
+      foreignKeyCallbacks={foreignKeyCallbacks}
+      modifySubmissionRows={modifySubmissionRows}
+      onSubmitSuccess={onSubmitSuccess}
+      onSubmitError={onSubmitError}
+    >
+      <RecordeditInner parentContainer={parentContainer} />
+    </RecordeditProvider>
+  );
+
+  // in viewer-annotation mode, we want the alerts to be handled by the parent
+  if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
+    return provider;
+  }
+
+  return <AlertsProvider>{provider}</AlertsProvider>;
 }
 
 export type RecordeditInnerProps = {
@@ -86,10 +104,31 @@ const RecordeditInner = ({
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
-    showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
+    showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
-  const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
+  const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
+  const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
+
+  /**
+   * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason 
+   * stated below from linked article. These properties are passed as props to the components so they only rerender when they need to instead
+   * of when the context changes
+   * 
+   *  - activeMultiForm is used by key-column and form-container
+   *  - toggleActiveMultiForm is used by key-column and multi-form-input-row
+   * 
+   * https://adevnadia.medium.com/react-re-renders-guide-preventing-unnecessary-re-renders-8a3d2acbdba3#:~:text=There%20is%20no%20way%20to
+   * There is no way to prevent a component that uses a portion of Context value from re-rendering, even if the used piece 
+   * of data hasn’t changed, even with useMemo hook. Context selectors, however, could be faked with the use of 
+   * higher-order components and React. memo .
+   */
+  const [activeMultiForm, setActiveMultiForm] = useState<number>(-1);
+  const toggleActiveMultiForm = (colIndex: number) => {
+    setActiveMultiForm((prev) => {
+      return colIndex === prev ? -1 : colIndex;
+    });
+  };
 
   /**
    * the following are used for bulk delete feature
@@ -264,23 +303,33 @@ const RecordeditInner = ({
     setFormProviderInitialized(true)
   }, [initialized]);
 
-  // properly set scrollable section height
+  /**
+   * - properly set scrollable section height
+   * - make sure the right padding is correct regardless of scrollbar being there or not
+   */
   useEffect(() => {
-    if (!formProviderInitialized) return;
+    if (!formProviderInitialized || config.displayMode !== RecordeditDisplayMode.FULLSCREEN) return;
+
     const resizeSensors = attachContainerHeightSensors(parentContainer);
+    resizeSensors.push(attachMainContainerPaddingSensor(parentContainer));
 
     return () => {
       resizeSensors?.forEach((rs) => !!rs && rs.detach());
     }
   }, [formProviderInitialized]);
 
-  // make sure the right padding is correct regardless of scrollbar being there or not
-  useLayoutEffect(() => {
-    if (!formProviderInitialized) return;
-    const paddingSensor = attachMainContainerPaddingSensor(parentContainer);
+  /**
+   * This useEffect triggers when addFormsEffect is set to true when "clone" is clicked
+   * this allows for showCloneSpinner state variable to change separately from callAddForm (which changes the total # of forms)
+   * when showCloneSpinner is changed there is a repaint of the DOM before this useEffect triggers,
+   *    which shows the spinner before triggering the addForms logic (which can be slow when many forms are added at once)
+   */
+  useEffect(() => {
+    if (!addFormsEffect) return;
 
-    return () => { paddingSensor.detach(); }
-  }, [formProviderInitialized]);
+    setAddFormsEffect(false);
+    callAddForm();
+  }, [addFormsEffect])
 
   const callAddForm = () => {
     // converts to number type. If NaN is returned, 1 is used instead
@@ -293,12 +342,12 @@ const RecordeditInner = ({
       numberFormsToAdd > 1 ? { clone: numberFormsToAdd } : undefined
     );
 
-    // TODO: need access to # of forms
     // refactor so provider manages the forms
     const numberForms = forms.length;
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
       const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
       addAlert(alertMessage, ChaiseAlertType.ERROR);
+      setShowCloneSpinner(false);
       return true;
     }
 
@@ -332,7 +381,47 @@ const RecordeditInner = ({
       });
     }
 
-    methods.reset(tempFormValues)
+    /**  
+     * NOTE: This might be able to be optimized to use setValue for each value in the new forms instead of resetting EVERY form in react hook form
+     *   for instance, 4 forms exist and 1 new form is added, this will call "reset" on all 5 forms
+     * 
+     * Is it possible for this change to cause longer scripting time? For instance, iterating over every single cell for each new form 
+     * could end up taking longer using setValue (and whatever happens in react-hook-form) vs no iteration and instead leaving it up to 
+     * react-hook-form and how `methods.reset()` works
+     * 
+     * A contradicting note, since each new form being added needs to render new input fields, form-row component will rerender. This
+     * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change 
+     * rendering performance at all. Maybe to prevent previous input fields from rerendering, the input-switch component should be memoized?
+     */
+    methods.reset(tempFormValues);
+  };
+
+  const renderSpinner = () => {
+    if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner || showApplyAllSpinner)) {
+      let spinnerClassName = 'submit-spinner';
+      let spinnerMessage = 'Saving...';
+
+      if (showDeleteSpinner) {
+        spinnerClassName = 'delete-spinner';
+        spinnerMessage = 'Deleting...';
+      } else if (showCloneSpinner) {
+        spinnerClassName = 'clone-spinner';
+        spinnerMessage = 'Cloning...';
+      } else if (showApplyAllSpinner) {
+        spinnerClassName = 'apply-all-spinner';
+        spinnerMessage = 'Updating Values...';
+      }
+
+      return (
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
+          <ChaiseSpinner
+            className={spinnerClassName}
+            message={spinnerMessage}
+          />
+        </div>
+      )
+    }
   };
 
   /**
@@ -354,7 +443,6 @@ const RecordeditInner = ({
 
       return (<>
         <span>{count} </span>
-        {/* NOTE in Angularjs, in edit mode the link was based on the original link, both now it's always unfiltered */}
         <Title addLink reference={reference}
           link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
         <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
@@ -393,7 +481,17 @@ const RecordeditInner = ({
         </button>
       </ChaiseTooltip>
     )
-  }
+  };
+
+  const renderBulkDeleteButton = () => {
+    if (!canShowBulkDelete) return;
+    return <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
+      <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+        <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
+        <span>Delete</span>
+      </button>
+    </ChaiseTooltip>
+  };
 
   const renderBottomPanel = () => {
     return (<div className='bottom-panel-container'>
@@ -403,8 +501,8 @@ const RecordeditInner = ({
       <div className='main-container' ref={mainContainer}>
         {columnModels.length > 0 && !resultsetProps &&
           <div className='main-body'>
-            <KeyColumn />
-            <FormContainer />
+            <KeyColumn activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
+            <FormContainer activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
           </div>
         }
         {resultsetProps &&
@@ -454,7 +552,7 @@ const RecordeditInner = ({
 
   const renderModals = () => {
     return (<>
-      { showDeleteConfirmationModal &&
+      {showDeleteConfirmationModal &&
         <DeleteConfirmationModal
           show={!!showDeleteConfirmationModal}
           message={showDeleteConfirmationModal.message}
@@ -463,7 +561,7 @@ const RecordeditInner = ({
           onCancel={showDeleteConfirmationModal.onCancel}
         />
       }
-      { uploadProgressModalProps &&
+      {uploadProgressModalProps &&
         <UploadProgressModal
           show={!!uploadProgressModalProps}
           rows={uploadProgressModalProps.rows}
@@ -474,178 +572,177 @@ const RecordeditInner = ({
     </>);
   }
 
-// if the main data is not initialized, just show spinner
-if (!initialized) {
-  if (errors.length > 0) {
-    return <></>;
+  // if the main data is not initialized, just show spinner
+  if (!initialized) {
+    if (errors.length > 0) {
+      return <></>;
+    }
+    return <ChaiseSpinner />;
   }
-  return <ChaiseSpinner />;
-}
 
-if (config.displayMode === RecordeditDisplayMode.POPUP) {
-  /**
-   * Popup differences:
-   *  - <Modal> wraps all of recordedit app
-   *  - <Modal.Header> does NOT include <Alerts>, they are part of modal body
-   *  - <renderSubmitButton> has different tooltip and id
-   *  - Close button
-   *  - title is <h2> instead of <h1>
-   *  - bulk delete, clone, reset controls not shown
-   *
-   * Since there are so many differences, Recordedit when shown in a modal has a very different "top panel"
-   */
-  return (
-    <Modal
-      className='create-saved-query'
-      show={true}
-      onHide={modalOptions?.onClose}
-    >
-      <div className='recordedit-container app-content-container'>
-        {formProviderInitialized && <FormProvider {...methods}>
-          {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
-            <div className='app-blocking-spinner-container'>
-              <div className='app-blocking-spinner-backdrop'></div>
-              <ChaiseSpinner
-                className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
-                message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
-              />
-            </div>
-          }
-          <Modal.Header>
-            <div className='top-panel-container'>
-              <div className='top-flex-panel'>
-                {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
-                <div className='top-left-panel close-panel'></div>
-                <div className='top-right-panel'>
-                  <div className='recordedit-title-container title-container meta-icons'>
-                    <div className='saved-query-controls recordedit-title-buttons title-buttons'>
-                      {renderSubmitButton()}
-                      <ChaiseTooltip
-                        placement='bottom'
-                        tooltip='Close this popup.'
-                      >
-                        <button
-                          className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
-                          onClick={() => modalOptions?.onClose()}
+  if (config.displayMode === RecordeditDisplayMode.POPUP) {
+    /**
+     * Popup differences:
+     *  - <Modal> wraps all of recordedit app
+     *  - <Modal.Header> does NOT include <Alerts>, they are part of modal body
+     *  - <renderSubmitButton> has different tooltip and id
+     *  - Close button
+     *  - title is <h2> instead of <h1>
+     *  - bulk delete, clone, reset controls not shown
+     *
+     * Since there are so many differences, Recordedit when shown in a modal has a very different "top panel"
+     */
+    return (
+      <Modal
+        className='create-saved-query'
+        show={true}
+        onHide={modalOptions?.onClose}
+      >
+        <div className='recordedit-container app-content-container'>
+          {formProviderInitialized && <FormProvider {...methods}>
+            {renderSpinner()}
+            <Modal.Header>
+              <div className='top-panel-container'>
+                <div className='top-flex-panel'>
+                  {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
+                  <div className='top-left-panel close-panel'></div>
+                  <div className='top-right-panel'>
+                    <div className='recordedit-title-container title-container meta-icons'>
+                      <div className='saved-query-controls recordedit-title-buttons title-buttons'>
+                        {renderSubmitButton()}
+                        <ChaiseTooltip
+                          placement='bottom'
+                          tooltip='Close this popup.'
                         >
-                          <strong className='chaise-btn-icon'>X</strong>
-                          <span>Cancel</span>
-                        </button>
-                      </ChaiseTooltip>
-                    </div>
-                    {/* NOTE: Modal uses h2 */}
-                    <h2 className='modal-title'>
-                      {/* NOTE: currently only used for saved queries. Turn into configuration param if reused */}
-                      <span>Save current search criteria for table </span>
-                      <Title reference={modalOptions?.parentReference} />
-                    </h2>
-                    <div className='form-controls'>
-                      {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
-                      <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
+                          <button
+                            className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
+                            onClick={() => modalOptions?.onClose()}
+                          >
+                            <strong className='chaise-btn-icon'>X</strong>
+                            <span>Cancel</span>
+                          </button>
+                        </ChaiseTooltip>
+                      </div>
+                      {/* NOTE: Modal uses h2 */}
+                      <h2 className='modal-title'>
+                        {/* NOTE: currently only used for saved queries. Turn into configuration param if reused */}
+                        <span>Save current search criteria for table </span>
+                        <Title reference={modalOptions?.parentReference} />
+                      </h2>
+                      <div className='form-controls'>
+                        {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
+                        <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Modal.Header>
-          <Modal.Body>
-            <Alerts />
-            {renderBottomPanel()}
-          </Modal.Body>
+            </Modal.Header>
+            <Modal.Body>
+              <Alerts />
+              {renderBottomPanel()}
+            </Modal.Body>
+            {renderModals()}
+          </FormProvider>}
+        </div>
+      </Modal>
+    )
+  }
+
+  if (config.displayMode === RecordeditDisplayMode.VIEWER_ANNOTATION) {
+    return (
+      <>
+        {formProviderInitialized && <FormProvider {...methods}>
+          {/* the spinners are displayed in place in the viewer.tsx component */}
+          <ViewerAnnotationFormContainer />
+          {/*
+            submit and delete button are added in the viewer.tsx comp
+            - we cannot submit right away and we have to get the annotation file first.
+            - delete expected behavior is different
+          */}
           {renderModals()}
         </FormProvider>}
-      </div>
-    </Modal>
-  )
-}
+      </>
+    )
+  }
 
-return (
-  <div className='recordedit-container app-content-container'>
-    {formProviderInitialized && <FormProvider {...methods}>
-      {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
-        <div className='app-blocking-spinner-container'>
-          <div className='app-blocking-spinner-backdrop'></div>
-          <ChaiseSpinner
-            className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
-            message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
-          />
-        </div>
-      }
-      <div className='top-panel-container'>
-        {/* recordedit level alerts */}
-        <Alerts />
-        <div className='top-flex-panel'>
-          {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
-          <div className='top-left-panel close-panel'></div>
-          <div className='top-right-panel'>
-            <div className='recordedit-title-container title-container meta-icons'>
-              {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
-                {renderSubmitButton()}
-                {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-                  <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
-                    <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
-                    <span>Delete</span>
-                  </button>
-                </ChaiseTooltip>}
-              </div>}
-              <h1 id='page-title'>{renderTitle()}</h1>
-            </div>
-            {!resultsetProps && <div className='form-controls'>
-              {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
-              <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
-              <div className='add-forms chaise-input-group'>
-                {appMode === appModes.EDIT ?
-                  <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
-                    <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
-                      <span className='chaise-btn-icon fa-solid fa-undo'></span>
-                      <span>Reset</span>
-                    </button>
-                  </ChaiseTooltip>
-                  :
-                  <div className='chaise-input-group'>
-                    <span className='chaise-input-group-prepend'>
-                      <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
-                    </span>
-                    <input
-                      id='copy-rows-input'
-                      ref={copyFormRef}
-                      type='number'
-                      className='chaise-input-control chaise-input-control-sm add-rows-input'
-                      placeholder='1'
-                      min='1'
-                    />
-                    <span className='chaise-input-group-append'>
-                      <ChaiseTooltip
-                        tooltip={
-                          allFormDataLoaded ?
-                            'Duplicate rightmost form the specified number of times.' :
-                            'Waiting for some columns to properly load.'
-                        }
-                        placement='bottom-end'
-                      >
-                        <button
-                          id='copy-rows-submit'
-                          className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                          onClick={callAddForm}
-                          type='button'
-                          disabled={!allFormDataLoaded}
-                        >
-                          <span>Clone</span>
-                        </button>
-                      </ChaiseTooltip>
-                    </span>
-                  </div>
-                }
+  return (
+    <div className='recordedit-container app-content-container'>
+      {formProviderInitialized && <FormProvider {...methods}>
+        {renderSpinner()}
+        <div className='top-panel-container'>
+          {/* recordedit level alerts */}
+          <Alerts />
+          <div className='top-flex-panel'>
+            {/* NOTE: This is here so the spacing can be done in one place for all the apps */}
+            <div className='top-left-panel close-panel'></div>
+            <div className='top-right-panel'>
+              <div className='recordedit-title-container title-container meta-icons'>
+                {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
+                  {renderSubmitButton()}
+                  {renderBulkDeleteButton()}
+                </div>}
+                <h1 id='page-title'>{renderTitle()}</h1>
               </div>
-            </div>}
+              {!resultsetProps && <div className='form-controls'>
+                {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
+                <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
+                <div className='add-forms chaise-input-group'>
+                  {appMode === appModes.EDIT ?
+                    <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
+                      <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
+                        <span className='chaise-btn-icon fa-solid fa-undo'></span>
+                        <span>Reset</span>
+                      </button>
+                    </ChaiseTooltip>
+                    :
+                    <div className='chaise-input-group'>
+                      <span className='chaise-input-group-prepend'>
+                        <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
+                      </span>
+                      <input
+                        id='copy-rows-input'
+                        ref={copyFormRef}
+                        type='number'
+                        className='chaise-input-control chaise-input-control-sm add-rows-input'
+                        placeholder='1'
+                        min='1'
+                      />
+                      <span className='chaise-input-group-append'>
+                        <ChaiseTooltip
+                          tooltip={
+                            allFormDataLoaded ?
+                              'Duplicate rightmost form the specified number of times.' :
+                              'Waiting for some columns to properly load.'
+                          }
+                          placement='bottom-end'
+                        >
+                          <button
+                            id='copy-rows-submit'
+                            className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
+                            onClick={() => {
+                              setShowCloneSpinner(true);
+                              setAddFormsEffect(true);
+                            }}
+                            type='button'
+                            disabled={!allFormDataLoaded}
+                          >
+                            <span>Clone</span>
+                          </button>
+                        </ChaiseTooltip>
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>}
+            </div>
           </div>
         </div>
-      </div>
-      {renderBottomPanel()}
-      {renderModals()}
-    </FormProvider>}
-  </div>
-);
+        {renderBottomPanel()}
+        {renderModals()}
+      </FormProvider>}
+    </div>
+  );
 }
 
 export default Recordedit;

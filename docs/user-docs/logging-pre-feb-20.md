@@ -6,16 +6,16 @@
 By providing `Deriva-Client-Context` header in ermrset requests we can log extra objects alongside the request. ERMrest will log the provided object in the `dcctx` attribute of logs. For example the following is a line from `/var/log/messages` file in dev.isrd:
 
 ```
-Jan 24 16:29:50 dev.isrd.isi.edu ermrest[4313.139635548755712]:
+Jan 24 16:29:50 dev.derivacloud.org ermrest[4313.139635548755712]:
 {
   "elapsed":0.014,
   "req":"OSGHMz7JSySiS0Y5UOLA6w",
   "scheme":"https",
-  "host":"dev.isrd.isi.edu",
+  "host":"dev.derivacloud.org",
   "status":"304 Not Modified",
   "method":"GET",
   "path":"/ermrest/catalog/1/attributegroup/M:=isa:dataset/F5:=left(thumbnail)=(isa:file:id)/$M/F4:=left(owner)=(isa:person:name)/$M/F3:=left(gene_summary)=(vocabulary:gene_summary:id)/$M/F2:=left(status)=(isa:dataset_status:id)/$M/F1:=left(project)=(isa:project:id)/$M/release_date,id;M:=array(M:*),F5:=array(F5:*),F4:=array(F4:*),F3:=array(F3:*),F2:=array(F2:*),F1:=array(F1:*)@sort(release_date::desc::,id)?limit=26", "client":"128.9.184.94",
-  "referrer":"https://dev.isrd.isi.edu/~ashafaei/chaise/recordset/",
+  "referrer":"https://dev.derivacloud.org/chaise/recordset/",
   "agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
   "track":"f671a1bf.559966234faaf",
   "dcctx":{

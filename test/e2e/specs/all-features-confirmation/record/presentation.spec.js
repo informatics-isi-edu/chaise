@@ -52,7 +52,7 @@ var testParams = {
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel, accommodation_inbound3 one| accommodation_inbound3 three| accommodation_inbound3 five", type: "text"},
         { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\" class=\"external-link-icon\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
-        { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
+        { title: "Category", value: "Hotel", type: "text", comment: "can support markdown", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
         { title: "User Rating", value: "4.3000", type: "float4", markdown_title: "<strong>User Rating</strong>" },
         { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
@@ -280,6 +280,18 @@ describe('View existing record,', function() {
                 expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
+
+        it('should have "booking" related table with bulk edit disabled when no rows', () => {
+            const btn = chaisePage.recordPage.getBulkEditLink('booking', true);
+
+            expect(btn.isPresent()).toBeTruthy();
+            expect(btn.getAttribute('class')).toContain('disabled', 'Bulk edit is not disabled');
+        });
+
+        it('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows present', () => {
+            const btn = chaisePage.recordPage.getBulkEditLink('accommodation_collections', true);
+            expect(btn.isPresent()).not.toBeTruthy();
+        });
     });
 
     describe("For side panel table of contents in Record App", function() {
@@ -324,9 +336,9 @@ describe('View existing record,', function() {
                 tableNames.forEach(function (tableName, idx) {
                     tableName.getText().then(function (name) {
                         expect(name.replace(/ +/g, " ")).toEqual(testParams.sidePanelTest.sidePanelTableOrder[idx], "Order is not maintained for related tables in the side panel");
-                    }); 
+                    });
                 })
-                
+
                 done();
             }).catch( function(err) {
                 console.log(err);

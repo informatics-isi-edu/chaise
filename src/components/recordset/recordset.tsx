@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
@@ -18,13 +19,14 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -161,6 +163,8 @@ const RecordsetInner = ({
   const [facetsRegistered, setFacetsRegistered] = useState(false);
 
   const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
+
+  const [permalinkTooltip, setPermalinkTooltip] = useState(MESSAGE_MAP.tooltip.permalink);
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
@@ -529,11 +533,26 @@ const RecordsetInner = ({
 
   const recordsetLink = getRecordsetLink();
 
-  const copyPermalink = () => {
+  /**
+   * the callback for when permalink button is clicked
+   */
+  const copyPermalink = (e: React.MouseEvent) => {
+    // avoid the navigation
+    e.preventDefault();
+
     // log the action
     logRecordsetClientAction(LogActions.PERMALINK_LEFT);
 
-    copyToClipboard(recordsetLink);
+    // copy to the clipboard
+    copyToClipboard(recordsetLink).then(() => {
+      setPermalinkTooltip('Copied!');
+      setTimeout(() => {
+        setPermalinkTooltip(MESSAGE_MAP.tooltip.permalink);
+      }, 1000);
+    }).catch((err) => {
+      $log.warn('failed to copy with the following error:')
+      $log.warn(err);
+    })
   }
 
   /**
@@ -766,17 +785,25 @@ const RecordsetInner = ({
     </div>
   );
 
-  const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
-      <div className='main-body'>
-        <RecordsetTable
-          config={config}
-          initialSortObject={initialReference.location.sortObject}
-        />
+  const renderMainContainer = () => {
+    const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
+    return (
+      <div className='main-container dynamic-padding' ref={mainContainer}>
+        {hasSpinner &&
+          <div className='recordset-main-spinner-container sticky-spinner-outer-container'>
+            <ChaiseSpinner className='recordest-main-spinner manual-position-spinner' />
+          </div>
+        }
+        <div className={`main-body${hasSpinner ? ' with-spinner' : ''}`}>
+          <RecordsetTable
+            config={config}
+            initialSortObject={initialReference.location.sortObject}
+          />
+        </div>
+        {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
       </div>
-      {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
-    </div>
-  );
+    )
+  };
 
   /**
    * The left panels that should be resized together
@@ -790,10 +817,6 @@ const RecordsetInner = ({
 
   return (
     <div className='recordset-container app-content-container'>
-      {
-        errors.length === 0 && (isLoading || forceShowSpinner) &&
-        <ChaiseSpinner className='recordest-main-spinner' />
-      }
       <div className='top-panel-container'>
         {/* recordset level alerts */}
         <Alerts />
@@ -823,7 +846,7 @@ const RecordsetInner = ({
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
                   />
-                  <ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.permalink}>
+                  <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
                     <a
                       id='permalink'
                       className='chaise-btn chaise-btn-primary'
@@ -846,8 +869,8 @@ const RecordsetInner = ({
                       <small className='h3-class'>({versionInfo.humanized})</small>
                     </ChaiseTooltip>
                   }
-                  {reference.commentDisplay === 'inline' && reference.comment &&
-                    <span className='inline-tooltip'>{reference.comment}</span>
+                  {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
+                    <span className='inline-tooltip'><DisplayCommentValue comment={reference.comment} /></span>
                   }
                 </h1>
               </div>

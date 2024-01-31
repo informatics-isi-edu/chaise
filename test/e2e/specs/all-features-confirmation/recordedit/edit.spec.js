@@ -17,13 +17,13 @@ var testParams = {
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
         key: { name: "id", value: "2000", operator: "="},
-        not_ci: true,
+        test_results: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "<strong>Name of Accommodation</strong>", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, totalCount: 5, comment: "Type of accommodation ('Resort/Hotel/Motel')", nullok: false}, // the total count is the total number of rows in the category.json data file
+            { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, totalCount: 5, comment: "_markdown_ comment can be turned off", nullok: false}, // the total count is the total number of rows in the category.json data file
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", nullok: false, type: "longtext"},
             { name: "description", title: "Description", type: "markdown"},
@@ -85,7 +85,7 @@ var testParams = {
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
        table_displayname: "file",
        table_comment: "asset/object",
-       not_ci: !process.env.CI,
+       test_results: !process.env.CI,
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [

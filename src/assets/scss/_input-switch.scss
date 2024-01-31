@@ -1,255 +1,283 @@
 @use 'variables';
 .chaise-input-control {
-  .input-switch {
-    padding-right: 0;
-    height: auto;
-  }
-  // This padding is added to prevent overlap of "x" button with the text area if the text is long
-  .has-scrollbar {
-    padding-right: 2rem !important;
-  }
-  // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
-  .has-scrollbar-clear {
-    margin-right: 10px;
-  }
-  .input-switch-clear {
-    position: absolute;
-    top: 2px;
-    right: 6px;
-    cursor: pointer;
-  }
+    .input-switch {
+        padding-right: 0;
+        height: auto;
+    }
+    // This padding is added to prevent overlap of "x" button with the text area if the text is long
+    .has-scrollbar {
+        padding-right: 2rem !important;
+    }
+    // This margin is added to prevent overlap of "x" button with the vertical scrollbar if the text is long
+    .has-scrollbar-clear {
+        margin-right: 10px;
+    }
+    .input-switch-clear {
+        position: absolute;
+        top: 2px;
+        right: 6px;
+        cursor: pointer;
+    }
 }
 
 // CSS fixes for lontext to override classes from common css file - for Josh to refer to
 .input-switch-longtext,
 .input-switch-json,
 .input-switch-array {
-  .chaise-input-control {
-    height: auto;
-    padding: 0 !important;
-    textarea,
-    .disabled-textarea {
-      padding: 4px 10px;
-      min-height: 110px;
-      display: flex;
-      width: 100%;
-      border: none;
-      border-radius: 4px;
-      outline: 0;
+    .chaise-input-control {
+        height: auto;
+        padding: 0 !important;
+        textarea,
+        .disabled-textarea {
+            padding: 4px 10px;
+            min-height: 110px;
+            display: flex;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            outline: 0;
+        }
     }
-  }
 }
 
 .input-switch-longtext {
-  .md-editor {
-    border: 1px solid map-get(variables.$color-map, 'border');
-    border-radius: 4px;
-    .md-header {
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      padding: 6px 4px;
-      background: #f5f5f5;
+    .md-editor {
+        border: 1px solid map-get(variables.$color-map, 'border');
+        border-radius: 4px;
+        .md-header {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            padding: 6px 4px;
+            background: #f5f5f5;
+        }
+        .chaise-input-control {
+            border: none !important;
+            textarea,
+            .disabled-textarea {
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        }
+        .md-preview {
+            background: #fff;
+            border-top: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd;
+            min-height: 10px;
+            overflow: auto;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+            font-size: 14px !important;
+            line-height: 1.42857143 !important;
+            color: #333 !important;
+            width: 100% !important;
+            background-color: #d8d8dc !important;
+            resize: vertical;
+        }
     }
-    .chaise-input-control {
-      border: none !important;
-      textarea,
-      .disabled-textarea {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-      }
-    }
-    .md-preview {
-      background: #fff;
-      border-top: 1px dashed #ddd;
-      border-bottom: 1px dashed #ddd;
-      min-height: 10px;
-      overflow: auto;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
-      font-size: 14px !important;
-      line-height: 1.42857143 !important;
-      color: #333 !important;
-      width: 100% !important;
-      background-color: #d8d8dc !important;
-      resize: vertical;
-    }
-  }
 }
 
 .input-switch-datetime {
-  .input-switch-time {
-    margin-bottom: 1px;
-    .chaise-input-group-text,
-    .chaise-input-control {
-      border-top: none;
+    .input-switch-time {
+        margin-bottom: 1px;
+        .chaise-input-group-text,
+        .chaise-input-control {
+            border-top: none;
+        }
     }
-  }
-  .chaise-btn-group {
-    float: right;
-  }
+    .chaise-btn-group {
+        float: right;
+    }
 }
 
 .chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
 .chaise-firefox .input-switch-time.chaise-input-control.has-feedback {
-  padding-right: variables.$input-remove-width;
+    padding-right: variables.$input-remove-width;
 }
 
 .input-switch-color {
-  position: relative;
-  .chaise-input-control {
-    display: inline-flex;
-  }
-  .hex-sign {
-    color: map-get(variables.$color-map, 'placeholder');
-  }
-  .chaise-color-picker-preview {
-    width: 40px;
-    height: 28px;
-    margin-left: -10px;
-    margin-top: -4px;
-    margin-right: 5px;
-    &.no-color {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+    position: relative;
+    .chaise-input-control {
+        display: inline-flex;
     }
-    // the one in the popover is using the button styles
-    &:not(.chaise-btn) {
-      border: 0;
-      border-radius: 3px 0 0 3px;
-      cursor: pointer;
+    .hex-sign {
+        color: map-get(variables.$color-map, 'placeholder');
     }
-  }
+    .chaise-color-picker-preview {
+        width: 40px;
+        height: 28px;
+        margin-left: -10px;
+        margin-top: -4px;
+        margin-right: 5px;
+        &.no-color {
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+        }
+        // the one in the popover is using the button styles
+        &:not(.chaise-btn) {
+            border: 0;
+            border-radius: 3px 0 0 3px;
+            cursor: pointer;
+        }
+    }
 }
 
 .chaise-color-picker-popup {
-  background-color: white;
-  padding: 10px;
-  // change the default spacing of color picker
-  .react-colorful {
-    height: 184px;
-    width: 184px;
-    .react-colorful__pointer {
-      height: 16px;
-      width: 16px;
+    background-color: white;
+    padding: 10px;
+    // change the default spacing of color picker
+    .react-colorful {
+        height: 184px;
+        width: 184px;
+        .react-colorful__pointer {
+            height: 16px;
+            width: 16px;
+        }
+        .react-colorful__hue {
+            height: 14px;
+        }
     }
-    .react-colorful__hue {
-      height: 14px;
+    .popover-controls {
+        input {
+            width: 100%;
+            margin-top: 5px;
+        }
+        .popover-buttons {
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            .chaise-btn {
+                height: 25px !important;
+                padding: 2px 10px;
+                width: 55px !important;
+            }
+        }
     }
-  }
-  .popover-controls {
-    input {
-      width: 100%;
-      margin-top: 5px;
-    }
-    .popover-buttons {
-      margin-top: 5px;
-      display: flex;
-      justify-content: space-between;
-      .chaise-btn {
-        height: 25px !important;
-        padding: 2px 10px;
-        width: 55px !important;
-      }
-    }
-  }
 }
 
-// rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
-.input-switch-foreignkey.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
-  padding-top: 0px;
+.input-switch-foreignkey {
+    position: relative;
+    // displayed while loading the fk data
+    .foreignkey-input-spinner-container {
+        // make sure the spinner is displayed in the center
+        display: flex;
+        justify-content: center;
+        .foreignkey-input-spinner-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
+            background: map-get(variables.$color-map, 'disabled-background');
+            opacity: 0.55;
+        }
+        .spinner-border-sm {
+            top: 8px;
+            position: absolute;
+            z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner');
+        }
+    }
+    // rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
+    &.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
+        padding-top: 0px;
+    }
 }
 
+
+}
 .input-switch-boolean,
 .input-switch-foreignkey.fk-dropdown {
-  // remove the default bootstrap caret
-  .dropdown-toggle.no-caret::after {
-    content: none !important;
-  }
-  // highlight the recordedit input for visual clarity
-  .dropdown.show {
-    > .chaise-input-group,
+    // remove the default bootstrap caret
+    .dropdown-toggle.no-caret::after {
+        content: none !important;
+    }
+    
+    // highlight the recordedit input for visual clarity
+    .dropdown.show {
+        >.chaise-input-group,
+        .dropdown-menu {
+            border: 2px solid map-get(variables.$color-map, 'primary');
+            border-radius: 6px;
+        }
+    }
+    
+    .responsive-dropdown-menu,
     .dropdown-menu {
-      border: 2px solid map-get(variables.$color-map, 'primary');
-      border-radius: 6px;
-    }
-  }
-  .responsive-dropdown-menu,
-  .dropdown-menu {
-    // make sure the menu expands the whole row
-    width: auto;
-    min-width: 100%;
-    min-height: 75px;
-    background-color: #eef6ff;
-    // dropdown opens down
-    &[data-popper-placement^='bottom'] {
-      margin-top: -4px;
-    }
-    // dropdown opens up
-    &[data-popper-placement^='top'] {
-      margin-bottom: -3px;
-    }
-    // remove rounded borders for search input components when in a dropdown
-    .search-row .chaise-search-box {
-      .chaise-input-group-prepend > .chaise-input-group-text {
-        border-bottom-left-radius: 0;
-      }
-      .chaise-input-group-append > .chaise-search-btn {
-        border-bottom-right-radius: 0;
-      }
-    }
-    // for making the dropdown list scrollable (keeping the buttons sticky)
-    .dropdown-list {
-      // rules specifically for fk-dropdown list of options
-      max-height: 355px;
-      overflow-y: auto;
-      padding-top: 0.5rem;
-      .dropdown-item {
-        cursor: pointer;
-        label {
-          padding-left: 31px;
-          cursor: inherit;
-          // if we want to wrap text at dropdown width instead of stretching to accomodate
-          .dropdown-select-value {
-            // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
-            //    text-wrap will balance between stretching the dropdown and forcing text to wrap
-            // text-wrap: balance;
-            // force text to wrap at dropdown width
-            white-space: normal;
-          }
+        // make sure the menu expands the whole row
+        width: auto;
+        min-width: 100%;
+        min-height: 75px;
+        background-color: #eef6ff;
+        // dropdown opens down
+        &[data-popper-placement^='bottom'] {
+            margin-top: -4px;
         }
-        .fa-check {
-          vertical-align: top;
-          padding-top: 0.25rem;
+        // dropdown opens up
+        &[data-popper-placement^='top'] {
+            margin-bottom: -3px;
         }
-        // check is `14px` wide, reduce the padding when it's visible
-        .fa-check ~ label {
-          padding-left: 17px;
+        // remove rounded borders for search input components when in a dropdown
+        .search-row .chaise-search-box {
+            .chaise-input-group-prepend>.chaise-input-group-text {
+                border-bottom-left-radius: 0;
+            }
+            .chaise-input-group-append>.chaise-search-btn {
+                border-bottom-right-radius: 0;
+            }
         }
-      }
+        // for making the dropdown list scrollable (keeping the buttons sticky)
+        .dropdown-list {
+            // rules specifically for fk-dropdown list of options
+            max-height: 355px;
+            overflow-y: auto;
+            padding-top: 0.5rem;
+            .dropdown-item {
+                cursor: pointer;
+                label {
+                    padding-left: 31px;
+                    cursor: inherit;
+                    // if we want to wrap text at dropdown width instead of stretching to accomodate
+                    .dropdown-select-value {
+                        // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
+                        //    text-wrap will balance between stretching the dropdown and forcing text to wrap
+                        // text-wrap: balance;
+                        // force text to wrap at dropdown width
+                        white-space: normal;
+                    }
+                }
+                .fa-check {
+                    vertical-align: top;
+                    padding-top: 0.25rem;
+                }
+                // check is `14px` wide, reduce the padding when it's visible
+                .fa-check~label {
+                    padding-left: 17px;
+                }
+            }
+        }
+        .dropdown-item.load-more-row {
+            // same height as chaise-btn-sm
+            height: variables.$btn-height-sm;
+            a {
+                pointer-events: none;
+            }
+        }
+        .dropdown-item.no-results {
+            &:active {
+                color: unset;
+            }
+            &:hover {
+                // matches the style when no hover event is happening
+                // setting to 'unset' might have unintended consequences
+                background-color: transparent;
+            }
+        }
     }
-    .dropdown-item.load-more-row {
-      // same height as chaise-btn-sm
-      height: variables.$btn-height-sm;
-      a {
-        pointer-events: none;
-      }
-    }
-    .dropdown-item.no-results {
-      &:active {
-        color: unset;
-      }
-      &:hover {
-        // matches the style when no hover event is happening
-        // setting to 'unset' might have unintended consequences
-        background-color: transparent;
-      }
-    }
-  }
 }
-
 .input-switch-file {
-  .chaise-image-preview {
-    margin-top: 5px;
-  }
-  .chaise-input-control {
-    cursor: text;
-  }
+    .chaise-image-preview {
+        margin-top: 5px;
+    }
+    
+    .chaise-input-control {
+        cursor: text;
+    }
 }

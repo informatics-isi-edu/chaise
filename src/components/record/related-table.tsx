@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
@@ -11,6 +12,7 @@ import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
@@ -85,8 +87,8 @@ const RelatedTableInner = ({
   return (
     <div>
       {/* in case of inline, the comments are already handled */}
-      {!relatedModel.isInline && usedRef.commentDisplay === 'inline' && usedRef.comment &&
-        <div className='inline-tooltip'>{usedRef.comment}</div>
+      {!relatedModel.isInline && usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.INLINE &&
+        <div className='inline-tooltip'><DisplayCommentValue comment={usedRef.comment} /></div>
       }
       {displayCustomMode &&
         <>
@@ -98,7 +100,7 @@ const RelatedTableInner = ({
           }
         </>
       }
-      <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
+      <div className={`related-table-content${displayCustomMode ? (' ' + CLASS_NAMES.HIDDEN) : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <div id={tableContainerID}>
           <RecordsetTable

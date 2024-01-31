@@ -2,7 +2,6 @@
 @use 'variables';
 
 .chaise-body {
-
   .recordset-container {
     // override the minimum width of side-panel (written the same way as app.scss
     // this is done to fit the more-filters message
@@ -10,7 +9,6 @@
     .bottom-panel-container .side-panel-resizable.open-panel {
       min-width: 270px;
     }
-
 
     .top-panel-container {
       .top-flex-panel .top-left-panel div.panel-header {
@@ -50,6 +48,15 @@
             margin-right: 5px;
             margin-bottom: 5px;
 
+            /**
+             * override the default behavior of button and button group
+             * without these the buttons would become misaligned and ellipsis logic won't work
+             */
+            align-items: unset;
+            .chaise-btn {
+              display: inline-block;
+            }
+
             .chaise-btn:focus {
               background-color: map-get(variables.$color-map, 'white');
             }
@@ -75,13 +82,13 @@
               white-space: nowrap;
 
               // only add the colon if the title exists
-              &~.chaise-btn.filter-chiclet-value {
+              & ~ .chaise-btn.filter-chiclet-value {
                 border-left: 0;
 
                 position: relative;
 
                 &:before {
-                  content: ":";
+                  content: ':';
                   position: absolute;
                   left: 0;
                 }
@@ -171,6 +178,15 @@
           float: right;
         }
       }
+    }
+
+    // when spinner is displayed, we have to adjust the margin-top
+    .main-body.with-spinner {
+      margin-top: variables.$main-spinner-height * -1;
+    }
+    .recordset-main-spinner-container {
+      // show the tooltip in the middle of the container
+      top: calc(50% - variables.$main-spinner-height);
     }
   }
 }

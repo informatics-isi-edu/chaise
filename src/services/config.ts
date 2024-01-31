@@ -73,6 +73,8 @@ export class ConfigService {
 
   private static _ermrestLocation: string;
 
+  private static _catalogID: string;
+
   /**
    * Should be called in useEffect of the main app, to ensure all the
    * configurations are done before any other components are running.
@@ -140,6 +142,8 @@ export class ConfigService {
 
     const catalogId = getCatalogId();
 
+    ConfigService._catalogID = catalogId;
+
     if (catalogId) {
       // the server object that can be used in other places
       ConfigService._server = ERMrest.ermrestFactory.getServer(service, ConfigService._contextHeaderParams);
@@ -202,6 +206,10 @@ export class ConfigService {
 
   static get contextHeaderParams() {
     return ConfigService._contextHeaderParams;
+  }
+
+  static get catalogID() {
+    return ConfigService._catalogID;
   }
 
   // -------------------------- private functions: --------------------------- //

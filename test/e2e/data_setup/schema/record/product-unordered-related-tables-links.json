@@ -431,7 +431,9 @@
                                 "template_engine": "handlebars",
                                 "wait_for": ["entity_set_accommodation_inbound2"],
                                 "markdown_pattern": "{{#each $self}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}} ({{#each entity_set_accommodation_inbound2}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}})"
-                            }
+                            },
+                            "comment": "related table, has waitfor entityset and markdown_pattern (has markdown comment)",
+                            "comment_display": "inline"
                         },
                         {
                             "sourcekey": "entity_set_accommodation_inbound3",
@@ -457,7 +459,8 @@
                                 "RID"
                             ],
                             "markdown_name": "inbound related with filter on main table",
-                            "comment": "inbound related, filter on main"
+                            "comment": "inbound related, filter on main (comment _markdown_ is turned off)",
+                            "comment_render_markdown": false
                         },
                         {
                             "source": [

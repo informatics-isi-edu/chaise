@@ -113,7 +113,7 @@ const RelatedTableActions = ({
    * 1) All buttons pushing to dropdown if we have just one button in the table header section
    * 2) Resize sensor not getting called if there is no change in width of the button container even if we resize
    * So we should put resize sensor on a container that won’t be affected by the logic inside it.
-   * We are using ResizeSensor to listen to the resize event. 
+   * We are using ResizeSensor to listen to the resize event.
    */
     const mainContainer:any = document.querySelector('.main-container');
     const calculateButtons = () => {
@@ -126,7 +126,7 @@ const RelatedTableActions = ({
         buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
         /**
          * If there aren't any enough space to show even one button, just switch to showing all as dropdown.
-         * 350 is based on the width of the container containing dropdown and last visible button. We choose 350 
+         * 350 is based on the width of the container containing dropdown and last visible button. We choose 350
          * because that is when the space gets more congested and we need to push all buttons to the dropdown
          */
         setShowAllActionsAsDropdown(mainContainer?.offsetWidth < 350);
@@ -353,42 +353,41 @@ const RelatedTableActions = ({
       pageLimit: number,
       logStack: any,
       logStackPath: string,
-      requestCauses: any,
-      reloadStartTime: any
-    ) => {
-      const defer = Q.defer();
-      const disabledRows: any = [];
+      requestCauses?: any,
+      reloadStartTime?: any
+    ): Promise<{ page: any, disabledRows?: any }> => {
+      return new Promise((resolve, reject) => {
+        const disabledRows: any = [];
 
-      let action = LogActions.LOAD,
-        newStack = logStack;
-      if (Array.isArray(requestCauses) && requestCauses.length > 0) {
-        action = LogActions.RELOAD;
-        newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
-      }
-      // using the service instead of the record one since this is called from the modal
-      const logObj = {
-        action: LogService.getActionString(action, logStackPath),
-        stack: newStack,
-      };
-      // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
-      domainRef
-        .setSamePaging(page)
-        .read(pageLimit, logObj, false, true)
-        .then(function (newPage: any) {
-          newPage.tuples.forEach(function (newTuple: any) {
-            const index = page.tuples.findIndex(function (tuple: any) {
-              return tuple.uniqueId == newTuple.uniqueId;
+        let action = LogActions.LOAD,
+          newStack = logStack;
+        if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+          action = LogActions.RELOAD;
+          newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
+        }
+        // using the service instead of the record one since this is called from the modal
+        const logObj = {
+          action: LogService.getActionString(action, logStackPath),
+          stack: newStack,
+        };
+        // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+        domainRef
+          .setSamePaging(page)
+          .read(pageLimit, logObj, false, true)
+          .then(function (newPage: any) {
+            newPage.tuples.forEach(function (newTuple: any) {
+              const index = page.tuples.findIndex(function (tuple: any) {
+                return tuple.uniqueId == newTuple.uniqueId;
+              });
+              if (index > -1) disabledRows.push(page.tuples[index]);
             });
-            if (index > -1) disabledRows.push(page.tuples[index]);
+
+            resolve({ disabledRows: disabledRows, page: page });
+          })
+          .catch(function (err: any) {
+            reject(err);
           });
-
-          defer.resolve({ disabledRows: disabledRows, page: page });
-        })
-        .catch(function (err: any) {
-          defer.reject(err);
-        });
-
-      return defer.promise;
+      });
     };
 
     // this function is here since we need to access the outer scope here
@@ -699,6 +698,23 @@ const RelatedTableActions = ({
       </span>
     );
   };
+
+  const renderBulkEditBtnTooltip = () => {
+    if (relatedModel.recordsetState.page?.length < 1) {
+      return(
+        <span>
+          Unable to edit {currentTable} records until some are created.
+        </span>
+      )
+    }
+
+    return(
+      <span>
+        Edit this page of {currentTable} records related to this {mainTable}.
+      </span>
+    )
+  }
+
   /*
     * This function is to render each button. We call the renderButton function with button text,
     * inner element classname and boolean flag to show tertiary class(for the dropdown buttons) or not
@@ -715,8 +731,12 @@ const RelatedTableActions = ({
         {relatedModel.isPureBinary && relatedModel.canDelete &&  renderButton('Unlink records', false)}
 
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
-
-        {relatedModel.canEdit && renderButton('Bulk Edit', false)}
+        {/*
+          * if user can edit, also check for create permission
+          *   - if they can't create, allow edit if there are some rows set
+          *   - disable button if can create but no rows
+          */}
+        {relatedModel.canEdit && (relatedModel.canCreate || relatedModel.recordsetState.page?.length > 0) && renderButton('Bulk Edit', false)}
 
         {renderButton('Explore', false)}
       </div>
@@ -754,21 +774,20 @@ const RelatedTableActions = ({
           </ChaiseTooltip>
         );
       case 'Bulk Edit':
+        const disableBulkEdit = relatedModel.recordsetState.page?.length < 1;
         return (
           <ChaiseTooltip
             placement='top'
-            tooltip={
-              <span>
-                Edit this page of {currentTable} records related to this {mainTable}.
-              </span>
-            }
+            tooltip={renderBulkEditBtnTooltip()}
           >
             <a
-            className={`chaise-btn bulk-edit-link ${
-              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-            }`}
+              className={`chaise-btn bulk-edit-link
+                ${tertiary ? ' chaise-btn-tertiary dropdown-button' : ' chaise-btn-secondary'}
+                ${disableBulkEdit ? ' disabled': ''}`
+              }
               href={editLink}
               onClick={onBulkEdit}
+              aria-disabled={disableBulkEdit}
             >
               <span className='chaise-btn-icon fa fa-pencil'></span>
               <span>Bulk Edit</span>

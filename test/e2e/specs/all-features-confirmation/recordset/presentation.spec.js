@@ -25,8 +25,8 @@ var testParams = {
             { title: "json_col_with_markdown" },
             { title: "no_of_beds", comment: "test all-outbound + waitfor for normal columns" },
             { title: "no_of_baths", comment: "wait_for normal columns on multiple aggregates" },
-            { title: "Category", comment: "Type of accommodation ('Resort/Hotel/Motel')" },
-            { title: "Type of Facilities", comment: "Type of facilities ('Luxury/Upscale/Basic')" },
+            { title: "Category", comment: "Type of accommodation (Resort, Hotel, or Motel)" },
+            { title: "Type of Facilities", comment: "Type of facilities (Luxury/Upscale/Basic)" },
             { title: "Image Count", comment: "Image Count" },
             { title: "Image Distinct Count", comment: "Image Distinct Count" },
             { title: "Min Image ID", comment: "Min Image ID" },
@@ -194,7 +194,7 @@ var testParams = {
     },
     tooltip: {
         exportDropdown: "Click to choose an export format.",
-        permalink: "Click to copy the current url to clipboard.",
+        permalink: "Click to copy the current URL to clipboard.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     },
     activeList: {

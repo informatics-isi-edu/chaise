@@ -23,8 +23,13 @@ div.modal-title {
   font-weight: normal;
 }
 
-// uploader
+/******** Popup modal for file upload ********/
 .modal-upload-progress {
+  // to allow scrolling and showing all content
+  .modal-content {
+    max-height: unset;
+  }
+
   .progress {
     margin-bottom: 0;
     height: 30px;
@@ -115,6 +120,11 @@ div.modal-title {
 
 /******* Popup modal for share ********/
 .chaise-share-citation-modal {
+  // to allow scrolling and showing all content
+  .modal-content {
+    max-height: unset;
+  }
+
   ul {
     word-break: break-word;
     padding-left: 10px;

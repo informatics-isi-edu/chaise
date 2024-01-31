@@ -77,7 +77,6 @@
 @mixin chaise-btn() {
   @include border-radius(variables.$btn-border-radius);
   cursor: pointer;
-  display: inline-block;
   height: variables.$btn-height;
   min-width: variables.$btn-height;
   border: variables.$btn-border-width solid;
@@ -89,6 +88,14 @@
   -moz-user-select: none;
   -ms-user-select: none;
   white-space: nowrap;
+  /** 
+  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to 
+  * use this property  to override what bootstrap is defining.
+  */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
 }
 
 @mixin chaise-btn-primary() {

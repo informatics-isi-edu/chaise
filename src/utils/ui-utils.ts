@@ -243,26 +243,19 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   return sensors;
 }
 
-export function copyToClipboard(text: string) {
-  if (document.execCommand) {
-    const dummy = document.createElement('input');
-    dummy.setAttribute('visibility', 'hidden');
-    dummy.setAttribute('display', 'none');
-
-    document.body.appendChild(dummy);
-    dummy.setAttribute('id', 'permalink_copy');
-    dummy.value = text;
-    dummy.select();
-    document.execCommand('copy');
-
-    document.body.removeChild(dummy);
-  }
-  else if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(text).catch((err) => {
-      $log.warn('failed to copy with the following error:')
-      $log.warn(err);
+/**
+ * add the given text to clipboard
+ * @param text the text that should be copied to clipboard
+ */
+export function copyToClipboard(text: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    navigator.clipboard.writeText(text).then(() => {
+      resolve();
+    }).catch((err) => {
+      reject(err);
     });
-  }
+  });
+
 }
 
 /**
@@ -396,4 +389,13 @@ export function createChaiseTooltips(container: Element) {
       })
     });
   }
+}
+
+/**
+ * trigger form submission. should only be used when we don't have access to the handleSubmit function.
+ * for example in viewer annotation form, we're calling this from viewer provider which is outside of recordedit component.
+ * borrowed from here: https://github.com/react-hook-form/react-hook-form/issues/566#issuecomment-730077495
+ */
+export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
+  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 }

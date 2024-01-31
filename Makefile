@@ -50,7 +50,7 @@ E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.c
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
 # not part of the make recordedit command anymore
 # E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
-E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
+E2EDIrecordMultiFormInput=test/e2e/specs/default-config/recordedit/multi-form-input.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
@@ -92,7 +92,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2ErecordsetSavedQuery)
-RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
@@ -184,18 +184,18 @@ test: test-ALL_TESTS
 # ============================================================= #
 
 # HTML files that need to be created
-HTML=viewer/index.html \
-	 $(DIST)/chaise-dependencies.html
+HTML=$(DIST)/chaise-dependencies.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
-	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
-	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
-	$(DIST)/$(VIEWER_JS_SOURCE_MIN)
+	$(DIST)/$(SHARED_JS_SOURCE_MIN)
 
 SOURCE=src
 
 DIST=dist
+
+# where config files are defined
+CONFIG=config
 
 # Shared utilities
 COMMON=common
@@ -272,10 +272,18 @@ $(SASS): $(shell find $(COMMON)/styles/scss/)
 	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
-JS_CONFIG=chaise-config.js
-$(JS_CONFIG): chaise-config-sample.js
-	cp -n chaise-config-sample.js $(JS_CONFIG) || true
+# should eventually be removed
+DEPRECATED_JS_CONFIG=chaise-config.js
+
+JS_CONFIG=$(CONFIG)/chaise-config.js
+$(JS_CONFIG): $(CONFIG)/chaise-config-sample.js
+	cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
+
+VIEWER_CONFIG=$(CONFIG)/viewer-config.js
+$(VIEWER_CONFIG): $(CONFIG)/viewer-config-sample.js
+	cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
+	touch $(VIEWER_CONFIG)
 
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
@@ -285,12 +293,11 @@ $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 	@echo 'chaiseBuildVariables.OSDViewerBasePath="$(OSD_VIEWER_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 
-
 $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 	$(info - creating chaise-dependencies.html)
 	@> $(DIST)/chaise-dependencies.html
 	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
-	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
 
 # list of file and folders that will be sent to the given location
@@ -302,7 +309,8 @@ RSYNC_FILE_LIST=common \
 	scripts \
 	sitemap \
 	styles \
-	viewer \
+	$(JS_CONFIG_SAMPLE) \
+	$(VIEWER_CONFIG_SAMPLE) \
 	version.txt
 
 # the same list above but also includes the config files
@@ -325,50 +333,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
-# -------------------------- viewer app -------------------------- #
-VIEWER_ROOT=viewer
-
-VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
-$(VIEWER_CONFIG): $(VIEWER_ROOT)/viewer-config-sample.js
-	cp -n $(VIEWER_ROOT)/viewer-config-sample.js $(VIEWER_CONFIG) || true
-	touch $(VIEWER_CONFIG)
-
-VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
-	$(VIEWER_ROOT)/viewer.controller.js \
-	$(VIEWER_ROOT)/viewer.utils.js \
-	$(VIEWER_ROOT)/context.js \
-	$(VIEWER_ROOT)/annotations/annotations.js \
-	$(VIEWER_ROOT)/annotations/annotations.service.js \
-	$(VIEWER_ROOT)/annotations/annotations.controller.js
-
-VIEWER_JS_SOURCE_MIN=viewer.min.js
-$(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
-	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
-
-VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
-	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
-	$(COMMON)/vendor/mask.min.js \
-	$(COMMON)/vendor/spectrum/spectrum.min.js
-
-VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-	$(COMMON)/vendor/spectrum/spectrum.min.css
-
-.make-viewer-includes: $(BUILD_VERSION)
-	@> .make-viewer-includes
-	$(info - creating .make-viewer-includes)
-	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-viewer-includes)
-
-viewer/index.html: viewer/index.html.in .make-viewer-includes
-	$(info - creating viewer/index.html)
-	@$(call build_html, .make-viewer-includes, viewer/index.html)
 
 # -------------------------- utility functions -------------------------- #
 
@@ -509,7 +473,7 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' . $(CHAISEDIR)
 	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
 	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 

@@ -326,7 +326,7 @@
                     "title_pattern":   "{{lgt}}",
                     "journal_pattern": "Journal of Front End Faceting Test Data",
                     "year_pattern":    "{{formatDate RCT 'YYYY'}}",
-                    "url_pattern":     "https://dev.isrd.isi.edu/chaise/record/#{{$catalog.snapshot}}/faceting:main/RID={{RID}}"
+                    "url_pattern":     "{{$location.origin}}/chaise/record/#{{$catalog.snapshot}}/faceting:main/RID={{RID}}"
                 },
                 "tag:misd.isi.edu,2015:display": {
                     "show_saved_query": true
@@ -906,7 +906,7 @@
                 }
             ],
             "foreign_keys": [
-                
+
             ],
             "kind": "table",
             "annotations": {

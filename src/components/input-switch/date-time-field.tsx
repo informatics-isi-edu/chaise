@@ -36,117 +36,29 @@ type DateTimeFieldProps = InputFieldProps & {
 
 const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
-  const { setValue, control, clearErrors, watch, setError, getFieldState } = useFormContext();
+  // NOTE: Including these context properties causes this component to redraw every time a change to the form occurs
+  //   Can this functionality be done in a different way with react-hook-form to prevent so much rerendering when the component hasn't changed?
+  const { setValue, control, clearErrors, setError, getFieldState } = useFormContext();
   const dateVal = useWatch({ name: `${props.name}-date` });
   const timeVal = useWatch({ name: `${props.name}-time` });
 
   const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
 
-
-  // useEffect(() => {
-
-  //   /**
-  //    * this will make sure we're updating the underlying value after
-  //    * each update to the date and time fields.
-  //    *
-  //    * NOTE: just claling setError will not mark the form as invalid and the form.
-  //    * when users submit the form, the validators on the input itself will trigger
-  //    * that's why I'm setting the values to something invalid so it can then invalidate
-  //    * them and disallow submit.
-  //    */
-  //   const sub = watch((data, options) => {
-  //     const name = props.name
-  //     console.log('datetime watch triggered');
-
-  //     if (options.name && (options.name === `${name}-date` || options.name === `${name}-time`)) {
-  //       const dateVal = data[`${name}-date`];
-  //       let timeVal = data[`${name}-time`];
-
-  //       // if both are missing, the input is empty
-  //       if (!dateVal && !timeVal && !props.requiredInput) {
-  //         clearErrors(name);
-  //         setValue(name, '');
-  //         return;
-  //       }
-
-  //       // if date is missing, this is invalid
-  //       if (!dateVal) {
-  //         setError(name, { type: 'custom', message: ERROR_MESSAGES.INVALID_DATE });
-  //         setValue(name, 'invalid-value');
-  //         return;
-  //       }
-  //       // otherwise validate the date value
-  //       else {
-  //         const err = VALIDATE_VALUE_BY_TYPE['date'](dateVal);
-  //         if (typeof err === 'string') {
-  //           setError(name, { type: 'custom', message: err });
-  //           setValue(name, 'invalid-value');
-  //           return;
-  //         }
-  //       }
-
-  //       // if only time is missing, just use 00:00:00 for it
-  //       if (!timeVal && !props.requiredInput) {
-  //         timeVal = '00:00:00';
-  //       }
-  //       // otherwise validate the time value
-  //       else {
-  //         if (!timeVal) {
-  //           setError(name, { type: 'custom', message: 'Please enter a valid time' });
-  //           setValue(name, 'invalid-value');
-  //           return;
-  //         }
-  //         const err = VALIDATE_VALUE_BY_TYPE['time'](timeVal);
-  //         if (typeof err === 'string') {
-  //           setError(name, { type: 'custom', message: err });
-  //           setValue(name, 'invalid-value');
-  //           return;
-  //         }
-  //       }
-
-  //       /**
-  //        * concatenate date and time together
-  //        * since time can have multiple formats, we cannot simply concatenate the strings
-  //        * and have to rely on moment to do this for us.
-  //        */
-  //       const date = windowRef.moment(dateVal, dataFormats.date);
-  //       const time = windowRef.moment(timeVal, dataFormats.time);
-  //       const dateTime = date.set({
-  //         hour: time.get('hour'),
-  //         minute: time.get('minute'),
-  //         second: time.get('second')
-  //       });
-
-  //       // adds the timezone info if needed
-  //       const valueToSet = dateTime.format(DATE_TIME_FORMAT);
-
-  //       clearErrors(name);
-  //       setValue(name, valueToSet);
-  //     }
-  //   });
-
-  //   return () => sub.unsubscribe();
-  // }, [watch]);
-
-
   useEffect(() => {
     /**
-   * this will make sure we're updating the underlying value after
-   * each update to the date and time fields.
-   *
-   * NOTE: just calling setError will not mark the form as invalid and the form.
-   * when users submit the form, the validators on the input itself will trigger
-   * that's why I'm setting the values to something invalid so it can then invalidate
-   * them and disallow submit.
-   */
+     * this will make sure we're updating the underlying value after
+     * each update to the date and time fields.
+     *
+     * NOTE: just calling setError will not mark the form as invalid and the form.
+     * when users submit the form, the validators on the input itself will trigger
+     * that's why I'm setting the values to something invalid so it can then invalidate
+     * them and disallow submit.
+     */
+    const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-
-    // console.log(dateVal);
-    // console.log(timeVal);
-    
     if (!dateVal && !timeVal && !props.requiredInput) {
-      clearErrors(props.name);
+      if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
       return;
     }
@@ -167,7 +79,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
       }
     }
 
-    // if only time is missing, just use 00:00:00 for it
+    // if only time is missing, use 00:00:00 for it
     let timeValTemp = '';
     if (!timeVal && !props.requiredInput) {
       timeValTemp = '00:00:00';
@@ -203,7 +115,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     // adds the timezone info if needed
     const valueToSet = dateTime.format(DATE_TIME_FORMAT);
 
-    clearErrors(props.name);
+    if (datetimeFieldState.error) clearErrors(props.name);
     setValue(props.name, valueToSet);
 
   }, [dateVal, timeVal])
@@ -212,7 +124,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     name: `${props.name}-date`,
     control,
     rules: {
-      required: props.requiredInput,
+      required: props.requiredInput
     },
   });
   const dateField = formInputDate?.field;
@@ -224,7 +136,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     name: `${props.name}-time`,
     control,
     rules: {
-      required: props.requiredInput,
+      required: props.requiredInput
     },
   });
   const timeField = formInputTime?.field;

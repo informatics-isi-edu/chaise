@@ -8,8 +8,9 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 // models
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, PrefillObject, RecordeditColumnModel,
-  SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions
+  appModes, PrefillObject, RecordeditColumnModel, RecordeditForeignkeyCallbacks,
+  MULTI_FORM_INPUT_FORM_VALUE, TimestampOptions
+
 } from '@isrd-isi-edu/chaise/src/models/recordedit'
 
 // services
@@ -22,7 +23,7 @@ import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isNonEmptyObject, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -30,7 +31,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any, queryParams?: any): RecordeditColumnModel {
+export function columnToColumnModel(column: any, isHidden?: boolean, queryParams?: any): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
   const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
@@ -80,7 +81,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     inputType: type,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
-    hasDomainFilter
+    hasDomainFilter,
+    isHidden: !!isHidden
   };
 }
 
@@ -118,31 +120,51 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
+ * @param setValue if defined, use this function to set the value in react hook form instead of updating the `values` object
  */
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean,
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
-
   const dstKey = `${destFormValue}-${column.name}`;
 
-
   if (clearValue) {
-    values[dstKey] = '';
+    if (setValue) {
+      setValue(dstKey, '');
+    } else {
+      values[dstKey] = '';
+    }
   } else if (srcKey) {
-    if (column.inputType !== 'array') {
-      values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+    const tempVal = replaceNullOrUndefined(values[srcKey], '')
+    if (setValue) {
+      setValue(dstKey, tempVal);
+    } else {
+      values[dstKey] = tempVal;
     }
   }
 
   if (column.type.name.indexOf('timestamp') !== -1) {
     if (clearValue) {
-      values[`${dstKey}-date`] = '';
-      values[`${dstKey}-time`] = '';
+      if (setValue) {
+        setValue(`${dstKey}-date`, '');
+        setValue(`${dstKey}-time`, '');
+      } else {
+        values[`${dstKey}-date`] = '';
+        values[`${dstKey}-time`] = '';
+      }
     } else if (srcKey) {
-      values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
-      values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
+      const tempDateVal = values[`${srcKey}-date`] || '';
+      const tempTimeVal = values[`${srcKey}-time`] || '';
+
+      if (setValue) {
+        setValue(`${dstKey}-date`, tempDateVal);
+        setValue(`${dstKey}-time`, tempTimeVal);
+      } else {
+        values[`${dstKey}-date`] = tempDateVal;
+        values[`${dstKey}-time`] = tempTimeVal;
+      }
     }
   }
 
@@ -164,7 +186,12 @@ function _copyOrClearValueForColumn(
         val = values[`${srcFormValue}-${col.name}`];
       }
       if (val === null || val === undefined) return;
-      values[`${destFormValue}-${col.name}`] = val;
+
+      if (setValue) {
+        setValue(`${destFormValue}-${col.name}`, val);
+      } else {
+        values[`${destFormValue}-${col.name}`] = val;
+      }
     });
   }
 }
@@ -182,20 +209,22 @@ function _copyOrClearValueForColumn(
  * @param clearValue signal that we want to clear the inputs.
  * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
  * flag to skip doing so.
+ * @param setValue if defined, use this function to set the value in react hook form instead of updating the `values` object
  */
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean,
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
 
   const column = columnModel.column;
 
-  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
+  _copyOrClearValueForColumn(column, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns, setValue);
 
   // copy the columns in the column mapping.
   if (column.isInputIframe) {
     column.inputIframeProps.columns.forEach((c: any) => {
-      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns);
+      _copyOrClearValueForColumn(c, values, foreignKeyData, destFormValue, srcFormValue, clearValue, skipFkColumns, setValue);
     });
   }
 
@@ -232,12 +261,6 @@ export function populateCreateInitialValues(
 
   // the data associated with the foreignkeys
   const foreignKeyData: any = {};
-
-  // TODO: add initialValues to submissionRows (viewer feature)
-  // is this even needed?
-  // if (DataUtils.isObjectAndNotNull(initialValues)) {
-  //     model.submissionRows[0] = initialValues;
-  // }
 
   // populate defaults
   // NOTE: should only be 1 form
@@ -318,14 +341,13 @@ export function populateCreateInitialValues(
             // if all the columns of the foreignkey are prefilled, use that instead of default
             const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
 
-            // TODO viewer feature
             // if all the columns of the foreignkey are initialized, use that instead of default
-            // const allInitialized = column.foreignKey.colset.columns.every((col: any) => {
-            //     return values[col.name] !== null;
-            // });
+            const allInitialized = isNonEmptyObject(initialValues) && column.foreignKey.colset.columns.every((col: any) => {
+              return initialValues[col.name] !== undefined && initialValues[col.name] !== null;
+            });
 
-            if (allPrefilled) {
-              const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+            if (allPrefilled || allInitialized) {
+              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -354,18 +376,18 @@ export function populateCreateInitialValues(
         values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
         values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
 
-        // add the select-all input value
+        // add the multi form input value
         if (formIndex === 0) {
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-date`] = '';
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-time`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-date`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-time`] = '';
         }
       } else {
         values[`${formValue}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
 
-        // add the select-all input value
+        // add the multi form input value
         if (formIndex === 0) {
-          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
         }
       }
     }
@@ -530,11 +552,11 @@ export function populateEditInitialValues(
     columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
       const column = colModel.column;
 
-      // add the select-all input values
+      // add the multi form input values
       if (formIndex === 0) {
         // just use empty value (this is to make sure react-hook-forms has this key from the beginning)
         // NOTE if we actually want to show the default values, we should send extra requests.
-        copyOrClearValue(colModel, values, foreignKeyData, SELECT_ALL_INPUT_FORM_VALUE, undefined, true);
+        copyOrClearValue(colModel, values, foreignKeyData, MULTI_FORM_INPUT_FORM_VALUE, undefined, true);
       }
 
       // If input is disabled, and it's copy, we don't want to copy the value
@@ -663,10 +685,10 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
  * the following will extract the foreignKeyData of the row that we need.
  */
 export function populateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
-  const linkedData : any = {};
+  const linkedData: any = {};
   if (isObjectAndNotNull(foreignKeyData)) {
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const k =  `${formNumber}-${col.name}`;
+      const k = `${formNumber}-${col.name}`;
       if (k in foreignKeyData) {
         linkedData[col.name] = foreignKeyData[k];
       }
@@ -731,27 +753,27 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
 
 /* The following 3 functions are for foreignkey fields */
 export function createForeignKeyReference(
-  column: any, 
-  parentReference: any, 
-  formNumber: number, 
-  foreignKeyData: any, 
+  column: any,
+  parentReference: any,
+  formNumber: number,
+  foreignKeyData: any,
   getValuesFunction: () => any
 ): any {
   const andFilters: any = [];
-    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-    // this is to ensure the selected row has a value for the foreignkey
-    column.foreignKey.key.colset.columns.forEach((col: any) => {
-      andFilters.push({ source: col.name, hidden: true, not_null: true });
-    });
+  // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+  // this is to ensure the selected row has a value for the foreignkey
+  column.foreignKey.key.colset.columns.forEach((col: any) => {
+    andFilters.push({ source: col.name, hidden: true, not_null: true });
+  });
 
-    const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
-    const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
-    return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
+  const linkedData = populateLinkedData(parentReference, formNumber, foreignKeyData?.current);
+  const submissionRow = populateSubmissionRow(parentReference, formNumber, getValuesFunction());
+  return column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
 }
 
 
 export function callOnChangeAfterSelection(
-  selectedRow: any, 
+  selectedRow: any,
   onChange: any,
   name: string,
   column: any,
@@ -784,10 +806,10 @@ export function callOnChangeAfterSelection(
 
 export function clearForeignKeyData(
   name: string,
-  column: any, 
+  column: any,
   formNumber: number,
   foreignKeyData: any,
-  setFunction: (name: string, value: any) => void
+  setFunction: (name: string, value: any) => void,
 ): void {
   // clear the raw values
   column.foreignKey.colset.columns.forEach((col: any) => {
@@ -800,4 +822,40 @@ export function clearForeignKeyData(
   }
 
   // the input-field will take care of clearing the displayed rowname.
+}
+
+/**
+ * returns a validator function that can be used for foreignkeys.
+ * (handles calling the onChange callback)
+ */
+export function validateForeignkeyValue(
+  /**
+   * the input name
+   */
+  name: string,
+  /**
+   * the ERMrest column object
+   */
+  column: any,
+  /**
+   * the foreignKeyData ref object
+   */
+  foreignKeyData: any,
+  /**
+   * the callbacks defined on the foreignkey input
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
+): Function {
+  return function () {
+    if (!foreignKeyCallbacks || !foreignKeyCallbacks.onChange) {
+      return true;
+    }
+
+    let data: any = {};
+    if (foreignKeyData && foreignKeyData.current) {
+      data = { ...foreignKeyData.current[name] }
+    }
+
+    return foreignKeyCallbacks.onChange(column, data);
+  }
 }

@@ -14,11 +14,12 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { resolvePermalink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { getVersionDate, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
-
+import { copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 export type ShareCiteModalProps = {
   /**
@@ -37,8 +38,7 @@ export type ShareCiteModalProps = {
   reference: any,
   /**
    * the citation object
-   * NOTE hideCitation is not needed, we just need to send null for this
-   * and true for citationReady.
+   * if you don't want to show citation use { isReady: true, value: null } for this prop
    */
   citation: CitationModel,
   /**
@@ -75,6 +75,10 @@ const ShareCiteModal = ({
   logStackPath,
 }: ShareCiteModalProps): JSX.Element => {
 
+  const DEFAULT_COPY_TOOLTIP = 'Copy link URL to clipboard.';
+  const [versionLinkCopyTooltip, setVersionLinkCopyTooltip] = useState(DEFAULT_COPY_TOOLTIP);
+  const [liveLinkCopyTooltip, setLiveLinkCopyTooltip] = useState(DEFAULT_COPY_TOOLTIP);
+
   const logCitationDownload = () => {
     LogService.logClientAction({
       action: LogService.getActionString(LogActions.CITE_BIBTEXT_DOWNLOAD, logStackPath),
@@ -82,25 +86,41 @@ const ShareCiteModal = ({
     }, reference.defaultLogInfo);
   };
 
-  const copyToClipboard = (text: string, action: string) => {
+  /**
+   * set the tooltip of the copy button
+   * @param isVersionLink whether this is for the version link or live link
+   * @param str the tooltip
+   */
+  const setLinkCopyTooltip = (isVersionLink: boolean, str: string) => {
+    if (isVersionLink) {
+      setVersionLinkCopyTooltip(str)
+    } else {
+      setLiveLinkCopyTooltip(str);
+    }
+  }
+
+  /**
+   * the callback for clicking on the copy link button
+   * @param isVersionLink whether this is for the version link or live link
+   */
+  const onCopyToClipboard = (isVersionLink: boolean) => {
+    const action = isVersionLink ? LogActions.SHARE_VERSIONED_LINK_COPY : LogActions.SHARE_LIVE_LINK_COPY;
+    const text = isVersionLink ? versionLink : liveLink;
+
     LogService.logClientAction({
       action: LogService.getActionString(action, logStackPath),
       stack: logStack ? logStack : LogService.getStackObject()
     }, reference.defaultLogInfo);
 
-    // Create a dummy input to put the text string into it, select it, then copy it
-    // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
-    // it has to be a user initiated action that is done through the DOM object
-    const dummy = document.createElement('input');
-    dummy.setAttribute('visibility', 'hidden');
-    dummy.setAttribute('display', 'none');
-    document.body.appendChild(dummy);
-    // dummy.setAttribute('id', 'copy_id');
-    // document.getElementById('copy_id')!.value = text;
-    dummy.value = text;
-    dummy.select();
-    document.execCommand('copy');
-    document.body.removeChild(dummy);
+    copyToClipboard(text).then(() => {
+      setLinkCopyTooltip(isVersionLink, 'Copied!');
+      setTimeout(() => {
+        setLinkCopyTooltip(isVersionLink, DEFAULT_COPY_TOOLTIP);
+      }, 1000);
+    }).catch((err) => {
+      $log.warn('failed to copy with the following error:');
+      $log.warn(err);
+    })
   }
 
   const citationReady = !!citation && citation.isReady;
@@ -147,7 +167,8 @@ const ShareCiteModal = ({
         <Modal.Title>{usedTitle}</Modal.Title>
         <button
           className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
-          onClick={() => onClose()}
+          // prevent the event from propagating to the button that opened it
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
         >
           <strong className='chaise-btn-icon'>X</strong>
           <span>Close</span>
@@ -183,10 +204,11 @@ const ShareCiteModal = ({
                   <ChaiseTooltip placement='bottom' tooltip={`Data snapshotted at ${versionDate}`}>
                     <small>({versionDateRelative}) </small>
                   </ChaiseTooltip>
-                  <ChaiseTooltip placement='bottom' tooltip='Copy link URL to clipboard.'>
+                  <ChaiseTooltip placement='bottom' tooltip={versionLinkCopyTooltip} dynamicTooltipString>
                     <span
                       className='fa-solid fa-clipboard chaise-copy-to-clipboard-btn'
-                      onClick={() => copyToClipboard(versionLink, LogActions.SHARE_VERSIONED_LINK_COPY)}
+                      // prevent the event from propagating to the button that opened it
+                      onClick={(e) => { e.stopPropagation(); onCopyToClipboard(true); }}
                     />
                   </ChaiseTooltip>
                 </h3>
@@ -195,10 +217,11 @@ const ShareCiteModal = ({
             }
             <h3 className='share-item-header'>
               <span>Live Link </span>
-              <ChaiseTooltip placement='bottom' tooltip='Copy link URL to clipboard.'>
+              <ChaiseTooltip placement='bottom' tooltip={liveLinkCopyTooltip} dynamicTooltipString>
                 <span
                   className='fa-solid fa-clipboard chaise-copy-to-clipboard-btn'
-                  onClick={() => copyToClipboard(liveLink, LogActions.SHARE_LIVE_LINK_COPY)}
+                  // prevent the event from propagating to the button that opened it
+                  onClick={(e) => { e.stopPropagation(); onCopyToClipboard(false); }}
                 />
               </ChaiseTooltip>
             </h3>
@@ -225,7 +248,8 @@ const ShareCiteModal = ({
               <a
                 className='share-item-value chaise-btn chaise-download-btn bibtex-download-btn'
                 download={`${downloadFilename}.bib`} href={bibtexObjectURL}
-                onClick={() => logCitationDownload()}>
+                // prevent the event from propagating to the button that opened it
+                onClick={(e) => { e.stopPropagation(); logCitationDownload(); }}>
                 BibTex
               </a>
             </li>

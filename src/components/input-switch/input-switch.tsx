@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
+import { memo } from 'react';
+
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -16,7 +18,7 @@ import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-fie
 import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe-field';
 
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import React from 'react';
 
 export type InputSwitchProps = {
@@ -118,6 +120,10 @@ export type InputSwitchProps = {
    */
   waitingForForeignKeyData?: boolean,
   /**
+   * customize the foreignkey callbacks
+   */
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
+  /**
    * whether we should offer the extra now/today buttons
    */
   displayExtraDateTimeButtons?: boolean,
@@ -164,7 +170,8 @@ const InputSwitch = ({
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
   displayDateTimeLabels,
-  additionalControllerRules
+  additionalControllerRules,
+  foreignKeyCallbacks
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -233,6 +240,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
           additionalControllerRules={additionalControllerRules}
         />
       case 'dropdown-select':
@@ -260,6 +268,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'file':
         if (!columnModel) {

@@ -23,12 +23,20 @@
     }
   }
 }
-// Optional: Group multiple button groups together for a toolbar
+
+/**
+ * this rule will make sure the content are aligned with each other, but as a result the bounding box of each
+ * button might be misaligned with the rest. so this only should be used when we're hiding the borders
+ */
+.chaise-btn-group-no-border {
+  align-items: baseline; // to align it to the same line
+}
+
+// Changing this to grid to set maximum two rows of wrapping buttons if width is less
 .chaise-btn-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
 
   .input-group {
     width: auto;

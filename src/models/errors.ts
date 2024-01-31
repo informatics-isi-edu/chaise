@@ -266,3 +266,9 @@ export class InvalidHelpPage extends ChaiseError {
     );
   }
 }
+
+export class LimitedBrowserSupport extends ChaiseError {
+  constructor(message: string, subMessage?: string, clickOkToDismiss?: boolean) {
+    super(errorNames.limitedBrowserSupport, message, subMessage, clickOkToDismiss)
+  }
+}

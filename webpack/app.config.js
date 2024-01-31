@@ -13,6 +13,7 @@ const webpack = require('webpack');
  *   - appTitle: (string) Added to the default title tag.
  *   - bundleName: (string) if defined, will be used to name the bundle. Otherwise we will use appName.
  *   - externalFiles: (array of strings) the extra files that we should add script tag for
+ *   - externalStyleFiles: (array of strings) the extra css files that we should add script tag for
  *   - appConfigLocation: (string) the app-specific config file that we should add script tag for
  *   - isLib: (boolean) whether this is a library or an app.
  *
@@ -70,13 +71,19 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       // ermrestjs
       `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
       `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
-      // chaise-config
+      // old chaise-config location TODO should be removed
       `${chaisePath}chaise-config.js?v=${buildVersion}`,
+      // chaise-config
+      `${chaisePath}config/chaise-config.js?v=${buildVersion}`,
       // the specific app config file
       ...ac.appConfigLocation ? [`${ac.appConfigLocation}?v=${buildVersion}`] : [],
       // external files that the app might need
       ...Array.isArray(ac.externalFiles) ? ac.externalFiles.map((f) => `${f}?v=${buildVersion}`) : []
     ];
+
+    const externalStyleFiles = [
+      ...Array.isArray(ac.externalStyleFiles) ? ac.externalStyleFiles.map((f) => `${f}?v=${buildVersion}`) : []
+    ]
 
     // create the html plugin
     appHTMLPlugins.push(
@@ -97,6 +104,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         app_name: ac.appName,
         title: ac.appTitle,
         external_files: externalFiles.map((f) => `<script src="${f}"></script>`).join('\n'),
+        external_style_files: externalStyleFiles.map((f) => `<link href="${f}" rel="stylesheet"></script>`).join('\n'),
       })
     );
 
@@ -112,7 +120,8 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
           // we don't want webpack to inject assets automatically
           inject: false,
           // in this mode, we want the string version so we can append the webpack files to it
-          external_files: JSON.stringify(externalFiles)
+          external_files: JSON.stringify(externalFiles),
+          external_style_files: JSON.stringify(externalStyleFiles)
         })
       );
     }
@@ -209,35 +218,40 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         maxSize: 500000,
         hidePathInfo: true,
         name: 'common',
+        /**
+         * the noted priority is also changing the order of include statements in the output html.
+         * we want to make sure chaise is the last css file that is added, that's why it has the lowest priority.
+         * this was mainly an issue in deriva-webapps where the bootstrap rules were overriding our chaise rules.
+         *
+         * TODO we should come up with a better solution. "priority" property is mainly to make sure a rule has
+         * precedence over another one. so if two rules match the given "test", the one with higher priority wins.
+         * but now we're abusing it to dicatet the order of assets.
+         */
         cacheGroups: {
           // this group is useful for deriva-webapps
           chaiseVendor: {
             test: /[\\/]node_modules[\\/]\@isrd-isi-edu[\\/]chaise[\\/]/,
             name: 'vendor-chaise',
             chunks: 'all',
-            priority: 4
+            priority: 1
           },
           reactVendor: {
             test: /[\\/]node_modules[\\/](react|react-dom|react-bootstrap)[\\/]/,
             name: 'vendor-react',
             chunks: 'all',
-            priority: 3
+            priority: 2
           },
           bootstrapVendor: {
             test: /[\\/]node_modules[\\/]bootstrap[\\/]/,
             name: 'vendor-bootstrap',
             chunks: 'all',
-            priority: 2
+            priority: 3
           },
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
+            test: /[\\/]node_modules[\\/](?!(\@isrd-isi-edu[\\/]chaise|bootstrap|react|react-dom|react-bootstrap)[\\/])/,
             name: 'vendor-rest',
             chunks: 'all',
-            /**
-             * we have to make sure priority of this group is less than the rest
-             * so this rule is used when others failed
-             */
-            priority: 1
+            priority: 4
           }
         },
       },
