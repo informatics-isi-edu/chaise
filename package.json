@@ -28,7 +28,7 @@
   ],
   "devDependencies": {
     "@isrd-isi-edu/ermrest-data-utils": "0.0.5",
-    "@playwright/test": "^1.34.2",
+    "@playwright/test": "^1.41.1",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "chance": "x",
@@ -43,7 +43,7 @@
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
-    "playwright": "^1.34.2",
+    "playwright": "latest",
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",

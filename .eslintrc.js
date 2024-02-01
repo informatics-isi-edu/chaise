@@ -53,6 +53,9 @@ module.exports = {
     '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
+
+    // ------------------ testing ------------------
+    '@typescript-eslint/no-floating-promises': 'warn'
   },
   settings: {
     'import/resolver': 'webpack',

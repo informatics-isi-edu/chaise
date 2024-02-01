@@ -9,9 +9,11 @@ import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/tes
 
 test.describe('Navbar', () => {
 
-  test.beforeEach(async ({ page, baseURL }, testInfo) => {
+  test.beforeEach(async ({ page, baseURL, browser, browserName }, testInfo) => {
     const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
     await page.goto(`${baseURL}${PAGE_URL}`);
+
+    console.log(`browser information: ${browserName} ${browser.version()}`);
   })
 
   test('basic features', async ({ page }) => {

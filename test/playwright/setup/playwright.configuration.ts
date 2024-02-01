@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import os from 'os';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { MAIN_USER_STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 
 const getConfig = (options: TestOptions) => {
 
@@ -26,7 +26,7 @@ const getConfig = (options: TestOptions) => {
   const reporterFolder = resolve(__dirname, `./../../../playwright-report/${options.testName}`);
 
   const extraBrowserParams = {
-    storageState: STORAGE_STATE
+    storageState: MAIN_USER_STORAGE_STATE
   };
 
   const config = defineConfig({
@@ -88,25 +88,25 @@ const getConfig = (options: TestOptions) => {
           permissions: ['clipboard-read', 'clipboard-write']
         },
       },
-      {
-        name: 'firefox',
-        dependencies: ['pretest'],
-        use: {
-          ...devices['Desktop Firefox'],
-          ...extraBrowserParams,
-          launchOptions: {
-            firefoxUserPrefs: {
-              'dom.events.asyncClipboard.readText': true,
-              'dom.events.testing.asyncClipboard': true,
-            },
-          }
-        },
-      },
-      {
-        name: 'webkit',
-        dependencies: ['pretest'],
-        use: { ...devices['Desktop Safari'], ...extraBrowserParams },
-      },
+      // {
+      //   name: 'firefox',
+      //   dependencies: ['pretest'],
+      //   use: {
+      //     ...devices['Desktop Firefox'],
+      //     ...extraBrowserParams,
+      //     launchOptions: {
+      //       firefoxUserPrefs: {
+      //         'dom.events.asyncClipboard.readText': true,
+      //         'dom.events.testing.asyncClipboard': true,
+      //       },
+      //     }
+      //   },
+      // },
+      // {
+      //   name: 'webkit',
+      //   dependencies: ['pretest'],
+      //   use: { ...devices['Desktop Safari'], ...extraBrowserParams },
+      // },
     ],
   });
 

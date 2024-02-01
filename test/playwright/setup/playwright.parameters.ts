@@ -108,7 +108,8 @@ export const getMainUserSessionObject = () => {
 /**
  * the file that contains the logged in browser state
  */
-export const STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
+export const MAIN_USER_STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
+export const RESTRICTED_USER_STORAGE_STATE = resolve(__dirname, '../.auth/user.json');
 
 
 export const DOWNLOAD_FOLDER = resolve(__dirname, '../.download');
