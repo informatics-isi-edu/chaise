@@ -68,7 +68,7 @@ var testParams = {
         { title: "# distinct thumbnail collection", comment: "Count distinct of thumbnail collection", value: "1", markdown_title: "# distinct thumbnail collection"},
         { title: "agg column with waitfor entityset and all-outbound", comment: "Minimum of title", value: "Sherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five", markdown_title: "agg column with waitfor entityset and all-outbound"},
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel", markdown_title: "Max Name of accommodation_collection"},
-        { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
+        { title: "json_col", value: null },
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
         { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
         { title: "table_w_invalid_row_markdown_pattern"},
