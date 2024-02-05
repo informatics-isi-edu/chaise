@@ -143,6 +143,17 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
     });
 
+    it ("should properly show the inline comments for columns", (done) => {
+      const columns = tableParams.columns.filter(function(c) { if (c.inline_comment) return true; });
+      chaisePage.recordEditPage.getColumnInlineComments().getText().then((comments) => {
+        expect(comments.length).toBe(columns.length);
+        columns.forEach((c, index) => {
+          expect(comments[index]).toEqual(c.inline_comment, `missmatch for ${c.title}`);
+        });
+        done();
+      }).catch((chaisePage.catchTestError(done)));
+    });
+
     it("should show red asterisk (*) before for fields which are required", function() {
         var columns = tableParams.columns.filter(function(c) { if (c.nullok === false && !c.generated && !c.immutable) return true; });
         columns.forEach(function(c) {

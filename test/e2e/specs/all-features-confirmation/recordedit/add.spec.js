@@ -20,10 +20,10 @@ var testParams = {
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
             { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, totalCount: 5, comment: "Type of accommodation (Resort, Hotel, or Motel)"}, // the total count is the total number of rows in the category.json data file
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
-            { name: "summary", title: "Summary", type: "longtext", nullok: false},
+            { name: "summary", title: "Summary", type: "longtext", nullok: false, inline_comment: "A comment displayed for the summary column"},
             { name: "description", title: "Description", type: "markdown"},
             { name: "json_col", title: "json_col", type:"json"},
-            { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
+            { name: "no_of_rooms", title: "Number of Rooms", type: "int2", inline_comment: 'This shows the number of rooms!'},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean", nullok: false },
