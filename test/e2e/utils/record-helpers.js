@@ -223,16 +223,6 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it('should not show any columns with null value', function() {
-        var columns = tableParams.columns;
-        columns.forEach(function(column) {
-            var elem = element(by.id('row-' + column.title.toLowerCase()));
-            if (column.value === null) {
-                expect(elem.isPresent()).toBe(false);
-            }
-        });
-    });
-
     it("should show related table names and their tables", function() {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;

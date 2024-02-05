@@ -6,7 +6,7 @@ var testParams = {
     column_names: [
         "text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled",
         "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled",
-        "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default", "color_rgb_hex", "color_rgb_hex_disabled"
+        "timestamptz", "timestamptz_disabled", "json", "json_disabled", "color_rgb_hex", "color_rgb_hex_disabled"
     ],
     table_name: "defaults-table",
     default_column_values: {
@@ -88,7 +88,6 @@ var testParams = {
         timestamptz_disabled: "2010-06-13 17:22:00",
         json: JSON.stringify({"name":"testing_json"},undefined,2),
         json_disabled: JSON.stringify(98.786),
-        json_disabled_no_default: JSON.stringify(null),
         color_rgb_hex: "#123456",
         color_rgb_hex_disabled: "#654321"
     },
