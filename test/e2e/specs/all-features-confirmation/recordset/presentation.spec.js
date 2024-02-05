@@ -64,7 +64,7 @@ var testParams = {
                 summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
-                json_col: JSON.stringify(null, undefined, 2),
+                json_col: '',
                 json_col_with_markdown: "Status is: “delivered”",
                 no_of_beds: "beds: 1, id: 2002, has gym, image id cnt: 4",
                 no_of_baths: "baths: 1, id: 2002, images: 3005, 3006, 3008, 30007",
