@@ -1,19 +1,18 @@
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import React, { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 // models
 import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { simpleDeepCopy } from '../../utils/data-utils';
