@@ -186,11 +186,11 @@ const MultiFormInputRow = ({
 
     setAllValuesEffect(0);
 
-    // without delaying this function call, the spinner would show briefly 
+    // without delaying this function call, the spinner would show briefly
     // after the app appeared to freeze instead of before the "appeared freeze"
     setTimeout(() => {
       // if 1/true, clear all values
-      // if -1/false, apply the value in the input to all selected forms 
+      // if -1/false, apply the value in the input to all selected forms
       const isClear = (allValuesEffect === 1)
 
       logRecordeditClientAction(
@@ -339,7 +339,7 @@ const MultiFormInputRow = ({
                   // we should disable it when its empty or has error
                   // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
                   disabled={
-                    (errors && inputName in errors) || activeForms?.length === 0
+                    (errors && inputName in errors) || activeForms?.length === 0 || isEmpty
                   }
                 >
                   Apply

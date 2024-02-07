@@ -700,18 +700,24 @@ describe('Regarding multi form input and clone button', () => {
               }).catch(chaisePage.catchTestError(done));
             });
 
-            it('when all forms are selected, clicking on apply should apply change to all forms', (done) => {
+            // select all is clicked here
+            it ('the apply button should be disabled if the value is empty', (done) => {
               // select all
               chaisePage.clickButton(recordEditPage.getMultiFormInputCheckbox()).then(() => {
-                // set the value
-                return recordEditHelpers.setInputValue(
-                  MULI_FORM_INPUT_FORM_NUMBER,
-                  params.column_name,
-                  params.column_displayname,
-                  params.type,
-                  params.apply_to_all
-                );
-              }).then(() => {
+                expect(applybtn.getAttribute('disabled')).toBeTruthy('apply btn is not disabled');
+                done();
+              }).catch(chaisePage.catchTestError(done));
+            });
+
+            it('when all forms are selected, clicking on apply should apply change to all forms', (done) => {
+              // we've already selected all forms, so set the value
+              recordEditHelpers.setInputValue(
+                MULI_FORM_INPUT_FORM_NUMBER,
+                params.column_name,
+                params.column_displayname,
+                params.type,
+                params.apply_to_all
+              ).then(() => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
               }).then(() => {
