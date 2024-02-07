@@ -1,19 +1,17 @@
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FormRow from '@isrd-isi-edu/chaise/src/components/recordedit/form-row';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import React, { Ref, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 // models
 import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { simpleDeepCopy } from '../../utils/data-utils';
 
 type FormContainerProps = {
   /* the index of column that is showing the select all input */
@@ -31,17 +29,7 @@ const FormContainer = ({
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
-  const [needsWiderMinWidth, setNeedsWiderMinWidth] = useState<boolean>(false);
-
   const { handleSubmit } = useFormContext();
-
-  useEffect(() => {
-    // set wider width if array_text field is present in form
-    setNeedsWiderMinWidth(columnModels.filter(col => col.inputType === 'array' && col.column.type.baseType.name === 'text').length > 0)
-
-  }, [columnModels])
-
-
 
   const formContainer = useRef<any>(null);
 
