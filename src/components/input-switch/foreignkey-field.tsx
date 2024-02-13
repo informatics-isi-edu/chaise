@@ -11,7 +11,9 @@ import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  appModes, MULTI_FORM_INPUT_FORM_VALUE, RecordeditColumnModel, RecordeditForeignkeyCallbacks
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps,
@@ -20,7 +22,6 @@ import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -109,6 +110,12 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onAttemptToChange) {
+      if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onAttemptToChange() === false) {
+        return;
+      }
+    }
+
     const recordsetConfig: RecordsetConfig = {
       viewable: false,
       editable: false,
@@ -123,7 +130,10 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     const ref = createForeignKeyReference(
       props.columnModel.column,
       props.parentReference,
-      usedFormNumber,
+      /**
+       * if it's the multi-form input, use the first row.
+       */
+      usedFormNumber === MULTI_FORM_INPUT_FORM_VALUE ? 1 : usedFormNumber,
       props.foreignKeyData,
       getValues
     );

@@ -96,6 +96,11 @@ export type RecordeditForeignkeyCallbacks = {
    * return `true` if the value is valid. otherwise return a string that will be showed as an error.
    */
   onChange?: (column: any, rowData: any) => true | string,
+  /**
+   * if defined, will be called before opening the modal selector.
+   * if returns a `false`, the popup will not open. otherwise it will open the popup
+   */
+  onAttemptToChange?: () => boolean;
 }
 
 export interface RecordeditColumnModel {

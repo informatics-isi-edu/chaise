@@ -13,6 +13,7 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -51,8 +52,12 @@ const MultiFormInputRow = ({
 
   const cm = columnModels[columnModelIndex];
   const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
+  const isForeignKey = cm.column.isForeignKey;
 
-  const { formState: { errors }, getValues, setValue } = useFormContext();
+  const colName = cm.column.name;
+  const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
+
+  const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
   const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
 
@@ -257,10 +262,53 @@ const MultiFormInputRow = ({
     setShowApplyAllSpinner(false);
   };
 
-  // -------------------------- render logic ---------------------- //
+  const checkForeignKeyDomainFilter = () => {
+    if (!cm.hasDomainFilter) return true;
 
-  const colName = cm.column.name;
-  const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
+    clearErrors(inputName);
+
+    let computedRefURI = '';
+    const areAllSame = forms.every((formNumber: number, formIndex: number) => {
+      const ref = createForeignKeyReference(cm.column, reference, formNumber, foreignKeyData, getValues);
+      if (formIndex === 0) {
+        computedRefURI = ref.uri;
+      } else {
+        return computedRefURI === ref.uri;
+      }
+      return true;
+    });
+
+    // some domain-filters are different, so we cannot proceed
+    if (areAllSame) return true;
+
+    const usedCols = cm.column.domainFilterUsedColumns;
+
+    let errorMessage = '';
+    if (Array.isArray(usedCols) && usedCols.length > 0) {
+      const usedColsSummary = usedCols.reduce((res, curr, currIndex, arr) => {
+        res += `<code>${curr.displayname.value}</code>`;
+        if (currIndex !== arr.length) {
+          res += (currIndex === arr.length - 1) ? ' and ' : ', ';
+        }
+        return res;
+      }, '');
+      errorMessage = `This feature is constrained by ${usedColsSummary}.`;
+    } else {
+      errorMessage = `This feature is constrained by other fields (hint: <code>${cm.column.domainFilterRawString}</code>).`;
+    }
+
+    errorMessage += ` Make sure all the records you want to set <code>${cm.column.displayname.value}</code> for, have the same values for those fields.`;
+
+
+    setValue(inputName, '', { shouldTouch: true });
+    setError(inputName, { type: 'custom', message: errorMessage });
+
+    // TODO the error should be removed on change of the other fields
+
+    return false;
+  };
+
+  // -------------------------- render logic ---------------------- //
 
   const renderHelpTooltip = () => {
     const splitLine1 =
@@ -395,6 +443,7 @@ const MultiFormInputRow = ({
             parentReference={reference}
             foreignKeyData={foreignKeyData}
             waitingForForeignKeyData={waitingForForeignKeyData}
+            foreignKeyCallbacks={isForeignKey ? { onAttemptToChange: checkForeignKeyDomainFilter } : undefined}
           />
         </div>
       </div>
