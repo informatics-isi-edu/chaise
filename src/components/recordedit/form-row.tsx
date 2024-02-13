@@ -103,13 +103,12 @@ const FormRow = ({
    *    while we're setting the max-wdith to be the same as form-container, this has to be defined here as we must
    *    update it when the size of multi-form-input-row changes. if we do this based on form-container size then it won't
    *    cover the cases where we scroll horziontally and open a new multi-form-input-row
-   *    (I'm using the same event for inline comments as well)
    */
   useLayoutEffect(() => {
     if (!container || !container.current) return;
 
-    let cachedHeight = -1, cachedWidth = -1;
-    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+    let cachedHeight = -1;
+    const sensor = new ResizeSensor(container.current as Element, () => {
       if (!container.current) return;
 
       const newHeight = container.current.getBoundingClientRect().height;
@@ -121,20 +120,15 @@ const FormRow = ({
         }
       }
 
-      const newWidth = container.current.offsetWidth;
-      if (newWidth !== cachedWidth) {
-        cachedWidth = newWidth;
-        const nonScrollableDivs = document.querySelectorAll<HTMLElement>('.multi-form-input-row,.inline-comment-row');
-        const formContainer = document.querySelector('.form-container') as HTMLElement;
-        if (formContainer) {
-          // Width of the visible area
-          const visibleWidth = formContainer.offsetWidth;
+      // make sure the max-width of the multi-form-input-row is the same as visible width of the form
+      const nonScrollableDiv = document.querySelector<HTMLElement>('.multi-form-input-row');
+      const formContainer = document.querySelector<HTMLElement>('.form-container');
+      if (formContainer && nonScrollableDiv) {
+        // Width of the visible area
+        const visibleWidth = formContainer.offsetWidth;
 
-          // Set the max-width to the visible width
-          if (nonScrollableDivs) {
-            nonScrollableDivs.forEach((el) => { el.style.maxWidth = visibleWidth + 'px' });
-          }
-        }
+        // Set the max-width to the visible width
+        nonScrollableDiv.style.maxWidth = visibleWidth + 'px';
       }
 
     });
@@ -330,8 +324,9 @@ const FormRow = ({
   return (
     <div className={`form-inputs-row${isActiveForm ? ' highlighted-row' : ''}${hasInlineComment ? ' with-inline-tooltip' : ''}`} ref={container}>
       {hasInlineComment &&
-        <div className='inline-comment-row match-entity-value'>
-          <div className='inline-tooltip'><DisplayCommentValue comment={columnModel.column.comment} /></div>
+        <div className='inline-comment-row'>
+          <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={columnModel.column.comment} /></div>
+          <hr />
         </div>
       }
       <div className='inputs-row' ref={formsRef}>
