@@ -211,7 +211,7 @@
           "annotations": {}
         },
         {
-          "comment": null,
+          "comment": "This shows the number of rooms!",
           "name": "no_of_rooms",
           "default": null,
           "nullok": true,
@@ -221,7 +221,12 @@
           "annotations": {
             "comment" : ["top"],
             "tag:misd.isi.edu,2015:display": {
-              "name": "Number of Rooms"
+              "name": "Number of Rooms",
+              "comment_display": {
+                "entry": {
+                  "column_comment_display": "inline"
+                }
+              }
             }
           }
         },
@@ -376,7 +381,8 @@
           "detailed" : ["id", "title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "json_col","no_of_rooms", "opened_on", "date_col", "luxurious"],
           "entry/create": [
             "id", "title", "website", ["product-add", "fk_category"], "rating",
-            "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious",
+            { "source": "summary", "comment": "A comment displayed for the _summary_ column", "comment_display": "inline"},
+            "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious",
             "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array",
             "color_rgb_hex_column"
           ],

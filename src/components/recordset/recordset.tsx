@@ -870,7 +870,7 @@ const RecordsetInner = ({
                     </ChaiseTooltip>
                   }
                   {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <span className='inline-tooltip'><DisplayCommentValue comment={reference.comment} /></span>
+                    <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
                   }
                 </h1>
               </div>

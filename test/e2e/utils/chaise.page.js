@@ -39,6 +39,10 @@ var recordEditPage = function() {
         return element.all(by.css('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip'));
     };
 
+    this.getColumnInlineComments = () => {
+      return element.all(by.css('.inline-comment-row'));
+    };
+
     this.getColumnWithAsterisk = function(el) {
         return el.element(by.xpath('./../..')).element(by.className('text-danger'));
     };
