@@ -98,9 +98,8 @@ export type RecordeditForeignkeyCallbacks = {
   onChange?: (column: any, rowData: any) => true | string,
   /**
    * if defined, will be called before opening the modal selector.
-   * if returns a `false`, the popup will not open. otherwise it will open the popup
    */
-  onAttemptToChange?: () => boolean;
+  onAttemptToChange?: () => Promise<{allowed: boolean, domainFilterFormNumber?: number}>;
 }
 
 export interface RecordeditColumnModel {

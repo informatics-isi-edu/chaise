@@ -144,6 +144,12 @@
               "type": {
                   "typename": "text"
               }
+          },
+          {
+            "name": "text_col",
+            "type": {
+                "typename": "text"
+            }
           }
       ],
       "annotations": {
@@ -151,6 +157,72 @@
           "row_name": {
               "row_markdown_pattern": "{{{name}}}"
           }
+        }
+      }
+    },
+    "table_w_domain_filter": {
+      "kind": "table",
+      "table_name": "table_w_domain_filter",
+      "schema_name": "multi-form-input",
+      "keys": [{"unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [["multi-form-input", "table_w_domain_filter_fk1"]],
+          "foreign_key_columns": [
+              {
+                  "column_name": "fk_col",
+                  "table_name": "table_w_domain_filter",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "referenced_columns": [
+              {
+                  "column_name": "id",
+                  "table_name": "f1",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:foreign-key": {
+              "domain_filter": {
+                  "ermrest_path_pattern": "text_col={{{text_col}}}",
+                  "pattern_sources": ["text_col"]
+              }
+            }
+          }
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          }
+        },
+        {
+          "name": "text_col",
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Text column"
+            }
+          }
+        },
+        {
+          "name": "fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id", "text_col", ["multi-form-input", "table_w_domain_filter_fk1"]
+          ]
         }
       }
     }

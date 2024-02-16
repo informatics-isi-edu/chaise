@@ -14,6 +14,7 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { asyncTimeout } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -23,7 +24,7 @@ type MultiFormInputRowProps = {
   /**
   * The forms which are active.
   */
-  activeForms?: any[];
+  activeForms?: number[];
   /**
   * The state function to set active forms.
   */
@@ -59,7 +60,7 @@ const MultiFormInputRow = ({
 
   const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
-  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
+  const selectAllFieldValue = useWatch({ name: inputName });
 
   const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
@@ -262,15 +263,26 @@ const MultiFormInputRow = ({
     setShowApplyAllSpinner(false);
   };
 
-  const checkForeignKeyDomainFilter = () => {
-    if (!cm.hasDomainFilter) return true;
+  /**
+   * if the fk input has a domain-filter, we have to make sure it's identical
+   * for all the selected rows. otherwise we won't be able to offer this feature.
+   */
+  const checkForeignKeyDomainFilter = async () => {
+    let domainFilterFormNumber = activeForms && activeForms.length > 0 ? activeForms[0] : 1;
 
+    if (!cm.hasDomainFilter || !activeForms || activeForms.length < 2) {
+      return { allowed: true, domainFilterFormNumber };
+    }
+
+    // remove the existing error
     clearErrors(inputName);
 
+    // make sure the computed references are the same
     let computedRefURI = '';
-    const areAllSame = forms.every((formNumber: number, formIndex: number) => {
+    const areAllSame = activeForms.every((formNumber: number, formIndex: number) => {
       const ref = createForeignKeyReference(cm.column, reference, formNumber, foreignKeyData, getValues);
       if (formIndex === 0) {
+        domainFilterFormNumber = formNumber;
         computedRefURI = ref.uri;
       } else {
         return computedRefURI === ref.uri;
@@ -279,7 +291,9 @@ const MultiFormInputRow = ({
     });
 
     // some domain-filters are different, so we cannot proceed
-    if (areAllSame) return true;
+    if (areAllSame) {
+      return { allowed: true, domainFilterFormNumber };
+    }
 
     const usedCols = cm.column.domainFilterUsedColumns;
 
@@ -287,8 +301,8 @@ const MultiFormInputRow = ({
     if (Array.isArray(usedCols) && usedCols.length > 0) {
       const usedColsSummary = usedCols.reduce((res, curr, currIndex, arr) => {
         res += `<code>${curr.displayname.value}</code>`;
-        if (currIndex !== arr.length) {
-          res += (currIndex === arr.length - 1) ? ' and ' : ', ';
+        if (currIndex < arr.length - 1) {
+          res += (currIndex === arr.length - 2) ? ' and ' : ', ';
         }
         return res;
       }, '');
@@ -296,16 +310,21 @@ const MultiFormInputRow = ({
     } else {
       errorMessage = `This feature is constrained by other fields (hint: <code>${cm.column.domainFilterRawString}</code>).`;
     }
+    errorMessage += ` Make sure all the records you want to set <code>${cm.column.displayname.value}</code> for`;
+    errorMessage += ', have the same values for those fields.';
+    errorMessage += ' Try again after upadting those fields.';
 
-    errorMessage += ` Make sure all the records you want to set <code>${cm.column.displayname.value}</code> for, have the same values for those fields.`;
+    /**
+     * if we should show an error, just add a dummy wait time so the previous
+     * error is cleared and then we show it again.
+     */
+    await asyncTimeout(20);
 
-
+    // calling set-value to "touch" the input. otherwise the error won't show up.
     setValue(inputName, '', { shouldTouch: true });
-    setError(inputName, { type: 'custom', message: errorMessage });
+    setError(inputName, { type: 'custom-domain-filter-error', message: errorMessage });
 
-    // TODO the error should be removed on change of the other fields
-
-    return false;
+    return { allowed: false };
   };
 
   // -------------------------- render logic ---------------------- //
