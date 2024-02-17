@@ -5,7 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -15,7 +15,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // utilities
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { addQueryParamsToURL, fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { CUSTOM_EVENTS, RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
@@ -34,6 +34,17 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     reference, totalRowCount, update, isLoading
   } = useRecordset();
 
+  const [editAppLink, setEditAppLink] = useState<string>(reference.table?.reference?.contextualize?.entryEdit.appLink);
+  useEffect(() => {
+    let tempLink = reference.table?.reference?.contextualize?.entryEdit.appLink;
+
+    if (tempLink.indexOf('?limit=') === -1 && tempLink.indexOf('&limit=') === -1) {
+      tempLink = tempLink + (tempLink.indexOf('?') === -1 ? '?limit=' : '&limit=') + pageLimit;
+    }
+
+    setEditAppLink(tempLink);
+  }, [pageLimit, reference])
+
   const container = useRef<HTMLDivElement>(null);
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
@@ -43,6 +54,15 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
       return a - b;
     });
   }
+
+  // on component load, generate referrer id, construct the link and append to the element
+  const createReferrerID = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
+  let createAppLink = reference.table?.reference?.contextualize?.entryCreate.appLink;
+  
+  // append invalidate param
+  createAppLink = addQueryParamsToURL(createAppLink, {
+    invalidate: fixedEncodeURIComponent(createReferrerID)
+  }); 
 
   const renderPageLimits = () => pageLimits.map((limit: number, index: number) => {
     return (<Dropdown.Item
@@ -129,15 +149,11 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   }
 
   /**
-   * on click of create button generate referrer id, construct the link and open in new tab
+   * on click of create button fire custom event and log client action if needed
    */
   const addRecord = () => {
-    const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
-    const newRef = reference.table?.reference?.contextualize?.entryCreate;
-    let appLink = newRef.appLink;
-
     if (!!container.current) {
-      const eventDetails: { [key: string]: any } = { id: referrer_id };
+      const eventDetails: { [key: string]: any } = { id: createReferrerID };
 
       // currently containerDetails is not used for this code path,
       // but for completeness I added the following:
@@ -146,29 +162,10 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
       fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, container.current, eventDetails);
     }
 
-    if (appLink) {
-      appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
-        'invalidate=' + fixedEncodeURIComponent(referrer_id);
-
-      if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
-        logRecordsetClientAction(LogActions.ADD_INTEND);
-      }
-
-      windowRef.open(appLink, '_blank');
+    if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
+      logRecordsetClientAction(LogActions.ADD_INTEND);
     }
-  };
-
-  /**
-   * navigate on click of edit button
-   */
-  const editRecord = () => {
-    let link = reference.contextualize?.entryEdit?.appLink;
-
-    if (link.indexOf('?limit=') === -1 && link.indexOf('&limit=') === -1)
-      link = link + (link.indexOf('?') === -1 ? '?limit=' : '&limit=') + pageLimit;
-
-    location.href = link;
-  };
+  }
 
   /**
    * whether to display create button
@@ -240,13 +237,17 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               tooltip={<>Create new{' '}<DisplayValue value={reference.displayname} /></>}
             >
               <span className='chaise-table-header-buttons-span'>
-                <button
-                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-create-link`}
+                <a
+                  className='chaise-btn chaise-btn-primary chaise-table-header-create-link'
+                  href={createAppLink}
                   onClick={addRecord}
+                  onContextMenu={addRecord}
+                  rel='noreferrer'
+                  target='_blank'
                 >
                   <span className='chaise-btn-icon fa-solid fa-plus' />
                   <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
-                </button>
+                </a>
               </span>
             </ChaiseTooltip>
           )}
@@ -258,14 +259,13 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               tooltip={shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page of records.'}
             >
               <span>
-                <button
-                  className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
-                  onClick={editRecord}
-                  disabled={shouldEditButtonDisabled()}
+                <a
+                  className={`chaise-btn chaise-btn-primary chaise-table-header-edit-link${shouldEditButtonDisabled() ? ' disabled' : ''}`}
+                  href={editAppLink}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pen' />
                   <span>Bulk Edit</span>
-                </button>
+                </a>
               </span>
             </ChaiseTooltip>
           )}
