@@ -5,236 +5,50 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 
 // utils
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { formatDatetime, formatFloat, formatInt, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import React, { useEffect, useRef, useState } from 'react';
+import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import React, { useEffect, useState } from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProps, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
-import { EventType, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import ChaiseDroppable from '../chaise-droppable';
 
-// since we're using strict mode, react-beautiful-dnd misbehaves due to multiple renders caused by strict mode
-// this is to guard against it
-const StrictModeDroppable = React.memo(function StrictModeDroppable({ children, ...props }: DroppableProps) {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    const animation = requestAnimationFrame(() => setEnabled(true));
-    return () => {
-      cancelAnimationFrame(animation);
-      setEnabled(false);
-    };
-  }, []);
-  if (!enabled) {
-    return null;
-  }
-  return <Droppable {...props}>{children}</Droppable>;
-});
 
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
   baseArrayType: string,
 };
 
-type RowItem = {
-  id: number,
-  value: string
-}
-
-type Options = {
-  name?: string,
-  type?: EventType,
-  value?: unknown
-  values?: {
-    [x: string]: any
-  }
-}
-
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
-  const [itemList, setItemList] = useState<RowItem[]>([])
-  const [counter, setCounter] = useState(1);
-  const [disableAddButton, setDisableAddButton] = useState<boolean>(true);
   const { disableInput, name, baseArrayType } = props;
-  const { getValues, setValue, register, unregister, trigger, getFieldState } = useFormContext();
+  const { register, trigger, control } = useFormContext();
+  const { fields, append, remove, move } = useFieldArray({ name: name, control: control });
+  /**
+   * We use this to keep track of errors in new value input box
+   */
   const formState = useFormState({ name: `${name}-new-item` });
   const addNewValue = useWatch({ name: `${name}-new-item` });
-  const arrayFieldValue = useWatch({ name: 'updateAllField' });
 
 
+  // TODO - remove this block
   useEffect(() => {
+    console.log(fields);
 
-    if (arrayFieldValue !== name.split('-')[1]) return;
-
-    setDefaultFieldState(getValues(name));
-    setValue('updateAllField', '')
-  }, [arrayFieldValue])
-
-  // since we're using strict mode, the useEffect is getting called twice in dev mode
-  // this is to guard against it
-  const setupStarted = useRef<boolean>(false);
-
-  useEffect(() => {
-    
-    // Prevents useEffect from getting invoked twice in dev mode
-    if (setupStarted.current) return;
-    setupStarted.current = true;
-
-    let defaultValues = getValues(name);
-
-    // getValues() returns the values as a string. we need to parse the array from its string representation
-    defaultValues = defaultValues && typeof defaultValues === 'string' ? JSON.parse(defaultValues) : []
-
-    if (defaultValues && defaultValues.length > 0) {// Populate default Values if present
-      setDefaultFieldState(defaultValues)
-    } else { // create a row with empty value if no default values exist
-      setDefaultFieldState([])
-    }
-  }, [arrayFieldValue])
-
-  useEffect(() => {
-
-    // Update the array field in the react-hook-form context
-    if (itemList.length) {
-      updateFormValue(name, itemList.map(item => formatValue(item.value)).filter(value => value?.toString().trim()))
-    } else {
-      updateFormValue(name, [])
-    }
-  }, [itemList])
-
-
-  // TODO Simplify
-  useEffect(() => {
-    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue))
-  }, [addNewValue, formState])
-
-  
-  const generateId = () => {
-    const curr = counter;
-    setCounter(prev => prev + 1);
-    return curr;
-  }
-
-
-  const formatValue = (value: string) => {
-
-    switch (baseArrayType) {
-      case 'int4':
-        return formatInt(value);
-      case 'float4':
-        return formatFloat(value);
-      default:
-        return value;
-    }
-  }
-
-  const updateFormValue = (field: string, value: any) => {
-    if (getValues(field) === undefined || getValues(field) === '') {
-      register(field)
-    }
-    setValue(field, value)
-  }
-
-  /***
-   * Adds a new row at a specified index with a given value.
-   * @param index - index at the which new row needs to be created
-   * @param formKey ```[optional]``` specify the value that needs to be fetched from the react-hook-form. Empty if no value provided
-   */
-  const addItem = (index: number, formKey?: string) => () => {
-
-    const elementId = generateId();
-    index = typeof index === 'number' && index > -1 ? index + 1 : itemList.length
-    const formVal = formKey ? getValues(formKey) : ''
-
-    setItemList([...itemList.slice(0, index),
-    {
-      id: elementId,
-      value: formVal
-    },
-    ...itemList.slice(index, itemList.length)
-    ])
-
-    if (baseArrayType === 'timestamp') {
-      const v = formatDatetime(formVal, { outputMomentFormat: dataFormats.timestamp });
-
-      updateFormValue(`${name}-row-${elementId}-date`, formVal === '' ? '' : v?.date)
-      updateFormValue(`${name}-row-${elementId}-time`, formVal === '' ? '' : v?.time)
-    }
-    updateFormValue(`${name}-row-${elementId}`, formVal)
-  }
-
-  const setDefaultFieldState = (values: (string)[]) => {
-    setItemList(
-      values.length ?
-        values.map((defVal: string, idx: number): RowItem => {
-
-          if (baseArrayType === 'timestamp') {
-            const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });
-
-            updateFormValue(`${name}-row-${idx}-date`, defVal === '' ? '' : v?.date)
-            updateFormValue(`${name}-row-${idx}-time`, defVal === '' ? '' : v?.time)
-          }
-          updateFormValue(`${name}-row-${idx}`, defVal)
-
-          return {
-            id: idx,
-            value: defVal
-          }
-        })
-        :
-        []
-    )
-
-    setCounter(values.length + 1)
-  }
-
-  /**
-   * Delete row with a specific ID
-   * @param itemId id of row to be deleted
-   */
-  const deleteItemWithId = (itemId: number) => {
-    unregister(`${name}-row-${itemId}`)
-    setItemList([...itemList.filter((item: RowItem) => item.id !== itemId)])
-  }
-
-  /**
-   * Updates the state value of a given row
-   * @param id specify the row id
-   * @param fieldValue new value for the row
-   */
-  const onTextEdit = (id: number, fieldValue: string) => {
-    setItemList((prev: RowItem[]) => {
-      return [...prev.map((el: RowItem) => {
-        if (el.id === id) {
-          return {
-            id: id,
-            value: fieldValue
-          };
-        }
-        return el;
-      })
-      ]
-    })
-  }
+  }, [fields])
 
   const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(itemList);
-
-    if (!result.destination) {
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(itemList.length - 1, 0, reorderedItem);
-    } else {
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
+    if (result.destination) {
+      move(result.source.index, result.destination.index);
     }
-
-    setItemList(items);
   }
 
-  const DraggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
+
+  const DraggableItemRenderer = (item: any, index: number, disableInput: boolean | undefined) => {
 
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
-          return <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={name + '-' + item.id.toString()}>
+          return <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={item.id}>
             <div className='move-icon'>
               <i className='fa-solid fa-grip-vertical'></i>
             </div>
@@ -243,10 +57,10 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               <InputSwitch
                 {...props}
                 type={getInputType({ name: baseArrayType })}
-                {...register(`${name}-row-${item.id}`, {
-                  value: item.value !== undefined ? item.value : '', onChange: (event) => {
-                    onTextEdit(item.id, event.target.value);
-                  }
+                key={item.id}
+                {...register(`${name}.${index}.val`, {
+                  value: item.val,
+                  onChange: () => trigger(`${name}.${index}.val`)
                 })}
                 displayExtraDateTimeButtons={true}
                 displayDateTimeLabels={baseArrayType === 'date' ? false : true}
@@ -260,7 +74,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <div className='action-buttons'>
                   <button
                     type='button' className='fa-solid fa-trash chaise-btn chaise-btn-tertiary chaise-btn-sm'
-                    onClick={() => { deleteItemWithId(item.id) }}
+                    onClick={() => { remove(index) }}
                   />
                 </div>
               }
@@ -285,21 +99,21 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
           <div className='input-items-container-new'>
             <DragDropContext onDragEnd={handleOnDragEnd}>
-              <StrictModeDroppable droppableId={`${name}-input-items-new`}>
+              <ChaiseDroppable droppableId={`${name}-input-items-new`}>
                 {
                   (provided: DroppableProvided) => (
                     <ul
-                      className={`input-items-new ${itemList.length ? 'add-margin-bottom' : ''}`}
+                      className={`input-items-new ${fields.length ? 'add-margin-bottom' : ''}`}
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                       key={`${name}-list`}
                     >
-                      {itemList.map((item: RowItem, index: number) => DraggableItemRenderer(item, index, disableInput))}
+                      {fields.map((item: object & { id: string }, index: number) => DraggableItemRenderer(item, index, disableInput))}
                       {provided.placeholder}
                     </ul>
                   )
                 }
-              </StrictModeDroppable>
+              </ChaiseDroppable>
             </DragDropContext>
             <div className={`add-element-container ${baseArrayType}`}>
               <InputSwitch
@@ -311,7 +125,13 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               />
               <button
                 type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
-                onClick={addItem(-1, `${name}-new-item`)} disabled={disableAddButton}
+                onClick={() => append({ val: addNewValue })}
+                /**
+                 * We disable the Add button when - 
+                 * 1. There are validation errors in the addNewValue field.
+                 * 2. The addNewValue field value is empty
+                 */
+                disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
               >Add</button>
             </div>
           </div>
