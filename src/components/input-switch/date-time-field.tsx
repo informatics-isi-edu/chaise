@@ -38,14 +38,25 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   // NOTE: Including these context properties causes this component to redraw every time a change to the form occurs
   //   Can this functionality be done in a different way with react-hook-form to prevent so much rerendering when the component hasn't changed?
-  const { setValue, control, clearErrors, setError, getFieldState } = useFormContext();
+  const { setValue, control, clearErrors, setError, getFieldState, getValues } = useFormContext();
+  const dateTimeVal = useWatch({ name: props.name });
   const dateVal = useWatch({ name: `${props.name}-date` });
   const timeVal = useWatch({ name: `${props.name}-time` });
 
   const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
 
+
   useEffect(() => {
-    /**
+    // Set default values if they exists
+    if (!dateVal && !timeVal && dateTimeVal) {
+      const v = formatDatetime(dateTimeVal, { outputMomentFormat: DATE_TIME_FORMAT })
+
+      setValue(`${props.name}-date`, v?.date);
+      setValue(`${props.name}-time`, v?.time);
+    }
+  }, [])
+
+  useEffect(() => {/**
      * this will make sure we're updating the underlying value after
      * each update to the date and time fields.
      *
@@ -208,6 +219,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
                 className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
                 type='text' disabled={props.disableInput} {...timeField} onChange={handleTimeChange}
                 placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.time}
+              // value={timeVal} //default time value does not reflect in the input element by setting the form state alone.
               />
               <ClearInputBtn
                 btnClassName={`${props.clearTimeClasses} input-switch-clear`}
