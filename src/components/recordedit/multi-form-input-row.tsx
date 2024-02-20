@@ -270,12 +270,16 @@ const MultiFormInputRow = ({
   const checkForeignKeyDomainFilter = async () => {
     let domainFilterFormNumber = activeForms && activeForms.length > 0 ? activeForms[0] : 1;
 
-    if (!cm.hasDomainFilter || !activeForms || activeForms.length < 2) {
+    if (!cm.hasDomainFilter) {
       return { allowed: true, domainFilterFormNumber };
     }
 
     // remove the existing error
     clearErrors(inputName);
+
+    if (!activeForms || activeForms.length < 2) {
+      return { allowed: true, domainFilterFormNumber }
+    }
 
     // make sure the computed references are the same
     let computedRefURI = '';
@@ -302,7 +306,11 @@ const MultiFormInputRow = ({
       const usedColsSummary = usedCols.reduce((res, curr, currIndex, arr) => {
         res += `<code>${curr.displayname.value}</code>`;
         if (currIndex < arr.length - 1) {
-          res += (currIndex === arr.length - 2) ? ' and ' : ', ';
+          if (currIndex !== arr.length - 2) {
+            res += ', ';
+          } else {
+            res += ((arr.length !== 2) ? ',' : '') + ' and ';
+          }
         }
         return res;
       }, '');

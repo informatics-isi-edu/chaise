@@ -1,10 +1,12 @@
 [
   {
     "id": "1",
-    "text_col": "val1"
+    "text_col": "val1",
+    "text_col_2": "val1"
   },
   {
     "id": "2",
-    "text_col": "val2"
+    "text_col": "val2",
+    "text_col_2": "val2"
   }
 ]
