@@ -204,6 +204,7 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
