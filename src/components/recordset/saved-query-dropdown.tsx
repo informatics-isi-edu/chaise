@@ -4,6 +4,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DuplicateSavedQueryModal from '@isrd-isi-edu/chaise/src/components/modals/duplicate-saved-query-modal';
 import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedit';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -583,7 +584,7 @@ const SavedQueryDropdown = ({
       return (
         <ChaiseTooltip
           placement='bottom-end'
-          tooltip={<span>Please login to be able to save searches for <code>{reference.displayname.value}</code>.</span>}
+          tooltip={<span>Please login to be able to save searches for <code><DisplayValue value={reference.displayname} /></code>.</span>}
         >
           <div className='chaise-btn chaise-btn-primary disabled dropdown-toggle'>
             <span className='chaise-btn-icon fa-solid fa-floppy-disk' />

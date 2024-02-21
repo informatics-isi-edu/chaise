@@ -601,7 +601,7 @@ const RecordInner = ({
       >
         <ChaiseTooltip
           placement='right'
-          tooltip={<span>Scroll to the <code>{displayname.value}</code> section{pageInfo}</span>}
+          tooltip={<span>Scroll to the <code><DisplayValue value={displayname} /></code> section{pageInfo}</span>}
         >
           <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
             <DisplayValue value={displayname} />
