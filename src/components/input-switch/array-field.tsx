@@ -5,18 +5,25 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 
 // utils
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import React, { useEffect, useState } from 'react';
+import { formatDatetime, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import React from 'react';
 import {
-  DragDropContext, Draggable, DraggableProvided, Droppable, DroppableProps, DroppableProvided, DropResult
+  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import { dataFormats } from '../../utils/constants';
 import ChaiseDroppable from '../chaise-droppable';
 
 
 type ArrayFieldProps = InputFieldProps & {
-  /* the type of each element in the array */
+  /**
+   * the type of each element in the array 
+   */
   baseArrayType: string,
+  /**
+   * represents the presence of timezone in case of TimeStamp field
+   */
+  hasTimezone?: boolean
 };
 
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
@@ -30,16 +37,27 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const addNewValue = useWatch({ name: `${name}-new-item` });
 
 
-  // TODO - remove this block
-  useEffect(() => {
-    console.log(fields);
-
-  }, [fields])
-
   const handleOnDragEnd = (result: DropResult) => {
     if (result.destination) {
       move(result.source.index, result.destination.index);
     }
+  }
+
+  const addItem = (value: any) => {
+
+    let valueToAdd: any = {
+      "val": value
+    }
+
+    if (getInputType({ name: baseArrayType }) === `timestamp`) {
+      const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
+      const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
+
+      valueToAdd["val-date"] = v?.date
+      valueToAdd["val-time"] = v?.time
+    }
+
+    append(valueToAdd)
   }
 
 
@@ -125,7 +143,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               />
               <button
                 type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
-                onClick={() => append({ val: addNewValue })}
+                onClick={() => addItem(addNewValue)}
                 /**
                  * We disable the Add button when - 
                  * 1. There are validation errors in the addNewValue field.
