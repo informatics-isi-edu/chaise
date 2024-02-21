@@ -18,6 +18,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type IframeFieldModalProps = {
   /**
@@ -103,7 +104,7 @@ const IframeFieldModal = ({
   useEffect(() => {
     if (!showModal) return;
     const recieveIframeMessage = (event: any) => {
-      if (event.origin !== window.location.origin) return;
+      if (event.origin !== windowRef.location.origin) return;
       const mapping = columnModel.column.inputIframeProps.fieldMapping;
       const optionalFieldNames = columnModel.column.inputIframeProps.optionalFieldNames;
 
@@ -228,10 +229,10 @@ const IframeFieldModal = ({
     /**
      * listen for the messages that the iframe will send
      */
-    window.addEventListener('message', recieveIframeMessage);
+    windowRef.addEventListener('message', recieveIframeMessage);
 
     return () => {
-      window.removeEventListener('message', recieveIframeMessage);
+      windowRef.removeEventListener('message', recieveIframeMessage);
     }
   }, [showModal]);
 

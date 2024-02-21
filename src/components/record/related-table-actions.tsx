@@ -115,7 +115,7 @@ const RelatedTableActions = ({
    * So we should put resize sensor on a container that won’t be affected by the logic inside it.
    * We are using ResizeSensor to listen to the resize event.
    */
-    const mainContainer:any = document.querySelector('.main-container');
+    const mainContainer: any = document.querySelector('.main-container');
     const calculateButtons = () => {
 
       let buttons: any = [];
@@ -135,33 +135,33 @@ const RelatedTableActions = ({
         let totalWidth = 0;
 
         //This condition is to push all the buttons to the dropdown when the container width is below 200
-          if (showAllActionsAsDropdown) {
-            buttonContainer.style.height = '0';
-          } else {
-            buttonContainer.style.height = '30px';
+        if (showAllActionsAsDropdown) {
+          buttonContainer.style.height = '0';
+        } else {
+          buttonContainer.style.height = '30px';
+        }
+        // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
+        // is overflowing the container width. If yes, push the button to the dropdown
+
+        buttons.forEach((button: any, index: number) => {
+          const buttonWidth = button.getBoundingClientRect().width;
+          if (index === 0) {
+            buttonLeftOffset =
+              button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
           }
-          // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
-          // is overflowing the container width. If yes, push the button to the dropdown
 
-          buttons.forEach((button: any, index: number) => {
-            const buttonWidth = button.getBoundingClientRect().width;
-            if (index === 0) {
-              buttonLeftOffset =
-                button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
-            }
-
-            if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
-              // calculate the total button container width if it doesn't overflow
-              totalWidth += buttonWidth;
-              if(showAllActionsAsDropdown){
-                tableHeaderButtonsToAddToDropdown.push(button);
-              }
-            } else {
-              // Push to dropdown if it overflowa
+          if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
+            // calculate the total button container width if it doesn't overflow
+            totalWidth += buttonWidth;
+            if (showAllActionsAsDropdown) {
               tableHeaderButtonsToAddToDropdown.push(button);
             }
-          });
-          setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
+          } else {
+            // Push to dropdown if it overflowa
+            tableHeaderButtonsToAddToDropdown.push(button);
+          }
+        });
+        setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
       }
     };
     calculateButtons();
@@ -175,16 +175,15 @@ const RelatedTableActions = ({
     };
   }, [showAllActionsAsDropdown]);
 
-   // This function is to toggle the dropdown to show or hide with options
-   const toggleDropdown = (bool: boolean, evt: any) => {
+  // This function is to toggle the dropdown to show or hide with options
+  const toggleDropdown = (bool: boolean, evt: any) => {
     evt.originalEvent.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
   };
 
   // Adding different classname for table header and main section to apply styles
-  const containerClassName = `related-table-actions ${
-    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
-  }`;
+  const containerClassName = `related-table-actions ${!relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
+    }`;
 
   /*
    * Callback function for dropdown item click
@@ -197,8 +196,10 @@ const RelatedTableActions = ({
         onExplore(evt);
         break;
       case 'Link records':
+        onLinkRecords(evt);
+        break;
       case 'Add records':
-        onCreate(evt);
+        onAddRecords(evt);
         break;
       case 'Edit Records':
         onUnlink(evt);
@@ -234,15 +235,22 @@ const RelatedTableActions = ({
     toggleRelatedDisplayMode(relatedModel.index, relatedModel.isInline);
   };
 
-  const onCreate = (e: MouseEvent<HTMLElement>) => {
+  const onLinkRecords = (e: MouseEvent<HTMLElement>) => {
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
 
-    if (relatedModel.isPureBinary) {
-      pauseUpdateRecordPage();
-      openAddPureBinaryModal();
-      return;
-    }
+    pauseUpdateRecordPage();
+    openAddPureBinaryModal();
+  }
+
+  // Generate a unique id for this request
+  // append it to the URL
+  const addReferrerId = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+  // Generate a unique cookie name and set it to expire after 24hrs.
+  const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+  const onAddRecords = (e: MouseEvent<HTMLElement>) => {
+    // this is to avoid the accordion header to recieve the click
+    e.stopPropagation();
 
     // log the client action
     LogService.logClientAction(
@@ -256,36 +264,18 @@ const RelatedTableActions = ({
       relatedModel.initialReference.defaultLogInfo
     );
 
-    // Generate a unique cookie name and set it to expire after 24hrs.
-    const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
     const cookieValue = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
     CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + 60 * 60 * 24 * 1000));
 
-    // Generate a unique id for this request
-    // append it to the URL
-    const referrer_id = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
-
     if (!!containerRef.current) {
       fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, containerRef.current, {
-        id: referrer_id,
+        id: addReferrerId,
         containerDetails: {
           isInline: relatedModel.isInline,
           index: relatedModel.index,
         },
       });
     }
-
-    // Redirect to the url in a new tab
-    windowRef.open(
-      addQueryParamsToURL(
-        relatedModel.initialReference.unfilteredReference.contextualize.entryCreate.appLink,
-        {
-          prefill: cookieName,
-          invalidate: referrer_id,
-        }
-      ),
-      '_blank'
-    );
   };
 
   const openAddPureBinaryModal = () => {
@@ -648,9 +638,8 @@ const RelatedTableActions = ({
     return (
       <ChaiseTooltip placement='top' tooltip={tooltip}>
         <button
-          className={`chaise-btn toggle-display-link ${
-            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-          }`}
+          className={`chaise-btn toggle-display-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+            }`}
           onClick={tertiary ? undefined : onToggleDisplayMode}
         >
           <span className={`chaise-btn-icon ${icon}`}></span>
@@ -701,14 +690,14 @@ const RelatedTableActions = ({
 
   const renderBulkEditBtnTooltip = () => {
     if (relatedModel.recordsetState.page?.length < 1) {
-      return(
+      return (
         <span>
           Unable to edit {currentTable} records until some are created.
         </span>
       )
     }
 
-    return(
+    return (
       <span>
         Edit this page of {currentTable} records related to this {mainTable}.
       </span>
@@ -728,7 +717,7 @@ const RelatedTableActions = ({
       >
         {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`, false)}
 
-        {relatedModel.isPureBinary && relatedModel.canDelete &&  renderButton('Unlink records', false)}
+        {relatedModel.isPureBinary && relatedModel.canDelete && renderButton('Unlink records', false)}
 
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
         {/*
@@ -762,9 +751,8 @@ const RelatedTableActions = ({
             }
           >
             <a
-              className={`chaise-btn more-results-link ${
-                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-              }`}
+              className={`chaise-btn more-results-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
               href={exploreLink}
               onClick={onExplore}
             >
@@ -783,7 +771,7 @@ const RelatedTableActions = ({
             <a
               className={`chaise-btn bulk-edit-link
                 ${tertiary ? ' chaise-btn-tertiary dropdown-button' : ' chaise-btn-secondary'}
-                ${disableBulkEdit ? ' disabled': ''}`
+                ${disableBulkEdit ? ' disabled' : ''}`
               }
               href={editLink}
               onClick={onBulkEdit}
@@ -795,20 +783,46 @@ const RelatedTableActions = ({
           </ChaiseTooltip>
         );
       case 'Link records':
-      case 'Add records':
         return (
           <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
-          <button
-          className={`chaise-btn add-records-link ${
-            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-          }`}
-            onClick={tertiary ? undefined : onCreate}
-            disabled={relatedModel.canCreateDisabled}
-          >
-            <span className='chaise-btn-icon fa-solid fa-plus'></span>
-            <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
-          </button>
-        </ChaiseTooltip>
+            <button
+              className={`chaise-btn add-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
+              onClick={tertiary ? undefined : onLinkRecords}
+              disabled={relatedModel.canCreateDisabled}
+            >
+              <span className='chaise-btn-icon fa-solid fa-plus'></span>
+              <span>Link records</span>
+            </button>
+          </ChaiseTooltip>
+        )
+      case 'Add records':
+        let addRecordProps = {}
+        if (!tertiary) {
+          addRecordProps = {
+            href: addQueryParamsToURL(
+              relatedModel.initialReference.unfilteredReference.contextualize.entryCreate.appLink,
+              {
+                prefill: cookieName,
+                invalidate: addReferrerId,
+              }),
+              onClick: onAddRecords,
+              onContextMenu: onAddRecords,
+              rel: 'noreferrer',
+              target: '_blank'
+          }
+        }
+        return (
+          <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
+            <a
+              className={`chaise-btn add-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }${relatedModel.canCreateDisabled ? ' disabled' : ''}`}
+              {...addRecordProps}
+            >
+              <span className='chaise-btn-icon fa-solid fa-plus'></span>
+              <span>Add records</span>
+            </a>
+          </ChaiseTooltip>
         )
       case 'Unlink records':
         return (
@@ -821,9 +835,8 @@ const RelatedTableActions = ({
             }
           >
             <button
-            className={`chaise-btn unlink-records-link ${
-              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-            }`}
+              className={`chaise-btn unlink-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
               onClick={tertiary ? undefined : onUnlink}
             >
               <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
@@ -845,27 +858,27 @@ const RelatedTableActions = ({
         {buttonsInDropdown.length > 0 && (
           <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
             <ChaiseTooltip
-          placement='top'
-          tooltip={
-            <span>
-              {`${showAllActionsAsDropdown ? 'View the available actions.' : 'View the extra available actions.'}`}
-            </span>
-          }
-        >
-            <Dropdown.Toggle
-              disabled={false}
-              className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${showAllActionsAsDropdown
-                && !relatedModel.isInline ? 'show-all-actions-as-dropdown' : ''}`}
+              placement='top'
+              tooltip={
+                <span>
+                  {`${showAllActionsAsDropdown ? 'View the available actions.' : 'View the extra available actions.'}`}
+                </span>
+              }
             >
-              <span className='fa fa-angle-double-right'></span>
-            </Dropdown.Toggle>
+              <Dropdown.Toggle
+                disabled={false}
+                className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${showAllActionsAsDropdown
+                  && !relatedModel.isInline ? 'show-all-actions-as-dropdown' : ''}`}
+              >
+                <span className='fa fa-angle-double-right'></span>
+              </Dropdown.Toggle>
             </ChaiseTooltip>
             <Dropdown.Menu>
               {buttonsInDropdown.map((button: any, index) => (
                 <Dropdown.Item
                   as={'li'}
                   key={`dropdown-button-${index}`}
-                   onClick={(e: any) => handleDropDownClick(e, button)}
+                  onClick={(e: any) => handleDropDownClick(e, button)}
                 >
                   {renderButton(button.textContent, true)}
                 </Dropdown.Item>

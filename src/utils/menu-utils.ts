@@ -14,6 +14,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utilities
 import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /* ===== Interfaces ===== */
 export interface MenuOption {
@@ -54,7 +55,7 @@ function _getPath(cc: any): string {
       if (path[path.length - 1] !== '/') path += '/';
     }
 
-    _path = window.location.host + path;
+    _path = windowRef.location.host + path;
   }
 
   return _path;

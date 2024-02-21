@@ -434,10 +434,10 @@ export default function RecordeditProvider({
       e.returnValue = 'Do you want to leave this page? Changes you have made will not be saved.';
     }
 
-    window.removeEventListener('beforeunload', avoidLeave);
-    window.addEventListener('beforeunload', avoidLeave);
+    windowRef.removeEventListener('beforeunload', avoidLeave);
+    windowRef.addEventListener('beforeunload', avoidLeave);
     return () => {
-      window.removeEventListener('beforeunload', avoidLeave);
+      windowRef.removeEventListener('beforeunload', avoidLeave);
     };
   }, [loginModal, errors]);
 
@@ -494,11 +494,11 @@ export default function RecordeditProvider({
               // check if there is a window that opened the current one
               // make sure the update function is defined for that window
               // verify whether we still have a valid vaue to call that function with
-              if (window.opener && window.opener.updated && queryParams.invalidate) {
-                window.opener.updated(queryParams.invalidate);
+              if (windowRef.opener && windowRef.opener.updated && queryParams.invalidate) {
+                windowRef.opener.updated(queryParams.invalidate);
               }
             } catch (exp) {
-              // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+              // if windowRef.opener is from another origin, this will result in error on accessing any attribute in windowRef.opener
               // And if it's from another origin, we don't need to call updated since it's not
               // the same row that we wanted to update in recordset (table directive)
             }

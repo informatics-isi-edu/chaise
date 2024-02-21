@@ -377,7 +377,7 @@ const RecordsetInner = ({
       if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
         permalink?.removeEventListener('contextmenu', logPermalink);
       }
-      window.removeEventListener('focus', onFocus);
+      windowRef.removeEventListener('focus', onFocus);
     }
   }, []);
 
@@ -387,18 +387,18 @@ const RecordsetInner = ({
    * update function changes
    */
   useEffect(() => {
-    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
 
-    window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
-    window.addEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
+    windowRef.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
+    windowRef.addEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
 
-    window.removeEventListener('focus', onFocus);
-    window.addEventListener('focus', onFocus);
+    windowRef.removeEventListener('focus', onFocus);
+    windowRef.addEventListener('focus', onFocus);
     return () => {
-      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-      window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
-      window.removeEventListener('focus', onFocus);
+      windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+      windowRef.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
+      windowRef.removeEventListener('focus', onFocus);
     };
   }, [update]);
 

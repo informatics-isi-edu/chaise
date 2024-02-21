@@ -76,7 +76,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       // success callback
       const successCb: sessionCbFunction = (response?: Session | null) => {
         if (shouldReloadPageAfterLogin(session)) {
-          window.location.reload();
+          windowRef.location.reload();
         } else if (response && !isSameSessionAsPrevious(response)) {
           dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
         }
@@ -193,7 +193,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
 
     // open a window with proper position and width and height
-    const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
+    const win = windowRef.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
 
     // focus on the opened window
     win?.focus();
@@ -216,7 +216,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   ) => {
     const referrerId = '' + (new Date().getTime());
 
-    const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
+    const referrerUrl = `${windowRef.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
     const url = `${serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
@@ -247,10 +247,10 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       } else if (data.login_form !== undefined) {
         // we want to use the old login flow to login
         // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
-        win = window;
+        win = windowRef;
         // prevents the dialog from popping up shortly before the page redirects to login
         type = '';
-        const referrer = window.location.href;
+        const referrer = windowRef.location.href;
         const login_form = data.login_form;
         login_url = `../login?referrer=${fixedEncodeURIComponent(referrer)}`;
         const method = login_form.method;
@@ -311,7 +311,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // post login callback function
   const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
-    window.addEventListener('message', (args) => {
+    windowRef.addEventListener('message', (args) => {
       if (args && args.data && (typeof args.data === 'string')) {
         AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
         AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
@@ -366,7 +366,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // object with type - { data: Session }
     return ConfigService.http.get(`${serviceURL}/authn/session`, config).then((response: any) => {
       if (context === '401' && shouldReloadPageAfterLogin(response)) {
-        // window.location.reload();
         return response.data;
       }
 
@@ -443,8 +442,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   const refreshLogin = (action: string) => {
     // get referrerid from browser url
-    const referrerId = queryStringToJSON(window.location.search).referrerid,
-      preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
+    const referrerId = queryStringToJSON(windowRef.location.search).referrerid,
+      preauthReferrer = windowRef.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
       redirectUrl = serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
 
     // TODO: type of config/headers object

@@ -234,8 +234,8 @@ const RecordInner = ({
    * updateRecordPage function changes
    */
   useEffect(() => {
-    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
 
     windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
     windowRef.addEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
@@ -246,7 +246,7 @@ const RecordInner = ({
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
     return () => {
-      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+      windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
