@@ -182,8 +182,9 @@ const RelatedTableActions = ({
   };
 
   // Adding different classname for table header and main section to apply styles
-  const containerClassName = `related-table-actions ${!relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
-    }`;
+  const containerClassName = `related-table-actions ${
+    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
+  }`;
 
   /*
    * Callback function for dropdown item click
@@ -638,8 +639,9 @@ const RelatedTableActions = ({
     return (
       <ChaiseTooltip placement='top' tooltip={tooltip}>
         <button
-          className={`chaise-btn toggle-display-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-            }`}
+          className={`chaise-btn toggle-display-link ${tertiary ? 
+            'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+          }`}
           onClick={tertiary ? undefined : onToggleDisplayMode}
         >
           <span className={`chaise-btn-icon ${icon}`}></span>
@@ -751,8 +753,9 @@ const RelatedTableActions = ({
             }
           >
             <a
-              className={`chaise-btn more-results-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-                }`}
+              className={`chaise-btn more-results-link ${
+                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+              }`}
               href={exploreLink}
               onClick={onExplore}
             >
@@ -786,8 +789,9 @@ const RelatedTableActions = ({
         return (
           <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
             <button
-              className={`chaise-btn add-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-                }`}
+              className={`chaise-btn add-records-link ${
+                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+              }`}
               onClick={tertiary ? undefined : onLinkRecords}
               disabled={relatedModel.canCreateDisabled}
             >
@@ -815,8 +819,10 @@ const RelatedTableActions = ({
         return (
           <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
             <a
-              className={`chaise-btn add-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-                }${relatedModel.canCreateDisabled ? ' disabled' : ''}`}
+              className={`chaise-btn add-records-link 
+                ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'}
+                ${relatedModel.canCreateDisabled ? ' disabled' : ''}`
+              }
               {...addRecordProps}
             >
               <span className='chaise-btn-icon fa-solid fa-plus'></span>
@@ -835,8 +841,9 @@ const RelatedTableActions = ({
             }
           >
             <button
-              className={`chaise-btn unlink-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-                }`}
+              className={`chaise-btn unlink-records-link ${
+                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+              }`}
               onClick={tertiary ? undefined : onUnlink}
             >
               <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>

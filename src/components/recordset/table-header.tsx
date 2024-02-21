@@ -16,7 +16,6 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // utilities
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { addQueryParamsToURL, fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { CUSTOM_EVENTS, RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
