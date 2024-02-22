@@ -33,17 +33,6 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     reference, totalRowCount, update, isLoading
   } = useRecordset();
 
-  const [editAppLink, setEditAppLink] = useState<string>(reference.table?.reference?.contextualize?.entryEdit.appLink);
-  useEffect(() => {
-    let tempLink = reference.table?.reference?.contextualize?.entryEdit.appLink;
-
-    if (tempLink.indexOf('?limit=') === -1 && tempLink.indexOf('&limit=') === -1) {
-      tempLink = tempLink + (tempLink.indexOf('?') === -1 ? '?limit=' : '&limit=') + pageLimit;
-    }
-
-    setEditAppLink(tempLink);
-  }, [pageLimit, reference])
-
   const container = useRef<HTMLDivElement>(null);
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
@@ -62,6 +51,16 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   createAppLink = addQueryParamsToURL(createAppLink, {
     invalidate: fixedEncodeURIComponent(createReferrerID)
   }); 
+
+  const editAppLink = () => {
+    let tempLink = reference.contextualize?.entryEdit.appLink;
+
+    if (tempLink.indexOf('?limit=') === -1 && tempLink.indexOf('&limit=') === -1) {
+      tempLink = tempLink + (tempLink.indexOf('?') === -1 ? '?limit=' : '&limit=') + pageLimit;
+    }
+
+    return tempLink;
+  }
 
   const renderPageLimits = () => pageLimits.map((limit: number, index: number) => {
     return (<Dropdown.Item
@@ -259,8 +258,10 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
             >
               <span>
                 <a
-                  className={`chaise-btn chaise-btn-primary chaise-table-header-edit-link${shouldEditButtonDisabled() ? ' disabled' : ''}`}
-                  href={editAppLink}
+                  className={`chaise-btn chaise-btn-primary chaise-table-header-edit-link${
+                    shouldEditButtonDisabled() ? ' disabled' : ''
+                  }`}
+                  href={editAppLink()}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pen' />
                   <span>Bulk Edit</span>
