@@ -270,6 +270,7 @@ const MultiFormInputRow = ({
   const checkForeignKeyDomainFilter = async () => {
     let domainFilterFormNumber = activeForms && activeForms.length > 0 ? activeForms[0] : 1;
 
+    // if the fk doesn't have any domain-filter, we can just proceed without any checks
     if (!cm.hasDomainFilter) {
       return { allowed: true, domainFilterFormNumber };
     }
@@ -288,13 +289,13 @@ const MultiFormInputRow = ({
       if (formIndex === 0) {
         domainFilterFormNumber = formNumber;
         computedRefURI = ref.uri;
-      } else {
-        return computedRefURI === ref.uri;
+        return true;
       }
-      return true;
+
+      return computedRefURI === ref.uri;
     });
 
-    // some domain-filters are different, so we cannot proceed
+    // if all domain-filters are the same, we can proceed with openning the fk popup/dropdown
     if (areAllSame) {
       return { allowed: true, domainFilterFormNumber };
     }
@@ -325,6 +326,8 @@ const MultiFormInputRow = ({
     /**
      * if we should show an error, just add a dummy wait time so the previous
      * error is cleared and then we show it again.
+     * this is added for the cases when we have a small number of forms. in this case the operation is very quick,
+     * so we are adding a dummy wait so users can actually see the spinner.
      */
     await asyncTimeout(20);
 

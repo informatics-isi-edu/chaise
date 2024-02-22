@@ -98,6 +98,10 @@ export type RecordeditForeignkeyCallbacks = {
   onChange?: (column: any, rowData: any) => true | string,
   /**
    * if defined, will be called before opening the modal selector.
+   * The returned promise must be resolved with an object with the following props:
+   * - allowed: whether we can continue with opening the fk popup/dropdown
+   * - domainFilterFormNumber: The formNumber that should be used for generating the filteredRef
+   *   (this is useful for multi-form input where we're not necessarily have the first form selected)
    */
   onAttemptToChange?: () => Promise<{allowed: boolean, domainFilterFormNumber?: number}>;
 }
