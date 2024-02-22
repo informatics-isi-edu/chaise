@@ -1984,7 +1984,7 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
 
 /**
  *
- * expected types: 'timestamp', 'boolean', 'fk', any other string
+ * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', any other string
  *
  * expected valueProps:
  * {
@@ -2036,7 +2036,27 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
           return chaisePage.clickButton(el);
         }).then(() => {
           // wait for modal to close
-          return browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+          return browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()));
+        }).then(() => {
+          resolve();
+        }).catch(err => reject(err));
+        break;
+      case 'fk-dropdown':
+        let dropdownOptions;
+        chaisePage.clickButton(recordEditPage.getDropdownElementByName(name, formNumber)).then(() => {
+          return browser.wait(() => {
+            return chaisePage.recordEditPage.getDropdownSelectableOptions().count().then((ct) => {
+                return ct === valueProps.modal_num_rows;
+            });
+          });
+        }).then(() => {
+          dropdownOptions = dropdownOptions = chaisePage.recordEditPage.getDropdownSelectableOptions();
+          expect(dropdownOptions.count()).toEqual(valueProps.modal_num_rows);
+          //select the option
+          return chaisePage.clickButton(dropdownOptions.get(valueProps.modal_option_index));
+        }).then(() => {
+          // wait for the dropdown to close
+          return chaisePage.waitForElementInverse(dropdownOptions);
         }).then(() => {
           resolve();
         }).catch(err => reject(err));

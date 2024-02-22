@@ -279,6 +279,14 @@ export function debounce(callback: Function, timeout: number) {
 }
 
 /**
+ * create a timeout that can be used in async/await fns
+ * @param ms how long we should wait
+ */
+export function asyncTimeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
  * This function is used for firing custom events
  * @param {string} eventName - the event name
  * @param {string|Element} targetElement - a DOM element from which the event will propogate

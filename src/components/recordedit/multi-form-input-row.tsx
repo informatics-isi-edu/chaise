@@ -13,6 +13,8 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { asyncTimeout } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type MultiFormInputRowProps = {
   /**
@@ -22,7 +24,7 @@ type MultiFormInputRowProps = {
   /**
   * The forms which are active.
   */
-  activeForms?: any[];
+  activeForms?: number[];
   /**
   * The state function to set active forms.
   */
@@ -51,10 +53,14 @@ const MultiFormInputRow = ({
 
   const cm = columnModels[columnModelIndex];
   const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
+  const isForeignKey = cm.column.isForeignKey;
 
-  const { formState: { errors }, getValues, setValue } = useFormContext();
+  const colName = cm.column.name;
+  const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
+
+  const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
-  const selectAllFieldValue = useWatch({ name: `${MULTI_FORM_INPUT_FORM_VALUE}-${cm.column.name}` });
+  const selectAllFieldValue = useWatch({ name: inputName });
 
   const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
@@ -257,10 +263,82 @@ const MultiFormInputRow = ({
     setShowApplyAllSpinner(false);
   };
 
-  // -------------------------- render logic ---------------------- //
+  /**
+   * if the fk input has a domain-filter, we have to make sure it's identical
+   * for all the selected rows. otherwise we won't be able to offer this feature.
+   */
+  const checkForeignKeyDomainFilter = async () => {
+    let domainFilterFormNumber = activeForms && activeForms.length > 0 ? activeForms[0] : 1;
 
-  const colName = cm.column.name;
-  const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
+    // if the fk doesn't have any domain-filter, we can just proceed without any checks
+    if (!cm.hasDomainFilter) {
+      return { allowed: true, domainFilterFormNumber };
+    }
+
+    // remove the existing error
+    clearErrors(inputName);
+
+    if (!activeForms || activeForms.length < 2) {
+      return { allowed: true, domainFilterFormNumber }
+    }
+
+    // make sure the computed references are the same
+    let computedRefURI = '';
+    const areAllSame = activeForms.every((formNumber: number, formIndex: number) => {
+      const ref = createForeignKeyReference(cm.column, reference, formNumber, foreignKeyData, getValues);
+      if (formIndex === 0) {
+        domainFilterFormNumber = formNumber;
+        computedRefURI = ref.uri;
+        return true;
+      }
+
+      return computedRefURI === ref.uri;
+    });
+
+    // if all domain-filters are the same, we can proceed with openning the fk popup/dropdown
+    if (areAllSame) {
+      return { allowed: true, domainFilterFormNumber };
+    }
+
+    const usedCols = cm.column.domainFilterUsedColumns;
+
+    let errorMessage = '';
+    if (Array.isArray(usedCols) && usedCols.length > 0) {
+      const usedColsSummary = usedCols.reduce((res, curr, currIndex, arr) => {
+        res += `<code>${curr.displayname.value}</code>`;
+        if (currIndex < arr.length - 1) {
+          if (currIndex !== arr.length - 2) {
+            res += ', ';
+          } else {
+            res += ((arr.length !== 2) ? ',' : '') + ' and ';
+          }
+        }
+        return res;
+      }, '');
+      errorMessage = `This feature is constrained by ${usedColsSummary}.`;
+    } else {
+      errorMessage = `This feature is constrained by other fields (hint: <code>${cm.column.domainFilterRawString}</code>).`;
+    }
+    errorMessage += ` Make sure all the records you want to set <code>${cm.column.displayname.value}</code> for`;
+    errorMessage += ', have the same values for those fields.';
+    errorMessage += ' Try again after upadting those fields.';
+
+    /**
+     * if we should show an error, just add a dummy wait time so the previous
+     * error is cleared and then we show it again.
+     * this is added for the cases when we have a small number of forms. in this case the operation is very quick,
+     * so we are adding a dummy wait so users can actually see the spinner.
+     */
+    await asyncTimeout(20);
+
+    // calling set-value to "touch" the input. otherwise the error won't show up.
+    setValue(inputName, '', { shouldTouch: true });
+    setError(inputName, { type: 'custom-domain-filter-error', message: errorMessage });
+
+    return { allowed: false };
+  };
+
+  // -------------------------- render logic ---------------------- //
 
   const renderHelpTooltip = () => {
     const splitLine1 =
@@ -395,6 +473,7 @@ const MultiFormInputRow = ({
             parentReference={reference}
             foreignKeyData={foreignKeyData}
             waitingForForeignKeyData={waitingForForeignKeyData}
+            foreignKeyCallbacks={isForeignKey ? { onAttemptToChange: checkForeignKeyDomainFilter } : undefined}
           />
         </div>
       </div>

@@ -144,12 +144,140 @@
               "type": {
                   "typename": "text"
               }
+          },
+          {
+            "name": "text_col",
+            "type": {
+                "typename": "text"
+            }
           }
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:table-display" : {
           "row_name": {
               "row_markdown_pattern": "{{{name}}}"
+          }
+        }
+      }
+    },
+    "table_w_domain_filter": {
+      "kind": "table",
+      "table_name": "table_w_domain_filter",
+      "schema_name": "multi-form-input",
+      "keys": [{"unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [["multi-form-input", "table_w_domain_filter_fk1"]],
+          "foreign_key_columns": [
+              {
+                  "column_name": "fk_col",
+                  "table_name": "table_w_domain_filter",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "referenced_columns": [
+              {
+                  "column_name": "id",
+                  "table_name": "f1",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:foreign-key": {
+              "domain_filter": {
+                  "ermrest_path_pattern": "text_col={{{text_col}}}",
+                  "pattern_sources": ["text_col"]
+              }
+            }
+          }
+        },
+        {
+          "names": [["multi-form-input", "table_w_domain_filter_fk2"]],
+          "foreign_key_columns": [
+              {
+                  "column_name": "fk2_col",
+                  "table_name": "table_w_domain_filter",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "referenced_columns": [
+              {
+                  "column_name": "id",
+                  "table_name": "f1",
+                  "schema_name": "multi-form-input"
+              }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:foreign-key": {
+              "domain_filter": {
+                  "ermrest_path_pattern": "text_col={{{text_col_2}}}",
+                  "pattern_sources": [
+                    {"sourcekey": "text_col_2_source_def"},
+                    ["multi-form-input", "table_w_domain_filter_fk1"]
+                  ]
+              },
+              "display": {
+                "entry": {
+                    "selector_ux_mode": "simple-search-dropdown"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          }
+        },
+        {
+          "name": "text_col",
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Text column"
+            }
+          }
+        },
+        {
+          "name": "text_col_2",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk2_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id", "text_col", "text_col_2",
+            ["multi-form-input", "table_w_domain_filter_fk1"], ["multi-form-input", "table_w_domain_filter_fk2"]
+          ]
+        },
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "columns": true,
+          "fkeys": false,
+          "sources": {
+            "text_col_2_source_def": {
+              "source": "text_col_2",
+              "markdown_name": "Second text column"
+            }
           }
         }
       }

@@ -304,6 +304,7 @@ describe('input-iframe support in recordedit', () => {
 
         // value is displayed properly
         const val = recordEditPage.getIframeInputDisplay(iframeInputContainer);
+        chaisePage.waitForElement(val);
         expect(val.getText()).toBe(testParams.edit.newValues.creator);
 
         done();
