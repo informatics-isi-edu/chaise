@@ -129,7 +129,7 @@ const ChaiseNavbar = (): JSX.Element => {
     const debouncedFunc = debounce(setHeight, 500);
 
     // Call when there is resize event
-    window.addEventListener('resize', debouncedFunc);
+    windowRef.addEventListener('resize', debouncedFunc);
   }, []);
 
   /**
