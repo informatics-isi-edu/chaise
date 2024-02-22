@@ -448,6 +448,9 @@ To handle global errors, the app wrapper adds an `ErrorProvider` to handle the e
 ### Chaise Navbar
 The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
 
+### Buttons vs Links
+We want to be aware of why we are using `<button>` or `<a>` tags. Generally we should use `<a>` for navigation when possible since this allows for other operating system and browser features. More details about which buttons and links are used for actions or navigation can be found in [this spreadsheet](https://docs.google.com/spreadsheets/d/1p7fI8Uput9nUuG1oc7m8ZfNwS0pu-HU70PmMDhcNmHM/edit#gid=0).
+
 ## Using Chaise through npm
 
 Using npm, we can implement Chaise-like applications and use Chaise's existing code. This is how we're using Chaise to develop [`deriva-webapps`](https://github.com/informatics-isi-edu/deriva-webapps) React applications.
