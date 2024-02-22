@@ -100,7 +100,18 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const dropdownToggleRef = useRef<HTMLDivElement>(null);
   const dropdownMenuRef = useRef<HTMLDivElement>(null);
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  /**
+   * this is added to handle the cases where the fk dropdown is the last item in the form.
+   * we have to add extra padding to the page to make sure it's displayed properly on the page.
+   */
+  const [triggerDropdownChange, setTriggerDropdownChange] = useState<boolean>(false);
+
+  /**
+   * whether we are showing the fk dropdown or not.
+   * we might not want to allow users to open the dropdown, so we're handling the state here ourselves
+   * instead of letting bootstrap's dropdown handle it internally
+   */
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
@@ -121,7 +132,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   // when dropdown is opened, set a class so dropdown opens without being pushed inside the table container
   useLayoutEffect(() => {
-    if (!dropdownOpen || !dropdownMenuRef.current || !formContainer) return;
+    if (!triggerDropdownChange || !dropdownMenuRef.current || !formContainer) return;
 
     // trigger on timeout to ensure this happens after popper calculates what it needs to for dropdownMenuRef.current
     windowRef.setTimeout(
@@ -143,13 +154,13 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         // to get the max space needed we do:
         //    395 - (8 + 40) = 347
         // use ~350 to give a little extra room
-        if (popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < 350) {
+        if (popperPlacement && popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < 350) {
           formContainer.classList.add('dropdown-open');
         }
 
-        setDropdownOpen(false);
+        setTriggerDropdownChange(false);
       });
-  }, [dropdownOpen]);
+  }, [triggerDropdownChange]);
 
   /**
    * populate the dropdown rows after a request is done.
@@ -187,14 +198,14 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   }
 
-  const intializeDropdownRows = () => {
+  const intializeDropdownRows = (domainFilterFormNumber?: number) => {
     setShowSpinner(true);
     setDropdownInitialized(false);
 
     let ref = createForeignKeyReference(
       props.columnModel.column,
       props.parentReference,
-      usedFormNumber,
+      typeof domainFilterFormNumber === 'number' ? domainFilterFormNumber : usedFormNumber,
       props.foreignKeyData,
       getValues
     ).contextualize.compactSelectForeignKey;
@@ -307,21 +318,43 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
   const onToggle = (show: boolean) => {
-    if (show) {
-      // triggers useLayoutEffect that handles whether to add the dropdown-open class
-      setDropdownOpen(true);
 
-      if (!dropdownInitialized || props.columnModel.hasDomainFilter) {
-        // if there is a domain filter pattern, the dropdown should be reinitialized incase the filtered reference has changed
-        intializeDropdownRows();
+    if (show) {
+      const cb = (domainFilterFormNumber?: number) => {
+        // triggers useLayoutEffect that handles whether to add the dropdown-open class
+        setShowDropdown(true);
+        setTriggerDropdownChange(true);
+
+        if (!dropdownInitialized || props.columnModel.hasDomainFilter) {
+          // if there is a domain filter pattern, the dropdown should be reinitialized incase the filtered reference has changed
+          intializeDropdownRows(domainFilterFormNumber);
+        } else {
+          const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
+          LogService.logClientAction({
+            action: LogService.getActionString(LogActions.OPEN, stackPath),
+            stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+          }, dropdownReference.defaultLogInfo);
+        }
+      };
+
+      if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onAttemptToChange) {
+        setShowSpinner(true);
+        props.foreignKeyCallbacks.onAttemptToChange().then((res) => {
+          if (res.allowed) {
+            cb(res.domainFilterFormNumber);
+          }
+        }).finally(() => setShowSpinner(false));
+        return;
       } else {
-        const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
-        LogService.logClientAction({
-          action: LogService.getActionString(LogActions.OPEN, stackPath),
-          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
-        }, dropdownReference.defaultLogInfo);
+        cb();
+        return;
       }
-    } else {
+
+    }
+    //
+    else {
+      setShowDropdown(false);
+
       // will remove the class if it's present. no need to check for it
       if (formContainer) {
         formContainer.classList.remove('dropdown-open');
@@ -444,7 +477,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
               <Spinner animation='border' size='sm' />
             </div>
           }
-          <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
+          <Dropdown show={showDropdown} onToggle={onToggle} aria-disabled={props.disableInput}>
             <Dropdown.Toggle
               as='div'
               className='chaise-input-group no-caret'

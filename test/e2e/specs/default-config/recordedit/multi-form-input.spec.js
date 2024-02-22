@@ -701,7 +701,7 @@ describe('Regarding multi form input and clone button', () => {
             });
 
             // select all is clicked here
-            it ('the apply button should be disabled if the value is empty', (done) => {
+            it('the apply button should be disabled if the value is empty', (done) => {
               // select all
               chaisePage.clickButton(recordEditPage.getMultiFormInputCheckbox()).then(() => {
                 expect(applybtn.getAttribute('disabled')).toBeTruthy('apply btn is not disabled');
@@ -850,7 +850,7 @@ describe('Regarding multi form input and clone button', () => {
           }).then(() => {
             return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'int_col', 'int_col', 'int', { value: '666' });
           }).then(() => {
-            chaisePage.waitForElementCondition(EC.elementToBeClickable(applyBtn));
+            return chaisePage.waitForElementCondition(EC.elementToBeClickable(applyBtn));
           }).then(() => {
             // apply the value
             return chaisePage.clickButton(applyBtn);
@@ -870,6 +870,101 @@ describe('Regarding multi form input and clone button', () => {
         })
 
       });
+    });
+
+    describe('domain-filter support', () => {
+      let applyBtn;
+      beforeAll((done) => {
+        chaisePage.navigate(`${browser.params.url}/recordedit/#${browser.params.catalogId}/multi-form-input:table_w_domain_filter/id=1;id=2`).then(() => {
+          return chaisePage.recordeditPageReady();
+        }).then(() => {
+          done();
+        }).catch(chaisePage.catchTestError(done));
+      });
+
+      describe('for foreign key popups,', () => {
+        it('if there was just one form is selected, the domain-filter of that form should be honored in the popup', (done) => {
+          chaisePage.clickButton(recordEditPage.getMultiFormToggleButton('fk_col')).then(() => {
+            applyBtn = recordEditPage.getMultiFormApplyBtn();
+            // wait for multi-form-row to show up
+            return chaisePage.waitForElement(applyBtn);
+          }).then(() => {
+            return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'fk_col', 'fk_col', 'fk', { modal_num_rows: 1, modal_option_index: 0 });
+          }).then(() => {
+            return chaisePage.waitForElementCondition(EC.elementToBeClickable(applyBtn));
+          }).then(() => {
+            // apply the value
+            return chaisePage.clickButton(applyBtn);
+          }).then(() => {
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+
+        it('if multiple selected, after clicking the fk popup, chaise should compute domain-filters for selected forms and complain if they don\'t match', (done) => {
+          let errorEl;
+          chaisePage.clickButton(recordEditPage.getMultiFormInputCheckbox()).then(() => {
+            return chaisePage.clickButton(recordEditPage.getForeignKeyInputButton('fk_col', MULI_FORM_INPUT_FORM_NUMBER));
+          }).then(() => {
+            errorEl = chaisePage.recordEditPage.getErrorMessageForAColumn('ryb03_WTq7RSmwG7_gNXgw', MULI_FORM_INPUT_FORM_NUMBER);
+            return chaisePage.waitForElement(errorEl);
+          }).then(() => {
+            expect(errorEl.getText()).toBe('This feature is constrained by Text column. Make sure all the records you want to set fk_col for, have the same values for those fields. Try again after upadting those fields.');
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+
+        it('after fixing the issue, fk popup should open properly and the error should be hidden.', (done) => {
+          recordEditHelpers.setInputValue(1, 'text_col', 'Text column', 'text', { value: 'val2' }).then(() => {
+            return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'ryb03_WTq7RSmwG7_gNXgw', 'fk_col', 'fk', { modal_num_rows: 2, modal_option_index: 0 });
+          }).then(() => {
+            errorEl = chaisePage.recordEditPage.getErrorMessageForAColumn('ryb03_WTq7RSmwG7_gNXgw', MULI_FORM_INPUT_FORM_NUMBER);
+            expect(errorEl.isPresent()).toBeFalsy();
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+      });
+
+      describe('for foreign key dropdowns,', () => {
+        it('if there was just one form is selected, the domain-filter of that form should be honored in the popup', (done) => {
+          chaisePage.clickButton(recordEditPage.getMultiFormToggleButton('fk2_col')).then(() => {
+            applyBtn = recordEditPage.getMultiFormApplyBtn();
+            // wait for multi-form-row to show up
+            return chaisePage.waitForElement(applyBtn);
+          }).then(() => {
+            return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'PGdROfG2vixU8Z4k_JS-Hg', 'fk2_col', 'fk-dropdown', { modal_num_rows: 1, modal_option_index: 0 });
+          }).then(() => {
+            return chaisePage.waitForElementCondition(EC.elementToBeClickable(applyBtn));
+          }).then(() => {
+            // apply the value
+            return chaisePage.clickButton(applyBtn);
+          }).then(() => {
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+
+        it('if multiple selected, after clicking the fk input, chaise should compute domain-filters for selected forms and complain if they don\'t match', (done) => {
+        let errorEl;
+          chaisePage.clickButton(recordEditPage.getMultiFormInputCheckbox()).then(() => {
+            return chaisePage.clickButton(recordEditPage.getDropdownElementByName('PGdROfG2vixU8Z4k_JS-Hg', MULI_FORM_INPUT_FORM_NUMBER));
+          }).then(() => {
+            errorEl = chaisePage.recordEditPage.getErrorMessageForAColumn('PGdROfG2vixU8Z4k_JS-Hg', MULI_FORM_INPUT_FORM_NUMBER);
+            return chaisePage.waitForElement(errorEl);
+          }).then(() => {
+            expect(errorEl.getText()).toBe('This feature is constrained by Second text column and fk_col. Make sure all the records you want to set fk2_col for, have the same values for those fields. Try again after upadting those fields.');
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+
+        it('after fixing the issue, fk popup should open properly and the error should be hidden.', (done) => {
+          recordEditHelpers.setInputValue(1, 'text_col_2', 'Second text column', 'text', { value: 'val2' }).then(() => {
+            return recordEditHelpers.setInputValue(MULI_FORM_INPUT_FORM_NUMBER, 'PGdROfG2vixU8Z4k_JS-Hg', 'fk2_col', 'fk-dropdown', { modal_num_rows: 2, modal_option_index: 0 });
+          }).then(() => {
+            errorEl = chaisePage.recordEditPage.getErrorMessageForAColumn('PGdROfG2vixU8Z4k_JS-Hg', MULI_FORM_INPUT_FORM_NUMBER);
+            expect(errorEl.isPresent()).toBeFalsy();
+            done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+      })
     });
   });
 
