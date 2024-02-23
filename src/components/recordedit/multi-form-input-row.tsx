@@ -12,9 +12,9 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { copyOrClearValue, createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { asyncTimeout } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type MultiFormInputRowProps = {
   /**
@@ -175,7 +175,7 @@ const MultiFormInputRow = ({
     const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
     const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
     if (textarea) {
-      if (window.innerWidth < 1800) {
+      if (windowRef.innerWidth < 1800) {
         const newContainerWidth = nonScrollableDiv.offsetWidth;
         textarea.style.width = `${newContainerWidth}px`;
       } else {

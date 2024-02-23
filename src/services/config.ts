@@ -311,7 +311,7 @@ export class ConfigService {
     /**
      * make sure the current host is part of internalHosts
      */
-    const currHost = window.location.host;
+    const currHost = windowRef.location.host;
     if (!Array.isArray(cc.internalHosts)) {
       cc.internalHosts = [currHost];
     }

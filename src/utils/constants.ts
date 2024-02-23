@@ -39,8 +39,8 @@ export const CHAISE_CONFIG_STATIC_PROPERTIES = [
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
-  internalHosts: [window.location.host],
-  ermrestLocation: `${window.location.origin}/ermrest`,
+  internalHosts: [windowRef.location.host],
+  ermrestLocation: `${windowRef.location.origin}/ermrest`,
   headTitle: 'Chaise',
   navbarBrandText: 'Chaise',
   logoutURL: '/',
@@ -207,7 +207,7 @@ export const HELP_PAGES = {
   }
 }
 
-const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
+const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
 export const RECORDEDIT_MAX_ROWS = 200;

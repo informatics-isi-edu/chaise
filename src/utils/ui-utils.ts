@@ -317,7 +317,7 @@ export function fireCustomEvent(eventName = 'myEvent', targetElement: string | E
 export function convertVWToPixel(value: number) {
   const e = document.documentElement;
   const g = document.getElementsByTagName('body')[0];
-  const x = window.innerWidth || e.clientWidth || g.clientWidth;
+  const x = windowRef.innerWidth || e.clientWidth || g.clientWidth;
 
   const result = (x * value) / 100;
   return result;
