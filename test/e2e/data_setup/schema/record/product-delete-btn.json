@@ -342,7 +342,8 @@
           "*" : [
               ["product-delete-btn", "fk_booking_accommodation"],
               ["product-delete-btn", "fk_accommodation_image"],
-              ["product-delete-btn", "fk_media_accommodation"]
+              ["product-delete-btn", "fk_media_accommodation"],
+              ["product-delete-btn", "inbound_related_to_accommodation_for_delete_fk1"]
           ]
         }
       }
@@ -379,7 +380,8 @@
               "schema_name": "product-delete-btn",
               "column_name": "id"
             }
-          ]
+          ],
+          "on_delete": "CASCADE"
         }
       ],
       "table_name": "booking",
@@ -801,7 +803,8 @@
               "schema_name": "product-delete-btn",
               "column_name": "id"
             }
-          ]
+          ],
+          "on_delete": "CASCADE"
         }
       ],
       "table_name": "media",
@@ -846,20 +849,148 @@
           "markdown_name": "**media**"
         }
       }
-    }
-  },
-  "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking",
-    "media"
-  ],
-  "comment": null,
-  "annotations": {
-    "tag:misd.isi.edu,2015:display": {
-      "name": "accommodation"
+    },
+    "invisible_inbound_related_to_accommodation": {
+      "kind": "table",
+      "table_name": "invisible_inbound_related_to_accommodation",
+      "schema_name": "product-delete-btn",
+      "keys": [{"unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": {"typename": "int4"}
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-delete-btn", "invisible_inbound_related_to_accommodation_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "invisible_inbound_related_to_accommodation",
+              "column_name": "id"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "accommodation",
+              "column_name": "id"
+            }
+          ],
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "inbound_related_to_accommodation_for_delete": {
+      "kind": "table",
+      "table_name": "inbound_related_to_accommodation_for_delete",
+      "schema_name": "product-delete-btn",
+      "keys": [{"unique_columns": ["id"]}, {"unique_columns": ["name"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": {"typename": "int4"}
+        },
+        {
+          "name": "name",
+          "nullok": false,
+          "type": {"typename": "text"}
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-delete-btn", "inbound_related_to_accommodation_for_delete_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "inbound_related_to_accommodation_for_delete",
+              "column_name": "id"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "accommodation",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display" : {
+          "row_name": {
+              "row_markdown_pattern": "{{{name}}}"
+          }
+        }
+      }
+    },
+    "delete_table": {
+      "kind": "table",
+      "table_name": "delete_table",
+      "schema_name": "product-delete-btn",
+      "keys": [{"unique_columns": ["id"]}, {"unique_columns": ["name"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": {"typename": "int4"}
+        },
+        {
+          "name": "name",
+          "nullok": false,
+          "type": {"typename": "text"}
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display" : {
+          "row_name": {
+              "row_markdown_pattern": "{{{name}}}"
+          }
+        }
+      }
+    },
+    "inbound_to_delete_table": {
+      "kind": "table",
+      "table_name": "inbound_to_delete_table",
+      "schema_name": "product-delete-btn",
+      "keys": [{"unique_columns": ["id"]}, {"unique_columns": ["name"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": {"typename": "int4"}
+        },
+        {
+          "name": "name",
+          "nullok": false,
+          "type": {"typename": "text"}
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-delete-btn", "inbound_to_delete_table_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "inbound_to_delete_table",
+              "column_name": "id"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "product-delete-btn",
+              "table_name": "delete_table",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display" : {
+          "row_name": {
+              "row_markdown_pattern": "{{{name}}}"
+          }
+        }
+      }
     }
   },
   "schema_name": "product-delete-btn"

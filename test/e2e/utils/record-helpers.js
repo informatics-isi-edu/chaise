@@ -4,7 +4,7 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
-const { browser } = require('protractor');
+const { browser, ElementFinder } = require('protractor');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -1683,4 +1683,30 @@ function checkRelatedRowValues(displayname, isInline, rowValues, done) {
         console.log(error);
         done.fail();
     });
+}
+
+/**
+ * click on the given button to open the delete-confirm. make sure it looks good, and then confirm.
+ * @param {ElementFinder} btn the delete btn
+ * @param {string} confirmText the confirm text
+ */
+exports.testDeleteConfirm = (btn, confirmText) => {
+  return new Promise ((resolve, reject) => {
+    browser.wait(EC.visibilityOf(btn), browser.params.defaultTimeout);
+
+    let modalTitle;
+    chaisePage.clickButton(btn).then(() => {
+      modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+
+      return browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+    }).then(() => {
+      expect(modalTitle.getText()).toBe("Confirm Delete");
+
+      expect(chaisePage.recordPage.getConfirmDeleteText().getText()).toEqual(confirmText);
+
+      return chaisePage.clickButton(chaisePage.recordPage.getConfirmDeleteButton());
+    }).then(() => {
+      resolve();
+    }).catch(err => reject(err));
+  });
 }

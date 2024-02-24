@@ -612,7 +612,7 @@ var recordPage = function() {
     };
 
     this.getDeleteActionButtons = function (displayname) {
-        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
+        return element(by.id("rt-" + displayname)).all(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -673,7 +673,11 @@ var recordPage = function() {
 
     this.getConfirmDeleteButton = function () {
         return element(by.css(".confirm-delete-modal .ok-button"));
-    }
+    };
+
+    this.getConfirmDeleteText = function () {
+      return element(by.css(".confirm-delete-modal .modal-body"));
+    };
 
     this.getShowAllRelatedEntitiesButton = function() {
         return element(by.css(".toggle-empty-sections"));
