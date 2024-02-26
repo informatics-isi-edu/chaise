@@ -67,7 +67,7 @@ describe('Delete functionality in record page with confirm dialog,', () => {
           '\n\n',
           'This may also delete related records in the following 3 tables/sections: media, booking, and invisible_inbound_related_to_accommodation†',
           '\n',
-          'Check the related records that are going to be deleted from the relavant sections in the side panel.',
+          'Check the related records that are going to be deleted from the relevant sections in the side panel.',
           'Some of the affected tables (denoted by †) might not be visible in the side panel.'
         ].join('');
         testDeleteConfirm(chaisePage.recordPage.getDeleteRecordButton(), message).then(() => {
