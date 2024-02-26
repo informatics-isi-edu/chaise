@@ -335,14 +335,18 @@
           "top_columns": ["title", "rating", "category", "opened_on"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-delete-btn", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-delete-btn", "fk_cover"], ["product-delete-btn", "fk_thumbnail"], "opened_on", "luxurious"]
+          "detailed" : [
+            "id", "title", "website", ["product-delete-btn", "fk_category"], "rating",
+            "summary", "description", "no_of_rooms", ["product-delete-btn", "fk_cover"],
+            ["product-delete-btn", "fk_thumbnail"], "opened_on", "luxurious",
+            ["product-delete-btn", "fk_media_accommodation"]
+          ]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
               ["product-delete-btn", "fk_booking_accommodation"],
               ["product-delete-btn", "fk_accommodation_image"],
-              ["product-delete-btn", "fk_media_accommodation"],
               ["product-delete-btn", "inbound_related_to_accommodation_for_delete_fk1"]
           ]
         }
