@@ -93,7 +93,7 @@ export const dataFormats = {
   },
   regexp: {
     integer: /^\-?\d+$/,
-    float: /^\-?(\d+)?((\.)?\d+)?$/
+    float: /^[+-]?\d*(?:\.*\d*(?:[eE][+-]?\d+)?)?$/
   }
 }
 

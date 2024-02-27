@@ -30,7 +30,8 @@ const FormContainer = ({
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
-  const { handleSubmit } = useFormContext();
+  // invoke dirtyFields so it is properly updated when submitted
+  const { formState: { dirtyFields }, handleSubmit } = useFormContext();
 
   const formContainer = useRef<any>(null);
 
@@ -88,7 +89,7 @@ const FormContainer = ({
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
+        onSubmit={handleSubmit((data) => onSubmitValid(data, dirtyFields), onSubmitInvalid)}
         // onSubmit={
         //   (e: any) => {
         //     e.preventDefault();
