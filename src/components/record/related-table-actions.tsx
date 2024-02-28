@@ -4,7 +4,7 @@ import React, { MouseEvent, useState, useRef, useEffect, useLayoutEffect } from 
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import Dropdown from 'react-bootstrap/Dropdown';
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -903,6 +903,7 @@ const RelatedTableActions = ({
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
           title={showDeleteConfirmationModal.title}
+          context={DeleteConfirmationModalTypes.SINGLE}
         />
       )}
     </>

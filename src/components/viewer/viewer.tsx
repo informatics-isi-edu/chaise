@@ -11,7 +11,7 @@ import ViewerAnnotationStrokeSlider from '@isrd-isi-edu/chaise/src/components/vi
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer-menu-buttons';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -258,7 +258,11 @@ const ViewerInner = ({
             onCancel={() => setShowCloseConfirmationModal(false)}
           />
         }
-        {deleteAnnotationConfirmProps && <DeleteConfirmationModal show={!!deleteAnnotationConfirmProps} {...deleteAnnotationConfirmProps} />}
+        {deleteAnnotationConfirmProps && <DeleteConfirmationModal
+          show={!!deleteAnnotationConfirmProps}
+          context={DeleteConfirmationModalTypes.SINGLE}
+          {...deleteAnnotationConfirmProps}
+        />}
       </div>
     </>
   )
