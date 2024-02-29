@@ -53,6 +53,10 @@ const ChaiseNavbar = (): JSX.Element => {
   const [showRidSpinner, setShowRidSpinner] = useState(false);
   const [topBanners, setTopBanners] = useState<NavbarBanner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<NavbarBanner[]>([]);
+  /**
+   * Keeps track of most recently opened dropdown
+   */
+  const [openDropDown, setOpenDropDown] = useState<number |undefined>(undefined);
 
   const dropdownWrapper = useRef<any>(null);
 
@@ -185,7 +189,16 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   // TODO: onToggle event type
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption) => {
+  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption,index:number) => {
+    /**
+     * Update the state to reflect most recently opened dropdown
+     */
+    if(isOpen){
+      setOpenDropDown(index)
+    }else{
+      setOpenDropDown(undefined)
+    }
+
     onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
   }
 
@@ -347,10 +360,11 @@ const ChaiseNavbar = (): JSX.Element => {
             key={index}
             ref={dropdownWrapper}
             title={renderDropdownName(item)}
-            onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
+            onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item,index)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
             className='chaise-nav-item'
+            show={openDropDown == index} // Display dropdown if it is the most recently opened.
           >
             <NavbarDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></NavbarDropdown>
           </NavDropdown>
