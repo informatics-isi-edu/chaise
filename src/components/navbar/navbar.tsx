@@ -56,7 +56,7 @@ const ChaiseNavbar = (): JSX.Element => {
   /**
    * Keeps track of most recently opened dropdown
    */
-  const [openDropDown, setOpenDropDown] = useState<number |undefined>(undefined);
+  const [openDropDown, setOpenDropDown] = useState<number | undefined>(undefined);
 
   const dropdownWrapper = useRef<any>(null);
 
@@ -189,13 +189,13 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   // TODO: onToggle event type
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption,index:number) => {
+  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
     /**
      * Update the state to reflect most recently opened dropdown
      */
-    if(isOpen){
+    if (isOpen) {
       setOpenDropDown(index)
-    }else{
+    } else {
       setOpenDropDown(undefined)
     }
 
@@ -329,7 +329,7 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{isHTML: true, value: renderName(item)}} />);
+  const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{ isHTML: true, value: renderName(item) }} />);
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
@@ -342,7 +342,7 @@ const ChaiseNavbar = (): JSX.Element => {
           <DisplayValue
             key={index}
             as={Nav.Link}
-            value={{isHTML: true, value: renderName(item)}}
+            value={{ isHTML: true, value: renderName(item) }}
             className={'chaise-nav-item ' + menuItemClasses(item, session, false)}
             props={{
               href: item.url,
@@ -361,7 +361,7 @@ const ChaiseNavbar = (): JSX.Element => {
             ref={dropdownWrapper}
             title={renderDropdownName(item)}
             show={openDropDown == index} // Display dropdown if it is the most recently opened.
-            onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item,index)}
+            onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item, index)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
             className='chaise-nav-item'
