@@ -278,10 +278,10 @@ const integerFieldValidation = {
   message: ERROR_MESSAGES.INVALID_INTEGER
 };
 
-const numericFieldValidation = {
-  value: dataFormats.regexp.float,
-  message: ERROR_MESSAGES.INVALID_NUMERIC
-};
+const numericFieldValidation = (value: any) => {
+  if (!value) return;
+  return !isNaN(parseFloat(value)) && isFinite(value) || ERROR_MESSAGES.INVALID_NUMERIC;
+}
 
 const dateFieldValidation = (value: string) => {
   if (!value) return;

@@ -89,7 +89,7 @@ const FormContainer = ({
       <form
         id='recordedit-form'
         className='recordedit-form chaise-hr-scrollable'
-        onSubmit={handleSubmit((data) => onSubmitValid(data, dirtyFields), onSubmitInvalid)}
+        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
         // onSubmit={
         //   (e: any) => {
         //     e.preventDefault();

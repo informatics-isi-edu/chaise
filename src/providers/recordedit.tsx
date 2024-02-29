@@ -79,7 +79,7 @@ export const RecordeditContext = createContext<{
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
   /* callback for react-hook-form to call when forms are valid */
-  onSubmitValid: (data: any, dirtyFields: any) => void,
+  onSubmitValid: (data: any) => void,
   /* callback for react-hook-form to call when forms are NOT valid */
   onSubmitInvalid: (errors: any, e?: any) => void,
   /**
@@ -441,11 +441,9 @@ export default function RecordeditProvider({
     };
   }, [loginModal, errors]);
 
-  const onSubmitValid = (data: any, dirtyFields: any) => {
+  const onSubmitValid = (data: any) => {
     // remove all existing alerts
     removeAllAlerts();
-
-    // TODO: read dirtyFields and create a set of columns to update
 
     const submissionRows: any[] = [];
     // f is the number in forms array that is
