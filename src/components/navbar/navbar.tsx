@@ -360,11 +360,11 @@ const ChaiseNavbar = (): JSX.Element => {
             key={index}
             ref={dropdownWrapper}
             title={renderDropdownName(item)}
+            show={openDropDown == index} // Display dropdown if it is the most recently opened.
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item,index)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
             className='chaise-nav-item'
-            show={openDropDown == index} // Display dropdown if it is the most recently opened.
           >
             <NavbarDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></NavbarDropdown>
           </NavDropdown>
