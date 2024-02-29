@@ -153,7 +153,7 @@ const NavbarDropdown = ({
     return (
       <Dropdown
         key={index}
-        show={openedDropDownIndex == index} // Display dropdown if it is the most recently opened.
+        show={openedDropDownIndex === index} // Display dropdown if it is the most recently opened.
         drop={subMenuStyle.dropEnd ? 'end' : 'start'}
         className='dropdown-submenu'
         ref={dropdownWrapper}

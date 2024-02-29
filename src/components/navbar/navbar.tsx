@@ -358,7 +358,7 @@ const ChaiseNavbar = (): JSX.Element => {
             key={index}
             ref={dropdownWrapper}
             title={renderDropdownName(item)}
-            show={openedDropDownIndex == index} // Display dropdown if it is the most recently opened.
+            show={openedDropDownIndex === index} // Display dropdown if it is the most recently opened.
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item, index)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
