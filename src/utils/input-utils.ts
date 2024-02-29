@@ -281,7 +281,7 @@ const integerFieldValidation = {
 const numericFieldValidation = (value: any) => {
   if (!value) return;
   return !isNaN(parseFloat(value)) && isFinite(value) || ERROR_MESSAGES.INVALID_NUMERIC;
-}
+};
 
 const dateFieldValidation = (value: string) => {
   if (!value) return;

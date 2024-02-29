@@ -30,8 +30,7 @@ const FormContainer = ({
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
-  // invoke dirtyFields so it is properly updated when submitted
-  const { formState: { dirtyFields }, handleSubmit } = useFormContext();
+  const { handleSubmit } = useFormContext();
 
   const formContainer = useRef<any>(null);
 
