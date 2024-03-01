@@ -553,17 +553,21 @@ Use this property to avoid recordedit app from showing an alert when users are t
      ```
 
  #### shareCiteAcls
- Use this property to show/hide or enable/disable the button used to open the share and cite dialog on Record app. The accepted values for the array for both show and enable are `"*"` or any valid globus group key. If either key/value pair is undefined in the object, it will default to `["*"]`. Consult the chaise-config-sample.js file for more details.
-system columns:
+Use this property to show/hide or enable/disable the button used to open the share and cite dialog on Record app. The accepted values for the array for both show and enable are `"*"` or any valid globus group key.
+
    - Type: Object
    - Default behavior: the share cite button is viewable and enabled for everyone
    - Sample syntax:
      ```
-     shareCiteAcls: {
-       show: ["*"],
-       enable: ["*"]
+     "shareCiteAcls": {
+       "show": ["*"],
+       "enable": ["*"]
      }
      ```
+   - Notes:
+      - You can use `"shareCiteAcls": true` as a shorthand syntax for `"shareCiteAcls": {"show": ["*"], "enable": ["*"]}` which means showing and enabling for all users (the default behavior).
+      - You can use `"shareCiteAcls": false` as a shorthand syntax for `"shareCiteAcls": {"show": [], "enable": []}` which means hiding for all users.
+      - If either key/value pair is undefined in the object, it will default to `["*"]`. For instance if you just want to enable this feature for specific users, you could just do `{"enable": ["more-privilidged-users"]}` and chaise will add the `"show": ["*"]` for you.
 
 ### System Columns Configuration:
  #### systemColumnsDisplayCompact
@@ -622,7 +626,7 @@ system columns:
      ```
 
  #### configRules
- Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`). 
+ Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`).
    - Type: Array
    - General syntax:
      ```
