@@ -5,7 +5,7 @@ import { Accordion, Modal } from 'react-bootstrap';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
@@ -139,7 +139,8 @@ const RecordeditInner = ({
     onConfirm: () => void,
     onCancel: () => void,
     buttonLabel: string,
-    message?: JSX.Element
+    message?: JSX.Element,
+    reference?: any
   } | null>(null);
 
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
@@ -193,7 +194,6 @@ const RecordeditInner = ({
         });
 
         let confirmMessage;
-        // TODO should be adjusted if we changed how we're tracking the tuples
         if (tuples.length > 1) {
           confirmMessage = <>Are you sure you want to delete all {tuples.length} of the displayed records?</>
         }
@@ -207,7 +207,8 @@ const RecordeditInner = ({
               stack: LogService.getStackObject()
             });
           },
-          message: confirmMessage
+          message: confirmMessage,
+          reference
         });
 
       } else {
@@ -551,6 +552,7 @@ const RecordeditInner = ({
   }
 
   const renderModals = () => {
+    const deleteConfirmContext = tuples.length > 1 ? DeleteConfirmationModalTypes.BULK : DeleteConfirmationModalTypes.SINGLE;
     return (<>
       {showDeleteConfirmationModal &&
         <DeleteConfirmationModal
@@ -559,6 +561,8 @@ const RecordeditInner = ({
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
+          reference={showDeleteConfirmationModal.reference}
+          context={deleteConfirmContext}
         />
       }
       {uploadProgressModalProps &&

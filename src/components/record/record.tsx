@@ -5,7 +5,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import Accordion from 'react-bootstrap/Accordion';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -146,7 +146,8 @@ const RecordInner = ({
     onConfirm: () => void,
     onCancel: () => void,
     buttonLabel: string,
-    message: JSX.Element
+    message: JSX.Element,
+    reference: any
   } | null>(null);
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
@@ -414,7 +415,8 @@ const RecordInner = ({
             setShowDeleteConfirmationModal(null);
             logRecordClientAction(LogActions.DELETE_CANCEL);
           },
-          message: confirmMessage
+          message: confirmMessage,
+          reference
         });
 
       } else {
@@ -867,6 +869,8 @@ const RecordInner = ({
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
+          reference={showDeleteConfirmationModal.reference}
+          context={DeleteConfirmationModalTypes.RECORD_MAIN}
         />
       }
     </div>
