@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating', 'hideRecordeditLeaveAlert'
+  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCiteAcls'
 ];
 
 /**
@@ -252,8 +252,6 @@ export const VIEWER_CONSTANT = {
     LINE_THICKNESS_LOG_TIMEOUT: 1000
   }
 };
-
-
 
 
 // TODO if chaise is not built how we expect, this value will be undefiend.

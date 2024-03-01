@@ -1147,6 +1147,23 @@
                     ]
                 }
             }
+        },
+        "static_acl_table": {
+          "kind": "table",
+          "table_name": "static_acl_table",
+          "schema_name": "multi-permissions",
+          "keys": [{"unique_columns": ["id"]}],
+          "column_definitions": [
+            {
+              "name": "id",
+              "type": {"typename": "int2"},
+              "nullok": false
+            },
+            {
+              "name": "title",
+              "type": {"typename": "text"}
+            }
+          ]
         }
     },
     "annotations": {}
