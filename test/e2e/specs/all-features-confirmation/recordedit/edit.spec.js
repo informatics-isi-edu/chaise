@@ -55,7 +55,7 @@ var testParams = {
         inputs: [
             {
                 "title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
-                "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
+                "rating": "1e0", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",

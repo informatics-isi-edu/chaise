@@ -273,14 +273,20 @@ const integer8FieldValidation = (value: string) => {
   return parseInt(value, 10) <= parseInt(INTEGER_LIMITS.INT_8_MAX, 10) || ERROR_MESSAGES.INTEGER_8_MAX;
 }
 
-const integerFieldValidation = {
-  value: dataFormats.regexp.integer,
-  message: ERROR_MESSAGES.INVALID_INTEGER
-};
+const integerFieldValidation = (value: string) => {
+  if (!value) return;
+  let isValid = true;
+
+  isValid = dataFormats.regexp.integer.test(value);
+  return isValid || ERROR_MESSAGES.INVALID_INTEGER;
+}
 
 const numericFieldValidation = (value: any) => {
   if (!value) return;
-  return !isNaN(parseFloat(value)) && isFinite(value) || ERROR_MESSAGES.INVALID_NUMERIC;
+  let isValid = true;
+
+  isValid = value === value.trim() && !isNaN(parseFloat(value)) && isFinite(value)
+  return isValid || ERROR_MESSAGES.INVALID_NUMERIC;
 };
 
 const dateFieldValidation = (value: string) => {
