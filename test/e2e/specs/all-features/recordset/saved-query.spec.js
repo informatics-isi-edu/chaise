@@ -1,5 +1,7 @@
 const chaisePage = require('../../../utils/chaise.page.js');
 const pImport = require('../../../utils/protractor.import.js');
+var recordHelpers = require('../../../utils/record-helpers.js');
+var moment = require('moment');
 const EC = protractor.ExpectedConditions;
 
 const testParams = {
@@ -9,7 +11,12 @@ const testParams = {
   maxInputClass: 'range-max',
   maxInputClearClass: 'max-clear',
   firstSavedQueryName: 'main with int_col ( 11 to 22)',
-  secondSavedQueryName: 'main with int_col ( 11 to 22); one'
+  secondSavedQueryName: 'main with int_col ( 11 to 22); one',
+  key: {
+    name: 'id',
+    operator: '=',
+    value: '1'
+  }
 };
 
 const chaiseConfigAnnotation = {
@@ -301,4 +308,29 @@ describe('View recordset page and form a query,', () => {
       });
     });
   });
+
+  describe('should have proper citation in share cite modal', () => {
+    var RIDLink = browser.params.url + "/record/#" + browser.params.catalogId + '/saved_query:' + testParams.table_name;
+    RIDLink += '/RID=' + chaisePage.getEntityRow('saved_query', testParams.table_name, [{column: testParams.key.name, value: testParams.key.value}]).RID;
+    var rctVal = chaisePage.getEntityRow('saved_query', testParams.table_name, [{column: testParams.key.name, value: testParams.key.value}]).RCT
+
+    var keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+    beforeAll((done) => {
+      const url = browser.params.url + '/record/#' + browser.params.catalogId + '/saved_query:' + testParams.table_name + '/' + keys.join('');
+      chaisePage.navigate(url);
+
+      done();
+    })
+
+    recordHelpers.testSharePopup({
+        permalink: RIDLink,
+        // the table has history-capture: true
+        hasVersionedLink: true,
+        verifyVersionedLink: false,
+        citation: "Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data " + RIDLink + " (" + moment(rctVal).format("YYYY") + ").",
+        bibtextFile: false,
+        title: "Share and Cite"
+    });
+  })
 });
