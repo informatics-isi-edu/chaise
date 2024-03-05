@@ -98,7 +98,7 @@ var testParams = {
         // the table has history-capture: true
         hasVersionedLink: true,
         verifyVersionedLink: true,
-        citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3) Sherathon Hotel, accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
+        citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3). Sherathon Hotel. accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
         bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
         title: "Share and Cite"
     },
