@@ -285,7 +285,10 @@ const numericFieldValidation = (value: any) => {
   if (!value) return;
   let isValid = true;
 
-  isValid = value === Number(('' + value).trim()) && !isNaN(parseFloat(value)) && isFinite(value)
+  // 2 equals since values get loaded into inputs as numbers
+  // but when user types, they are strings
+  // eslint-disable-next-line eqeqeq
+  isValid = value == ('' + value).trim() && !isNaN(parseFloat(value)) && isFinite(value)
   return isValid || ERROR_MESSAGES.INVALID_NUMERIC;
 };
 

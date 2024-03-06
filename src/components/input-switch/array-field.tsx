@@ -50,7 +50,7 @@ const ArrayField = (props : ArrayFieldProps): JSX.Element => {
         case 'numeric':
         case 'float4':
         case 'float8':
-          isValid = val === Number(('' +val).trim()) &&!isNaN(parseFloat(val)) && isFinite(val);
+          isValid = val == ('' + val).trim() &&!isNaN(parseFloat(val)) && isFinite(val);
           break;
         case 'int2':
         case 'int4':
