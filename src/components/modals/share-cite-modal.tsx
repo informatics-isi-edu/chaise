@@ -17,6 +17,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
+import { hasTrailingPeriod } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { resolvePermalink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { getVersionDate, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -121,6 +122,12 @@ const ShareCiteModal = ({
       $log.warn('failed to copy with the following error:');
       $log.warn(err);
     })
+  }
+
+  const appendTrailingPeriod = (str: string) => {
+    if (hasTrailingPeriod(str)) return str;
+
+    return str + '.';
   }
 
   const citationReady = !!citation && citation.isReady;
@@ -236,8 +243,8 @@ const ShareCiteModal = ({
             <li className='share-modal-citation'>
               {!hideHeaders && <h2>Data Citation</h2>}
               <div className='share-modal-citation-text'>
-                {citation.value.author && <span>{citation.value.author} </span>}
-                {citation.value.title && <span>{citation.value.title} </span>}
+                {citation.value.author && <span>{appendTrailingPeriod(citation.value.author)} </span>}
+                {citation.value.title && <span>{appendTrailingPeriod(citation.value.title)} </span>}
                 <i>{citation.value.journal}</i> <a href={citation.value.url}>{citation.value.url}</a> ({citation.value.year}).
               </div>
             </li>

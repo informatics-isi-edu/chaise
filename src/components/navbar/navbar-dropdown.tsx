@@ -35,6 +35,12 @@ const NavbarDropdown = ({
 }: NavbarDropdownProps): JSX.Element => {
   const { logout, session } = useAuthn();
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
+  /**
+   * Keeps track of most recently opened dropdown
+   * We track this to make sure only one dropdown is open at a time.
+   * For more details, see #2363
+   */
+  const [openedDropDownIndex, setOpenedDropDownIndex] = useState<number>();
 
   /**
    * State variables to align submenu/dropdown to right or left
@@ -124,7 +130,11 @@ const NavbarDropdown = ({
   }
 
   // TODO: onToggle event type
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption) => {
+  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
+    /**
+     * Update the state to reflect most recently opened dropdown
+     */
+    setOpenedDropDownIndex(isOpen ? index : undefined);
     onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN, item);
   }
 
@@ -143,11 +153,12 @@ const NavbarDropdown = ({
     return (
       <Dropdown
         key={index}
+        show={openedDropDownIndex === index} // Display dropdown if it is the most recently opened.
         drop={subMenuStyle.dropEnd ? 'end' : 'start'}
         className='dropdown-submenu'
         ref={dropdownWrapper}
         onClick={alignDropDown}
-        onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
+        onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item, index)}
       >
         <DisplayValue
           as={Dropdown.Toggle}
