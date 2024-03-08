@@ -7,17 +7,9 @@ import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-uti
 
 
 const NumericField = (props: InputFieldProps): JSX.Element => {
-  let rules;
-  if (props.type === 'integer2' || props.type === 'integer4' || props.type === 'integer8') {
-    rules = {
-      validate: VALIDATE_VALUE_BY_TYPE[props.type]
-    }
-  } else {
-    rules = {
-      pattern: VALIDATE_VALUE_BY_TYPE[props.type]
-    }
+  const rules = {
+    validate: VALIDATE_VALUE_BY_TYPE[props.type]
   }
-  
 
   return (
     <InputField {...props} controllerRules={rules}>
