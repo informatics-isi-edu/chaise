@@ -5,7 +5,6 @@
 var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
-var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
 var moment = require('moment');
 
 var currentTimestampTime = moment().format("x");
@@ -72,7 +71,7 @@ var testParams = {
         results: [
             [
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"},
-                {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Castle"},
+                {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-edit:category/id=10004`, "value":"Castle"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
                 "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#723456"

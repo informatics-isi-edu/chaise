@@ -1,6 +1,5 @@
 var pImport =  require('../utils/protractor.import.js');
 var chaisePage = require('../utils/chaise.page.js');
-var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
@@ -208,11 +207,7 @@ exports.testPresentation = function (tableParams) {
 
                     const aTag = chaisePage.recordPage.getLinkChild(columnEls);
                     const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
-                    let columnUrl = mustache.render(column.presentation.template, {
-                        "catalog_id": process.env.catalogId,
-                        "chaise_url": process.env.CHAISE_BASE_URL,
-                    });
-                    columnUrl += "RID=" + dataRow.RID;
+                    const columnUrl = column.presentation.url + "RID=" + dataRow.RID;
 
                     expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
                     expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
