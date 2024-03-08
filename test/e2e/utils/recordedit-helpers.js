@@ -1,7 +1,6 @@
 var chaisePage = require('./chaise.page.js');
 const recordEditPage = chaisePage.recordEditPage;
 var moment = require('moment');
-var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var chance = require('chance').Chance();
 var exec = require('child_process').execSync;
 var EC = protractor.ExpectedConditions;
@@ -1749,12 +1748,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                                         result = tableParams.results[index][k];
 
                                         if (typeof result.link === 'string') {
-                                            var link = mustache.render(result.link, {
-                                                "catalog_id": process.env.catalogId,
-                                                "chaise_url": process.env.CHAISE_BASE_URL,
-                                            });
-
-                                            expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(link);
+                                            expect(cells[k].element(by.tagName("a")).getAttribute("href")).toContain(result.link);
                                             expect(cells[k].element(by.tagName("a")).getText()).toBe(result.value, "data missmatch in row with index=" + index + ", columns with index=" + k);
                                         } else {
                                             expect(cells[k].getText()).toBe(result, "data missmatch in row with index=" + index + ", columns with index=" + k);
@@ -1838,12 +1832,8 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
         }
         else if (column_values[columnName] && typeof column_values[columnName].link === 'string') {
             column = column.element(by.css("a"));
-            var link = mustache.render(column_values[columnName].link, {
-                "catalog_id": process.env.catalogId,
-                "chaise_url": process.env.CHAISE_BASE_URL,
-            });
             expect(column.getText()).toEqual(column_values[columnName].value, "Value for " + columnName + " is not what was expected");
-            expect(column.getAttribute('href')).toContain(link, "link for " + columnName + " is not what was expected");
+            expect(column.getAttribute('href')).toContain(column_values[columnName].link, "link for " + columnName + " is not what was expected");
         } else {
             var val = column_values[columnName];
             if (typeof val === 'object' && val != null && typeof val.value === "string") {
