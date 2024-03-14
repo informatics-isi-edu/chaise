@@ -14,8 +14,8 @@ This is a guide for people who develop Chaise.
   * [Handling time](#handling-time)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
-    + [Make targets](#make-targets)
-    + [NPM](#npm)
+  * [Make targets](#make-targets)
+  * [NPM](#npm)
 - [Structure of an App](#structure-of-an-app)
 - [Using Chaise through npm](#using-chaise-through-npm)
 - [Error handling](#error-handling)
@@ -279,6 +279,14 @@ The rules that should be followed while writing code.
     the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
 
   - Scrolling can be persisted by using the `scrolling : scroll` option.
+
+#### Supporting styles and classes in configuration
+There are multiple places in chaise and deriva-webapps that we want to allow for users to be able to customize the look and feel of different apps and features. Below are some of the guidelines for when to expose a style property in configuration, attach ids and classes to elements that are made available for custom.css, and define other special classes for use in configs and annotations.
+  - style properties that are directly exposed in configuration documents are usually quantifiable values or boolean values. 
+    - For instance width, max-width, font-size are all quatifiable properties that expect a specific numeric value (usually a number, decimal, or percentage)
+  - there is a defined set of [special classes](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#special-classes) that can be attached to elements using markdown in annotations or certain configurations that allow for a list of classes to be defined
+    - we want to include these classes when a style property might have multiple values (like an enum) instead of an integer. Think about the `align-items` or `overflow` CSS properties that could have multiple values
+  - At a minimum, chaise and deriva-webapps should be attaching unique classes to elements to communicate different parts of the page or components to help data modelers write their own custom CSS by targeting these unique classes
 
 ### Font Awesome
 
