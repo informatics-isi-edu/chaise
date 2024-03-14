@@ -200,11 +200,15 @@ describe('View existing record,', function() {
         it ("should not have the default csv export option and only the defined template should be available", function (done) {
             const exportDropdown = chaisePage.recordsetPage.getExportDropdown()
             exportDropdown.click().then(function () {
-                const options = chaisePage.recordsetPage.getExportOptions();
-                expect(options.count()).toBe(1, "count missmatch");
+                const annotTemplate = chaisePage.recordsetPage.getExportOption("Defined template");
+                expect(annotTemplate.getText()).toBe("Defined template");
 
-                const csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
-                expect(csvOption.getText()).toBe("Defined template");
+                /**
+                 * the acl test cases might run in parallel with this one and add the "Configurations".
+                 * so we cannot assume the number of options here.
+                 */
+                const csvOption = chaisePage.recordsetPage.getExportOption('This record (CSV)');
+                expect(csvOption.isPresent()).toBeFalsy();
                 return exportDropdown.click();
             }).then(function () {
                 done();
