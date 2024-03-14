@@ -23,7 +23,8 @@ var testParams = {
     file_names: [
         "Accommodations.csv",
         "accommodation_" + chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID + ".zip",
-        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
+        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
+        'BDBag.json'
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     inline_none_test: {
