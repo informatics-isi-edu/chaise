@@ -1,6 +1,7 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/multi-form-input-row';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
 import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -8,6 +9,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
 import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -105,8 +107,8 @@ const FormRow = ({
   useLayoutEffect(() => {
     if (!container || !container.current) return;
 
-    let cachedHeight = -1, cachedWidth = -1;
-    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+    let cachedHeight = -1;
+    const sensor = new ResizeSensor(container.current as Element, () => {
       if (!container.current) return;
 
       const newHeight = container.current.getBoundingClientRect().height;
@@ -118,15 +120,15 @@ const FormRow = ({
         }
       }
 
-      const newWidth = container.current.offsetWidth;
-      if (newWidth !== cachedWidth) {
-        cachedWidth = newWidth;
-        const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
-        const formContainer = document.querySelector('.form-container') as HTMLElement;
-        if (formContainer && nonScrollableDiv) {
-          const visibleWidth = formContainer.offsetWidth; // Width of the visible area
-          nonScrollableDiv.style.maxWidth = visibleWidth + 'px'; // Set the max-width to the visible width
-        }
+      // make sure the max-width of the multi-form-input-row is the same as visible width of the form
+      const nonScrollableDiv = document.querySelector<HTMLElement>('.multi-form-input-row');
+      const formContainer = document.querySelector<HTMLElement>('.form-container');
+      if (formContainer && nonScrollableDiv) {
+        // Width of the visible area
+        const visibleWidth = formContainer.offsetWidth;
+
+        // Set the max-width to the visible width
+        nonScrollableDiv.style.maxWidth = visibleWidth + 'px';
       }
 
     });
@@ -135,7 +137,7 @@ const FormRow = ({
       sensor.detach();
     };
   }, []);
-  
+
   useEffect(() => {
     // This condition is to remove the form from the acitve forms if we delete the form.
     // removeClicked is passed from the parent to communicate that delete form is clicked
@@ -161,7 +163,7 @@ const FormRow = ({
     if (columnModelIndex === 0) {
         // only run this on the first form row to keep track of total forms visible
         if (!formsRef || !formsRef.current || !showCloneSpinner) return;
-  
+
         if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
     }
   }, [forms, removeClicked]);
@@ -213,6 +215,7 @@ const FormRow = ({
   // -------------------------- render logic ---------------------- //
 
   const columnModel = columnModels[columnModelIndex];
+  const hasInlineComment = columnModel.column.comment && columnModel.column.comment.displayMode === CommentDisplayModes.INLINE;
 
   /**
    * Returntrue if,
@@ -319,7 +322,13 @@ const FormRow = ({
   };
 
   return (
-    <div className={`form-inputs-row ${isActiveForm ? 'highlighted-row' : ''}`} ref={container}>
+    <div className={`form-inputs-row${isActiveForm ? ' highlighted-row' : ''}${hasInlineComment ? ' with-inline-tooltip' : ''}`} ref={container}>
+      {hasInlineComment &&
+        <div className='inline-comment-row'>
+          <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={columnModel.column.comment} /></div>
+          <hr />
+        </div>
+      }
       <div className='inputs-row' ref={formsRef}>
         {forms.map((formNumber: number, formIndex: number) => (
           <div

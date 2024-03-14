@@ -2,7 +2,7 @@
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 import { ResizeSensor } from 'css-element-queries';
 
@@ -103,7 +103,8 @@ const TableRow = ({
     onConfirm: () => void,
     onCancel: () => void,
     buttonLabel: string,
-    message: JSX.Element
+    message: JSX.Element,
+    reference?: any
   } | null>(null);
   /**
    * used to show loading indicator in the delete button
@@ -173,7 +174,7 @@ const TableRow = ({
     )
 
     setSensor(tempSensor);
-    
+
     // fetch all <img> tags with -chaise-post-load class and keep count of the total
     // attach an onload function that updates how many have loaded
     const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
@@ -185,7 +186,7 @@ const TableRow = ({
       numImagesLoaded.current++;
       if (numImagesLoaded.current === numImages.current) initializeOverflows();
     }
-    
+
     imgTags.forEach((image: HTMLImageElement) => {
       image.addEventListener('load', onImageLoad);
       image.addEventListener('error', onImageLoad);
@@ -203,7 +204,7 @@ const TableRow = ({
   /**
    * as images load, check if we have loaded all images before triggering the overflow logic one more time
    * We can't rely on this useEffect alone since there might not be any images
-   * 
+   *
    * NOTE: images can be a value for a column or part of a aggregate request to fetch multiple images
    *   the above ResizeSensor doesn't recalculate when images load as part of an aggregate request so this useEffect
    *   does it one last time when all images have finished loading
@@ -347,7 +348,8 @@ const TableRow = ({
               stack: logStack
             }, reference.defaultLogInfo);
           },
-          message: confirmMessage
+          message: confirmMessage,
+          reference: !isUnlink ? reference : undefined
         });
 
       } else {
@@ -577,6 +579,8 @@ const TableRow = ({
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
+          reference={showDeleteConfirmationModal.reference}
+          context={DeleteConfirmationModalTypes.SINGLE}
         />
       }
     </>

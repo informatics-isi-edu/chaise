@@ -14,7 +14,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
   CHAISE_CONFIG_STATIC_PROPERTIES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
@@ -301,17 +301,35 @@ export class ConfigService {
       ConfigService._applyHostConfigRules(catalogAnnotation, cc, true);
     }
 
-    // shareCiteAcls is a nested object, user could define shareCiteAcls:
-    //     { show: ['*'] }
-    // with no enable array defined
-    // make sure the object has both defined and apply the default if one or the other is missing
-    if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
-    if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+
+    /**
+     * shareCiteAcls can either be a boolean or object:
+     * if =true, we should show and enable it.
+     * if =false, we should hide and disable it.
+     * otherwise we have to make sure it has both show and enable props
+     */
+    if (cc.shareCiteAcls === true) {
+      cc.shareCiteAcls = { show: ['*'], enable: ['*'] }
+    }
+    else if (cc.shareCiteAcls === false) {
+      cc.shareCiteAcls = { show: [], enable: [] }
+    }
+    else if (!isObjectAndNotNull(cc.shareCiteAcls)) {
+      cc.shareCiteAcls = DEFAULT_CHAISE_CONFIG.shareCiteAcls;
+    }
+    else {
+      // shareCiteAcls is a nested object, user could define shareCiteAcls:
+      //     { show: ['*'] }
+      // with no enable array defined
+      // make sure the object has both defined and apply the default if one or the other is missing
+      if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
+      if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+    }
 
     /**
      * make sure the current host is part of internalHosts
      */
-    const currHost = window.location.host;
+    const currHost = windowRef.location.host;
     if (!Array.isArray(cc.internalHosts)) {
       cc.internalHosts = [currHost];
     }

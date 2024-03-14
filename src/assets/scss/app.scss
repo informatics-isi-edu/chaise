@@ -218,7 +218,12 @@ html {
   }
 
   .inline-tooltip {
-    font-size: 16px;
+    &.inline-tooltip-sm {
+      font-size: 13px;
+    }
+    &.inline-tooltip-lg {
+      font-size: 16px;
+    }
   }
 
   #page-title .inline-tooltip {

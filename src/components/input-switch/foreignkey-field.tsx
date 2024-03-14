@@ -11,7 +11,9 @@ import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
-import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  appModes, MULTI_FORM_INPUT_FORM_VALUE, RecordeditColumnModel, RecordeditForeignkeyCallbacks
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps,
@@ -20,7 +22,6 @@ import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -85,11 +86,13 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
+  const [showSpinner, setShowSpinner] = useState<boolean>(false);
+
   /**
    * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
    * - we don't need to show spinner for prefilled fks since the inputs are already disabled
    */
-  const showSpinner = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
+  const showSpinnerOnLoad = props.waitingForForeignKeyData && (props.columnModel.hasDomainFilter ||
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
 
   /**
@@ -109,6 +112,20 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onAttemptToChange) {
+      setShowSpinner(true);
+      props.foreignKeyCallbacks.onAttemptToChange().then((res) => {
+        if (res.allowed) {
+          populateRecordsetModalProps(res.domainFilterFormNumber);
+        }
+      }).finally(() => setShowSpinner(false));
+      return;
+    } else {
+      populateRecordsetModalProps();
+    }
+  };
+
+  const populateRecordsetModalProps = (domainFilterFormNumber?: number) => {
     const recordsetConfig: RecordsetConfig = {
       viewable: false,
       editable: false,
@@ -123,7 +140,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     const ref = createForeignKeyReference(
       props.columnModel.column,
       props.parentReference,
-      usedFormNumber,
+      typeof domainFilterFormNumber === 'number' ? domainFilterFormNumber : usedFormNumber,
       props.foreignKeyData,
       getValues
     );
@@ -140,7 +157,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       },
       getDisabledTuples: props.foreignKeyCallbacks ? props.foreignKeyCallbacks.getDisabledTuples : undefined
     });
-  };
+  }
 
   const hideRecordsetModal = () => {
     setRecordsetModalProps(null);
@@ -174,7 +191,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-foreignkey'>
-          {showSpinner &&
+          {(showSpinnerOnLoad || showSpinner) &&
             <div className='foreignkey-input-spinner-container'>
               <div className='foreignkey-input-spinner-backdrop'></div>
               <Spinner animation='border' size='sm' />

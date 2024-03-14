@@ -5,7 +5,6 @@
 var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
-var mustache = require('../../../../../../ermrestjs/vendor/mustache.min.js');
 var moment = require('moment');
 
 var currentTimestampTime = moment().format("x");
@@ -24,12 +23,12 @@ var testParams = {
             { name: "title", title: "<strong>Name of Accommodation</strong>", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
             { name: "category",  title: "Category", type: "text", isForeignKey: true, count: 5, totalCount: 5, comment: "_markdown_ comment can be turned off", nullok: false}, // the total count is the total number of rows in the category.json data file
-            { name: "rating", title: "User Rating", type: "float4", nullok: false},
+            { name: "rating", title: "User Rating", type: "float4", nullok: false, inline_comment: "Average user rating from 1 to 5 stars"},
             { name: "summary", title: "Summary", nullok: false, type: "longtext"},
             { name: "description", title: "Description", type: "markdown"},
             { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" },
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
-            { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
+            { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false, inline_comment: "The exact time and date where this accommodation became available!" },
             { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean" },
             { name: "text_array", title: "text_array", type: "array", baseType: "text" },
@@ -55,7 +54,7 @@ var testParams = {
         inputs: [
             {
                 "title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
-                "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
+                "rating": "1e0", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
@@ -72,7 +71,7 @@ var testParams = {
         results: [
             [
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"},
-                {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Castle"},
+                {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-edit:category/id=10004`, "value":"Castle"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
                 "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#723456"

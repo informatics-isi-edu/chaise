@@ -1,10 +1,9 @@
 var pImport =  require('../utils/protractor.import.js');
 var chaisePage = require('../utils/chaise.page.js');
-var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
-const { browser } = require('protractor');
+const { browser, ElementFinder } = require('protractor');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -208,11 +207,7 @@ exports.testPresentation = function (tableParams) {
 
                     const aTag = chaisePage.recordPage.getLinkChild(columnEls);
                     const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
-                    let columnUrl = mustache.render(column.presentation.template, {
-                        "catalog_id": process.env.catalogId,
-                        "chaise_url": process.env.CHAISE_BASE_URL,
-                    });
-                    columnUrl += "RID=" + dataRow.RID;
+                    const columnUrl = column.presentation.url + "RID=" + dataRow.RID;
 
                     expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
                     expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
@@ -220,16 +215,6 @@ exports.testPresentation = function (tableParams) {
                     expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
                 }
         	}
-        });
-    });
-
-    it('should not show any columns with null value', function() {
-        var columns = tableParams.columns;
-        columns.forEach(function(column) {
-            var elem = element(by.id('row-' + column.title.toLowerCase()));
-            if (column.value === null) {
-                expect(elem.isPresent()).toBe(false);
-            }
         });
     });
 
@@ -1693,4 +1678,30 @@ function checkRelatedRowValues(displayname, isInline, rowValues, done) {
         console.log(error);
         done.fail();
     });
+}
+
+/**
+ * click on the given button to open the delete-confirm. make sure it looks good, and then confirm.
+ * @param {ElementFinder} btn the delete btn
+ * @param {string} confirmText the confirm text
+ */
+exports.testDeleteConfirm = (btn, confirmText) => {
+  return new Promise ((resolve, reject) => {
+    browser.wait(EC.visibilityOf(btn), browser.params.defaultTimeout);
+
+    let modalTitle;
+    chaisePage.clickButton(btn).then(() => {
+      modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+
+      return browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+    }).then(() => {
+      expect(modalTitle.getText()).toBe("Confirm Delete");
+
+      expect(chaisePage.recordPage.getConfirmDeleteText().getText()).toEqual(confirmText);
+
+      return chaisePage.clickButton(chaisePage.recordPage.getConfirmDeleteButton());
+    }).then(() => {
+      resolve();
+    }).catch(err => reject(err));
+  });
 }

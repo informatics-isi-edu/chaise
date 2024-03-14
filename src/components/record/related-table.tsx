@@ -88,7 +88,7 @@ const RelatedTableInner = ({
     <div>
       {/* in case of inline, the comments are already handled */}
       {!relatedModel.isInline && usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.INLINE &&
-        <div className='inline-tooltip'><DisplayCommentValue comment={usedRef.comment} /></div>
+        <div className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={usedRef.comment} /></div>
       }
       {displayCustomMode &&
         <>

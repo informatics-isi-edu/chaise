@@ -273,14 +273,23 @@ const integer8FieldValidation = (value: string) => {
   return parseInt(value, 10) <= parseInt(INTEGER_LIMITS.INT_8_MAX, 10) || ERROR_MESSAGES.INTEGER_8_MAX;
 }
 
-const integerFieldValidation = {
-  value: dataFormats.regexp.integer,
-  message: ERROR_MESSAGES.INVALID_INTEGER
-};
+const integerFieldValidation = (value: string) => {
+  if (!value) return;
+  let isValid = true;
 
-const numericFieldValidation = {
-  value: dataFormats.regexp.float,
-  message: ERROR_MESSAGES.INVALID_NUMERIC
+  isValid = dataFormats.regexp.integer.test(value);
+  return isValid || ERROR_MESSAGES.INVALID_INTEGER;
+}
+
+const numericFieldValidation = (value: any) => {
+  if (!value) return;
+  let isValid = true;
+
+  // 2 equals since values get loaded into inputs as numbers
+  // but when user types, they are strings
+  // eslint-disable-next-line eqeqeq
+  isValid = value == ('' + value).trim() && !isNaN(parseFloat(value)) && isFinite(value)
+  return isValid || ERROR_MESSAGES.INVALID_NUMERIC;
 };
 
 const dateFieldValidation = (value: string) => {
