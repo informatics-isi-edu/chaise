@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCiteAcls'
+  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu'
 ];
 
 /**
@@ -65,14 +65,22 @@ export const DEFAULT_CHAISE_CONFIG = {
   savedQueryConfig: null,
   loggedInMenu: {},
   facetPanelDisplay: {},
-  shareCiteAcls: {
-    show: ['*'],
-    enable: ['*'],
+  shareCite: {
+    acls: {
+      show: ['*'],
+      enable: ['*'],
+    }
   },
   templating: {
     engine: 'mustache'
   },
   hideRecordeditLeaveAlert: false,
+  exportConfigsSubmenu: {
+    acls: {
+      show: [],
+      enable: []
+    }
+  }
 };
 
 export const dataFormats = {

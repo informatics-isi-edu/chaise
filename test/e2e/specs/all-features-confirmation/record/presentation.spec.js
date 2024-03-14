@@ -240,17 +240,17 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCite defined', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
 
                     expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
 
-                    expect(chaiseConfig.shareCiteAcls).toBeDefined();
+                    expect(chaiseConfig.shareCite).toBeDefined();
                     // both defined in chiase-config
-                    expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
-                    expect(chaiseConfig.shareCiteAcls.enable).toEqual(["*"]);
+                    expect(chaiseConfig.shareCite.acls.show).toEqual(["*"]);
+                    expect(chaiseConfig.shareCite.acls.enable).toEqual(["*"]);
                 });
             });
 

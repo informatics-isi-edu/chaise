@@ -301,29 +301,26 @@ export class ConfigService {
       ConfigService._applyHostConfigRules(catalogAnnotation, cc, true);
     }
 
-
-    /**
-     * shareCiteAcls can either be a boolean or object:
-     * if =true, we should show and enable it.
-     * if =false, we should hide and disable it.
-     * otherwise we have to make sure it has both show and enable props
-     */
-    if (cc.shareCiteAcls === true) {
-      cc.shareCiteAcls = { show: ['*'], enable: ['*'] }
-    }
-    else if (cc.shareCiteAcls === false) {
-      cc.shareCiteAcls = { show: [], enable: [] }
-    }
-    else if (!isObjectAndNotNull(cc.shareCiteAcls)) {
-      cc.shareCiteAcls = DEFAULT_CHAISE_CONFIG.shareCiteAcls;
-    }
-    else {
-      // shareCiteAcls is a nested object, user could define shareCiteAcls:
-      //     { show: ['*'] }
-      // with no enable array defined
+    // make sure shareCite has the proper structure
+    if (!isObjectAndNotNull(cc.shareCite)) {
+      cc.shareCite = DEFAULT_CHAISE_CONFIG.shareCite;
+    } else if (!isObjectAndNotNull(cc.shareCite.acls)) {
+      cc.shareCite.acls = DEFAULT_CHAISE_CONFIG.shareCite.acls;
+    } else {
       // make sure the object has both defined and apply the default if one or the other is missing
-      if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
-      if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+      if (!cc.shareCite.acls.show) cc.shareCite.acls.show = ['*'];
+      if (!cc.shareCite.acls.enable) cc.shareCite.acls.enable = ['*'];
+    }
+
+    // make sure exportConfigsSubmenu has the proper structure
+    if (!isObjectAndNotNull(cc.exportConfigsSubmenu)) {
+      cc.exportConfigsSubmenu = DEFAULT_CHAISE_CONFIG.exportConfigsSubmenu;
+    } else if (!isObjectAndNotNull(cc.exportConfigsSubmenu.acls)) {
+      cc.exportConfigsSubmenu.acls = DEFAULT_CHAISE_CONFIG.exportConfigsSubmenu.acls;
+    } else {
+      // make sure the object has both defined and apply the default if one or the other is missing
+      if (!cc.exportConfigsSubmenu.acls.show) cc.exportConfigsSubmenu.acls.show = ['*'];
+      if (!cc.exportConfigsSubmenu.acls.enable) cc.exportConfigsSubmenu.acls.enable = ['*'];
     }
 
     /**
