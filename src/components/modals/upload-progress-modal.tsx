@@ -227,9 +227,15 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsUpload(false);
     uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
       row.forEach((item: UploadFileObject) => {
-        item.hatracObj.createUploadJob().then(
-          () => onJobCreated(item),
-          onError);
+        if (item.hatracObj.updateDispositionOnly) {
+          item.hatracObj.createUpdateMetadataJob().then(
+            () => onJobCreated(item),
+            onError)
+        } else {
+          item.hatracObj.createUploadJob().then(
+            () => onJobCreated(item),
+            onError);
+        }
       });
     });
   };
