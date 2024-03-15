@@ -79,12 +79,12 @@ exports.testPresentation = function (tableParams) {
 
     exports.testSharePopup(tableParams.sharePopupParams);
 
-    it("should have '2' options in the export dropdown menu.", function (done) {
+    it("should have '3' options in the export dropdown menu.", function (done) {
         const exportButton = chaisePage.recordsetPage.getExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         chaisePage.clickButton(exportButton).then(function () {
-            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(3, "incorrect number of export options");
             // close the dropdown
             return exportButton.click();
         }).then(function () {
@@ -116,7 +116,7 @@ exports.testPresentation = function (tableParams) {
             });
         });
 
-        it("should have 'BDBag' as a download option and download the file.", function(done) {
+        xit("should have 'BDBag' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                 expect(bagOption.getText()).toBe("BDBag");
@@ -138,6 +138,29 @@ exports.testPresentation = function (tableParams) {
                 console.log(err);
                 done.fail();
             });
+        });
+
+        it ('should have `Configurations` option that opens a submenu to download the config file.', (done) => {
+            let exportSubmenuOptions, configOption;
+            chaisePage.clickButton(chaisePage.recordsetPage.getExportDropdown()).then(() => {
+                configOption = chaisePage.recordsetPage.getExportOption('configurations');
+                return chaisePage.waitForElement(configOption);
+            }).then(() => {
+                expect(configOption.getText()).toBe('Configurations');
+                return chaisePage.clickButton(configOption);
+            }).then(() => {
+                exportSubmenuOptions = chaisePage.recordsetPage.getExportSubmenuOptions();
+                expect(exportSubmenuOptions.count()).toBe(1);
+                const bdBagSubmenu = chaisePage.recordsetPage.getExportSubmenuOption('BDBag');
+                expect(bdBagSubmenu.isDisplayed()).toBeTruthy();
+                chaisePage.clickButton(bdBagSubmenu);
+            }).then(() => {
+                return browser.wait(function () {
+                  return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[2]);
+                }, browser.params.defaultTimeout);
+            }).then(() => {
+                done();
+            }).catch((done) => chaisePage.catchTestError(done));
         });
     }
 

@@ -118,16 +118,3 @@
 .show > button.chaise-btn.btn.dropdown-toggle {
   @include helpers.chaise-btn-primary();
 }
-
-// override the default behavior of dropdowns in bootstrap
-.chaise-dropdown.dropdown {
-  display: inline-block;
-  .dropdown-item {
-    color: map-get(variables.$color-map, 'black');
-
-    &:hover,
-    &:focus {
-      text-decoration: none;
-    }
-  }
-}

@@ -407,3 +407,26 @@ export function createChaiseTooltips(container: Element) {
 export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
   form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 }
+
+/**
+ * given an object, stringify it and prompt a download
+ */
+export function saveObjectAsJSONFile(obj: any, filename: string) {
+  const str = JSON.stringify(obj, null, '  ');
+
+  const blob = new Blob([str], { type: 'text/json' });
+  const link = document.createElement('a');
+
+  link.download = filename;
+  link.href = window.URL.createObjectURL(blob);
+  link.dataset.downloadurl = ['text/json', link.download, link.href].join(':');
+
+  const evt = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+
+  link.dispatchEvent(evt);
+  link.remove()
+}

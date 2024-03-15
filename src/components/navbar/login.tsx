@@ -4,10 +4,10 @@ import { MouseEvent, useEffect, useRef, useState } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
-import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ProfileModal from '@isrd-isi-edu/chaise/src/components/modals/profile-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -164,10 +164,11 @@ const ChaiseLogin = (): JSX.Element => {
 
   const renderMenuChildren = () => {
     if (loggedInMenu.menuOptions) {
-      return (<NavbarDropdown
+      return (<DropdownSubmenu
         menu={loggedInMenu.menuOptions}
         openProfileCb={handleOpenProfileClick}
         parentDropdown={dropdownWrapper}
+        displayType={DropdownSubmenuDisplayTypes.PROFILE_MENU}
       />)
     }
 
@@ -258,7 +259,7 @@ const ChaiseLogin = (): JSX.Element => {
     return (
       <Dropdown
         ref={dropdownWrapper}
-        className='username-display nav-item'
+        className='username-display nav-item chaise-dropdown'
         onToggle={handleLoginDropdownToggle}
         style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}
       >
