@@ -1,108 +1,287 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_array-field.scss';
+
 // components
-import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
-//hooks
-import { useRef } from 'react';
+import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+
 // utils
-import { getSimpleColumnType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { arrayFieldPlaceholder } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatDatetime, formatFloat, formatInt } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { useEffect, useState } from 'react';
+import {
+  DragDropContext, Draggable, DraggableProvided,
+  DraggableStateSnapshot, DraggingStyle, Droppable, DroppableProvided, DropResult
+} from 'react-beautiful-dnd';
+import { EventType, useFormContext } from 'react-hook-form';
+import InputSwitch from './input-switch';
+
 type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
   baseArrayType: string,
 };
 
-const ArrayField = (props : ArrayFieldProps): JSX.Element => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const arrayFieldValidation = (value: string) => {
-    if (!value) return;
+type RowItem = {
+  id: number,
+  value: string
+}
 
-    // make sure it's an array
-    let validArray = false, arr;
-    try {
-      arr = JSON.parse(value);
-      validArray = Array.isArray(arr);
-    } catch (e) {}
+type Options = {
+  name?: string,
+  type?: EventType,
+  value?: unknown
+  values?: {
+    [x: string]: any
+  }
+}
 
-    if (!validArray) {
-      return 'Please enter a valid array structure' + ((props.baseArrayType === 'text') ? ' e.g. [\"value1\", \"value2\"]' : '.');
+const ArrayField = (props: ArrayFieldProps): JSX.Element => {
+  const [itemList, setItemList] = useState<RowItem[]>([])
+  const [counter, setCounter] = useState(0);
+  const { disableInput, name, baseArrayType } = props;
+  const { getValues, setValue, watch, register, unregister } = useFormContext();
+
+
+
+
+  useEffect(() => {
+    let defaultValues = getValues(name);
+
+    defaultValues = typeof defaultValues === 'object' || !defaultValues ? defaultValues : JSON.parse(defaultValues)
+
+    if (defaultValues && defaultValues.length > 0) {// Populate default Values if present
+      setDefaultFieldState(defaultValues)
+    } else { // create a row with empty value if no default values exist
+      setDefaultFieldState([''])
+    }
+  }, [])
+
+
+  useEffect(() => {
+
+    // Update the array field in the react-hook-form context
+    if (itemList.length) {
+      updateFormValue(name, itemList.map(item => formatValue(item.value)).filter(value => value?.toString().trim()))
+    }
+  }, [itemList])
+
+  useEffect(() => {
+
+    const sub = watch((data, options: Options) => {
+
+      // Apply All executed
+      if (options.values && options.values[`-1-${name.split('-')[1]}`]) {
+        const valuesToWrite = options.values[`-1-${name.split('-')[1]}`]
+
+        setDefaultFieldState(valuesToWrite.length ? valuesToWrite : [''])
+      }
+      //-----------------------
+
+      // Clear All fields
+      if (options.values && options.values[name] === '') {
+
+        const keysToClear = Object.keys(options.values).filter(keyName => keyName.includes(`${name}-row-`))
+        keysToClear.push(`-1-${name.split('-')[1]}`)
+
+        unregister(keysToClear)
+        setDefaultFieldState([''])
+      }
+      // Update component state as per the changes observed in the individual row values in the form context
+      else if (options.name?.startsWith(`${name}-row`)) {
+        const itemId = parseInt(options.name?.split('-').at(-1) as string)
+        onTextEdit(itemId, data[`${name}-row-${itemId}`])
+      }
+    })
+
+    return () => sub.unsubscribe();
+  }, [watch])
+
+  const generateId = () => {
+    const curr = counter;
+    setCounter(prev => prev + 1);
+    return curr;
+  }
+
+  const formatValue = (value: string) => {
+    switch (baseArrayType) {
+      case 'int4':
+        return formatInt(value);
+      case 'float4':
+        return formatFloat(value);
+      default:
+        return value;
+    }
+  }
+
+  const updateFormValue = (field: string, value: any) => {
+    if (!getValues(field)) {
+      register(field)
+    }
+    setValue(field, value)
+  }
+
+  /***
+   * Adds a new row at a specified index with a given value.
+   * @param index - index at the which new row needs to be created
+   * @param value [optional] specify the placeholder value at the newly created row. Empty if no value provided
+   */
+  const addItem = (index: number, value?: number | string) => () => {
+    const elementId = generateId();
+    index = typeof index === 'number' && index > -1 ? index + 1 : itemList.length
+
+    setItemList([...itemList.slice(0, index),
+    {
+      id: elementId,
+      value: value ? value : ''
+    },
+    ...itemList.slice(index, itemList.length)
+    ])
+
+    updateFormValue(`${name}-row-${elementId}`, value ? value : '')
+  }
+
+  const setDefaultFieldState = (values: (string | number)[]) => {
+
+    setItemList(
+      values.map((defVal: string | number, idx: number): RowItem => {
+
+        if (baseArrayType === 'timestamp') {
+          const v = formatDatetime(defVal, { outputMomentFormat: dataFormats.timestamp });
+
+          updateFormValue(`${name}-row-${idx}-date`, defVal === '' ? '' : v?.date)
+          updateFormValue(`${name}-row-${idx}-time`, defVal === '' ? '' : v?.time)
+        }
+        updateFormValue(`${name}-row-${idx}`, defVal)
+
+        return {
+          id: idx,
+          value: defVal
+        }
+      })
+    )
+    setCounter(values.length)
+  }
+
+  /**
+   * Delete row with a specific ID
+   * @param itemId id of row to be deleted
+   */
+  const deleteItemWithId = (itemId: number) => {
+    unregister(`${name}-row-${itemId}`)
+    setItemList([...itemList.filter((item: RowItem) => item.id !== itemId)])
+  }
+
+  /**
+   * Updates the state value of a given row
+   * @param id specify the row id
+   * @param fieldValue new value for the row
+   */
+  const onTextEdit = (id: number, fieldValue: string) => {
+    setItemList((prev: RowItem[]) => {
+      return [...prev.map((el: RowItem) => {
+        if (el.id === id) {
+          el.value = fieldValue;
+          return el;
+        }
+        return el;
+      })
+      ]
+    })
+  }
+
+  const handleOnDragEnd = (result: DropResult) => {
+    const items = Array.from(itemList);
+
+    if (!result.destination) {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(itemList.length - 1, 0, reorderedItem);
+    } else {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
     }
 
-    const moment = windowRef.moment;
-    // validate individual array values
-    for (let i = 0; i < arr.length; i++) {
-      let isValid = false;
-      const val = arr[i];
+    setItemList(items);
+  }
 
-      // null is a valid value for any type
-      if (val === null) continue;
+  const draggableItemRenderer = (item: RowItem, index: number, disableInput: boolean | undefined) => {
 
-      switch (props.baseArrayType) {
-        case 'timestamptz':
-        case 'timestamp':
-          isValid = moment(val, moment.ISO_8601, true).isValid();
-          break;
-        case 'date':
-          isValid = moment(val, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid();
-          break;
-        case 'numeric':
-        case 'float4':
-        case 'float8':
-          isValid = val == ('' + val).trim() &&!isNaN(parseFloat(val)) && isFinite(val);
-          break;
-        case 'int2':
-        case 'int4':
-        case 'int8':
-          isValid = dataFormats.regexp.integer.test(val);
-          break;
-        case 'boolean':
-          isValid = (typeof val === 'boolean');
-          break;
-        default:
-          isValid = (typeof val === 'string' || val instanceof String);
-          break;
-      }
+    return <>
+      <Draggable key={item.id} draggableId={item.id.toString()} index={index} isDragDisabled={disableInput}>
+        {
+          (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+            if (snapshot.isDragging) {
 
-      if (!isValid) {
-        return '`' + val + '` is not a valid ' + getSimpleColumnType(props.baseArrayType) + ' value.';
-      }
-    }
+              provided.draggableProps.style = {
+                ...provided.draggableProps.style,
+                left: 5,
+                top: index * (baseArrayType === 'timestamp' ? 111 : 50)
+              } as DraggingStyle
+            }
 
-    return true;
-  };
+            return <>
+              <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                <div className='move-icon'>
+                  <i className='fa-solid fa-grip-vertical'></i>
+                </div>
 
-  const placeholder = props.placeholder ? props.placeholder : arrayFieldPlaceholder(props.baseArrayType);
+                <InputSwitch
+                  {...props}
+                  type={baseArrayType}
+                  // name={`${name}-row-${item.id}`}
+                  {...register(`${name}-row-${item.id}`, { value: item.value ? item.value : '' })}
+
+                  displayExtraDateTimeButtons={true}
+                  displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+                />
+
+                <div>
+                  {
+                    !disableInput &&
+                    <div className='action-buttons'>
+                      <button
+                        type='button' className='fa-solid fa-minus chaise-btn chaise-btn-tertiary chaise-btn-sm'
+                        onClick={() => { deleteItemWithId(item.id) }} disabled={disableInput || itemList.length === 1}
+                      />
+                      <button
+                        type='button' className='fa-solid fa-plus chaise-btn chaise-btn-tertiary chaise-btn-sm'
+                        onClick={addItem(index)} disabled={disableInput}
+                      />
+                    </div>
+                  }
+                </div>
+              </li>
+            </>
+          }
+        }
+      </Draggable>
+    </>
+  }
 
   return (
-    <InputField {...props}
-      controllerRules={{
-        validate: arrayFieldValidation
-      }}
-    >
-      {(field, onChange, showClear, clearInput) => (
-        <div className='input-switch-array'>
-          <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
-            <textarea
-              placeholder={placeholder} rows={5} className={`${props.inputClasses} input-switch ${
-                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
-              }`}
-              {...field} onChange={onChange} disabled={props.disableInput}
-              ref={textAreaRef}
-            />
-            <ClearInputBtn
-              btnClassName={`${props.clearClasses} input-switch-clear ${
-                hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
-              }`}
-              clickCallback={clearInput}
-              show={showClear && !props.disableInput}
-            />
-          </div>
-        </div>
-      )}
-    </InputField>
+    <>
+      <div className='array-input-field-container'>
+        {name.includes('array_disabled') ?
+          <InputSwitch
+            {...props}
+            type={'text'}
+            name={name}
+          />
+          :
+          <DragDropContext onDragEnd={handleOnDragEnd}>
+            <Droppable droppableId={'input-items'}>
+              {
+                (provided: DroppableProvided) => (
+                  <ul className='input-items' {...provided.droppableProps} ref={provided.innerRef}>
+                    {itemList.map((item: RowItem, index: number) => draggableItemRenderer(item, index, disableInput))}
+                    {provided.placeholder}
+                  </ul>
+                )
+              }
+            </Droppable>
+          </DragDropContext>
+        }
+      </div>
+    </>
   )
 }
 
 export default ArrayField;
+

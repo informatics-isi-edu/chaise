@@ -197,28 +197,28 @@ export function arrayFieldPlaceholder(baseType: string) {
   let placeholder;
   switch (baseType) {
     case 'timestamptz':
-      placeholder = 'example: [ \"2001-01-01T01:01:01-08:00\", \"2002-02-02T02:02:02-08:00\" ]'
+      placeholder = ["2001-01-01T01:01:01-08:00", "2002-02-02T02:02:02-08:00"]
     case 'timestamp':
-      placeholder = 'example: [ \"2001-01-01T01:01:01\", \"2002-02-02T02:02:02\" ]'
+      placeholder = ["2001-01-01T01:01:01", "2002-02-02T02:02:02"]
       break;
     case 'date':
-      placeholder = 'example: [ \"2001-01-01\", \"2001-02-02\" ]'
+      placeholder = ["2001-01-01", "2001-02-02"]
       break;
     case 'numeric':
     case 'float4':
     case 'float8':
-      placeholder = 'example: [ 1, 2.2 ]'
+      placeholder = [1, 2.2]
       break;
     case 'int2':
     case 'int4':
     case 'int8':
-      placeholder = 'example: [ 1, 2 ]'
+      placeholder = [1, 2]
       break;
     case 'boolean':
-      placeholder = 'example: [ true, false ]'
+      placeholder = [true, false]
       break;
     default:
-      placeholder = 'example: [ \"value1\", \"value2\" ]'
+      placeholder = ["value1", "value2"]
       break;
   }
 
@@ -326,9 +326,11 @@ export const VALIDATE_VALUE_BY_TYPE: {
 } = {
   'int': integerFieldValidation,
   'integer2': integer2FieldValidation,
+  'int4': integer4FieldValidation,
   'integer4': integer4FieldValidation,
   'integer8': integer8FieldValidation,
   'float': numericFieldValidation,
+  'float4': numericFieldValidation,
   'number': numericFieldValidation,
   'date': dateFieldValidation,
   'time': timeFieldValidation,
