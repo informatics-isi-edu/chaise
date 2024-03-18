@@ -309,8 +309,10 @@ const InputSwitch = ({
           displayDateTimeLabels={displayDateTimeLabels}
         />;
       case 'integer2':
+      case 'int4':
       case 'integer4':
       case 'integer8':
+      case 'float4':
       case 'number':
         return <NumericField
           type={type}
