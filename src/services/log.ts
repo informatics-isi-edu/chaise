@@ -22,6 +22,14 @@ export class LogService {
   }
 
   /**
+   * allows changing the app-mode
+   * (used in viewer annotation form)
+   */
+  static changeAppMode(appMode: LogAppModes) {
+    LogService._logAppMode = appMode;
+  }
+
+  /**
    * Takes a object, adds default logging info to it, and logs the request with ermrest
    * @params {Object} logObj - object of key/value pairs that are specific to this action
    * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests

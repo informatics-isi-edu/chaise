@@ -4,11 +4,14 @@ import { createRoot } from 'react-dom/client';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 
+// services
+import { ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+
 // utilities
 import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-const loginLibSettings = {
+const loginLibSettings : ConfigServiceSettings = {
   appName: APP_NAMES.LOGIN
 };
 

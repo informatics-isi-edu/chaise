@@ -4,6 +4,7 @@ $left-panel-width-sm: 15vw;
 $left-panel-min-width: 170px;
 $viewport-margin: 20px;
 $main-alley:30px;
+$main-spinner-height: 97px;
 
 
 // button props
@@ -27,6 +28,9 @@ $chaise-caption-column-width: 200px;
 $chaise-checkbox-width: 20px;
 $chaise-checkbox-height: 20px;
 
+
+// currently only used in recordedit. content/input shouldn't be wider than this
+$re-max-allowed-input-width: 1200px;
 
 // fonts
 $font-size: 14px;

@@ -18,7 +18,7 @@ import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log'
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
@@ -29,7 +29,7 @@ import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/sr
 import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
-const recordeditSettings = {
+const recordeditSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORDEDIT,
   appTitle: 'Recordedit',
   overrideHeadTitle: true,
@@ -110,10 +110,10 @@ const RecordeditApp = (): JSX.Element => {
 
       const queryParams = res.queryParams || {};
       setRecordeditProps({
-        appMode, 
+        appMode,
         config: {displayMode: RecordeditDisplayMode.FULLSCREEN},
-        queryParams, 
-        reference, 
+        queryParams,
+        reference,
         logInfo: { logAppMode, logObject, logStack, logStackPath }
       });
 

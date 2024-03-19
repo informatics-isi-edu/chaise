@@ -5,7 +5,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import Accordion from 'react-bootstrap/Accordion';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -46,7 +46,6 @@ import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/u
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export type RecordProps = {
   /**
@@ -146,7 +145,8 @@ const RecordInner = ({
     onConfirm: () => void,
     onCancel: () => void,
     buttonLabel: string,
-    message: JSX.Element
+    message: JSX.Element,
+    reference: any
   } | null>(null);
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
@@ -234,8 +234,8 @@ const RecordInner = ({
    * updateRecordPage function changes
    */
   useEffect(() => {
-    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    windowRef.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
 
     windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
     windowRef.addEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
@@ -246,7 +246,7 @@ const RecordInner = ({
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
     return () => {
-      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+      windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
@@ -414,7 +414,8 @@ const RecordInner = ({
             setShowDeleteConfirmationModal(null);
             logRecordClientAction(LogActions.DELETE_CANCEL);
           },
-          message: confirmMessage
+          message: confirmMessage,
+          reference
         });
 
       } else {
@@ -601,7 +602,7 @@ const RecordInner = ({
       >
         <ChaiseTooltip
           placement='right'
-          tooltip={<span>Scroll to the <code>{displayname.value}</code> section{pageInfo}</span>}
+          tooltip={<span>Scroll to the <code><DisplayValue value={displayname} /></code> section{pageInfo}</span>}
         >
           <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
             <DisplayValue value={displayname} />
@@ -867,6 +868,8 @@ const RecordInner = ({
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
+          reference={showDeleteConfirmationModal.reference}
+          context={DeleteConfirmationModalTypes.RECORD_MAIN}
         />
       }
     </div>

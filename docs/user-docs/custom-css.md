@@ -16,7 +16,8 @@ Custom style classes with modified styling attributes can be added in `chaise.cs
 - [Changing chaise styles](#changing-chaise-styles)
   - [Body](#body)
   - [Navbar](#navbar)
-  - [App-sepecific](#app-sepecific)
+  - [Page-sepecific](#page-sepecific)
+  - [Inline comments](#inline-comments)
 - [Character replacement](#character-replacement)
 - [Examples](#examples)
 - [Custom Markdown Styles](#custom-markdown-styles)
@@ -100,6 +101,45 @@ Navbar related classes:
    - column class should be specified when scoping CSS rules to all columns with that name
    - use in conjunction with schema class and table class to be more specific as to what table headings to apply styling to
    - More often than not, you will want to apply styling for each of the columns rather than at the table level, so the `.c_<column.name>` identifier should almost always be included in the selector.
+
+### Inline comments
+
+The following are the selectors for the inline comments:
+
+- `.inline-tooltip`: The wrapper for the comments that are displayed inline.
+  - `.inline-tooltip.inline-tooltip-sm`: Used for column-level inline comments
+    - `.recordedit-container .inline-comment-row`: Recordedit columns
+  - `.inline-tooltip.inline-tooltip-lg`: Table-level inline comments (Recordset page title, Record inline and related entities)
+
+Common custom rules that you might want to define for inline comments:
+
+1. Change the default font-size
+
+```css
+.inline-tooltip.inline-tooltip-sm {
+  font-size: 10px !important; /* default is 13px */
+}
+
+.inline-tooltip.inline-tooltip-lg {
+  font-size: 20px !important; /* default is 16px */
+}
+```
+
+2. Changing the color, font-size, or font-style of the inline comments in recordedit:
+
+```css
+.recordedit-container .inline-comment-row .inline-tooltip {
+  /* changing the color */
+  color: #333 !important;
+
+  /* changing its size */
+  font-size: 14px !important;
+
+  /* making it italic: */
+  font-style: italic !important;
+}
+```
+
 
 ## Character replacement
 

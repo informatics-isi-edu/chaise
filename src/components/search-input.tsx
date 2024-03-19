@@ -213,12 +213,12 @@ const SearchInput = ({
           <ChaiseTooltip
             placement='bottom-start'
             tooltip={
-              <>
+              <span className='markdown-container'>
                 <p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p>
                 <p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p>
                 <p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</p>
                 <p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>
-              </>
+              </span>
             }
           >
             <button

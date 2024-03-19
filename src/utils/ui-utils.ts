@@ -243,26 +243,19 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   return sensors;
 }
 
-export function copyToClipboard(text: string) {
-  if (document.execCommand) {
-    const dummy = document.createElement('input');
-    dummy.setAttribute('visibility', 'hidden');
-    dummy.setAttribute('display', 'none');
-
-    document.body.appendChild(dummy);
-    dummy.setAttribute('id', 'permalink_copy');
-    dummy.value = text;
-    dummy.select();
-    document.execCommand('copy');
-
-    document.body.removeChild(dummy);
-  }
-  else if (navigator && navigator.clipboard) {
-    navigator.clipboard.writeText(text).catch((err) => {
-      $log.warn('failed to copy with the following error:')
-      $log.warn(err);
+/**
+ * add the given text to clipboard
+ * @param text the text that should be copied to clipboard
+ */
+export function copyToClipboard(text: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    navigator.clipboard.writeText(text).then(() => {
+      resolve();
+    }).catch((err) => {
+      reject(err);
     });
-  }
+  });
+
 }
 
 /**
@@ -283,6 +276,14 @@ export function debounce(callback: Function, timeout: number) {
       callback.apply(this, args);
     }, timeout);
   }
+}
+
+/**
+ * create a timeout that can be used in async/await fns
+ * @param ms how long we should wait
+ */
+export function asyncTimeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -316,7 +317,7 @@ export function fireCustomEvent(eventName = 'myEvent', targetElement: string | E
 export function convertVWToPixel(value: number) {
   const e = document.documentElement;
   const g = document.getElementsByTagName('body')[0];
-  const x = window.innerWidth || e.clientWidth || g.clientWidth;
+  const x = windowRef.innerWidth || e.clientWidth || g.clientWidth;
 
   const result = (x * value) / 100;
   return result;
@@ -396,4 +397,36 @@ export function createChaiseTooltips(container: Element) {
       })
     });
   }
+}
+
+/**
+ * trigger form submission. should only be used when we don't have access to the handleSubmit function.
+ * for example in viewer annotation form, we're calling this from viewer provider which is outside of recordedit component.
+ * borrowed from here: https://github.com/react-hook-form/react-hook-form/issues/566#issuecomment-730077495
+ */
+export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
+  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}
+
+/**
+ * given an object, stringify it and prompt a download
+ */
+export function saveObjectAsJSONFile(obj: any, filename: string) {
+  const str = JSON.stringify(obj, null, '  ');
+
+  const blob = new Blob([str], { type: 'text/json' });
+  const link = document.createElement('a');
+
+  link.download = filename;
+  link.href = window.URL.createObjectURL(blob);
+  link.dataset.downloadurl = ['text/json', link.download, link.href].join(':');
+
+  const evt = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+
+  link.dispatchEvent(evt);
+  link.remove()
 }

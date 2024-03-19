@@ -14,8 +14,8 @@ This is a guide for people who develop Chaise.
   * [Handling time](#handling-time)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
-    + [Make targets](#make-targets)
-    + [NPM](#npm)
+  * [Make targets](#make-targets)
+  * [NPM](#npm)
 - [Structure of an App](#structure-of-an-app)
 - [Using Chaise through npm](#using-chaise-through-npm)
 - [Error handling](#error-handling)
@@ -23,6 +23,9 @@ This is a guide for people who develop Chaise.
   * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
 - [Context and provider pattern](#context-and-provider-pattern)
+- [Performance](#performance)
+  * [Debugging](#debugging)
+  * [Memoization](#memoization)
 
 ## Reading Material
 In this section, we've included all the guides and tools that we think are useful
@@ -121,6 +124,27 @@ The rules that should be followed while writing code.
     setCounter(prevCounter => prevCounter + 1);
   };
   ```
+- When to use different React hooks, `useState`, `useRef`, and `useStateRef`
+  - `useState`:
+    - common to both `useState` and `useRef`, remembers it's value after a rerender of the component
+    - used to bind component state with rendering the component
+    - state update is asynchronous, the new state value won't be updated until after rerender
+    - modifying the state will queue a rerender of the component which will have the new state value that was set before rerender
+  - `useRef`:
+    - common to both `useState` and `useRef`, remembers it's value after a rerender of the component
+    - does not trigger rerenders of the component or `useEffect` of component
+    - ref update is synchronous, meaning the new value is immediately available in other functions
+    - better for accessing mutable values that are independent of the React component state
+    - useful when mutating a value that is used in another function later in the stack before a rerender would occur
+      - for instance, in a function used as a callback for a promise
+    - `<ref>.current` is a mutable value 
+  - `useStateRef`:
+    - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
+    - intended to be synchronous
+- Calling functions after `useState` update and browser repaint
+  - When the set function of a `useState` hook is called, a browser repaint is triggered followed by each `useEffect` and `useLayoutEffect` being checked for changes
+  - If a change occurred that triggers a `useEffect` or `useLayoutEffect` hook, the defined function for that hook will run after the browser repaint with the updated values for the `useState` hook.
+  - This is useful for displaying feedback to the user before triggering some functionality that might take some time to process (cloning forms in recordedit or submitting many at once)
 - List items must have keys, which tell React list item   identity
   - Should be unique per list
   - Ideally, use item IDs
@@ -255,6 +279,14 @@ The rules that should be followed while writing code.
     the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
 
   - Scrolling can be persisted by using the `scrolling : scroll` option.
+
+#### Supporting styles and classes in configuration
+There are multiple places in chaise and deriva-webapps that we want to allow for users to be able to customize the look and feel of different apps and features. Below are some of the guidelines for when to expose a style property in configuration, attach ids and classes to elements that are made available for custom.css, and define other special classes for use in configs and annotations.
+  - style properties that are directly exposed in configuration documents are usually quantifiable values or boolean values. 
+    - For instance width, max-width, font-size are all quatifiable properties that expect a specific numeric value (usually a number, decimal, or percentage)
+  - there is a defined set of [special classes](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#special-classes) that can be attached to elements using markdown in annotations or certain configurations that allow for a list of classes to be defined
+    - we want to include these classes when a style property might have multiple values (like an enum) instead of an integer. Think about the `align-items` or `overflow` CSS properties that could have multiple values
+  - At a minimum, chaise and deriva-webapps should be attaching unique classes to elements to communicate different parts of the page or components to help data modelers write their own custom CSS by targeting these unique classes
 
 ### Font Awesome
 
@@ -391,8 +423,14 @@ This section will go over how we think the NPM modules should be managed.
   - `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
 - Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
   - Ensure the used node and npm versions are updated and the latest stable.
-  - Run `npm install` to sync `package-lock.json` with `package.json`.
-  - Double-check the changes to `pacakge-lock.json`.
+  - Run `npm install --include=dev` to sync `package-lock.json` with `package.json`.
+  - Double-check the changes to `package-lock.json`.
+- Only for main contributors: to publish a new version of chaise to npm, we should,
+  1. Update the `version` property in `package.json`.
+  2. Update the `version` and `packages.version` properties in `package-lock.json`. Or run `npm install --include=dev`.
+    - If you used `npm install` double-check the changes to `package-lock.json`.
+  3. Push the changes to the main branch.
+  4. After pushing the changes, `npm-publish.yml` GitHub workflow will detect the version change and properly publish the new version to npm.
 
 ## Structure of an App
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
@@ -417,6 +455,9 @@ To handle global errors, the app wrapper adds an `ErrorProvider` to handle the e
 
 ### Chaise Navbar
 The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
+
+### Buttons vs Links
+We want to be aware of why we are using `<button>` or `<a>` tags. Generally we should use `<a>` for navigation when possible since this allows for other operating system and browser features. More details about which buttons and links are used for actions or navigation can be found in [this spreadsheet](https://docs.google.com/spreadsheets/d/1p7fI8Uput9nUuG1oc7m8ZfNwS0pu-HU70PmMDhcNmHM/edit#gid=0).
 
 ## Using Chaise through npm
 
@@ -987,3 +1028,26 @@ const CounterDisplayInner = () => {
 
 export default CounterDisplay;
 ```
+
+## Performance
+
+In this section, we should summarize everything related to performance. This includes how to debug performance issues and common practices to fix issues. 
+
+### Debugging
+
+Before jumping into solutions, consider debugging and finding the root of the problem. 
+
+- You should install official [React developer tools](https://react.dev/learn/react-developer-tools). With this, you can look at components and see when/why each rerenders.
+  - By default, the "Profiler" tab only works in development mode. To use this tab in the production mode, you need to uncomment the `'react-dom$': 'react-dom/profiling',` alias in the [app.config.js](https://github.com/informatics-isi-edu/chaise/blob/master/webpack/app.config.js) file.
+- Installing in the `development` mode allows you to add break points in the code. You should also be mindful of the browser console, as React and other dependencies usually print warning/errors only in this mode. That being said, as we mentioned in [here](#development-vs-production), `development` has its downsides.
+
+### Memoization
+
+React always re-renders children when a parent component has to be re-rendered. But since we're using the provider pattern, the immediate relationship is unimportant. So, if we find any performance issues, it is probably related to redundant components rendering because of this. `memo`  lets us skip re-rendering a component when its props are unchanged. You can see how we've used it [here](https://github.com/informatics-isi-edu/chaise/pull/2341/commits/29720eb277faaa6fc768a912ffcf8a8ec4776980), which significantly improved the performance of record page.
+
+That being said, performance-related changes applied incorrectly can even harm performance. Use `React.memo()` wisely. Don't use memoization if you can't quantify the performance gains.
+
+Useful links:
+- https://react.dev/reference/react/memo
+- https://dmitripavlutin.com/use-react-memo-wisely/
+

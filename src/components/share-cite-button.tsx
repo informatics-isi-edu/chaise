@@ -1,9 +1,12 @@
-import { useState } from 'react';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ShareCiteModal, { ShareCiteModalProps } from '@isrd-isi-edu/chaise/src/components/modals/share-cite-modal';
 import Spinner from 'react-bootstrap/Spinner';
+
+// hooks
+import { useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -11,6 +14,10 @@ import { CitationModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+
+// utilities
+import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 
 type ShareCiteButtonProps = {
   reference: any,
@@ -24,7 +31,13 @@ type ShareCiteButtonProps = {
     title: string,
     value: string,
     link?: string
-  }[]
+  }[],
+  onBtnClick?: (e: any) => void,
+  btnClass?: string,
+  btnTooltip?: {
+    pending: string,
+    ready: string
+  }
 };
 
 const ShareCiteButton = ({
@@ -35,9 +48,14 @@ const ShareCiteButton = ({
   citation,
   title,
   hideHeaders,
-  extraInfo
+  extraInfo,
+  onBtnClick,
+  btnClass,
+  btnTooltip
 }: ShareCiteButtonProps): JSX.Element => {
-  // TODO viewer app: should be changed so it's also useful in viewer app
+
+  const { session } = useAuthn();
+
   const [waitingForModal, setWaitingForModal] = useState(false);
   const [shareModalProps, setShareModalProps] = useState<ShareCiteModalProps | null>(null);
 
@@ -50,11 +68,15 @@ const ShareCiteButton = ({
       showVersionWarning,
       title,
       hideHeaders,
-      extraInfo
+      extraInfo,
+      logStack,
+      logStackPath,
     });
   }
 
-  const onButtonClick = () => {
+  const onButtonClick = (e: any) => {
+    if (onBtnClick) onBtnClick(e);
+
     if (!reference.table.supportHistory) {
       showShareModal(false);
       return;
@@ -80,19 +102,32 @@ const ShareCiteButton = ({
     });
   };
 
+  const canShowShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.show, session);
+  const canEnableShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.enable, session);
+
+  if (!btnTooltip) {
+    btnTooltip = { pending: 'Opening the share and cite links...', ready: 'Show the share and cite links.' };
+  }
 
   return (
     <>
-      <ChaiseTooltip
-        placement='bottom-start'
-        tooltip={waitingForModal ? 'Opening the share and cite links...' : 'Click here to show the share and cite links.'}
-      >
-        <button className='share-cite-btn chaise-btn chaise-btn-primary' onClick={onButtonClick} disabled={waitingForModal}>
-          {!waitingForModal && <span className='chaise-btn-icon fa fa-share-square'></span>}
-          {waitingForModal && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
-          <span>Share and cite</span>
-        </button>
-      </ChaiseTooltip>
+      {canShowShareCiteBtn &&
+        <ChaiseTooltip
+          placement='bottom-start'
+          tooltip={waitingForModal ? btnTooltip?.pending : btnTooltip?.ready}
+          dynamicTooltipString
+        >
+          <button
+            className={btnClass ? btnClass : 'share-cite-btn chaise-btn chaise-btn-primary'}
+            onClick={onButtonClick}
+            disabled={!canEnableShareCiteBtn || waitingForModal}
+          >
+            {!waitingForModal && <span className='chaise-btn-icon fa fa-share-square'></span>}
+            {waitingForModal && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
+            <span>Share and cite</span>
+          </button>
+        </ChaiseTooltip>
+      }
       {shareModalProps &&
         <ShareCiteModal {...shareModalProps} />
       }

@@ -48,8 +48,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   const [isCreateUploadJob, setIsCreateUploadJob] = useState<boolean>(false);
   const [isFileExists, setIsFileExists] = useState<boolean>(false);
 
-  const [erred, setErred] = useState<boolean>(false);
-  const [aborted, setAborted] = useState<boolean>(false);
+  const erred = useRef<boolean>(false);
+  const aborted = useRef<boolean>(false);
 
   // total number of files being uploaded
   const [filesCt, setFilesCt] = useState<number>(0);
@@ -172,7 +172,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   }, [])
 
   const cancelUpload = () => {
-    setAborted(true);
+    aborted.current = true
     // TODO: abortUploads
     abortUploads();
     onCancel();
@@ -183,7 +183,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // This function calls for checksumCalculation in hatrac.js for all files
   const calculateChecksum = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     setTitle('Calculating and Verifying Checksum');
     setIsCreateUploadJob(false);
@@ -203,7 +203,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // verifies if the same file exists in the namespace with the same size/length
   const checkFileExists = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     setTitle('Checking for existing files');
     setIsFileExists(true);
@@ -220,7 +220,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // if the job was marked to be skipped in the fileExists check, skip creating the job and mark it as complete
   const createUploadJobs = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     setTitle('Creating Upload Jobs for the files');
     setIsCreateUploadJob(true);
@@ -237,7 +237,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // This function starts the upload in hatrac.js for all files
   const startUpload = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     setTitle('Uploading files');
     setIsUpload(true);
@@ -258,7 +258,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     speedIntervalTimer = setInterval(() => {
       const diff = sizeTransferredRef.current - lastByteTransferredRef.current;
       setLastByteTransferred(sizeTransferredRef.current);
-
+      
       if (diff > 0) setSpeed(humanFileSize(diff) + 'ps');
     }, 1000);
   };
@@ -266,7 +266,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // This function starts to upload the next file in queue
   const startQueuedUpload = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     const item = queueRef.current.shift();
     if (!item) return;
@@ -280,7 +280,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // Complete upload jobs one by one
   const doQueuedJobCompletion = () => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     setTitle('Finalizing Upload');
 
@@ -302,7 +302,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     }
 
     clearInterval(speedIntervalTimer);
-    setAborted(true);
+    aborted.current = true;
     setSpeed('');
     rows.forEach((row: any) => {
       for (const k in row) {
@@ -315,9 +315,9 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
   // This function is called by all rejected promises from above functions
   const onError = (err: any) => {
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
-    setErred(true);
+    erred.current = true;
     abortUploads(err);
     onCancel(err);
   };
@@ -362,7 +362,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // It updates the progress for checksum on the UI
   const onChecksumProgressChanged = (ufo: UploadFileObject, uploadedSize: number) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     // This code updates the specific progress bar for checksum for the file
     ufo.jobCreateDone = false;
@@ -391,7 +391,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // Once all files are done, call checkFileExists
   const onChecksumCompleted = (ufo: UploadFileObject, url: string) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     ufo.fileExistsDone = false;
     ufo.checksumPercent = 100;
@@ -399,20 +399,21 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     if (!ufo.checksumCompleted) {
       ufo.checksumCompleted = true;
       ufo.url = url;
-      setChecksumCompleted((prev: number) => prev++);
-
-      // Once all checksums have been calculated call checkFileExists
-      if (checksumCompleted === filesCt) {
-        checkFileExists();
-      }
+      setChecksumCompleted((prev: number) => prev + 1);
     }
   };
+
+  useEffect(() => {
+    if (filesCt === 0 || checksumCompleted !== filesCt) return;
+
+    checkFileExists();
+  }, [checksumCompleted])
 
   // This function is called as a success promise callback by checkFileExists function above for each file
   // Once all files have been checked if they exist or not, call createUploadJobs
   const onFileExistSuccess = (ufo: UploadFileObject) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     ufo.skipUploadJob = ufo.hatracObj.jobDone;
     ufo.fileExistsDone = true;
@@ -422,10 +423,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     // if the job is already done, that means the file has an identical file already in the server (md5 and size match)
     // we don't want to even create a job for that file because it shouldn't be uploaded
     if (ufo.hatracObj.jobDone) {
-      tempfilesToUploadCt--;
-      setFilesToUploadCt((prev: number) => prev--);
+      tempfilesToUploadCt = tempfilesToUploadCt - 1;
+      setFilesToUploadCt((prev: number) => prev - 1);
     } else {
-      setFileExistsCount((prev: number) => prev++)
+      setFileExistsCount((prev: number) => prev + 1)
     }
 
     // This code updates the main progress bar for file exist progress for all files
@@ -455,7 +456,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // Once upload jobs for all files are done it calls startUpload
   const onJobCreated = (ufo: UploadFileObject) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     // This code updates the individual progress bar for job creation progress for this file
     ufo.jobCreateDone = true;
@@ -487,7 +488,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // It updates the progress for upload on the UI
   const onProgressChanged = (ufo: UploadFileObject, uploadedSize: number) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     // This code updates the individual progress bar for uploading file
     ufo.uploadStarted = true;
@@ -515,7 +516,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // Once all files are uploaded it calls doQueuedJobCompletion
   const onUploadCompleted = (ufo: UploadFileObject) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     ufo.progress = ufo.size;
     ufo.progressPercent = 100;
@@ -528,7 +529,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         });
       });
 
-      setNumUploadsCompleted((prev: number) => prev++)
+      setNumUploadsCompleted((prev: number) => prev + 1)
 
       // If all files have been uploaded then call doQueuedJobCompletion
       // to sent requests to mark the job as done
@@ -553,7 +554,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   // When there are no more pending jobs to complete, close the modal
   const onCompleteUploadJob = (ufo: UploadFileObject, url: string) => {
 
-    if (erred || aborted) return;
+    if (erred.current || aborted.current) return;
 
     ufo.completeUploadJob = true;
     ufo.versionedUrl = url;

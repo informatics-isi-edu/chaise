@@ -433,7 +433,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 
     var related_w_entityset_waitfor = {
-        comment: "related table, has waitfor entityset and markdown_pattern",
+        comment: "related table, has waitfor entityset and markdown_pattern (has markdown comment)",
+        inlineComment: true,
         schemaName: "product-unordered-related-tables-links",
         displayname: "inbound related with display.wait_for entityset",
         name: "accommodation_inbound1",
@@ -471,7 +472,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
     // since they are basically the same path with just added filters
     describe("regarding usage of filter in source", function () {
         var related_w_filter_on_main = {
-          comment: "inbound related, filter on main",
+          comment: "inbound related, filter on main (comment _markdown_ is turned off)",
+          inlineComment: true,
           schemaName: "product-unordered-related-tables-links",
           displayname: "inbound related with filter on main table",
           name: "booking",

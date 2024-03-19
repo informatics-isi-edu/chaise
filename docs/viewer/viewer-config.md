@@ -30,7 +30,7 @@ Each configuration is specified by a given key name. When users go to
 the viewer app, we will use the `config` query parameter to determine which
 configuration we should use.
 
-The configuration file must be defined under `viewer/viewer-config.js` and the following is the structure of this config file:
+The configuration file must be defined under `config/viewer-config.js` and the following is the structure of this config file:
 ```javascript
 var viewerConfigs = {
   <config-name>: <configuration>
@@ -64,7 +64,7 @@ query parameters other than "img1" and "img2", will use `<config1>`.
 
 ### Parameters
 
-The parameters are explained in the [`viewer-config-sample.js`](https://github.com/informatics-isi-edu/chaise/tree/master/viewer/viewer-config-sample.js) file.
+The parameters are explained in the [`viewer-config-sample.js`](https://github.com/informatics-isi-edu/chaise/tree/master/config/viewer-config-sample.js) file.
 
 ## Channel Configuration
 

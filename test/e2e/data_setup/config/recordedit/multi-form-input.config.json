@@ -1,0 +1,15 @@
+{
+  "catalog": {},
+  "schema": {
+      "name": "multi-form-input",
+      "createNew": true,
+      "path": "test/e2e/data_setup/schema/recordedit/multi-form-input.json"
+  },
+  "tables": {
+      "createNew": true
+  },
+  "entities": {
+      "createNew": true,
+      "path": "test/e2e/data_setup/data/multi-form-input"
+  }
+}

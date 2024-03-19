@@ -11,6 +11,8 @@ This document contains deprecated chaise-config parameters.
    * [profileURL](#profileURL)
 * [Display Configuration:](#display-configuration)
    * [maxRelatedTablesOpen](#maxrelatedtablesopen)
+* [Share and Cite Configuration:](#share-and-cite-configuration)
+   * [shareCiteAcls](#shareciteacls)
 * [Search Application](#search-application)
    * [sidebarPosition](#sidebarPosition)
    * [attributesSidebarHeading](#attributesSidebarHeading)
@@ -70,6 +72,26 @@ This document contains deprecated chaise-config parameters.
      maxRelatedTablesOpen: 5
      ```
 
+### Share and Cite Configuration:
+
+ #### shareCiteAcls
+Use this property to show/hide or enable/disable the button used to open the share and cite dialog on Record app. The accepted values for the array for both show and enable are `"*"` or any valid globus group key.
+
+  > Please use the new [`shareCite`](chaise-config.md#sharecite) property instead of this deprecated property.
+
+  - Type: Object
+   - Default behavior: the share cite button is viewable and enabled for everyone
+   - Sample syntax:
+     ```
+     "shareCiteAcls": {
+       "show": ["*"],
+       "enable": ["*"]
+     }
+     ```
+   - Notes:
+      - You can use `"shareCiteAcls": true` as a shorthand syntax for `"shareCiteAcls": {"show": ["*"], "enable": ["*"]}` which means showing and enabling for all users (the default behavior).
+      - You can use `"shareCiteAcls": false` as a shorthand syntax for `"shareCiteAcls": {"show": [], "enable": []}` which means hiding for all users.
+      - If either key/value pair is undefined in the object, it will default to `["*"]`. For instance if you just want to enable this feature for specific users, you could just do `{"enable": ["more-privilidged-users"]}` and chaise will add the `"show": ["*"]` for you.
 
 ### Search Application:
 

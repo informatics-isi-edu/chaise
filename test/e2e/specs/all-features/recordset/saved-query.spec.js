@@ -1,5 +1,7 @@
 const chaisePage = require('../../../utils/chaise.page.js');
 const pImport = require('../../../utils/protractor.import.js');
+var recordHelpers = require('../../../utils/record-helpers.js');
+var moment = require('moment');
 const EC = protractor.ExpectedConditions;
 
 const testParams = {
@@ -9,7 +11,12 @@ const testParams = {
   maxInputClass: 'range-max',
   maxInputClearClass: 'max-clear',
   firstSavedQueryName: 'main with int_col ( 11 to 22)',
-  secondSavedQueryName: 'main with int_col ( 11 to 22); one'
+  secondSavedQueryName: 'main with int_col ( 11 to 22); one',
+  key: {
+    name: 'id',
+    operator: '=',
+    value: '1'
+  }
 };
 
 const chaiseConfigAnnotation = {
@@ -157,9 +164,7 @@ describe('View recordset page and form a query,', () => {
 
     it('open apply saved queries modal, verify query was saved, and close the modal', (done) => {
       chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueryDropdown()).then(() => {
-        const savedQueriesOption = chaisePage.recordsetPage.getSavedQueriesOption();
-
-        return savedQueriesOption.click();
+        return chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueriesOption());
       }).then(() => {
         browser.wait(() => {
           return chaisePage.recordsetPage.getModalRows().count().then((ct) => {
@@ -189,7 +194,7 @@ describe('View recordset page and form a query,', () => {
 
         expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe('Duplicate Saved Search', 'modal title is incorrect');
         expect(element(by.css('.modal-body')).getText()).toContain('name "' + testParams.firstSavedQueryName + '"', 'modal contains incorrect saved query name text');
-        
+
         return chaisePage.recordsetPage.getModalCloseBtn().click();
       }).then(() => {
         done();
@@ -257,9 +262,7 @@ describe('View recordset page and form a query,', () => {
 
     it('open apply saved query modal, verify 2 queries now, and apply first saved query', (done) => {
       chaisePage.recordsetPage.getSavedQueryDropdown().click().then(() => {
-        const savedQueriesOption = chaisePage.recordsetPage.getSavedQueriesOption();
-
-        return savedQueriesOption.click();
+        return chaisePage.clickButton(chaisePage.recordsetPage.getSavedQueriesOption());
       }).then(() => {
         browser.wait(() => {
           return chaisePage.recordsetPage.getModalRows().count().then((ct) => {
@@ -292,7 +295,7 @@ describe('View recordset page and form a query,', () => {
         }, browser.params.defaultTimeout);
 
         expect(chaisePage.recordsetPage.getRows().count()).toBe(12, 'number of rows is incorrect after applying saved query');
-        
+
         return chaisePage.recordsetPage.getFacetFilters();
       }).then((filters) => {
         expect(filters.length).toBe(1, 'number of filters incorrect on page load');
@@ -305,4 +308,29 @@ describe('View recordset page and form a query,', () => {
       });
     });
   });
+
+  describe('should have proper citation in share cite modal', () => {
+    var RIDLink = browser.params.url + "/record/#" + browser.params.catalogId + '/saved_query:' + testParams.table_name;
+    RIDLink += '/RID=' + chaisePage.getEntityRow('saved_query', testParams.table_name, [{column: testParams.key.name, value: testParams.key.value}]).RID;
+    var rctVal = chaisePage.getEntityRow('saved_query', testParams.table_name, [{column: testParams.key.name, value: testParams.key.value}]).RCT
+
+    var keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+    beforeAll((done) => {
+      const url = browser.params.url + '/record/#' + browser.params.catalogId + '/saved_query:' + testParams.table_name + '/' + keys.join('');
+      chaisePage.navigate(url);
+
+      done();
+    })
+
+    recordHelpers.testSharePopup({
+        permalink: RIDLink,
+        // the table has history-capture: true
+        hasVersionedLink: true,
+        verifyVersionedLink: false,
+        citation: "Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data " + RIDLink + " (" + moment(rctVal).format("YYYY") + ").",
+        bibtextFile: false,
+        title: "Share and Cite"
+    });
+  })
 });

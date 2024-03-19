@@ -125,16 +125,16 @@
               "entry": [
                 "id",
                 {
-                    "source": [{"outbound": ["fk-display-mode", "fk_w_fk_annotation"]}, "id"], 
+                    "source": [{"outbound": ["fk-display-mode", "fk_w_fk_annotation"]}, "id"],
                     "markdown_name": "fk1 dropdown"
                 },
                 {
-                    "source": [{"outbound": ["fk-display-mode", "fk_w_table_annotation"]}, "id"], 
+                    "source": [{"outbound": ["fk-display-mode", "fk_w_table_annotation"]}, "id"],
                     "markdown_name": "fk2 dropdown"
                 },
                 {
-                    "source": [{"outbound": ["fk-display-mode", "fk_visible_columns"]}, "id"], 
-                    "markdown_name": "fk3 dropdown", 
+                    "source": [{"outbound": ["fk-display-mode", "fk_visible_columns"]}, "id"],
+                    "markdown_name": "fk3 dropdown",
                     "display": {
                         "selector_ux_mode": "simple-search-dropdown"
                     }

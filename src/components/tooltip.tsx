@@ -20,19 +20,25 @@ type ChaiseTooltipProps = {
    * The class name that will be attached to the tooltip
    * (can be used for applying custom styles to the tooltip)
    */
-   className?: string,
-   /**
-    * if you want to manually control the tooltip, use
-    * this property in combination with `onToggle`.
-    * You should make sure `show` is set to proper value in that callback.
-    */
-   show?: boolean,
-   /**
-    * if you want to manually control the tooltip, use
-    * this property in combination with `show`.
-    * You should make sure `show` is set to proper value in this callback.
-    */
-   onToggle?: (nextShow: boolean) => void
+  className?: string,
+  /**
+   * if you want to manually control the tooltip, use
+   * this property in combination with `onToggle`.
+   * You should make sure `show` is set to proper value in that callback.
+   */
+  show?: boolean,
+  /**
+   * if you want to manually control the tooltip, use
+   * this property in combination with `show`.
+   * You should make sure `show` is set to proper value in this callback.
+   */
+  onToggle?: (nextShow: boolean) => void,
+  /**
+   * whether the text is dynamic and we should remount the tooltip when its content changes.
+   * This must be used with dynamic tooltips that change while user is still seeing the tooltip. without it the tooltip
+   * will be misaligned and might even go over the edge of the window.
+   */
+  dynamicTooltipString?: boolean
 }
 
 
@@ -42,7 +48,8 @@ const ChaiseTooltip = ({
   placement,
   className,
   show,
-  onToggle
+  onToggle,
+  dynamicTooltipString
 }: ChaiseTooltipProps): JSX.Element => {
   /**
    * - in react-bootstrap, the focus on the buttons remains even in cases where
@@ -60,7 +67,7 @@ const ChaiseTooltip = ({
    * TODO we might want to explore better ways to handle this. ideally we should find
    * a way to automatically blur the buttons, or manually do it for the cases where we also have tooltip
    */
-  const trigger : OverlayTriggerType[] = ['hover'];
+  const trigger: OverlayTriggerType[] = ['hover'];
   if (IS_DEV_MODE) {
     trigger.push('focus');
   }
@@ -72,7 +79,14 @@ const ChaiseTooltip = ({
       onToggle={onToggle}
       placement={placement}
       overlay={
-        <Tooltip className={className}>
+        <Tooltip
+          className={className}
+          /**
+           * adding the tooltip as key will make sure we're remounting when tooltip changes.
+           * we have to remount so the tooltip position is updated properly
+           */
+          {...(dynamicTooltipString && typeof tooltip === 'string' && { key: tooltip })}
+        >
           {tooltip}
         </Tooltip>
       }

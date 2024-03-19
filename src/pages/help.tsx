@@ -17,7 +17,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { InvalidHelpPage } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { APP_NAMES, ID_NAMES, HELP_PAGES, HELP_PAGES_FOLDER_LOCATION } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -26,7 +26,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-const helpSettings = {
+const helpSettings: ConfigServiceSettings = {
   appName: APP_NAMES.HELP,
   appTitle: 'Help Page',
   overrideHeadTitle: true,

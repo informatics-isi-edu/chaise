@@ -159,7 +159,7 @@
                     }
                 },
                 {
-                    "comment": "Type of accommodation ('Resort/Hotel/Motel')",
+                    "comment": "Type of accommodation (Resort, Hotel, or Motel)",
                     "name": "category",
                     "default": null,
                     "nullok": false,
@@ -175,7 +175,8 @@
                             "2"
                         ],
                         "tag:misd.isi.edu,2015:display": {
-                            "name": "Category"
+                            "name": "Category",
+                            "comment": "can support _markdown_"
                         }
                     }
                 },
@@ -544,7 +545,8 @@
                 "tag:isrd.isi.edu,2018:citation": {
                     "template_engine": "handlebars",
                     "author_pattern": "{{#each entity_set_accommodation_inbound1}}{{this.rowName}}{{#unless @last}}, {{/unless}}{{/each}}({{{cnt_d_accommodation_inbound1}}})",
-                    "journal_pattern": "{{title}}, {{{entity_all_outbound_outbound1_outbound3.rowName}}}",
+                    "title_pattern": "{{title}}",
+                    "journal_pattern": "{{{entity_all_outbound_outbound1_outbound3.rowName}}}",
                     "year_pattern": "{{formatDate RCT 'YYYY'}}",
                     "url_pattern": "{{website}}",
                     "id_pattern": "{{id}}",
@@ -1312,7 +1314,7 @@
                     }
                 },
                 {
-                    "comment": "Type of accommodation_collection ('Resort/Hotel/Motel')",
+                    "comment": "Type of accommodation_collection (Resort/Hotel/Motel)",
                     "name": "category",
                     "default": null,
                     "nullok": false,

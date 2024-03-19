@@ -59,7 +59,7 @@ export const MESSAGE_MAP = {
   tooltip: {
     versionTime: 'You are looking at data that was snapshotted on ',
     downloadCSV: 'Click to download all matched results',
-    permalink: 'Click to copy the current url to clipboard.',
+    permalink: 'Click to copy the current URL to clipboard.',
     actionCol: 'Click on the action buttons to view, edit, or delete each record',
     viewCol: 'Click on the icon to view the detailed page associated with each record',
     null: 'Search for any record with no value assigned',

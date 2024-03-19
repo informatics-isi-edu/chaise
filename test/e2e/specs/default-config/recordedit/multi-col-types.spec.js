@@ -1,5 +1,4 @@
 // The goal of this spec is to test whether RecordEdit app correctly converts data for different column types for submission to ERMrest by verifying the contents that we expect to show up on record page, show up properly.
-var testConfiguration = browser.params.configuration;
 var moment = require('moment');
 
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
@@ -95,10 +94,8 @@ var testParams = {
             // Value of foreign (fk_null_col) related entity
             "Un6B-zCfMiIKZGKbF1TPFw": "Abraham Lincoln",
             json_null_col: "89.586",
-            json_col: "null",
             timestamp_txt: currentTimestampTime,
             asset_null_col: {ignoreInCI: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
-            asset_null_col_filename: {ignoreInCI: true, value: "testfile500kb_nulltest.png"},
             asset_null_col_bytes: {ignoreInCI: true, value: "512 kB"},
             color_rgb_hex_null_col: "#123456"
         }

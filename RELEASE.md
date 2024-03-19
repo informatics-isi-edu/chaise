@@ -7,6 +7,31 @@ This document is a summary of code changes in Chaise. This is the vocabulary use
   - `[Fixed]`: bug fixes.
   - `[No changes]` means that Chaise hasn't been changed in the described duration.
 
+# 1//24
+  - [Fixed] Recordset might not display all content with "show more" not displayed with images that take a long time to load
+  - [Improved] Recordedit app performance improved
+  - [Added] Show a spinner when adding more forms in recordedit app using the clone button
+  - [Changed] Set all input in recordedit app to allow for selecting some (or all) inputs to set a value for
+
+# 9/12/23
+  - [Fixed] Enter does not submit recordedit form
+  - [Added] Typeahead search dropdown added to recordedit app for foreign key inputs
+  - [Improved] Tooltip support in chaise improved to properly allow for markdown content
+  - [Added] Iframe inputs in recordedit app
+
+# 7/24/23
+  - [Improved] Record app performance improved
+  - [Added] Saved Queries feature added to Recordset.
+
+# 6/27/23
+  - [Chaned] Change behavior of chaise-config properties, ermrestLocation, defaultCatalog, and defaultTables.
+
+# 4/5/23
+  - [Changed] Recordedit app migrated to ReactJS. AngularJS version of both removed.
+
+# 2/1/23
+  - [Changed] Limit the number of displayed selected items in facet panel
+
 # 12/15/22
   - [Fixed] Fixed a bug when using the set all input to clear all foreign keys wouldn't clear data submitted to the database.
   - [Fixed] Login flow was not working properly for some edge cases after ReactJS migration of Authn Service.

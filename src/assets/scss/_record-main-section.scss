@@ -8,16 +8,9 @@
 
     position: relative;
 
+    // when spinner is displayed, we have to adjust the margin-top
     &.with-spinner {
-      margin-top: map-get(variables.$record-spacing-map, 'main-spinner-height') * -1;
-    }
-    .record-main-spinner-container {
-      position: sticky;
-      position: -webkit-sticky;
-      top: min(50px, 50%);
-      .record-main-spinner {
-        height: map-get(variables.$record-spacing-map, 'main-spinner-height');
-      }
+      margin-top: variables.$main-spinner-height * -1;
     }
 
     > table {

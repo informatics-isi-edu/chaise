@@ -10,7 +10,13 @@
  * uses under the hood).
  */
 module.exports = function (templateParams) {
-  const CSS_DEPS = JSON.stringify(templateParams.htmlWebpackPlugin.files.css);
+
+  // this is already stringified, so we have to remove the last `]` and add the rest
+  let externalStyleFiles = templateParams.htmlWebpackPlugin.options.external_style_files;
+  let webpackStyleFiles = JSON.stringify(templateParams.htmlWebpackPlugin.files.css);
+
+  // create a string representation of both
+  const CSS_DEPS = `${externalStyleFiles.slice(0, -1)},${webpackStyleFiles.substring(1)}`;
 
   // this is already stringified, so we have to remove the last `]` and add the rest
   let externalFiles = templateParams.htmlWebpackPlugin.options.external_files;

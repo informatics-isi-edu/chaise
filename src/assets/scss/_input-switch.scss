@@ -171,9 +171,38 @@
   }
 }
 
-// rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
-.input-switch-foreignkey.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
-  padding-top: 0px;
+.input-switch-foreignkey {
+  position: relative;
+
+  // displayed while loading the fk data
+  .foreignkey-input-spinner-container {
+
+    // make sure the spinner is displayed in the center
+    display: flex;
+    justify-content: center;
+
+    .foreignkey-input-spinner-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
+      background: map-get(variables.$color-map, 'disabled-background');
+      opacity: 0.55;
+    }
+    .spinner-border-sm {
+      top: 8px;
+      position: absolute;
+      z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner');
+    }
+  }
+
+  // rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
+  &.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
+    padding-top: 0px;
+  }
+
 }
 
 .input-switch-boolean,
@@ -215,11 +244,11 @@
     .search-row .chaise-search-box {
       .chaise-input-group-prepend > .chaise-input-group-text {
         border-bottom-left-radius: 0;
-      } 
+      }
 
       .chaise-input-group-append > .chaise-search-btn {
         border-bottom-right-radius: 0;
-      } 
+      }
     }
 
     // for making the dropdown list scrollable (keeping the buttons sticky)
@@ -241,7 +270,7 @@
             // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
             //    text-wrap will balance between stretching the dropdown and forcing text to wrap
             // text-wrap: balance;
-            
+
             // force text to wrap at dropdown width
             white-space: normal;
           }

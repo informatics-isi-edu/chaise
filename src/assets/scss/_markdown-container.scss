@@ -25,6 +25,12 @@
   }
 
   figure {
+    /**
+     * bootstrap 5 is adding a margin that we want to override.
+     * adding this ensures two images side by side are aligned properly.
+     */
+    margin: unset;
+
     overflow-x: auto;
     figcaption {
       min-height: 20px;

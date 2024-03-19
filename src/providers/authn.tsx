@@ -15,6 +15,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import Q from 'q';
 import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -41,6 +42,7 @@ export const AuthnContext = createContext<{
   shouldReloadPageAfterLogin: (serverSession: Session | null) => boolean;
   showPreviousSessionAlert: () => boolean;
   validateSessionBeforeMutation: (cb: () => void) => void;
+  validateSession: () => Promise<Session | null>;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -74,7 +76,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       // success callback
       const successCb: sessionCbFunction = (response?: Session | null) => {
         if (shouldReloadPageAfterLogin(session)) {
-          window.location.reload();
+          windowRef.location.reload();
         } else if (response && !isSameSessionAsPrevious(response)) {
           dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
         }
@@ -191,7 +193,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
 
     // open a window with proper position and width and height
-    const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
+    const win = windowRef.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
 
     // focus on the opened window
     win?.focus();
@@ -214,7 +216,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   ) => {
     const referrerId = '' + (new Date().getTime());
 
-    const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
+    const referrerUrl = `${windowRef.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
     const url = `${serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
@@ -245,10 +247,10 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       } else if (data.login_form !== undefined) {
         // we want to use the old login flow to login
         // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
-        win = window;
+        win = windowRef;
         // prevents the dialog from popping up shortly before the page redirects to login
         type = '';
-        const referrer = window.location.href;
+        const referrer = windowRef.location.href;
         const login_form = data.login_form;
         login_url = `../login?referrer=${fixedEncodeURIComponent(referrer)}`;
         const method = login_form.method;
@@ -309,7 +311,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // post login callback function
   const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
-    window.addEventListener('message', (args) => {
+    windowRef.addEventListener('message', (args) => {
       if (args && args.data && (typeof args.data === 'string')) {
         AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
         AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
@@ -335,9 +337,9 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       headers: {} as any
     };
 
-    // config.headers[ERMrest.contextHeaderName] = {
-    //   action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
-    // }
+    config.headers[ConfigService.ERMrest.contextHeaderName] = {
+      action: LogService.getActionString(LogActions.SESSION_RETRIEVE, '', '')
+    }
 
     /**
      * NOTE: the following is for future implementation when we decide to verify session against the cookie object
@@ -364,7 +366,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // object with type - { data: Session }
     return ConfigService.http.get(`${serviceURL}/authn/session`, config).then((response: any) => {
       if (context === '401' && shouldReloadPageAfterLogin(response)) {
-        // window.location.reload();
         return response.data;
       }
 
@@ -441,8 +442,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   const refreshLogin = (action: string) => {
     // get referrerid from browser url
-    const referrerId = queryStringToJSON(window.location.search).referrerid,
-      preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
+    const referrerId = queryStringToJSON(windowRef.location.search).referrerid,
+      preauthReferrer = windowRef.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
       redirectUrl = serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
 
     // TODO: type of config/headers object
@@ -591,6 +592,34 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   };
 
   /**
+   * Will return a promise that is resolved with the session.
+   * Meant for validating the server session and verify if it's still active or not
+   */
+  const validateSession = (): Promise<Session | null> => {
+    return new Promise((resolve) => {
+      const config = {
+        skipHTTP401Handling: true,
+        headers: {} as any
+      };
+      config.headers[ConfigService.ERMrest.contextHeaderName] = {
+        action: LogService.getActionString(LogActions.SESSION_VALIDATE, '', '')
+      }
+      return ConfigService.http.get(serviceURL + '/authn/session', config).then((response: any) => {
+        if (!session) {
+          // only update _session if no session is set
+          _setSession(response.data)
+        }
+        resolve(response.data);
+      }).catch((err: any) => {
+        $log.warn(ConfigService.ERMrest.responseToError(err));
+
+        _setSession(null);
+        resolve(null);
+      });
+    });
+  }
+
+  /**
    * TODO technically this function should even ask for preauthn in _logInHelper
    * This function opens a modal dialog which has a link for login
    * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
@@ -615,7 +644,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       session,
       shouldReloadPageAfterLogin,
       showPreviousSessionAlert,
-      validateSessionBeforeMutation
+      validateSessionBeforeMutation,
+      validateSession
     }
   }, [session]);
 
@@ -625,33 +655,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     </AuthnContext.Provider>
   )
 } // end provider
-
-
-//   /**
-//    * Will return a promise that is resolved with the session.
-//    * Meant for validating the server session and verify if it's still active or not
-//    */
-//   validateSession: function () {
-//     var config = {
-//       skipHTTP401Handling: true,
-//       headers: {}
-//     };
-//     config.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
-//     }
-//     return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function (response) {
-//       if (!_session) {
-//         // only update session if no session is set
-//         _session = response.data;
-//       }
-//       return _session;
-//     }).catch(function (err) {
-//       $log.warn(ERMrest.responseToError(err));
-
-//       _session = null;
-//       return _session;
-//     });
-//   },
 
 //   subscribeOnChange: function (fn) {
 //     // To avoid same ids for an instance we add counter

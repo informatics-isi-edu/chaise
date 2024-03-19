@@ -1,8 +1,15 @@
 # How to annotate an image
 
-* [Add a new Annotation](#add-a-new-annotation)
-* [Edit/Delete an existing Annotation](#editdelete-an-existing-annotation)
-* [Draw a Shape](#draw-a-shape)
+- [Add a new Annotation](#add-a-new-annotation)
+- [Edit/Delete an existing Annotation](#editdelete-an-existing-annotation)
+- [Draw a Shape](#draw-a-shape)
+  * [Path](#path)
+  * [Rectangle](#rectangle)
+  * [Circle](#circle)
+  * [Line](#line)
+  * [Arrow line](#arrow-line)
+  * [Polygon](#polygon)
+  * [Text](#text)
 
 ## Add a new annotation {id=add-a-new-annotation}
 
@@ -64,7 +71,7 @@
 
 ## Draw a shape {id=draw-a-shape}
 
-### Path
+### Path {id=path}
 
 1. Select the path tool (pencil icon) from the annotation tool bar.
 	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Path.png)
@@ -75,7 +82,7 @@
 
 4. To add subsequent paths, repeat steps 2 & 3.
 
-### Rectangle
+### Rectangle {id=rectangle}
 
 1. Select the rectangle tool (square icon) from the annotation tool bar.
 
@@ -87,7 +94,7 @@
 
 4. To add subsequent rectangles, repeat steps 2 & 3.
 
-### Circle
+### Circle {id=circle}
 
 1. Select the circle tool (circle icon) from the annotation tool bar.
 
@@ -99,20 +106,28 @@
 
 4. To add subsequent circles, repeat steps 2 & 3.
 
-### Line
+### Line {id=line}
 1. Select the line tool (line icon) from the annotation tool bar.
 	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Line.png)
 
-2. Press and hold the left mouse button to draw the line on the image. Drag the mouse pointer
-
-to draw. As you drag the mouse, you will see the the line change its end point.
+2. Press and hold the left mouse button to draw the line on the image. Drag the mouse pointer to draw. As you drag the mouse, you will see the the line change its end point.
 
 3. Let go of the mouse button when you are done drawing.
 
 4. To add subsequent lines, repeat steps 2 & 3.
 
+### Arrow line {id=arrow-line}
 
-### Polygon
+1. Select the arrow line tool (arrow icon) from the annotation tool bar.
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/ArrowLine.png)
+
+2. Press and hold the left mouse button to draw the arrow line on the image. Drag the mouse pointer to draw. As you drag the mouse, you will see the the arrow line change its end point.
+
+3. Let go of the mouse button when you are done drawing.
+
+4. To add subsequent arrow lines, repeat steps 2 & 3.
+
+### Polygon {id=polygon}
 1. Select the polygon tool (polygon icon) from the annotation tool bar.
 	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Polygon.png)
 
@@ -123,3 +138,24 @@ to draw. As you drag the mouse, you will see the the line change its end point.
 4. Let go of the mouse button when you are done placing the edge on the image.
 
 5. To add subsequent polygons, de-select the polygon icon from the annotation toolbar and select it again.
+
+### Text {id=text}
+
+
+1. Select the text tool ("A" icon) from the annotation tool bar.
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Text.png)
+
+2. Upon clicking the text option, you will see the font size selector beside the option. To adjust the font size, you can,
+ - Click on "+" or "-" buttons.
+ - Or, click on the displayed number to see the list of most common font sizes and pick one of those.
+ - Or, Type a new number.
+
+3. Click anywhere on the image that you would like to add the text.
+
+4. Click inside the displayed textbox and write your text.
+
+5. The text will wrap into the next line after writing a long text. If you want your text to be displayed on the same line, You can use the knob on the right side of the textbox to resize the box.
+
+6. If you want to move the textbox, press and hold the left mouse button on the textbox and start moving your mouse. Releasing your left mouse button will stop this move.
+
+7. To add subsequent texts, repeat step 3 & 4.

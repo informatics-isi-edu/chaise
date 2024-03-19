@@ -1,127 +1,86 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var testParams = {
-    table_name: "accommodation",
-    key: {
-        name: "id",
-        value: "4004",
-        operator: "="
-    }
-};
+const { testDeleteConfirm } = require('../../../utils/record-helpers.js');
 
-describe('View existing record,', function() {
+const getURL = (appName, tableName, filter) => {
+  return `${browser.params.url}/${appName}/#${browser.params.catalogId}/product-delete-btn:${tableName}${filter ? '/' + filter : ''}`;
+}
 
-    describe("For table " + testParams.table_name + ",", function() {
+describe('Delete functionality in record page with confirm dialog,', () => {
 
-        var table, record;
+  describe('when the deleted row is from a table without any inline fks with on delete cascade', () => {
+    beforeAll((done) => {
+      chaisePage.navigate(getURL('record', "delete_table", 'id=1'));
 
-        beforeAll(function() {
-            var keys = [];
-            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-delete-btn:" + testParams.table_name + "/" + keys.join("&");
-            chaisePage.navigate(url);
-            table = browser.params.defaultSchema.content.tables[testParams.table_name];
-            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
-        });
-
-        it("should load chaise-config.js and have confirmDelete=true", function() {
-            browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.confirmDelete).toBe(true);
-            });
-        });
-
-        describe("Clicking the delete record button ,", function() {
-            var allWindows, EC = protractor.ExpectedConditions;
-
-            // etags are not supported in ermrestjs
-            xit("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
-                // Set up a mismatching ETag scenario before attempting delete to ensure that
-                // that the delete operation doesn't throw a 412 error when ETags are mismatching
-                // but the referenced tuples haven't changed from the tuples in the DB.
-                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-                    config, changedValue;
-
-                // Edit the current record in a new tab in order to change the ETag
-                // - Grab current url, change record to recordedit, open this new url in a new tab
-                browser.driver.getCurrentUrl().then(function(url) {
-                    url = url.replace('/record/', '/recordedit/');
-                    return browser.executeScript('window.open(arguments[0]);', url);
-                }).then(function() {
-                    return browser.getAllWindowHandles();
-                }).then(function(handles) {
-                    allWindows = handles;
-                    return browser.switchTo().window(allWindows[1]);
-                }).then(function() {
-                    // In order to simulate someone else modifying a record (in order to
-                    // trigger a 412), we should set RecEdit's window.opener to null so
-                    // that RecordSet won't think that this RecEdit page was opened by the same user
-                    // from the original page.
-                    return browser.executeScript('window.opener = null');
-                }).then(function() {
-                    return chaisePage.waitForElement(element(by.id("submit-record-button")));
-                }).then(function() {
-                    // - Change a small thing. Submit.
-                    var input = chaisePage.recordEditPage.getInputById(0, 'Summary');
-                    input.clear();
-                    input.sendKeys('as;dkfa;sljk als;dkj f;alsdjf a;');
-                    return chaisePage.recordEditPage.getSubmitRecordButton().click();
-                }).then(function(handles) {
-                    // - Go back to initial Record page
-                    browser.close();
-                    browser.switchTo().window(allWindows[0]);
-                }).then(function() {
-                    return chaisePage.recordPage.getDeleteRecordButton().click()
-                }).then(function () {
-                    browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                    // expect modal to open
-                    return modalTitle.getText();
-                }).then(function (text) {
-                    expect(text).toBe("Confirm Delete");
-                    return chaisePage.recordPage.getConfirmDeleteButton().click();
-                }).then(function () {
-                    // Expect another modal to appear to tell user that this record cannot be deleted without page refresh.
-                    var refreshBtn = element(by.id('refresh-btn'));
-                    chaisePage.waitForElement(refreshBtn);
-                    return refreshBtn.click();
-                }).then(function() {
-                    return chaisePage.waitForElement(element(by.css('.record-main-section-table')));
-                }).then(function() {
-                    changedValue = chaisePage.recordPage.getColumnValue('summary');
-                    expect(changedValue.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
-                }).catch(function(error) {
-                    console.dir(error);
-                    expect('Something went wrong with this promise chain.').toBe('Please see error message.');
-                });
-            }).pend("412 support has been dropped from ermestjs.");
-
-            it("should redirect to data browser if ETags match (like normal).", function () {
-                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-                    deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton(),
-                    config;
-
-                chaisePage.waitForElement(element(by.css('.record-main-section-table'))).then(function() {
-                    return browser.executeScript('return chaiseConfig;');
-                }).then(function(chaiseConfig) {
-                    config = chaiseConfig;
-
-                    browser.wait(EC.visibilityOf(deleteReccordBtn), browser.params.defaultTimeout);
-                    return deleteReccordBtn.click();
-                }).then(function () {
-                    browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
-                    // expect modal to open
-                    return modalTitle.getText();
-                }).then(function (text) {
-                    expect(text).toBe("Confirm Delete");
-                    return chaisePage.recordPage.getConfirmDeleteButton().click();
-                }).then(function () {
-                    browser.driver.sleep(1000);
-                    return browser.driver.getCurrentUrl();
-                }).then(function(url) {
-                    expect(url.indexOf('/recordset/')).toBeGreaterThan(-1);
-                }).catch(function(error) {
-                    console.log(error);
-                    expect('Something went wrong with this promise chain.').toBe('Please see error message.');
-                });
-            });
-        });
+      chaisePage.recordPageReady();
+      done();
     });
+
+    describe('related entity row', () => {
+      it ('clicking on delete button should open a confirm with proper message, and confirming should properly delete.', (done) => {
+        const message = 'Are you sure you want to delete inbound_to_delete_table:one?';
+        testDeleteConfirm(chaisePage.recordsetPage.getDeleteActionButtons().first(), message).then(() => {
+          // the fact that we can delete after this it means that this has been fully removed
+          // so we don't need to wait
+          done();
+        }).catch(chaisePage.catchTestError(done));
+      });
+    });
+
+    describe('the main record', () => {
+      it('clicking on delete button should open a confirm with proper message, and confirming should properly delete.', (done) => {
+        const message = 'Are you sure you want to delete delete_table: one?';
+        testDeleteConfirm(chaisePage.recordPage.getDeleteRecordButton(), message).then(() => {
+          return browser.wait(function () {
+            return browser.driver.getCurrentUrl().then(function (url) {
+              return url.startsWith(getURL('recordset', 'delete_table'));
+            });
+          });
+        }).then(() => {
+          done();
+        }).catch(chaisePage.catchTestError(done));
+      });
+    });
+  });
+
+  describe('when the deleted row is from a table with inline fks with on delete cascade', () => {
+    beforeAll((done) => {
+      chaisePage.navigate(getURL('record', "accommodation", 'id=4004'));
+      chaisePage.recordPageReady();
+      done();
+    });
+
+    describe('related entity row', () => {
+      it ('clicking on delete button should open a confirm with proper message, and confirming should properly delete.', (done) => {
+        const message = 'Are you sure you want to delete inbound_related_to_accommodation_for_delete:Four thousand four?';
+        testDeleteConfirm(chaisePage.recordPage.getDeleteActionButtons('inbound_related_to_accommodation_for_delete').first(), message).then(() => {
+          // the fact that we can delete after this it means that this has been fully removed
+          // so we don't need to wait
+          done();
+        }).catch(chaisePage.catchTestError(done));
+      });
+    });
+
+    describe('the main record', () => {
+      it('clicking on delete button should open a confirm with proper message, and confirming should properly delete.', (done) => {
+        const message = [
+          'Are you sure you want to delete Accommodations: Hilton Hotel?',
+          '\n\n',
+          'This may also delete related records in the following 3 tables/sections: media, booking, and invisible_inbound_related_to_accommodation†',
+          '\n',
+          'Check the related records that are going to be deleted from the relevant sections in the side panel.',
+          'Some of the affected tables (denoted by †) might not be visible in the side panel.'
+        ].join('');
+        testDeleteConfirm(chaisePage.recordPage.getDeleteRecordButton(), message).then(() => {
+          return browser.wait(function () {
+            return browser.driver.getCurrentUrl().then(function (url) {
+              return url.startsWith(getURL('recordset', 'accommodation'));
+            });
+          });
+        }).then(() => {
+          done();
+        }).catch(chaisePage.catchTestError(done));
+      });
+    });
+  });
+
 });

@@ -26,9 +26,17 @@ var chaiseConfig = {
     templating: {
       engine: 'handlebars'
     },
-    shareCiteAcls: {
+    shareCite: {
+        acls: {
+            show: ["*"],
+            enable: ["*"]
+        }
+    },
+    exportConfigsSubmenu: {
+      acls: {
         show: ["*"],
         enable: ["*"]
+      }
     },
     loggedInMenu: {
         menuOptions: [

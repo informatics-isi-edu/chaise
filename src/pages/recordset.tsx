@@ -18,7 +18,7 @@ import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilties
@@ -32,7 +32,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { initializeSavingQueries } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 
 
-const recordsetSettings = {
+const recordsetSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORDSET,
   appTitle: 'Recordset',
   overrideHeadTitle: true,

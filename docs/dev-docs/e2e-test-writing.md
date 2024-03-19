@@ -50,11 +50,11 @@ Setting it to `true` means that subsequent additions/injections to the the contr
 Synchronization makes protractor wait for Angular promises to resolve and causes the url's to be scrambled. Chaise uses the `#` delimiter to determine url parameters to be sent to Ermrest. Thus, enabling synchronization, changes the url, appending an extra / after the `#` symbol.
 
 Thus a correct url like this
-`https://dev.isrd.isi.edu/chaise/record/#1/legacy:dataset/id=1580`
+`https://exampel.com/chaise/record/#1/legacy:dataset/id=1580`
 
 changes to
 
-`https://dev.isrd.isi.edu/chaise/record/#/1/legacy:dataset/id=1580`
+`https://exampel.com/chaise/record/#/1/legacy:dataset/id=1580`
 
 Thus, the parser is unable to parse it. To avoid this we simply disable synchronization in the start of testcases.
 
@@ -90,7 +90,7 @@ chaisePage.waitForElement(element(by.id("some-id"), 5000).then(function() {
 This can be useful when you want to wait for the URL to change in case of form submissions or link clicks.
 
 ```js
-var url = "http://dev.isrd.isi.edu/chaise/search";
+var url = "http://example.com/chaise/search";
 chaisePage.waitForUrl(url, 5000).then(function() {
    console.log("Redirected to url");
 }, function(err) {

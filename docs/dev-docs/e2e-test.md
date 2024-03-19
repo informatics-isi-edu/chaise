@@ -33,11 +33,11 @@ export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 These variables are used in our test framework to communicate with `ERMrest`. The following is how these variables most probably should look like:
 
 ```sh
-export CHAISE_BASE_URL=https://dev.isrd.isi.edu/~<your-user-directory>chaise # No trailing `/`
-export ERMREST_URL=https://dev.isrd.isi.edu/ermrest # No trailing `/`
+export CHAISE_BASE_URL=https://dev.derivacloud.org/~<your-user-directory>chaise # No trailing `/`
+export ERMREST_URL=https://dev.derivacloud.org/ermrest # No trailing `/`
 export AUTH_COOKIE="webauthn=PutYourCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
 export RESTRICTED_AUTH_COOKIE="webauthn=PutAnotherCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
-export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise # No trailing `/`
+export REMOTE_CHAISE_DIR_PATH=some_user_name@dev.derivacloud.org:public_html/chaise # No trailing `/`
 export SHARDING=false
 ```
 
@@ -51,7 +51,7 @@ You can get your cookie by querying the database, or using the following simple 
 
 ## How To Run Tests
 ### Prerequistes
-1. After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
+1. After setting up the environment variables, make sure that the `https://dev.derivacloud.org/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
 
 2. Make sure all the dependencies are installed by running the following command:
 
@@ -71,7 +71,7 @@ You can get your cookie by querying the database, or using the following simple 
     ```
     As the name suggests this will not install dependencies. That's why you need to install all the dependencies in step 2.
 
-4. Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository (This will upload your local code to the remote server):
+4. Upload your code on the `https://dev.derivacloud.org/~<your-user-directory>` by the running the following command in your local chaise repository (This will upload your local code to the remote server):
 
     ```sh
     make deploy
@@ -240,7 +240,7 @@ $ eval ssh-agent
 $ ssh-add PATH/TO/KEY
 
 # export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-$ export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise
+$ export REMOTE_CHAISE_DIR_PATH=some_user_name@dev.derivacloud.org:public_html/chaise
 ```
 
 **CI**: For CI there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.

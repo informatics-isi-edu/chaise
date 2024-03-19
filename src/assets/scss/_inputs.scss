@@ -235,7 +235,9 @@
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
     opacity: 1;
     cursor: not-allowed;
-
+    // We are adding this to fix the issue in firefox where the form is not clickable if its disabled
+    pointer-events: none;
+    
     // make sure the input is taking the input-disabled styles and not the default bootstrap/browser ones
     // (using * so it selects input, textarea, or any other HTML element that we might have
     *::placeholder, *:disabled {

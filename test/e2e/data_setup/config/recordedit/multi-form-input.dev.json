@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordedit/multi-form-input.config.json"
+      ],
+      "schema": "multi-form-input"
+  },
+  "cleanup" : true
+}
