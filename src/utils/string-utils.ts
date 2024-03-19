@@ -25,3 +25,7 @@ const ID_SAFE_REGEX = /[^\w-]+/g;
 export function makeSafeIdAttr(string: string) {
     return String(string).replace(ID_SAFE_REGEX, '-');
 }
+
+export function hasTrailingPeriod(str: string) {
+  return str[str.length-1] === '.';
+}

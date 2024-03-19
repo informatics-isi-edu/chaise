@@ -14,8 +14,8 @@ This is a guide for people who develop Chaise.
   * [Handling time](#handling-time)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
-    + [Make targets](#make-targets)
-    + [NPM](#npm)
+  * [Make targets](#make-targets)
+  * [NPM](#npm)
 - [Structure of an App](#structure-of-an-app)
 - [Using Chaise through npm](#using-chaise-through-npm)
 - [Error handling](#error-handling)
@@ -25,7 +25,7 @@ This is a guide for people who develop Chaise.
 - [Context and provider pattern](#context-and-provider-pattern)
 - [Performance](#performance)
   * [Debugging](#debugging)
-  * [Memorization](#memorization)
+  * [Memoization](#memoization)
 
 ## Reading Material
 In this section, we've included all the guides and tools that we think are useful
@@ -280,6 +280,14 @@ The rules that should be followed while writing code.
 
   - Scrolling can be persisted by using the `scrolling : scroll` option.
 
+#### Supporting styles and classes in configuration
+There are multiple places in chaise and deriva-webapps that we want to allow for users to be able to customize the look and feel of different apps and features. Below are some of the guidelines for when to expose a style property in configuration, attach ids and classes to elements that are made available for custom.css, and define other special classes for use in configs and annotations.
+  - style properties that are directly exposed in configuration documents are usually quantifiable values or boolean values. 
+    - For instance width, max-width, font-size are all quatifiable properties that expect a specific numeric value (usually a number, decimal, or percentage)
+  - there is a defined set of [special classes](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#special-classes) that can be attached to elements using markdown in annotations or certain configurations that allow for a list of classes to be defined
+    - we want to include these classes when a style property might have multiple values (like an enum) instead of an integer. Think about the `align-items` or `overflow` CSS properties that could have multiple values
+  - At a minimum, chaise and deriva-webapps should be attaching unique classes to elements to communicate different parts of the page or components to help data modelers write their own custom CSS by targeting these unique classes
+
 ### Font Awesome
 
 In font-awesome, each font/icon can either be solid, regular, or light. In some cases
@@ -447,6 +455,9 @@ To handle global errors, the app wrapper adds an `ErrorProvider` to handle the e
 
 ### Chaise Navbar
 The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
+
+### Buttons vs Links
+We want to be aware of why we are using `<button>` or `<a>` tags. Generally we should use `<a>` for navigation when possible since this allows for other operating system and browser features. More details about which buttons and links are used for actions or navigation can be found in [this spreadsheet](https://docs.google.com/spreadsheets/d/1p7fI8Uput9nUuG1oc7m8ZfNwS0pu-HU70PmMDhcNmHM/edit#gid=0).
 
 ## Using Chaise through npm
 
@@ -1030,7 +1041,7 @@ Before jumping into solutions, consider debugging and finding the root of the pr
   - By default, the "Profiler" tab only works in development mode. To use this tab in the production mode, you need to uncomment the `'react-dom$': 'react-dom/profiling',` alias in the [app.config.js](https://github.com/informatics-isi-edu/chaise/blob/master/webpack/app.config.js) file.
 - Installing in the `development` mode allows you to add break points in the code. You should also be mindful of the browser console, as React and other dependencies usually print warning/errors only in this mode. That being said, as we mentioned in [here](#development-vs-production), `development` has its downsides.
 
-### Memorization
+### Memoization
 
 React always re-renders children when a parent component has to be re-rendered. But since we're using the provider pattern, the immediate relationship is unimportant. So, if we find any performance issues, it is probably related to redundant components rendering because of this. `memo`  lets us skip re-rendering a component when its props are unchanged. You can see how we've used it [here](https://github.com/informatics-isi-edu/chaise/pull/2341/commits/29720eb277faaa6fc768a912ffcf8a8ec4776980), which significantly improved the performance of record page.
 

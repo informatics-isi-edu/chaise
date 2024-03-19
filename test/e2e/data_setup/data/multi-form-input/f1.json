@@ -1,6 +1,6 @@
 [
-  {"id": "1", "name": "one"},
-  {"id": "2", "name": "two"},
-  {"id": "3", "name": "three"},
-  {"id": "4", "name": "four"}
+  {"id": "1", "name": "one", "text_col": "val1"},
+  {"id": "2", "name": "two", "text_col": "val2"},
+  {"id": "3", "name": "three", "text_col": "val2"},
+  {"id": "4", "name": "four", "text_col": "val3"}
 ]

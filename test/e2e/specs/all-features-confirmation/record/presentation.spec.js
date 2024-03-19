@@ -23,7 +23,8 @@ var testParams = {
     file_names: [
         "Accommodations.csv",
         "accommodation_" + chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID + ".zip",
-        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
+        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
+        'BDBag.json'
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     inline_none_test: {
@@ -52,25 +53,56 @@ var testParams = {
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel, accommodation_inbound3 one| accommodation_inbound3 three| accommodation_inbound3 five", type: "text"},
         { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\" class=\"external-link-icon\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
-        { title: "Category", value: "Hotel", type: "text", comment: "can support markdown", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
+        {
+          title: "Category", value: "Hotel", type: "text", comment: "can support markdown",
+          presentation: {
+            type:"url",
+            url: `${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-record:category/`,
+            table_name: "category",
+            key_value: [{column: "id", value: "10003"}]
+          }
+        },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
         { title: "User Rating", value: "4.3000", type: "float4", markdown_title: "<strong>User Rating</strong>" },
         { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
         { title: "Description", type: "markdown", match: "html", value: "<p><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>\n"},
         { title: "Number of Rooms", value: "23", type: "int2"},
-        { title: "Cover Image", value: "3005", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
+        {
+          title: "Cover Image", value: "3005", type: "int2",
+          presentation: {
+            type: "url",
+            url: `${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-record:file/`,
+            table_name: "file",
+            key_value: [{column: "id", value: "3005"}]
+          }
+        },
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
         { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel</p>", comment: "collections", type: "inline" },
-        { title: "table_w_aggregates", value: "3", comment: "has aggregates", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:table_w_aggregates/", table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]} },
+        {
+          title: "table_w_aggregates", value: "3", comment: "has aggregates",
+          presentation: {
+            type: "inline",
+            url: `${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-record:table_w_aggregates/`,
+            table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]
+          }
+        },
         { title: "# thumbnail collection", comment: "Count of thumbnail collection", value: "1", markdown_title: "# thumbnail collection"},
         { title: "# distinct thumbnail collection", comment: "Count distinct of thumbnail collection", value: "1", markdown_title: "# distinct thumbnail collection"},
         { title: "agg column with waitfor entityset and all-outbound", comment: "Minimum of title", value: "Sherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five", markdown_title: "agg column with waitfor entityset and all-outbound"},
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel", markdown_title: "Max Name of accommodation_collection"},
-        { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
+        { title: "json_col", value: null },
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
-        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
+        {
+          title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005",
+          presentation: {
+            type: "inline",
+            url: `${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-record:file/`,
+            table_name: "file",
+            key_value: [{column: "id", value: "3005"}]
+          }
+        },
         { title: "table_w_invalid_row_markdown_pattern"},
         { title: "virtual column wait_for all-outbound", "value": "virtual value of 2002 with title Sherathon Hotel", markdown_title: "virtual column wait_for all-outbound"},
         { title: "virtual column wait_for agg", "value": "virtual Sherathon Hotel", markdown_title: "virtual column wait_for agg"},
@@ -98,7 +130,7 @@ var testParams = {
         // the table has history-capture: true
         hasVersionedLink: true,
         verifyVersionedLink: true,
-        citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3) Sherathon Hotel, accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
+        citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3). Sherathon Hotel. accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
         bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
         title: "Share and Cite"
     },
@@ -209,17 +241,17 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCite defined', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
 
                     expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
 
-                    expect(chaiseConfig.shareCiteAcls).toBeDefined();
+                    expect(chaiseConfig.shareCite).toBeDefined();
                     // both defined in chiase-config
-                    expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
-                    expect(chaiseConfig.shareCiteAcls.enable).toEqual(["*"]);
+                    expect(chaiseConfig.shareCite.acls.show).toEqual(["*"]);
+                    expect(chaiseConfig.shareCite.acls.enable).toEqual(["*"]);
                 });
             });
 

@@ -11,9 +11,11 @@ var chaiseConfig = {
     logoutURL: '/image-annotation',
     // signUpURL: '', The URL at a which a user can create a new account
     dataBrowser: '',
-    shareCiteAcls: {
-        show: ["*"],  // [] <- hide
-        enable: ["*"] // [] <- disable
+    shareCite: {
+        acls: {
+          show: ["*"],  // [] <- hide
+          enable: ["*"] // [] <- disable
+        }
     },
     maxColumns: 6,
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',

@@ -49,10 +49,11 @@ If a property appears in the same configuration twice, the property defined late
    * [hideRecordeditLeaveAlert](#hiderecordeditleavealert)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
-   * [exportSerivePath](#exportservicepath)
+   * [exportServicePath](#exportservicepath)
+   * [exportConfigsSubmenu](#exportconfigssubmenu)
  * [Share and Cite Configuration:](#share-and-cite-configuration)
    * [resolverImplicitCatalog](#resolverimplicitcatalog)
-   * [shareCiteAcls](#shareciteacls)
+   * [shareCite](#sharecite)
  * [System Columns Configuration:](#system-columns-configuration)
    * [systemColumnsDisplayCompact](#systemcolumnsdisplaycompact)
    * [systemColumnsDisplayDetailed](#systemcolumnsdisplaydetailed)
@@ -542,6 +543,25 @@ Use this property to avoid recordedit app from showing an alert when users are t
      exportServicePath: "/deriva/export/"
      ```
 
+#### exportConfigsSubmenu
+Use this property to modify the display setting for the "Configurations" submenu in the export menu. This option would allow users to download the raw config file that is used for communicating with export service.
+
+- Type: Object
+   - Default behavior: the "Configurations" submenu is not displayed.
+   - Sample syntax:
+     ```
+     "exportConfigsSubmenu": {
+      "acls": {
+        "show": ["*"],
+        "enable": ["*"]
+      }
+     }
+     ```
+   - Attributes:
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and open the "Configurations" submenu.
+       - If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default.
+       - An empty array (`[]`) will hide the option or disable it for everyone
+
 ### Share and Cite Configuration:
  #### resolverImplicitCatalog
  Set to a catalog id, `N`, if your resolver accepts `/id/X` instead of `/id/N/X` and you prefer to share records with this shorter URL. If the property is `null`, the resolver functionality will be turned off and the default permalink will be used. Anything else will be ignored and the default behavior will be applied which is to always use the catalog-qualified form, `/id/N/X`.
@@ -552,18 +572,24 @@ Use this property to avoid recordedit app from showing an alert when users are t
      resolverImplicitCatalog: "1"
      ```
 
- #### shareCiteAcls
- Use this property to show/hide or enable/disable the button used to open the share and cite dialog on Record app. The accepted values for the array for both show and enable are `"*"` or any valid globus group key. If either key/value pair is undefined in the object, it will default to `["*"]`. Consult the chaise-config-sample.js file for more details.
-system columns:
+ #### shareCite
+Use this property to modify the display settings for the "share and cite" button and dialog on Record app.
+
    - Type: Object
-   - Default behavior: the share cite button is viewable and enabled for everyone
+   - Default behavior: the share and cite button is viewable and enabled for everyone
    - Sample syntax:
      ```
-     shareCiteAcls: {
-       show: ["*"],
-       enable: ["*"]
+     "shareCite": {
+      "acls": {
+        "show": ["*"],
+        "enable": ["*"]
+      }
      }
      ```
+   - Attributes:
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click on the share and cite button.
+       - If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default.
+       - An empty array (`[]`) will hide the button or disable it for everyone.
 
 ### System Columns Configuration:
  #### systemColumnsDisplayCompact
@@ -622,7 +648,7 @@ system columns:
      ```
 
  #### configRules
- Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`). 
+ Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`).
    - Type: Array
    - General syntax:
      ```

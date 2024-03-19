@@ -16,6 +16,8 @@ export enum LogActions {
   OPEN= ';open',
   CLOSE= ';close',
   EXPORT_OPEN= 'export' + ';open',
+  EXPORT_CONFIG_OPEN = 'export/config' + ';open',
+  EXPORT_CONFIG_DOWNLOAD = 'export/config' + ';download',
   ADD_INTEND= 'add' + ';intend',
   EDIT_INTEND= 'edit' + ';intend',
   DELETE_INTEND= 'delete' + ';intend',

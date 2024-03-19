@@ -9,9 +9,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 // models
 import { appModes, RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-
-// services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
@@ -51,12 +49,20 @@ const KeyColumn = ({
 
   // -------------------------- render logic ---------------------- //
 
+  /**
+   * whether the column has comment and it's in tooltip display mode
+   */
+  const columnHasTooltip = (column: any) => {
+    return column.comment && column.comment.displayMode === CommentDisplayModes.TOOLTIP;
+  }
+
   const renderColumnHeader = (column: any) => {
-    const headerClassName = `column-displayname${column.comment ? ' chaise-icon-for-tooltip' : ''}`;
+    const hasTooltip = columnHasTooltip(column);
+    const headerClassName = `column-displayname${hasTooltip ? ' chaise-icon-for-tooltip' : ''}`;
     return (
       <span className={headerClassName}>
         <DisplayValue value={column.displayname} />
-        {column.comment ? ' ' : ''}
+        {hasTooltip ? ' ' : ''}
       </span>
     )
   }
@@ -122,7 +128,7 @@ const KeyColumn = ({
           // to ensure consistent height between this element and FormRow
           <span key={colName} className={entityKeyClassName} >
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
-            {column.comment ?
+            {columnHasTooltip(column) ?
               <ChaiseTooltip
                 placement='right'
                 tooltip={<DisplayCommentValue comment={column.comment} />}

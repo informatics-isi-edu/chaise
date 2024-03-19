@@ -1,5 +1,8 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
+// components
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+
 // hooks
 import { useEffect, useState } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
@@ -182,7 +185,9 @@ const InputField = ({
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
-      {showError && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
+      {showError && error?.message &&
+        <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />
+      }
     </div>
   );
 };

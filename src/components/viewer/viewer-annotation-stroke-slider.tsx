@@ -38,10 +38,10 @@ const ViewerAnnotationStrokeSlider = (): JSX.Element => {
       }
     };
 
-    window.addEventListener('message', recieveIframeMessage);
+    windowRef.addEventListener('message', recieveIframeMessage);
 
     return () => {
-      window.removeEventListener('message', recieveIframeMessage);
+      windowRef.removeEventListener('message', recieveIframeMessage);
     }
   }, []);
 

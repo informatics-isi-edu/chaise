@@ -21,6 +21,7 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 const loginSettings : ConfigServiceSettings = {
@@ -66,10 +67,10 @@ const LoginPopupApp = (): JSX.Element => {
 
     // if the config is invalid, don't require group membership to continue automatically
     if (!validConfig || hasGroup) {
-      const qString = queryStringToJSON(window.location.search);
-      if (qString.referrerid && (typeof qString.action === 'undefined') && window.opener) {
+      const qString = queryStringToJSON(windowRef.location.search);
+      if (qString.referrerid && (typeof qString.action === 'undefined') && windowRef.opener) {
         //For child window
-        window.opener.postMessage(window.location.search, window.opener.location.href);
+        windowRef.opener.postMessage(windowRef.location.search, windowRef.opener.location.href);
 
         // Create the user in 'user_profile" table with `onconflict=skip` if user exists already
         // POST /ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip
@@ -93,8 +94,8 @@ const LoginPopupApp = (): JSX.Element => {
           //    - should it be part of termsAndConditionsConfig
           //    - or it's own property since this could be for a separate feature request
           //       - (having user profiles but not require a specific globus group for login)
-          ConfigService.http.post(window.location.origin + userProfilePath, rows).then((response: any) => {
-            window.close();
+          ConfigService.http.post(windowRef.location.origin + userProfilePath, rows).then((response: any) => {
+            windowRef.close();
           }).catch((error: any) => {
             // NOTE: this should almost never happen
             //     will happen in any deployment that turns this feature on before we rework the
@@ -105,7 +106,7 @@ const LoginPopupApp = (): JSX.Element => {
             console.log('error creating user');
           });
         } else {
-          window.close();
+          windowRef.close();
         }
       }
     } else {
@@ -122,7 +123,7 @@ const LoginPopupApp = (): JSX.Element => {
     refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
       setShowSpinner(false);
 
-      window.location = redirectUrl;
+      windowRef.location = redirectUrl;
     });
   }
 

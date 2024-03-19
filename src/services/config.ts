@@ -14,7 +14,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
   CHAISE_CONFIG_STATIC_PROPERTIES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
@@ -301,17 +301,32 @@ export class ConfigService {
       ConfigService._applyHostConfigRules(catalogAnnotation, cc, true);
     }
 
-    // shareCiteAcls is a nested object, user could define shareCiteAcls:
-    //     { show: ['*'] }
-    // with no enable array defined
-    // make sure the object has both defined and apply the default if one or the other is missing
-    if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
-    if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = DEFAULT_CHAISE_CONFIG.shareCiteAcls.enable;
+    // make sure shareCite has the proper structure
+    if (!isObjectAndNotNull(cc.shareCite)) {
+      cc.shareCite = DEFAULT_CHAISE_CONFIG.shareCite;
+    } else if (!isObjectAndNotNull(cc.shareCite.acls)) {
+      cc.shareCite.acls = DEFAULT_CHAISE_CONFIG.shareCite.acls;
+    } else {
+      // make sure the object has both defined and apply the default if one or the other is missing
+      if (!cc.shareCite.acls.show) cc.shareCite.acls.show = ['*'];
+      if (!cc.shareCite.acls.enable) cc.shareCite.acls.enable = ['*'];
+    }
+
+    // make sure exportConfigsSubmenu has the proper structure
+    if (!isObjectAndNotNull(cc.exportConfigsSubmenu)) {
+      cc.exportConfigsSubmenu = DEFAULT_CHAISE_CONFIG.exportConfigsSubmenu;
+    } else if (!isObjectAndNotNull(cc.exportConfigsSubmenu.acls)) {
+      cc.exportConfigsSubmenu.acls = DEFAULT_CHAISE_CONFIG.exportConfigsSubmenu.acls;
+    } else {
+      // make sure the object has both defined and apply the default if one or the other is missing
+      if (!cc.exportConfigsSubmenu.acls.show) cc.exportConfigsSubmenu.acls.show = ['*'];
+      if (!cc.exportConfigsSubmenu.acls.enable) cc.exportConfigsSubmenu.acls.enable = ['*'];
+    }
 
     /**
      * make sure the current host is part of internalHosts
      */
-    const currHost = window.location.host;
+    const currHost = windowRef.location.host;
     if (!Array.isArray(cc.internalHosts)) {
       cc.internalHosts = [currHost];
     }

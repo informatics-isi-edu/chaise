@@ -29,6 +29,9 @@ $chaise-checkbox-width: 20px;
 $chaise-checkbox-height: 20px;
 
 
+// currently only used in recordedit. content/input shouldn't be wider than this
+$re-max-allowed-input-width: 1200px;
+
 // fonts
 $font-size: 14px;
 $h1-font-size: 2.5rem;

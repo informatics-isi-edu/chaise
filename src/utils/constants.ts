@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating', 'hideRecordeditLeaveAlert'
+  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu'
 ];
 
 /**
@@ -39,8 +39,8 @@ export const CHAISE_CONFIG_STATIC_PROPERTIES = [
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
-  internalHosts: [window.location.host],
-  ermrestLocation: `${window.location.origin}/ermrest`,
+  internalHosts: [windowRef.location.host],
+  ermrestLocation: `${windowRef.location.origin}/ermrest`,
   headTitle: 'Chaise',
   navbarBrandText: 'Chaise',
   logoutURL: '/',
@@ -65,14 +65,22 @@ export const DEFAULT_CHAISE_CONFIG = {
   savedQueryConfig: null,
   loggedInMenu: {},
   facetPanelDisplay: {},
-  shareCiteAcls: {
-    show: ['*'],
-    enable: ['*'],
+  shareCite: {
+    acls: {
+      show: ['*'],
+      enable: ['*'],
+    }
   },
   templating: {
     engine: 'mustache'
   },
   hideRecordeditLeaveAlert: false,
+  exportConfigsSubmenu: {
+    acls: {
+      show: [],
+      enable: []
+    }
+  }
 };
 
 export const dataFormats = {
@@ -207,7 +215,7 @@ export const HELP_PAGES = {
   }
 }
 
-const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
+const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
 export const RECORDEDIT_MAX_ROWS = 200;
@@ -252,8 +260,6 @@ export const VIEWER_CONSTANT = {
     LINE_THICKNESS_LOG_TIMEOUT: 1000
   }
 };
-
-
 
 
 // TODO if chaise is not built how we expect, this value will be undefiend.

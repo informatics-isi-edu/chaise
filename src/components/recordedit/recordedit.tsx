@@ -5,7 +5,7 @@ import { Accordion, Modal } from 'react-bootstrap';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
@@ -111,16 +111,16 @@ const RecordeditInner = ({
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
   /**
-   * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason 
+   * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason
    * stated below from linked article. These properties are passed as props to the components so they only rerender when they need to instead
    * of when the context changes
-   * 
+   *
    *  - activeMultiForm is used by key-column and form-container
    *  - toggleActiveMultiForm is used by key-column and multi-form-input-row
-   * 
+   *
    * https://adevnadia.medium.com/react-re-renders-guide-preventing-unnecessary-re-renders-8a3d2acbdba3#:~:text=There%20is%20no%20way%20to
-   * There is no way to prevent a component that uses a portion of Context value from re-rendering, even if the used piece 
-   * of data hasn’t changed, even with useMemo hook. Context selectors, however, could be faked with the use of 
+   * There is no way to prevent a component that uses a portion of Context value from re-rendering, even if the used piece
+   * of data hasn’t changed, even with useMemo hook. Context selectors, however, could be faked with the use of
    * higher-order components and React. memo .
    */
   const [activeMultiForm, setActiveMultiForm] = useState<number>(-1);
@@ -139,7 +139,8 @@ const RecordeditInner = ({
     onConfirm: () => void,
     onCancel: () => void,
     buttonLabel: string,
-    message?: JSX.Element
+    message?: JSX.Element,
+    reference?: any
   } | null>(null);
 
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
@@ -193,7 +194,6 @@ const RecordeditInner = ({
         });
 
         let confirmMessage;
-        // TODO should be adjusted if we changed how we're tracking the tuples
         if (tuples.length > 1) {
           confirmMessage = <>Are you sure you want to delete all {tuples.length} of the displayed records?</>
         }
@@ -207,7 +207,8 @@ const RecordeditInner = ({
               stack: LogService.getStackObject()
             });
           },
-          message: confirmMessage
+          message: confirmMessage,
+          reference
         });
 
       } else {
@@ -381,16 +382,16 @@ const RecordeditInner = ({
       });
     }
 
-    /**  
+    /**
      * NOTE: This might be able to be optimized to use setValue for each value in the new forms instead of resetting EVERY form in react hook form
      *   for instance, 4 forms exist and 1 new form is added, this will call "reset" on all 5 forms
-     * 
-     * Is it possible for this change to cause longer scripting time? For instance, iterating over every single cell for each new form 
-     * could end up taking longer using setValue (and whatever happens in react-hook-form) vs no iteration and instead leaving it up to 
+     *
+     * Is it possible for this change to cause longer scripting time? For instance, iterating over every single cell for each new form
+     * could end up taking longer using setValue (and whatever happens in react-hook-form) vs no iteration and instead leaving it up to
      * react-hook-form and how `methods.reset()` works
-     * 
+     *
      * A contradicting note, since each new form being added needs to render new input fields, form-row component will rerender. This
-     * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change 
+     * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change
      * rendering performance at all. Maybe to prevent previous input fields from rerendering, the input-switch component should be memoized?
      */
     methods.reset(tempFormValues);
@@ -518,7 +519,7 @@ const RecordeditInner = ({
                 </Accordion.Button>
                 <Accordion.Body>
                   {resultsetProps.success.exploreLink &&
-                    <div className='inline-tooltip'>
+                    <div className='inline-tooltip inline-tooltip-lg'>
                       <p>
                         This table content displays user submitted values.
                         Use the <a href={resultsetProps.success.editLink}>Bulk Edit</a> button
@@ -551,6 +552,7 @@ const RecordeditInner = ({
   }
 
   const renderModals = () => {
+    const deleteConfirmContext = tuples.length > 1 ? DeleteConfirmationModalTypes.BULK : DeleteConfirmationModalTypes.SINGLE;
     return (<>
       {showDeleteConfirmationModal &&
         <DeleteConfirmationModal
@@ -559,6 +561,8 @@ const RecordeditInner = ({
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
           onCancel={showDeleteConfirmationModal.onCancel}
+          reference={showDeleteConfirmationModal.reference}
+          context={deleteConfirmContext}
         />
       }
       {uploadProgressModalProps &&

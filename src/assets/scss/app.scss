@@ -8,6 +8,7 @@
 @import "buttons";
 @import "button-group";
 @import "inputs";
+@import "dropdown";
 @import "modal";
 
 // if we want to hide the page and then show navbar and content together
@@ -218,7 +219,12 @@ html {
   }
 
   .inline-tooltip {
-    font-size: 16px;
+    &.inline-tooltip-sm {
+      font-size: 13px;
+    }
+    &.inline-tooltip-lg {
+      font-size: 16px;
+    }
   }
 
   #page-title .inline-tooltip {

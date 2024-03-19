@@ -39,6 +39,10 @@ var recordEditPage = function() {
         return element.all(by.css('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip'));
     };
 
+    this.getColumnInlineComments = () => {
+      return element.all(by.css('.inline-comment-row'));
+    };
+
     this.getColumnWithAsterisk = function(el) {
         return el.element(by.xpath('./../..')).element(by.className('text-danger'));
     };
@@ -608,7 +612,7 @@ var recordPage = function() {
     };
 
     this.getDeleteActionButtons = function (displayname) {
-        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
+        return element(by.id("rt-" + displayname)).all(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -669,7 +673,11 @@ var recordPage = function() {
 
     this.getConfirmDeleteButton = function () {
         return element(by.css(".confirm-delete-modal .ok-button"));
-    }
+    };
+
+    this.getConfirmDeleteText = function () {
+      return element(by.css(".confirm-delete-modal .modal-body"));
+    };
 
     this.getShowAllRelatedEntitiesButton = function() {
         return element(by.css(".toggle-empty-sections"));
@@ -967,13 +975,26 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
+    this.getExportDropdownMenu = () => {
+        return element(by.css('.export-menu dropdown-menu'));
+    }
+
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
     };
 
     this.getExportOption = function (optionName) {
         var option = makeSafeIdAttr(optionName);
-        return element(by.css(".export-" + option));
+        return element(by.css(".export-menu-item-" + option));
+    };
+
+    this.getExportSubmenuOptions = function () {
+      return element.all(by.css(".export-submenu-item"));
+    };
+
+    this.getExportSubmenuOption = function (optionName) {
+      var option = makeSafeIdAttr(optionName);
+      return element(by.css(".export-submenu-item-" + option));
     };
 
     this.getExportModal = function () {

@@ -124,7 +124,7 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
  */
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, 
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean,
   skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
@@ -149,7 +149,7 @@ function _copyOrClearValueForColumn(
     if (clearValue) {
       if (setValue) {
         setValue(`${dstKey}-date`, '');
-        setValue(`${dstKey}-time`, ''); 
+        setValue(`${dstKey}-time`, '');
       } else {
         values[`${dstKey}-date`] = '';
         values[`${dstKey}-time`] = '';
@@ -213,7 +213,7 @@ function _copyOrClearValueForColumn(
  */
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean, 
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean,
   skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
 ) {
 

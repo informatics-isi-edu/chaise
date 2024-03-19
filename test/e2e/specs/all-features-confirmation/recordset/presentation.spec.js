@@ -12,7 +12,7 @@ var testParams = {
         key: { name: "id", value: "2001", operator: "::gt::" },
         shortest_key_filter: "RID=",
         sortby: "no_of_rooms",
-        file_names: ["Accommodations.csv", "accommodation.zip"],
+        file_names: ["Accommodations.csv", "accommodation.zip", "BDBag.json"],
         columns: [
             { title: "Name of Accommodation" },
             { title: "Website", comment: "A valid url of the accommodation" },
@@ -64,7 +64,7 @@ var testParams = {
                 summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
-                json_col: JSON.stringify(null, undefined, 2),
+                json_col: '',
                 json_col_with_markdown: "Status is: “delivered”",
                 no_of_beds: "beds: 1, id: 2002, has gym, image id cnt: 4",
                 no_of_baths: "baths: 1, id: 2002, images: 3005, 3006, 3008, 30007",
@@ -449,7 +449,7 @@ describe('View recordset,', function () {
                 const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 exportDropdown.click().then(function () {
                     const exportMenuItems = chaisePage.recordsetPage.getExportOptions();
-                    expect(exportMenuItems.count()).toBe(2, "incorrect number of export options");
+                    expect(exportMenuItems.count()).toBe(3, "incorrect number of export options");
                     // close the dropdown
                     return exportDropdown.click();
                 }).then(function () {
@@ -500,6 +500,29 @@ describe('View recordset,', function () {
                     }).catch(function (err) {
                         done.fail(err);
                     });
+                });
+
+                it ('should have `Configurations` option that opens a submenu to download the config file.', (done) => {
+                    let exportSubmenuOptions, configOption;
+                    chaisePage.clickButton(chaisePage.recordsetPage.getExportDropdown()).then(() => {
+                        configOption = chaisePage.recordsetPage.getExportOption('configurations');
+                        return chaisePage.waitForElement(configOption);
+                    }).then(() => {
+                        expect(configOption.getText()).toBe('Configurations');
+                        return chaisePage.clickButton(configOption);
+                    }).then(() => {
+                        exportSubmenuOptions = chaisePage.recordsetPage.getExportSubmenuOptions();
+                        expect(exportSubmenuOptions.count()).toBe(1);
+                        const bdBagSubmenu = chaisePage.recordsetPage.getExportSubmenuOption('BDBag');
+                        expect(bdBagSubmenu.isDisplayed()).toBeTruthy();
+                        chaisePage.clickButton(bdBagSubmenu);
+                    }).then(() => {
+                        return browser.wait(function () {
+                          return fs.existsSync(process.env.PWD + "/test/e2e/BDBag.json");
+                        }, browser.params.defaultTimeout);
+                    }).then(() => {
+                        done();
+                    }).catch((done) => chaisePage.catchTestError(done));
                 });
             }
 

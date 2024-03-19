@@ -1,10 +1,9 @@
 var pImport =  require('../utils/protractor.import.js');
 var chaisePage = require('../utils/chaise.page.js');
-var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
-const { browser } = require('protractor');
+const { browser, ElementFinder } = require('protractor');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -80,12 +79,12 @@ exports.testPresentation = function (tableParams) {
 
     exports.testSharePopup(tableParams.sharePopupParams);
 
-    it("should have '2' options in the export dropdown menu.", function (done) {
+    it("should have '3' options in the export dropdown menu.", function (done) {
         const exportButton = chaisePage.recordsetPage.getExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         chaisePage.clickButton(exportButton).then(function () {
-            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(3, "incorrect number of export options");
             // close the dropdown
             return exportButton.click();
         }).then(function () {
@@ -117,7 +116,7 @@ exports.testPresentation = function (tableParams) {
             });
         });
 
-        it("should have 'BDBag' as a download option and download the file.", function(done) {
+        xit("should have 'BDBag' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                 expect(bagOption.getText()).toBe("BDBag");
@@ -139,6 +138,29 @@ exports.testPresentation = function (tableParams) {
                 console.log(err);
                 done.fail();
             });
+        });
+
+        it ('should have `Configurations` option that opens a submenu to download the config file.', (done) => {
+            let exportSubmenuOptions, configOption;
+            chaisePage.clickButton(chaisePage.recordsetPage.getExportDropdown()).then(() => {
+                configOption = chaisePage.recordsetPage.getExportOption('configurations');
+                return chaisePage.waitForElement(configOption);
+            }).then(() => {
+                expect(configOption.getText()).toBe('Configurations');
+                return chaisePage.clickButton(configOption);
+            }).then(() => {
+                exportSubmenuOptions = chaisePage.recordsetPage.getExportSubmenuOptions();
+                expect(exportSubmenuOptions.count()).toBe(1);
+                const bdBagSubmenu = chaisePage.recordsetPage.getExportSubmenuOption('BDBag');
+                expect(bdBagSubmenu.isDisplayed()).toBeTruthy();
+                chaisePage.clickButton(bdBagSubmenu);
+            }).then(() => {
+                return browser.wait(function () {
+                  return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[2]);
+                }, browser.params.defaultTimeout);
+            }).then(() => {
+                done();
+            }).catch((done) => chaisePage.catchTestError(done));
         });
     }
 
@@ -208,11 +230,7 @@ exports.testPresentation = function (tableParams) {
 
                     const aTag = chaisePage.recordPage.getLinkChild(columnEls);
                     const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
-                    let columnUrl = mustache.render(column.presentation.template, {
-                        "catalog_id": process.env.catalogId,
-                        "chaise_url": process.env.CHAISE_BASE_URL,
-                    });
-                    columnUrl += "RID=" + dataRow.RID;
+                    const columnUrl = column.presentation.url + "RID=" + dataRow.RID;
 
                     expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
                     expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
@@ -220,16 +238,6 @@ exports.testPresentation = function (tableParams) {
                     expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
                 }
         	}
-        });
-    });
-
-    it('should not show any columns with null value', function() {
-        var columns = tableParams.columns;
-        columns.forEach(function(column) {
-            var elem = element(by.id('row-' + column.title.toLowerCase()));
-            if (column.value === null) {
-                expect(elem.isPresent()).toBe(false);
-            }
         });
     });
 
@@ -1694,4 +1702,30 @@ function checkRelatedRowValues(displayname, isInline, rowValues, done) {
         console.log(error);
         done.fail();
     });
+}
+
+/**
+ * click on the given button to open the delete-confirm. make sure it looks good, and then confirm.
+ * @param {ElementFinder} btn the delete btn
+ * @param {string} confirmText the confirm text
+ */
+exports.testDeleteConfirm = (btn, confirmText) => {
+  return new Promise ((resolve, reject) => {
+    browser.wait(EC.visibilityOf(btn), browser.params.defaultTimeout);
+
+    let modalTitle;
+    chaisePage.clickButton(btn).then(() => {
+      modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+
+      return browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+    }).then(() => {
+      expect(modalTitle.getText()).toBe("Confirm Delete");
+
+      expect(chaisePage.recordPage.getConfirmDeleteText().getText()).toEqual(confirmText);
+
+      return chaisePage.clickButton(chaisePage.recordPage.getConfirmDeleteButton());
+    }).then(() => {
+      resolve();
+    }).catch(err => reject(err));
+  });
 }

@@ -112,7 +112,10 @@
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
-          // We add this so that the multi-form-input-row spans across the entire view
+        }
+
+        &.highlighted-row, &.with-inline-tooltip {
+          // We add this so that the multi-form-input-row and inline-comment-row span across the entire view
           max-width: none;
         }
 
@@ -132,16 +135,37 @@
           }
         }
 
-        .multi-form-input-row {
+        .inline-comment-row, .multi-form-input-row {
           width: 100%;
           display: flex;
-          flex-direction: column;
-          align-items: center;
           gap: 5px;
           // Making it sticky so that it is fixed in its position and rest of the form conatiner scrolls horizontally
           position: sticky;
           top: 0;
           left: 0;
+        }
+
+        .inline-comment-row {
+          flex-direction: column;
+
+          color: map-get(variables.$color-map, 'column-inline-tooltip');
+          border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+
+          padding: 8px 10px 0 8px;
+
+          .inline-tooltip {
+            max-width: variables.$re-max-allowed-input-width;
+          }
+          hr {
+            margin-top: 0;
+            margin-bottom: 0;
+          }
+        }
+
+        .multi-form-input-row {
+          flex-direction: column;
+          align-items: center;
+
           z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
 
           // Adding a div to align the content center always
@@ -213,7 +237,7 @@
         @media (min-width: 1800px) {
           .multi-form-input-row {
             .center-align {
-              width: 1200px;
+              width: variables.$re-max-allowed-input-width;
             }
 
             .center-align-textarea {
@@ -225,7 +249,7 @@
               // if we want to cover the whole multi form row, move this to .multi-form-row
               position: relative;
               textarea {
-                width: 1200px;
+                width: variables.$re-max-allowed-input-width;
                 max-width: 100%;
               }
             }

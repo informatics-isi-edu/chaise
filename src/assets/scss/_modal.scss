@@ -355,6 +355,14 @@ div.modal-title {
   }
 }
 
+/******** Popup modal for confirming delete ********/
+.confirm-delete-modal {
+  .noted-table-icon {
+    padding-right: 3px;
+    font-weight: 900;
+  }
+}
+
 /*************** z-index for modal backdrops ***************/
 div.modal-backdrop {
   // override the default bootstrap value

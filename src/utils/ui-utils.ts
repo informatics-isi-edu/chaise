@@ -279,6 +279,14 @@ export function debounce(callback: Function, timeout: number) {
 }
 
 /**
+ * create a timeout that can be used in async/await fns
+ * @param ms how long we should wait
+ */
+export function asyncTimeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
  * This function is used for firing custom events
  * @param {string} eventName - the event name
  * @param {string|Element} targetElement - a DOM element from which the event will propogate
@@ -309,7 +317,7 @@ export function fireCustomEvent(eventName = 'myEvent', targetElement: string | E
 export function convertVWToPixel(value: number) {
   const e = document.documentElement;
   const g = document.getElementsByTagName('body')[0];
-  const x = window.innerWidth || e.clientWidth || g.clientWidth;
+  const x = windowRef.innerWidth || e.clientWidth || g.clientWidth;
 
   const result = (x * value) / 100;
   return result;
@@ -398,4 +406,27 @@ export function createChaiseTooltips(container: Element) {
  */
 export function manuallyTriggerFormSubmit(form: HTMLFormElement) {
   form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}
+
+/**
+ * given an object, stringify it and prompt a download
+ */
+export function saveObjectAsJSONFile(obj: any, filename: string) {
+  const str = JSON.stringify(obj, null, '  ');
+
+  const blob = new Blob([str], { type: 'text/json' });
+  const link = document.createElement('a');
+
+  link.download = filename;
+  link.href = window.URL.createObjectURL(blob);
+  link.dataset.downloadurl = ['text/json', link.download, link.href].join(':');
+
+  const evt = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+
+  link.dispatchEvent(evt);
+  link.remove()
 }
