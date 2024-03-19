@@ -143,7 +143,7 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
     }
 
     // merge all the schema configurations
-    const catalog: any = {}, schemas: any = {}, entities : any = {};
+    const catalog: any = {}, schemas: any = {}, entities: any = {};
 
     schemaConfigurations.forEach((config: any) => {
       // copy annotations and ACLs over to the submitted catalog object
@@ -299,15 +299,18 @@ function copyChaiseConfig(chaiseConfigFilePath?: string) {
   // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
   let cmd;
   if (typeof remoteChaiseDirPath === 'string') {
-    cmd = `scp ${chaiseFilePath} ${remoteChaiseDirPath}/chaise-config.js`;
+    // since we're copying to a folder which might or might not exist, we have to use rsync and cannot use scp
+    cmd = `rsync -v ${chaiseFilePath} ${remoteChaiseDirPath}/config/`;
     console.log('Copying using scp');
   } else {
-    cmd = `sudo cp ${chaiseFilePath} /var/www/html/chaise/chaise-config.js`;
+    const configFolder = '/var/www/html/chaise/config';
+    // make sure the config folder is defined and then copy the chaise-config.js
+    cmd = `sudo mkdir -p ${configFolder} && sudo cp ${chaiseFilePath} ${configFolder}/chaise-config.js`;
     console.log('Copying using cp');
   }
 
   try {
-    execSync(cmd);
+    require('child_process').execSync(cmd);
     console.log(`Copied file ${chaiseFilePath} successfully to chaise-config.js \n`);
   } catch (exp) {
     console.log(exp);

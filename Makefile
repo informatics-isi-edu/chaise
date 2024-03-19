@@ -444,7 +444,7 @@ npm-install-modules:
 npm-install-all-modules:
 	@npm clean-install --include=dev
 	@npx patch-package
-	@npx playwright install-deps
+	@npx playwright install --with-deps
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
