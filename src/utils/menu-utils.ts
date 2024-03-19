@@ -17,6 +17,15 @@ import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /* ===== Interfaces ===== */
+export enum MenuOptionTypes {
+  CALLBACK = 'callback',
+  HEADER = 'header',
+  LOGOUT = 'logout',
+  MENU = 'menu',
+  MY_PROFILE = 'my_profile',
+  URL = 'url'
+}
+
 export interface MenuOption {
   acls: MenuAcls,
   children?: MenuOption[],
@@ -27,8 +36,23 @@ export interface MenuOption {
   markdownName?: string, // TODO: remove
   names?: string[],
   newTab: boolean,
-  type?: string, // TODO: enum ['header', 'logout', 'menu', 'my_profile', 'url']
-  url?: string
+  /**
+   * if missing, we're using header or menu depending whether it has children or not
+   */
+  type?: MenuOptionTypes,
+  url?: string,
+  /**
+   * if type callback, we will call this function
+   */
+  callback?: () => void
+  /**
+   * the class name attached to the component
+   */
+  className?: string,
+  /**
+   * if it's a menu type, we will use this for logging the toggle event
+   */
+  logAction?: LogActions
 }
 
 export interface MenuAcls {
@@ -249,10 +273,11 @@ export function onLinkClick(event: MouseEvent<HTMLElement>, menuObject: MenuOpti
 }
 
 export function menuItemClasses(option: MenuOption, session: Session | null, checkHeader: boolean): string {
-  let classes = '';
-  if (!canEnable(option, session)) classes += 'disable-link ';
-  if (checkHeader && option.header === true) classes += 'chaise-dropdown-header';
-  return classes;
+  const classes = [];
+  if (!canEnable(option, session)) classes.push('disable-link');
+  if (checkHeader && option.header === true) classes.push('chaise-dropdown-header');
+  if (option.className) classes.push(option.className);
+  return classes.join(' ');
 }
 
 /**

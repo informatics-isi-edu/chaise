@@ -3,11 +3,13 @@
 import Dropdown from 'react-bootstrap/Dropdown';
 import ExportModal from '@isrd-isi-edu/chaise/src/components/modals/export-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 
 // hooks
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -22,6 +24,9 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
+import { saveObjectAsJSONFile } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { MenuOption, MenuOptionTypes } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 type ExportProps = {
   reference: any,
@@ -39,12 +44,23 @@ type ExportProps = {
   csvOptionName?: string
 };
 
+enum ExportType {
+  DIRECT = 'DIRECT',
+  BAG = 'BAG',
+  FILE = 'FILE'
+}
+
 const Export = ({
   reference,
   tuple,
   disabled,
   csvOptionName
 }: ExportProps): JSX.Element => {
+
+  const { dispatchError } = useError();
+  const { addAlert } = useAlert();
+  const { session } = useAuthn();
+
   /**
    * State variable to export options
    */
@@ -66,9 +82,7 @@ const Export = ({
    */
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const { dispatchError } = useError();
-
-  const { addAlert } = useAlert();
+  const dropdownWrapper = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const options: any = [];
@@ -77,7 +91,7 @@ const Export = ({
         if (reference.csvDownloadLink) {
           options.push({
             displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
-            type: 'DIRECT',
+            type: ExportType.DIRECT,
           });
         }
 
@@ -98,26 +112,56 @@ const Export = ({
 
   }, []);
 
+
+  //-------------------  callbacks:   --------------------//
+
+  const _getExporterProps = (option: any) => {
+    const exporter = new ConfigService.ERMrest.Exporter(
+      reference,
+      reference.table.name + (tuple ? `_${tuple.uniqueId}` : ''),
+      option,
+      ConfigService.chaiseConfig.exportServicePath
+    );
+    return {
+      exporter,
+      stack: LogService.addExtraInfoToStack(null, {
+        template: {
+          displayname: exporter.template.displayname,
+          type: exporter.template.type
+        }
+      })
+    };
+  }
+
+  const downloadExportConfiguration = (option: any) => {
+    const res = _getExporterProps(option);
+    saveObjectAsJSONFile(res.exporter.exportParameters, `${option.displayname}.json`);
+
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.EXPORT_CONFIG_DOWNLOAD),
+      stack: res.stack
+    }, reference.defaultLogInfo);
+
+  }
+
   /**
    * Send the request for export
    * @param option selected export option
    * @returns Downloads the selected file
    */
-  const startExporting = (option: any) => () => {
+  const startExporting = (option: any) => {
     const formatType = option.type;
     switch (formatType) {
-      case 'DIRECT':
+      case ExportType.DIRECT:
         location.href = reference.csvDownloadLink;
         break;
-      case 'BAG':
-      case 'FILE':
+      case ExportType.BAG:
+      case ExportType.FILE:
         setSelectedOption(option);
-        const exporter = new ConfigService.ERMrest.Exporter(
-          reference,
-          reference.table.name + (tuple ? `_${tuple.uniqueId}` : ''),
-          option,
-          ConfigService.chaiseConfig.exportServicePath
-        );
+        const res = _getExporterProps(option);
+        const exporter = res.exporter;
+        const logStack = res.stack;
+
         const exportParametersString = JSON.stringify(exporter.exportParameters, null, '  ');
 
         // begin export and start a timer
@@ -125,41 +169,30 @@ const Export = ({
         console.time('External export duration');
 
         setExporterObj(exporter);
-        if (exporter) {
-          const logStack = LogService.addExtraInfoToStack(null, {
-            template: {
-              displayname: exporter.template.displayname,
-              type: exporter.template.type
-            }
-          });
-          const logObj = {
-            action: LogService.getActionString(LogActions.EXPORT),
-            stack: logStack
-          }
-          exporter
-            .run(logObj)
-            .then((response: any) => {
-              setSelectedOption(null);
-              setExporterObj(null);
-
-              console.timeEnd('External export duration');
-
-              // if it was canceled, just ignore the result
-              if (response.canceled) return;
-              location.href = response.data[0];
-            })
-            .catch((error: any) => {
-              setSelectedOption(null);
-              setExporterObj(null);
-
-              console.timeEnd('External export duration');
-
-              error.subMessage = error.message;
-              error.message = 'Export failed. Please report this problem to your system administrators.';
-
-              dispatchError({ error, isDismissible: true });
-            });
+        const logObj = {
+          action: LogService.getActionString(LogActions.EXPORT),
+          stack: logStack
         }
+        exporter.run(logObj).then((response: any) => {
+          setSelectedOption(null);
+          setExporterObj(null);
+
+          console.timeEnd('External export duration');
+
+          // if it was canceled, just ignore the result
+          if (response.canceled) return;
+          location.href = response.data[0];
+        }).catch((error: any) => {
+          setSelectedOption(null);
+          setExporterObj(null);
+
+          console.timeEnd('External export duration');
+
+          error.subMessage = error.message;
+          error.message = 'Export failed. Please report this problem to your system administrators.';
+
+          dispatchError({ error, isDismissible: true });
+        });
         break;
       default:
         dispatchError({
@@ -173,7 +206,7 @@ const Export = ({
     if (!!exporterObj) {
       exporterObj.cancel();
     }
-  }
+  };
 
   const closeModal = () => {
     cancelExport();
@@ -182,7 +215,10 @@ const Export = ({
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
-  // nextShow is true when the dropdown is open
+  /**
+   * called when users want to toggle the main dropdown
+   * used for conditionally hiding the tooltip when the dropdown is open. and do client logging.
+   */
   const onDropdownToggle = (nextShow: boolean) => {
     // toggle the tooltip based on dropdown's inverse state
     setUseTooltip(!nextShow);
@@ -197,9 +233,43 @@ const Export = ({
     }
   };
 
+  //-------------------  render logic:   --------------------//
+
+  // generate the submenu options if there are any non-direct templates
+  const configsSubmenu: MenuOption[] = [];
+  const configsSubmenuOptions: MenuOption[] = [];
+  options.forEach((o) => {
+    if (o.type === ExportType.DIRECT) return;
+
+    configsSubmenuOptions.push({
+      type: MenuOptionTypes.CALLBACK,
+      nameMarkdownPattern: o.displayname,
+      callback: () => downloadExportConfiguration(o),
+      acls: { show: ['*'], enable: ['*'] },
+      isValid: true,
+      newTab: false,
+      className: `export-submenu-item export-submenu-item-${makeSafeIdAttr(o.displayname)}`
+    });
+  });
+
+  const showConfigsSubmenu = isGroupIncluded(ConfigService.chaiseConfig.exportConfigsSubmenu.acls.show, session);
+  console.log(ConfigService.chaiseConfig.exportConfigsSubmenu);
+  if (showConfigsSubmenu && configsSubmenuOptions.length > 0) {
+    configsSubmenu.push({
+      type: MenuOptionTypes.MENU,
+      nameMarkdownPattern: 'Configurations',
+      children: configsSubmenuOptions,
+      acls: ConfigService.chaiseConfig.exportConfigsSubmenu.acls,
+      logAction: LogActions.EXPORT_CONFIG_OPEN,
+      isValid: true,
+      newTab: false,
+      className: 'export-menu-item export-menu-item-configurations'
+    });
+  }
+
   return (
     <>
-      <Dropdown className='export-menu chaise-dropdown' onToggle={onDropdownToggle}>
+      <Dropdown className='export-menu chaise-dropdown' onToggle={onDropdownToggle} ref={dropdownWrapper}>
         <ChaiseTooltip
           placement='bottom' tooltip={MESSAGE_MAP.tooltip.export}
           show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
@@ -212,16 +282,27 @@ const Export = ({
             <span>Export</span>
           </Dropdown.Toggle>
         </ChaiseTooltip>
-        <Dropdown.Menu>
+        <Dropdown.Menu
+          // the following is needed by DropdownSubmenu
+          renderOnMount
+          align={{ sm: 'start' }}
+        >
           {options.map((option: any, index: number) => (
             <Dropdown.Item
-              className={`export-menu-item export-${makeSafeIdAttr(option.displayname)}`}
+              className={`export-menu-item export-menu-item-${makeSafeIdAttr(option.displayname)}`}
               key={`export-${index}`}
-              onClick={startExporting(option)}
+              onClick={() => startExporting(option)}
             >
               {option.displayname}
             </Dropdown.Item>
           ))}
+          {configsSubmenu.length > 0 && <Dropdown.Divider />}
+          {configsSubmenu.length > 0 &&
+            <DropdownSubmenu
+              displayType={DropdownSubmenuDisplayTypes.GENERAL}
+              menu={configsSubmenu} parentDropdown={dropdownWrapper}
+            />
+          }
         </Dropdown.Menu>
       </Dropdown>
 

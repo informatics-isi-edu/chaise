@@ -9,10 +9,10 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Spinner from 'react-bootstrap/Spinner';
 
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
-import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -362,9 +362,9 @@ const ChaiseNavbar = (): JSX.Element => {
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item, index)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
-            className='chaise-nav-item'
+            className='chaise-nav-item chaise-dropdown'
           >
-            <NavbarDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></NavbarDropdown>
+            <DropdownSubmenu menu={item.children} parentDropdown={dropdownWrapper} alignRight displayType={DropdownSubmenuDisplayTypes.NAVBAR} />
           </NavDropdown>
         );
       }

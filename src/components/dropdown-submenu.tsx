@@ -9,32 +9,67 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  MenuOption, canEnable, canShow,
+  MenuOption, MenuOptionTypes, canEnable, canShow,
   menuItemClasses, onDropdownToggle,
   onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-interface NavbarDropdownProps {
+export enum DropdownSubmenuDisplayTypes {
+  NAVBAR = 'navbar',
+  PROFILE_MENU = 'profile',
+  GENERAL = 'general'
+}
+
+interface DropdownSubmenuProps {
   menu: MenuOption[],
   openProfileCb?: MouseEventHandler,
-  parentDropdown: any // TODO: useRef wrapper type
   /**
    * Property to capture parent menu's alignment.
    * submenu takes alginRight prop and makes decision whether to align right or left
    * based on parent's alignment. (eg: if parent alignment is right, child will continue to align
    * right till it reaches end of the screen)
    */
-  alignRight?: boolean
+  alignRight?: boolean,
+  /**
+   * whether this is on navbar or not
+   */
+  displayType: DropdownSubmenuDisplayTypes,
+  parentDropdown: any // TODO: useRef wrapper type
 }
 
-// NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax
-//       hasn't been updated to use the "types" or set default types on menu ingest
-const NavbarDropdown = ({
-  menu, openProfileCb, parentDropdown, alignRight
-}: NavbarDropdownProps): JSX.Element => {
+/**
+ * react-bootstrap doesn't support recursive dropdowns by default. that's why we created this component to handle that.
+ *
+ * if you're planning to use this inside a NavDropdown make sure `renderMenuOnMount` is included (otherwise the positioning might be wrong)
+ *
+ * ```
+ * <NavDropDown renderMenuOnMount ... >
+ *  <DropdownSubmenu ... />
+ * </NavDropDown>
+ * ```
+ *
+ * And if you're using this inside a Dropdown, make sure to include `renderOnMount` and  dynamic `align`:
+ *
+ * ```
+ * <Dropdown>
+ *   ...
+ *   <Dropdown.Menu renderOnMount align={{ sm: 'start' }} ... >
+ *     <DropdownSubmenu ... />
+ *   </Dropdown.Menu>
+ * </Dropdown>
+ * ```
+ *
+ * The custom logic that we have for positioning the submenu only works when react-bootstrap is handling it. By defining
+ * dynamic alignment we're making sure that's the case (otherwise react-bootstrap is delegating that to popper).
+ */
+const DropdownSubmenu = ({
+  menu, openProfileCb, alignRight, displayType
+}: DropdownSubmenuProps): JSX.Element => {
   const { logout, session } = useAuthn();
+
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
+
   /**
    * Keeps track of most recently opened dropdown
    * We track this to make sure only one dropdown is open at a time.
@@ -129,18 +164,22 @@ const NavbarDropdown = ({
     onLinkClick(event, item);
   }
 
-  // TODO: onToggle event type
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
+  const handleDropdownSubmenuToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
     /**
      * Update the state to reflect most recently opened dropdown
      */
     setOpenedDropDownIndex(isOpen ? index : undefined);
-    onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN, item);
+
+    let action = item.logAction;
+    if (!action) {
+      action = displayType === DropdownSubmenuDisplayTypes.PROFILE_MENU ? LogActions.NAVBAR_ACCOUNT_DROPDOWN : LogActions.NAVBAR_MENU_OPEN;
+    }
+    onDropdownToggle(isOpen, event, action, item);
   }
 
   const renderHeader = (item: MenuOption, index: number) => <DisplayValue
     key={index}
-    as={NavDropdown.Header}
+    as={displayType === DropdownSubmenuDisplayTypes.GENERAL ? Dropdown.Header : NavDropdown.Header}
     className='chaise-dropdown-header'
     value={{ isHTML: true, value: renderName(item) }}
     props={{
@@ -149,7 +188,6 @@ const NavbarDropdown = ({
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
-
     return (
       <Dropdown
         key={index}
@@ -158,7 +196,7 @@ const NavbarDropdown = ({
         className='dropdown-submenu'
         ref={dropdownWrapper}
         onClick={alignDropDown}
-        onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item, index)}
+        onToggle={(isOpen, event) => handleDropdownSubmenuToggle(isOpen, event, item, index)}
       >
         <DisplayValue
           as={Dropdown.Toggle}
@@ -170,9 +208,8 @@ const NavbarDropdown = ({
           }}
         />
         <Dropdown.Menu
-          // renderOnMount prop is required to get submenu's width that can be
-          // used to align submenu to left or right
           renderOnMount
+          align={{ sm: 'start' }}
           style={{
             top: subMenuStyle.fromTop,
             left: subMenuStyle.fromLeft,
@@ -180,11 +217,12 @@ const NavbarDropdown = ({
           // Moved inline style position: fixed property to css class
           className='custom-dropdown-submenu'
         >
-          <NavbarDropdown
+          <DropdownSubmenu
             menu={item.children || []}
             openProfileCb={openProfileCb}
-            parentDropdown={dropdownWrapper}
             alignRight={subMenuStyle.dropEnd}
+            parentDropdown={dropdownWrapper}
+            displayType={displayType}
           />
         </Dropdown.Menu>
       </Dropdown>)
@@ -192,7 +230,7 @@ const NavbarDropdown = ({
 
   const renderUrl = (item: MenuOption, index: number) => <DisplayValue
     key={index}
-    as={NavDropdown.Item}
+    as={displayType === DropdownSubmenuDisplayTypes.GENERAL ? Dropdown.Item : NavDropdown.Item}
     className={menuItemClasses(item, session, true)}
     value={{ isHTML: true, value: renderName(item) }}
     props={{
@@ -207,36 +245,48 @@ const NavbarDropdown = ({
     if (!canShow(child, session) || !child.isValid) return;
 
     switch (child.type) {
-      case 'header':
+      case MenuOptionTypes.HEADER:
         return (renderHeader(child, index));
-      case 'menu':
+      case MenuOptionTypes.MENU:
         return (renderDropdownMenu(child, index));
-      case 'url':
+      case MenuOptionTypes.URL:
         return (renderUrl(child, index));
-      case 'my_profile':
+      case MenuOptionTypes.MY_PROFILE:
         return (
           <DisplayValue
             key={index}
-            as={NavDropdown.Item}
-            value={{isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'My Profile'}}
+            as={displayType === DropdownSubmenuDisplayTypes.GENERAL ? Dropdown.Item : NavDropdown.Item}
+            value={{ isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'My Profile' }}
             props={{
               id: 'profile-link',
               onClick: openProfileCb
             }}
           />
         )
-      case 'logout':
+      case MenuOptionTypes.LOGOUT:
         return (
           <DisplayValue
             key={index}
-            as={NavDropdown.Item}
-            value={{isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'Log Out'}}
+            as={displayType === DropdownSubmenuDisplayTypes.GENERAL ? Dropdown.Item : NavDropdown.Item}
+            value={{ isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'Log Out' }}
             props={{
               id: 'logout-link',
               onClick: () => logout(LogActions.LOGOUT_NAVBAR)
             }}
           />
-        )
+        );
+      case MenuOptionTypes.CALLBACK:
+        return (
+          <DisplayValue
+            key={index}
+            as={displayType === DropdownSubmenuDisplayTypes.GENERAL ? Dropdown.Item : NavDropdown.Item}
+            value={{ isHTML: true, value: child.nameMarkdownPattern ? renderName(child) : 'Option' }}
+            props={{
+              onClick: child.callback
+            }}
+            className={menuItemClasses(child, session, true)}
+          />
+        );
       default:
         // create an unclickable header
         if (child.header === true && !child.children && !child.url) {
@@ -260,4 +310,4 @@ const NavbarDropdown = ({
   </>)
 }
 
-export default NavbarDropdown;
+export default DropdownSubmenu;

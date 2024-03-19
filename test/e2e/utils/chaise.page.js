@@ -975,13 +975,26 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
+    this.getExportDropdownMenu = () => {
+        return element(by.css('.export-menu dropdown-menu'));
+    }
+
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
     };
 
     this.getExportOption = function (optionName) {
         var option = makeSafeIdAttr(optionName);
-        return element(by.css(".export-" + option));
+        return element(by.css(".export-menu-item-" + option));
+    };
+
+    this.getExportSubmenuOptions = function () {
+      return element.all(by.css(".export-submenu-item"));
+    };
+
+    this.getExportSubmenuOption = function (optionName) {
+      var option = makeSafeIdAttr(optionName);
+      return element(by.css(".export-submenu-item-" + option));
     };
 
     this.getExportModal = function () {
