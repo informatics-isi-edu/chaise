@@ -106,7 +106,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   return (
     <>
-      <div className='array-input-field-container'>
+      <div className={`array-input-field-container ${name}`}>
         {name.includes('array_disabled') ?
           <InputSwitch
             {...props}
