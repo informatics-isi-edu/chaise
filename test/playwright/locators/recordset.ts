@@ -12,7 +12,7 @@ export default class RecordsetLocators {
   }
 
   static getPageTitleElement(page: Page): Locator {
-    return page.locator('page-title');
+    return page.locator('#page-title');
   }
 
   static getRecordSetTable(page: Page): Locator {

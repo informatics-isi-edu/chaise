@@ -32,6 +32,8 @@ profileModal.waitFor({ state: 'detached' });
 ## Test FAQ
 
 - `toHaveText` is prefered to direct `innerText` or `textContent()`, but it doesn't handle calling on a parent element. So you have call it on the child.
+  - https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text
+-
 
 ### Common errors
 
@@ -80,4 +82,42 @@ TODO explain how to add locator classes to `locators` folder.
 ## Assertions
 
 https://playwright.dev/docs/test-assertions
+
+## Test class
+
+https://playwright.dev/docs/api/class-test
+
+
+- skip is not available inside the step: https://github.com/microsoft/playwright/issues/10033
+
+```
+test.describe('test grouping description', () => {
+  test.beforeEach(async ({page}) => {
+    // you can go to a page here and every test below
+    // will start from that page.
+  });
+
+  // tests don't share the same tab/window
+  test('individual test 1', async ({ page }) => {
+    // skip a test
+    test.skip(someCondition);
+
+    await test.step('step 1', async () => {
+
+    });
+
+    await test.step('step 2', async () => {
+
+    });
+  });
+
+  test('individual test 2', async ({ page }) => {
+
+  });
+
+});
+
+```
+
+
 

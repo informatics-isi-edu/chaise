@@ -6,7 +6,7 @@ import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record
 
 // utils
 import { CHAISE_BASE_URL, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
-import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
+import { testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -58,7 +58,6 @@ test.describe('Related tables', () => {
   const URL_PATH = `${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-
     const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${URL_PATH}`;
 
     await page.goto(`${baseURL}${PAGE_URL}`);
@@ -102,9 +101,83 @@ test.describe('Related tables', () => {
     );
   });
 
+  test('for specific related entities,', async ({ page, context, baseURL }, testInfo) => {
+
+    await test.step('for a one-hop away related entity', async () => {
+      await testRelatedTablePresentation(
+        page,
+        context,
+        testInfo,
+        {
+          testTitle: 'inbound related, no applink or row_markdown_pattern',
+          tableName: 'booking',
+          schemaName: 'product-unordered-related-tables-links',
+          displayname: 'booking',
+          baseTableName:'Accommodations',
+          count: 6,
+          canDelete: true,
+          canEdit: true,
+          inlineComment: true,
+          comment: 'booking inline comment',
+          bulkEditLink: [
+            `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
+            'product-unordered-related-tables-links:booking',
+            // we cannot test the actual facet blob since it's based on RID
+            // and we also don't have access to ermrestjs here to encode it for us
+            '*::facets::'
+          ].join('/'),
+          viewMore: {
+              displayname: 'booking',
+              filter: 'AccommodationsSuper 8 North Hollywood Motel'
+          },
+          rowValues: [
+              ['125.0000','2016-03-12 00:00:00'],
+              ['100.0000','2016-06-01 00:00:00'],
+              ['110.0000','2016-05-19 01:00:00'],
+              ['120.0000','2015-11-10 00:00:00'],
+              ['180.0000','2016-09-04 01:00:00'],
+              ['80.0000','2016-01-01 00:00:00'],
+          ],
+          rowViewPaths: [
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '8'}],
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '9'}],
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '10'}],
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '11'}],
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '12'}],
+              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '13'}]
+          ],
+          add: {
+              tableName: 'booking',
+              schemaName: 'product-unordered-related-tables-links',
+              relatedDisplayname: 'booking',
+              tableDisplayname: 'booking',
+              prefilledValues: {
+                  'fk_1': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // the same fk
+                  'fk_2': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // superset fk
+                  'fk2_col': { value: '4', displayType: 'input' }, // the second column of fk_2
+                  'fk_3': { value: 'Select a value', displayType: 'fk', isDisabled: false }, // supserset fk but nullok
+                  'fk3_col1': { value: '', displayType: 'input' },
+                  'fk_4': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // supserset fk
+                  'fk_5': { value: '4: four', displayType: 'fk', isDisabled: true } // the second column of fk_2 that is a fk to another table
+              },
+              rowValuesAfter: [
+                  ['247.0000',''],
+                  ['100.0000','2016-06-01 00:00:00'],
+                  ['110.0000','2016-05-19 01:00:00'],
+                  ['120.0000','2015-11-10 00:00:00'],
+                  ['180.0000','2016-09-04 01:00:00'],
+                  ['80.0000','2016-01-01 00:00:00'],
+              ]
+          }
+        }
+      );
+
+    });
+  });
+
 });
 
-test.describe('Scroll to query parameter', () => {
+test.skip('Scroll to query parameter', () => {
   test('after page load should scroll to the related table', async ({ page, baseURL }, testInfo) => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);

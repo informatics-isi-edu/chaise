@@ -60,10 +60,52 @@ export default class RecordLocators {
     return acc.locator('.accordion-collapse');
   }
 
-  static getMoreResultsLink(page: Page, displayname: string, isInline?: boolean): Locator {
+  static getRelatedTableBulkEditLink(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    return loc.locator('.bulk-edit-link');
+  }
+
+  static getRelatedTableExploreLink(page: Page, displayname: string, isInline?: boolean): Locator {
     const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
     return loc.locator('.more-results-link');
   }
+
+  static getRelatedTableAddButton(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    return loc.locator('.add-records-link');
+  }
+
+  static getRelatedTableUnlinkButton(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    return loc.locator('.unlink-records-link');
+  }
+
+  static getRelatedTableToggleDisplay(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    return loc.locator('.toggle-display-link');
+  }
+
+  static getRelatedTableRows(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    return loc.locator('.chaise-table-row');
+  }
+
+  static getRelatedTableRowLink(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
+    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
+    return rows.nth(rowIndex).locator('td').nth(0).locator('.view-action-button');
+  }
+
+  static getRelatedTableRowEdit(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
+    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
+    return rows.nth(rowIndex).locator('td').nth(0).locator('.edit-action-button');
+  }
+
+  static getRelatedTableRowDelete(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
+    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
+    return rows.nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
+  }
+
+
 
   static getSidePanelHeadings(page: Page): Locator {
     return page.locator('.columns-container li.toc-heading');
