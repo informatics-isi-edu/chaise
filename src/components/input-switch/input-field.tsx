@@ -192,7 +192,7 @@ const InputField = ({
   if (showError) {
     if (error?.type === 'required') {
       // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
-      showError = formInput.formState.isSubmitted || name.includes('row'); 
+      showError = formInput.formState.isSubmitted || name.includes('.val'); 
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
     }
