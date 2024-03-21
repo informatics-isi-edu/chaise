@@ -46,7 +46,6 @@ import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/u
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export type RecordProps = {
   /**

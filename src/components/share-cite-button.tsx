@@ -102,8 +102,8 @@ const ShareCiteButton = ({
     });
   };
 
-  const canShowShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCiteAcls.show, session);
-  const canEnableShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCiteAcls.enable, session);
+  const canShowShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.show, session);
+  const canEnableShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.enable, session);
 
   if (!btnTooltip) {
     btnTooltip = { pending: 'Opening the share and cite links...', ready: 'Show the share and cite links.' };

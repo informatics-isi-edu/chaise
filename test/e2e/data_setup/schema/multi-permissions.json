@@ -1163,7 +1163,26 @@
               "name": "title",
               "type": {"typename": "text"}
             }
-          ]
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2019:export": {
+              "*": {
+                "templates": [{
+                  "outputs": [{
+                    "source": {
+                      "api": "entity"
+                    },
+                    "destination": {
+                      "type": "csv",
+                      "name": "table_bag"
+                    }
+                  }],
+                  "displayname": "Defined template",
+                  "type": "BAG"
+                }]
+              }
+            }
+          }
         }
     },
     "annotations": {}
