@@ -1,11 +1,8 @@
 import moment from 'moment';
-import { test, expect, TestInfo } from '@playwright/test';
-
-// locators
+import { test, expect } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
-
-// utils
-import { CHAISE_BASE_URL, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
+import {  getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
 import { testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
 
 const testParams = {
@@ -106,7 +103,6 @@ test.describe('Related tables', () => {
     await test.step('for a one-hop away related entity', async () => {
       await testRelatedTablePresentation(
         page,
-        context,
         testInfo,
         {
           testTitle: 'inbound related, no applink or row_markdown_pattern',
@@ -152,13 +148,13 @@ test.describe('Related tables', () => {
               relatedDisplayname: 'booking',
               tableDisplayname: 'booking',
               prefilledValues: {
-                  'fk_1': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // the same fk
-                  'fk_2': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // superset fk
-                  'fk2_col': { value: '4', displayType: 'input' }, // the second column of fk_2
-                  'fk_3': { value: 'Select a value', displayType: 'fk', isDisabled: false }, // supserset fk but nullok
-                  'fk3_col1': { value: '', displayType: 'input' },
-                  'fk_4': { value: 'Super 8 North Hollywood Motel', displayType: 'fk', isDisabled: true }, // supserset fk
-                  'fk_5': { value: '4: four', displayType: 'fk', isDisabled: true } // the second column of fk_2 that is a fk to another table
+                  'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // the same fk
+                  'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // superset fk
+                  'fk2_col': { value: '4', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // the second column of fk_2
+                  'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // supserset fk but nullok
+                  'fk3_col1': { value: '', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false },
+                  'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // supserset fk
+                  'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true } // the second column of fk_2 that is a fk to another table
               },
               rowValuesAfter: [
                   ['247.0000',''],

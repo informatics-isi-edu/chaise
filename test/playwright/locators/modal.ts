@@ -12,6 +12,10 @@ export default class ModalLocators {
     return page.locator('.chaise-share-citation-modal');
   }
 
+  static getConfirmDeleteModal(page: Page) : Locator {
+    return page.locator('.confirm-delete-modal');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
@@ -24,6 +28,10 @@ export default class ModalLocators {
 
   static getCloseBtn(modal: Locator): Locator {
     return modal.locator('.modal-close');
+  }
+
+  static getOkButton(modal: Locator) : Locator {
+    return modal.locator('.ok-button');
   }
 
 

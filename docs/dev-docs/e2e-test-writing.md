@@ -79,9 +79,42 @@ console.log(await newPage.title());
 
 TODO explain how to add locator classes to `locators` folder.
 
+```
+
+const locator = page.locat('.some-element');
+const samePage = locator.page()
+const context = samePage.context();
+
+```
+
+
 ## Assertions
 
 https://playwright.dev/docs/test-assertions
+
+```
+// ❌ bad
+expect(el.isVisible()).toBeTruthy();
+expect(el.isVisible()).toBeFalsy();
+expect(el.isPresent()).toBeTruthy();
+expect(el.isPresent()).toBeFalsy();
+
+// ✅ good
+epxect(el).toBeVisible();
+epxect(el).not.toBeVisible();
+epxect(el).toBeAttached();
+epxect(el).not.toBeAttached();
+```
+
+Test attributes:
+
+```
+await expect.soft(element).toHaveAttribute('innerHTML', regexOrFullString);
+await expect(link).toHaveAttribute('href', regexOrFullString);
+
+expect(await link.getAttribute('innerHTML')).toContain(partialExpected);
+expect(await link.getAttribute('href')).toContain(partialExpected)
+```
 
 ## Test class
 

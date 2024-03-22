@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // locators
 import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar';
-import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
+import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 
 // utils
 import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
@@ -81,7 +81,7 @@ test.describe('Navbar', () => {
     });
   });
 
-  test('menu support', async ({ page, context }, testInfo) => {
+  test('menu support', async ({ page }, testInfo) => {
     const menu = NavbarLocators.getMenu(page);
 
     await test.step('should generate the correct # of list items', async () => {
@@ -97,7 +97,7 @@ test.describe('Navbar', () => {
 
         await expect.soft(searchOption, 'first top level menu option text missmatch').toHaveText('Search');
 
-        const newPage = await PageLocators.clickNewTabLink(searchOption, context);
+        const newPage = await clickNewTabLink(searchOption);
         await newPage.waitForURL('**/chaise/search/#1/isa:dataset**');
         await newPage.close();
       });
@@ -115,7 +115,7 @@ test.describe('Navbar', () => {
         await expect.soft(datasetOption, 'First 2nd level option for RecordSets missmatch').toHaveText('Dataset');
 
         // check that clicking opens the link
-        const newPage = await PageLocators.clickNewTabLink(datasetOption, context);
+        const newPage = await clickNewTabLink(datasetOption);
         await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`);
         await newPage.close();
       });

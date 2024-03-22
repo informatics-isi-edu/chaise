@@ -1,16 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-// locators
 import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar';
-import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
-
-// utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 
 test.describe('Navbar', () => {
 
-  test('when navbar is visible', async ({ page, baseURL, context }, testInfo) => {
+  test('when navbar is visible', async ({ page, baseURL }, testInfo) => {
     const navbar = NavbarLocators.getContainer(page);
     const loginMenuOption = NavbarLocators.getLoginMenuContainer(page);
 
@@ -42,7 +39,7 @@ test.describe('Navbar', () => {
 
     if (!process.env.CI) {
       await test.step('should open a new tab when clicking the link for the login information', async () => {
-        const newPage = await PageLocators.clickNewTabLink(loginMenuOption, context);
+        const newPage = await clickNewTabLink(loginMenuOption);
 
         await newPage.close();
       });

@@ -56,10 +56,12 @@ export const setCatalogID = (projectName: string, catalogId: string) => {
  */
 export const ENTITIES_PATH = 'entities.json';
 
+export type EntityRowColumnValues = { column: string, value: string }[];
+
 /**
  * return the row values based on the given criteria. useful for finding the system generated value of columns.
  */
-export const getEntityRow = (testInfo: TestInfo, schema: string, table: string, row: { column: string, value: string }[]) => {
+export const getEntityRow = (testInfo: TestInfo, schema: string, table: string, row: EntityRowColumnValues) => {
   let match, entities;
   try {
     const fileContent = fs.readFileSync(ENTITIES_PATH, { encoding: 'utf8', flag: 'r' });

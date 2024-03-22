@@ -1,5 +1,6 @@
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { Locator, Page } from '@playwright/test';
+import RecordsetLocators from './recordset';
 
 export default class RecordLocators {
   static async waitForRecordPageReady(page: Page, timeout?: number) {
@@ -84,28 +85,6 @@ export default class RecordLocators {
     const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
     return loc.locator('.toggle-display-link');
   }
-
-  static getRelatedTableRows(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
-    return loc.locator('.chaise-table-row');
-  }
-
-  static getRelatedTableRowLink(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
-    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
-    return rows.nth(rowIndex).locator('td').nth(0).locator('.view-action-button');
-  }
-
-  static getRelatedTableRowEdit(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
-    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
-    return rows.nth(rowIndex).locator('td').nth(0).locator('.edit-action-button');
-  }
-
-  static getRelatedTableRowDelete(page: Page, displayname: string, rowIndex: number, isInline?: boolean): Locator {
-    const rows = RecordLocators.getRelatedTableRows(page, displayname, isInline);
-    return rows.nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
-  }
-
-
 
   static getSidePanelHeadings(page: Page): Locator {
     return page.locator('.columns-container li.toc-heading');
