@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 /**
  * TODO
@@ -40,6 +41,14 @@ export enum RecordeditInputType {
 
 export default class RecordeditLocators {
 
+  static async waitForRecordeditPageReady(container: Locator | Page, timeout?: number) {
+    await RecordeditLocators.getSubmitRecordButton(container).waitFor({ state: 'visible', timeout });
+  }
+
+  static async submitForm(container: Locator | Page) {
+    await RecordeditLocators.getSubmitRecordButton(container).click();
+  }
+
   static getPageTitle(container: Locator | Page): Locator {
     return container.locator('#page-title');
   }
@@ -51,6 +60,16 @@ export default class RecordeditLocators {
   static getSubmitRecordButton(container: Locator | Page): Locator {
     return container.locator('#submit-record-button');
   };
+
+  static getInputForAColumn(container: Locator | Page, name: string, formNumber: number) {
+    formNumber = formNumber || 1;
+    return container.locator(`input[name="${formNumber}-${name}"]`);
+  };
+
+  static getForeignKeyInputDisplay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
+    columnDisplayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`#form-${formNumber}-${columnDisplayName}-display`);
+  }
 
 
 }

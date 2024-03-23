@@ -1,6 +1,5 @@
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { Locator, Page } from '@playwright/test';
-import RecordsetLocators from './recordset';
 
 export default class RecordLocators {
   static async waitForRecordPageReady(page: Page, timeout?: number) {

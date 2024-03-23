@@ -43,7 +43,7 @@ profileModal.waitFor({ state: 'detached' });
 Make sure `await` is consistently everywhere. It's needed for step, outside of it, and expects
 
 7b8f4775b390d09ea8f8548425e47ac2e
-```
+```ts
 test.describe('feature', () => {
   const PAGE_URL = `/recordset/#${process.env.CATALOG_ID!}/product-navbar:accommodation`;
 
@@ -79,7 +79,7 @@ console.log(await newPage.title());
 
 TODO explain how to add locator classes to `locators` folder.
 
-```
+```ts
 
 const locator = page.locat('.some-element');
 const samePage = locator.page()
@@ -92,7 +92,7 @@ const context = samePage.context();
 
 https://playwright.dev/docs/test-assertions
 
-```
+```ts
 // ❌ bad
 expect(el.isVisible()).toBeTruthy();
 expect(el.isVisible()).toBeFalsy();
@@ -106,9 +106,19 @@ epxect(el).toBeAttached();
 epxect(el).not.toBeAttached();
 ```
 
+Test class attribute:
+
+```ts
+// partial regex match
+await expect.soft(input).toHaveClass(/input\-disabled/);
+
+// full match
+await expect.soft(input).toHaveClass('input-disabled');
+```
+
 Test attributes:
 
-```
+```ts
 await expect.soft(element).toHaveAttribute('innerHTML', regexOrFullString);
 await expect(link).toHaveAttribute('href', regexOrFullString);
 
@@ -116,14 +126,26 @@ expect(await link.getAttribute('innerHTML')).toContain(partialExpected);
 expect(await link.getAttribute('href')).toContain(partialExpected)
 ```
 
-## Test class
+## Actions
+
+https://playwright.dev/docs/input
+
+```ts
+await locator.fill('Peter');
+
+await locator.click();
+
+await locator.hover();
+```
+
+## Test structure
 
 https://playwright.dev/docs/api/class-test
 
 
 - skip is not available inside the step: https://github.com/microsoft/playwright/issues/10033
 
-```
+```ts
 test.describe('test grouping description', () => {
   test.beforeEach(async ({page}) => {
     // you can go to a page here and every test below

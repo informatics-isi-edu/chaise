@@ -52,7 +52,7 @@ test.describe('Navbar', () => {
 
     await RecordsetLocators.waitForRecordsetPageReady(page);
 
-    await expect(NavbarLocators.getContainer(page)).not.toBeAttached();
+    await expect.soft(NavbarLocators.getContainer(page)).not.toBeAttached();
   });
 
 });

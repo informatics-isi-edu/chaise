@@ -48,7 +48,8 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    workers: process.env.CI ? 4 : undefined,
+    // workers: process.env.CI ? 4 : undefined,
+    workers: 4,
 
     // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways
     outputDir: resolve(__dirname, `./../../../playwright-output/${options.testName}`),

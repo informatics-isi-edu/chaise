@@ -590,6 +590,11 @@ var recordPage = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
+    /**
+     * TODO
+     * in playwright use RecordsetLocators.getRows instead and
+     * pass the contaienr yourself.
+     */
     this.getRelatedTableRows = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
         return el.all(by.css(".chaise-table-row"));
@@ -785,6 +790,9 @@ var recordPage = function() {
         return element(by.className('show-toc-btn'));
     }
 
+    /**
+     * TODO in playwright use the recordset function
+     */
     this.getModalSidePanel = function() {
         return element(by.css(".modal-body")).element(by.css('.side-panel-resizable'));
     }
@@ -848,6 +856,9 @@ var recordsetPage = function() {
         return el.all(by.tagName("td"));
     };
 
+    /**
+     * TODO in playwright version, use rdsetLocators.getRows(rsModal)
+     */
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .chaise-table-row'));
     };
@@ -1167,10 +1178,16 @@ var recordsetPage = function() {
         return popup.element(by.css('.chaise-table-header-total-count'));
     };
 
+    /**
+     * TODO playwright: use RecordsetLocators.getCheckboxInputs
+     */
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    /**
+     * TODO playwright: use RecordsetLocators.getRowCheckboxInput
+     */
     this.getModalRecordsetTableOptionByIndex = function (popup, index) {
         return popup.element(by.css(".recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };

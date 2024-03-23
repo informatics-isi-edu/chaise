@@ -19,7 +19,7 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
   for (const expectedRow of expectedRowValues) {
     const cells = rows.nth(index).locator('td');
 
-    // action-btns cell is also returned here
+    // action-btns cell is also returned here (that's why +1)
     await expectFn(cells).toHaveCount(expectedRow.length + 1);
 
     const temp = expectedRow[index];
@@ -27,6 +27,7 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
     for (let innerIndex = 0; innerIndex < expectedRow.length; innerIndex++) {
       const expectedCell = expectedRow[innerIndex];
 
+      // action-btns cell is also returned here (that's why +1)
       const cell = cells.nth(innerIndex + 1);
       await expectFn(cell).toBeVisible();
 

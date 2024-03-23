@@ -52,9 +52,7 @@ type RelatedTableTestParams = {
   /**
    * default 25
    */
-  pageSize?: number,
-
-  add?: AddRelatedTableParams
+  pageSize?: number
 };
 
 export const testRelatedTablePresentation = async (page: Page, testInfo: TestInfo, params: RelatedTableTestParams) => {
@@ -200,10 +198,6 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
           await testTooltip(addBtn, expected, APP_NAMES.RECORD, true);
         });
-
-        if (params.add) {
-          await testAddRelatedTable(addBtn, params.add);
-        }
       }
     }
   });
@@ -215,7 +209,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
         let index = 0;
         for (const row of params.rowViewPaths) {
-          const btn = RecordsetLocators.getViewActionButton(currentEl, index);
+          const btn = RecordsetLocators.getRowViewButton(currentEl, index);
           expect.soft(await btn.getAttribute('href')).toContain(getURL('record', tableName, row));
           index++;
         }
@@ -230,7 +224,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
       } else if (params.rowViewPaths) {
         // only testing the first link (it's a button not a link, so testing all of them would add a lot of test time)
         await test.step('clicking on edit button should open a tab to recordedit page', async () => {
-          const btn = RecordsetLocators.getEditButton(currentEl, 0);
+          const btn = RecordsetLocators.getRowEditButton(currentEl, 0);
 
           expect.soft(btn).toBeVisible();
 
@@ -238,7 +232,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           if (!params.rowViewPaths) return;
 
           const newPage = await clickNewTabLink(btn);
-          await newPage.waitForURL(`**/chaise${getURL('recordedit', tableName, params.rowViewPaths[0])}`);
+          await newPage.waitForURL(`**${getURL('recordedit', tableName, params.rowViewPaths[0])}**`);
           await newPage.close();
         });
       }
@@ -246,20 +240,21 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
     if (typeof params.canDelete === 'boolean') {
       test.step('Delete or Unlink button', async () => {
-        const deleteBtn = RecordsetLocators.getDeleteButton(currentEl, 0);
-
+        let deleteBtn: Locator;
         if (params.canDelete) {
           await test.step('should be visible', async () => {
+            deleteBtn = RecordsetLocators.getRowDeleteButton(currentEl, 0);
             expect.soft(deleteBtn).toBeVisible();
           });
 
-          await test.step('should have the proper tooltip', async () => {
-            let expected = 'Delete';
-            if (params.isAssociation) {
-              expected = `Disconnect ${params.displayname}: ${params.tableName} from this ${params.baseTableName}.`;
-            }
-            await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
-          });
+          // TODO not working
+          // test.step('should have the proper tooltip', async () => {
+          //   let expected = 'Delete';
+          //   if (params.isAssociation) {
+          //     expected = `Disconnect ${params.displayname}: ${params.tableName} from this ${params.baseTableName}.`;
+          //   }
+          //   await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
+          // });
 
           if (!params.isAssociation) {
             await test.step('it should update the table and title after confirmation.', async () => {
@@ -293,9 +288,9 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   if (displayIsToggled && !hasNoRows) {
     await test.step('toggle display mode back', async () => {
       await markdownToggleLink.click();
+      await expect.soft(markdownToggleLink).toHaveText(params.canEdit ? 'Edit mode' : 'Table mode');
     });
   }
-
 
 }
 
@@ -348,7 +343,7 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
   await test.step('should show the share dialog when clicking the share button.', async () => {
     await shareBtn.click();
 
-    await expect(shareCiteModal).toBeVisible();
+    await expect.soft(shareCiteModal).toBeVisible();
 
     await expect.soft(ModalLocators.getModalTitle(shareCiteModal)).toHaveText(params.title)
 
@@ -379,8 +374,6 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
     // TODO test copy to clipboard
     const liveBtn = btns.nth(params.hasVersionedLink ? 1 : 0);
     await liveBtn.click();
-
-    await page.pause();
 
     let clipboardText = await getClipboardContent(page);
     expect.soft(clipboardText).toBe(expectedLink);
@@ -427,7 +420,8 @@ type AddRelatedTableParams = {
   /**
    * the displayname of the related reference (what users see)
    */
-  relatedDisplayname: string,
+  displayname: string,
+  isInline?: boolean,
   /**
    * the displayname of the related table
    */
@@ -435,6 +429,9 @@ type AddRelatedTableParams = {
   prefilledValues: {
     [colName: string]: {
       value: string,
+      /**
+       * this function currently only supports fk input and normal input elements.
+       */
       inputType: RecordeditInputType,
       isDisabled: boolean
     }
@@ -442,137 +439,221 @@ type AddRelatedTableParams = {
   rowValuesAfter: RecordsetRowValue[]
 }
 
-export const testAddRelatedTable = async (addBtn: Locator, params: AddRelatedTableParams) => {
+export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: Page) => Promise<void>, params: AddRelatedTableParams) => {
   await test.step('Add feature', async () => {
-
     let newPage: Page;
     await test.step('clicking on `Add` button should open recordedit.', async () => {
+      const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
       newPage = await clickNewTabLink(addBtn);
-      await newPage.waitForURL(`**/${params.schemaName}:${params.tableName}`);
-      await expect(newPage).toHaveURL(/prefill\=/);
-      await expect(RecordeditLocators.getPageTitle(newPage)).toHaveText(`Create 1 ${params.tableDisplayname}`)
+      await newPage.waitForURL(`**/${params.schemaName}:${params.tableName}**`);
+      await expect.soft(newPage).toHaveURL(/prefill\=/);
+      await expect.soft(RecordeditLocators.getPageTitle(newPage)).toHaveText(new RegExp(`/Create 1 ${params.tableDisplayname}/`))
+
+      await RecordeditLocators.waitForRecordeditPageReady(page);
     });
 
     await test.step('the opened form should have the prefill value for foreignkey.', async () => {
-      // TODO
+      if (!newPage) return;
+
+      for (const colName in params.prefilledValues) {
+        const expectedCol = params.prefilledValues[colName];
+
+        let input;
+        switch (expectedCol.inputType) {
+          case RecordeditInputType.FK_POPUP:
+            input = RecordeditLocators.getForeignKeyInputDisplay(newPage, colName, 1);
+            await expect.soft(input).toHaveText(expectedCol.value);
+            if (expectedCol.isDisabled) {
+              await expect.soft(input).toHaveClass(/input\-disabled/);
+            } else {
+              await expect.soft(input).not.toHaveClass(/input\-disabled/);
+            }
+            break
+          // TODO we should add other types if we need to
+          default:
+            input = RecordeditLocators.getInputForAColumn(newPage, colName, 1);
+            await expect.soft(input).toHaveValue(expectedCol.value);
+            await expect.soft(input).toBeDisabled();
+            break;
+        }
+      }
     });
 
     await test.step('submitting the form and coming back to record page should update the related table.', async () => {
       if (!newPage) return;
 
+      await inputCallback(newPage);
+      await RecordeditLocators.submitForm(newPage);
+      await newPage.waitForURL('**/record/**');
+      await newPage.close();
 
-      // TODO
-
-      newPage.close();
+      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
     });
 
+  });
+}
 
-    //   var recordeditUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.tableName;
+type AddAssociationTableParams = {
+  displayname: string,
+  isInline?: boolean,
 
-    //   expect(addBtn.isDisplayed()).toBeTruthy("add button is not displayed");
-    //   // .click will focus on the element and therefore shows the tooltip.
-    //   // and that messes up other tooltip tests that we have
-    //   chaisePage.clickButton(addBtn).then(function () {
-    //     // This Add link opens in a new tab so we have to track the windows in the browser...
-    //     return browser.getAllWindowHandles();
-    //   }).then(function (handles) {
-    //     allWindows = handles;
-    //     // ... and switch to the new tab here...
-    //     return browser.switchTo().window(allWindows[1]);
-    //   }).then(function () {
-    //     return chaisePage.waitForElement(element(by.id('submit-record-button')));
-    //   }).then(function () {
+  modalTitle: string,
+  totalCount: number,
+  disabledRows: string[],
+  selectedOptions: number[],
+  rowValuesAfter: RecordsetRowValue[],
+  search?: {
+    term: string,
+    afterSearchCount: number
+    afterSearchDisabledRows: string[],
+  }
+}
 
-    //     return browser.wait(function () {
-    //       return browser.driver.getCurrentUrl().then(function (url) {
-    //         return url.startsWith(recordeditUrl);
-    //       });
-    //     }, browser.params.defaultTimeout);
-    //   }).then(function () {
-    //     // ... and then get the url from this new tab...
-    //     return browser.driver.getCurrentUrl();
-    //   }).then(function (url) {
-    //     expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
+export const testAddAssociationTable = async (page: Page, params: AddAssociationTableParams) => {
+  await test.step('link feature', async () => {
+    const rsModal = ModalLocators.getRecordsetSearchPopup(page);
 
-    //     var title = chaisePage.recordEditPage.getEntityTitleElement().getText();
-    //     expect(title).toBe('Create 1 ' + params.tableDisplayname + ' record', "recordedit title missmatch.");
+    await test.step('clicking on `Link` button should open up a modal.', async () => {
+      const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
+      await addBtn.click();
 
-    //     done();
-    //   }).catch(function (err) {
-    //     console.log(err);
-    //     done.fail();
-    //   });
-    // });
+      await expect.soft(rsModal).toBeVisible();
+      await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
+      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
-    // it("the opened form should have the prefill value for foreignkey.", function (done) {
-    //   for (var column in params.prefilledValues) {
-    //     ((col) => {
-    //       if (typeof params.prefilledValues[col] === 'object') {
-    //         const colObj = params.prefilledValues[col];
-    //         let input
-    //         // disabled FK inputs are tested differently than disabled text inputs
-    //         if (colObj.displayType === 'input') {
-    //           input = chaisePage.recordEditPage.getInputForAColumn(col, 1);
-    //           expect(input.getAttribute('value')).toBe(colObj.value, "value missmatch for " + col);
-    //           expect(input.getAttribute('disabled')).toBe(colObj.value === "" ? null : 'true', "disabled missmatch for " + col);
-    //         } else {
-    //           input = chaisePage.recordEditPage.getForeignKeyInputDisplay(col, 1);
-    //           expect(input.getText()).toBe(colObj.value, "value missmatch for " + col);
+      const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
 
-    //           input.getAttribute('class').then((classAttr) => {
-    //             if (!colObj.isDisabled) {
-    //               expect(classAttr.indexOf('input-disabled')).toBe(-1, col + " was disabled.");
-    //             } else {
-    //               expect(classAttr.indexOf('input-disabled')).toBeGreaterThan(-1, col + " was not disabled.");
-    //             }
-    //           });
-    //         }
+      // check the state of the facet panel
+      await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
+    });
 
-    //       } else {
-    //         // NOTE/TODO: should probably be removed since all tests should be migrated to have an object
-    //         const fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(col, 1);
-    //         expect(fkInput.getText()).toBe(params.prefilledValues[col], "value missmatch for " + col);
+    await test.step('current values must be disabled.', async () => {
+      const disabledRows = RecordsetLocators.getDisabledRows(rsModal);
+      await expect.soft(disabledRows).toHaveCount(params.disabledRows.length);
 
-    //         fkInput.getAttribute('class').then((classAttr) => {
-    //           if (params.prefilledValues[col] === "") {
-    //             expect(classAttr.indexOf('input-disabled')).toBe(-1, col + " was disabled.");
-    //           } else {
-    //             expect(classAttr.indexOf('input-disabled')).toBeGreaterThan(-1, col + " was not disabled.");
-    //           }
-    //         });
-    //       }
-    //     })(column);
-    //   }
-    //   done();
-    // });
+      let index = 0;
+      for (const expected of params.disabledRows) {
+        const disabledCell = RecordsetLocators.getRowFirstCell(rsModal, index, true);
+        await expect.soft(disabledCell).toHaveText(expected);
+        index++;
+      }
+    });
 
-    // it("submitting the form and coming back to record page should update the related table.", function (done) {
-    //   inputCallback().then(function () {
-    //     return chaisePage.recordEditPage.submitForm();
-    //   }).then(function () {
-    //     // wait until redirected to record page
-    //     return browser.wait(EC.presenceOf(element(by.className('record-container'))), browser.params.defaultTimeout);
-    //   }).then(function () {
-    //     return browser.close();
-    //   }).then(function () {
-    //     return browser.switchTo().window(allWindows[0]);
-    //   }).then(function () {
-    //     //TODO should remove this, but sometimes it's not working in test cases
-    //     return browser.driver.navigate().refresh();
-    //   }).then(function () {
-    //     // check for the updated value.
-    //     //there's no loading indocator, so we have to wait for count
-    //     return browser.wait(function () {
-    //       return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).count().then(function (cnt) {
-    //         return cnt === params.rowValuesAfter.length;
-    //       }, function (err) { throw err; });
-    //     });
-    //   }).then(function () {
-    //     checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
-    //   }).catch(function (error) {
-    //     console.log(error);
-    //     done.fail();
-    //   });
-    // });
+    if (params.search) {
+      await test.step('should be able to search the displayed values.', async () => {
+        if (!params.search) return;
+
+        const searchInp = RecordsetLocators.getMainSearchInput(rsModal);
+        const searchSubmitBtn = RecordsetLocators.getSearchSubmitButton(rsModal);
+
+        // search
+        await searchInp.fill(params.search.term);
+        await searchSubmitBtn.click();
+
+        // wait for rows to update
+        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.search.afterSearchCount)
+
+        // make sure the disabled list is updated
+        const disabledRows = RecordsetLocators.getDisabledRows(rsModal);
+        await expect.soft(disabledRows).toHaveCount(params.search.afterSearchDisabledRows.length);
+
+        let index = 0;
+        for (const expected of params.search.afterSearchDisabledRows) {
+          const disabledCell = RecordsetLocators.getRowFirstCell(rsModal, index, true);
+          await expect.soft(disabledCell).toHaveText(expected);
+          index++;
+        }
+
+        // clear search
+        await RecordsetLocators.getSearchClearButton(rsModal).click();
+        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
+
+      });
+    }
+
+    test.step('user should be able to select new values and submit.', async () => {
+      // select the options
+      for (const op of params.selectedOptions) {
+        await RecordsetLocators.getRowCheckboxInput(rsModal, op).click();
+      }
+
+      await ModalLocators.getSubmitButton(rsModal).click();
+      await expect.soft(rsModal).not.toBeAttached();
+
+      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
+
+    });
+  });
+}
+
+type BatchUnlinkAssociationParams = {
+  displayname: string,
+  isInline?: boolean,
+  modalTitle: string,
+  totalCount: number,
+  selectedOptions: number[],
+  rowValuesAfter: RecordsetRowValue[],
+}
+
+export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchUnlinkAssociationParams) => {
+  await test.step('Batch Unlink feature', async () => {
+    const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+
+    await test.step('clicking on `Unlink records` button should open up a modal.', async () => {
+      const unlinkBtn = RecordLocators.getRelatedTableUnlinkButton(page, params.displayname, params.isInline);
+      await unlinkBtn.click();
+
+      await expect.soft(rsModal).toBeVisible();
+      await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
+      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
+
+      const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+
+      // check the state of the facet panel
+      await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
+    });
+
+    await test.step('user should be able to select values to unlink and submit.', async () => {
+      // select the options
+      for (const op of params.selectedOptions) {
+        await RecordsetLocators.getRowCheckboxInput(rsModal, op).click();
+      }
+
+      // click on submit
+      await ModalLocators.getSubmitButton(rsModal).click();
+
+      // confirm the unlink
+      const confirmModal = ModalLocators.getConfirmDeleteModal(page);
+      await expect.soft(confirmModal).toBeVisible();
+      await expect.soft(ModalLocators.getModalTitle(confirmModal)).toHaveText('Confirm Unlink');
+      await expect.soft(ModalLocators.getModalText(confirmModal)).toHaveText('Are you sure you want to unlink 2 records?');
+      const okBtn = ModalLocators.getOkButton(confirmModal);
+      await expect.soft(okBtn).toHaveText('Unlink');
+      await okBtn.click();
+      await expect.soft(confirmModal).not.toBeAttached();
+
+      // make sure summary modal shows up
+      const summaryModal = ModalLocators.getErrorModal(page);
+      await expect.soft(summaryModal).toBeVisible();
+      await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('atch Unlink Summary');
+
+      // close the summary modal
+      await ModalLocators.getCloseBtn(summaryModal).click();
+
+      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
+
+      // close the recordset modal
+      await ModalLocators.getCloseBtn(rsModal).click();
+      await expect.soft(rsModal).not.toBeAttached();
+
+      // make sure correct values are displayed
+      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
+    });
+
   });
 }

@@ -12,8 +12,16 @@ export default class ModalLocators {
     return page.locator('.chaise-share-citation-modal');
   }
 
-  static getConfirmDeleteModal(page: Page) : Locator {
+  static getConfirmDeleteModal(page: Page): Locator {
     return page.locator('.confirm-delete-modal');
+  }
+
+  static getRecordsetSearchPopup(page: Page): Locator {
+    return page.locator('.search-popup');
+  }
+
+  static getErrorModal(page: Page): Locator {
+    return page.locator('.modal-error');
   }
 
   // ------------- common modal functions -------------- //
@@ -30,8 +38,12 @@ export default class ModalLocators {
     return modal.locator('.modal-close');
   }
 
-  static getOkButton(modal: Locator) : Locator {
+  static getOkButton(modal: Locator): Locator {
     return modal.locator('.ok-button');
+  }
+
+  static getSubmitButton(modal: Locator): Locator {
+    return modal.locator('#multi-select-submit-btn');
   }
 
 

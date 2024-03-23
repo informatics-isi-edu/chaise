@@ -175,9 +175,10 @@ TODO
 TODO
 
 ```
-page.pause();
+await page.pause();
 
 npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
+npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --max-failures=1
 ```
 
 ## Writing test

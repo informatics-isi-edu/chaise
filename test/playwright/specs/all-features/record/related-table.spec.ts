@@ -1,9 +1,9 @@
 import moment from 'moment';
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
-import { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
-import {  getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
-import { testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
+import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { testAddRelatedTable, testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -42,9 +42,6 @@ const testParams = {
     'association with filter on main table (1)',
     'association with filter on related table (1)',
     'path of length 3 with filters (1)'
-  ],
-  relatedTables: [
-
   ],
   scrollToDisplayname: 'table_w_aggregates'
 };
@@ -98,78 +95,105 @@ test.describe('Related tables', () => {
     );
   });
 
-  test('for specific related entities,', async ({ page, context, baseURL }, testInfo) => {
-
-    await test.step('for a one-hop away related entity', async () => {
-      await testRelatedTablePresentation(
-        page,
-        testInfo,
-        {
-          testTitle: 'inbound related, no applink or row_markdown_pattern',
-          tableName: 'booking',
-          schemaName: 'product-unordered-related-tables-links',
+  test('for a one-hop away related entity', async ({ page, baseURL }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'inbound related, no applink or row_markdown_pattern',
+        tableName: 'booking',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'booking',
+        baseTableName: 'Accommodations',
+        count: 6,
+        canDelete: true,
+        canEdit: true,
+        inlineComment: true,
+        comment: 'booking inline comment',
+        bulkEditLink: [
+          `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
+          'product-unordered-related-tables-links:booking',
+          // we cannot test the actual facet blob since it's based on RID
+          // and we also don't have access to ermrestjs here to encode it for us
+          '*::facets::'
+        ].join('/'),
+        viewMore: {
           displayname: 'booking',
-          baseTableName:'Accommodations',
-          count: 6,
-          canDelete: true,
-          canEdit: true,
-          inlineComment: true,
-          comment: 'booking inline comment',
-          bulkEditLink: [
-            `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
-            'product-unordered-related-tables-links:booking',
-            // we cannot test the actual facet blob since it's based on RID
-            // and we also don't have access to ermrestjs here to encode it for us
-            '*::facets::'
-          ].join('/'),
-          viewMore: {
-              displayname: 'booking',
-              filter: 'AccommodationsSuper 8 North Hollywood Motel'
-          },
-          rowValues: [
-              ['125.0000','2016-03-12 00:00:00'],
-              ['100.0000','2016-06-01 00:00:00'],
-              ['110.0000','2016-05-19 01:00:00'],
-              ['120.0000','2015-11-10 00:00:00'],
-              ['180.0000','2016-09-04 01:00:00'],
-              ['80.0000','2016-01-01 00:00:00'],
-          ],
-          rowViewPaths: [
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '8'}],
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '9'}],
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '10'}],
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '11'}],
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '12'}],
-              [{column: 'accommodation_id', value: '2004'}, {column: 'id', value: '13'}]
-          ],
-          add: {
-              tableName: 'booking',
-              schemaName: 'product-unordered-related-tables-links',
-              relatedDisplayname: 'booking',
-              tableDisplayname: 'booking',
-              prefilledValues: {
-                  'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // the same fk
-                  'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // superset fk
-                  'fk2_col': { value: '4', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // the second column of fk_2
-                  'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // supserset fk but nullok
-                  'fk3_col1': { value: '', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false },
-                  'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // supserset fk
-                  'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true } // the second column of fk_2 that is a fk to another table
-              },
-              rowValuesAfter: [
-                  ['247.0000',''],
-                  ['100.0000','2016-06-01 00:00:00'],
-                  ['110.0000','2016-05-19 01:00:00'],
-                  ['120.0000','2015-11-10 00:00:00'],
-                  ['180.0000','2016-09-04 01:00:00'],
-                  ['80.0000','2016-01-01 00:00:00'],
-              ]
-          }
-        }
-      );
+          filter: 'AccommodationsSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['125.0000', '2016-03-12 00:00:00'],
+          ['100.0000', '2016-06-01 00:00:00'],
+          ['110.0000', '2016-05-19 01:00:00'],
+          ['120.0000', '2015-11-10 00:00:00'],
+          ['180.0000', '2016-09-04 01:00:00'],
+          ['80.0000', '2016-01-01 00:00:00'],
+        ],
+        rowViewPaths: [
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '8' }],
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '9' }],
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '10' }],
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '11' }],
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '12' }],
+          [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '13' }]
+        ]
+      }
+    );
 
-    });
+    await testAddRelatedTable(
+      page,
+      async (newPage: Page) => {
+        const inp = RecordeditLocators.getInputForAColumn(newPage, 'price', 1);
+        await inp.fill('247.00');
+      },
+      {
+        tableName: 'booking',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'booking',
+        tableDisplayname: 'booking',
+        prefilledValues: {
+          'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // the same fk
+          'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // superset fk
+          'fk2_col': { value: '4', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // the second column of fk_2
+          'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // supserset fk but nullok
+          'fk3_col1': { value: '', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false },
+          'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // supserset fk
+          'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true } // the second column of fk_2 that is a fk to another table
+        },
+        rowValuesAfter: [
+          ['247.0000', ''],
+          ['100.0000', '2016-06-01 00:00:00'],
+          ['110.0000', '2016-05-19 01:00:00'],
+          ['120.0000', '2015-11-10 00:00:00'],
+          ['180.0000', '2016-09-04 01:00:00'],
+          ['80.0000', '2016-01-01 00:00:00'],
+        ]
+      }
+    );
   });
+
+  test('for a related entity with search applink', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: "inbound related, has row_markdown_pattern",
+        schemaName: "product-unordered-related-tables-links",
+        displayname: "media",
+        tableName: "media",
+        baseTableName:"Accommodations",
+        count: 1,
+        canDelete: true,
+        canEdit: false,
+        markdownValue: "<p>2004</p>\n",
+        isMarkdown: true
+      }
+    )
+  });
+
+  // test('for a pure and binary association', async ({ page }, testInfo) => {
+
+  // });
 
 });
 
@@ -189,9 +213,9 @@ test.skip('Scroll to query parameter', () => {
     await heading.waitFor({ state: 'visible' });
 
     // make sure it scrolls into view
-    await expect(heading).toBeInViewport();
+    await expect.soft(heading).toBeInViewport();
 
     // make sure it is open
-    await expect(heading).toHaveClass(/show/);
+    await expect.soft(heading).toHaveClass(/show/);
   });
 });
