@@ -6,8 +6,6 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import { useLayoutEffect, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 
 // models
 import { RecordeditDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -35,9 +33,6 @@ const FormContainer = ({
 
 
   const { handleSubmit } = useFormContext();
-
-
-
 
   const formContainer = useRef<any>(null);
 
