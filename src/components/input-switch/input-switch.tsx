@@ -19,6 +19,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import React from 'react';
 
 export type InputSwitchProps = {
   /**
@@ -169,8 +170,8 @@ const InputSwitch = ({
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
   displayDateTimeLabels,
-  foreignKeyCallbacks,
-  additionalControllerRules
+  additionalControllerRules,
+  foreignKeyCallbacks
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -242,6 +243,7 @@ const InputSwitch = ({
           waitingForForeignKeyData={waitingForForeignKeyData}
           additionalControllerRules={additionalControllerRules}
           foreignKeyCallbacks={foreignKeyCallbacks}
+          additionalControllerRules={additionalControllerRules}
         />
       case 'dropdown-select':
         if (!columnModel) {
@@ -429,4 +431,4 @@ const InputSwitch = ({
   })();
 };
 
-export default memo(InputSwitch);
+export default React.memo(InputSwitch);

@@ -306,10 +306,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Array fields, ", function () {
 
                   it("should show ArrayField input with correct value.", function () {
-                
+
                       arrayCols.forEach((col)=>{
                         // Check if ArrayField is rendered correctly
-                      
+
                         const arrayField = element(by.css(`.array-input-field-container[class$="${col.name}"]`));
                         arrayField.click()
 
@@ -324,12 +324,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                   // test the invalid values once
                   if (recordIndex === 0) {
                       var invalidArrayValues = {
-                          "time": 
+                          "time":
                               {
                                   "value": "200113",
                                   "error": "Please enter a valid time value in 24-hr HH:MM:SS format."
-                              },                          
-                          "date": 
+                              },
+                          "date":
                               {
                                   "value": "200113-01",
                                   "error": "Please enter a valid date value in YYYY-MM-DD format."
@@ -347,18 +347,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                   "error": "Please enter a valid decimal value."
                               }
                           ,
-                          "boolean": 
+                          "boolean":
                               {
                                   "value": "true",
                                   "error": "Please enter a valid array structure."
                               }
                           ,
-                          "text": 
+                          "text":
                               {
                                   "value": "\"test\"",
                                   "error": "Please enter a valid array structure e.g. [\"value1\", \"value2\"]"
                               }
-                          
+
                       };
 
                       it ("should validate invalid array input.", function(){
@@ -379,7 +379,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                               errorElement = addNewValField.element(by.className("input-switch-error"));
 
                               expect(errorElement.getText()).toBe(invalidArrayValues[col.baseType].error)
-                              
+
                               // clear input after test
                               clearInput.click()
                               break;
@@ -389,13 +389,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                               let addNewValDateInput, addNewValTimeInput;
                               addNewValDateInput = addNewValField.element(by.className("input-switch-date")).element(by.className(" input-switch"))
                               addNewValTimeInput = addNewValField.element(by.className("input-switch-time")).element(by.className(" input-switch"))
-                              
+
                               clearInput = addNewValField.element(by.className("date-time-clear-btn"))
 
                               // Input invalid Date
                               browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,"200113-01"), 500);
                               errorElement = addNewValField.element(by.className("input-switch-error"));
-                                                            
+
                               expect(errorElement.getText()).toBe(invalidArrayValues["date"].error)
 
                               // Clear DateTime field Values
@@ -419,7 +419,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                   }
 
-                  
+
                   it ("should be able to set the correct value.", function () {
                     var validArrayValues = {
                       "time":  new Date().toString().split(' ')[4],
@@ -443,7 +443,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           let addNewValInput, arrItem;
                           addNewValInput = addNewValField.element(by.className(" input-switch"));
                           browser.wait(addNewValInput.sendKeys(validArrayValues[col.baseType]), 500);
-                          
+
                           addButton = addNewValField.element(by.className("add-button"))
                           addButton.click()
 
@@ -457,27 +457,27 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           let addNewValDateInput, addNewValTimeInput, arrItemDate, arrItemTime;
                           addNewValDateInput = addNewValField.element(by.className("input-switch-date")).element(by.className(" input-switch"))
                           addNewValTimeInput = addNewValField.element(by.className("input-switch-time")).element(by.className(" input-switch"))
-                          
+
                           // Input Valid Date and Time
                           browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]), 500);
                           browser.wait(addNewValTimeInput.sendKeys(validArrayValues["time"]), 500);
-                          
+
                           addButton = addNewValField.element(by.className("add-button"))
                           addButton.click()
 
-                          arrItemDate = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-date input`))
-                          arrItemTime = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-time input`))
+                        arrItemDate = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-date input`))
+                        arrItemTime = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-time input`))
 
                           expect(arrItemDate.getAttribute('value')).toBe(validArrayValues["date"])
                           expect(arrItemTime.getAttribute('value')).toBe(validArrayValues["time"])
-                          
+
                           break;
                       }
                     })
                   })
                 });
             }
-            
+
             if (longTextCols.length > 0) {
                 describe("longText fields, ", function () {
                     it("should show textarea input for longtext datatype and then set the value.", function() {

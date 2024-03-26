@@ -64,7 +64,7 @@
             border-bottom: 1px dashed #ddd;
             min-height: 10px;
             overflow: auto;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
             font-size: 14px !important;
             line-height: 1.42857143 !important;
             color: #333 !important;
@@ -203,11 +203,11 @@
         min-height: 75px;
         background-color: #eef6ff;
         // dropdown opens down
-        &[data-popper-placement^="bottom"] {
+        &[data-popper-placement^='bottom'] {
             margin-top: -4px;
         }
         // dropdown opens up
-        &[data-popper-placement^="top"] {
+        &[data-popper-placement^='top'] {
             margin-bottom: -3px;
         }
         // remove rounded borders for search input components when in a dropdown

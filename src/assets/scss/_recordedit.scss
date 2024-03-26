@@ -3,7 +3,7 @@
 @use 'helpers';
 // From _recordedit-app.scss
 .recordedit-container {
-    .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
+    .btn-sm[data-handler='bootstrap-markdown-cmdRidLink'] {
         padding: 5px 3px;
     }
     .form-controls {
@@ -233,6 +233,9 @@
                         }
                     }
                 }
+                .multi-form-input-textarea {
+                    width: 100%;
+                }
             }
             // form header and form inputs
             .entity-value {
@@ -246,7 +249,7 @@
                     top: 0;
                     height: 100%;
                     width: 100%;
-                    z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
+                    z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
                 }
                 .column-permission-warning {
                     margin: 0;
