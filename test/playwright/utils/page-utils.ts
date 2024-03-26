@@ -1,4 +1,4 @@
-import { Page, Locator, BrowserContext, expect } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 
 import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
@@ -59,15 +59,15 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
  * To make sure the hover goes away after this test, we're hovering over an element.
  * This element is chosen based on app.
  */
-export async function testTooltip(locator: Locator, expectedTooltip: string, appName: APP_NAMES, isSoft?: boolean) {
+export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean) {
   await locator.hover();
 
   const el = PageLocators.getTooltipContainer(locator.page());
 
   const expectFn = isSoft ? expect.soft : expect;
 
-  expectFn(el).toBeVisible();
-  expectFn(el).toHaveText(expectedTooltip);
+  await expectFn(el).toBeVisible();
+  await expectFn(el).toHaveText(expectedTooltip);
 
   // hover over an element that we know doesn't have tooltip to remove the tooltip
   let hoverEl;
@@ -88,6 +88,6 @@ export async function testTooltip(locator: Locator, expectedTooltip: string, app
   }
 
   await hoverEl.hover();
-  expectFn(el).not.toBeAttached();
+  await expectFn(el).not.toBeAttached();
 
 }

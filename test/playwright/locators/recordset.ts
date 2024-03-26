@@ -22,7 +22,7 @@ export default class RecordsetLocators {
 
   static getSelectedRowsFilters(container: Page | Locator): Locator {
     // // adding ".selected-chiclet-name" to the selector to not select the clear-all-btn
-    return container.locator('.selected chiclets .selected-chiclet .selected-chiclet-name');
+    return container.locator('.selected-chiclets').locator('.selected-chiclet .selected-chiclet-name');
   }
 
   static getFacetFilters(container: Page | Locator): Locator {

@@ -91,20 +91,37 @@ test.describe('feature', () => {
 
 ## Managing page
 
-https://playwright.dev/docs/pages
+- Useful links
+  - https://playwright.dev/docs/pages
 
-```ts
-// Start waiting for new page before clicking. Note no await.
-const pagePromise = context.waitForEvent('page');
-await page.getByText('open new tab').click();
-const newPage = await pagePromise;
-await newPage.waitForLoadState();
-console.log(await newPage.title());
-```
+- Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
+  ```ts
+  const newPage = await PageLocators.clickNewTabLink(someButton, context);
+  await newPage.waitForURL('someURL');
+
+  await newPage.waitForURL(`**/recordedit/**`);
+  await expect.soft(newPage).toHaveURL(/prefill\=/);
+
+  await newPage.close();
+  ```
+
+
+- In playwright, each page behaves like a focused, active page. Bringing the page to front is not required. But this also
+  means that the pages will never go out of focus (`blur`) and so when you switch back to a page, it will not automatically
+  create a `focus` event. For tests that rely on `focus` event, we have to manually dispatch the event like the following:
+  ```ts
+  await page.evaluate(() =>
+    document.dispatchEvent(new Event('focus', { bubbles: true })),
+  );
+  ```
 
 
 ## Locators
 
+- Useful links
+  - https://playwright.dev/docs/locators
+
+-
 TODO explain how to add locator classes to `locators` folder.
 
 ```ts
@@ -149,11 +166,14 @@ await expect.soft(input).toHaveClass('input-disabled');
 Test attributes:
 
 ```ts
-await expect.soft(element).toHaveAttribute('innerHTML', regexOrFullString);
+// prefered
 await expect(link).toHaveAttribute('href', regexOrFullString);
-
-expect(await link.getAttribute('innerHTML')).toContain(partialExpected);
+// if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
 expect(await link.getAttribute('href')).toContain(partialExpected)
+
+// avoid using `.innerHTML` or getAttribute('innerHTML'
+expect(await link.innerHTML()).toContain(partialExpected);
+expect(await link.innerHTML()).toBe(fullString);
 ```
 
 ## Actions

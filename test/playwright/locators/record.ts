@@ -57,6 +57,11 @@ export default class RecordLocators {
     return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')
   }
 
+  static getRelatedMarkdownContainer(page: Page, displayname: string, isInline?: boolean): Locator {
+    const loc = RecordLocators.getRelatedTableContainer(page, displayname, isInline);
+    return loc.locator('.related-markdown-content');
+  }
+
   static getRelatedTableHeading(page: Page, displayname: string): Locator {
     return RecordLocators.getRelatedTableAccordion(page, displayname).locator('.panel-heading');
   }

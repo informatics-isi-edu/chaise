@@ -66,7 +66,6 @@ test.describe('Related tables', () => {
     await RecordLocators.waitForRecordPageReady(page);
   });
 
-  // TODO
   test('overal structure of the page', async ({ page }) => {
     await test.step('table of contents should be displayed properly and in correct order', async () => {
       await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveCount(testParams.tocHeaders.length);
@@ -129,7 +128,7 @@ test.describe('Related tables', () => {
           filter: 'AccommodationsSuper 8 North Hollywood Motel'
         },
         rowValues: [
-          ['125.0000', '2016-03-12 00:00:00'],
+          ['125.0000', '2016-03-12 00:00:00'], // will be deleted
           ['100.0000', '2016-06-01 00:00:00'],
           ['110.0000', '2016-05-19 01:00:00'],
           ['120.0000', '2015-11-10 00:00:00'],
@@ -160,15 +159,15 @@ test.describe('Related tables', () => {
         tableDisplayname: 'booking',
         prefilledValues: {
           'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_POPUP, isDisabled: true }, // the same fk
-          'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.TEXT, isDisabled: true }, // superset fk
-          'fk2_col': { value: '4', inputType: RecordeditInputType.FK_POPUP, isDisabled: false }, // the second column of fk_2
+          'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_POPUP, isDisabled: true }, // superset fk
+          'fk2_col': { value: '4', inputType: RecordeditInputType.TEXT, isDisabled: true }, // the second column of fk_2
           'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_POPUP, isDisabled: false }, // supserset fk but nullok
           'fk3_col1': { value: '', inputType: RecordeditInputType.TEXT, isDisabled: false },
           'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_POPUP, isDisabled: true }, // supserset fk
           'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_POPUP, isDisabled: true } // the second column of fk_2 that is a fk to another table
         },
         rowValuesAfter: [
-          ['247.0000', ''],
+          ['247.0000', ''], // 125 is deleted and this one is added
           ['100.0000', '2016-06-01 00:00:00'],
           ['110.0000', '2016-05-19 01:00:00'],
           ['120.0000', '2015-11-10 00:00:00'],
@@ -192,7 +191,7 @@ test.describe('Related tables', () => {
         count: 2,
         viewMore: {
           displayname: 'schedule',
-          filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+          filter: 'AccommodationsSuper 8 North Hollywood Motel'
         }
       }
     )
@@ -215,7 +214,7 @@ test.describe('Related tables', () => {
         isMarkdown: true
       }
     )
-  })
+  });
 
   test('for a pure and binary association', async ({ page }, testInfo) => {
     await testRelatedTablePresentation(
@@ -231,7 +230,7 @@ test.describe('Related tables', () => {
         isAssociation: true,
         viewMore: {
           displayname: 'related_table',
-          filter: 'base table association related\nSuper 8 North Hollywood Motel'
+          filter: 'base table association relatedSuper 8 North Hollywood Motel'
         },
         rowValues: [
           ['Television']
@@ -292,7 +291,7 @@ test.describe('Related tables', () => {
       totalCount: 3,
       failedPostDeleteMessage: [
         'None of the 2 chosen records could be unlinked. Check the error details below to see more information.',
-        '\n\nShow Error Details'
+        'Show Error Details'
       ].join(''),
       successPostDeleteMessage: 'The chosen record successfully unlinked.',
       countAfterUnlink: 2,
@@ -347,7 +346,7 @@ test.describe('Related tables', () => {
       });
     });
 
-    test('test', async ({ page }) => {
+    test('restricted user', async ({ page }) => {
       const rsModal = ModalLocators.getRecordsetSearchPopup(page);
 
       await test.step('should fail to unlink rows that can\'t be unlinked with an error message in the batch remove summary', async () => {
@@ -358,7 +357,7 @@ test.describe('Related tables', () => {
         await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
         await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
-        const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+        const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
         await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
 
         // select 'Television' (not deletable)
@@ -408,7 +407,7 @@ test.describe('Related tables', () => {
         const confirmModal = ModalLocators.getConfirmDeleteModal(page);
         await expect.soft(confirmModal).toBeVisible();
         await expect.soft(ModalLocators.getModalTitle(confirmModal)).toHaveText('Confirm Unlink');
-        await expect.soft(ModalLocators.getModalText(confirmModal)).toHaveText('Are you sure you want to unlink 1 records?');
+        await expect.soft(ModalLocators.getModalText(confirmModal)).toHaveText('Are you sure you want to unlink 1 record?');
         const okBtn = ModalLocators.getOkButton(confirmModal);
         await expect.soft(okBtn).toHaveText('Unlink');
         await okBtn.click();
@@ -471,7 +470,6 @@ test.describe('Related tables', () => {
 
   });
 
-
   test('for a pure and binary association with page_size and hide_row_count', async ({ page }, testInfo) => {
     await testRelatedTablePresentation(
       page,
@@ -488,9 +486,173 @@ test.describe('Related tables', () => {
         isAssociation: true,
         canEdit: true
       }
+    );
+
+    await test.step('Opened modal by `Link` button should honor the page_size and hide_row_count.', async () => {
+      const addRelatedRecordLink = RecordLocators.getRelatedTableAddButton(page, 'accommodation_image', false);
+      await addRelatedRecordLink.click();
+
+      const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+      await expect.soft(rsModal).toBeVisible();
+      await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText('Link file to Accommodations: Super 8 North Hollywood Motel');
+      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
+
+      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText('Displaying first2records');
+
+      await ModalLocators.getCloseBtn(rsModal).click();
+      await expect.soft(rsModal).not.toBeAttached();
+    });
+  });
+
+  test('for a pure and binary association with row_markdown_pattern', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'association table, has markdown',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'association_table_markdown',
+        tableName: 'association_table_markdown',
+        entityMarkdownName: '1:Television',
+        associationLeafTableName: 'related_table',
+        baseTableName: 'Accommodations',
+        isAssociation: true,
+        isMarkdown: true,
+        count: 1,
+        canEdit: true,
+        canDelete: true
+      }
+    );
+  });
+
+  test('for a related entity with a path of length 3', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'related with a path of length 3',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'related_table_2',
+        tableName: 'related_table_2',
+        baseTableName: 'Accommodations',
+        viewMore: {
+          displayname: 'related_table_2',
+          filter: 'base table association relatedSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['one'],
+          ['three'],
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '1' }], [{ column: 'id', value: '3' }]
+        ],
+        count: 2, // by load time it's one but when we add another related for the other table this should be updated too.
+        canEdit: true,
+        canCreate: false,
+        canDelete: true
+      }
+    );
+  });
+
+  test('for a related entity with aggregate columns', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'related with aggregate columns',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'table_w_aggregates',
+        tableName: 'table_w_aggregates',
+        baseTableName: 'Accommodations',
+        viewMore: {
+          displayname: 'table_w_aggregates',
+          filter: 'fk_to_accommodationSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['1', '100', '100', '1', '1', 'virtual 100 with Super 8 North Hollywood Motel'],
+          ['2', '101', '101', '1', '1', 'virtual 101 with Super 8 North Hollywood Motel'],
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '1' }], [{ column: 'id', value: '2' }]
+        ],
+        count: 2,
+        canEdit: true,
+        canCreate: true,
+        canDelete: true
+      }
     )
   });
 
+  test('for a related table with invalid row_markdown_pattern', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'has markdown that results in empty string',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'table_w_invalid_row_markdown_pattern',
+        tableName: 'table_w_invalid_row_markdown_pattern',
+        baseTableName: 'Accommodations',
+        viewMore: {
+          displayname: 'table_w_invalid_row_markdown_pattern',
+          filter: 'AccommodationsSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['four']
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '2004' }]
+        ],
+        count: 1,
+        canEdit: true
+      }
+    )
+  });
+
+  test('for a related entity with wait_for entity set and markdown_pattern', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'related table, has waitfor entityset and markdown_pattern (has markdown comment)',
+        inlineComment: true,
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'inbound related with display.wait_for entityset',
+        tableName: 'accommodation_inbound1',
+        baseTableName: 'Accommodations',
+        markdownValue: [
+          '<p>accommodation_inbound1 seven, accommodation_inbound1 eight, ',
+          'accommodation_inbound1 nine (accommodation_inbound2 seven, accommodation_inbound2 eight, accommodation_inbound2 nine)</p>\n'
+        ].join(''),
+        isMarkdown: true,
+        count: 3,
+        canEdit: true,
+        canDelete: true
+      }
+    );
+  });
+
+  test('for a related entity with wait_for aggregate and markdown_pattern', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'related table, has waitfor entityset and markdown_pattern',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'inbound related with display.wait_for agg',
+        tableName: 'accommodation_inbound3',
+        baseTableName: 'Accommodations',
+        markdownValue: '<p>accommodation_inbound3 seven, accommodation_inbound3 eight, accommodation_inbound3 nine (3)</p>\n',
+        isMarkdown: true,
+        count: 3,
+        canEdit: true,
+        canDelete: true
+      }
+    );
+  });
+
+  // the rest of test cases are special cases that we don't need to run on CI
+  if (process.env.CI) return;
 
 });
 

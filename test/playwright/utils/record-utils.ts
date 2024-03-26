@@ -12,290 +12,6 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants'
 import { clickAndVerifyDownload, clickNewTabLink, getClipboardContent, testTooltip } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
 
-type RelatedTableTestParams = {
-  testTitle: string,
-  tableName: string,
-  schemaName: string,
-  /**
-   * the displayname that users see on the page
-   */
-  displayname: string,
-  /**
-   * the name of the table that this record app belongs to
-   */
-  baseTableName: string,
-
-  isAssociation?: boolean,
-  associationLeafTableName?: string,
-
-  comment?: string,
-  inlineComment?: boolean,
-
-  count: number,
-
-  canEdit?: boolean,
-  bulkEditLink?: string,
-
-  canCreate?: boolean,
-  canDelete?: boolean,
-
-  isMarkdown?: boolean
-  isInline?: boolean,
-  isTableMode?: boolean
-  viewMore?: {
-    displayname: string,
-    filter: string,
-  },
-  rowValues?: RecordsetRowValue[],
-  rowViewPaths?: { column: string, value: string }[][],
-  markdownValue?: string,
-  /**
-   * default 25
-   */
-  pageSize?: number
-};
-
-export const testRelatedTablePresentation = async (page: Page, testInfo: TestInfo, params: RelatedTableTestParams) => {
-  const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
-  const markdownToggleLink = RecordLocators.getRelatedTableToggleDisplay(page, params.displayname, params.isInline);
-  const rows = RecordsetLocators.getRows(currentEl);
-  const tableName = params.isAssociation && params.associationLeafTableName ? params.associationLeafTableName : params.tableName;
-
-  // if it was markdown, we are changing the view, change it back. these booleans are used for that
-  let hasNoRows = false, displayIsToggled = false;
-
-  const getURL = (appName: string, tName: string, rowVal: EntityRowColumnValues) => {
-    const savedData = getEntityRow(testInfo, params.schemaName, tableName, rowVal);
-    return `/${appName}/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${tName}/RID=${savedData.RID}`;
-  }
-
-  if (!params.isInline) {
-    await test.step('title should be correct', async () => {
-      const titleEl = RecordLocators.getRelatedTableSectionHeaderDisplayname(page, params.displayname);
-      await expect.soft(titleEl).toHaveText(params.displayname);
-    });
-  }
-
-  if (params.inlineComment && params.comment) {
-    await test.step('inline comment should be displayed.', async () => {
-      const inlineComment = RecordLocators.getRelatedTableInlineComment(page, params.displayname);
-      // we have to have this otherwise typescript will complain
-      if (!params.comment) return;
-      await expect.soft(inlineComment).toHaveText(params.comment);
-    });
-  }
-
-  await test.step('table level', async () => {
-    if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
-      const md = PageLocators.getMarkdownContainer(currentEl);
-
-      await test.step('markdown container must be visible.', async () => {
-        await expect.soft(md).toBeVisible();
-
-        if (params.markdownValue) {
-          await expect.soft(md).toHaveAttribute('innerHTML', params.markdownValue);
-        }
-      });
-
-      if (typeof params.canEdit === 'boolean') {
-        await test.step('the button to switch from/to tabular mode should be visible.', async () => {
-          await expect.soft(markdownToggleLink).toHaveText(params.canEdit ? 'Edit mode' : 'Table mode');
-        });
-
-        await test.step('toggle button should have the proper tooltip', async () => {
-          const expectedTooltip = params.canEdit ?
-            `Display edit controls for ${params.displayname} records related to this ${params.baseTableName}.` :
-            `Display related ${params.displayname} in tabular mode.`;
-
-          await testTooltip(markdownToggleLink, expectedTooltip, APP_NAMES.RECORD, true);
-        });
-
-        await test.step('clicking on the toggle should change the view to tabular.', async () => {
-          await markdownToggleLink.click();
-          await expect.soft(markdownToggleLink).toHaveText('Custom mode');
-
-          await testTooltip(markdownToggleLink, 'Switch back to the custom display mode.', APP_NAMES.RECORD, true);
-
-          displayIsToggled = true;
-        });
-      }
-    } else {
-      await test.step('option for different display modes should not be presented to user.', async () => {
-        await expect.soft(markdownToggleLink).not.toBeVisible();
-      });
-    }
-
-    if (params.rowValues) {
-      await test.step('rows of data should be correct and respect the given page_size.', async () => {
-        // silence the ts error
-        if (!params.rowValues) return;
-
-        await testRecordsetTableRowValues(currentEl, params.rowValues, true);
-      });
-    }
-
-
-    await test.step('Explore button', async () => {
-      const exploreButton = RecordLocators.getRelatedTableExploreLink(page, params.displayname, params.isInline);
-
-      await test.step('should be displayed.', async () => {
-        await expect.soft(exploreButton).toBeVisible();
-      });
-
-
-      if (params.viewMore) {
-        await test.step('should go to the recordset app with correct set of filters', async () => {
-          if (!params.viewMore) return;
-
-          await exploreButton.click();
-          await page.waitForURL('**/recordset/**');
-          await RecordsetLocators.waitForRecordsetPageReady(page);
-
-          await expect.soft(RecordsetLocators.getPageTitleElement(page), 'recordset title missmatch.').toHaveText(params.viewMore.displayname);
-
-          const chiclets = RecordsetLocators.getFacetFilters(page);
-          await expect.soft(chiclets).toHaveCount(1);
-
-          // const content = await chiclets.first().textContent();
-          // expect.soft(content, 'filter missmatch').toBe(params.viewMore!.filter)
-          await expect.soft(chiclets.nth(0)).toHaveText(params.viewMore.filter);
-
-          await page.goBack();
-          await RecordLocators.waitForRecordPageReady(page);
-        });
-      }
-
-    });
-
-    // bulk edit
-    if (typeof params.canEdit === 'boolean') {
-      const bulkEditTest = params.canEdit ? '`Bulk Edit` button should be visible with correct link' : '`Bulk Edit` button should not be offered.';
-      await test.step(bulkEditTest, async () => {
-        const btn = RecordLocators.getRelatedTableBulkEditLink(page, params.displayname, params.isInline);
-
-        if (!params.canEdit) {
-          await expect.soft(btn).not.toBeVisible();
-        } else {
-          await expect.soft(btn).toBeVisible();
-
-          if (params.bulkEditLink) {
-            expect.soft(await btn.getAttribute('href')).toContain(params.bulkEditLink);
-          }
-        }
-      });
-    }
-
-    if (typeof params.canCreate === 'boolean') {
-      const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
-
-      await test.step(`Add button should be ${params.canCreate ? 'visible' : 'invisible'}.`, async () => {
-        expect.soft(addBtn.isVisible()).toBe(params.canCreate);
-      });
-
-      if (params.canCreate) {
-        await test.step('Add/link button should have the proper tooltip.', async () => {
-          const expected = params.isAssociation ?
-            `Connect ${params.displayname} records to this ${params.baseTableName}.` :
-            `Create ${params.displayname} records for this ${params.baseTableName}.`;
-
-          await testTooltip(addBtn, expected, APP_NAMES.RECORD, true);
-        });
-      }
-    }
-  });
-
-  await test.step('row level', async () => {
-    if (params.rowViewPaths) {
-      await test.step('`View Details` button should have the correct link.', async () => {
-        if (!params.rowViewPaths) return;
-
-        let index = 0;
-        for (const row of params.rowViewPaths) {
-          const btn = RecordsetLocators.getRowViewButton(currentEl, index);
-          expect.soft(await btn.getAttribute('href')).toContain(getURL('record', tableName, row));
-          index++;
-        }
-      });
-    }
-
-    if (typeof params.canEdit === 'boolean') {
-      if (!params.canEdit) {
-        await test.step('edit button should not be visible.', async () => {
-          await expect.soft(currentEl.locator('.edit-action-button')).toBeVisible();
-        });
-      } else if (params.rowViewPaths) {
-        // only testing the first link (it's a button not a link, so testing all of them would add a lot of test time)
-        await test.step('clicking on edit button should open a tab to recordedit page', async () => {
-          const btn = RecordsetLocators.getRowEditButton(currentEl, 0);
-
-          await expect.soft(btn).toBeVisible();
-
-          // silence the ts error
-          if (!params.rowViewPaths) return;
-
-          const newPage = await clickNewTabLink(btn);
-          await newPage.waitForURL(`**${getURL('recordedit', tableName, params.rowViewPaths[0])}**`);
-          await newPage.close();
-        });
-      }
-    }
-
-    if (typeof params.canDelete === 'boolean') {
-      await test.step('Delete or Unlink button', async () => {
-        let deleteBtn: Locator;
-        if (params.canDelete) {
-          await test.step('should be visible', async () => {
-            deleteBtn = RecordsetLocators.getRowDeleteButton(currentEl, 0);
-            await expect.soft(deleteBtn).toBeVisible();
-          });
-
-          // TODO not working
-          // test.step('should have the proper tooltip', async () => {
-          //   let expected = 'Delete';
-          //   if (params.isAssociation) {
-          //     expected = `Disconnect ${params.displayname}: ${params.tableName} from this ${params.baseTableName}.`;
-          //   }
-          //   await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
-          // });
-
-          if (!params.isAssociation) {
-            await test.step('it should update the table and title after confirmation.', async () => {
-              const currCount = await rows.count();
-              const confirmModal = ModalLocators.getConfirmDeleteModal(page);
-
-              await deleteBtn.click();
-
-              await expect.soft(confirmModal).toBeVisible();
-
-              await ModalLocators.getOkButton(confirmModal).click();
-
-              await expect.soft(confirmModal).not.toBeAttached();
-
-              await expect.soft(rows).toHaveCount(currCount - 1);
-
-              hasNoRows = currCount - 1 === 0;
-            });
-          }
-
-        } else {
-          await test.step('should not be visible', async () => {
-            await expect.soft(deleteBtn).not.toBeVisible();
-          });
-        }
-      });
-    }
-  });
-
-  // if it was markdown, we are changing the view, change it back.
-  if (displayIsToggled && !hasNoRows) {
-    await test.step('toggle display mode back', async () => {
-      await markdownToggleLink.click();
-      await expect.soft(markdownToggleLink).toHaveText(params.canEdit ? 'Edit mode' : 'Table mode');
-    });
-  }
-
-}
-
 
 type ShareCiteModalParams = {
   /**
@@ -324,12 +40,6 @@ type ShareCiteModalParams = {
   bibtextFile?: string,
 }
 
-/**
- * test share cite modal features.
- *
- * @param params
- * @param URLPath if you want the test case to navigate before testing, pass the url path. otherwise skip this.
- */
 export const testShareCiteModal = async (page: Page, params: ShareCiteModalParams) => {
   const expectedLink = params.link;
   const shareBtn = RecordLocators.getShareButton(page);
@@ -417,6 +127,308 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
 
 }
 
+type RelatedTableTestParams = {
+  testTitle: string,
+  tableName: string,
+  schemaName: string,
+  /**
+   * the displayname that users see on the page
+   */
+  displayname: string,
+  /**
+   * the name of the table that this record app belongs to
+   */
+  baseTableName: string,
+
+  isAssociation?: boolean,
+  associationLeafTableName?: string,
+  /**
+   * used for testing the tooltip of unlink btn
+   */
+  entityMarkdownName?: string,
+
+  comment?: string,
+  inlineComment?: boolean,
+
+  count: number,
+
+  canEdit?: boolean,
+  bulkEditLink?: string,
+
+  canCreate?: boolean,
+
+  /**
+   * if true and isAssociation=false, this function will remove the first displayed row.
+   */
+  canDelete?: boolean,
+
+  isMarkdown?: boolean
+  isInline?: boolean,
+  isTableMode?: boolean
+  viewMore?: {
+    displayname: string,
+    filter: string,
+  },
+  rowValues?: RecordsetRowValue[],
+  rowViewPaths?: { column: string, value: string }[][],
+  markdownValue?: string,
+  /**
+   * default 25
+   */
+  pageSize?: number
+};
+
+export const testRelatedTablePresentation = async (page: Page, testInfo: TestInfo, params: RelatedTableTestParams) => {
+  const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
+  const markdownToggleLink = RecordLocators.getRelatedTableToggleDisplay(page, params.displayname, params.isInline);
+  const rows = RecordsetLocators.getRows(currentEl);
+  const tableName = params.isAssociation && params.associationLeafTableName ? params.associationLeafTableName : params.tableName;
+
+  // if it was markdown, we are changing the view, change it back. these booleans are used for that
+  let hasNoRows = false, displayIsToggled = false;
+
+  const getURL = (appName: string, tName: string, rowVal: EntityRowColumnValues) => {
+    const savedData = getEntityRow(testInfo, params.schemaName, tableName, rowVal);
+    return `/${appName}/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${tName}/RID=${savedData.RID}`;
+  }
+
+  if (!params.isInline) {
+    await test.step('title should be correct', async () => {
+      const titleEl = RecordLocators.getRelatedTableSectionHeaderDisplayname(page, params.displayname);
+      await expect.soft(titleEl).toHaveText(params.displayname);
+    });
+  }
+
+  if (params.inlineComment && params.comment) {
+    await test.step('inline comment should be displayed.', async () => {
+      const inlineComment = RecordLocators.getRelatedTableInlineComment(page, params.displayname);
+      // we have to have this otherwise typescript will complain
+      if (!params.comment) return;
+      await expect.soft(inlineComment).toHaveText(params.comment);
+    });
+  }
+
+  await test.step('table level', async () => {
+    if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
+      const md = RecordLocators.getRelatedMarkdownContainer(page, params.displayname, params.isInline);
+
+      await test.step('markdown container must be visible.', async () => {
+        await expect.soft(md).toBeVisible();
+
+        if (params.markdownValue) {
+          // await expect.soft(md).toHaveAttribute('innerHTML', params.markdownValue);
+          const innerHTML = await md.innerHTML();
+          expect.soft(innerHTML).toBe(params.markdownValue);
+        }
+      });
+
+      if (typeof params.canEdit === 'boolean') {
+        await test.step('the button to switch from/to tabular mode should be visible.', async () => {
+          await expect.soft(markdownToggleLink).toHaveText(params.canEdit ? 'Edit mode' : 'Table mode');
+        });
+
+        await test.step('toggle button should have the proper tooltip', async () => {
+          const expectedTooltip = params.canEdit ?
+            `Display edit controls for ${params.displayname} records related to this ${params.baseTableName}.` :
+            `Display related ${params.displayname} in tabular mode.`;
+
+          await testTooltip(markdownToggleLink, expectedTooltip, APP_NAMES.RECORD, true);
+        });
+      }
+
+      await test.step('clicking on the toggle should change the view to tabular.', async () => {
+        await markdownToggleLink.click();
+        await expect.soft(markdownToggleLink).toHaveText('Custom mode');
+        await testTooltip(markdownToggleLink, 'Switch back to the custom display mode.', APP_NAMES.RECORD, true);
+
+        displayIsToggled = true;
+      });
+
+
+    } else {
+      await test.step('option for different display modes should not be presented to user.', async () => {
+        await expect.soft(markdownToggleLink).not.toBeVisible();
+      });
+    }
+
+    if (params.rowValues) {
+      await test.step('rows of data should be correct and respect the given page_size.', async () => {
+        // silence the ts error
+        if (!params.rowValues) return;
+
+        await testRecordsetTableRowValues(currentEl, params.rowValues, true);
+      });
+    }
+
+
+    await test.step('Explore button', async () => {
+      const exploreButton = RecordLocators.getRelatedTableExploreLink(page, params.displayname, params.isInline);
+
+      await test.step('should be displayed.', async () => {
+        await expect.soft(exploreButton).toBeVisible();
+      });
+
+
+      if (params.viewMore) {
+        await test.step('should go to the recordset app with correct set of filters', async () => {
+          if (!params.viewMore) return;
+
+          await exploreButton.click();
+          await page.waitForURL('**/recordset/**');
+          await RecordsetLocators.waitForRecordsetPageReady(page);
+
+          await expect.soft(RecordsetLocators.getPageTitleElement(page), 'recordset title missmatch.').toHaveText(params.viewMore.displayname);
+
+          const chiclets = RecordsetLocators.getFacetFilters(page);
+          await expect.soft(chiclets).toHaveCount(1);
+
+          // const content = await chiclets.first().textContent();
+          // expect.soft(content, 'filter missmatch').toBe(params.viewMore!.filter)
+          await expect.soft(chiclets.nth(0)).toHaveText(params.viewMore.filter);
+
+          await page.goBack();
+          await RecordLocators.waitForRecordPageReady(page);
+        });
+      }
+
+    });
+
+    // bulk edit
+    if (typeof params.canEdit === 'boolean') {
+      const bulkEditTest = params.canEdit ? '`Bulk Edit` button should be visible with correct link' : '`Bulk Edit` button should not be offered.';
+      await test.step(bulkEditTest, async () => {
+        const btn = RecordLocators.getRelatedTableBulkEditLink(page, params.displayname, params.isInline);
+
+        if (!params.canEdit) {
+          await expect.soft(btn).not.toBeVisible();
+        } else {
+          await expect.soft(btn).toBeVisible();
+
+          if (params.bulkEditLink) {
+            expect.soft(await btn.getAttribute('href')).toContain(params.bulkEditLink);
+          }
+        }
+      });
+    }
+
+    if (typeof params.canCreate === 'boolean') {
+      const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
+
+      await test.step(`Add button should be ${params.canCreate ? 'visible' : 'invisible'}.`, async () => {
+        if (params.canCreate) {
+          await expect.soft(addBtn).toBeVisible();
+        } else {
+          await expect.soft(addBtn).not.toBeVisible();
+        }
+      });
+
+      if (params.canCreate) {
+        await test.step('Add/link button should have the proper tooltip.', async () => {
+          const expected = params.isAssociation ?
+            `Connect ${params.displayname} records to this ${params.baseTableName}.` :
+            `Create ${params.displayname} records for this ${params.baseTableName}.`;
+
+          await testTooltip(addBtn, expected, APP_NAMES.RECORD, true);
+        });
+      }
+    }
+  });
+
+  await test.step('row level', async () => {
+    if (params.rowViewPaths) {
+      await test.step('`View Details` button should have the correct link.', async () => {
+        if (!params.rowViewPaths) return;
+
+        let index = 0;
+        for (const row of params.rowViewPaths) {
+          const btn = RecordsetLocators.getRowViewButton(currentEl, index);
+          expect.soft(await btn.getAttribute('href')).toContain(getURL('record', tableName, row));
+          index++;
+        }
+      });
+    }
+
+    if (typeof params.canEdit === 'boolean') {
+      await test.step(`edit button should${!params.canEdit ? ' not ' : ' '}be visible.`, async () => {
+        const editBtns = currentEl.locator('.edit-action-button');
+        if (params.canEdit) {
+          await expect.soft(editBtns.first()).toBeVisible();
+        } else {
+          await expect.soft(editBtns.first()).not.toBeVisible();
+        }
+      });
+
+      if (params.canEdit && params.rowViewPaths) {
+        // only testing the first link (it's a button not a link, so testing all of them would add a lot of test time)
+        await test.step('clicking on edit button should open a tab to recordedit page', async () => {
+          const btn = RecordsetLocators.getRowEditButton(currentEl, 0);
+
+          await expect.soft(btn).toBeVisible();
+
+          // silence the ts error
+          if (!params.rowViewPaths) return;
+
+          const newPage = await clickNewTabLink(btn);
+          await newPage.waitForURL(`**${getURL('recordedit', tableName, params.rowViewPaths[0])}**`);
+          await newPage.close();
+        });
+      }
+    }
+
+    if (typeof params.canDelete === 'boolean') {
+      await test.step('Delete or Unlink button', async () => {
+        let deleteBtn: Locator;
+        if (params.canDelete) {
+          await test.step('should be visible', async () => {
+            deleteBtn = RecordsetLocators.getRowDeleteButton(currentEl, 0);
+            await expect.soft(deleteBtn).toBeVisible();
+          });
+
+          await test.step('should have the proper tooltip', async () => {
+            let expected = 'Delete';
+            if (params.isAssociation) {
+              expected = `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTableName}.`;
+            }
+            await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
+          });
+
+          if (!params.isAssociation) {
+            await test.step('it should update the table and title after confirmation.', async () => {
+              const currCount = await rows.count();
+              const confirmModal = ModalLocators.getConfirmDeleteModal(page);
+
+              await deleteBtn.click();
+
+              await expect.soft(confirmModal).toBeVisible();
+
+              await ModalLocators.getOkButton(confirmModal).click();
+
+              await expect.soft(confirmModal).not.toBeAttached();
+
+              await expect.soft(rows).toHaveCount(currCount - 1);
+
+              hasNoRows = currCount - 1 === 0;
+            });
+          }
+
+        } else {
+          await test.step('should not be visible', async () => {
+            await expect.soft(deleteBtn).not.toBeVisible();
+          });
+        }
+      });
+    }
+  });
+
+  // if it was markdown, we are changing the view, change it back.
+  if (displayIsToggled && !hasNoRows) {
+    await test.step('toggle display mode back', async () => {
+      await markdownToggleLink.click();
+      await expect.soft(markdownToggleLink).toHaveText(params.canEdit ? 'Edit mode' : 'Table mode');
+    });
+  }
+
+}
 
 type AddRelatedTableParams = {
   tableName: string,
@@ -456,7 +468,7 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
       await RecordeditLocators.waitForRecordeditPageReady(newPage);
     });
 
-    await test.step('the opened form should have the prefilled value for theforeignkey.', async () => {
+    await test.step('the opened form should have the proper prefilled values.', async () => {
       if (!newPage) return;
 
       for await (const colName of Object.keys(params.prefilledValues)) {
@@ -477,7 +489,11 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
           default:
             input = RecordeditLocators.getInputForAColumn(newPage, colName, 1);
             await expect.soft(input).toHaveValue(expectedCol.value);
-            await expect.soft(input).toBeDisabled();
+            if (expectedCol.isDisabled) {
+              await expect.soft(input).toBeDisabled();
+            } else {
+              await expect.soft(input).not.toBeDisabled();
+            }
             break;
         }
       }
@@ -486,10 +502,21 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
     await test.step('submitting the form and coming back to record page should update the related table.', async () => {
       if (!newPage) return;
 
+      // modif
       await inputCallback(newPage);
+
+
       await RecordeditLocators.submitForm(newPage);
       await newPage.waitForURL('**/record/**');
       await newPage.close();
+
+      /**
+       * in playwright all opened tabs are focused and focus is never lost.
+       * so we have to manually call focus on the page
+       */
+      await page.evaluate(() =>
+        document.dispatchEvent(new Event('focus', { bubbles: true })),
+      );
 
       const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
@@ -526,7 +553,7 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
       await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
-      const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+      const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
       await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
 
       // check the state of the facet panel
@@ -615,7 +642,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
-      const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+      const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
       await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
 
       // check the state of the facet panel

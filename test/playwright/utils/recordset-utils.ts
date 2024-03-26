@@ -1,5 +1,5 @@
-import { expect, Locator, Page } from "@playwright/test"
-import RecordsetLocators from "../locators/recordset";
+import { expect, Locator, Page } from '@playwright/test'
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright//locators/recordset';
 
 export type RecordsetRowValue = string[] | {
   url: string,
@@ -11,9 +11,7 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
   const expectFn = isSoft ? expect.soft : expect;
 
   const rows = RecordsetLocators.getRows(container);
-
   await expectFn(rows).toHaveCount(expectedRowValues.length);
-
 
   let index = 0;
   for (const expectedRow of expectedRowValues) {
@@ -21,8 +19,6 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
 
     // action-btns cell is also returned here (that's why +1)
     await expectFn(cells).toHaveCount(expectedRow.length + 1);
-
-    const temp = expectedRow[index];
 
     for (let innerIndex = 0; innerIndex < expectedRow.length; innerIndex++) {
       const expectedCell = expectedRow[innerIndex];
