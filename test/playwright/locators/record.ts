@@ -9,34 +9,52 @@ export default class RecordLocators {
     await RecordLocators.getTableOfContentsRelatedSpinner(page).waitFor({ state: 'detached', timeout })
   }
 
+  // ----------------- general selectors -------------------- //
   static getEntityTitleElement(page: Page): Locator {
     return page.locator('.entity-title');
-  }
-
-  static getMainSectionTable(page: Page): Locator {
-    return page.locator('.record-main-section-table');
-  }
-
-  static getEntityRelatedTable(page: Page, displayname: string): Locator {
-    displayname = makeSafeIdAttr(displayname);
-    return page.locator(`#entity-${displayname}`);
-  }
-
-  static getRelatedSectionSpinner(page: Page): Locator {
-    return page.locator('.related-section-spinner');
   }
 
   static getTableOfContentsRelatedSpinner(page: Page): Locator {
     return page.locator('#rt-toc-loading');
   }
 
-  static getDisplayedRelatedTableTitles(page: Page): Locator {
-    return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')
+  static getSidePanelHeadings(page: Page): Locator {
+    return page.locator('.columns-container li.toc-heading');
   }
 
-  static getRelatedTableAccordion(page: Page, displayname: string): Locator {
+  static getShareButton(page: Page): Locator {
+    return page.locator('.share-cite-btn');
+  }
+
+  // ----------------- main section selectors ------------------------ //
+
+  static getMainSectionTable(page: Page): Locator {
+    return page.locator('.record-main-section-table');
+  }
+
+  static getEntityRelatedTable(container: Locator | Page, displayname: string): Locator {
     displayname = makeSafeIdAttr(displayname);
-    return page.locator(`#rt-heading-${displayname}`);
+    return container.locator(`#entity-${displayname}`);
+  }
+
+  // --------------------- related table selectors ----------------- //
+
+  static getRelatedTableContainer(container: Locator | Page, displayname: string, isInline?: boolean): Locator {
+    if (isInline) return RecordLocators.getEntityRelatedTable(container, displayname);
+    return RecordLocators.getRelatedTableAccordion(container, displayname);
+  }
+
+  static getRelatedTableAccordion(container: Locator | Page, displayname: string): Locator {
+    displayname = makeSafeIdAttr(displayname);
+    return container.locator(`#rt-heading-${displayname}`);
+  }
+
+  static getRelatedSectionSpinner(page: Page): Locator {
+    return page.locator('.related-section-spinner');
+  }
+
+  static getDisplayedRelatedTableTitles(page: Page): Locator {
+    return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')
   }
 
   static getRelatedTableHeading(page: Page, displayname: string): Locator {
@@ -61,22 +79,22 @@ export default class RecordLocators {
   }
 
   static getRelatedTableBulkEditLink(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    const loc = RecordLocators.getRelatedTableContainer(page, displayname, isInline);
     return loc.locator('.bulk-edit-link');
   }
 
   static getRelatedTableExploreLink(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    const loc = RecordLocators.getRelatedTableContainer(page, displayname, isInline);
     return loc.locator('.more-results-link');
   }
 
   static getRelatedTableAddButton(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    const loc = RecordLocators.getRelatedTableContainer(page, displayname, isInline);
     return loc.locator('.add-records-link');
   }
 
   static getRelatedTableUnlinkButton(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+    const loc = RecordLocators.getRelatedTableContainer(page, displayname, isInline);
     return loc.locator('.unlink-records-link');
   }
 
@@ -85,12 +103,5 @@ export default class RecordLocators {
     return loc.locator('.toggle-display-link');
   }
 
-  static getSidePanelHeadings(page: Page): Locator {
-    return page.locator('.columns-container li.toc-heading');
-  }
-
-  static getShareButton(page: Page): Locator {
-    return page.locator('.share-cite-btn');
-  }
 
 }

@@ -59,12 +59,12 @@ export default class RecordeditLocators {
 
   static getSubmitRecordButton(container: Locator | Page): Locator {
     return container.locator('#submit-record-button');
-  };
+  }
 
   static getInputForAColumn(container: Locator | Page, name: string, formNumber: number) {
     formNumber = formNumber || 1;
     return container.locator(`input[name="${formNumber}-${name}"]`);
-  };
+  }
 
   static getForeignKeyInputDisplay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
     columnDisplayName = makeSafeIdAttr(columnDisplayName);

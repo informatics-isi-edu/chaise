@@ -1,9 +1,16 @@
 import moment from 'moment';
 import { test, expect, Page } from '@playwright/test';
+import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
-import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
-import { testAddRelatedTable, testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
+import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import {
+  testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
+  testRelatedTablePresentation, testShareCiteModal
+} from '@isrd-isi-edu/chaise/test/playwright/utils/record-utils';
+import { RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import { testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -152,13 +159,13 @@ test.describe('Related tables', () => {
         displayname: 'booking',
         tableDisplayname: 'booking',
         prefilledValues: {
-          'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // the same fk
-          'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // superset fk
-          'fk2_col': { value: '4', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // the second column of fk_2
-          'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false }, // supserset fk but nullok
-          'fk3_col1': { value: '', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: false },
-          'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true }, // supserset fk
-          'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_DROPDOWN, isDisabled: true } // the second column of fk_2 that is a fk to another table
+          'fk_1': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_POPUP, isDisabled: true }, // the same fk
+          'fk_2': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.TEXT, isDisabled: true }, // superset fk
+          'fk2_col': { value: '4', inputType: RecordeditInputType.FK_POPUP, isDisabled: false }, // the second column of fk_2
+          'fk_3': { value: 'Select a value', inputType: RecordeditInputType.FK_POPUP, isDisabled: false }, // supserset fk but nullok
+          'fk3_col1': { value: '', inputType: RecordeditInputType.TEXT, isDisabled: false },
+          'fk_4': { value: 'Super 8 North Hollywood Motel', inputType: RecordeditInputType.FK_POPUP, isDisabled: true }, // supserset fk
+          'fk_5': { value: '4: four', inputType: RecordeditInputType.FK_POPUP, isDisabled: true } // the second column of fk_2 that is a fk to another table
         },
         rowValuesAfter: [
           ['247.0000', ''],
@@ -177,27 +184,317 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: "inbound related, has row_markdown_pattern",
-        schemaName: "product-unordered-related-tables-links",
-        displayname: "media",
-        tableName: "media",
-        baseTableName:"Accommodations",
-        count: 1,
-        canDelete: true,
-        canEdit: false,
-        markdownValue: "<p>2004</p>\n",
-        isMarkdown: true
+        testTitle: 'inbound related, has applink defined as search',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'schedule',
+        tableName: 'schedule',
+        baseTableName: 'Accommodations',
+        count: 2,
+        viewMore: {
+          displayname: 'schedule',
+          filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+        }
       }
     )
   });
 
-  // test('for a pure and binary association', async ({ page }, testInfo) => {
+  test('for a related entity with row_markdown_pattern', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'inbound related, has row_markdown_pattern',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'media',
+        tableName: 'media',
+        baseTableName: 'Accommodations',
+        count: 1,
+        canDelete: true,
+        canEdit: false,
+        markdownValue: '<p>2004</p>\n',
+        isMarkdown: true
+      }
+    )
+  })
 
-  // });
+  test('for a pure and binary association', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'association table',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'association_table',
+        tableName: 'association_table',
+        associationLeafTableName: 'related_table',
+        baseTableName: 'Accommodations',
+        isAssociation: true,
+        viewMore: {
+          displayname: 'related_table',
+          filter: 'base table association related\nSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['Television']
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '1' }]
+        ],
+        count: 1,
+        canEdit: true,
+      }
+    );
+
+    await testAddAssociationTable(page, {
+      displayname: 'association_table',
+      modalTitle: 'Link related_table to Accommodations: Super 8 North Hollywood Motel',
+      totalCount: 5,
+      disabledRows: ['1'],
+      search: {
+        term: 'television|Coffee',
+        afterSearchCount: 2,
+        afterSearchDisabledRows: ['1']
+      },
+      selectOptions: [1, 2, 3, 4],
+      rowValuesAfter: [
+        ['Television'],
+        ['Air Conditioning'],
+        ['Coffee Maker'],
+        ['UHD TV'],
+        ['Space Heater']
+      ]
+    });
+
+    await testBatchUnlinkAssociationTable(page, {
+      // we unlink rows 2 and 4 ('Air Conditioning' and 'UHD TV')
+      displayname: 'association_table',
+      modalTitle: 'Unlink association_table from Accommodations: Super 8 North Hollywood Motel',
+      totalCount: 5,
+      selectOptions: [1, 3],
+      postDeleteMessage: 'All of the 2 chosen records successfully unlinked.',
+      rowValuesAfter: [
+        ['Television'],
+        ['Coffee Maker'],
+        ['Space Heater']
+      ]
+    })
+  });
+
+  /**
+   * test trying to unlink 2 rows where 1 is allowed and 1 is not
+   * verifies the error case works as expected and rows are still selected after failure
+   * need to attach a 'postLogin' function to reload the record page we are testing
+   */
+  test.describe('batch unlink with dynamic acls', () => {
+    const params = {
+      displayname: 'association_table',
+      modalTitle: 'Unlink association_table from Accommodations: Super 8 North Hollywood Motel',
+      // 2 have been unlinked by previous test
+      totalCount: 3,
+      failedPostDeleteMessage: [
+        'None of the 2 chosen records could be unlinked. Check the error details below to see more information.',
+        '\n\nShow Error Details'
+      ].join(''),
+      successPostDeleteMessage: 'The chosen record successfully unlinked.',
+      countAfterUnlink: 2,
+      rowValuesAfter: [
+        ['Television'],
+        ['Coffee Maker']
+      ]
+    };
+
+    // run with the restricted user
+    test.use({ storageState: RESTRICTED_USER_STORAGE_STATE });
+
+    // add acls
+    test.beforeAll(async ({ }, testInfo) => {
+      const restrictedUserId = process.env.RESTRICTED_AUTH_COOKIE_ID;
+      const catalogId = getCatalogID(testInfo.project.name);
+      await importACLs({
+        'catalog': {
+          'id': catalogId,
+          'schemas': {
+            'product-unordered-related-tables-links': {
+              'tables': {
+                'accommodation': {
+                  'acls': {
+                    'select': [restrictedUserId]
+                  }
+                },
+                'related_table': {
+                  'acls': {
+                    'select': [restrictedUserId],
+                    'delete': [restrictedUserId]
+                  }
+                },
+                'association_table': {
+                  'acls': {
+                    'select': [restrictedUserId]
+                  },
+                  'acl_bindings': {
+                    'can_delete_row': {
+                      'types': ['delete'],
+                      'projection': [
+                        { 'filter': 'id_related', 'operand': 5 }, 'id_related' // 'Space Heater'
+                      ],
+                      'projection_type': 'nonnull'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+
+    test('test', async ({ page }) => {
+      const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+
+      await test.step('should fail to unlink rows that can\'t be unlinked with an error message in the batch remove summary', async () => {
+        const unlinkBtn = RecordLocators.getRelatedTableUnlinkButton(page, params.displayname);
+        await unlinkBtn.click();
+
+        await expect.soft(rsModal).toBeVisible();
+        await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(params.modalTitle);
+        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
+
+        const expectedText = `Displaying all\n${params.totalCount} \nof ${params.totalCount} records`;
+        await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+
+        // select 'Television' (not deletable)
+        await RecordsetLocators.getRowCheckboxInput(rsModal, 0).click();
+        // select 'Space Heater' (deletable)
+        await RecordsetLocators.getRowCheckboxInput(rsModal, 2).click();
+
+        // click on submit
+        await ModalLocators.getSubmitButton(rsModal).click();
+
+        // confirm the unlink
+        const confirmModal = ModalLocators.getConfirmDeleteModal(page);
+        await expect.soft(confirmModal).toBeVisible();
+        await expect.soft(ModalLocators.getModalTitle(confirmModal)).toHaveText('Confirm Unlink');
+        await expect.soft(ModalLocators.getModalText(confirmModal)).toHaveText('Are you sure you want to unlink 2 records?');
+        const okBtn = ModalLocators.getOkButton(confirmModal);
+        await expect.soft(okBtn).toHaveText('Unlink');
+        await okBtn.click();
+        await expect.soft(confirmModal).not.toBeAttached();
+
+        // make sure summary modal shows up
+        const summaryModal = ModalLocators.getErrorModal(page);
+        await expect.soft(summaryModal).toBeVisible();
+        await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
+        await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.failedPostDeleteMessage);
+
+        // close the summary modal
+        await ModalLocators.getCloseBtn(summaryModal).click();
+        await expect.soft(summaryModal).not.toBeAttached();
+      });
+
+      await test.step('should have rows still selected after failed delete', async () => {
+        // make sure the recordset modal rows don't update
+        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
+
+        await expect.soft(RecordsetLocators.getSelectedRowsFilters(rsModal)).toHaveCount(2);
+      });
+
+      await test.step('should deselect the 2nd row and resubmit delete', async () => {
+        // deselect 'Television' (not deletable)
+        await RecordsetLocators.getRowCheckboxInput(rsModal, 0).click();
+
+        // click on submit
+        await ModalLocators.getSubmitButton(rsModal).click();
+
+        // confirm the unlink
+        const confirmModal = ModalLocators.getConfirmDeleteModal(page);
+        await expect.soft(confirmModal).toBeVisible();
+        await expect.soft(ModalLocators.getModalTitle(confirmModal)).toHaveText('Confirm Unlink');
+        await expect.soft(ModalLocators.getModalText(confirmModal)).toHaveText('Are you sure you want to unlink 1 records?');
+        const okBtn = ModalLocators.getOkButton(confirmModal);
+        await expect.soft(okBtn).toHaveText('Unlink');
+        await okBtn.click();
+        await expect.soft(confirmModal).not.toBeAttached();
+
+        // make sure summary modal shows up
+        const summaryModal = ModalLocators.getErrorModal(page);
+        await expect.soft(summaryModal).toBeVisible();
+        await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
+        await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.successPostDeleteMessage);
+
+        // close the summary modal
+        await ModalLocators.getCloseBtn(summaryModal).click();
+        await expect.soft(summaryModal).not.toBeAttached();
+
+        // make sure the recordset modal rows update
+        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
+
+        // close the recordset modal
+        await ModalLocators.getCloseBtn(rsModal).click();
+        await expect.soft(rsModal).not.toBeAttached();
+
+        // make sure correct values are displayed
+        const currentEl = RecordLocators.getRelatedTableAccordion(page, params.displayname);
+        await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
+      });
+    });
+
+    // remove acls
+    test.afterAll((async ({ }, testInfo) => {
+      const catalogId = getCatalogID(testInfo.project.name);
+      await importACLs({
+        'catalog': {
+          'id': catalogId,
+          'schemas': {
+            'product-unordered-related-tables-links': {
+              'tables': {
+                'accommodation': {
+                  'acls': {
+                    'select': []
+                  }
+                },
+                'related_table': {
+                  'acls': {
+                    'select': [],
+                    'delete': []
+                  }
+                },
+                'association_table': {
+                  'acls': {
+                    'select': []
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    }));
+
+  });
+
+
+  test('for a pure and binary association with page_size and hide_row_count', async ({ page }, testInfo) => {
+    await testRelatedTablePresentation(
+      page,
+      testInfo,
+      {
+        testTitle: 'association table, has page_size',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'accommodation_image',
+        tableName: 'accommodation_image',
+        associationLeafTableName: 'related_name',
+        baseTableName: 'Accommodations',
+        count: 3,
+        pageSize: 2,
+        isAssociation: true,
+        canEdit: true
+      }
+    )
+  });
+
 
 });
 
-test.skip('Scroll to query parameter', () => {
+test.describe('Scroll to query parameter', () => {
   test('after page load should scroll to the related table', async ({ page, baseURL }, testInfo) => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);

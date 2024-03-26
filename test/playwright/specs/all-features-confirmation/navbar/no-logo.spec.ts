@@ -5,7 +5,8 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar
 import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 
 // utils
-import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/playwright/utils/user-utils';
 
 test.describe('Navbar', () => {
 

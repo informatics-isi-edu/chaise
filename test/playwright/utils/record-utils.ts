@@ -7,7 +7,7 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
 import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
 
-import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 import { clickAndVerifyDownload, clickNewTabLink, getClipboardContent, testTooltip } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
@@ -56,7 +56,7 @@ type RelatedTableTestParams = {
 };
 
 export const testRelatedTablePresentation = async (page: Page, testInfo: TestInfo, params: RelatedTableTestParams) => {
-  const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+  const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
   const markdownToggleLink = RecordLocators.getRelatedTableToggleDisplay(page, params.displayname, params.isInline);
   const rows = RecordsetLocators.getRows(currentEl);
   const tableName = params.isAssociation && params.associationLeafTableName ? params.associationLeafTableName : params.tableName;
@@ -145,18 +145,20 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
       if (params.viewMore) {
         await test.step('should go to the recordset app with correct set of filters', async () => {
+          if (!params.viewMore) return;
+
           await exploreButton.click();
           await page.waitForURL('**/recordset/**');
           await RecordsetLocators.waitForRecordsetPageReady(page);
 
-          await expect.soft(RecordsetLocators.getPageTitleElement(page), 'recordset title missmatch.').toHaveText(params.viewMore!.displayname);
+          await expect.soft(RecordsetLocators.getPageTitleElement(page), 'recordset title missmatch.').toHaveText(params.viewMore.displayname);
 
           const chiclets = RecordsetLocators.getFacetFilters(page);
-          await expect.soft(chiclets, 'filter didn\'t show up').toHaveCount(1);
+          await expect.soft(chiclets).toHaveCount(1);
 
           // const content = await chiclets.first().textContent();
           // expect.soft(content, 'filter missmatch').toBe(params.viewMore!.filter)
-          await expect.soft(chiclets.nth(0)).toHaveText(params.viewMore!.filter);
+          await expect.soft(chiclets.nth(0)).toHaveText(params.viewMore.filter);
 
           await page.goBack();
           await RecordLocators.waitForRecordPageReady(page);
@@ -204,7 +206,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
   await test.step('row level', async () => {
     if (params.rowViewPaths) {
-      await test.step("'View Details' button should have the correct link.", async () => {
+      await test.step('`View Details` button should have the correct link.', async () => {
         if (!params.rowViewPaths) return;
 
         let index = 0;
@@ -219,14 +221,14 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
     if (typeof params.canEdit === 'boolean') {
       if (!params.canEdit) {
         await test.step('edit button should not be visible.', async () => {
-          expect.soft(currentEl.locator('.edit-action-button')).toBeVisible();
+          await expect.soft(currentEl.locator('.edit-action-button')).toBeVisible();
         });
       } else if (params.rowViewPaths) {
         // only testing the first link (it's a button not a link, so testing all of them would add a lot of test time)
         await test.step('clicking on edit button should open a tab to recordedit page', async () => {
           const btn = RecordsetLocators.getRowEditButton(currentEl, 0);
 
-          expect.soft(btn).toBeVisible();
+          await expect.soft(btn).toBeVisible();
 
           // silence the ts error
           if (!params.rowViewPaths) return;
@@ -239,12 +241,12 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
     }
 
     if (typeof params.canDelete === 'boolean') {
-      test.step('Delete or Unlink button', async () => {
+      await test.step('Delete or Unlink button', async () => {
         let deleteBtn: Locator;
         if (params.canDelete) {
           await test.step('should be visible', async () => {
             deleteBtn = RecordsetLocators.getRowDeleteButton(currentEl, 0);
-            expect.soft(deleteBtn).toBeVisible();
+            await expect.soft(deleteBtn).toBeVisible();
           });
 
           // TODO not working
@@ -388,9 +390,11 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
 
   if (params.citation) {
     await test.step('should have a citation present', async () => {
+      if (!params.citation) return;
+
       // verify citation
       await expect.soft(ModalLocators.getCitationHeader(shareCiteModal)).toHaveText('Data Citation');
-      await expect.soft(ModalLocators.getCitationText(shareCiteModal)).toHaveText(params.citation!);
+      await expect.soft(ModalLocators.getCitationText(shareCiteModal)).toHaveText(params.citation);
 
       // verify bibtex
       await expect.soft(ModalLocators.getDownloadCitationHeader(shareCiteModal)).toHaveText('Download Data Citation:');
@@ -447,15 +451,15 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
       newPage = await clickNewTabLink(addBtn);
       await newPage.waitForURL(`**/${params.schemaName}:${params.tableName}**`);
       await expect.soft(newPage).toHaveURL(/prefill\=/);
-      await expect.soft(RecordeditLocators.getPageTitle(newPage)).toHaveText(new RegExp(`/Create 1 ${params.tableDisplayname}/`))
+      await expect.soft(RecordeditLocators.getPageTitle(newPage)).toHaveText(`Create 1 ${params.tableDisplayname} record`);
 
-      await RecordeditLocators.waitForRecordeditPageReady(page);
+      await RecordeditLocators.waitForRecordeditPageReady(newPage);
     });
 
-    await test.step('the opened form should have the prefill value for foreignkey.', async () => {
+    await test.step('the opened form should have the prefilled value for theforeignkey.', async () => {
       if (!newPage) return;
 
-      for (const colName in params.prefilledValues) {
+      for await (const colName of Object.keys(params.prefilledValues)) {
         const expectedCol = params.prefilledValues[colName];
 
         let input;
@@ -464,9 +468,9 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
             input = RecordeditLocators.getForeignKeyInputDisplay(newPage, colName, 1);
             await expect.soft(input).toHaveText(expectedCol.value);
             if (expectedCol.isDisabled) {
-              await expect.soft(input).toHaveClass(/input\-disabled/);
+              await expect.soft(input).toHaveClass(/input-disabled/);
             } else {
-              await expect.soft(input).not.toHaveClass(/input\-disabled/);
+              await expect.soft(input).not.toHaveClass(/input-disabled/);
             }
             break
           // TODO we should add other types if we need to
@@ -487,7 +491,7 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
       await newPage.waitForURL('**/record/**');
       await newPage.close();
 
-      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
     });
 
@@ -501,7 +505,7 @@ type AddAssociationTableParams = {
   modalTitle: string,
   totalCount: number,
   disabledRows: string[],
-  selectedOptions: number[],
+  selectOptions: number[],
   rowValuesAfter: RecordsetRowValue[],
   search?: {
     term: string,
@@ -573,16 +577,16 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
       });
     }
 
-    test.step('user should be able to select new values and submit.', async () => {
+    await test.step('user should be able to select new values and submit.', async () => {
       // select the options
-      for (const op of params.selectedOptions) {
+      for (const op of params.selectOptions) {
         await RecordsetLocators.getRowCheckboxInput(rsModal, op).click();
       }
 
       await ModalLocators.getSubmitButton(rsModal).click();
       await expect.soft(rsModal).not.toBeAttached();
 
-      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
 
     });
@@ -594,7 +598,8 @@ type BatchUnlinkAssociationParams = {
   isInline?: boolean,
   modalTitle: string,
   totalCount: number,
-  selectedOptions: number[],
+  selectOptions: number[],
+  postDeleteMessage: string,
   rowValuesAfter: RecordsetRowValue[],
 }
 
@@ -619,7 +624,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
 
     await test.step('user should be able to select values to unlink and submit.', async () => {
       // select the options
-      for (const op of params.selectedOptions) {
+      for (const op of params.selectOptions) {
         await RecordsetLocators.getRowCheckboxInput(rsModal, op).click();
       }
 
@@ -639,11 +644,14 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       // make sure summary modal shows up
       const summaryModal = ModalLocators.getErrorModal(page);
       await expect.soft(summaryModal).toBeVisible();
-      await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('atch Unlink Summary');
+      await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
+      await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.postDeleteMessage);
 
       // close the summary modal
       await ModalLocators.getCloseBtn(summaryModal).click();
+      await expect.soft(summaryModal).not.toBeAttached();
 
+      // make sure the recordset modal rows update
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
 
       // close the recordset modal
@@ -651,7 +659,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(rsModal).not.toBeAttached();
 
       // make sure correct values are displayed
-      const currentEl = params.isInline ? RecordLocators.getEntityRelatedTable(page, params.displayname) : RecordLocators.getRelatedTableAccordion(page, params.displayname);
+      const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
     });
 

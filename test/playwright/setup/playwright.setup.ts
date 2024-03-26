@@ -4,8 +4,9 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH, PRESET_PROJECT_NAME, setCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import { ENTITIES_PATH, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import { setCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
 
 /**
  *

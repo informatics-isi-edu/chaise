@@ -2,8 +2,9 @@ import { FullConfig } from '@playwright/test';
 import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { removeAllCatalogs } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.import';
-import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { removeAllCatalogs } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import axios from 'axios';
 
 async function globalTeardown(config: FullConfig) {
   /**
@@ -29,7 +30,9 @@ async function globalTeardown(config: FullConfig) {
   // TODO
   // if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
   //   // cleanup the hatrac namespaces
-  //   promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
+  //   for (const ns of testConfiguration.hatracNamespaces) {
+  //     const response = await axios(ns, { method: 'DELETE', headers: { Cookie: process.env.AUTH_COOKIE! } });
+  //   }
   // }
 
   // remove the created catalogs
@@ -37,9 +40,10 @@ async function globalTeardown(config: FullConfig) {
     await removeAllCatalogs();
   }
 
-  // TODO
   // delete the entities file
-  // fs.unlinkSync(ENTITIES_PATH);
+  try {
+    fs.unlinkSync(ENTITIES_PATH);
+  } catch (exp) { }
 
 }
 

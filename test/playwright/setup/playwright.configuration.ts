@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import os from 'os';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { MAIN_USER_STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { MAIN_USER_STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 
 const getConfig = (options: TestOptions) => {
 

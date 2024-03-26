@@ -5,7 +5,8 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar
 import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
 
 // utils
-import { getMainUserSessionObject, getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/playwright/utils/user-utils';
 
 test.describe('Navbar', () => {
 

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import NavbarLocators from '@isrd-isi-edu/chaise/test/playwright/locators/navbar';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
 import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 
 test.describe('Navbar', () => {

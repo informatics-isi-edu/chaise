@@ -39,6 +39,7 @@ common/styles/navbar.css
 /playwright/.cache/
 test/playwright/.auth
 test/playwright/.download
+test/playwright/.upload
 
 # config files
 config/*-config.js

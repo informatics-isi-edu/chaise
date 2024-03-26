@@ -33,7 +33,35 @@ profileModal.waitFor({ state: 'detached' });
 
 - `toHaveText` is prefered to direct `innerText` or `textContent()`, but it doesn't handle calling on a parent element. So you have call it on the child.
   - https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text
--
+- If you want to run async code inside a loop, use `for ... of`
+  - Array:
+
+  ```ts
+  const disabledRows = ['one', 'three'];
+
+  let index = 0;
+  for (const expected of disabledRows) {
+    const disabledCell = RecordsetLocators.getRowFirstCell(page, index, true);
+    await expect.soft(disabledCell).toHaveText(expected);
+    index++;
+  }
+  ```
+
+
+  - Object:
+
+  ```ts
+  const values = {
+    'col1': 1,
+    'col2': 2
+  }
+
+  let index = 0;
+  for (const colName of Object.keys(values)) {
+    await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(values[colName]);
+    index++;
+  }
+  ```
 
 ### Common errors
 
@@ -86,6 +114,8 @@ const samePage = locator.page()
 const context = samePage.context();
 
 ```
+
+Iterate over locators: https://playwright.dev/docs/api/class-locator#locator-all
 
 
 ## Assertions

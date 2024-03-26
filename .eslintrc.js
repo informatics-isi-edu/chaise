@@ -71,5 +71,14 @@ module.exports = {
     'common/**/*', 'lib/**/*', 'styles/**/*',
     // we might want to remove the following later:
     'test/e2e/*', 'config/*'
+  ],
+  // without the following eslint stopped working.
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      parserOptions: {
+        project: ['./tsconfig.json'],
+      },
+    }
   ]
 };

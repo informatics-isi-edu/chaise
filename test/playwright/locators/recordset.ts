@@ -18,15 +18,27 @@ export default class RecordsetLocators {
     return container.locator('#page-title');
   }
 
-  // ---------------- facet panel selectors ------------------ //
+  // ---------------- facet chiclet selectors ---------------- //
 
-  static getSidePanel(container: Page | Locator): Locator {
-    return container.locator('.side-panel-resizable');
+  static getSelectedRowsFilters(container: Page | Locator): Locator {
+    // // adding ".selected-chiclet-name" to the selector to not select the clear-all-btn
+    return container.locator('.selected chiclets .selected-chiclet .selected-chiclet-name');
   }
-
 
   static getFacetFilters(container: Page | Locator): Locator {
     return container.locator('.chiclets-container .filter-chiclet');
+  }
+
+  static getClearAllFilters(container: Page | Locator): Locator {
+    return container.locator('.clear-all-filters');
+  }
+
+  static getClearCustomFilters(container: Page | Locator): Locator {
+    return container.locator('.clear-custom-filters');
+  }
+
+  static getClearCustomFacets(container: Page | Locator): Locator {
+    return container.locator('.clear-custom-facets');
   }
 
   // --------------- main search selectors ------------------- //
@@ -48,7 +60,7 @@ export default class RecordsetLocators {
   }
 
   static getSearchClearButton(container: Page | Locator): Locator {
-    return RecordsetLocators.getMainSearchBox(container).locator('remove-search-btn');
+    return RecordsetLocators.getMainSearchBox(container).locator('.remove-search-btn');
   }
 
   // --------------- table-level selectors ------------------- //
@@ -133,6 +145,14 @@ export default class RecordsetLocators {
   static getRowDeleteButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
   }
+
+
+  // ---------------- facet panel selectors ------------------ //
+
+  static getSidePanel(container: Page | Locator): Locator {
+    return container.locator('.side-panel-resizable');
+  }
+
 
 
 }

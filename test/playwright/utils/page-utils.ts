@@ -1,5 +1,5 @@
 import { Page, Locator, BrowserContext, expect } from '@playwright/test';
-import { DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.parameters';
+import { DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 
 import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';

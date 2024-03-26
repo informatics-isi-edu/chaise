@@ -17,4 +17,11 @@ export const performLogin = async (cookie: any, storagePath: string, page: Page)
   await page.context().storageState({ path: storagePath });
 }
 
+/**
+ * return the session object for the main user (catalog owner).
+ * (populated during setup)
+ */
+export const getMainUserSessionObject = () => {
+  return JSON.parse(process.env.WEBAUTHN_SESSION!);
+}
 
