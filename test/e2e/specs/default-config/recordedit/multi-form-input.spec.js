@@ -454,14 +454,21 @@ const testParams = {
             ''
           ]
         }
+      },
+      {
+        type: 'array',
+        column_displayname: 'array_text',
+        column_name: 'array_text',
+        // TODO Aniket add the props
       }
     ],
     submission_results: [
-      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
-      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
-      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png'],
-      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png'],
-      ['5', '', 'manual', '2', '', '', '', 'true', '', ''],
+      // TODO Aniket add the expected array value
+      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png', 'TODO ANIKET'],
+      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png', 'TODO ANIKET'],
+      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png', 'TODO ANIKET'],
+      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png', 'TODO ANIKET'],
+      ['5', '', 'manual', '2', '', '', '', 'true', '', '', 'TODO ANIKET'],
     ]
   },
   submission: {
@@ -470,7 +477,7 @@ const testParams = {
     table_displayname: 'main',
     result_columns: [
       'id', 'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
+      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
     ],
     test_results: true,
     files: testFiles
