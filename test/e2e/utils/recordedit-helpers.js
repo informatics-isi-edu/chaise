@@ -1996,6 +1996,9 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
  *  modal_num_rows,
  *  modal_option_index,
  *
+ * // array props (currently only supports array of text):
+ *  value: string[]
+ *
  * }
  *
  * @param {string} name input name
@@ -2077,6 +2080,12 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
         exports.selectFileReturnPromise(valueProps.value, fileInput, fileTextInput).then(() => {
           resolve();
         }).catch(err => reject(err));
+        break;
+      case 'array':
+        // NOTE we're assuming it's array of text
+
+        // TODO Aniket set the array value
+
         break;
       default:
         let inputEl;
