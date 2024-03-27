@@ -19,6 +19,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import React from 'react';
 
 export type InputSwitchProps = {
   /**
@@ -130,6 +131,18 @@ export type InputSwitchProps = {
    * whether we should display the date/time labels
    */
   displayDateTimeLabels?: boolean
+  /**
+   * `optional`additional controller rules for the input field.
+   *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
+   */
+  additionalControllerRules?: {
+    [key: string]: (string | number | boolean | RegExp | Function | Object) | RuleWithMessage
+  }
+};
+
+export type RuleWithMessage = {
+  value: (boolean | number | RegExp),
+  message: string
 };
 
 const InputSwitch = ({
@@ -157,6 +170,7 @@ const InputSwitch = ({
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
   displayDateTimeLabels,
+  additionalControllerRules,
   foreignKeyCallbacks
 }: InputSwitchProps): JSX.Element | null => {
 
@@ -190,6 +204,7 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -226,7 +241,9 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          additionalControllerRules={additionalControllerRules}
           foreignKeyCallbacks={foreignKeyCallbacks}
+          additionalControllerRules={additionalControllerRules}
         />
       case 'dropdown-select':
         if (!columnModel) {
@@ -272,6 +289,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />
       case 'timestamp':
         return <DateTimeField
@@ -291,6 +309,7 @@ const InputSwitch = ({
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'date':
         return <DateField
@@ -307,6 +326,7 @@ const InputSwitch = ({
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'integer2':
       case 'integer4':
@@ -324,6 +344,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'boolean':
         return <BooleanField
@@ -339,6 +360,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'markdown':
       case 'longtext':
@@ -355,6 +377,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'json':
       case 'jsonb':
@@ -371,6 +394,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'color':
         return <ColorField
@@ -385,6 +409,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'text':
       default:
@@ -400,9 +425,10 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />
     }
   })();
 };
 
-export default memo(InputSwitch);
+export default React.memo(InputSwitch);

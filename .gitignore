@@ -40,3 +40,6 @@ config/*-config.js
 /chaise-config.js
 /google-dataset-config.js
 viewer/viewer-config.js
+
+# ignore private key
+sshKey
