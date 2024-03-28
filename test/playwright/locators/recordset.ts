@@ -146,6 +146,10 @@ export default class RecordsetLocators {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
   }
 
+  static getRowSelectButton(container: Page | Locator, rowIndex: number): Locator {
+    return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.select-action-button');
+  }
+
 
   // ---------------- facet panel selectors ------------------ //
 

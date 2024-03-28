@@ -53,6 +53,8 @@ const testParams = {
   scrollToDisplayname: 'table_w_aggregates'
 };
 
+// TODO playwright: we should break this file into at least two files
+
 test.describe('Related tables', () => {
   const keys = [];
   keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
@@ -106,7 +108,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'inbound related, no applink or row_markdown_pattern',
         tableName: 'booking',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'booking',
@@ -114,8 +115,7 @@ test.describe('Related tables', () => {
         count: 6,
         canDelete: true,
         canEdit: true,
-        inlineComment: true,
-        comment: 'booking inline comment',
+        inlineComment: 'booking inline comment',
         bulkEditLink: [
           `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
           'product-unordered-related-tables-links:booking',
@@ -183,7 +183,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'inbound related, has applink defined as search',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'schedule',
         tableName: 'schedule',
@@ -202,7 +201,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'inbound related, has row_markdown_pattern',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'media',
         tableName: 'media',
@@ -221,7 +219,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'association table',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'association_table',
         tableName: 'association_table',
@@ -475,7 +472,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'association table, has page_size',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'accommodation_image',
         tableName: 'accommodation_image',
@@ -509,7 +505,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'association table, has markdown',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'association_table_markdown',
         tableName: 'association_table_markdown',
@@ -530,7 +525,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'related with a path of length 3',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'related_table_2',
         tableName: 'related_table_2',
@@ -559,7 +553,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'related with aggregate columns',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'table_w_aggregates',
         tableName: 'table_w_aggregates',
@@ -588,7 +581,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'has markdown that results in empty string',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'table_w_invalid_row_markdown_pattern',
         tableName: 'table_w_invalid_row_markdown_pattern',
@@ -614,8 +606,7 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'related table, has waitfor entityset and markdown_pattern (has markdown comment)',
-        inlineComment: true,
+        inlineComment: 'related table, has waitfor entityset and markdown_pattern (has markdown comment)',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'inbound related with display.wait_for entityset',
         tableName: 'accommodation_inbound1',
@@ -637,7 +628,6 @@ test.describe('Related tables', () => {
       page,
       testInfo,
       {
-        testTitle: 'related table, has waitfor entityset and markdown_pattern',
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'inbound related with display.wait_for agg',
         tableName: 'accommodation_inbound3',
@@ -653,6 +643,40 @@ test.describe('Related tables', () => {
 
   // the rest of test cases are special cases that we don't need to run on CI
   if (process.env.CI) return;
+
+  // TODO playwright: the rest of test cases should be added here.
+
+  /**
+   * these test cases rely on the previous related and assoc tests
+   * since they are basically the same path with just added filters
+   */
+  test.describe('regarding usage of filter in source', () => {
+
+    test('for a related entity with wait_for aggregate and markdown_pattern', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(
+        page,
+        testInfo,
+        {
+          inlineComment: 'inbound related, filter on main (comment _markdown_ is turned off)',
+          schemaName: 'product-unordered-related-tables-links',
+          displayname: 'inbound related with filter on main table',
+          tableName: 'booking',
+          baseTableName: 'Accommodations',
+          count: 2,
+          rowValues: [
+            ['247.0000', ''],
+            ['100.0000', '2016-06-01 00:00:00'],
+            ['110.0000', '2016-05-19 01:00:00'],
+            ['120.0000', '2015-11-10 00:00:00'],
+            ['180.0000', '2016-09-04 01:00:00'],
+            ['80.0000', '2016-01-01 00:00:00'],
+          ],
+          canCreate: true
+        }
+      );
+    });
+
+  });
 
 });
 

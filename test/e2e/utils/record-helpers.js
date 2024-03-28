@@ -209,6 +209,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    // TODO playwright: modify testRecordMainSectionValues and use it here as well
     it("should validate the values of each column", function () {
         expect(chaisePage.recordPage.getAllColumnValues().count()).toEqual(notNullColumns.length, "length missmatch.");
         notNullColumns.forEach(function (column) {

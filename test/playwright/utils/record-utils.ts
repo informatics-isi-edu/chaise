@@ -4,13 +4,40 @@ import { Locator, Page, TestInfo, expect, test } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
-import PageLocators from '@isrd-isi-edu/chaise/test/playwright/locators/page';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
 
 import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 import { clickAndVerifyDownload, clickNewTabLink, getClipboardContent, testTooltip } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
+
+
+/**
+ * TODO this function is currently only used for recordedit result test, but
+ * we should also use this for the 'should validate the values of each column' test in record-helpers.js
+ */
+export const testRecordMainSectionValues = async (page: Page, expectedColumnNames: string[], expectedColumnValues: RecordsetRowValue) => {
+  await RecordLocators.waitForRecordPageReady(page);
+
+  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnNames.length);
+  await expect(RecordLocators.getAllColumnNames(page)).toHaveText(expectedColumnNames);
+
+  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnValues.length);
+
+  const allValues = RecordLocators.getAllColumnValues(page);
+  let index = 0;
+  for (const expectedValue of expectedColumnValues) {
+    const value = allValues.nth(index);
+    if (typeof expectedValue === 'string') {
+      await expect.soft(value).toHaveText(expectedValue);
+    } else {
+      const link = value.locator('a');
+      expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
+      await expect.soft(link).toHaveText(expectedValue.caption);
+    }
+  }
+  index++;
+}
 
 
 type ShareCiteModalParams = {
@@ -128,7 +155,6 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
 }
 
 type RelatedTableTestParams = {
-  testTitle: string,
   tableName: string,
   schemaName: string,
   /**
@@ -147,8 +173,7 @@ type RelatedTableTestParams = {
    */
   entityMarkdownName?: string,
 
-  comment?: string,
-  inlineComment?: boolean,
+  inlineComment?: string,
 
   count: number,
 
@@ -199,12 +224,12 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
     });
   }
 
-  if (params.inlineComment && params.comment) {
+  if (params.inlineComment) {
     await test.step('inline comment should be displayed.', async () => {
       const inlineComment = RecordLocators.getRelatedTableInlineComment(page, params.displayname);
       // we have to have this otherwise typescript will complain
-      if (!params.comment) return;
-      await expect.soft(inlineComment).toHaveText(params.comment);
+      if (!params.inlineComment) return;
+      await expect.soft(inlineComment).toHaveText(params.inlineComment);
     });
   }
 

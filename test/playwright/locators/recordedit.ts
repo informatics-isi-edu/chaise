@@ -45,12 +45,18 @@ export default class RecordeditLocators {
     await RecordeditLocators.getSubmitRecordButton(container).waitFor({ state: 'visible', timeout });
   }
 
+  // --------------- page-level selectors ---------------- //
+
   static async submitForm(container: Locator | Page) {
     await RecordeditLocators.getSubmitRecordButton(container).click();
   }
 
   static getPageTitle(container: Locator | Page): Locator {
     return container.locator('#page-title');
+  }
+
+  static getPageTitleLink(container: Locator | Page): Locator {
+    return container.locator('#page-title a');
   }
 
   static getRequiredInfoEl(container: Locator | Page): Locator {
@@ -61,15 +67,206 @@ export default class RecordeditLocators {
     return container.locator('#submit-record-button');
   }
 
-  static getInputForAColumn(container: Locator | Page, name: string, formNumber: number) {
+  static getCloneFormInput(container: Locator | Page): Locator {
+    return container.locator('#copy-rows-input');
+  }
+
+  static getCloneFormInputSubmitButton(container: Locator | Page): Locator {
+    return container.locator('#copy-rows-submit');
+  }
+
+  static getRecordeditResetButton(container: Locator | Page): Locator {
+    return container.locator('#recordedit-reset');
+  }
+
+  static getBulkDeleteButton(container: Locator | Page): Locator {
+    return container.locator('#bulk-delete-button');
+  }
+
+  static getRecordeditForms(container: Locator | Page): Locator {
+    return container.locator('.recordedit-form .form-header');
+  }
+
+  static getRecoreditResultsetTables(container: Locator | Page): Locator {
+    return container.locator('.resultset-tables');
+  }
+
+
+  // ---------------- input-level selectors/functions -------------- //
+  static async clearInput(inputEl: Locator) {
+    await inputEl.focus();
+    await inputEl.page().keyboard.press('Meta+A');
+    await inputEl.page().keyboard.press('Backspace');
+  }
+
+  /**
+    * returns the cell (entity-value).
+    * this is useful if we want to test the extra classes attached to it.
+    */
+  static getFormInputCell(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    // TODO does this work?
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('xpath=..')
+  }
+
+  static getInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
     return container.locator(`input[name="${formNumber}-${name}"]`);
   }
 
+  static getTextAreaForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`textarea[name="${formNumber}-${name}"]`);
+  }
+
+  static getDateInputsForAColumn(container: Locator | Page, name: string, formNumber: number): { date: Locator, todayBtn: Locator } {
+    formNumber = formNumber || 1;
+    const inputName = `${formNumber}-${name}`;
+    return {
+      date: container.locator(`input[name="${inputName}"]`),
+      todayBtn: container.locator(`.input-switch-container-${inputName} .date-today-btn`)
+    }
+  }
+
+  static getTimestampInputsForAColumn(container: Locator | Page, name: string, formNumber: number): {
+    date: Locator, time: Locator, nowBtn: Locator, clearBtn: Locator
+  } {
+    formNumber = formNumber || 1;
+    const inputName = `${formNumber}-${name}`;
+    const wrapper = container.locator(`.input-switch-container-${inputName}`);
+    return {
+      date: wrapper.locator(`input[name="${inputName}-date"]`),
+      time: wrapper.locator(`input[name="${inputName}-time"]`),
+      nowBtn: wrapper.locator('.date-time-now-btn'),
+      clearBtn: wrapper.locator('.date-time-clear-btn')
+    };
+  }
+
+  static getInputControlForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control');
+  }
+
+  static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control > span');
+  }
+
+  // -------------- color input selectors -------------- //
+  static getColorInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('input');
+  }
+
+  static async getColorInputBackground(page: Page, name: string, formNumber: number): Promise<string> {
+    formNumber = formNumber || 1;
+    return await page.evaluate(async () => {
+      const el = document.querySelector(`.input-switch-container-${formNumber}-${name} .chaise-color-picker-preview`) as HTMLElement;
+      const ctx = document.createElement('canvas').getContext('2d');
+      if (!ctx || !el) return '';
+      ctx.fillStyle = el.style.backgroundColor;
+      return ctx.fillStyle;
+    })
+  }
+
+  static getColorInputBtn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name} button`);
+  }
+
+  static getColorInputPopup(container: Locator | Page): Locator {
+    return container.locator('.chaise-color-picker-popup:not(.sp-hidden)');
+  }
+
+  static getColorInputPopupInput(container: Locator | Page): Locator {
+    return RecordeditLocators.getColorInputPopup(container).locator('.sp-input');
+  }
+
+  static getColorInputPopupClearBtn(container: Locator | Page): Locator {
+    return RecordeditLocators.getColorInputPopup(container).locator('.sp-clear');
+  }
+
+  static getColorInputPopupSelectBtn(container: Locator | Page): Locator {
+    return RecordeditLocators.getColorInputPopup(container).locator('.sp-choose');
+  }
+
+  // -------------- foreignkey input selectors -------------- //
   static getForeignKeyInputDisplay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
     columnDisplayName = makeSafeIdAttr(columnDisplayName);
     return container.locator(`#form-${formNumber}-${columnDisplayName}-display`);
   }
 
+  static getForeignKeyInputButton(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
+    columnDisplayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`#form-${formNumber}-${columnDisplayName}-button`);
+  }
 
+  static getForeignKeyInputClear(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
+    return RecordeditLocators.getForeignKeyInputDisplay(container, columnDisplayName, formNumber).locator('.remove-input-btn');
+  }
+
+
+  // ----------------- multi form input selectors ------------------- //
+
+  static getMultiFormToggleButton(container: Locator | Page, columnDisplayName: string): Locator {
+    columnDisplayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator('.multi-form-' + columnDisplayName);
+  }
+
+  static getMultiFormApplyBtn(container: Locator | Page): Locator {
+    return container.locator('.multi-form-input-apply-btn');
+  }
+
+  static getMultiFormClearBtn(container: Locator | Page): Locator {
+    return container.locator('.multi-form-input-clear-btn');
+  }
+
+  static getMultiFormCloseBtn(container: Locator | Page): Locator {
+    return container.locator('.multi-form-input-close-btn');
+  }
+
+  static getMultiFormInputCheckbox(container: Locator | Page): Locator {
+    return container.locator('.multi-form-input-checkbox input');
+  }
+
+  static getMultiFormInputCheckboxLabel(container: Locator | Page): Locator {
+    return container.locator('.multi-form-input-checkbox label');
+  }
+
+
+  // ------------------ dropdown selectors  --------------------- //
+  static getDropdownElementByName = (container: Locator | Page, name: string, formNumber: number) => {
+    return container.locator(`.input-switch-container-${formNumber}-${name} .dropdown-toggle`);
+  }
+
+  // --------------- foreign key dropdown selectors ------------- //
+  static getFkeyDropdowns(container: Locator | Page): Locator {
+    return container.locator('.fk-dropdown');
+  }
+
+  static getDropdownSelectableOptions(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show').locator('.dropdown-select-value');
+  }
+
+  static getDropdownLoadMoreRow(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu .load-more-row');
+  }
+
+  static getDropdownSearch(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu .search-row .chaise-input-control input');
+  }
+
+  // ------------- boolean dropdown selectors ----------------- //
+  static getDropdownText(dropdown: Locator): Locator {
+    return dropdown.locator('.chaise-input-control');
+  }
+
+  static getOpenDropdownOptionsContainer(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show');
+  }
+
+  // Gets the boolean dropdown options after the input is opened and attached to input container
+  static getDropdownOptions(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show').locator('li');
+  }
 }

@@ -10,31 +10,52 @@ export default class RecordLocators {
   }
 
   // ----------------- general selectors -------------------- //
-  static getEntityTitleElement(page: Page): Locator {
-    return page.locator('.entity-title');
+  static getEntityTitleElement(container: Locator | Page): Locator {
+    return container.locator('.entity-title');
   }
 
-  static getTableOfContentsRelatedSpinner(page: Page): Locator {
-    return page.locator('#rt-toc-loading');
+  static getTableOfContentsRelatedSpinner(container: Locator | Page): Locator {
+    return container.locator('#rt-toc-loading');
   }
 
-  static getSidePanelHeadings(page: Page): Locator {
-    return page.locator('.columns-container li.toc-heading');
+  static getSidePanelHeadings(container: Locator | Page): Locator {
+    return container.locator('.columns-container li.toc-heading');
   }
 
-  static getShareButton(page: Page): Locator {
-    return page.locator('.share-cite-btn');
+  static getShareButton(container: Locator | Page): Locator {
+    return container.locator('.share-cite-btn');
   }
 
   // ----------------- main section selectors ------------------------ //
 
-  static getMainSectionTable(page: Page): Locator {
-    return page.locator('.record-main-section-table');
+  static getMainSectionTable(container: Locator | Page): Locator {
+    return container.locator('.record-main-section-table');
   }
 
   static getEntityRelatedTable(container: Locator | Page, displayname: string): Locator {
     displayname = makeSafeIdAttr(displayname);
     return container.locator(`#entity-${displayname}`);
+  }
+
+  static getColumns(container: Locator | Page): Locator {
+    return container.locator('tr:not(.forced-hidden) td.entity-key');
+  }
+
+  static getAllColumnNames(container: Locator | Page): Locator {
+    return container.locator('tr:not(.forced-hidden) td.entity-key > span.column-displayname > span');
+  }
+
+  static getColumnNameElement(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} td.entity-key > span.column-displayname`);
+  }
+
+  static getAllColumnValues(container: Locator | Page): Locator {
+    return container.locator('tr:not(.forced-hidden) td.entity-value');
+  }
+
+  static getColumnValue(container: Locator | Page, columnName: string): Locator {
+    return container.locator(`#row-${columnName} .entity-value span`);
   }
 
   // --------------------- related table selectors ----------------- //

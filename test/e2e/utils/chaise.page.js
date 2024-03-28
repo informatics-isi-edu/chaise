@@ -5,10 +5,13 @@ var recordEditPage = function() {
     var that = this;
 
     // recordedit form view
+
+    // TODO playwright: renamed to getPageTitle
     this.getEntityTitleElement = function() {
         return element(by.css('.app-container #page-title'));
     };
 
+    // TODO playwright: renamed to getPageTitleLink
     this.getEntityTitleLinkElement = function() {
         return this.getEntityTitleElement().element(by.tagName('a'));
     };
@@ -455,6 +458,8 @@ var recordEditPage = function() {
     };
 
     /* alert selectors */
+
+    // TODO use getAlertErrorElement instead of this
     this.getAlertError = function() {
         /**
          * TODO while this is only used in recordedit, the submission might be

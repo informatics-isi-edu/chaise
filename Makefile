@@ -193,6 +193,9 @@ testdeleteprohibited-playwright: playwright-DELETE_PROHIBITED_PARALLEL_TESTS_PLA
 .PHONY: testdefaultconfig
 testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
+.PHONY: testdefaultconfig
+testdefaultconfig-playwright: test-DEFAULT_CONFIG_PARALLEL_TESTS_PLAYWRIGHT
+
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
 testfooter: test-FOOTER_TESTS
