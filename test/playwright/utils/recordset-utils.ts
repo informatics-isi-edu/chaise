@@ -15,16 +15,14 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
 
   let index = 0;
   for (const expectedRow of expectedRowValues) {
-    const cells = rows.nth(index).locator('td');
+    const cells = rows.nth(index).locator('td:not(.action-btns)');
 
-    // action-btns cell is also returned here (that's why +1)
-    await expectFn(cells).toHaveCount(expectedRow.length + 1);
+    await expectFn(cells).toHaveCount(expectedRow.length);
 
     for (let innerIndex = 0; innerIndex < expectedRow.length; innerIndex++) {
       const expectedCell = expectedRow[innerIndex];
 
-      // action-btns cell is also returned here (that's why +1)
-      const cell = cells.nth(innerIndex + 1);
+      const cell = cells.nth(innerIndex);
       await expectFn(cell).toBeVisible();
 
       if (typeof expectedCell === 'string') {

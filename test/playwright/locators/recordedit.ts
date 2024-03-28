@@ -147,9 +147,20 @@ export default class RecordeditLocators {
     return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control');
   }
 
+  static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.input-switch-error.text-danger');
+  }
+
+  // -------------- file input selectors --------------- //
   static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
     return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control > span');
+  }
+
+  static getFileInputButtonForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-group-append');
   }
 
   // -------------- color input selectors -------------- //

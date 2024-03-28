@@ -1,10 +1,9 @@
-import { test, expect, Page, TestInfo } from '@playwright/test';
-import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
-import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
+import { test, expect, Page } from '@playwright/test';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
-import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
-import { testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
+import {
+  createFiles, deleteFiles, setInputValue, testFormValuesForAColumn, testSubmission
+} from '@isrd-isi-edu/chaise/test/playwright/utils/recordedit-utils';
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
 
@@ -33,7 +32,7 @@ const testParams = {
     number_of_forms: 5,
     types: [
       {
-        type: 'textarea',
+        type: RecordeditInputType.MARKDOWN,
         column_name: 'markdown_col',
         column_displayname: 'markdown_col',
         apply_to_all: {
@@ -80,7 +79,7 @@ const testParams = {
         }
       },
       {
-        type: 'text',
+        type: RecordeditInputType.TEXT,
         column_name: 'text_col',
         column_displayname: 'text_col',
         apply_to_all: {
@@ -127,7 +126,7 @@ const testParams = {
         }
       },
       {
-        type: 'int',
+        type: RecordeditInputType.INT_4,
         column_name: 'int_col',
         column_displayname: 'int_col',
         apply_to_all: {
@@ -174,7 +173,7 @@ const testParams = {
         }
       },
       {
-        type: 'float',
+        type: RecordeditInputType.NUMBER,
         column_name: 'float_col',
         column_displayname: 'float_col',
         apply_to_all: {
@@ -221,7 +220,7 @@ const testParams = {
         }
       },
       {
-        type: 'date',
+        type: RecordeditInputType.DATE,
         column_name: 'date_col',
         column_displayname: 'date_col',
         apply_to_all: {
@@ -268,11 +267,11 @@ const testParams = {
         }
       },
       {
-        type: 'timestamp',
+        type: RecordeditInputType.TIMESTAMP,
         column_name: 'timestamp_col',
         column_displayname: 'timestamp_col',
         apply_to_all: {
-          date_value: '2021-10-09', time_value: '18:00',
+          value: { date_value: '2021-10-09', time_value: '18:00' },
           column_values_after: [
             { date_value: '2021-10-09', time_value: '18:00' },
             { date_value: '2021-10-09', time_value: '18:00' },
@@ -282,7 +281,7 @@ const testParams = {
           ],
         },
         apply_to_some: {
-          date_value: '2012-11-10', time_value: '06:00',
+          value: { date_value: '2012-11-10', time_value: '06:00' },
           deselected_forms: [1, 2],
           column_values_after: [
             { date_value: '2021-10-09', time_value: '18:00' },
@@ -303,7 +302,7 @@ const testParams = {
           ]
         },
         manual_test: {
-          date_value: '2006-06-06', time_value: '06:06',
+          value: { date_value: '2006-06-06', time_value: '06:06' },
           formNumber: 4,
           column_values_after: [
             { date_value: '2021-10-09', time_value: '18:00' },
@@ -315,7 +314,7 @@ const testParams = {
         }
       },
       {
-        type: 'boolean',
+        type: RecordeditInputType.BOOLEAN,
         column_displayname: 'boolean_col',
         column_name: 'boolean_col',
         apply_to_all: {
@@ -362,12 +361,11 @@ const testParams = {
         }
       },
       {
-        type: 'fk',
+        type: RecordeditInputType.FK_POPUP,
         column_displayname: 'fk_col',
         column_name: 'lIHKX0WnQgN1kJOKR0fK5A',
         apply_to_all: {
-          modal_num_rows: 4,
-          modal_option_index: 0,
+          value: { modal_num_rows: 4, modal_option_index: 0 },
           column_values_after: [
             'one',
             'one',
@@ -378,8 +376,7 @@ const testParams = {
         },
         apply_to_some: {
           deselected_forms: [1, 2],
-          modal_num_rows: 4,
-          modal_option_index: 2,
+          value: { modal_num_rows: 4, modal_option_index: 2 },
           column_values_after: [
             'one',
             'one',
@@ -400,8 +397,7 @@ const testParams = {
         },
         manual_test: {
           formNumber: 4,
-          modal_num_rows: 4,
-          modal_option_index: 3,
+          value: { modal_num_rows: 4, modal_option_index: 3 },
           column_values_after: [
             'one',
             'one',
@@ -412,7 +408,7 @@ const testParams = {
         }
       },
       {
-        type: 'upload',
+        type: RecordeditInputType.FILE,
         column_displayname: 'asset_col',
         column_name: 'asset_col',
         apply_to_all: {
@@ -459,28 +455,31 @@ const testParams = {
         }
       }
     ],
-    submission_results: [
-      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
-      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
-      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png'],
-      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png'],
-      ['5', '', 'manual', '2', '', '', '', 'true', '', ''],
-    ]
-  },
-  submission: {
-    table_name: 'main',
-    schema_name: 'multi-form-input',
-    table_displayname: 'main',
-    result_columns: [
-      'id', 'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-      'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
-    ],
-    test_results: true,
-    files: testFiles
+    submission: {
+      tableDisplayname: 'main',
+      resultColumnNames: [
+        'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
+        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
+      ],
+      resultRowValues: [
+        ['markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
+        ['markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png'],
+        ['some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png'],
+        ['manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png'],
+        ['', 'manual', '2', '', '', '', 'true', '', ''],
+      ]
+
+    }
   }
 };
 
 test.describe('multi form input in create mode', () => {
+
+  test.beforeAll(async () => {
+    if (!process.env.CI && testFiles.length > 0) {
+      await createFiles(testFiles);
+    }
+  });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}`;
@@ -601,10 +600,93 @@ test.describe('multi form input in create mode', () => {
   });
 
   test('for different column types', async ({ page }) => {
-    //
+
+    await test.step('should be able to add more forms to the page', async () => {
+      await RecordeditLocators.getCloneFormInput(page).fill((testParams.apply_tests.number_of_forms - 1).toString());
+      await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
+      await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(testParams.apply_tests.number_of_forms);
+    });
+
+    for (const params of testParams.apply_tests.types) {
+      // on CI don't run the upload tests
+      if (process.env.CI && params.type === RecordeditInputType.FILE) continue;
+
+      const colDisplayname = params.column_displayname;
+      const toggleBtn = RecordeditLocators.getMultiFormToggleButton(page, colDisplayname);
+      const applybtn = RecordeditLocators.getMultiFormApplyBtn(page);
+      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page)
+
+      await test.step(`${params.type}`, async () => {
+
+        await test.step('when no forms are selected, apply and clear buttons should be disabled', async () => {
+          await toggleBtn.click();
+          await expect.soft(applybtn).toBeVisible();
+
+          // deselect the first form that is selected by default
+          const cell = RecordeditLocators.getFormInputCell(page, params.column_name, 1);
+          await cell.click();
+          await expect.soft(cell).not.toHaveClass(/entity-active/);
+
+          await expect.soft(applybtn).toBeDisabled();
+          await expect.soft(clearBtn).toBeDisabled();
+        });
+
+        // select all is clicked here
+        await test.step('the apply button should be disabled if the value is empty', async () => {
+          await RecordeditLocators.getMultiFormInputCheckbox(page).click();
+          await expect.soft(applybtn).toBeDisabled();
+        });
+
+        await test.step('when all forms are selected, clicking on apply should apply change to all forms', async () => {
+          await setInputValue(page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_all.value);
+          await applybtn.click();
+          await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, true, params.apply_to_all.column_values_after);
+        });
+
+        await test.step('when some forms are selected, clicking on apply should apply change to selected forms', async () => {
+          // deselect some forms
+          for (const f of params.apply_to_some.deselected_forms) {
+            await RecordeditLocators.getFormInputCell(page, params.column_name, f).click();
+          }
+
+          await setInputValue(page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_some.value);
+          await applybtn.click();
+          await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, true, params.apply_to_some.column_values_after);
+        });
+
+        await test.step('when some forms are selected, clicking on clear should clear values in selected forms', async () => {
+          // deselect some forms
+          for (const f of params.clear_some.deselected_forms) {
+            await RecordeditLocators.getFormInputCell(page, params.column_name, f).click();
+          }
+
+          await clearBtn.click();
+          await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, true, params.clear_some.column_values_after);
+        });
+
+        await test.step('change values in the forms without affecting the other forms', async () => {
+          // close the multi-form-row
+          await toggleBtn.click();
+          await expect.soft(applybtn).not.toBeAttached();
+
+          // change one value manually
+          await setInputValue(page, params.manual_test.formNumber, params.column_name, colDisplayname, params.type, params.manual_test.value);
+          await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, false, params.manual_test.column_values_after);
+        });
+
+      });
+    }
+
+    await test.step('user should be able to submit and save data.', async () => {
+      await testSubmission(page, testParams.apply_tests.submission);
+    })
   });
 
-
+  test.afterAll(async () => {
+    if (!process.env.CI && testFiles.length > 0) {
+      await deleteFiles(testFiles);
+    }
+  });
 
 });
 

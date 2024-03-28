@@ -311,7 +311,7 @@ function copyChaiseConfig(chaiseConfigFilePath?: string) {
   }
 
   try {
-    require('child_process').execSync(cmd);
+    execSync(cmd);
     console.log(`Copied file ${chaiseFilePath} successfully to chaise-config.js \n`);
   } catch (exp) {
     console.log(exp);

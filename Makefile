@@ -166,6 +166,9 @@ testrecordset: test-RECORDSET_TESTS
 .PHONY: testparallel
 testparallel: test-PARALLEL_TESTS
 
+.PHONY: testparallel-playwright
+testparallel-playwright: playwright-PARALLEL_TESTS_PLAYWRIGHT
+
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
 testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS

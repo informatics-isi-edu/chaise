@@ -27,12 +27,16 @@ export type RecordeditFile = {
  * @param  {RecordeditFile[]} files array of objects with at least path, and size as attributes.
  */
 export const createFiles = async (files: RecordeditFile[]) => {
-  files.forEach((f) => {
-    if (f.skipCreation) return;
-    const path = resolve(UPLOAD_FOLDER, f.path);
-    execSync(`perl -e 'print \"1\" x ${f.size}' > ${path}`);
-    console.log(`${path} created`);
-  });
+
+  for (const f of files) {
+    if (!f.skipCreation) {
+      const path = resolve(UPLOAD_FOLDER, f.path);
+      execSync(`mkdir -p ${UPLOAD_FOLDER}`);
+      execSync(`perl -e 'print \"1\" x ${f.size}' > ${path}`);
+      console.log(`${path} created`);
+    }
+  }
+
 };
 
 /**
@@ -48,9 +52,15 @@ export const deleteFiles = async (files: RecordeditFile[]) => {
   });
 };
 
-export const selectFile = async (file: RecordeditFile, fileInput: Locator, fileTextInput: Locator) => {
-  const fileChooserPromise = fileInput.page().waitForEvent('filechooser');
-  await fileInput.click();
+/**
+ * can be used for setting a file for an input.
+ * @param file the file that will be selected
+ * @param fileInputBtn the button that opens the file chooser when users click on it
+ * @param fileTextInput the text input that displays the selected file
+ */
+export const selectFile = async (file: RecordeditFile, fileInputBtn: Locator, fileTextInput: Locator) => {
+  const fileChooserPromise = fileInputBtn.page().waitForEvent('filechooser');
+  await fileInputBtn.click();
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles(resolve(UPLOAD_FOLDER, file.path));
   await expect.soft(fileTextInput).toHaveText(file.name);
@@ -148,16 +158,17 @@ export const setInputValue = async (
       const inputs = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       await inputs.clearBtn.click();
       await inputs.date.fill('');
+      await inputs.date.fill(valueProps.date_value);
       await inputs.time.fill('');
       await inputs.time.fill(valueProps.time_value);
-      await inputs.time.fill(valueProps.date_value);
       break;
+
     case RecordeditInputType.FILE:
       if (typeof valueProps !== 'object' || !('name' in valueProps)) return;
 
-      const fileInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+      const fileInputBtn = RecordeditLocators.getFileInputButtonForAColumn(page, name, formNumber);
       const fileTextInput = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
-      await selectFile(valueProps, fileInput, fileTextInput);
+      await selectFile(valueProps, fileInputBtn, fileTextInput);
       break;
 
     default:
@@ -169,7 +180,6 @@ export const setInputValue = async (
       } else {
         inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
       }
-
       await RecordeditLocators.clearInput(inputEl);
       await inputEl.fill(valueProps);
       break;
@@ -211,7 +221,7 @@ export const testFormValuesForAColumn = async (
       case RecordeditInputType.FK_POPUP:
         if (typeof value !== 'string') return;
 
-        input = RecordeditLocators.getForeignKeyInputDisplay(page, name, formNumber);
+        input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
         if (allDisabled) {
           await expect.soft(input).toHaveClass(/input-disabled/);
         }
@@ -285,7 +295,7 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
     await expect.soft(resultset).toBeVisible();
 
-    const expectedTitle = `${params.resultRowValues.length} records ${isEditMode ? 'updated': 'created'} successfully`;
+    const expectedTitle = `${params.resultRowValues.length} ${params.tableDisplayname} records ${isEditMode ? 'updated' : 'created'} successfully`;
     await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(expectedTitle);
 
     await testRecordsetTableRowValues(resultset, params.resultRowValues, true);
