@@ -89,20 +89,20 @@ const getConfig = (options: TestOptions) => {
           permissions: ['clipboard-read', 'clipboard-write']
         },
       },
-      // {
-      //   name: 'firefox',
-      //   dependencies: ['pretest'],
-      //   use: {
-      //     ...devices['Desktop Firefox'],
-      //     ...extraBrowserParams,
-      //     launchOptions: {
-      //       firefoxUserPrefs: {
-      //         'dom.events.asyncClipboard.readText': true,
-      //         'dom.events.testing.asyncClipboard': true,
-      //       },
-      //     }
-      //   },
-      // },
+      {
+        name: 'firefox',
+        dependencies: ['pretest'],
+        use: {
+          ...devices['Desktop Firefox'],
+          ...extraBrowserParams,
+          launchOptions: {
+            firefoxUserPrefs: {
+              'dom.events.asyncClipboard.readText': true,
+              'dom.events.testing.asyncClipboard': true,
+            },
+          }
+        },
+      },
       // {
       //   name: 'webkit',
       //   dependencies: ['pretest'],
