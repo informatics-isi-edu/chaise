@@ -13,7 +13,7 @@ concurrency: chaise_env
 
 jobs:
   install-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
