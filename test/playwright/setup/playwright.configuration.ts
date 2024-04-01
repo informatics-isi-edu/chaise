@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import os from 'os';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
-import { MAIN_USER_STORAGE_STATE, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import { MAIN_USER_STORAGE_STATE, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 
 const getConfig = (options: TestOptions) => {
 
@@ -76,13 +76,13 @@ const getConfig = (options: TestOptions) => {
     // Configure projects for major browsers.
     projects: [
       {
-        name: PRESET_PROJECT_NAME,
+        name: PW_PROJECT_NAMES.PRETEST,
         testDir: __dirname,
         testMatch: 'playwright.pretest.ts'
       },
       {
-        name: 'chromium',
-        dependencies: ['pretest'],
+        name: PW_PROJECT_NAMES.CHROME,
+        dependencies: [PW_PROJECT_NAMES.PRETEST],
         use: {
           ...devices['Desktop Chrome'],
           ...extraBrowserParams,
@@ -90,8 +90,8 @@ const getConfig = (options: TestOptions) => {
         },
       },
       {
-        name: 'firefox',
-        dependencies: ['pretest'],
+        name: PW_PROJECT_NAMES.FIREFOX,
+        dependencies: [PW_PROJECT_NAMES.PRETEST],
         use: {
           ...devices['Desktop Firefox'],
           ...extraBrowserParams,
@@ -103,11 +103,11 @@ const getConfig = (options: TestOptions) => {
           }
         },
       },
-      // {
-      //   name: 'webkit',
-      //   dependencies: ['pretest'],
-      //   use: { ...devices['Desktop Safari'], ...extraBrowserParams },
-      // },
+      {
+        name: PW_PROJECT_NAMES.SAFARI,
+        dependencies: ['pretest'],
+        use: { ...devices['Desktop Safari'], ...extraBrowserParams },
+      },
     ],
   });
 

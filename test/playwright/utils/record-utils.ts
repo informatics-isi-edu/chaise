@@ -7,7 +7,7 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/playwright/locators/modal';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/playwright/locators/recordedit';
 
 import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
-import { APP_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 import { clickAndVerifyDownload, clickNewTabLink, getClipboardContent, testTooltip } from '@isrd-isi-edu/chaise/test/playwright/utils/page-utils';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/playwright/utils/recordset-utils';
 
@@ -67,7 +67,7 @@ type ShareCiteModalParams = {
   bibtextFile?: string,
 }
 
-export const testShareCiteModal = async (page: Page, params: ShareCiteModalParams) => {
+export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params: ShareCiteModalParams) => {
   const expectedLink = params.link;
   const shareBtn = RecordLocators.getShareButton(page);
   const shareCiteModal = ModalLocators.getShareCiteModal(page);
@@ -105,25 +105,28 @@ export const testShareCiteModal = async (page: Page, params: ShareCiteModalParam
     }
   });
 
-  await test.step('copy to clipboard buttons should be available and work', async () => {
-    const btns = ModalLocators.getShareLinkCopyBtns(shareCiteModal);
+  // unable to run this on safari due to permission issue (https://github.com/microsoft/playwright/issues/13037)
+  if (testInfo.project.name !== PW_PROJECT_NAMES.SAFARI) {
+    await test.step('copy to clipboard buttons should be available and work', async () => {
+      const btns = ModalLocators.getShareLinkCopyBtns(shareCiteModal);
 
-    await expect.soft(btns).toHaveCount(params.hasVersionedLink ? 2 : 1);
+      await expect.soft(btns).toHaveCount(params.hasVersionedLink ? 2 : 1);
 
-    // TODO test copy to clipboard
-    const liveBtn = btns.nth(params.hasVersionedLink ? 1 : 0);
-    await liveBtn.click();
+      // TODO test copy to clipboard
+      const liveBtn = btns.nth(params.hasVersionedLink ? 1 : 0);
+      await liveBtn.click();
 
-    let clipboardText = await getClipboardContent(page);
-    expect.soft(clipboardText).toBe(expectedLink);
-
-    if (params.verifyVersionedLink) {
-      await btns.first().click();
-
-      clipboardText = await getClipboardContent(page);
+      let clipboardText = await getClipboardContent(page);
       expect.soft(clipboardText).toBe(expectedLink);
-    }
-  });
+
+      if (params.verifyVersionedLink) {
+        await btns.first().click();
+
+        clipboardText = await getClipboardContent(page);
+        expect.soft(clipboardText).toBe(expectedLink);
+      }
+    });
+  }
 
   if (params.citation) {
     await test.step('should have a citation present', async () => {

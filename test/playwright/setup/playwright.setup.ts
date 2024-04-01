@@ -5,7 +5,7 @@ import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/playwright/setup/playwright.model';
 import { removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
-import { ENTITIES_PATH, PRESET_PROJECT_NAME } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
+import { ENTITIES_PATH, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/playwright/utils/constants';
 import { setCatalogID } from '@isrd-isi-edu/chaise/test/playwright/utils/catalog-utils';
 
 /**
@@ -46,7 +46,7 @@ export default async function globalSetup(config: FullConfig) {
 
   const projectNames: string[] = [];
   config.projects.forEach((p) => {
-    if (p.name === PRESET_PROJECT_NAME) return;
+    if (p.name === PW_PROJECT_NAMES.PRETEST) return;
     projectNames.push(p.name);
   });
 

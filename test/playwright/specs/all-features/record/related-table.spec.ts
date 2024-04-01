@@ -86,6 +86,7 @@ test.describe('Related tables', () => {
     const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/RID=${ridValue}`;
     await testShareCiteModal(
       page,
+      testInfo,
       {
         title: 'Share and Cite',
         link,

@@ -14,7 +14,7 @@ export enum APP_NAMES {
   RECORDEDIT = 'recordedit',
   RECORDSET = 'recordset',
   VIEWER = 'viewer'
-};
+}
 
 export const ERMREST_URL = process.env.ERMREST_URL;
 
@@ -41,4 +41,9 @@ export const UPLOAD_FOLDER = resolve(__dirname, '../.upload');
  */
 export const ENTITIES_PATH = 'entities.json';
 
-export const PRESET_PROJECT_NAME = 'pretest';
+export enum PW_PROJECT_NAMES {
+  PRETEST = 'pretest',
+  CHROME = 'chrome',
+  FIREFOX = 'firefox',
+  SAFARI = 'safari'
+}
