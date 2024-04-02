@@ -489,6 +489,68 @@ var recordEditPage = function() {
     this.getRecordSetTable = function() {
         return element(by.className('recordset-table'));
     };
+
+    // ArrayField Selectors
+
+    /**
+     * 
+     * @typedef {Object} ArrayFieldContainerElement
+     * @property {Function} getAddNewElementContainer - returns the add new element container for the given array field
+     * @property {Function} getAddNewValueInputElement - returns add new element input element for a given array field
+     * @property {Function} getAddButton - returns add button for a given array field
+     * @property {Function} getArrayItem - returns the element added to the array
+     */
+
+    /**
+     * 
+     * @param {string} fieldName - Arrayfield Name
+     * @param {string} baseType - baseType of the Array
+     * @return {ArrayFieldContainerElement} arrayFieldContainer
+     * 
+     */
+    this.getArrayFieldContainer = function(fieldName, baseType){
+      const elem = element(by.css(`.array-input-field-container[class$="${fieldName}"]`));
+
+      
+      elem.getAddNewElementContainer = function(){
+        return this.element(by.className("add-element-container"));
+      }
+
+      elem.getAddButton = function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        return addNewContainer.element(by.className("add-button"))
+      }
+
+      switch(baseType){
+        case 'date':
+        case 'integer':
+        case 'number':
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return addNewContainer.element(by.className(" input-switch"))
+          }
+
+          elem.getArrayItem = function(){
+            return this.element(by.css(`li [class$="${fieldName}-0-val"] input`));
+          }
+
+        break;
+        case 'timestamp':
+        case 'timestamptz' :
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return [
+              addNewContainer.element(by.className("input-switch-date")).element(by.className(" input-switch")),
+              addNewContainer.element(by.className("input-switch-time")).element(by.className(" input-switch"))
+          ]
+          }
+
+        break;
+      }
+      return  elem;
+    };
+
+    
 };
 
 var recordPage = function() {

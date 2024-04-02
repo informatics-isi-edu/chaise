@@ -309,12 +309,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                       arrayCols.forEach((col)=>{
                         // Check if ArrayField is rendered correctly
-
-                        const arrayField = element(by.css(`.array-input-field-container[class$="${col.name}"]`));
-                        arrayField.click()
+                        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`1-${col.name}`);
+                        arrayField.click()                        
 
                         expect(arrayField.isDisplayed()).toBeTruthy(colError(col.name, "element not visible"));
-                        const addNewValField = arrayField.element(by.className("add-element-container"))
+                        // const addNewValField = arrayField.element(by.className("add-element-container"))
+                        const addNewValField = arrayField.getAddNewElementContainer()
 
                         expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
 
@@ -431,8 +431,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
 
                     arrayCols.forEach(col=>{
-                      const arrayField = element(by.css(`.array-input-field-container[class$="${col.name}"]`))
-                      const addNewValField = arrayField.element(by.className("add-element-container"))
+                      const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+                      
+                      const addNewValField = arrayField.getAddNewElementContainer();
                       expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
 
                       let addButton;
@@ -441,13 +442,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         case 'integer':
                         case 'number':
                           let addNewValInput, arrItem;
-                          addNewValInput = addNewValField.element(by.className(" input-switch"));
+                          addNewValInput = arrayField.getAddNewValueInputElement();
+                          
+                          // Input Valid Value
                           browser.wait(addNewValInput.sendKeys(validArrayValues[col.baseType]), 500);
 
-                          addButton = addNewValField.element(by.className("add-button"))
+                          addButton = arrayField.getAddButton()
                           addButton.click()
 
-                          arrItem = arrayField.element(by.css(`li [class$="${col.name}-0-val"] input`))
+                          arrItem = arrayField.getArrayItem()
 
                           expect(arrItem.getAttribute('value')).toBe(validArrayValues[col.baseType])
                           break;
@@ -455,18 +458,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         case 'timestamp':
                         case 'timestamptz':
                           let addNewValDateInput, addNewValTimeInput, arrItemDate, arrItemTime;
-                          addNewValDateInput = addNewValField.element(by.className("input-switch-date")).element(by.className(" input-switch"))
-                          addNewValTimeInput = addNewValField.element(by.className("input-switch-time")).element(by.className(" input-switch"))
 
+                          [addNewValDateInput, addNewValTimeInput] = arrayField.getAddNewValueInputElement();
+                          
                           // Input Valid Date and Time
                           browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]), 500);
                           browser.wait(addNewValTimeInput.sendKeys(validArrayValues["time"]), 500);
 
-                          addButton = addNewValField.element(by.className("add-button"))
+                          addButton = arrayField.getAddButton();
                           addButton.click()
-
-                        arrItemDate = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-date input`))
-                        arrItemTime = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-time input`))
+                          
+                          arrItemDate = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-date input`))
+                          arrItemTime = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-time input`))
 
                           expect(arrItemDate.getAttribute('value')).toBe(validArrayValues["date"])
                           expect(arrItemTime.getAttribute('value')).toBe(validArrayValues["time"])
@@ -2083,7 +2086,8 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
         break;
       case 'array':
         // NOTE we're assuming it's array of text
-
+        console.log(formNumber, name, displayname, displayType);
+        console.log(valueProps);
         // TODO Aniket set the array value
 
         break;
