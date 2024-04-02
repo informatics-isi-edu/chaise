@@ -1,7 +1,17 @@
 
-# Writing End to End Test Cases
+# Writing Protractor End to End Test Cases
 
 In this section we have summarized all the resources that you need for writing test cases alongside different issues that we have faced. Please make sure to follow the given instructions.
+
+## Useful Links
+
+Protractor uses [Jasmine](http://jasmine.github.io/) for its test syntax. As in unit testing, a test file is comprised of one or more `it` blocks that describe the requirements of your application. `it` blocks are made of *commands* and *expectations*. Commands tell Protractor to do something with the application such as navigate to a page or click on a button. Expectations tell Protractor to assert something about the application's state, such as the value of a field or the current URL.
+
+Check out the [Angular Docs](https://docs.angularjs.org/guide/e2e-testing) for more on testing your Angular app with Protractor. See the [Protractor docs](https://angular.github.io/protractor/#/tutorial) for more information on Protractor as well.
+
+There is also an [Angular testing cheat sheet](https://spagettikoodi.wordpress.com/2015/01/14/angular-testing-cheat-sheet/) that will help you get around the syntax for assertions.
+
+There're tons of features that Protractor supports but here we are going to discuss one which allows for data creation utilities.
 
 ## Test Idioms
 
@@ -11,7 +21,7 @@ Please follow [this link](https://github.com/informatics-isi-edu/ermrestjs/blob/
 
 You can find the complete list of test FAQs in [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/test-faq.md).
 
-## Page Object Pattern [chaise.page.js](https://github.com/informatics-isi-edu/chaise/blob/master/test/e2e/utils/chaise.page.js)
+## Page Object Pattern [chaise.page.js](https://github.com/informatics-isi-edu/chaise/blob/master/test/e2e/utils/protractor/chaise.page.js)
 
 To write the tests, usually one has to first find the DOM elements on the page, then perform some actions on the elements, finally expect (assert) the correct result will show up. There are two logics here, DOM finding and expectation. To separate concerns, most DOM finding logic is put into a **Page Object** file "chaise.page.js". So in ".spec.js" files where the tests (expectations) are written, more effort can be focused on the expectation logic.
 

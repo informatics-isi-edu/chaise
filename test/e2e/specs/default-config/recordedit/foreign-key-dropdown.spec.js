@@ -97,7 +97,7 @@ describe('Create a record,', () => {
                     });
 
                     expect(dropdownOptions.count()).toBe(25, 'total rows loaded in fk1 dropdown after clearing search are incorrect');
-                    
+
                     // select option 2 (index 1) and close the dropdown
                     return dropdownOptions;
                 }).then((options) => {

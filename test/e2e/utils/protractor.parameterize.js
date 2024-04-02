@@ -11,7 +11,7 @@ exports.parameterize = function(config, configParams) {
     var testConfiguration = configParams.testConfiguration || {};
 
     testConfiguration.authCookie = process.env.AUTH_COOKIE;
-    var pImport = require('../utils/protractor.import.js');
+    var pImport = require('./protractor.import.js');
 
     var catalogId = null,
         Q = require('q');
@@ -295,20 +295,20 @@ exports.parameterize = function(config, configParams) {
     });
 
     /**
-     * This function can sometimes be called twice so we want to call process.exit only after trying to 
+     * This function can sometimes be called twice so we want to call process.exit only after trying to
      * delete the catalog and the request succeeds or fails
-     * 
+     *
      * When Ctrl+C is pressed, the shell sends a SIGINT signal to the foreground process/process-group.
-     * 
-     * So, if the foreground process is Node, it's only sent to the Node process. But when it's a npm 
+     *
+     * So, if the foreground process is Node, it's only sent to the Node process. But when it's a npm
      * process with a child Node process attached, the SIGINT is sent to both npm and Node processes.
-     * 
-     * The reason why the Node process receives the signal a second time is because the npm process 
+     *
+     * The reason why the Node process receives the signal a second time is because the npm process
      * listens to signals and relays them to the child Node process
      */
     process.on('SIGINT', function(code) {
         catalogId = process.env.CATALOGID;
-        
+
         console.log('About to exit because of SIGINT (ctrl + c)');
         pImport.tear(testConfiguration, catalogId).finally(function() {
             process.exit(1);

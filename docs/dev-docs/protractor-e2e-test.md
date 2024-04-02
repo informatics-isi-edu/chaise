@@ -1,4 +1,4 @@
-# End to End Testing Documentation
+# End to End Testing With Protractor
 
 For now, we only have E2E tests in Chaise. E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
 

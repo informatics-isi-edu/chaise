@@ -36,10 +36,9 @@ common/styles/navbar.css
 # playwright
 /playwright-output/
 /playwright-report/
-/playwright/.cache/
-test/playwright/.auth
-test/playwright/.download
-test/playwright/.upload
+test/e2e/.auth
+test/e2e/.download
+test/e2e/.upload
 
 # config files
 config/*-config.js

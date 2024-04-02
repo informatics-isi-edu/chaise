@@ -59,7 +59,7 @@ Chaise uses `onPrepare` method to create/setup test data needed for a test confi
 
 After setup the method set the `authCookie` in the browser if available in environment variable `AUTH_COOKIE` and navigates the browser to the relevant url of the catalog and schema. For instance if we opted to create a new catalog and schema in the configuration, then the onPrepare method will set the baseUrl for the testcase as **/chaise/search/#234/product**.
 
-Once all this stuff is done, the control is transferred to Protractor to run the test specs. Once the tests have finished running and the WebDriver instance has been shut down the `onCleanup` method is called. If the `cleanup` property is set to true in your test configuration then this method deletes all the data that was created in the `onPrepare` method. So if you mentioned to use an existing catalog, but create a new schema, the onCleanup method will just delete the newly created schema. It refers the same test configuration used for setup. 
+Once all this stuff is done, the control is transferred to Protractor to run the test specs. Once the tests have finished running and the WebDriver instance has been shut down the `onCleanup` method is called. If the `cleanup` property is set to true in your test configuration then this method deletes all the data that was created in the `onPrepare` method. So if you mentioned to use an existing catalog, but create a new schema, the onCleanup method will just delete the newly created schema. It refers the same test configuration used for setup.
 
 If you didn't have any data setup then there won't be any cleanup.
 
@@ -78,7 +78,7 @@ var pImport = require('../utils/protractor.import.js'), catalogId;
 
 // Call this method to setup data
 var beforeTestRun = function(EC) {
-	
+
 	// Call setup to create data
 	pImport.setup(testConfiguration).then(function(data) {
 
@@ -87,7 +87,7 @@ var beforeTestRun = function(EC) {
 
         // Set the authentication cookie if needed
         chaisePage.setAuthCookie(url, testConfiguration.authCookie);
-    	
+
     	// If catalog information is available then change the url to pint to that catalog and schema if needed
         if (data.catalogId) {
             catalogId = data.catalogId;
@@ -133,5 +133,5 @@ describe('Sidebar top search input,', function () {
 
 ```
 
-Please refer following [sample folder](/test/e2e/specs/sample) to understand the intest data creation and cleanup and its configuration. 
+Please refer following [sample folder](/test/e2e/specs/sample) to understand the intest data creation and cleanup and its configuration.
 
