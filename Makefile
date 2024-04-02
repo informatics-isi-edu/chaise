@@ -80,13 +80,13 @@ E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 # errors test
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel test scripts (protractor)
-FullFeaturesParallel_PROTRACTOR=test/e2e/specs/all-features/protractor.conf.js
-FullFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
+AllFeaturesParallel_PROTRACTOR=test/e2e/specs/all-features/protractor.conf.js
+AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel_PROTRACTOR=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel_PROTRACTOR=test/e2e/specs/default-config/protractor.conf.js
 ## Parallel test scripts
-FullFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
-FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/playwright.config.ts
+AllFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
+AllFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/playwright.config.ts
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/playwright.config.ts
 DefaultConfigParallel=test/e2e/specs/default-config/playwright.config.ts
 # Setup for manual tests
@@ -102,9 +102,9 @@ FOOTER_TESTS_PROTRACTOR=$(E2Efooter)
 ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(FullFeaturesConfirmationParallel_PROTRACTOR)
-FULL_FEATURES_PARALLEL_TESTS_PROTRACTOR=$(FullFeaturesParallel_PROTRACTOR)
-PARALLEL_TESTS_PROTRACTOR=$(FullFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(FullFeaturesParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
+ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
+ALL_FEATURES_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesParallel_PROTRACTOR)
+PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(AllFeaturesParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
 ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(PERMISSIONS_TESTS_PROTRACTOR) $(FOOTER_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
 
 # playwright tests
@@ -118,9 +118,9 @@ FOOTER_TESTS=
 ERRORS_TESTS=
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
-FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
-PARALLEL_TESTS=$(FullFeaturesConfirmationParallel) $(DefaultConfigParallel) $(FullFeaturesParallel) $(DeleteProhibitedParallel)
+ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(AllFeaturesConfirmationParallel)
+ALL_FEATURES_PARALLEL_TESTS=$(AllFeaturesParallel)
+PARALLEL_TESTS=$(AllFeaturesConfirmationParallel) $(DefaultConfigParallel) $(AllFeaturesParallel) $(DeleteProhibitedParallel)
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
 ALL_MANUAL_TESTS=$(Manualrecordset)
@@ -198,19 +198,19 @@ testparallel: test-PARALLEL_TESTS
 .PHONY: testparallel-protractor
 testparallel-protractor: test_protractor-PARALLEL_TESTS_PROTRACTOR
 
-#Rule to run the full features chaise configuration tests in parallel
-.PHONY: testfullfeatures
-testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
+#Rule to run the All features chaise configuration tests in parallel
+.PHONY: testallfeatures
+testallfeatures: test-ALL_FEATURES_PARALLEL_TESTS
 
-.PHONY: testfullfeatures-protractor
-testfullfeatures-protractor: test_protractor-FULL_FEATURES_PARALLEL_TESTS_PROTRACTOR
+.PHONY: testallfeatures-protractor
+testallfeatures-protractor: test_protractor-ALL_FEATURES_PARALLEL_TESTS_PROTRACTOR
 
-#Rule to run the full features chaise configuration tests in parallel
-.PHONY: testfullfeaturesconfirmation
-testfullfeaturesconfirmation: test-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS
+#Rule to run the All features chaise configuration tests in parallel
+.PHONY: testallfeaturesconfirmation
+testallfeaturesconfirmation: test-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS
 
-.PHONY: testfullfeaturesconfirmation-protractor
-testfullfeaturesconfirmation-protractor: test_protractor-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR
+.PHONY: testallfeaturesconfirmation-protractor
+testallfeaturesconfirmation-protractor: test_protractor-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR
 
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited

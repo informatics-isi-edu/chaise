@@ -129,8 +129,14 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
+      - name: Run all features test spec
+        id: test-all-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeatures
       - name: Run all features confirmation test spec
-        id: test-playwright-all-features-confirmation
+        id: test-all-features-confirmation
         continue-on-error: true
         run: |
           cd chaise
@@ -141,12 +147,6 @@ jobs:
         run: |
           cd chaise
           make testdefaultconfig
-      - name: Run all features test spec
-        id: test-all-features
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeatures
       - name: Run delete prohibited test spec
         id: test-delete-prohibited
         continue-on-error: true
@@ -166,50 +166,50 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run full features confirmation test spec (protractor)
-        id: test-protractor-full-features-confirmation
+      - name: Run all features test spec  (protractor)
+        id: test-protractor-all-features
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeaturesconfirmation-protractor
+          make testallfeatures-protractor
+      - name: Run all features confirmation test spec (protractor)
+        id: test-protractor-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation-protractor
       - name: Run default config test spec  (protractor)
         id: test-protractor-default-config
         continue-on-error: true
         run: |
           cd chaise
           make testdefaultconfig-protractor
-      - name: Run full features test spec  (protractor)
-        id: test-protractor-full-features
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testfullfeatures-protractor
       - name: Run delete prohibited test spec  (protractor)
         id: test-protractor-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
           make testdeleteprohibited-protractor
+      - name: Check on all features test spec
+        if: always() && steps.test-all-features.outcome != 'success'
+        run: exit 1
       - name: Check on all features confirmation test spec
         if: always() && steps.test-all-features-confirmation.outcome != 'success'
         run: exit 1
       - name: Check on default config test spec
         if: always() && steps.test-default-config.outcome != 'success'
         run: exit 1
-      - name: Check on all features test spec
-        if: always() && steps.test-all-features.outcome != 'success'
-        run: exit 1
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
+      - name: Check on all features test spec (protractor)
+        if: always() && steps.test-protractor-all-features.outcome != 'success'
         run: exit 1
       - name: Check on all features confirmation test spec (protractor)
         if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
         run: exit 1
       - name: Check on default config test spec (protractor)
         if: always() && steps.test-protractor-default-config.outcome != 'success'
-        run: exit 1
-      - name: Check on all features test spec (protractor)
-        if: always() && steps.test-protractor-all-features.outcome != 'success'
         run: exit 1
       - name: Check on delete prohibited test spec (protractor)
         if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
