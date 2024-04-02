@@ -8,7 +8,10 @@ import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/te
 
 import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { clickAndVerifyDownload, clickNewTabLink, getClipboardContent, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import {
+  clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
+  manuallyTriggerFocus, testTooltip
+} from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
@@ -530,21 +533,14 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
     await test.step('submitting the form and coming back to record page should update the related table.', async () => {
       if (!newPage) return;
 
-      // modif
+      // change other inputs
       await inputCallback(newPage);
-
 
       await RecordeditLocators.submitForm(newPage);
       await newPage.waitForURL('**/record/**');
       await newPage.close();
 
-      /**
-       * in playwright all opened tabs are focused and focus is never lost.
-       * so we have to manually call focus on the page
-       */
-      await page.evaluate(() =>
-        document.dispatchEvent(new Event('focus', { bubbles: true })),
-      );
+      await manuallyTriggerFocus(page);
 
       const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);

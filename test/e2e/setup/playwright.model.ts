@@ -5,8 +5,6 @@ export type TestOptions = {
   testName: string,
 
   testMatch?: string|RegExp|Array<string|RegExp>,
-
-
   /**
    * location of the .dev.json file
    */

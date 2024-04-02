@@ -49,7 +49,7 @@ E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-
 E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
 # not part of the make recordedit command anymore
-E2EDIrecordMultiFormInput=test/e2e/specs/default-config/recordedit/multi-form-input.config.ts
+E2EDIrecordMultiFormInput=test/e2e/specs/default-config/multi-form-input/multi-form-input.config.ts
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js

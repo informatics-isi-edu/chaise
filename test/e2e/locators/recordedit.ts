@@ -92,12 +92,7 @@ export default class RecordeditLocators {
   }
 
 
-  // ---------------- input-level selectors/functions -------------- //
-  static async clearInput(inputEl: Locator) {
-    await inputEl.focus();
-    await inputEl.page().keyboard.press('Meta+A');
-    await inputEl.page().keyboard.press('Backspace');
-  }
+  // ---------------- input-level selectors -------------- //
 
   /**
     * returns the cell (entity-value).

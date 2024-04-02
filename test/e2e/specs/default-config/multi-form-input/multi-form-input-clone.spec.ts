@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { clearInput } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
   schema_table: 'multi-form-input:main',
@@ -36,7 +37,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
   });
 
   await test.step('should allow users to add the maximum amount of forms.', async () => {
-    await RecordeditLocators.clearInput(cloneFormInput);
+    await clearInput(cloneFormInput);
     await cloneFormInput.fill(testParams.max_input_rows.toString());
     await cloneFormSubmitButton.click();
 

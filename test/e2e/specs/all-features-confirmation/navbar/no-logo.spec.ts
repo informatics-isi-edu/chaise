@@ -10,12 +10,10 @@ import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/us
 
 test.describe('Navbar', () => {
 
-  test.beforeEach(async ({ page, baseURL, browser, browserName }, testInfo) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
     await page.goto(`${baseURL}${PAGE_URL}`);
-
-    console.log(`browser information: ${browserName} ${browser.version()}`);
-  })
+  });
 
   test('basic features', async ({ page }) => {
     const navbar = NavbarLocators.getContainer(page);

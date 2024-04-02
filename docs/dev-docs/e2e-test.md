@@ -1,7 +1,17 @@
 # End to End Testing Documentation
 
-For now, we only have E2E tests in Chaise. E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
+E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
 
+## Table of contents
+
+- [Tools used](#tools-used)
+- [Setup](#setup)
+- [How To Run Tests](#how-to-run-tests)
+   * [Prerequistes](#prerequistes)
+   * [Test cases](#test-cases)
+- [File structure](#file-structure)
+- [Debugging](#debugging)
+- [Writing test](#writing-test)
 
 ## Tools used
 - [**Playwright**](https://playwright.dev/): The E2e test framework that we're using.
@@ -23,7 +33,7 @@ export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 
-These variables are used in our test framework to communicate with `ERMrest`. The following is how these variables most probably should look like:
+These variables are used in our test framework to communicate with ERMrest. The following is how these variables most probably should look like:
 
 ```sh
 export CHAISE_BASE_URL=https://dev.derivacloud.org/~<your-user-directory>chaise # No trailing `/`
@@ -43,6 +53,7 @@ You can get your cookie by querying the database, or using the following simple 
 
 
 ## How To Run Tests
+
 ### Prerequistes
 1. After setting up the environment variables, make sure that the `https://dev.derivacloud.org/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
 
@@ -81,7 +92,7 @@ You can get your cookie by querying the database, or using the following simple 
   and then run the following command:
 
   ```sh
-  $ make test
+  make test
   ```
 
 - To execute all the test cases in parallel, set the following:
@@ -93,93 +104,99 @@ You can get your cookie by querying the database, or using the following simple 
   and then run the following command:
 
   ```sh
-  $ make testparallel
+  make testparallel
   ```
 
-- To run a specific test spec
+- To run a specific test config
 
     ```sh
-    $ npx playwright test --config test/e2e/specs/search/data-independent/protractor.conf.js
+    npx playwright test --config test/e2e/specs/all-features/playwright.config.ts
+
+    npx playwright test --config test/e2e/specs/all-features/record/related-table.config.ts
+    ```
+
+- To limit the spec to just one browser
+
+    ```sh
+    npx playwright test --project=chrome --config test/e2e/specs/all-features/playwright.config.ts
+    ```
+
+- Run tests in headed browsers
+
+    ```sh
+    npx playwright test --headed --config test/e2e/specs/all-features/playwright.config.ts
     ```
 
 ## File structure
 
-TODO
-
-## Configuration
-
-TODO
-
-#### ChaiseConfigFilePath
-
-When a tester specifies a chaiseConfigFilePath, it copies the file specified in the `chaiseConfigFilePath` into REMOTE_CHAISE_DIR_PATH/chaise-config.js. This functionality is to make it work locally on developer machine pointing to some other server. In addition, to avoid the newly copied `chaise-config.js` file being used for other suites, it is reverted back to the previous one. Here previous refers to the `chaise-config-sample.js file`.
-
-**NOTE**: To specify which config you want to use for your spec, set `chaiseConfigFilePath` in your **protractor.conf.js** file as follows. You also need to run the [ssh-agent](http://mah.everybody.org/docs/ssh) in background as well as export a new environment variable that specifies your remote **dev.isrd** sshpath.
-
-For example
-```sh
-# run ssh-agent in background
-$ eval ssh-agent
-
-# add your key to ssh-agent
-$ ssh-add PATH/TO/KEY
-
-# export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-$ export REMOTE_CHAISE_DIR_PATH=some_user_name@dev.derivacloud.org:public_html/chaise
+```
+e2e/
+├─ data_setup/
+│  ├─ config/                         # test configuration files
+│  │  ├─ <name>/
+│  │  │  ├─ <name>.dev.json           # lists the schema config files (*.config.json)
+│  │  │  ├─ <name>.config.json        # the configuration for data utils that
+│  ├─ data/
+│  │  ├─ <name>/
+│  │  │  ├─ <table_name>.json         # data for a table
+│  ├─ schema/
+├─ setup/                             # The playwright specific setup files
+├─ specs/
+│  ├─ <group_name>/
+│  │  ├─ <name>.config.ts             # The config file that should be targeted for running tests
+│  │  ├─ <name>.spec.ts               # the test spec file
+├─ locators/
+│  ├─ <name>.ts                       # common locators that will be used by test specs
+├─ utils/
+│  ├─ <name>.ts                       # common utility functions that can be used everywhere
 ```
 
-**CI**: For CI there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
+### Config files
 
-### Test Configuration JSON file
-
-The `configFileName` which is **"search.dev.json"** here, specifies the file where the JSON for this suite exists. Apart from that everything is self-explanatory in the JSON.
-
-The structure of the configuration is
-```javascript
-{
-   "setup": {
-      "schemaConfigurations" : [{
-        "catalog": {
-            //"id": 1  //existing id of a catalog
-        },
-        "schema": {
-            "name": "product",
-            "createNew": true, // change this to false to avoid creating new schema
-            "path": "./schema/product.json" // path of the schema json file in data_setup folder
-        },
-        "tables": {
-            "createNew": true, // Mention this to be true to allow creating new tables
-        },
-        "entities": {
-            "createNew": true, // Mention this to be true to allow creating new entities
-            "path": "./data/product", // This is the path from where the json for the entities will be picked for import
-        },
-        "authCookie": ""
-    }],
-    "schema": "DEFAULT_NAME_OF_SCHEMA" // (Optional: Will set the default schema to the name you provide)
-  },
-  "cleanup": true, //Do you want to delete the created catalog/schema/tables/entities created in the setup phase
-}
-```
-
-- The `setup` object  allows you to specify whether the test-cases should create or use existing catalog, schema, tables and entities before running the testcases.
-- The `cleanup` property if true will delete all the data that was created in the dataSetup phase.
+- The expected format for the `<name>.dev.json` file:
+  ```javascript
+  {
+    "setup": {
+        "schemaConfigurations" : [{
+          "catalog": {
+              //"id": 1  //existing id of a catalog
+          },
+          "schema": {
+              "name": "product",
+              "createNew": true, // change this to false to avoid creating new schema
+              "path": "./schema/product.json" // path of the schema json file in data_setup folder
+          },
+          "tables": {
+              "createNew": true, // Mention this to be true to allow creating new tables
+          },
+          "entities": {
+              "createNew": true, // Mention this to be true to allow creating new entities
+              "path": "./data/product", // This is the path from where the json for the entities will be picked for import
+          },
+          "authCookie": ""
+      }],
+      "schema": "DEFAULT_NAME_OF_SCHEMA" // (Optional: Will set the default schema to the name you provide)
+    },
+    "cleanup": true, //Do you want to delete the created catalog/schema/tables/entities created in the setup phase
+  }
+  ```
+  - The `setup` object  allows you to specify whether the test-cases should create or use existing catalog, schema, tables and entities before running the testcases.
+  - The `cleanup` property if true will delete all the data that was created in the dataSetup phase.
 
 
-## Running tests in CI
-
-TODO
 
 ## Debugging
 
-TODO
+To debug Playwright tests,
 
-```
-await page.pause();
+1. Add `await page.pause();` wherever you want the execution to stop.
 
-npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
-npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --max-failures=1
-```
+2. Use the `--debug` CLI argument. You can also use `--max-failures=1` and `project=chrome` to limit the run:
+
+  ```
+  npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
+  npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug --max-failures=1
+  ```
 
 ## Writing test
 

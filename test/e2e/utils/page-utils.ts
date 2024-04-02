@@ -91,3 +91,14 @@ export async function testTooltip(locator: Locator, expectedTooltip: string | Re
   await expectFn(el).not.toBeAttached();
 
 }
+
+/**
+ * This function should be used when we expect browser to call the focus event.
+ * in playwright all opened tabs are focused and focus is never lost.
+ * so we have to manually call focus on the page.
+ */
+export async function manuallyTriggerFocus(page: Page) {
+  await page.evaluate(() =>
+    document.dispatchEvent(new Event('focus', { bubbles: true })),
+  );
+}

@@ -113,9 +113,7 @@ You can get your cookie by querying the database, or using the following simple 
 
 ```
 chaise/
-`-- test/
-    |-- unit
-    `-- e2e
+`-- test/e2e/
 	|-- data_setup
 	|   |-- config                       # test configuration files
         |   |   |-- record
@@ -129,7 +127,7 @@ chaise/
 	|   `-- schema
         |       |-- record
         |       |   `-- SCHEMA_NAME.json
-	|	`-- SCHEMA_NAME.json         # Schema Definition json
+	|	    `-- SCHEMA_NAME.json         # Schema Definition json
 	|-- specs
 	|   `-- all-features
 	|       |-- record

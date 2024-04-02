@@ -1,76 +1,248 @@
-#
 # Writing End to End Test Cases
 
-In this section we have summarized all the resources that you need for writing test cases alongside different issues that we have faced. Please make sure to follow the given instructions.
+In this section, we have summarized all the resources you need to write test cases alongside different issues that we have faced. Please make sure to follow the given instructions.
+
+## Table of contents
+
+- [Test Idioms](#test-idioms)
+   * [Data and schema](#data-and-schema)
+   * [Test structure](#test-structure)
+   * [Locators](#locators)
+   * [Assertions](#assertions)
+   * [Actions](#actions)
+   * [Managing page](#managing-page)
+- [Common issues/errors](#common-issueserrors)
 
 ## Test Idioms
 
-In this document we try to summarize what are the best practices while writing test cases in Chaise.
+This section summarizes the best practices for writing test cases in Chaise.
+
+### Data and schema
 
 - Try to keep your schema definitions as simple as possible. It only needs to cover the cases that you want to test. Avoid duplicating other existing schemas/tables.
-- Don't rely on ERMrestJS heuristics for the parts of the code that you are not testing, and define annotations. The heuristics change more regularly than the annotation won't. For example if you are testing the presentation of record app, define your own visible-columns and visible-foreignkeys annotation.
-- Be specific about the scenario that you are testing. If you want to test a very specific scenario, you don't have to test all the other features. For instance, if you want to test recordset page in a specific scenario, you don't have to test all the facet data and main data (The more general case should already be tested and should be separate from this specific test).
-- Use names that describe the situation you are trying to recreate. For instance if you are testing the annotations and you want to create a table with annotation 'x' just name the table `table_w_x`. This way we can easily look at the schema and understand which cases are covered in that schema.
+
+- Use names that describe the situation you are trying to recreate. For instance, if you are testing the annotations and want to create a table with annotation 'x', just name the table `table_w_x`. This way, we can easily examine the schema and understand which cases are covered.
+
+- Don't rely on ERMrestJS heuristics for the parts of the code you are not testing, and define annotations. The heuristics change more regularly than the annotation won't. For example, if you are testing the presentation of the record app, define your own visible-columns and visible-foreignkeys annotation.
+
+
+### Test structure
+
+- Be specific about the scenario that you are testing. If you want to test a specific scenario, you don't have to test all the other features. For instance, if you want to test recordset page in a particular scenario, you don't have to test all the facet data and main data (The more general case should already be tested and should be separate from this specific test).
+
 - If your test case is related to one of the currently implemented test specs,
-	- If they can share the same schema, you can modify its schema to cover your case too and add your test case to the corresponding test spec (Instead of creating a new configuration and test spec).
-	- (More applicable in ERMrestJS)Although it's preferable to not modify other schemas and create your very own schema that covers some specific test cases.
-- If you have multiple expect in your `it`, make sure they have their own error message.
+  - If they can share the same schema, you can modify its schema to cover your case and add your test case to the corresponding test spec (Instead of creating a new configuration and test spec).
 
-- Use `expect.soft` if this is one of steps and we should be able to run the next steps even if it fails.
+- By default, test files are run in parallel, while tests in a single file are run in order. Also, remember that each individual `test` will open its own browser.
+  - Useful links:
+    - https://playwright.dev/docs/api/class-test
+    - https://playwright.dev/docs/test-parallel
+  - The following are different ways that you can structure your tests:
+    - To reduce the runtime, breaking tests into multiple files is preferable. So if these tests won't affect each other, it's best to create multiple files that the `.config.ts` will then run.
+    - Another option is to keep them in the same file as two separate tests. In this case, each `test` will open a separate browser.
+        ```ts
+        test.describe('recordset tests', () => {
+          test.beforeEach(({page}) => {
+            await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+            await RecordsetLocators.waitForRecordsetPageReady();
+          })
 
-- Common wait-fors:
+          test('search', async ({page}) => {
+            await RecordsetLocators.getMainSearchBox(page).fill('test');
+            await expect(RecordsetLocators.getRows(page)).toHaveCount(2);
+          });
 
-```
-profileModal.waitFor({ state: 'visible' });
+          test('facet', async ({page}) => {
+            await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+            await expect(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(5);
+            await RecordsetLocators.getFacetOption(page, 2).click();
+            await expect(RecordsetLocators.getRows(page)).toHaveCount(5);
+          });
+        });
+        ```
+    - If your tests must run in order and on the same browser, use the `test.step` method.
+      - Don't forget to include `await` before each `test.step`.
+      - Playwright will not run the remaining steps if any of the steps fail. To get around this, you should use `expect.soft`.
+        ```ts
+          test('recordset search and facet', () => {
+            await test.step('go to recordset page', async () => {
+              await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+              await RecordsetLocators.waitForRecordsetPageReady();
+            });
 
-profileModal.waitFor({ state: 'attached' });
+            await test.step('search', async ({page}) => {
+              await RecordsetLocators.getMainSearchBox(page).fill('test');
+              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2);
+            });
 
-profileModal.waitFor({ state: 'detached' });
-```
+            await test.step('facet', async ({page}) => {
+              await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+              await expect.soft(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(2);
+              await RecordsetLocators.getFacetOption(page, 2).click();
+              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
+            });
+          });
+          ```
 
+- If you want to run async code inside a loop, use [for ... of](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of).
+  - Array
+    ```ts
+    const disabledRows = ['one', 'three'];
 
-## Test FAQ
+    let index = 0;
+    for (const expected of disabledRows) {
+      const disabledCell = RecordsetLocators.getRowFirstCell(page, index, true);
+      await expect.soft(disabledCell).toHaveText(expected);
+      index++;
+    }
+    ```
+  - Object
+    ```ts
+    const values = {
+      'col1': 1,
+      'col2': 2
+    }
 
-- `toHaveText` is prefered to direct `innerText` or `textContent()`, but it doesn't handle calling on a parent element. So you have call it on the child.
-  - https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text
-- If you want to run async code inside a loop, use `for ... of`
-  - Array:
+    let index = 0;
+    for (const colName of Object.keys(values)) {
+      await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(values[colName]);
+      index++;
+    }
+    ```
+
+### Locators
+
+- While [the official documentation](https://playwright.dev/docs/locators) asks us to avoid using CSS/XPath locators, we don't see any downside to using these locators and prefer them to the purpose-built locators that Playwright has.
+
+- To make it easier to select page elements, we've created `Locator` classes which you can find under the `locators` folder. If you want to access an element, avoid using CSS/XPath selectors directly in the spec file and create a function in the proper `Locator` class instead.
+
+- Try to reuse locators as much as possible. For example, if you want to get the recordset rows on a search popup, instead of creating a specific function for it, do the following:
+  ```ts
+  const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+  await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
+  ```
+- If you want to iterate over locators, use `.all()`: https://playwright.dev/docs/api/class-locator#locator-all
+
+- You can get the `page` and `context` object from a `Locator` object:
 
   ```ts
-  const disabledRows = ['one', 'three'];
-
-  let index = 0;
-  for (const expected of disabledRows) {
-    const disabledCell = RecordsetLocators.getRowFirstCell(page, index, true);
-    await expect.soft(disabledCell).toHaveText(expected);
-    index++;
-  }
+  const locator = page.locator('.some-element');
+  const samePage = locator.page()
+  const context = samePage.context();
   ```
 
+- If you want to wait for a locator, you can use `waitFor`. Although, it's better to use the `toVisible` or `toBeAttached` assertions instead.
+  ```ts
+  profileModal.waitFor({ state: 'visible' });
+  profileModal.waitFor({ state: 'attached' });
+  profileModal.waitFor({ state: 'detached' });
+  ```
 
-  - Object:
+### Assertions
+
+- You can find all the assertions that Playwright supports [here](https://playwright.dev/docs/test-assertions).
+
+- If you want to test whether an element is attached to DOM or visible, avoid using `isVisible` and `isPresent` and use the special assertions instead:
+  ```ts
+  // ❌ bad
+  expect(el.isVisible()).toBeTruthy();
+  expect(el.isVisible()).toBeFalsy();
+  expect(el.isPresent()).toBeTruthy();
+  expect(el.isPresent()).toBeFalsy();
+
+  // ✅ good
+  epxect(el).toBeVisible();
+  epxect(el).not.toBeVisible();
+  epxect(el).toBeAttached();
+  epxect(el).not.toBeAttached();
+  ```
+
+- Testing the inner text of an element ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text)):
+  ```ts
+  // partial regex match
+  await expect.soft(title).toHaveText(/Collections/);
+
+  // full match
+  await expect.soft(title).toHaveText('Data Collections');
+
+  // when the locator returns multiple items:
+  await expect(page.locator('ul > li')).toHaveText(['Text 1', 'Text 2', 'Text 3']);
+  ```
+
+- If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-class)):
 
   ```ts
-  const values = {
-    'col1': 1,
-    'col2': 2
-  }
+  // partial regex match
+  await expect.soft(input).toHaveClass(/input\-disabled/);
 
-  let index = 0;
-  for (const colName of Object.keys(values)) {
-    await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(values[colName]);
-    index++;
-  }
+  // full match
+  await expect.soft(input).toHaveClass('input-disabled');
   ```
 
-### Common errors
+- Test DOM attributes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-attribute)):
 
+  ```ts
+  // prefered
+  await expect(link).toHaveAttribute('href', regexOrFullString);
+  // if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
+  expect(await link.getAttribute('href')).toContain(partialExpected)
 
-**`Error: locator.click: Target closed`**
+  // avoid using `.innerHTML` or getAttribute('innerHTML'
+  expect(await link.innerHTML()).toContain(partialExpected);
+  expect(await link.innerHTML()).toBe(fullString);
+  ```
 
-Make sure `await` is consistently everywhere. It's needed for step, outside of it, and expects
+### Actions
 
-7b8f4775b390d09ea8f8548425e47ac2e
+In here we've listed all the actions that we encountered and we found useful. Please refer to [this link](https://playwright.dev/docs/input) for the complete list of available actions.
+
+- To change value of a input
+  ```ts
+  await locator.fill('new value');
+
+  // clear the value of input
+  await locator.fill('');
+
+  /**
+   * In some cases .fill('') might not work as expected so use the `clearInput` function in `recordedit-utils.ts` instead.
+   */
+  await clearInput(locator);
+  ```
+
+- Mouse actions:
+
+  ```ts
+  await locator.click();
+  await locator.hover();
+  ```
+
+### Managing page
+
+- Useful links
+  - https://playwright.dev/docs/pages
+
+- Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
+  ```ts
+  const newPage = await PageLocators.clickNewTabLink(someButton, context);
+  await newPage.waitForURL('someURL');
+
+  await newPage.waitForURL(`**/recordedit/**`);
+  await expect.soft(newPage).toHaveURL(/prefill\=/);
+
+  await newPage.close();
+  ```
+
+- In Playwright, each page behaves like a focused, active page. Bringing the page to front is not required. But this also
+  means that the pages will never go out of focus (`blur`) and so when you switch back to a page, it will not automatically
+  create a `focus` event. For tests that rely on `focus` event, call `manuallyTriggerFocus` function in `page-utils.ts` to
+  manually trigger this event.
+
+## Common issues/errors
+
+### `Error: locator.click: Target closed`
+
+This means that you didn't wait for the asynchronous event. So make sure `await` is consistently everywhere. It's needed for step, outside of it, and expects.
+
 ```ts
 test.describe('feature', () => {
   const PAGE_URL = `/recordset/#${process.env.CATALOG_ID!}/product-navbar:accommodation`;
@@ -88,141 +260,3 @@ test.describe('feature', () => {
   });
 })
 ```
-
-## Managing page
-
-- Useful links
-  - https://playwright.dev/docs/pages
-
-- Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
-  ```ts
-  const newPage = await PageLocators.clickNewTabLink(someButton, context);
-  await newPage.waitForURL('someURL');
-
-  await newPage.waitForURL(`**/recordedit/**`);
-  await expect.soft(newPage).toHaveURL(/prefill\=/);
-
-  await newPage.close();
-  ```
-
-
-- In playwright, each page behaves like a focused, active page. Bringing the page to front is not required. But this also
-  means that the pages will never go out of focus (`blur`) and so when you switch back to a page, it will not automatically
-  create a `focus` event. For tests that rely on `focus` event, we have to manually dispatch the event like the following:
-  ```ts
-  await page.evaluate(() =>
-    document.dispatchEvent(new Event('focus', { bubbles: true })),
-  );
-  ```
-
-
-## Locators
-
-- Useful links
-  - https://playwright.dev/docs/locators
-
--
-TODO explain how to add locator classes to `locators` folder.
-
-```ts
-
-const locator = page.locat('.some-element');
-const samePage = locator.page()
-const context = samePage.context();
-
-```
-
-Iterate over locators: https://playwright.dev/docs/api/class-locator#locator-all
-
-
-## Assertions
-
-https://playwright.dev/docs/test-assertions
-
-```ts
-// ❌ bad
-expect(el.isVisible()).toBeTruthy();
-expect(el.isVisible()).toBeFalsy();
-expect(el.isPresent()).toBeTruthy();
-expect(el.isPresent()).toBeFalsy();
-
-// ✅ good
-epxect(el).toBeVisible();
-epxect(el).not.toBeVisible();
-epxect(el).toBeAttached();
-epxect(el).not.toBeAttached();
-```
-
-Test class attribute:
-
-```ts
-// partial regex match
-await expect.soft(input).toHaveClass(/input\-disabled/);
-
-// full match
-await expect.soft(input).toHaveClass('input-disabled');
-```
-
-Test attributes:
-
-```ts
-// prefered
-await expect(link).toHaveAttribute('href', regexOrFullString);
-// if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
-expect(await link.getAttribute('href')).toContain(partialExpected)
-
-// avoid using `.innerHTML` or getAttribute('innerHTML'
-expect(await link.innerHTML()).toContain(partialExpected);
-expect(await link.innerHTML()).toBe(fullString);
-```
-
-## Actions
-
-https://playwright.dev/docs/input
-
-```ts
-await locator.fill('Peter');
-
-await locator.click();
-
-await locator.hover();
-```
-
-## Test structure
-
-https://playwright.dev/docs/api/class-test
-
-
-- skip is not available inside the step: https://github.com/microsoft/playwright/issues/10033
-
-```ts
-test.describe('test grouping description', () => {
-  test.beforeEach(async ({page}) => {
-    // you can go to a page here and every test below
-    // will start from that page.
-  });
-
-  // tests don't share the same tab/window
-  test('individual test 1', async ({ page }) => {
-    // skip a test
-    test.skip(someCondition);
-
-    await test.step('step 1', async () => {
-
-    });
-
-    await test.step('step 2', async () => {
-
-    });
-  });
-
-  test('individual test 2', async ({ page }) => {
-
-  });
-
-});
-
-```
-
-
-
