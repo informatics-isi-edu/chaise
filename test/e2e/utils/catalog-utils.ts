@@ -192,7 +192,7 @@ export const updateCatalogAnnotation = async (catalogId: string, annotation: any
       url: process.env.ERMREST_URL,
       id: catalogId
     };
-    ermrestUtils.createOrModifyCatalog(catalogObj, annotation, null).then(function () {
+    ermrestUtils.createOrModifyCatalog(catalogObj, annotation, null, process.env.AUTH_COOKIE).then(function () {
       console.log('successfully updated the catalog annotation');
       resolve();
     }).catch((err: any) => {

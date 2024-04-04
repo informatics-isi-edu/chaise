@@ -39,7 +39,7 @@ export default class NavbarLocators {
     return page.locator('.navbar-menu-options');
   }
 
-  static getLoginMenuContainer(page: Page): Locator{
+  static getLoginMenuContainer(page: Page): Locator {
     return NavbarLocators.getContainer(page).locator('.login-menu-options');
   }
 
@@ -53,5 +53,13 @@ export default class NavbarLocators {
 
   static getLogoutLink(page: Page): Locator {
     return page.locator('#logout-link');
+  }
+
+  static getGoToRIDInput(page: Page): Locator {
+    return page.locator('#rid-search-input');
+  }
+
+  static getGoToRIDButton(page: Page): Locator {
+    return page.locator('.rid-search .chaise-search-btn');
   }
 }

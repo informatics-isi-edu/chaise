@@ -14,17 +14,36 @@ export default class RecordLocators {
     return container.locator('.entity-title');
   }
 
+  static getShareButton(container: Locator | Page): Locator {
+    return container.locator('.share-cite-btn');
+  }
+
+  static getDeleteRecordButton(container: Locator | Page): Locator {
+    return container.locator('.title-buttons .delete-record-btn');
+  }
+
+  // ---------------- table of content selectors --------------------- //
+
   static getTableOfContentsRelatedSpinner(container: Locator | Page): Locator {
     return container.locator('#rt-toc-loading');
+  }
+
+  static getSidePanel(container: Locator | Page): Locator {
+    return container.locator('.side-panel-resizable');
+  }
+
+  static getHideTocBtn(container: Locator | Page): Locator {
+    return container.locator('.hide-toc-btn');
+  }
+
+  static getShowTocBtn(container: Locator | Page): Locator {
+    return container.locator('.show-toc-btn');
   }
 
   static getSidePanelHeadings(container: Locator | Page): Locator {
     return container.locator('.columns-container li.toc-heading');
   }
 
-  static getShareButton(container: Locator | Page): Locator {
-    return container.locator('.share-cite-btn');
-  }
 
   // ----------------- main section selectors ------------------------ //
 

@@ -12,6 +12,10 @@ export async function getClipboardContent(page: Page): Promise<string> {
   return await page.evaluate('navigator.clipboard.readText()');
 }
 
+export async function getPageURLOrigin(page: Page): Promise<string> {
+  return await page.evaluate(() => { return document.location.origin });
+}
+
 /**
  * click on the given link and return the opened page instance.
  *
