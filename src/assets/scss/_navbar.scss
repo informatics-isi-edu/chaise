@@ -57,9 +57,15 @@ body>.container {
   color: map-get(variables.$color-map, 'navbar-inverse-link');
   padding: 15px;
   text-decoration: none;
-
   &:hover {
     text-decoration: underline;
+  }
+}
+
+#login-link {
+  text-decoration: none;
+  &:hover {
+    text-decoration: none;
   }
 }
 

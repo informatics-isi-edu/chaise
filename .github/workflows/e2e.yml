@@ -13,7 +13,7 @@ concurrency: chaise_env
 
 jobs:
   install-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -51,7 +51,7 @@ jobs:
           sudo apt-get install -y python3-setuptools python3-ply
           sudo python3 --version
           sudo pip3 --version
-          sudo su -c 'echo /usr/lib/python3.8/site-packages > /usr/local/lib/python3.8/dist-packages/sys-site-packages.pth'
+          sudo su -c 'echo /usr/lib/python3.10/site-packages > /usr/local/lib/python3.10/dist-packages/sys-site-packages.pth'
           sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
           sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
           : # the line below will make sure pyopenssl and cryptography have compatible versions
