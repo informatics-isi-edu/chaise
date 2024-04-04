@@ -2,10 +2,22 @@ import { test, expect } from '@playwright/test';
 
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { getCatalogID, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
+
+  test.beforeAll(async ({ }, testInfo) => {
+    const catalogId = getCatalogID(testInfo.project.name);
+
+    // make sure the resolverImplicitCatalog is the same as current catalog id
+    await updateCatalogAnnotation(catalogId, {
+      'tag:isrd.isi.edu,2019:chaise-config': {
+        'navbarBrandText': 'override test123',
+        'navbarBrandImage': '../images/logo.png'
+      }
+    });
+  });
 
   test('when navbar is visible', async ({ page, baseURL }, testInfo) => {
     const navbar = NavbarLocators.getContainer(page);
