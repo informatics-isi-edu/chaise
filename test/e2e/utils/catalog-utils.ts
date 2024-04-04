@@ -197,6 +197,7 @@ export const updateCatalogAnnotation = async (catalogId: string, annotation: any
       resolve();
     }).catch((err: any) => {
       console.log('error while trying to update catalog annotation');
+      console.log(err);
       reject(err);
     });
   });

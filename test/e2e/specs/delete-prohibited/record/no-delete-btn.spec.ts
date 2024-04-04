@@ -16,7 +16,16 @@ test.describe('record page with specific chaise-config properties', () => {
     // make sure the resolverImplicitCatalog is the same as current catalog id
     await updateCatalogAnnotation(catalogId, {
       'tag:isrd.isi.edu,2019:chaise-config': {
-        'resolverImplicitCatalog': catalogId
+        'resolverImplicitCatalog': catalogId,
+        /**
+         * we have to make sure the config params that the other parallel test needs are also included
+         * NOTE:
+         * there might be a better way to do this. the function could fetch the existing annot and merge them.
+         * calling updateCatalogAnnotation in both specs won't work because one will override another one.
+         * also ermrest might throw a 503 if we attempt to change the catalog at the same time.
+         */
+        'navbarBrandText': 'override test123',
+        'navbarBrandImage': '../images/logo.png'
       }
     });
   });
@@ -65,25 +74,25 @@ test.describe('record page with specific chaise-config properties', () => {
     });
   });
 
-  test('should show an error dialog if an improper RID is typed into the RID search box', async ({ page }) => {
-    // test RID search and resolverImplicitCatalog
-    // in CI resolver server component isn't configured, so not testing
-    test.skip(!!process.env.CI);
+  // test RID search and resolverImplicitCatalog
+  // in CI resolver server component isn't configured, so not testing
+  if (!process.env.CI) {
+    test('should show an error dialog if an improper RID is typed into the RID search box', async ({ page }) => {
+      await NavbarLocators.getGoToRIDInput(page).fill('');
+      await NavbarLocators.getGoToRIDInput(page).fill('someobviouslywrongRID');
+      await NavbarLocators.getGoToRIDButton(page).click();
 
-    await NavbarLocators.getGoToRIDInput(page).fill('');
-    await NavbarLocators.getGoToRIDInput(page).fill('someobviouslywrongRID');
-    await NavbarLocators.getGoToRIDButton(page).click();
+      const errModal = ModalLocators.getErrorModal(page);
+      await expect(errModal).toBeVisible();
+      await expect(ModalLocators.getModalTitle(errModal)).toHaveText('Record Not Found');
 
-    const errModal = ModalLocators.getErrorModal(page);
-    await expect(errModal).toBeVisible();
-    await expect(ModalLocators.getModalTitle(errModal)).toHaveText('Record Not Found');
+      await expect(ModalLocators.getModalText(errModal)).toHaveText(
+        'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.'
+      );
 
-    await expect(ModalLocators.getModalText(errModal)).toHaveText(
-      'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.'
-    );
+      await ModalLocators.getCloseBtn(errModal).click();
+      await expect(page).toHaveURL(pageURLWithRID);
 
-    await ModalLocators.getCloseBtn(errModal).click();
-    await expect(page).toHaveURL(pageURLWithRID);
-
-  });
+    });
+  }
 });
