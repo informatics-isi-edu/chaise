@@ -1,149 +1,262 @@
-
 # Writing End to End Test Cases
 
-In this section we have summarized all the resources that you need for writing test cases alongside different issues that we have faced. Please make sure to follow the given instructions.
+In this section, we have summarized all the resources you need to write test cases alongside different issues that we have faced. Please make sure to follow the given instructions.
+
+## Table of contents
+
+- [Test Idioms](#test-idioms)
+   * [Data and schema](#data-and-schema)
+   * [Test structure](#test-structure)
+   * [Locators](#locators)
+   * [Assertions](#assertions)
+   * [Actions](#actions)
+   * [Managing page](#managing-page)
+- [Common issues/errors](#common-issueserrors)
 
 ## Test Idioms
 
-Please follow [this link](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/dev-docs/test-idioms.md) to access the Test idioms document. This document includes the best practices for writing test cases in both Chaise and ERMrestJS.
+This section summarizes the best practices for writing test cases in Chaise.
 
-## Test FAQ
+### Data and schema
 
-You can find the complete list of test FAQs in [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/test-faq.md).
+- Try to keep your schema definitions as simple as possible. It only needs to cover the cases that you want to test. Avoid duplicating other existing schemas/tables.
 
-## Page Object Pattern [chaise.page.js](https://github.com/informatics-isi-edu/chaise/blob/master/test/e2e/utils/chaise.page.js)
+- Use names that describe the situation you are trying to recreate. For instance, if you are testing the annotations and want to create a table with annotation 'x', just name the table `table_w_x`. This way, we can easily examine the schema and understand which cases are covered.
 
-To write the tests, usually one has to first find the DOM elements on the page, then perform some actions on the elements, finally expect (assert) the correct result will show up. There are two logics here, DOM finding and expectation. To separate concerns, most DOM finding logic is put into a **Page Object** file "chaise.page.js". So in ".spec.js" files where the tests (expectations) are written, more effort can be focused on the expectation logic.
-
-## Expectations
-
-Expectations should use [Jasmine matchers](https://jasmine.github.io/api/2.6/matchers.html). One thing to note with matchers is that a custom message can be attached to each matcher, `expect(value).toBe(expected_value, failure message)`. This should be done as often as possible to provide a point of contact to look at when debugging errors in test cases.
+- Don't rely on ERMrestJS heuristics for the parts of the code you are not testing, and define annotations. The heuristics change more regularly than the annotation won't. For example, if you are testing the presentation of the record app, define your own visible-columns and visible-foreignkeys annotation.
 
 
-## Expected Conditions
+### Test structure
 
-When writing tests, there will be times where the spec will attempt to run before the elements are available in the DOM. Having tests fail because an element isn't visible has been a sporadic but common enough issue. Protractor has a library called [Expected Conditions](http://www.protractortest.org/#/api?view=ProtractorExpectedConditions) that allows for waiting for a certain part of the DOM to be available before continuing to run tests.
+- Be specific about the scenario that you are testing. If you want to test a specific scenario, you don't have to test all the other features. For instance, if you want to test recordset page in a particular scenario, you don't have to test all the facet data and main data (The more general case should already be tested and should be separate from this specific test).
 
+- If your test case is related to one of the currently implemented test specs,
+  - If they can share the same schema, you can modify its schema to cover your case and add your test case to the corresponding test spec (Instead of creating a new configuration and test spec).
 
-## Clicking Elements
+- By default, test files are run in parallel, while tests in a single file are run in order. Also, remember that each individual `test` will open its own browser.
+  - Useful links:
+    - https://playwright.dev/docs/api/class-test
+    - https://playwright.dev/docs/test-parallel
+  - The following are different ways that you can structure your tests:
+    - To reduce the runtime, breaking tests into multiple files is preferable. So if these tests won't affect each other, it's best to create multiple files that the `.config.ts` will then run.
+    - Another option is to keep them in the same file as two separate tests. In this case, each `test` will open a separate browser.
+        ```ts
+        test.describe('recordset tests', () => {
+          test.beforeEach(({page}) => {
+            await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+            await RecordsetLocators.waitForRecordsetPageReady();
+          })
 
-Whenever you want to click an element, make sure that you don't trigger the click function on the element directly. This is because, if the element is not in the sight of browser, it will err out saying unable to find the element and will never get clicked.
+          test('search', async ({page}) => {
+            await RecordsetLocators.getMainSearchBox(page).fill('test');
+            await expect(RecordsetLocators.getRows(page)).toHaveCount(2);
+          });
 
-A workaround for this situation is to scroll the page to the element position and then click. `chaise.page.js` has a function to do this. It accepts a WebElement
+          test('facet', async ({page}) => {
+            await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+            await expect(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(5);
+            await RecordsetLocators.getFacetOption(page, 2).click();
+            await expect(RecordsetLocators.getRows(page)).toHaveCount(5);
+          });
+        });
+        ```
+    - If your tests must run in order and on the same browser, use the `test.step` method.
+      - Don't forget to include `await` before each `test.step`.
+      - Playwright will not run the remaining steps if any of the steps fail. To get around this, you should use `expect.soft`.
+        ```ts
+          test('recordset search and facet', () => {
+            await test.step('go to recordset page', async () => {
+              await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+              await RecordsetLocators.waitForRecordsetPageReady();
+            });
 
-```js
+            await test.step('search', async ({page}) => {
+              await RecordsetLocators.getMainSearchBox(page).fill('test');
+              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2);
+            });
 
-var chaisePage = require('chaise.page.js');
+            await test.step('facet', async ({page}) => {
+              await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+              await expect.soft(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(2);
+              await RecordsetLocators.getFacetOption(page, 2).click();
+              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
+            });
+          });
+          ```
 
-var elem = element.all(by.css('.add-button')).first();
+- If you want to run async code inside a loop, use [for ... of](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of).
+  - Array
+    ```ts
+    const disabledRows = ['one', 'three'];
 
-chaisePage.clickButton(elem);
+    let index = 0;
+    for (const expected of disabledRows) {
+      const disabledCell = RecordsetLocators.getRowFirstCell(page, index, true);
+      await expect.soft(disabledCell).toHaveText(expected);
+      index++;
+    }
+    ```
+  - Object
+    ```ts
+    const values = {
+      'col1': 1,
+      'col2': 2
+    }
 
+    let index = 0;
+    for (const colName of Object.keys(values)) {
+      await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(values[colName]);
+      index++;
+    }
+    ```
+
+### Locators
+
+- While [the official documentation](https://playwright.dev/docs/locators) asks us to avoid using CSS/XPath locators, we don't see any downside to using these locators and prefer them to the purpose-built locators that Playwright has.
+
+- To make it easier to select page elements, we've created `Locator` classes which you can find under the `locators` folder. If you want to access an element, avoid using CSS/XPath selectors directly in the spec file and create a function in the proper `Locator` class instead.
+
+- Try to reuse locators as much as possible. For example, if you want to get the recordset rows on a search popup, instead of creating a specific function for it, do the following:
+  ```ts
+  const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+  await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
+  ```
+- If you want to iterate over locators, use `.all()`: https://playwright.dev/docs/api/class-locator#locator-all
+
+- You can get the `page` and `context` object from a `Locator` object:
+
+  ```ts
+  const locator = page.locator('.some-element');
+  const samePage = locator.page()
+  const context = samePage.context();
+  ```
+
+- If you want to wait for a locator, you can use `waitFor`. Although, it's better to use the `toVisible` or `toBeAttached` assertions instead.
+  ```ts
+  profileModal.waitFor({ state: 'visible' });
+  profileModal.waitFor({ state: 'attached' });
+  profileModal.waitFor({ state: 'detached' });
+  ```
+
+### Assertions
+
+- You can find all the assertions that Playwright supports [here](https://playwright.dev/docs/test-assertions).
+
+- If you want to test whether an element is attached to DOM or visible, avoid using `isVisible` and `isPresent` and use the special assertions instead:
+  ```ts
+  // ❌ bad
+  expect(el.isVisible()).toBeTruthy();
+  expect(el.isVisible()).toBeFalsy();
+  expect(el.isPresent()).toBeTruthy();
+  expect(el.isPresent()).toBeFalsy();
+
+  // ✅ good
+  epxect(el).toBeVisible();
+  epxect(el).not.toBeVisible();
+  epxect(el).toBeAttached();
+  epxect(el).not.toBeAttached();
+  ```
+
+- Testing the inner text of an element ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text)):
+  ```ts
+  // partial regex match
+  await expect.soft(title).toHaveText(/Collections/);
+
+  // full match
+  await expect.soft(title).toHaveText('Data Collections');
+
+  // when the locator returns multiple items:
+  await expect(page.locator('ul > li')).toHaveText(['Text 1', 'Text 2', 'Text 3']);
+  ```
+
+- If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-class)):
+
+  ```ts
+  // partial regex match
+  await expect.soft(input).toHaveClass(/input\-disabled/);
+
+  // full match
+  await expect.soft(input).toHaveClass('input-disabled');
+  ```
+
+- Test DOM attributes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-attribute)):
+
+  ```ts
+  // prefered
+  await expect(link).toHaveAttribute('href', regexOrFullString);
+  // if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
+  expect(await link.getAttribute('href')).toContain(partialExpected)
+
+  // avoid using `.innerHTML` or getAttribute('innerHTML'
+  expect(await link.innerHTML()).toContain(partialExpected);
+  expect(await link.innerHTML()).toBe(fullString);
+  ```
+
+### Actions
+
+In here we've listed all the actions that we encountered and we found useful. Please refer to [this link](https://playwright.dev/docs/input) for the complete list of available actions.
+
+- To change value of a input
+  ```ts
+  await locator.fill('new value');
+
+  // clear the value of input
+  await locator.fill('');
+
+  /**
+   * In some cases .fill('') might not work as expected so use the `clearInput` function in `recordedit-utils.ts` instead.
+   */
+  await clearInput(locator);
+  ```
+
+- Mouse actions:
+
+  ```ts
+  await locator.click();
+  await locator.hover();
+  ```
+
+### Managing page
+
+- Useful links
+  - https://playwright.dev/docs/pages
+
+- Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
+  ```ts
+  const newPage = await PageLocators.clickNewTabLink(someButton, context);
+  await newPage.waitForURL('someURL');
+
+  await newPage.waitForURL(`**/recordedit/**`);
+  await expect.soft(newPage).toHaveURL(/prefill\=/);
+
+  await newPage.close();
+  ```
+
+- In Playwright, each page behaves like a focused, active page. Bringing the page to front is not required. But this also
+  means that the pages will never go out of focus (`blur`) and so when you switch back to a page, it will not automatically
+  create a `focus` event. For tests that rely on `focus` event, call `manuallyTriggerFocus` function in `page-utils.ts` to
+  manually trigger this event.
+
+## Common issues/errors
+
+### `Error: locator.click: Target closed`
+
+This means that you didn't wait for the asynchronous event. So make sure `await` is consistently everywhere. It's needed for step, outside of it, and expects.
+
+```ts
+test.describe('feature', () => {
+  const PAGE_URL = `/recordset/#${process.env.CATALOG_ID!}/product-navbar:accommodation`;
+
+  test.beforeEach(async ({ page, baseURL }) => {
+    await page.goto(`${baseURL}${PAGE_URL}`);
+  })
+
+  test('basic features,', async ({ page }) => {
+    const navbar = NavbarLocators.getContainer(page);
+
+    await test.step('navbar should be visible on load.', async () => {
+      await navbar.waitFor({ state: 'visible' });
+    });
+  });
+})
 ```
-
-## Synchronization Issues
-
-Currently Chaise is not using Angular router, thus we can't use Protractor [Synchronization](https://github.com/angular/protractor/blob/9891d430aff477c5feb80ae01b48356866820132/lib/protractor.js#L158).
-
-Setting it to `true` means that subsequent additions/injections to the the control flow don't also add browser.waitForAngular.
-
-Synchronization makes protractor wait for Angular promises to resolve and causes the url's to be scrambled. Chaise uses the `#` delimiter to determine url parameters to be sent to Ermrest. Thus, enabling synchronization, changes the url, appending an extra / after the `#` symbol.
-
-Thus a correct url like this
-`https://exampel.com/chaise/record/#1/legacy:dataset/id=1580`
-
-changes to
-
-`https://exampel.com/chaise/record/#/1/legacy:dataset/id=1580`
-
-Thus, the parser is unable to parse it. To avoid this we simply disable synchronization in the start of testcases.
-
-```js
-beforeAll(function () {
-	browser.ignoreSynchronization=true;
-	browser.get(browser.params.url);
-});
-```
-
-## Waiting For Elements To Be Visible
-
-Disabling synchronization has its own issues. Protractor by default waits for the Angular to be done with displaying data or complete http call. With disabled synchronization we need to add logic to handle situations which need the page/element/data to be visible before running the asserts.
-
-In such cases you might just be tempted to put in a `browser.sleep(2000)` to allow everything to get back on track.
-
-You shouldn't be using `browser.sleep` functions as they are brittle. Sleeps put your tests at the mercy of changes in your test environments (network speed, machine performance etc). They make your tests slower. From a maintainability point of view they are ambiguous to someone else reading your code. Why were the put there? Is the sleep long enough? They are an acceptance that you don't really know what is going on with your code and in my opinion should be banned (or at least you should try your best to resist the quick win they give you!).
-
-A simple workaround is to use [browser.wait](http://www.protractortest.org/#/api?view=webdriver.WebDriver.prototype.wait) in conjunction with other parameters such as a timeout/element/variable/functions.
-
-To wait for elements to be visible/rendered we can simply use following syntax
-
-```js
-chaisePage.waitForElement(element(by.id("some-id"), 5000).then(function() {
-   console.log("Element found");
-}, function(err) {
-   console.log("Element not found");
-});
-```
-
-## Waiting For Url To Change
-
-This can be useful when you want to wait for the URL to change in case of form submissions or link clicks.
-
-```js
-var url = "http://example.com/chaise/search";
-chaisePage.waitForUrl(url, 5000).then(function() {
-   console.log("Redirected to url");
-}, function(err) {
-   console.log("Unable to redirect to url");
-});
-```
-
-### Detecting CI Environment
-
-There're scenarios where you might need to determine which environment are your tests running; CI or locally. To determine that you can simply refer the variable `process.env.CI`. If it is true then the environment is CI else it is something else.
-
-```js
-if (process.env.CI) {
-   // DO something CI specific
-} else {
-  // DO something specific to local environment
-}
-```
-
-### Setting Webauthn Cookies in Test Cases
-
-You can always change the user authentication cookie in your tests. To do so, first you need to have the **webauthn** cookie.
-
-Now you need to put this code in your test to set the cookie and then redirect the user to specific page on success. The `performLogin(cookie)` function accepts a cookie and returns a promise. On successful completion of login the promise is resolved.
-
-```js
-var chaisePage = require('YOU_PATH/chaise.page.js');
-
-describe("Setting Login cookie", function() {
-   beforeAll(function(done) {
-      chaisePage.performLogin(COOKIE).then(function() {
-         // Successfully set the user cookie
-         // Add your code to redirect the user to another page on beforeAll
-      }, function(err) {
-         // Unable to set the cookie
-      });
-   });
-});
-
-});
-```
-
-You should try to put the performLogin function inside an `it` statement or `beforeAll`/`beforeEach` statement, so that it is executed in the flow of test.
-
-**NOTE**: Our CI environment doesn't uses HTTPS for CHAISE. When we setup the cookie we set the secure flag in the path for cookie depending on environment. [Reference](http://resources.infosecinstitute.com/securing-cookies-httponly-secure-flags/#gref)
-
-## Asynchronous actions
-
-Currently the asynchronous actions are implemented with promise manager of Selenium.
-The alternate approach to this can be the use of `async/await`.
-
-We shouldn't be using both the approaches together as the behaviour is unpredicatable. For adding `async/await` couple of things to keep in mind:
-1. Make sure you disabled control flow / promise manager. Mixing awaits with enabled control flow may lead to unpredictable results.
-2. Do not forget to prepend ALL your async actions with await (usually this is all protractor api methods). If you will forgot to do this - action without await won't be queued with other actions, so order of actions will be broken. [Source](https://stackoverflow.com/questions/44691940/explain-about-async-await-in-protractor/44701633#44701633)
-
-**NOTE**: Currently `async/await` is only used for viewport in [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/blob/c7ca3e890c7bf73b23c49ac4cbff5ee2733fa93c/test/e2e/utils/common/deriva-webapps.js#L73).

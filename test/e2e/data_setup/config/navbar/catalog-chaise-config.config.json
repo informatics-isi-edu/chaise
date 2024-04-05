@@ -1,11 +1,11 @@
 {
     "catalog": {
-        "annotations": {
-            "tag:isrd.isi.edu,2019:chaise-config": {
-                "navbarBrandText": "override test123",
-                "navbarBrandImage": "../images/logo.png"
-            }
+      "annotations": {
+        "tag:isrd.isi.edu,2019:chaise-config": {
+          "navbarBrandText": "override test123",
+          "navbarBrandImage": "../images/logo.png"
         }
+      }
     },
     "schema": {
         "name": "catalog-config-navbar",

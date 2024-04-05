@@ -33,6 +33,13 @@ common/styles/navbar.css
 # sass temporary compiled files
 .sass-cache
 
+# playwright
+/playwright-output/
+/playwright-report/
+test/e2e/.auth
+test/e2e/.download
+test/e2e/.upload
+
 # config files
 config/*-config.js
 

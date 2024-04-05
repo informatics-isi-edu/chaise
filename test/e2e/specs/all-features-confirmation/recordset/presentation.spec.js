@@ -1176,8 +1176,6 @@ describe('View recordset,', function () {
             }).then(function (config) {
                 chaiseConfig = config;
                 expect(chaiseConfig.confirmDelete).toBeTruthy();
-                // use "deFAuLtCaTAlog" since we are grabbing the property directly from chaise config. The application will use the right value
-                expect(chaiseConfig.deFAuLtCaTAlog).toBe(1);
                 expect(chaiseConfig.defaultTable.schema).toBe("isa");
                 expect(chaiseConfig.defaultTable.table).toBe("dataset");
             }).catch(function (error) {

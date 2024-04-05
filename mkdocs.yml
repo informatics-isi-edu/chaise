@@ -22,7 +22,6 @@ pages:
         - E2E Testing: dev-docs/e2e-test.md
         - Manual Testing: dev-docs/manual-test.md
         - Style Guide: dev-docs/style-guide.md
-        - Test FAQ: dev-docs/test-faq.md
     - Search:
         - Annotation: search/annotation.md
         - Heuristics: search/heuristics.md

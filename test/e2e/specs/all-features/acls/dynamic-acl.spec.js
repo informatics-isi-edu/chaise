@@ -699,8 +699,8 @@ describe("regarding dynamic ACL support, ", function () {
                     recordEditPage.submitForm().then(() => {
                         browser.wait(EC.invisibilityOf(element(by.css('.upload-table'))), browser.params.defaultTimeout);
 
-                        return browser.wait(() => { 
-                            return chaisePage.recordEditPage.getAlertError(); 
+                        return browser.wait(() => {
+                            return chaisePage.recordEditPage.getAlertError();
                         }, browser.params.defaultTimeout);
                     }).then((alert) => {
                         expect(alert.getText()).toContain(testParams.unauthorized_message, 'alert message is incorrect');
@@ -726,7 +726,7 @@ describe("regarding dynamic ACL support, ", function () {
 
     afterAll(function (done) {
         if (!process.env.CI && testParams.files.length > 0) recordEditHelpers.deleteFiles(testParams.files);
-        
+
         // clean up the ACLs
         pImport.importACLs(erasedAclConfig).then(function () {
             // login as the original user
