@@ -125,16 +125,16 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
-  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number | (string | number)[] ) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
   const dstKey = `${destFormValue}-${column.name}`;
 
   if (clearValue) {
     if (setValue) {
-      setValue(dstKey, '');
+      setValue(dstKey, column._type.isArray ? [] : '');
     } else {
-      values[dstKey] = '';
+      values[dstKey] = column._type.isArray ? [] : '';
     }
   } else if (srcKey) {
     const tempVal = replaceNullOrUndefined(values[srcKey], '')
