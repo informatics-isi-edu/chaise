@@ -314,9 +314,13 @@ var recordEditPage = function() {
      * returns the cell (entity-value).
      * this is useful if we want to test the extra classes attached to it.
      */
-    this.getFormInputCell = (name, index) => {
+    this.getFormInputCell = (name, index, isArray) => {
       index = index || 1;
       const inputName = index + '-' + name;
+       
+      if(isArray){
+        return element(by.className('array-input-field-container ' + inputName)).element(by.xpath('..'));
+      }
       return element(by.className('input-switch-container-' + inputName)).element(by.xpath('..'));
     };
 
@@ -525,6 +529,7 @@ var recordEditPage = function() {
         case 'date':
         case 'integer':
         case 'number':
+        case 'text':
           elem.getAddNewValueInputElement = function(){
             const addNewContainer = this.getAddNewElementContainer()
             return addNewContainer.element(by.className(" input-switch"))

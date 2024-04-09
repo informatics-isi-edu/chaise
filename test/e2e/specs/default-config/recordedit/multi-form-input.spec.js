@@ -460,15 +460,60 @@ const testParams = {
         column_displayname: 'array_text',
         column_name: 'array_text',
         // TODO Aniket add the props
+        apply_to_all: {
+          baseType : 'text',
+          value: 'text-value',
+          column_values_after : [
+            'text-value',
+            'text-value',
+            'text-value',
+            'text-value',
+            'text-value'
+          ]
+        },
+        apply_to_some: {
+          baseType : 'text',
+          value: 'some text-value',
+          deselected_forms: [1, 3],
+          column_values_after: [
+            'text-value',
+            'some text-value',
+            'text-value',
+            'some text-value',
+            'some text-value'
+          ],
+        },
+        clear_some: {
+          baseType : 'text',
+          deselected_forms: [4, 5],
+          column_values_after: [
+            'text-value',
+            '',
+            'text-value',
+            'some text-value',
+            'some text-value',
+          ]
+        },
+        manual_test: {
+          baseType : 'text',
+          value: 'manual value',
+          formNumber: 5,
+          column_values_after: [
+            'text-value',
+            '',
+            'text-value',
+            'some text-value',
+            'manual value',
+          ]
+        }
       }
     ],
     submission_results: [
-      // TODO Aniket add the expected array value
-      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png', 'TODO ANIKET'],
-      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png', 'TODO ANIKET'],
-      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png', 'TODO ANIKET'],
-      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png', 'TODO ANIKET'],
-      ['5', '', 'manual', '2', '', '', '', 'true', '', '', 'TODO ANIKET'],
+      ['1', 'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', process.env.CI ? '' : 'testfile128kb_1.png', ['text-value']],
+      ['2', 'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', process.env.CI ? '' : 'testfile128kb_1.png', []],
+      ['3', 'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', process.env.CI ? '' : 'testfile128kb_2.png', ['text-value']],
+      ['4', 'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', process.env.CI ? '' : 'testfile128kb_3.png', ['some text-value']],
+      ['5', '', 'manual', '2', '', '', '', 'true', '', '', ['manual value']],
     ]
   },
   submission: {
@@ -688,10 +733,10 @@ describe('Regarding multi form input and clone button', () => {
             let toggleBtn = recordEditPage.getMultiFormToggleButton(colDisplayname);
             let applybtn = recordEditPage.getMultiFormApplyBtn();
             let clearBtn = recordEditPage.getMultiFormClearBtn()
-
+            
             it('when no forms are selected, apply and clear buttons should be disabled ', (done) => {
-              const formInputCell = recordEditPage.getFormInputCell(params.column_name, 1);
-
+              const formInputCell = recordEditPage.getFormInputCell(params.column_name, 1, params.type === 'array');
+              
               // open the multi-form-row
               chaisePage.clickButton(toggleBtn).then(() => {
                 // wait for multi-form-row to show up
@@ -723,7 +768,7 @@ describe('Regarding multi form input and clone button', () => {
                 params.column_name,
                 params.column_displayname,
                 params.type,
-                params.apply_to_all
+                params.apply_to_all,
               ).then(() => {
                 // apply the value
                 return chaisePage.clickButton(applybtn);
@@ -737,7 +782,7 @@ describe('Regarding multi form input and clone button', () => {
             it('when some forms are selected, clicking on apply should apply change to selected forms', (done) => {
               // deselect some forms
               Promise.all(params.apply_to_some.deselected_forms.map((f) => {
-                const formInputCell = recordEditPage.getFormInputCell(params.column_name, f);
+                const formInputCell = recordEditPage.getFormInputCell(params.column_name, f, params.type === 'array');
                 return chaisePage.clickButton(formInputCell);
               })).then(() => {
                 // set the value
@@ -762,7 +807,7 @@ describe('Regarding multi form input and clone button', () => {
             it('when some forms are selected, clicking on clear should clear values in selected forms', (done) => {
               // deselect more forms
               Promise.all(params.clear_some.deselected_forms.map((f) => {
-                const formInputCell = recordEditPage.getFormInputCell(params.column_name, f);
+                const formInputCell = recordEditPage.getFormInputCell(params.column_name, f, params.type === 'array');
                 return chaisePage.clickButton(formInputCell);
               })).then(() => {
                 // click on the clear button

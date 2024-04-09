@@ -2085,10 +2085,32 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
         }).catch(err => reject(err));
         break;
       case 'array':
-        // NOTE we're assuming it's array of text
-        console.log(formNumber, name, displayname, displayType);
-        console.log(valueProps);
-        // TODO Aniket set the array value
+        // NOTE we're assuming it's array of text        
+        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${formNumber}-${displayname}`,valueProps.baseType);
+        
+        arrayField.getArrayItem().isPresent().then((isPresent)=>{
+
+          if(isPresent){
+
+            const arrayFieldItem = arrayField.getArrayItem();
+            
+            arrayFieldItem.sendKeys(
+              protractor.Key.chord(protractor.Key.CONTROL, 'a'),
+              protractor.Key.BACK_SPACE,
+              valueProps.value
+              ).then(()=>{
+              resolve();
+            })
+            
+          }else{
+
+            arrayField.getAddNewValueInputElement().sendKeys(valueProps.value).then(()=>{
+              return arrayField.getAddButton().click()
+            }).then(()=>{
+              resolve();
+            });
+          }
+        })
 
         break;
       default:
@@ -2165,6 +2187,20 @@ exports.testFormValuesForAColumn = (name, displayname, displayType, allDisabled,
             expect(inputControl.getAttribute('class')).toContain('input-disabled', `${message}: was not disabled.`);
           }
           expect(input.getText()).toBe(value, `${message}: value missmatch.`);
+          break;
+        case 'array':
+
+          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${formNumber}-${displayname}`,'text');
+
+          arrayField.getArrayItem().isPresent().then((isPresent)=>{
+            if(isPresent){
+              const arrItem = arrayField.getArrayItem();
+              expect(arrItem.getAttribute('value')).toBe(value)
+            }else{
+              expect(value).toBe('')
+            }
+          })
+
           break;
         default:
           const isTextArea = displayType === 'textarea';
