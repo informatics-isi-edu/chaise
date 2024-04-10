@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 
-
 RUN apt-get update \
     && apt-get install -y wget gnupg \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
@@ -30,9 +29,6 @@ WORKDIR /app
 # Copy chaise codebase
 COPY ./chaise /app/chaise
 
-# Copy your ssh key
-COPY chaise/test/e2e/docker/sshKey /app
-
 # Install test dependencies
 RUN cd chaise && \
     make deps-test
@@ -43,7 +39,6 @@ RUN groupadd -r chaiseuser && useradd -rm -g chaiseuser -G audio,video chaiseuse
     echo 'chaiseuser:test' | chpasswd && \   
     chmod -R 777 /app && \
     chmod -R 777 /home
-
 
 ENV DBUS_SESSION_BUS_ADDRESS autolaunch:  
 

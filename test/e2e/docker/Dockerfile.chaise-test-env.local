@@ -27,9 +27,6 @@ RUN apt-get install -y nodejs
 # Set the working directory
 WORKDIR /app
 
-# Copy your ssh key
-COPY chaise/test/e2e/docker/sshKey /app
-
 RUN echo 'chaiseuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/chaiseuser
 
 RUN groupadd -r chaiseuser && useradd -rm -g chaiseuser -G audio,video chaiseuser && \
