@@ -131,20 +131,14 @@ You have a choice between two Dockerfiles:
   - Sets the working directory as `/app`.
   - Copies application files `chaise` from the host to the container's `/app` directory.
 
-  ##### Step 6: Copy SSH public key
-  ```dockerfile
-  COPY chaise/test/e2e/docker/sshKey /app
-  ```
-  Copies the SSH public key `sshKey` from the host to the container's `/app` directory.
-
-  ##### Step 7: Install test dependencies
+  ##### Step 6: Install test dependencies
   ```dockerfile
   RUN cd chaise && \
       make deps-test
   ```
   Changes directory to `/app/chaise` and installs test dependencies using `make`.
 
-  ##### Step 8: Add user and set permissions
+  ##### Step 7: Add user and set permissions
   ```dockerfile
   RUN echo 'chaiseuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/chaiseuser
 
@@ -157,7 +151,7 @@ You have a choice between two Dockerfiles:
   - Creates a user `chaiseuser`, assigns it to groups `audio` and `video`, and sets its password.
   - Adjusts permissions for `/app` and `/home`.
 
-  ##### Step 9: Set environment variables
+  ##### Step 8: Set environment variables
   ```dockerfile
   ENV DBUS_SESSION_BUS_ADDRESS autolaunch:
   ENV DISPLAY host.docker.internal:0.0
@@ -172,13 +166,13 @@ You have a choice between two Dockerfiles:
     - When running GUI applications within a Docker container, it's crucial to set the `DISPLAY` variable correctly so that the application can display its graphical user interface on the host system's display.
     - In this Dockerfile, `host.docker.internal:0.0` is set as the value, telling the application within the container to display its GUI on the X11 server running on the host system.
 
-  ##### Step 10: Set User
+  ##### Step 9: Set User
   ```dockerfile
   USER chaiseuser
   ```
   Sets the user for subsequent commands to `chaiseuser`. We cannot run chrome inside a container as root user.
 
-  ##### Step 11: Define default command
+  ##### Step 10: Define default command
   ```dockerfile
   CMD ["/bin/bash"]
   ```
@@ -191,15 +185,14 @@ You have a choice between two Dockerfiles:
 
 To build a Docker image follow these steps:
 
-1. Copy your ssh key to `chaise/test/e2e/docker` and rename it to `sshKey`.
-2. Open a terminal or command prompt.
-3. Navigate to the directory containing `chaise`.
+1. Open a terminal or command prompt.
+2. Navigate to the directory containing `chaise`.
     ```
       parent_dir
       └── chaise
     ```
 
-4. Run the following command to build the Docker image:
+3. Run the following command to build the Docker image:
     ```
     docker build -t chaise-test-env -f chaise/test/e2e/docker/Dockerfile.chaise-test-env .
     ```
@@ -212,7 +205,7 @@ To build a Docker image follow these steps:
   - `-f chaise/test/e2e/docker/Dockerfile.chaise-test-env`: The `-f` flag is used to specify the path to the Dockerfile to be used for building the image.
   - `.`: The dot `.` at the end of the command specifies the build context. It tells Docker to use the current directory as the build context. The build context includes the Dockerfile and any files or directories referenced by the Dockerfile (e.g., files copied into the image using `COPY` instructions).
 
-5. After building, you can verify that the image was created successfully by running:
+4. After building, you can verify that the image was created successfully by running:
      ```
      docker images
      ```
@@ -228,6 +221,7 @@ To build a Docker image follow these steps:
       ```
       docker run --name <container_name> -d -i \
       -v <path-to-chaise>/chaise:/app/chaise \
+      -v <path-to-ssh-directory>:/etc/ssh \
       chaise-test-local
       ```
     Notes
@@ -236,6 +230,7 @@ To build a Docker image follow these steps:
     - `-d`: Runs the container in detached mode, meaning it runs in the background.
     - `-i`: Keeps STDIN open even if not attached, allowing interaction.
     - `-v <path-to-chaise>/chaise:/app/chaise`: Mounts the local directory "<path-to-chaise>/chaise" to "/app/chaise" in the container.
+    - `-v <path-to-ssh-directory>:/etc/ssh`: Mounts the local "ssh" directory to "/etc/ssh" in the container.
     - `chaise-test-local`: Specifies the Docker image used to create and run the container.
 
 
