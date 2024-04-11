@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'facet-within-facet'
   pull_request:
     branches:
       - 'master'
@@ -110,6 +111,7 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
+          git checkout facet-within-facet
           sudo make root-install
       - name: Install chaise
         run: |
