@@ -10,6 +10,19 @@
   .panel-group {
     margin-bottom: 20px;
 
+    .facet-item-container{
+      margin-top: -21px;
+      .move-icon{
+        position: relative;
+        left: 85%;
+        top: 31px;
+        padding-left: 15px;
+        z-index: 5;
+        width: fit-content;
+      }  
+    }
+    
+
     // each facet panel
     .facet-panel {
       border-radius: 0;

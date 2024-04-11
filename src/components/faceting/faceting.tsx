@@ -22,6 +22,12 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
+//react-beatiful-dnd
+import {
+  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
+} from 'react-beautiful-dnd';
+import ChaiseDroppable from '../chaise-droppable';
+
 
 type FacetingProps = {
   /**
@@ -623,6 +629,27 @@ const Faceting = ({
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
+  
+  const [orderedFacetColumn, setOrderedFacetColumn] = useState<any[]>([]);
+  
+    
+    useEffect(()=>{
+      // Get Facet Order from LocalStorage
+      const facetOrder = localStorage.getItem('facet-order') || undefined;
+
+      // If facet order is not stored in localStorage, display items in default order
+      if(!facetOrder){
+        setOrderedFacetColumn(reference.facetColumns.map((item:any ,index:number )=>[item,index]))
+        return;
+      }
+
+      // If facet order is present in localStorage, rearrange the items according to the stored order
+      const facetsInOrder: any[] = [];
+
+      JSON.parse(facetOrder).forEach((index: number) => facetsInOrder.push([reference.facetColumns[index],index]))
+      setOrderedFacetColumn(facetsInOrder)
+      
+    },[])
 
   if (!displayFacets) {
     if (facetModels.length === 0) {
@@ -631,10 +658,80 @@ const Faceting = ({
     return <></>
   }
 
+  const handleOnDragEnd = (result: DropResult) => {
+    const items = Array.from(orderedFacetColumn);
+
+    if (!result.destination) {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(orderedFacetColumn.length - 1, 0, reorderedItem);
+    } else {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
+
+    // Save facet order to localStorage
+    localStorage.setItem('facet-order', JSON.stringify(items.map(i=>i[1])))
+    
+    setOrderedFacetColumn(items);
+  }
+
   return (
     <div className='side-panel-container' ref={sidePanelContainer}>
       <div className='faceting-columns-container'>
-        <Accordion className='panel-group' activeKey={activeKeys} alwaysOpen >
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <ChaiseDroppable droppableId={`facet-droppable`}>
+            {
+              (provided: DroppableProvided) =>(
+                <Accordion 
+                  className='panel-group' activeKey={activeKeys} alwaysOpen 
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  key={`facet-list`}
+                >
+                  {orderedFacetColumn.map(([fc, index]:[any,number], idx)=>{
+                    return <Draggable key={index} draggableId={`facet-${index}`} index={idx}>
+                      {
+                        (provided:DraggableProvided) =>{
+                          return <div
+                              className='facet-item-container'
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                            >
+                            <div className='move-icon' {...provided.dragHandleProps}>
+                              <i className='fa-solid fa-grip-vertical'></i>
+                            </div>
+                            <Accordion.Item
+                              eventKey={index + ''} key={index}
+                              className={`facet-panel fc-${index}${facetModels[index].isOpen ? ' panel-open' : ''}`}
+                            >
+                              <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
+                                <FacetHeader
+                                  displayname={fc.displayname}
+                                  showTooltipIcon={fc.comment ? true : false}
+                                  comment={fc.comment}
+                                  isLoading={facetModels[index].isLoading}
+                                  facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
+                                  noConstraints={facetModels[index].noConstraints}
+                                />
+                              </Accordion.Header>                          
+                              <Accordion.Body>
+                                {renderFacet(fc, index)}
+                              </Accordion.Body>
+                            </Accordion.Item>
+                          </div>
+                        }
+                      }
+                    </Draggable>
+                  })}
+                  {provided.placeholder}
+                </Accordion>    
+              )
+            }
+          </ChaiseDroppable>
+        </DragDropContext>
+
+          {/* -------------- */}
+        {/* <Accordion className='panel-group' activeKey={activeKeys} alwaysOpen >
           {reference.facetColumns.map((fc: any, index: number) => (
             <Accordion.Item
               eventKey={index + ''} key={index}
@@ -655,7 +752,7 @@ const Faceting = ({
               </Accordion.Body>
             </Accordion.Item>
           ))}
-        </Accordion>
+        </Accordion> */}
       </div>
     </div>
   )
