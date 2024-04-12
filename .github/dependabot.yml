@@ -12,6 +12,26 @@ updates:
     ignore:
       - dependency-name: "moment*"
       - dependency-name: "protractor"
+    groups:
+      babel:
+        patterns:
+          - "@babel/*"
+          - "babel-loader"
+      bootstrap:
+        patterns:
+          - "react-bootstrap"
+          - "bootstrap"
+      eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "eslint-*"
+          - "eslint"
+      react:
+        patterns:
+          - "@types/react"
+          - "@types/react-dom"
+          - "react"
+          - "react-dom"
     assignees:
       - "jrchudy"
       - "RFSH"
