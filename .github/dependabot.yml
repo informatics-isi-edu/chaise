@@ -9,8 +9,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    allow:
-      dependency-type: "direct"
     ignore:
       - dependency-name: "moment*"
       - dependency-name: "protractor"
