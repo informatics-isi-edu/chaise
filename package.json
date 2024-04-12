@@ -43,7 +43,6 @@
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
-    "playwright": "latest",
     "prettier": "^2.8.4",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",
