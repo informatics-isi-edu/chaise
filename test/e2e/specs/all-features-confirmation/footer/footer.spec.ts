@@ -29,10 +29,12 @@ test.describe('Page Footer', () => {
             })
 
             await test.step('Page footer link should match with "privacy-policy"', async () => { 
-                const prevLink = await footerLink.getAttribute('href') || '';
+                // plink should be the `https://${server}/privacy-policy/`
+                let plink = await footerLink.getAttribute('href') || '';
 
-                // slice off the last
-                const plink = prevLink.slice(0, -1);
+                // slice off the last '/'
+                plink = plink.slice(0, -1);
+                // compare everything after the last '/' after slicing to verify the path
                 expect.soft(plink.substring(plink.lastIndexOf('/') + 1)).toEqual('privacy-policy');
             })
 
