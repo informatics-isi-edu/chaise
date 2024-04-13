@@ -76,7 +76,7 @@ E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/playwright.co
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/playwright.config.ts
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.conf.js
 # footer test
-E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
+E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel test scripts (protractor)
@@ -98,7 +98,6 @@ RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEd
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
 PERMISSIONS_TESTS_PROTRACTOR=$(E2EmultiPermissionsVisibility)
-FOOTER_TESTS_PROTRACTOR=$(E2Efooter)
 ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
@@ -114,7 +113,7 @@ RECORDSET_TESTS=
 RECORDADD_TESTS=$(E2EDIrecordMultiFormInput)
 RECORDEDIT_TESTS=
 PERMISSIONS_TESTS=
-FOOTER_TESTS=
+FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
