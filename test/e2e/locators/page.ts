@@ -9,4 +9,12 @@ export default class PageLocators {
   static getMarkdownContainer(container: Page | Locator) : Locator {
     return container.locator('.markdown-container:not(.chaise-comment)');
   }
+
+  static getFooterContainer(page: Page): Locator {
+    return page.locator('#footer');
+  }
+
+  static getFooterLink(page: Page): Locator {
+    return PageLocators.getFooterContainer(page).locator('a');
+  }
 }
