@@ -39,7 +39,7 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "eslint-webpack-plugin": "^4.1.0",
     "execSync": "x",
-    "jasmine-spec-reporter": "^2.5.0",
+    "jasmine-spec-reporter": "^7.0.0",
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
