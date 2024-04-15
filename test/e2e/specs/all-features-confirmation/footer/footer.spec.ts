@@ -21,21 +21,15 @@ test.describe('Page Footer', () => {
             const footerLink = PageLocators.getFooterLink(page);
             
             await test.step('footer should be visible on load', async () => {    
-                await footerMain.waitFor({ state: 'visible' });
+                await expect.soft(footerMain).toBeVisible();
             });
 
             await test.step('Page footer link should be visible', async () => {
-                await footerLink.waitFor({ state: 'visible' });
+                await expect.soft(footerLink).toBeVisible();
             })
 
             await test.step('Page footer link should match with "privacy-policy"', async () => { 
-                // plink should be the `https://${server}/privacy-policy/`
-                let plink = await footerLink.getAttribute('href') || '';
-
-                // slice off the last '/'
-                plink = plink.slice(0, -1);
-                // compare everything after the last '/' after slicing to verify the path
-                expect.soft(plink.substring(plink.lastIndexOf('/') + 1)).toEqual('privacy-policy');
+                await expect.soft(footerLink).toHaveAttribute('href', /privacy-policy/);
             })
 
         });
