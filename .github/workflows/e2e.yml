@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'master'
+      - '2326-customize-order-of-facets'
   pull_request:
     branches:
       - 'master'
