@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { DroppableProps, Droppable } from "react-beautiful-dnd";
+import React, { useState, useEffect } from 'react';
+import { DroppableProps, Droppable } from 'react-beautiful-dnd';
 
 /** Since we're using strict mode, react-beautiful-dnd misbehaves due to multiple renders caused by strict mode.
  *  This is to guard against it
