@@ -132,9 +132,9 @@ function _copyOrClearValueForColumn(
 
   if (clearValue) {
     if (setValue) {
-      setValue(dstKey, column._type?.isArray ? [] : '');
+      setValue(dstKey, column.type?.isArray ? [] : '');
     } else {
-      values[dstKey] = column._type?.isArray ? [] : '';
+      values[dstKey] = column.type?.isArray ? [] : '';
     }
   } else if (srcKey) {
     const tempVal = replaceNullOrUndefined(values[srcKey], '')

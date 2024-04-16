@@ -243,7 +243,6 @@ const InputSwitch = ({
           waitingForForeignKeyData={waitingForForeignKeyData}
           additionalControllerRules={additionalControllerRules}
           foreignKeyCallbacks={foreignKeyCallbacks}
-          additionalControllerRules={additionalControllerRules}
         />
       case 'dropdown-select':
         if (!columnModel) {

@@ -13,8 +13,8 @@ import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
-import { dataFormats } from '../../utils/constants';
-import ChaiseDroppable from '../chaise-droppable';
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 
 
 type ArrayFieldProps = InputFieldProps & {
@@ -22,10 +22,6 @@ type ArrayFieldProps = InputFieldProps & {
    * the type of each element in the array
    */
   baseArrayType: string,
-  /**
-   * represents the presence of timezone in case of TimeStamp field
-   */
-  hasTimezone?: boolean
   /**
    * represents the presence of timezone in case of TimeStamp field
    */
@@ -40,6 +36,9 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
    * We use this to keep track of errors in new value input box
    */
   const formState = useFormState({ name: `${name}-new-item` });
+  /**
+   * We use this to keep track of value in new value input box
+   */
   const addNewValue = useWatch({ name: `${name}-new-item` });
 
 
@@ -52,15 +51,15 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const addItem = (value: any) => {
 
     let valueToAdd: any = {
-      "val": value
+      'val': value
     }
 
-    if (getInputType({ name: baseArrayType }) === `timestamp`) {
+    if (getInputType({ name: baseArrayType }) === 'timestamp') {
       const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
       const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
 
-      valueToAdd["val-date"] = v?.date
-      valueToAdd["val-time"] = v?.time
+      valueToAdd['val-date'] = v?.date
+      valueToAdd['val-time'] = v?.time
     }
 
     append(valueToAdd)
