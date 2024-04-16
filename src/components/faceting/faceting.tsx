@@ -74,6 +74,11 @@ const Faceting = ({
    */
   const [allFacetsRegistered, setAllFacetsRegistered] = useState(false);
 
+  /**
+   * Store facets in custom order
+   */
+  const [orderedFacets, setOrderedFacets] = useState<any[]>([]);
+
   const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
     const res: FacetModel[] = [];
     let firstOpen = -1;
@@ -226,6 +231,27 @@ const Faceting = ({
     registerFacetCallbacks(updateFacetStates, updateFacets);
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
+
+  /**
+   * Fetch custom facet order from localStorage and update the orderedFacets state
+   */
+  useEffect(() => {
+    // Get Facet Order from LocalStorage
+    const facetOrder = localStorage.getItem('facet-order') || undefined;
+
+    // If facet order is not stored in localStorage, display items in default order
+    if (!facetOrder) {
+      setOrderedFacets(reference.facetColumns.map((item: any, index: number) => [item, index]))
+      return;
+    }
+
+    // If facet order is present in localStorage, rearrange the items according to the stored order
+    const facetsInOrder: any[] = [];
+
+    JSON.parse(facetOrder).forEach((index: number) => facetsInOrder.push([reference.facetColumns[index], index]))
+    setOrderedFacets(facetsInOrder)
+
+  }, [])
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -629,27 +655,6 @@ const Faceting = ({
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
-  
-  const [orderedFacetColumn, setOrderedFacetColumn] = useState<any[]>([]);
-  
-    
-    useEffect(()=>{
-      // Get Facet Order from LocalStorage
-      const facetOrder = localStorage.getItem('facet-order') || undefined;
-
-      // If facet order is not stored in localStorage, display items in default order
-      if(!facetOrder){
-        setOrderedFacetColumn(reference.facetColumns.map((item:any ,index:number )=>[item,index]))
-        return;
-      }
-
-      // If facet order is present in localStorage, rearrange the items according to the stored order
-      const facetsInOrder: any[] = [];
-
-      JSON.parse(facetOrder).forEach((index: number) => facetsInOrder.push([reference.facetColumns[index],index]))
-      setOrderedFacetColumn(facetsInOrder)
-      
-    },[])
 
   if (!displayFacets) {
     if (facetModels.length === 0) {
@@ -659,20 +664,21 @@ const Faceting = ({
   }
 
   const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(orderedFacetColumn);
+    const items = Array.from(orderedFacets);
 
     if (!result.destination) {
       const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(orderedFacetColumn.length - 1, 0, reorderedItem);
+      items.splice(orderedFacets.length - 1, 0, reorderedItem);
     } else {
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, reorderedItem);
     }
 
     // Save facet order to localStorage
-    localStorage.setItem('facet-order', JSON.stringify(items.map(i=>i[1])))
+    localStorage.setItem('facet-order', JSON.stringify(items.map(i => i[1])))
+    console.log(items);
     
-    setOrderedFacetColumn(items);
+    setOrderedFacets(items);
   }
 
   return (
@@ -681,22 +687,22 @@ const Faceting = ({
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <ChaiseDroppable droppableId={`facet-droppable`}>
             {
-              (provided: DroppableProvided) =>(
-                <Accordion 
-                  className='panel-group' activeKey={activeKeys} alwaysOpen 
+              (provided: DroppableProvided) => (
+                <Accordion
+                  className='panel-group' activeKey={activeKeys} alwaysOpen
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                   key={`facet-list`}
                 >
-                  {orderedFacetColumn.map(([fc, index]:[any,number], idx)=>{
+                  {orderedFacets.map(([fc, index]: [any, number], idx) => {
                     return <Draggable key={index} draggableId={`facet-${index}`} index={idx}>
                       {
-                        (provided:DraggableProvided) =>{
+                        (provided: DraggableProvided) => {
                           return <div
-                              className='facet-item-container'
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                            >
+                            className='facet-item-container'
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
                             <div className='move-icon' {...provided.dragHandleProps}>
                               <i className='fa-solid fa-grip-vertical'></i>
                             </div>
@@ -713,7 +719,7 @@ const Faceting = ({
                                   facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
                                   noConstraints={facetModels[index].noConstraints}
                                 />
-                              </Accordion.Header>                          
+                              </Accordion.Header>
                               <Accordion.Body>
                                 {renderFacet(fc, index)}
                               </Accordion.Body>
@@ -724,13 +730,13 @@ const Faceting = ({
                     </Draggable>
                   })}
                   {provided.placeholder}
-                </Accordion>    
+                </Accordion>
               )
             }
           </ChaiseDroppable>
         </DragDropContext>
 
-          {/* -------------- */}
+        {/* -------------- */}
         {/* <Accordion className='panel-group' activeKey={activeKeys} alwaysOpen >
           {reference.facetColumns.map((fc: any, index: number) => (
             <Accordion.Item
