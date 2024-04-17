@@ -592,7 +592,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
   const submissionRow: any = {};
   const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
     let v = formData[formNumber + '-' + col.name];
-
+    
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
       if (col.isAsset) {
@@ -605,7 +605,9 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
         });
 
         v = tempVal;
-      } else {
+      } else if (col.type?.isArray) {
+        v = v.map((i:any) => i.val)
+      }else {
         // Special cases for formatting data
         switch (col.type.name) {
           case 'json':
