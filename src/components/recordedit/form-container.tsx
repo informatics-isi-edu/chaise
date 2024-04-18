@@ -34,6 +34,14 @@ const FormContainer = ({
 
   const { handleSubmit } = useFormContext();
 
+  useEffect(() => {
+    // set wider width if array_text field is present in form
+    setNeedsWiderMinWidth(columnModels.filter(col => col.inputType === 'array' && col.column.type.baseType.name === 'text').length > 0)
+
+  }, [columnModels])
+
+
+
   const formContainer = useRef<any>(null);
 
   // This state variable is to set the form index on click of remove btton

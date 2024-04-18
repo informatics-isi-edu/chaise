@@ -26,6 +26,20 @@ type ArrayFieldProps = InputFieldProps & {
   hasTimezone?: boolean
 };
 
+type RowItem = {
+  id: number,
+  value: string | number
+}
+
+type Options = {
+  name?: string,
+  type?: EventType,
+  value?: unknown
+  values?: {
+    [x: string]: any
+  }
+}
+
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const { disableInput, name, baseArrayType } = props;
   const { register, trigger, control } = useFormContext();
