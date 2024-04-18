@@ -18,12 +18,24 @@ export default class RecordLocators {
     return container.locator('.share-cite-btn');
   }
 
+  static getCreateRecordButton(container: Locator | Page): Locator {
+    return container.locator('.title-buttons .create-record-btn');
+  }
+
+  static getCopyRecordButton(container: Locator | Page): Locator {
+    return container.locator('.title-buttons .copy-record-btn');
+  }
+
   static getDeleteRecordButton(container: Locator | Page): Locator {
     return container.locator('.title-buttons .delete-record-btn');
   }
 
   static getEditRecordButton(container: Locator | Page): Locator {
     return container.locator('.title-buttons .edit-record-btn');
+  }
+
+  static getShowAllRelatedEntitiesButton(container: Locator | Page): Locator {
+    return container.locator('.toggle-empty-sections');
   }
 
   // ---------------- table of content selectors --------------------- //

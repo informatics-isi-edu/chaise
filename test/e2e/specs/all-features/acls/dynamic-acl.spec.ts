@@ -273,7 +273,7 @@ test.describe('regarding dynamic ACL support', () => {
     });
 
     test('when the related tables have dynamic acls', async ({ page, baseURL }, testInfo) => {
-      await test.step('should open the page properly', async () => {
+      await test.step('should load the page properly', async () => {
         await page.goto(getRecordURL(testParams.dynamic_acl.related.main_id, baseURL, testInfo));
         await RecordLocators.waitForRecordPageReady(page);
       });
@@ -314,7 +314,7 @@ test.describe('regarding dynamic ACL support', () => {
 
     test('when some of the rows cannot be edited', async ({ page, baseURL }, testInfo) => {
 
-      await test.step('should open the page properly', async () => {
+      await test.step('should load the page properly', async () => {
         // 1 all except id enabled, 2 table-level disabled, 3 all vis columns disabled
         await page.goto(getRecordeditURL('id=1;id=2;id=5', baseURL, testInfo));
         await RecordeditLocators.waitForRecordeditPageReady(page);
@@ -343,7 +343,7 @@ test.describe('regarding dynamic ACL support', () => {
     });
 
     test('when some of the columns in one of the rows cannot be edited', async ({ page, baseURL }, testInfo) => {
-      await test.step('should open the page properly', async () => {
+      await test.step('should load the page properly', async () => {
         await page.goto(getRecordeditURL('id=1;id=6', baseURL, testInfo));
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
@@ -380,7 +380,7 @@ test.describe('regarding dynamic ACL support', () => {
     });
 
     test('when some rows cannot be deleted', async ({ page, baseURL }, testInfo) => {
-      await test.step('should open the page properly', async () => {
+      await test.step('should load the page properly', async () => {
         await page.goto(getRecordeditURL('id=7;id=8;id=9', baseURL, testInfo));
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
@@ -423,7 +423,7 @@ test.describe('regarding dynamic ACL support', () => {
 
     if (!process.env.CI && testParams.files.length > 0) {
       test('when trying to create a file without permission, user should be shown an error alert', async ({ page, baseURL }, testInfo) => {
-        await test.step('should open the page properly', async () => {
+        await test.step('should load the page properly', async () => {
           await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_file_table/id=1`);
           await RecordeditLocators.waitForRecordeditPageReady(page);
         });
@@ -506,7 +506,7 @@ const getRecordURL = (id: number, baseURL: string | undefined, testInfo: TestInf
 const testRecordAppEditAndDeleteButtons = async (
   id: number, editable: boolean, deletable: boolean, page: Page, baseURL: string | undefined, testInfo: TestInfo
 ) => {
-  await test.step('should open the page properly', async () => {
+  await test.step('should load the page properly', async () => {
     await page.goto(getRecordURL(id, baseURL, testInfo));
     await RecordLocators.waitForRecordPageReady(page);
   });
@@ -581,7 +581,7 @@ const testRecordSetEditAndDeleteButtons = async (
   page: Page, baseURL: string | undefined, testInfo: TestInfo,
   uriFilter: string, rowCount: number, displayBulkEdit: boolean, expectedEditable: boolean[], expectedDeletable: boolean[]
 ) => {
-  await test.step('should open the page properly and show correct number of rows', async () => {
+  await test.step('should load the page properly and show correct number of rows', async () => {
     await page.goto(`${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_main_table/${uriFilter}@sort(id)`);
     await RecordsetLocators.waitForRecordsetPageReady(page);
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(rowCount);

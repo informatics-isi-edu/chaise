@@ -74,7 +74,6 @@ E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.js
 E2Enavbar=test/e2e/specs/all-features/navbar/playwright.config.ts
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/playwright.config.ts
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/playwright.config.ts
-E2EmultiPermissionsVisibility_PROTRACTOR=test/e2e/specs/all-features/permissions.conf.js
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
@@ -98,14 +97,13 @@ RECORD_TESTS_PROTRACTOR=$(E2EDrecord) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2ErecordsetSavedQuery)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
-PERMISSIONS_TESTS_PROTRACTOR=$(E2EmultiPermissionsVisibility_PROTRACTOR)
 ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
 ALL_FEATURES_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesParallel_PROTRACTOR)
 PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(AllFeaturesParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
-ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(PERMISSIONS_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
+ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
@@ -179,9 +177,6 @@ testrecordedit-protractor: test_protractor-RECORDEDIT_TESTS_PROTRACTOR
 # Rule to run permission tests
 .PHONY: testpermissions
 testpermissions:test-PERMISSIONS_TESTS
-
-.PHONY: testpermissions-protractor
-testpermissions-protractor:test_protractor-PERMISSIONS_TESTS_PROTRACTOR
 
 #Rule to run recordset app tests
 .PHONY: testrecordset

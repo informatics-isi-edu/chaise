@@ -106,3 +106,27 @@ export async function manuallyTriggerFocus(page: Page) {
     document.dispatchEvent(new Event('focus', { bubbles: true })),
   );
 }
+
+
+export async function testButtonState(button: Locator, useSoftExpect: boolean, isVisible: boolean, isDisabled?: boolean, label?: string) {
+  const expectFn = useSoftExpect ? expect.soft : expect;
+
+  if (!isVisible) {
+    await expectFn(button).not.toBeVisible();
+    return;
+  }
+
+  await expectFn(button).toBeVisible();
+
+  if (typeof isDisabled === 'boolean') {
+    if (isDisabled) {
+      await expectFn(button).toBeDisabled();
+    } else {
+      await expectFn(button).not.toBeDisabled();
+    }
+  }
+
+  if (label) {
+    await expectFn(button).toHaveText(label);
+  }
+}

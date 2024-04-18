@@ -5,6 +5,7 @@ export default getConfig({
   configFileName: 'multi-permissions/dev.json',
   chaiseConfigFilePath: 'test/e2e/specs/all-features/chaise-config.js',
   testMatch: [
-    'acls/*.spec.ts'
+    'acls/*.spec.ts',
+    '*/permissions-annotation.spec.ts'
   ]
 });

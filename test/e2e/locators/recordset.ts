@@ -100,6 +100,10 @@ export default class RecordsetLocators {
     return container.locator('.recordset-table');
   }
 
+  static getActionsHeader(container: Page | Locator): Locator {
+    return container.locator('.actions-header');
+  }
+
   static getRows(container: Page | Locator): Locator {
     return container.locator('.chaise-table-row');
   }
