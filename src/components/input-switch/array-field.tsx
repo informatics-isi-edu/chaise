@@ -28,7 +28,7 @@ type ArrayFieldProps = InputFieldProps & {
 
 type RowItem = {
   id: number,
-  value: string | number
+  value: string
 }
 
 type Options = {
