@@ -17,7 +17,7 @@ import ChaiseDroppable from '../chaise-droppable';
 
 type ArrayFieldProps = InputFieldProps & {
   /**
-   * the type of each element in the array 
+   * the type of each element in the array
    */
   baseArrayType: string,
   /**
@@ -145,7 +145,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
                 onClick={() => addItem(addNewValue)}
                 /**
-                 * We disable the Add button when - 
+                 * We disable the Add button when -
                  * 1. There are validation errors in the addNewValue field.
                  * 2. The addNewValue field value is empty
                  */
