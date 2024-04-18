@@ -15,7 +15,8 @@
 
 // New Styles
 .entity-value,
-.select-all-input {
+.select-all-input,
+.multi-form-input {
   .add-button{
     padding-right: 6px;
   }
@@ -82,7 +83,7 @@
             outline: none;
           }
         }
-        button:not(.chaise-btn.chaise-btn-primary) {
+        button:not(.chaise-btn.chaise-btn-primary,.chaise-btn-secondary) {
           height: 100%;
           width: auto;
         }
@@ -119,7 +120,9 @@
       display: flex;
       align-items: center;
       position: relative;
-      padding-bottom: 30px !important;
+      &.add-padding-bottom{
+        padding-bottom: 30px !important;
+      }
       .move-icon * {
         transform: translateX(-2px) !important;
       }
