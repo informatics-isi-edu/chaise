@@ -78,8 +78,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
   await test.step('share button should be available after the page is fully loaded.', async () => {
 
     await RecordLocators.waitForRecordPageReady(page);
-
-    await shareBtn.waitFor({ state: 'visible' });
+    await expect.soft(shareBtn).toBeVisible();
   });
 
   await test.step('should show the share dialog when clicking the share button.', async () => {
@@ -155,7 +154,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
   await test.step('clicking on close button should close the modal.', async () => {
     await ModalLocators.getCloseBtn(shareCiteModal).click();
 
-    await shareCiteModal.waitFor({ state: 'detached' });
+    await expect.soft(shareCiteModal).not.toBeAttached();
   });
 
 }

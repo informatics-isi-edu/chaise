@@ -19,7 +19,7 @@ test.describe('Navbar', () => {
     const navbar = NavbarLocators.getContainer(page);
 
     await test.step('navbar should be visible on load.', async () => {
-      await navbar.waitFor({ state: 'visible' });
+      await expect.soft(navbar).toBeVisible();
     });
 
     await test.step('should display the right title from chaiseConfig.', async () => {
@@ -134,8 +134,7 @@ test.describe('Navbar', () => {
 
     await test.step('clicking on username should open the login dropdown menu.', async () => {
       await username.click();
-
-      await loginMenu.waitFor({ state: 'visible' });
+      await expect.soft(loginMenu).toBeVisible();
     })
 
     await test.step('should change the name of the "My Profile" and "Log Out" links', async () => {

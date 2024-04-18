@@ -60,7 +60,7 @@ E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.con
 E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.config.ts
-E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
+E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.ts
 E2EDrecordLinks=test/e2e/specs/default-config/record/links.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
