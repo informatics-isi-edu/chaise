@@ -1,25 +1,30 @@
 @use 'sass:map';
 @use 'variables';
 @use 'helpers';
+
 // From _recordedit-app.scss
 .recordedit-container {
-  .btn-sm[data-handler='bootstrap-markdown-cmdRidLink'] {
+  .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
     padding: 5px 3px;
   }
+
   .form-controls {
     display: flex;
     align-items: flex-end;
     padding-top: 10px;
     padding-bottom: 10px;
+
     .add-forms {
       width: auto;
       margin-left: auto;
+
       .add-rows-input {
         width: 50px;
         padding-left: 5px;
       }
     }
   }
+
   .main-body {
     display: flex;
     flex-direction: row;
@@ -29,28 +34,31 @@
     // padding at bottom of page so edit form isn't touching the bottom of viewport
     // padding instead of margin so it doesn't mess with scrollable area
     padding-bottom: 40px;
+
     .entity-key-column {
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
+
       .entity-key {
         width: variables.$chaise-caption-column-width;
-        border-left: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
-        border-right: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
+        border-left: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
         // margin-left: 10px;
         background: white;
         padding: 8px;
+
         min-height: 47px;
         height: 47px;
+
         flex: none;
         position: relative;
+
         &.with-multi-form-toggle {
           padding-right: 45px;
         }
+
         .toggle-multi-form-btn {
           position: absolute;
           right: 5px;
@@ -58,14 +66,17 @@
         }
       }
     }
+
     .form-container {
       width: 100%;
       height: 100%;
       overflow-x: hidden;
+
       .chaise-table-top-scroll-wrapper {
         position: fixed;
       }
     }
+
     .recordedit-form {
       position: relative;
       display: flex;
@@ -74,6 +85,7 @@
       background-color: map-get(variables.$color-map, 'white');
       min-width: 250px;
       overflow-x: auto;
+
       &.dropdown-open {
         // max height of a dropdown is `399px`
         //    <search-row.height> + <dropdown-list.padding-top> + <dropdown-list.height> + <dropdown-menu.padding-bottom>
@@ -81,9 +93,11 @@
         // special case can occur when there are very few values to set (id + 1 foreign key in create mode)
         padding-bottom: 400px;
       }
+
       .form-header-row {
         display: flex;
       }
+
       .form-inputs-row {
         display: flex;
         flex-direction: column;
@@ -95,31 +109,33 @@
         width: -webkit-fit-content;
         // the rule below added for chaise-image-preview functionality
         max-width: 100%;
+
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
         }
-        &.highlighted-row,
-        &.with-inline-tooltip {
+
+        &.highlighted-row, &.with-inline-tooltip {
           // We add this so that the multi-form-input-row and inline-comment-row span across the entire view
           max-width: none;
         }
+
         .inputs-row {
           display: flex;
           flex-direction: row;
+
           // adding an overlay on top of form to add the click event
           .clickable-form-overlay {
             height: 100%;
             width: 100%;
             cursor: pointer;
             // This rule is to overwrite cursor:not-allowed for toolbar.
-            .chaise-btn-toolbar,
-            .dropdown {
+            .chaise-btn-toolbar, .dropdown {
               pointer-events: none;
             }
           }
         }
-        .inline-comment-row,
-        .multi-form-input-row {
+
+        .inline-comment-row, .multi-form-input-row {
           width: 100%;
           display: flex;
           gap: 5px;
@@ -128,12 +144,15 @@
           top: 0;
           left: 0;
         }
+
         .inline-comment-row {
           flex-direction: column;
+
           color: map-get(variables.$color-map, 'column-inline-tooltip');
-          border-right: variables.$chaise-RE-border-width solid
-            map-get(variables.$color-map, 'recordedit-border');
+          border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+
           padding: 8px 10px 0 8px;
+
           .inline-tooltip {
             max-width: variables.$re-max-allowed-input-width;
           }
@@ -142,10 +161,13 @@
             margin-bottom: 0;
           }
         }
+
         .multi-form-input-row {
           flex-direction: column;
           align-items: center;
+
           z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
+
           // Adding a div to align the content center always
           .center-align {
             width: 100%;
@@ -163,10 +185,12 @@
             display: flex;
             width: 100%;
             justify-content: space-between;
+
             .multi-form-input-checkbox-container {
               display: flex;
               align-items: center;
               cursor: pointer;
+
               .multi-form-input-checkbox {
                 display: flex;
                 align-items: center;
@@ -179,10 +203,12 @@
                 cursor: default;
                 color: map-get(variables.$color-map, 'black');
               }
+
               .multi-form-input-how-to:hover {
                 z-index: auto !important;
               }
             }
+
             .multi-form-input-button-container {
               /**
               * We are aligning the buttons always to the right of the container so that when the width is less it always
@@ -191,8 +217,10 @@
               text-align: right;
             }
           }
+
           .multi-form-input {
             width: 100%;
+
             // We follow the min-width given for multi-form-input-row which is 250px
             textarea {
               resize: both;
@@ -201,6 +229,7 @@
             }
           }
         }
+
         /**
           * We are adding this rule to center align the input area when the screen resolution is greater than 1800px.
           * We also give a width to the input area of 1200px.
@@ -210,9 +239,11 @@
             .center-align {
               width: variables.$re-max-allowed-input-width;
             }
+
             .center-align-textarea {
               width: auto;
             }
+
             .multi-form-input {
               // added so the spinner and backdrop only cover the input.
               // if we want to cover the whole multi form row, move this to .multi-form-row
@@ -222,99 +253,109 @@
                 max-width: 100%;
               }
             }
+
             .multi-form-input-textarea {
               width: 100%;
             }
           }
+
         }
+
         @media (max-width: 1799px) {
           .multi-form-input-row {
             .multi-form-input-input {
               width: 100%;
+
               textarea {
                 max-width: 100%;
               }
             }
           }
         }
-        .multi-form-input-textarea {
-          width: 100%;
-        }
       }
+
       // form header and form inputs
       .entity-value {
         // make sure the inputs take up as much space as they can
         // and are the same size
         flex: 1 1 0;
         position: relative;
+
         .column-permission-overlay {
           position: absolute;
           left: 0;
           top: 0;
           height: 100%;
           width: 100%;
-          z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
+          z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
         }
+
         .column-permission-warning {
           margin: 0;
           padding: 5px;
           color: map-get(variables.$color-map, 'recordedit-column-permission-warning');
         }
       }
+
       .entity-value,
       .match-entity-value {
         word-wrap: break-word;
         min-width: 250px;
-        border-right: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+
         // border-left: none;
         // border-top: none;
+
         border-radius: 0;
         min-height: 47px;
         padding: 8px 10px;
       }
+
       // This is added to show the form is selected to apply the change
       .entity-active {
         outline: 2px solid map-get(variables.$color-map, 'primary');
         outline-offset: -2px;
       }
+
       // only form inputs
       .column-cell {
         border-left: none;
         border-top: none;
-        border-right: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid
-          map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
         border-radius: 0;
         // height: 47px;
         min-height: 47px;
         padding: 8px 10px;
+
         .chaise-input-control.column-cell-input {
           border: 1px solid map-get(variables.$color-map, 'border');
           border-radius: 4px;
           padding: 0 10px;
           display: flex;
           align-items: center;
+
           .input-switch {
             height: auto;
           }
         }
       }
     }
+
     // in both entity-key-column and form
     .form-header {
       height: 47px;
-      border-top: variables.$chaise-RE-border-width solid
-        map-get(variables.$color-map, 'recordedit-border');
+      border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
       color: map-get(variables.$color-map, 'disabled');
+
       .form-header-buttons-container {
         float: right;
+
         .remove-form-btn {
           padding: 1px 7px 0px 7px;
         }
+
         .disabled-row-icon {
           margin-right: 10px;
           font-size: 1.3em;
@@ -323,79 +364,102 @@
       }
     }
   }
+
   .modal-popup {
     width: 100%;
     margin-bottom: 0px;
   }
+
   .record-number {
     font-size: 14px;
     margin-left: 10px;
     color: map-get(variables.$color-map, 'disabled');
   }
+
   .chaise-input-control[readonly] {
     background-color: map-get(variables.$color-map, 'white');
     opacity: 1;
   }
+
   textarea,
   .disabled-textarea {
     resize: vertical;
     height: auto;
   }
+
   .input-timestamptz {
     min-width: 112px;
   }
+
   .adjust-boolean-dropdown {
     border-top: 0;
   }
+
   @-moz-document url-prefix() {
-    #form-edit > table > tbody > tr > td:first-child {
+    #form-edit>table>tbody>tr>td:first-child {
       margin-top: -1px;
     }
   }
+
   .resultset-tables {
     padding-top: 10px;
     padding-bottom: 20px;
   }
+
   /****************** Upload modal css *****************/
+
   // .progress-percent {
   //   font-weight: bold;
   //   margin-top: -25px;
   //   margin-left: 50%;
   // }
+
   // .inner-progress-percent {
   //   margin-top: -18px;
   //   font-size: 12px;
   // }
+
   // table.upload-table {
+
   // }
+
   // table.upload-table > tbody {
   //   border: none;
   // }
+
   // table.upload-table > tbody > tr > td:first-child {
   //   padding-left: 20px;
+
   // }
+
   // table.upload-table > tbody > tr > td:last-child {
   //   width: 40%;
   // }
+
   // table.upload-table > tbody > tr > td:nth-child(2) {
   //   padding-left: 0px;
   //   padding-right: 0px;
   // }
+
   // table.upload-table > tbody > tr:last-child > td {
   //   border-bottom: 1px solid $disabled-background-color;
   //   background-color: white;
   // }
+
   // table.upload-table > tbody > tr:first-child > td {
   //   padding-left:0px;
   //   padding-top: 15px;
   //   border-bottom: 2px solid gainsboro;
   //   font-weight: 600;
   // }
+
   // table.upload-table .progress {
   //   height: 20px;
   // }
+
   // .upload-progress-bar {
   //   width: 0%;
   //   background-color: #8cacc7 !important;
   // }
+
 }
