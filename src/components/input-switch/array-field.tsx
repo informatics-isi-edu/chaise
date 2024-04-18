@@ -1,7 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_array-field.scss';
 
-import '@isrd-isi-edu/chaise/src/assets/scss/_array-field.scss';
-
 // components
 import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
@@ -15,6 +13,7 @@ import {
 import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 
 type ArrayFieldProps = InputFieldProps & {
@@ -23,13 +22,13 @@ type ArrayFieldProps = InputFieldProps & {
    */
   baseArrayType: string,
   /**
-   * represents the presence of timezone in case of TimeStamp field
+   * The column model that is used for this input
    */
-  hasTimezone?: boolean
+  columnModel?: RecordeditColumnModel
 };
 
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
-  const { disableInput, name, baseArrayType } = props;
+  const { disableInput, name, baseArrayType, requiredInput, columnModel } = props;
   const { register, trigger, control } = useFormContext();
   const { fields, append, remove, move } = useFieldArray({ name: name, control: control });
   /**
@@ -55,11 +54,15 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     }
 
     if (getInputType({ name: baseArrayType }) === 'timestamp') {
-      const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
+
+      const DATE_TIME_FORMAT = columnModel?.column.type.rootName === 'timestamptz' ? dataFormats.datetime.return : dataFormats.timestamp;
       const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
 
-      valueToAdd['val-date'] = v?.date
-      valueToAdd['val-time'] = v?.time
+      valueToAdd = {
+        'val': v?.datetime,
+        'val-date': v?.date,
+        'val-time': v?.time
+      }
     }
 
     append(valueToAdd)
@@ -71,10 +74,12 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
-          return <li className={`item ${baseArrayType}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={item.id}>
-            <div className='move-icon'>
-              <i className='fa-solid fa-grip-vertical'></i>
-            </div>
+          return <li className={`item ${getInputType({ name: baseArrayType })}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={item.id}>
+            {!disableInput &&
+              <div className='move-icon'>
+                <i className='fa-solid fa-grip-vertical'></i>
+              </div>
+            }
 
             <div className='item-input'>
               <InputSwitch
@@ -111,8 +116,8 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   return (
     <>
-      <div className={`array-input-field-container ${name}`}>
-        {name.includes('array_disabled') ?
+      <div className={`array-input-field-container ${name} ${getInputType({ name: baseArrayType })}`}>
+        {name.includes('array_disabled') && false ?
           <InputSwitch
             {...props}
             type={'text'}
@@ -126,7 +131,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 {
                   (provided: DroppableProvided) => (
                     <ul
-                      className={`input-items-new ${fields.length ? 'add-margin-bottom' : ''}`}
+                      className={`input-items-new`}
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                       key={`${name}-list`}
@@ -138,25 +143,32 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 }
               </ChaiseDroppable>
             </DragDropContext>
-            <div className={`add-element-container ${baseArrayType}`}>
-              <InputSwitch
-                {...props}
-                type={getInputType({ name: baseArrayType })}
-                {...register(`${name}-new-item`, { value: '', onChange: () => trigger(`${name}-new-item`) })}
-                displayExtraDateTimeButtons={true}
-                displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-              />
-              <button
-                type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
-                onClick={() => addItem(addNewValue)}
-                /**
-                 * We disable the Add button when -
-                 * 1. There are validation errors in the addNewValue field.
-                 * 2. The addNewValue field value is empty
-                 */
-                disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
-              >Add</button>
-            </div>
+            {!disableInput &&
+              <div className={`add-element-container ${getInputType({ name: baseArrayType })} ${fields.length ? 'add-margin-top' : ''}`}>
+                <InputSwitch
+                  {...props}
+                  requiredInput={requiredInput && !fields.length}
+                  type={getInputType({ name: baseArrayType })}
+                  {...register(`${name}-new-item`, {
+                    required: requiredInput && !fields.length,
+                    value: '',
+                    onChange: () => trigger(`${name}-new-item`)
+                  })}
+                  displayExtraDateTimeButtons={true}
+                  displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+                />
+                <button
+                  type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
+                  onClick={() => addItem(addNewValue)}
+                  /**
+                   * We disable the Add button when -
+                   * 1. There are validation errors in the addNewValue field.
+                   * 2. The addNewValue field value is empty
+                   */
+                  disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+                >Add</button>
+              </div>
+            }
           </div>
 
         }

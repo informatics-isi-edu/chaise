@@ -1,7 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
-import { memo } from 'react';
-
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -199,12 +197,12 @@ const InputSwitch = ({
           parentReference={parentReference}
           parentTuple={parentTuple}
         />;
-      case 'array':
+      case 'array':        
         return <ArrayField
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
-          hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
+          columnModel={columnModel?.column.type.rootName === 'timestamptz' ? columnModel : undefined}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}

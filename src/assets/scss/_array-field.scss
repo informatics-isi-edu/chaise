@@ -33,17 +33,17 @@
       .chaise-btn {
         height: 30px;
       }
+      &.add-margin-top{
+        margin-top: 10px;
+      }
     }
     .input-items-new {
       width: 100%;
-      margin-bottom: 2px;
+      margin-bottom: 0px;
       display: flex;
       flex-direction: column;
       gap: 3px;
 
-      &.add-margin-bottom {
-        margin-bottom: 10px;
-      }
       & *:focus {
         outline: none;
       }
@@ -107,10 +107,10 @@
         [class*='input-switch-container'] {
           flex: 1 1 1px;
         }
-        [class$='array_date'] {
+        [class$='date'] {
           flex: 1 1 1px;
         }
-        [class$='array_timestamp'] {
+        [class$='timestamp'] {
           flex: 1 1 1px;
         }
       }
