@@ -1,3 +1,7 @@
+# This creates a docker image with only chromedriver and its dependencies.
+# This can be directly used to run test cases locally both in HEADLESS and HEADFUL mode.
+# Make sure to use volume mounts to mount the chaise directory to the container.
+# for more information refer - docs/dev-docs/e2e-test-docker.md
 FROM ubuntu:20.04
 
 

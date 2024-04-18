@@ -68,6 +68,10 @@ export type InputSwitchProps = {
    */
   displayErrors?: boolean,
   /**
+   * true if the current Input is an element of an InputField of type array
+   */
+   isArrayElement? : boolean
+  /**
    * the handler function called on input change
    */
   onFieldChange?: ((value: string) => void),
@@ -156,6 +160,7 @@ const InputSwitch = ({
   disableInput,
   requiredInput,
   displayErrors = true,
+  isArrayElement = false,
   styles = {},
   columnModel,
   appMode,
@@ -211,6 +216,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           allowEnter={true}
         />;
@@ -229,6 +235,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -257,6 +264,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -284,6 +292,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           columnModel={columnModel}
           additionalControllerRules={additionalControllerRules}
@@ -303,6 +312,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
@@ -320,6 +330,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
@@ -340,6 +351,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           additionalControllerRules={additionalControllerRules}
         />;
@@ -355,6 +367,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           columnModel={columnModel}
           additionalControllerRules={additionalControllerRules}
@@ -372,6 +385,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           allowEnter={true}
           additionalControllerRules={additionalControllerRules}
@@ -389,6 +403,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           allowEnter={true}
           additionalControllerRules={additionalControllerRules}
@@ -405,6 +420,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           additionalControllerRules={additionalControllerRules}
         />;
@@ -421,6 +437,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          isArrayElement={isArrayElement}
           placeholder={placeholder as string}
           additionalControllerRules={additionalControllerRules}
         />

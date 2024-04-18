@@ -101,6 +101,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 displayExtraDateTimeButtons={true}
                 displayDateTimeLabels={baseArrayType === 'date' ? false : true}
                 requiredInput={true}
+                isArrayElement={true}
               />
             </div>
 

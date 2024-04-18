@@ -68,7 +68,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-    if (!dateVal && !timeVal && !props.requiredInput && !props.requiredInput) {
+    if (!dateVal && !timeVal && !props.requiredInput) {
       if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
       return;
@@ -92,7 +92,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
     // if only time is missing, use 00:00:00 for it
     let timeValTemp = '';
-    if (!timeVal && !props.requiredInput && !props.requiredInput) {
+    if (!timeVal && !props.requiredInput) {
       timeValTemp = '00:00:00';
     }
     // otherwise validate the time value
@@ -224,7 +224,6 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
                 className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
                 type='text' disabled={props.disableInput} {...timeField} onChange={handleTimeChange}
                 placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.time}
-              // value={timeVal} //default time value does not reflect in the input element by setting the form state alone.
               />
               <ClearInputBtn
                 btnClassName={`${props.clearTimeClasses} input-switch-clear`}
@@ -233,7 +232,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons && <div className={`chaise-btn-group ${getFieldState(props.name)?.invalid ? 'translateY' : ''}`}>
+          {!props.disableInput && props.displayExtraDateTimeButtons && <div className={`chaise-btn-group ${getFieldState(props.name)?.invalid ? 'translateY' : ''}`}> {/*'translateY' - Prevents overlap of error message and button group in case of arrayField by moving the button group lower*/}
             <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
               Now
             </button>

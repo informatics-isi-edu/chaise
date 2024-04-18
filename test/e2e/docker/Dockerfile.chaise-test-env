@@ -1,3 +1,5 @@
+# This creates a docker image with chaise and all the test dependencies installed. This can be directly used in a CI for headless testing.
+# for more information refer - docs/dev-docs/e2e-test-docker.md
 FROM ubuntu:20.04
 
 RUN apt-get update \

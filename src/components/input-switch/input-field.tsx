@@ -58,6 +58,10 @@ export type InputFieldProps = {
    */
   allowEnter?: boolean
   /**
+   * true if the current Input field is an element of an InputField of type array
+   */
+  isArrayElement? : boolean
+  /**
    * `optional`additional controller rules for the input field.
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
    */
@@ -119,12 +123,13 @@ const InputField = ({
   containerClasses = '',
   styles,
   allowEnter = false,
+  isArrayElement,
   onClear,
   controllerRules,
   checkHasValue,
   handleChange,
   checkIsTouched,
-  additionalControllerRules
+  additionalControllerRules,
 }: InputFieldCompProps): JSX.Element => {
 
   const { setValue, control, clearErrors ,trigger} = useFormContext();
@@ -192,7 +197,7 @@ const InputField = ({
   if (showError) {
     if (error?.type === 'required') {
       // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
-      showError = formInput.formState.isSubmitted || name.includes('.val'); 
+      showError = formInput.formState.isSubmitted || isArrayElement; 
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
     }
