@@ -418,8 +418,27 @@ function _populateEditInitialValueForAColumn(
 
   // stringify the returned array value
   if (column.type.isArray) {
+    
     if (usedValue !== null) {
-      values[`${formValue}-${column.name}`] = JSON.stringify(usedValue, undefined, 2);
+      
+      values[`${formValue}-${column.name}`] = usedValue.map((value:any) => {
+        let valueToAdd: any = {
+          'val': value
+        }
+    
+        if (getInputType({ name: column.type.baseType.name }) === 'timestamp') {
+          const DATE_TIME_FORMAT = column.type.rootName === 'timestamptz' ? dataFormats.datetime.return : dataFormats.timestamp;
+          const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
+    
+          valueToAdd = {
+            'val' : v?.datetime,
+            'val-date' : v?.date,
+            'val-time' : v?.time
+          }
+        }
+
+        return valueToAdd
+      });
     }
     return;
   }
