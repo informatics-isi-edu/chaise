@@ -58,6 +58,8 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const addItem = (value: any) => {
+    setDisableAddButton(Object.keys(formState.errors).includes(`${name}-new-item`) || getValues(`${name}-new-item`) === undefined || getValues(`${name}-new-item`) === '')
+  }, [formState])
 
     let valueToAdd: any = {
       "val": value
@@ -71,6 +73,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
       valueToAdd["val-time"] = v?.time
     }
 
+  //TODO - verify types
     append(valueToAdd)
   }
 
