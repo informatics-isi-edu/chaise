@@ -22,6 +22,10 @@ export default class RecordLocators {
     return container.locator('.title-buttons .delete-record-btn');
   }
 
+  static getEditRecordButton(container: Locator | Page): Locator {
+    return container.locator('.title-buttons .edit-record-btn');
+  }
+
   // ---------------- table of content selectors --------------------- //
 
   static getTableOfContentsRelatedSpinner(container: Locator | Page): Locator {

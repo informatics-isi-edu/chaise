@@ -117,6 +117,7 @@ jobs:
           cd chaise
           make deps-test
           make dist-wo-deps
+          make lint
           sudo make deploy
       - name: Add tests users
         run: |
