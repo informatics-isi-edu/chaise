@@ -1,6 +1,6 @@
 .squished-array-buttons {
   .array-input-field-container {
-    .add-button{
+    .add-button {
       padding-right: 8px;
     }
     .input-items-new {
@@ -17,7 +17,7 @@
 .entity-value,
 .select-all-input,
 .multi-form-input {
-  .add-button{
+  .add-button {
     padding-right: 6px;
   }
   .array-input-field-container {
@@ -34,7 +34,7 @@
       .chaise-btn {
         height: 30px;
       }
-      &.add-margin-top{
+      &.add-margin-top {
         margin-top: 10px;
       }
     }
@@ -83,7 +83,7 @@
             outline: none;
           }
         }
-        button:not(.chaise-btn.chaise-btn-primary,.chaise-btn-secondary) {
+        button:not(.chaise-btn.chaise-btn-primary, .chaise-btn-secondary) {
           height: 100%;
           width: auto;
         }
@@ -120,7 +120,7 @@
       display: flex;
       align-items: center;
       position: relative;
-      &.add-padding-bottom{
+      &.add-padding-bottom {
         padding-bottom: 30px !important;
       }
       .move-icon * {
