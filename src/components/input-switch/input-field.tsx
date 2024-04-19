@@ -168,7 +168,6 @@ const InputField = ({
   }
 
   useEffect(() => {
-
     const hasValue = checkHasValue ? checkHasValue(fieldValue) : Boolean(fieldValue);
     if (showClear != hasValue) {
       setShowClear(hasValue);

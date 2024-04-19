@@ -14,6 +14,7 @@ import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hoo
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 
 type ArrayFieldProps = InputFieldProps & {
@@ -30,7 +31,17 @@ type ArrayFieldProps = InputFieldProps & {
 const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const { disableInput, name, baseArrayType, requiredInput, columnModel } = props;
   const { register, trigger, control, setValue } = useFormContext();
-  const { fields, append, remove, move } = useFieldArray({ name: name, control: control });
+  const { fields, append, remove, move } = useFieldArray({
+    name: name,
+    control: control,
+    rules: {
+      required: requiredInput
+    }
+  });
+  /**
+   * We use this to keep track of errors in array field
+   */
+  const arrayFormState = useFormState({ name: name });
   /**
    * We use this to keep track of errors in new value input box
    */
@@ -76,6 +87,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
       setValue(`${name}-new-item-time`, '')
     }
   }
+
 
   const DraggableItemRenderer = (item: any, index: number, disableInput: boolean | undefined) => {
 
@@ -144,36 +156,35 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               }
             </ChaiseDroppable>
           </DragDropContext>
-          {(!disableInput || true) &&
-            <div className={`add-element-container ${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''} ${fields.length ? 'add-margin-top' : ''}`}>
-              <InputSwitch
-                {...props}
-                requiredInput={requiredInput && !fields.length}
-                type={getInputType({ name: baseArrayType })}
-                {...register(`${name}-new-item`, {
-                  required: requiredInput && !fields.length,
-                  value: '',
-                  onChange: () => trigger(`${name}-new-item`)
-                })}
-                displayExtraDateTimeButtons={true}
-                displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-              />
-              <button
-                type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
-                onClick={() => {
-                  addItem(addNewValue)
-                  clearAddNewField()
-                }}
-                /**
-                 * We disable the Add button when -
-                 * 1. There are validation errors in the addNewValue field.
-                 * 2. The addNewValue field value is empty
-                 */
-                disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
-              >Add</button>
-            </div>
-          }
+          <div className={`add-element-container ${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''} ${fields.length ? 'add-margin-top' : ''}`}>
+            <InputSwitch
+              type={getInputType({ name: baseArrayType })}
+              {...register(`${name}-new-item`, {
+                value: '',
+                onChange: () => trigger(`${name}-new-item`),
+              })}
+              displayExtraDateTimeButtons={true}
+              displayDateTimeLabels={baseArrayType === 'date' ? false : true}
+
+            />
+            <button
+              type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
+              onClick={() => {
+                addItem(addNewValue)
+                clearAddNewField()
+              }}
+              /**
+               * We disable the Add button when -
+               * 1. There are validation errors in the addNewValue field.
+               * 2. The addNewValue field value is empty
+               */
+              disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+            >Add</button>
+          </div>
         </div>
+        {Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
+          <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: 'Please enter a value for this Array field' }} />
+        }
       </div>
     </>
   )
