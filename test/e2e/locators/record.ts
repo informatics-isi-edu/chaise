@@ -14,6 +14,14 @@ export default class RecordLocators {
     return container.locator('.entity-title');
   }
 
+  static getEntitySubTitleElement(container: Locator | Page): Locator {
+    return container.locator('.entity-subtitle');
+  }
+
+  static getEntitySubTitleElementInner(container: Locator | Page): Locator {
+    return container.locator('.entity-subtitle span');
+  }
+
   static getShareButton(container: Locator | Page): Locator {
     return container.locator('.share-cite-btn');
   }

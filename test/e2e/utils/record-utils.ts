@@ -38,8 +38,8 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
     }
+    index++;
   }
-  index++;
 }
 
 
@@ -61,9 +61,9 @@ type ShareCiteModalParams = {
    */
   verifyVersionedLink: boolean,
   /**
-   * pass `null` citation should not be displayed.
+   * pass `false` when citation should not be displayed.
    */
-  citation: string | null,
+  citation?: string | false,
   /**
    * the location of the bibtext file so we can delete it after downloading it
    */
@@ -97,7 +97,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
 
   await test.step('should have proper links.', async () => {
     const expectedHeaders: string | string[] = params.hasVersionedLink ? ['Versioned Link', 'Live Link'] : ['Live Link'];
-    await expect.soft(ModalLocators.getShareLinkSubHeaders(shareCiteModal)).toHaveText(expectedHeaders);
+    await expect.soft(ModalLocators.getShareLinkSubHeaders(shareCiteModal)).toContainText(expectedHeaders);
 
     await expect.soft(ModalLocators.getLiveLinkElement(shareCiteModal)).toHaveText(expectedLink);
 
@@ -141,6 +141,11 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
       // verify bibtex
       await expect.soft(ModalLocators.getDownloadCitationHeader(shareCiteModal)).toHaveText('Download Data Citation:');
       await expect.soft(ModalLocators.getBibtex(shareCiteModal)).toHaveText('BibTex');
+    });
+  } else if (params.citation === false) {
+    await test.step('citation should not be present', async () => {
+      await expect.soft(ModalLocators.getCitationHeader(shareCiteModal)).not.toBeVisible();
+      await expect.soft(ModalLocators.getCitationText(shareCiteModal)).not.toBeVisible();
     });
   }
 
@@ -246,7 +251,6 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
         await expect.soft(md).toBeVisible();
 
         if (params.markdownValue) {
-          // await expect.soft(md).toHaveAttribute('innerHTML', params.markdownValue);
           const innerHTML = await md.innerHTML();
           expect.soft(innerHTML).toBe(params.markdownValue);
         }

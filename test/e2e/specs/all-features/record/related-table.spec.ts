@@ -71,13 +71,15 @@ test.describe('Related tables', () => {
 
   test('overal structure of the page', async ({ page }) => {
     await test.step('table of contents should be displayed properly and in correct order', async () => {
-      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveCount(testParams.tocHeaders.length);
-      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveText(testParams.tocHeaders);
+      const tocHeaders = RecordLocators.getSidePanelHeadings(page);
+      await expect.soft(tocHeaders).toHaveCount(testParams.tocHeaders.length);
+      await expect.soft(tocHeaders).toHaveText(testParams.tocHeaders);
     });
 
     await test.step('related entities should show in the expected order', async () => {
-      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveCount(testParams.headers.length);
-      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText(testParams.headers);
+      const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
+      await expect.soft(headers).toHaveCount(testParams.headers.length);
+      await expect.soft(headers).toHaveText(testParams.headers);
     });
   });
 

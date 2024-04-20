@@ -59,6 +59,10 @@ export default class RecordeditLocators {
     return container.locator('#page-title a');
   }
 
+  static getPageTitleLinkInner(container: Locator | Page): Locator {
+    return container.locator('#page-title a span');
+  }
+
   static getRequiredInfoEl(container: Locator | Page): Locator {
     return container.locator('.required-info');
   }
