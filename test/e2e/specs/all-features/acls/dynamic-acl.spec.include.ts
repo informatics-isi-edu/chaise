@@ -59,7 +59,9 @@ const testParams = {
   unauthorized_message: 'You are not authorized to upload or modify the file at this location. Please contact your system administrators.'
 };
 
-test.describe('regarding dynamic ACL support', () => {
+
+export const runDynamicACLTests = () => {
+
   // run with the restricted user
   test.use({ storageState: RESTRICTED_USER_STORAGE_STATE });
 
@@ -494,7 +496,7 @@ test.describe('regarding dynamic ACL support', () => {
     });
   });
 
-});
+};
 
 
 

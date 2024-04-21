@@ -6,7 +6,7 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import { getCatalogID, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { performLogin, removeAuthCookieAndReload } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
 
-test.describe('regarding static ACL support', async () => {
+export const runStaticACLTests = () => {
 
   test('anonymous user should be shown login modal when viewing recoredit app', async ({ page, baseURL }, testInfo) => {
     await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:static_acl_table/id=1`);
@@ -142,7 +142,7 @@ test.describe('regarding static ACL support', async () => {
   });
 
   // TODO more static acl tests should be added
-});
+};
 
 
 
