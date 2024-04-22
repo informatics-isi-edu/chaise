@@ -1935,6 +1935,8 @@ exports.selectFileReturnPromise = (file, fileInput, txtInput) => {
 /**
  * test a file input with the given column name, and file that we want to test
  * the file input against it.
+ *
+ * TODO in playwright version don't use this. use `selectFile` or `setInputValue`.
  * @param  {string}         colName         name of the column
  * @param  {int}            recordIndex     index of record in the view
  * @param  {obj}            file            object with at least path, and name attributes.

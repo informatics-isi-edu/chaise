@@ -1,10 +1,10 @@
 import { expect, Locator, Page } from '@playwright/test'
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-export type RecordsetRowValue = string[] | {
+export type RecordsetRowValue = ({
   url: string,
   caption: string
-}[]
+} | string)[]
 
 
 export async function testRecordsetTableRowValues(container: Page | Locator, expectedRowValues: RecordsetRowValue[], isSoft?: boolean) {

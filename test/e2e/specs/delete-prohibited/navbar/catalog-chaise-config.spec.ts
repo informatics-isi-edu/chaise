@@ -14,7 +14,7 @@ test.describe('Navbar', () => {
     await test.step('navbar should be visible on load.', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
       await page.goto(`${baseURL}${PAGE_URL}`);
-      await navbar.waitFor({ state: 'visible' });
+      await expect.soft(navbar).toBeVisible();
     });
 
     await test.step('should display the right title from catalog annotation chaiseConfig.', async () => {

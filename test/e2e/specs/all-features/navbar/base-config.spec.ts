@@ -20,7 +20,7 @@ test.describe('Navbar', () => {
     const navbar = NavbarLocators.getContainer(page);
 
     await test.step('navbar should be visible on load.', async () => {
-      await navbar.waitFor({ state: 'visible' });
+      await expect.soft(navbar).toBeVisible();
     });
 
     await test.step('should display the right title from chaiseConfig', async () => {
@@ -32,7 +32,6 @@ test.describe('Navbar', () => {
     });
 
     await test.step('should include the headTitle from chaiseConfig in the tab title (head > title)', async () => {
-      await page.waitForLoadState();
       const title = await page.title();
       /**
        * the expected value is misleading. we're only supposed to ignore this for the title which is tested above
@@ -118,7 +117,7 @@ test.describe('Navbar', () => {
 
     await test.step('clicking on username should open the login dropdown menu.', async () => {
       await username.click();
-      await loginMenu.waitFor({ state: 'visible' });
+      await expect.soft(loginMenu).toBeVisible();
 
       await expect.soft(profileLink, 'profile link shows wrong text').toHaveText('My Profile');
       await expect.soft(NavbarLocators.getLogoutLink(page), 'logout link shows wrong text').toHaveText('Log Out');
@@ -127,13 +126,13 @@ test.describe('Navbar', () => {
     await test.step('should open the profile card on click of My Profile link', async () => {
       await profileLink.click();
 
-      await profileModal.waitFor({ state: 'visible' });
+      await expect.soft(profileModal).toBeVisible();
     });
 
     await test.step('should close the profile card on click of X on the modal window', async () => {
       await ModalLocators.getCloseBtn(profileModal).click();
 
-      await profileModal.waitFor({ state: 'detached' });
+      await expect.soft(profileModal).not.toBeAttached();
     });
   });
 });

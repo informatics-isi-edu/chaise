@@ -24,6 +24,14 @@ export default class ModalLocators {
     return page.locator('.modal-error');
   }
 
+  static getLoginModal(page: Page): Locator {
+    return page.locator('.modal-login-instruction');
+  }
+
+  static getExportModal(page: Page): Locator {
+    return page.locator('.export-progress');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
