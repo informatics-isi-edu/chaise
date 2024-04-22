@@ -645,10 +645,6 @@ test.describe('Related tables', () => {
     );
   });
 
-  // the rest of test cases are special cases that we don't need to run on CI
-  // TODO if we realized that the CI is not taking a long time, we should consider running these on CI as well.
-  if (process.env.CI) return;
-
   /**
    * these test cases rely on the previous related and assoc tests
    * since they are basically the same path with just added filters

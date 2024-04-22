@@ -67,9 +67,8 @@ export const runDynamicACLTests = () => {
 
   test.beforeAll(async ({ }, testInfo) => {
     // create the files
-    if (!process.env.CI && testParams.files.length > 0) {
-      await createFiles(testParams.files);
-    }
+    await createFiles(testParams.files);
+
     // add acls
     const catalogId = getCatalogID(testInfo.project.name);
     await importACLs({
@@ -423,23 +422,21 @@ export const runDynamicACLTests = () => {
       });
     });
 
-    if (!process.env.CI && testParams.files.length > 0) {
-      test('when trying to create a file without permission, user should be shown an error alert', async ({ page, baseURL }, testInfo) => {
-        await test.step('should load the page properly', async () => {
-          await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_file_table/id=1`);
-          await RecordeditLocators.waitForRecordeditPageReady(page);
-        });
-
-        await test.step('after clicking on submit, user should see an error.', async () => {
-          await setInputValue(page, 1, 'uri', 'uri', RecordeditInputType.FILE, testParams.files[0]);
-
-          await RecordeditLocators.submitForm(page);
-          const alert = AlertLocators.getErrorAlert(page);
-          await expect.soft(alert).toBeVisible();
-          await expect.soft(alert).toContainText(testParams.unauthorized_message);
-        });
+    test('when trying to create a file without permission, user should be shown an error alert', async ({ page, baseURL }, testInfo) => {
+      await test.step('should load the page properly', async () => {
+        await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_file_table/id=1`);
+        await RecordeditLocators.waitForRecordeditPageReady(page);
       });
-    }
+
+      await test.step('after clicking on submit, user should see an error.', async () => {
+        await setInputValue(page, 1, 'uri', 'uri', RecordeditInputType.FILE, testParams.files[0]);
+
+        await RecordeditLocators.submitForm(page);
+        const alert = AlertLocators.getErrorAlert(page);
+        await expect.soft(alert).toBeVisible();
+        await expect.soft(alert).toContainText(testParams.unauthorized_message);
+      });
+    });
 
   });
 
@@ -462,9 +459,7 @@ export const runDynamicACLTests = () => {
 
   test.afterAll(async ({ }, testInfo) => {
     // remove the added files
-    if (!process.env.CI && testParams.files.length > 0) {
-      await deleteFiles(testParams.files);
-    }
+    await deleteFiles(testParams.files);
     // clean up the acls
     const catalogId = getCatalogID(testInfo.project.name);
     await importACLs({
@@ -589,7 +584,7 @@ const testRecordSetEditAndDeleteButtons = async (
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(rowCount);
   });
 
-  await test.step(`should ${displayBulkEdit ? '': 'not'} display the buld edit link`, async () => {
+  await test.step(`should ${displayBulkEdit ? '' : 'not'} display the buld edit link`, async () => {
     await page.pause();
     const link = RecordsetLocators.getBulkEditLink(page);
     if (displayBulkEdit) {
