@@ -708,11 +708,15 @@ const FacetRangePicker = ({
     });
   }
 
+  function _isValueDefined(val: any) {
+    return val !== undefined && val !== null;
+  }
+
   // disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
   const disableZoomIn = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     let limitedRange = false;
 
-    if (min && max) {
+    if (_isValueDefined(min) && _isValueDefined(max)) {
       if (isColumnOfType('int')) {
         limitedRange = ((max as number) - (min as number)) <= numBuckets;
       } else if (isColumnOfType('date')) {

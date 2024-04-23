@@ -1,7 +1,8 @@
 @use 'sass:map';
 @use 'variables';
 
-.chaise-dropdown {
+// the .dropdown selector is neede to ensure overriding default bootstrap and chaise styles
+.chaise-dropdown.dropdown {
   display: inline-block;
   position: relative;
 
@@ -87,11 +88,6 @@
     overflow-y: auto;
   }
 
-  .dropdown .dropdown-toggle,
-  .dropdown a {
-    text-decoration: none;
-  }
-
   // bootstrap adds css "borders" before element with .dropstart
   .dropstart .dropdown-toggle::before {
     content: none;
@@ -117,6 +113,14 @@
     padding: 0;
   }
 
+  // change the default link behaviors to not show the underline
+  a {
+    text-decoration: none;
+    &:hover, &:focus {
+      text-decoration: none;
+    }
+  }
+
   .dropdown-menu > a,
   .dropdown-menu > div > a {
     white-space: normal;
@@ -131,7 +135,6 @@
     &:focus,
     &:hover {
       color: lighten(map-get(variables.$color-map, 'black'), 10%);
-      text-decoration: none;
       background-color: darken(map-get(variables.$color-map, 'white'), 10%);
     }
   }

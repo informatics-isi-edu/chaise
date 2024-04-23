@@ -212,6 +212,8 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   const handleRidSearch = () => {
+    if (!isStringAndNotEmpty(formModel.ridSearchTerm)) return;
+
     const resolverId = cc.resolverImplicitCatalog;
     let splitId = {
       catalog: '',
@@ -252,7 +254,8 @@ const ChaiseNavbar = (): JSX.Element => {
       windowRef.open(url, '_blank');
     }).catch((err: any) => {
       setShowRidSpinner(false);
-      if (err.status === 404) {
+      // when using `/id/ridSearchTerm`, ermrest might throw 400 instead of 404
+      if (err.status === 404 || err.status === 400) {
         err = new NoRecordRidError();
       }
 

@@ -13,7 +13,7 @@ concurrency: chaise_env
 
 jobs:
   install-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -21,7 +21,8 @@ jobs:
       SHARDING: true
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
-    timeout-minutes: 120
+      NODE_TLS_REJECT_UNAUTHORIZED: '0'
+    timeout-minutes: 150
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
@@ -50,7 +51,7 @@ jobs:
           sudo apt-get install -y python3-setuptools python3-ply
           sudo python3 --version
           sudo pip3 --version
-          sudo su -c 'echo /usr/lib/python3.8/site-packages > /usr/local/lib/python3.8/dist-packages/sys-site-packages.pth'
+          sudo su -c 'echo /usr/lib/python3.10/site-packages > /usr/local/lib/python3.10/dist-packages/sys-site-packages.pth'
           sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
           sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
           : # the line below will make sure pyopenssl and cryptography have compatible versions
@@ -60,6 +61,9 @@ jobs:
           sudo pip3 install globus_sdk
           sudo pip3 install psycopg2-binary
           sudo pip3 install oauth2client
+          sudo pip3 uninstall crypto
+          sudo pip3 uninstall pycrypto
+          sudo pip3 install pycryptodome
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -96,11 +100,12 @@ jobs:
           git clone https://github.com/informatics-isi-edu/ermrest.git
           cd ermrest
           sudo -H make install PLATFORM=ubuntu1604
-          sudo which ermrest-deploy
           sudo -H make deploy PLATFORM=ubuntu1604
+          sudo bash ./test/ubuntu-travis-setup.sh
           cd ../chaise
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
+          sudo service apache2 restart
       - name: Install ermrestjs
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
@@ -112,6 +117,7 @@ jobs:
           cd chaise
           make deps-test
           make dist-wo-deps
+          make lint
           sudo make deploy
       - name: Add tests users
         run: |
@@ -124,6 +130,30 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
+      - name: Run all features test spec
+        id: test-all-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeatures
+      - name: Run all features confirmation test spec
+        id: test-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
       - name: Setup and connect to saucelabs
         timeout-minutes: 2
         run: |
@@ -137,42 +167,60 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run full features confirmation test spec
-        id: test-full-features-confirmation
+      - name: Run all features test spec  (protractor)
+        id: test-protractor-all-features
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeaturesconfirmation
-      - name: Run default config test spec
-        id: test-default-config
+          make testallfeatures-protractor
+      - name: Run all features confirmation test spec (protractor)
+        id: test-protractor-all-features-confirmation
         continue-on-error: true
         run: |
           cd chaise
-          make testdefaultconfig
-      - name: Run full features test spec
-        id: test-full-features
+          make testallfeaturesconfirmation-protractor
+      - name: Run default config test spec  (protractor)
+        id: test-protractor-default-config
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeatures
-      - name: Run delete prohibited test spec
-        id: test-delete-prohibited
+          make testdefaultconfig-protractor
+      - name: Run delete prohibited test spec  (protractor)
+        id: test-protractor-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
-          make testdeleteprohibited
-      - name: Check on full features confirmation test spec
-        if: always() && steps.test-full-features-confirmation.outcome != 'success'
+          make testdeleteprohibited-protractor
+      - name: Check on all features test spec
+        if: always() && steps.test-all-features.outcome != 'success'
+        run: exit 1
+      - name: Check on all features confirmation test spec
+        if: always() && steps.test-all-features-confirmation.outcome != 'success'
         run: exit 1
       - name: Check on default config test spec
         if: always() && steps.test-default-config.outcome != 'success'
         run: exit 1
-      - name: Check on full features test spec
-        if: always() && steps.test-full-features.outcome != 'success'
-        run: exit 1
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
+      - name: Check on all features test spec (protractor)
+        if: always() && steps.test-protractor-all-features.outcome != 'success'
+        run: exit 1
+      - name: Check on all features confirmation test spec (protractor)
+        if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec (protractor)
+        if: always() && steps.test-protractor-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec (protractor)
+        if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
+        run: exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: chaise/playwright-report/
+          retention-days: 30
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |

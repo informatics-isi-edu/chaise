@@ -5,10 +5,13 @@ var recordEditPage = function() {
     var that = this;
 
     // recordedit form view
+
+    // TODO playwright: renamed to getPageTitle
     this.getEntityTitleElement = function() {
         return element(by.css('.app-container #page-title'));
     };
 
+    // TODO playwright: renamed to getPageTitleLink
     this.getEntityTitleLinkElement = function() {
         return this.getEntityTitleElement().element(by.tagName('a'));
     };
@@ -459,6 +462,8 @@ var recordEditPage = function() {
     };
 
     /* alert selectors */
+
+    // TODO use getAlertErrorElement instead of this
     this.getAlertError = function() {
         /**
          * TODO while this is only used in recordedit, the submission might be
@@ -657,6 +662,11 @@ var recordPage = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
+    /**
+     * TODO
+     * in playwright use RecordsetLocators.getRows instead and
+     * pass the contaienr yourself.
+     */
     this.getRelatedTableRows = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
         return el.all(by.css(".chaise-table-row"));
@@ -852,6 +862,9 @@ var recordPage = function() {
         return element(by.className('show-toc-btn'));
     }
 
+    /**
+     * TODO in playwright use the recordset function
+     */
     this.getModalSidePanel = function() {
         return element(by.css(".modal-body")).element(by.css('.side-panel-resizable'));
     }
@@ -915,6 +928,9 @@ var recordsetPage = function() {
         return el.all(by.tagName("td"));
     };
 
+    /**
+     * TODO in playwright version, use rdsetLocators.getRows(rsModal)
+     */
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .chaise-table-row'));
     };
@@ -1041,10 +1057,6 @@ var recordsetPage = function() {
     this.getExportDropdown = function () {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
-
-    this.getExportDropdownMenu = () => {
-        return element(by.css('.export-menu dropdown-menu'));
-    }
 
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
@@ -1234,10 +1246,16 @@ var recordsetPage = function() {
         return popup.element(by.css('.chaise-table-header-total-count'));
     };
 
+    /**
+     * TODO playwright: use RecordsetLocators.getCheckboxInputs
+     */
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    /**
+     * TODO playwright: use RecordsetLocators.getRowCheckboxInput
+     */
     this.getModalRecordsetTableOptionByIndex = function (popup, index) {
         return popup.element(by.css(".recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };

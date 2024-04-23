@@ -253,7 +253,6 @@ const Export = ({
   });
 
   const showConfigsSubmenu = isGroupIncluded(ConfigService.chaiseConfig.exportConfigsSubmenu.acls.show, session);
-  console.log(ConfigService.chaiseConfig.exportConfigsSubmenu);
   if (showConfigsSubmenu && configsSubmenuOptions.length > 0) {
     configsSubmenu.push({
       type: MenuOptionTypes.MENU,

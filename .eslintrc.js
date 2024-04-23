@@ -50,9 +50,15 @@ module.exports = {
     'react/react-in-jsx-scope': 0,
 
     // ------------------ typescript ------------------
+    '@typescript-eslint/no-duplicate-enum-values': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
+
+    // ------------------ testing ------------------
+    '@typescript-eslint/no-floating-promises': 'warn'
   },
   settings: {
     'import/resolver': 'webpack',
@@ -66,7 +72,15 @@ module.exports = {
   // ignore the old code
   ignorePatterns: [
     'common/**/*', 'lib/**/*', 'styles/**/*',
-    // we might want to remove the following later:
-    'test/**/*', 'config/*'
+    'config/*'
+  ],
+  // without the following eslint stopped working.
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      parserOptions: {
+        project: ['./tsconfig.json'],
+      },
+    }
   ]
 };

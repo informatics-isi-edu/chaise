@@ -209,6 +209,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    // TODO playwright: modify testRecordMainSectionValues and use it here as well
     it("should validate the values of each column", function () {
         expect(chaisePage.recordPage.getAllColumnValues().count()).toEqual(notNullColumns.length, "length missmatch.");
         notNullColumns.forEach(function (column) {
@@ -450,11 +451,12 @@ exports.testPresentation = function (tableParams) {
 /**
  * opens the share and cite popup and test the content. The acceptable input:
  * {
+ *   title: "title", // required
  *   permalink: "the permalink", // required
  *   hasVersionedLink: boolean, // whether versioned link is present or not
  *   verifyVersionedLink: boolean, // if true, we will test the versioned link too.
  *   citation: string, // (optional) pass null if citation should not be displayed.
- *   bintextFile: string, // (optional) the location of the bibtext file so we can delete it after downloading it
+ *   bibtextFile: string, // (optional) the location of the bibtext file so we can delete it after downloading it
  * }
  */
 exports.testSharePopup = function (sharePopupParams) {
