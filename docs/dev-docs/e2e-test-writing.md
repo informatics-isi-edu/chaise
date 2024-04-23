@@ -184,12 +184,16 @@ This section summarizes the best practices for writing test cases in Chaise.
   ```ts
   // prefered
   await expect(link).toHaveAttribute('href', regexOrFullString);
+
   // if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
   expect(await link.getAttribute('href')).toContain(partialExpected)
+  ```
 
-  // avoid using `.innerHTML` or getAttribute('innerHTML'
+- Test `innerHTML`:
+
+  ```ts
   expect(await link.innerHTML()).toContain(partialExpected);
-  expect(await link.innerHTML()).toBe(fullString);
+  expect(await link.innerHTML()).toBe(expected);
   ```
 
 ### Actions

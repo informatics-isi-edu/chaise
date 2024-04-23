@@ -77,7 +77,7 @@ export const selectDropdownValue = async (dropdownEl: Locator, value: string) =>
   await dropdownEl.click();
 
   const optionsContainer = RecordeditLocators.getOpenDropdownOptionsContainer(dropdownEl.page());
-  await optionsContainer.waitFor({ state: 'visible' });
+  await expect.soft(optionsContainer).toBeVisible();
 
   const options = RecordeditLocators.getDropdownOptions(dropdownEl.page());
   await options.getByText(value).click();

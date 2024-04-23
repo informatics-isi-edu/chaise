@@ -9,8 +9,9 @@ import {
   testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
   testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -70,13 +71,15 @@ test.describe('Related tables', () => {
 
   test('overal structure of the page', async ({ page }) => {
     await test.step('table of contents should be displayed properly and in correct order', async () => {
-      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveCount(testParams.tocHeaders.length);
-      await expect.soft(RecordLocators.getSidePanelHeadings(page)).toHaveText(testParams.tocHeaders);
+      const tocHeaders = RecordLocators.getSidePanelHeadings(page);
+      await expect.soft(tocHeaders).toHaveCount(testParams.tocHeaders.length);
+      await expect.soft(tocHeaders).toHaveText(testParams.tocHeaders);
     });
 
     await test.step('related entities should show in the expected order', async () => {
-      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveCount(testParams.headers.length);
-      await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText(testParams.headers);
+      const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
+      await expect.soft(headers).toHaveCount(testParams.headers.length);
+      await expect.soft(headers).toHaveText(testParams.headers);
     });
   });
 
@@ -642,41 +645,202 @@ test.describe('Related tables', () => {
     );
   });
 
-  // the rest of test cases are special cases that we don't need to run on CI
-  if (process.env.CI) return;
-
-  // TODO playwright: the rest of test cases should be added here.
-
   /**
    * these test cases rely on the previous related and assoc tests
    * since they are basically the same path with just added filters
    */
   test.describe('regarding usage of filter in source', () => {
 
-    test('for a related entity with wait_for aggregate and markdown_pattern', async ({ page }, testInfo) => {
-      await testRelatedTablePresentation(
-        page,
-        testInfo,
-        {
-          inlineComment: 'inbound related, filter on main (comment _markdown_ is turned off)',
-          schemaName: 'product-unordered-related-tables-links',
-          displayname: 'inbound related with filter on main table',
-          tableName: 'booking',
-          baseTableName: 'Accommodations',
-          count: 2,
-          rowValues: [
-            ['247.0000', ''],
-            ['100.0000', '2016-06-01 00:00:00'],
-            ['110.0000', '2016-05-19 01:00:00'],
-            ['120.0000', '2015-11-10 00:00:00'],
-            ['180.0000', '2016-09-04 01:00:00'],
-            ['80.0000', '2016-01-01 00:00:00'],
-          ],
-          canCreate: true
-        }
+    test('for a related entity with filter on main table', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        inlineComment: 'inbound related, filter on main (comment _markdown_ is turned off)',
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'inbound related with filter on main table',
+        tableName: 'booking',
+        baseTableName: 'Accommodations',
+        count: 2,
+        rowValues: [
+          ['247.0000', ''],
+          ['100.0000', '2016-06-01 00:00:00'],
+          ['110.0000', '2016-05-19 01:00:00'],
+          ['120.0000', '2015-11-10 00:00:00'],
+          ['180.0000', '2016-09-04 01:00:00'],
+          ['80.0000', '2016-01-01 00:00:00'],
+        ],
+        canCreate: true
+      }
       );
     });
 
+    test('for a related entity with filter on related table', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'inbound related with filter on related table',
+        tableName: 'booking',
+        baseTableName: 'Accommodations',
+        count: 2,
+        viewMore: {
+          displayname: 'booking',
+          filter: 'AccommodationsSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['247.0000', ''], // created by another test case
+          ['80.0000', '2016-01-01 00:00:00']
+        ],
+        canCreate: false
+      });
+    });
+
+    test('pure and binary association with filter on main table', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'association with filter on main table',
+        tableName: 'association_table',
+        associationLeafTableName: 'related_table',
+        baseTableName: 'Accommodations',
+        isAssociation: true,
+        count: 2,
+        viewMore: {
+          displayname: 'related_table',
+          filter: 'base table association relatedSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['Television'],
+          ['Coffee Maker']
+        ],
+        canCreate: true
+      }
+      );
+    });
+
+    test('pure and binary association with filter on association table', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'association with filter on assoc table',
+        tableName: 'association_table',
+        associationLeafTableName: 'related_table',
+        baseTableName: 'Accommodations',
+        isAssociation: true,
+        count: 1,
+        viewMore: {
+          displayname: 'related_table',
+          filter: 'base table association relatedSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['Coffee Maker']
+        ],
+        canCreate: false
+      });
+    });
+
+    test('for a pure and binary association with filter on related table', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'association with filter on related table',
+        tableName: 'association_table',
+        associationLeafTableName: 'related_table',
+        baseTableName: 'Accommodations',
+        isAssociation: true,
+        count: 1,
+        rowValues: [
+          ['Television']
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '1' }]
+        ],
+        canCreate: true,
+      });
+
+      await testAddAssociationTable(page, {
+        displayname: 'association with filter on related table',
+        modalTitle: 'Link related_table to Accommodations: Super 8 North Hollywood Motel',
+        totalCount: 2,
+        disabledRows: ['1'],
+        selectOptions: [1],
+        rowValuesAfter: [
+          ['Television'],
+          ['Air Conditioning']
+        ]
+      });
+    });
+
+    test('for a related entity with a path of length 3 with filter', async ({ page }, testInfo) => {
+      await testRelatedTablePresentation(page, testInfo, {
+        schemaName: 'product-unordered-related-tables-links',
+        displayname: 'path of length 3 with filters',
+        tableName: 'related_table_2',
+        baseTableName: 'Accommodations',
+        viewMore: {
+          displayname: 'related_table_2',
+          filter: 'base table association relatedSuper 8 North Hollywood Motel'
+        },
+        rowValues: [
+          ['two'],
+          ['three']
+        ],
+        rowViewPaths: [
+          [{ column: 'id', value: '2' }],
+          [{ column: 'id', value: '3' }]
+        ],
+        count: 2, // one row is deleted by unlink test, another is added by add p&b filter on assoc
+      });
+
+      await test.step('add button should not be available', async () => {
+        await expect.soft(RecordLocators.getRelatedTableAddButton(page, 'path of length 3 with filters')).not.toBeAttached();
+      });
+    });
+
+  });
+
+  test('for a pure and binary association with a null value for the key on main', async ({ page }) => {
+    const linkBtn = RecordLocators.getRelatedTableAddButton(page, 'association_table_null_keys', true);
+
+    await test.step('should disable the "Link records" button', async () => {
+      // the table doesn't have any rows, so we have to first click on show all
+      await RecordLocators.getShowAllRelatedEntitiesButton(page).click();
+      await expect.soft(linkBtn).toBeVisible();
+      await expect.soft(linkBtn).toBeDisabled();
+    });
+
+    await test.step('"Link records" should have the proper tooltip', async () => {
+      const expected = 'Unable to connect to association_table_null_keys records until nullable_assoc_key in this Accommodations is set.'
+      await testTooltip(linkBtn, expected, APP_NAMES.RECORD, true);
+    });
+  });
+
+  test('for an inbound fk with a null value for the key on main', async ({ page }) => {
+    const addBtn = RecordLocators.getRelatedTableAddButton(page, 'inbound_null_key', true);
+
+    await test.step('should disable the "Add records" button', async () => {
+      // the table doesn't have any rows, so we have to first click on show all
+      await RecordLocators.getShowAllRelatedEntitiesButton(page).click();
+
+      await expect.soft(addBtn).toBeVisible();
+      await expect.soft(addBtn).toBeDisabled();
+    });
+
+    await test.step('"Add records" should have the proper tooltip', async () => {
+      const expected = 'Unable to create inbound_null_key records for this Accommodations until nullable_assoc_key in this Accommodations is set.'
+      await testTooltip(addBtn, expected, APP_NAMES.RECORD, true);
+    });
+  });
+
+
+  test('for a pure and binary association with a null value for the key on the leaf table', async ({ page }) => {
+    await test.step('should add a not null filter and only show 2 of the 5 rows for related_table_null_key', async () => {
+      // the table doesn't have any rows, so we have to first click on show all
+      await RecordLocators.getShowAllRelatedEntitiesButton(page).click();
+
+      const addBtn = RecordLocators.getRelatedTableAddButton(page, 'association_table_null_keys2', true);
+      await expect.soft(addBtn).toBeVisible();
+      await expect.soft(addBtn).not.toBeDisabled();
+
+      const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+      await addBtn.click();
+      await expect.soft(rsModal).toBeVisible();
+      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
+
+    });
   });
 
 });
@@ -694,7 +858,7 @@ test.describe('Scroll to query parameter', () => {
     const heading = RecordLocators.getRelatedTableAccordionContent(page, testParams.scrollToDisplayname);
 
     // make sure it exists
-    await heading.waitFor({ state: 'visible' });
+    await expect.soft(heading).toBeVisible();
 
     // make sure it scrolls into view
     await expect.soft(heading).toBeInViewport();

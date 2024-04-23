@@ -50,6 +50,9 @@ module.exports = {
     'react/react-in-jsx-scope': 0,
 
     // ------------------ typescript ------------------
+    '@typescript-eslint/no-duplicate-enum-values': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
