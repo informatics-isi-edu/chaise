@@ -158,14 +158,14 @@ export const QUERY_PARAMS = {
 };
 
 // these are the captured as `cid` value in logs
-export const APP_NAMES = {
-  HELP: 'help',
-  LOGIN: 'login',
-  NAVBAR: 'navbar',
-  RECORD: 'record',
-  RECORDEDIT: 'recordedit',
-  RECORDSET: 'recordset',
-  VIEWER: 'viewer'
+export enum APP_NAMES {
+  HELP = 'help',
+  LOGIN = 'login',
+  NAVBAR = 'navbar',
+  RECORD = 'record',
+  RECORDEDIT = 'recordedit',
+  RECORDSET = 'recordset',
+  VIEWER = 'viewer'
 };
 
 export const CLASS_NAMES = {

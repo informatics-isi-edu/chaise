@@ -114,7 +114,7 @@ describe('Recordset edit records,', function() {
                     return (ct == testParams.limit);
                 });
             }, browser.params.defaultTimeout);
-            
+
             chaisePage.recordsetPage.getRows().count().then(function(ct) {
                 expect(ct).toBe(testParams.limit);
 

@@ -618,10 +618,13 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
         // dereference formData so we aren't modifying content in react-hook-form
         // v is an object with `file`, `filename`, `filesize`, and `url` defined
         const tempVal = { ...v };
-        tempVal.hatracObj = new windowRef.ERMrest.Upload(v.file, {
-          column: col,
-          reference: reference
-        });
+        tempVal.hatracObj = null
+        if (v.file) {
+          tempVal.hatracObj = new windowRef.ERMrest.Upload(v.file, {
+            column: col,
+            reference: reference
+          });
+        }
 
         v = tempVal;
       } else if (col.type?.isArray) {
