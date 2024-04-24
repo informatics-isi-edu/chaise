@@ -501,6 +501,8 @@ var recordEditPage = function() {
      * @typedef {Object} ArrayFieldContainerElement
      * @property {Function} getAddNewElementContainer - returns the add new element container for the given array field
      * @property {Function} getAddNewValueInputElement - returns add new element input element for a given array field
+     * @property {Function} getClearInputButton - returns clear button for the current input
+     * @property {Function} getErrorMessageElement - returns error message element for the current input
      * @property {Function} getAddButton - returns add button for a given array field
      * @property {Function} getArrayItem - returns the element added to the array
      */
@@ -525,6 +527,11 @@ var recordEditPage = function() {
         return addNewContainer.element(by.className("add-button"))
       }
 
+      elem.getErrorMessageElement = function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        return addNewContainer.element(by.className("input-switch-error"));
+      }
+
       switch(baseType){
         case 'date':
         case 'integer':
@@ -536,9 +543,14 @@ var recordEditPage = function() {
           }
 
           elem.getArrayItem = function(){
-            return this.element(by.css(`li [class$="${fieldName}-0-val"] input`));
+            return this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`)).last();
           }
 
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className('remove-input-btn'));
+          }
+          
         break;
         case 'timestamp':
         case 'timestamptz' :
@@ -548,6 +560,18 @@ var recordEditPage = function() {
               addNewContainer.element(by.className("input-switch-date")).element(by.className(" input-switch")),
               addNewContainer.element(by.className("input-switch-time")).element(by.className(" input-switch"))
           ]
+          }
+
+          elem.getArrayItem = function(){
+            const dateInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`)).last();
+            const timeInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`)).last();
+            
+            return [dateInput, timeInput];
+          }
+
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className("date-time-clear-btn"));
           }
 
         break;

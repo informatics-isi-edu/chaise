@@ -310,7 +310,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                       arrayCols.forEach((col)=>{
                         // Check if ArrayField is rendered correctly
                         const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`1-${col.name}`);
-                        arrayField.click()                        
+                        arrayField.click()
 
                         expect(arrayField.isDisplayed()).toBeTruthy(colError(col.name, "element not visible"));
                         // const addNewValField = arrayField.element(by.className("add-element-container"))
@@ -361,9 +361,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                       };
 
-                      it ("should validate invalid array input.", function(){
-                        arrayCols.forEach(col=>{
-                          const addNewValField = element(by.css(`.array-input-field-container[class$="${col.name}"]`)).element(by.className("add-element-container"))
+                      it ("should validate invalid array input.", async function(){
+                        for(let col of arrayCols){
+                          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+
+                          const addNewValField = arrayField.getAddNewElementContainer()
                           expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
 
                           let errorElement,clearInput;
@@ -372,55 +374,57 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             case 'integer':
                             case 'number':
                               let addNewValInput;
-                              addNewValInput = addNewValField.element(by.className(" input-switch"));
-                              clearInput = addNewValField.element(by.className('remove-input-btn'));
+                              addNewValInput = arrayField.getAddNewValueInputElement();
+                              clearInput = await arrayField.getClearInputButton()
 
-                              browser.wait(addNewValInput.sendKeys(invalidArrayValues[col.baseType].value), 500);
-                              errorElement = addNewValField.element(by.className("input-switch-error"));
+                              await addNewValInput.sendKeys(invalidArrayValues[col.baseType].value)
+
+                              errorElement = await arrayField.getErrorMessageElement()
 
                               expect(errorElement.getText()).toBe(invalidArrayValues[col.baseType].error)
 
                               // clear input after test
-                              clearInput.click()
+                              await clearInput.click()
                               break;
 
                             case 'timestamp':
                             case 'timestamptz':
                               let addNewValDateInput, addNewValTimeInput;
-                              addNewValDateInput = addNewValField.element(by.className("input-switch-date")).element(by.className(" input-switch"))
-                              addNewValTimeInput = addNewValField.element(by.className("input-switch-time")).element(by.className(" input-switch"))
 
-                              clearInput = addNewValField.element(by.className("date-time-clear-btn"))
+                              [addNewValDateInput, addNewValTimeInput] = await arrayField.getAddNewValueInputElement()
+                              clearInput = await arrayField.getClearInputButton();
 
                               // Input invalid Date
-                              browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,"200113-01"), 500);
-                              errorElement = addNewValField.element(by.className("input-switch-error"));
+                              await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,"200113-01");
+
+                              errorElement = await arrayField.getErrorMessageElement()
 
                               expect(errorElement.getText()).toBe(invalidArrayValues["date"].error)
 
                               // Clear DateTime field Values
-                              clearInput.click()
+                              await clearInput.click();
 
                               // Input valid date and invalid time
-                              browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,new Date().toISOString().slice(0, 10)), 500);
-                              browser.wait(addNewValTimeInput.sendKeys("11111"), 500);
-                              errorElement = addNewValField.element(by.className("input-switch-error"));
+                              await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,new Date().toISOString().slice(0, 10));
+                              await addNewValTimeInput.sendKeys("11111");
+
+                              errorElement = await arrayField.getErrorMessageElement()
 
                               expect(errorElement.getText()).toBe(invalidArrayValues["time"].error)
 
                               // Clear Input after test
-                              clearInput.click()
+                              await clearInput.click()
                               break;
                           }
 
-                        })
+                        }
 
                       })
 
                   }
 
 
-                  it ("should be able to set the correct value.", function () {
+                  it ("should be able to set the correct value.", async function () {
                     var validArrayValues = {
                       "time":  new Date().toString().split(' ')[4],
                       "date":  new Date().toISOString().slice(0, 10),
@@ -429,10 +433,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                       "text": "sample text"
                     };
 
-
-                    arrayCols.forEach(col=>{
+                    for(let col of arrayCols){
                       const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
-                      
+
                       const addNewValField = arrayField.getAddNewElementContainer();
                       expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
 
@@ -443,14 +446,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         case 'number':
                           let addNewValInput, arrItem;
                           addNewValInput = arrayField.getAddNewValueInputElement();
-                          
-                          // Input Valid Value
-                          browser.wait(addNewValInput.sendKeys(validArrayValues[col.baseType]), 500);
+
+                          await addNewValInput.sendKeys(validArrayValues[col.baseType]);
 
                           addButton = arrayField.getAddButton()
-                          addButton.click()
+                          await addButton.click();
 
-                          arrItem = arrayField.getArrayItem()
+                          arrItem = await arrayField.getArrayItem();
 
                           expect(arrItem.getAttribute('value')).toBe(validArrayValues[col.baseType])
                           break;
@@ -460,23 +462,22 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           let addNewValDateInput, addNewValTimeInput, arrItemDate, arrItemTime;
 
                           [addNewValDateInput, addNewValTimeInput] = arrayField.getAddNewValueInputElement();
-                          
+
                           // Input Valid Date and Time
-                          browser.wait(addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]), 500);
-                          browser.wait(addNewValTimeInput.sendKeys(validArrayValues["time"]), 500);
+                          await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]);
+                          await addNewValTimeInput.sendKeys(validArrayValues["time"])
 
                           addButton = arrayField.getAddButton();
-                          addButton.click()
-                          
-                          arrItemDate = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-date input`))
-                          arrItemTime = arrayField.element(by.css(`li [class$="${col.name}-0-val"] .input-switch-time input`))
+                          await addButton.click();
+
+                          [arrItemDate, arrItemTime] = await arrayField.getArrayItem();
 
                           expect(arrItemDate.getAttribute('value')).toBe(validArrayValues["date"])
                           expect(arrItemTime.getAttribute('value')).toBe(validArrayValues["time"])
 
                           break;
                       }
-                    })
+                    }
                   })
                 });
             }
@@ -2085,15 +2086,15 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
         }).catch(err => reject(err));
         break;
       case 'array':
-        // NOTE we're assuming it's array of text        
+        // NOTE we're assuming it's array of text
         const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${formNumber}-${displayname}`,valueProps.baseType);
-        
+
         arrayField.getArrayItem().isPresent().then((isPresent)=>{
 
           if(isPresent){
 
             const arrayFieldItem = arrayField.getArrayItem();
-            
+
             arrayFieldItem.sendKeys(
               protractor.Key.chord(protractor.Key.CONTROL, 'a'),
               protractor.Key.BACK_SPACE,
@@ -2101,7 +2102,7 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
               ).then(()=>{
               resolve();
             })
-            
+
           }else{
 
             arrayField.getAddNewValueInputElement().sendKeys(valueProps.value).then(()=>{

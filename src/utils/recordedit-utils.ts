@@ -625,7 +625,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
 
         v = tempVal;
       } else if (col.type?.isArray) {
-        v = v.map((i:any) => i.val)
+        v = v.length ? v.map((i:any) => i.val) : ''
       }else {
         // Special cases for formatting data
         switch (col.type.name) {

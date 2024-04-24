@@ -58,9 +58,9 @@ export type InputFieldProps = {
    */
   allowEnter?: boolean
   /**
-   * true if the current Input field is an element of an InputField of type array
+   * display required error regardless of whether the form has been submitted or not.
    */
-  isArrayElement? : boolean
+  displayRequiredErrorBeforeSubmit? : boolean
   /**
    * `optional`additional controller rules for the input field.
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
@@ -123,7 +123,7 @@ const InputField = ({
   containerClasses = '',
   styles,
   allowEnter = false,
-  isArrayElement,
+  displayRequiredErrorBeforeSubmit,
   onClear,
   controllerRules,
   checkHasValue,
@@ -196,7 +196,7 @@ const InputField = ({
   if (showError) {
     if (error?.type === 'required') {
       // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
-      showError = formInput.formState.isSubmitted || isArrayElement; 
+      showError = formInput.formState.isSubmitted || displayRequiredErrorBeforeSubmit; 
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
     }

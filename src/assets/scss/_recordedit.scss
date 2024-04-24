@@ -125,7 +125,6 @@
 
           // adding an overlay on top of form to add the click event
           .clickable-form-overlay {
-            height: 100%;
             width: 100%;
             cursor: pointer;
             // This rule is to overwrite cursor:not-allowed for toolbar.

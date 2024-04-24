@@ -94,7 +94,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
-          return <li className={`item ${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={item.id}>
+          return <li className={`item item-${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''}`} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} key={item.id}>
 
             <div className='move-icon'>
               <i className='fa-solid fa-grip-vertical'></i>
@@ -113,7 +113,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 displayExtraDateTimeButtons={true}
                 displayDateTimeLabels={baseArrayType === 'date' ? false : true}
                 requiredInput={true}
-                isArrayElement={true}
+                displayRequiredErrorBeforeSubmit={true}
               />
             </div>
 
@@ -137,7 +137,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   return (
     <>
-      <div className={`array-input-field-container ${name} ${getInputType({ name: baseArrayType })}`}>
+      <div className={`array-input-field-container array-input-field-container-${getInputType({ name: baseArrayType })} array-input-field-container-${name}`}>
         <div className='input-items-container-new'>
           <DragDropContext onDragEnd={handleOnDragEnd}>
             <ChaiseDroppable droppableId={`${name}-input-items-new`}>
@@ -156,7 +156,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               }
             </ChaiseDroppable>
           </DragDropContext>
-          <div className={`add-element-container ${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''} ${fields.length ? 'add-margin-top' : ''}`}>
+          <div className={`add-element-container add-element-container-${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''} ${fields.length ? 'add-margin-top' : ''}`}>
             <InputSwitch
               type={getInputType({ name: baseArrayType })}
               {...register(`${name}-new-item`, {
@@ -165,7 +165,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               })}
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
-
+              disableInput={disableInput}
             />
             <button
               type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
