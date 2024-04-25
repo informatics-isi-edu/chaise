@@ -11,6 +11,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { clearInput } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
   table_name: 'main',
@@ -185,11 +186,11 @@ test.describe('View recordset page and form a query,', () => {
 
     await test.step('change name and description then save the query', async () => {
       const queryNameInput = RecordeditLocators.getInputForAColumn(page, 'name', 1);
-      await RecordeditLocators.clearInput(page, queryNameInput);
+      await queryNameInput.fill('');
       await queryNameInput.fill('Second saved query');
 
       const descriptionInput = RecordeditLocators.getTextAreaForAColumn(page, 'description', 1);
-      await RecordeditLocators.clearInput(page, descriptionInput);
+      await clearInput(descriptionInput);
       await descriptionInput.fill('Second query description');
 
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
