@@ -176,6 +176,14 @@ export default class RecordeditLocators {
     return container.locator(`.column-permission-warning-${formNumber}-${columnDisplayName}`)
   }
 
+  static async clearInput(page: Page, container: Locator) {
+    const inputVal = await container.getAttribute('value');
+    const numVals = inputVal ? inputVal.length + 1 : 0;
+    for (let i=0; i < numVals; i++) {
+      await page.keyboard.press('Backspace')
+    };
+};
+
   // -------------- file input selectors --------------- //
   static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
