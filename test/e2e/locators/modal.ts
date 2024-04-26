@@ -32,6 +32,10 @@ export default class ModalLocators {
     return page.locator('.export-progress');
   }
 
+  static getUploadProgressModal(page: Page): Locator {
+    return page.locator('.modal-upload-progress');
+  }
+
   static getCreateSavedQueryModal(page: Page): Locator {
     return page.locator('.create-saved-query');
   }
