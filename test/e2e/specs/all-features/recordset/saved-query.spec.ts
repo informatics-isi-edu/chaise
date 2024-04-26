@@ -122,10 +122,10 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await expect.soft(ModalLocators.getModalTitle(createSavedQueryModal)).toHaveText('Save current search criteria for table main');
 
-      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
+      await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
 
       const textAreaVal = 'main with:\n  - int_col (1 choice): int_col ( 11 to 22);';
-      await expect.soft(RecordeditLocators.getTextAreaForAColumn(page, 'description', 1)).toHaveValue(textAreaVal);
+      await expect.soft(RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
       
@@ -137,7 +137,7 @@ test.describe('View recordset page and form a query,', () => {
       await RecordsetLocators.getSavedQueriesOption(page).click();
 
       const savedQueriesModal = ModalLocators.getSavedQueriesModal(page);
-      await expect.soft(ModalLocators.getModalRows(savedQueriesModal)).toHaveCount(1);
+      await expect.soft(RecordsetLocators.getRows(savedQueriesModal)).toHaveCount(1);
 
       await ModalLocators.getCloseBtn(savedQueriesModal).click();
     });
@@ -171,19 +171,20 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await expect.soft(ModalLocators.saveQuerySubmit(createSavedQueryModal)).toBeVisible();
 
-      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveValue(testParams.secondSavedQueryName);
+      await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1)).toHaveValue(testParams.secondSavedQueryName);
     });
 
     await test.step('change name and description then save the query', async () => {
-      const queryNameInput = RecordeditLocators.getInputForAColumn(page, 'name', 1);
+      const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
+
+      const queryNameInput = RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1);
       await queryNameInput.fill('');
       await queryNameInput.fill('Second saved query');
 
-      const descriptionInput = RecordeditLocators.getTextAreaForAColumn(page, 'description', 1);
+      const descriptionInput = RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1);
       await clearInput(descriptionInput);
       await descriptionInput.fill('Second query description');
 
-      const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
       await expect.soft(AlertLocators.getAlerts(page)).toHaveCount(2);
     });
@@ -193,7 +194,7 @@ test.describe('View recordset page and form a query,', () => {
       await RecordsetLocators.getSavedQueriesOption(page).click();
 
       const savedQueriesModal = ModalLocators.getSavedQueriesModal(page);
-      await expect.soft(ModalLocators.getModalRows(savedQueriesModal)).toHaveCount(2);
+      await expect.soft(RecordsetLocators.getRows(savedQueriesModal)).toHaveCount(2);
 
       // queries are in order of their "last_execution_time" which is set to "now" when the query is saved
       // 2nd saved query should be the first row in the modal, we want to click the 1st saved query
