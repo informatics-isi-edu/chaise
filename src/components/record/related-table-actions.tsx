@@ -1,4 +1,4 @@
-import React, { MouseEvent, useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { MouseEvent, useState, useRef, useLayoutEffect } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -23,6 +23,7 @@ import {
   SelectedRow,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -115,7 +116,7 @@ const RelatedTableActions = ({
    * So we should put resize sensor on a container that won’t be affected by the logic inside it.
    * We are using ResizeSensor to listen to the resize event.
    */
-    const mainContainer:any = document.querySelector('.main-container');
+    const mainContainer: any = document.querySelector('.main-container');
     const calculateButtons = () => {
 
       let buttons: any = [];
@@ -135,33 +136,33 @@ const RelatedTableActions = ({
         let totalWidth = 0;
 
         //This condition is to push all the buttons to the dropdown when the container width is below 200
-          if (showAllActionsAsDropdown) {
-            buttonContainer.style.height = '0';
-          } else {
-            buttonContainer.style.height = '30px';
+        if (showAllActionsAsDropdown) {
+          buttonContainer.style.height = '0';
+        } else {
+          buttonContainer.style.height = '30px';
+        }
+        // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
+        // is overflowing the container width. If yes, push the button to the dropdown
+
+        buttons.forEach((button: any, index: number) => {
+          const buttonWidth = button.getBoundingClientRect().width;
+          if (index === 0) {
+            buttonLeftOffset =
+              button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
           }
-          // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
-          // is overflowing the container width. If yes, push the button to the dropdown
 
-          buttons.forEach((button: any, index: number) => {
-            const buttonWidth = button.getBoundingClientRect().width;
-            if (index === 0) {
-              buttonLeftOffset =
-                button.getBoundingClientRect().left - buttonContainer.getBoundingClientRect().left;
-            }
-
-            if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
-              // calculate the total button container width if it doesn't overflow
-              totalWidth += buttonWidth;
-              if(showAllActionsAsDropdown){
-                tableHeaderButtonsToAddToDropdown.push(button);
-              }
-            } else {
-              // Push to dropdown if it overflowa
+          if (totalWidth + buttonLeftOffset + buttonWidth <= containerWidth) {
+            // calculate the total button container width if it doesn't overflow
+            totalWidth += buttonWidth;
+            if (showAllActionsAsDropdown) {
               tableHeaderButtonsToAddToDropdown.push(button);
             }
-          });
-          setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
+          } else {
+            // Push to dropdown if it overflowa
+            tableHeaderButtonsToAddToDropdown.push(button);
+          }
+        });
+        setButtonsInDropdown(tableHeaderButtonsToAddToDropdown);
       }
     };
     calculateButtons();
@@ -175,16 +176,13 @@ const RelatedTableActions = ({
     };
   }, [showAllActionsAsDropdown]);
 
-   // This function is to toggle the dropdown to show or hide with options
-   const toggleDropdown = (bool: boolean, evt: any) => {
+  //-------------------  UI related callbacks:   --------------------//
+
+  // This function is to toggle the dropdown to show or hide with options
+  const toggleDropdown = (bool: boolean, evt: any) => {
     evt.originalEvent.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
   };
-
-  // Adding different classname for table header and main section to apply styles
-  const containerClassName = `related-table-actions ${
-    !relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'
-  }`;
 
   /*
    * Callback function for dropdown item click
@@ -606,6 +604,16 @@ const RelatedTableActions = ({
     updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
   };
 
+  //-------------------  render logic   --------------------//
+
+  // Adding different classname for table header and main section to apply styles
+  const containerClassName = `related-table-actions ${!relatedModel.isInline ? 'table-header-actions' : 'main-section-actions'}`;
+
+  let pureAndBinaryTitleComment;
+  if (usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP) {
+    pureAndBinaryTitleComment= usedRef.comment;
+  }
+
   const mainTable = (
     <code>
       <DisplayValue value={recordReference.displayname}></DisplayValue>
@@ -648,9 +656,7 @@ const RelatedTableActions = ({
     return (
       <ChaiseTooltip placement='top' tooltip={tooltip}>
         <button
-          className={`chaise-btn toggle-display-link ${
-            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-          }`}
+          className={`chaise-btn toggle-display-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'}`}
           onClick={tertiary ? undefined : onToggleDisplayMode}
         >
           <span className={`chaise-btn-icon ${icon}`}></span>
@@ -701,14 +707,14 @@ const RelatedTableActions = ({
 
   const renderBulkEditBtnTooltip = () => {
     if (relatedModel.recordsetState.page?.length < 1) {
-      return(
+      return (
         <span>
           Unable to edit {currentTable} records until some are created.
         </span>
       )
     }
 
-    return(
+    return (
       <span>
         Edit this page of {currentTable} records related to this {mainTable}.
       </span>
@@ -728,7 +734,7 @@ const RelatedTableActions = ({
       >
         {relatedModel.canCreate && renderButton(`${relatedModel.isPureBinary ? 'Link' : 'Add'} records`, false)}
 
-        {relatedModel.isPureBinary && relatedModel.canDelete &&  renderButton('Unlink records', false)}
+        {relatedModel.isPureBinary && relatedModel.canDelete && renderButton('Unlink records', false)}
 
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
         {/*
@@ -762,9 +768,8 @@ const RelatedTableActions = ({
             }
           >
             <a
-              className={`chaise-btn more-results-link ${
-                tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-              }`}
+              className={`chaise-btn more-results-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
               href={exploreLink}
               onClick={onExplore}
             >
@@ -783,7 +788,7 @@ const RelatedTableActions = ({
             <a
               className={`chaise-btn bulk-edit-link
                 ${tertiary ? ' chaise-btn-tertiary dropdown-button' : ' chaise-btn-secondary'}
-                ${disableBulkEdit ? ' disabled': ''}`
+                ${disableBulkEdit ? ' disabled' : ''}`
               }
               href={editLink}
               onClick={onBulkEdit}
@@ -798,17 +803,16 @@ const RelatedTableActions = ({
       case 'Add records':
         return (
           <ChaiseTooltip placement='top' tooltip={renderCreateBtnTooltip()}>
-          <button
-          className={`chaise-btn add-records-link ${
-            tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-          }`}
-            onClick={tertiary ? undefined : onCreate}
-            disabled={relatedModel.canCreateDisabled}
-          >
-            <span className='chaise-btn-icon fa-solid fa-plus'></span>
-            <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
-          </button>
-        </ChaiseTooltip>
+            <button
+              className={`chaise-btn add-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
+              onClick={tertiary ? undefined : onCreate}
+              disabled={relatedModel.canCreateDisabled}
+            >
+              <span className='chaise-btn-icon fa-solid fa-plus'></span>
+              <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
+            </button>
+          </ChaiseTooltip>
         )
       case 'Unlink records':
         return (
@@ -821,9 +825,8 @@ const RelatedTableActions = ({
             }
           >
             <button
-            className={`chaise-btn unlink-records-link ${
-              tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
-            }`}
+              className={`chaise-btn unlink-records-link ${tertiary ? 'chaise-btn-tertiary dropdown-button' : 'chaise-btn-secondary'
+                }`}
               onClick={tertiary ? undefined : onUnlink}
             >
               <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
@@ -845,27 +848,27 @@ const RelatedTableActions = ({
         {buttonsInDropdown.length > 0 && (
           <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
             <ChaiseTooltip
-          placement='top'
-          tooltip={
-            <span>
-              {`${showAllActionsAsDropdown ? 'View the available actions.' : 'View the extra available actions.'}`}
-            </span>
-          }
-        >
-            <Dropdown.Toggle
-              disabled={false}
-              className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${showAllActionsAsDropdown
-                && !relatedModel.isInline ? 'show-all-actions-as-dropdown' : ''}`}
+              placement='top'
+              tooltip={
+                <span>
+                  {`${showAllActionsAsDropdown ? 'View the available actions.' : 'View the extra available actions.'}`}
+                </span>
+              }
             >
-              <span className='fa fa-angle-double-right'></span>
-            </Dropdown.Toggle>
+              <Dropdown.Toggle
+                disabled={false}
+                className={`chaise-btn chaise-btn-primary dropdown-toggle-table ${showAllActionsAsDropdown
+                  && !relatedModel.isInline ? 'show-all-actions-as-dropdown' : ''}`}
+              >
+                <span className='fa fa-angle-double-right'></span>
+              </Dropdown.Toggle>
             </ChaiseTooltip>
             <Dropdown.Menu>
               {buttonsInDropdown.map((button: any, index) => (
                 <Dropdown.Item
                   as={'li'}
                   key={`dropdown-button-${index}`}
-                   onClick={(e: any) => handleDropDownClick(e, button)}
+                  onClick={(e: any) => handleDropDownClick(e, button)}
                 >
                   {renderButton(button.textContent, true)}
                 </Dropdown.Item>
@@ -882,6 +885,8 @@ const RelatedTableActions = ({
           onSubmit={submitPureBinaryCB}
           showSubmitSpinner={showPureBinarySpinner}
           onClose={closeAddPureBinaryModal}
+          displayname={relatedModel.initialReference.displayname}
+          comment={pureAndBinaryTitleComment}
         />
       )}
 
@@ -892,6 +897,9 @@ const RelatedTableActions = ({
           onSubmit={unlinkPureBinaryCB}
           showSubmitSpinner={showPureBinarySpinner}
           onClose={closeUnlinkPureBinaryModal}
+          displayname={relatedModel.initialReference.displayname}
+          comment={pureAndBinaryTitleComment}
+          closeLabel='Close'
         />
       )}
 

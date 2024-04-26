@@ -246,7 +246,7 @@ test.describe('Related tables', () => {
 
     await testAddAssociationTable(page, {
       displayname: 'association_table',
-      modalTitle: 'Link related_table to Accommodations: Super 8 North Hollywood Motel',
+      modalTitle: 'Link association_table to Accommodations: Super 8 North Hollywood Motel',
       totalCount: 5,
       disabledRows: ['1'],
       search: {
@@ -494,7 +494,7 @@ test.describe('Related tables', () => {
 
       const rsModal = ModalLocators.getRecordsetSearchPopup(page);
       await expect.soft(rsModal).toBeVisible();
-      await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText('Link file to Accommodations: Super 8 North Hollywood Motel');
+      await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText('Link accommodation_image to Accommodations: Super 8 North Hollywood Motel');
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
 
       await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText('Displaying first2records');
@@ -753,7 +753,7 @@ test.describe('Related tables', () => {
 
       await testAddAssociationTable(page, {
         displayname: 'association with filter on related table',
-        modalTitle: 'Link related_table to Accommodations: Super 8 North Hollywood Motel',
+        modalTitle: 'Link association with filter on related table to Accommodations: Super 8 North Hollywood Motel',
         totalCount: 2,
         disabledRows: ['1'],
         selectOptions: [1],

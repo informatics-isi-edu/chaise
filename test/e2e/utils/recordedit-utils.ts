@@ -293,11 +293,11 @@ type TestSubmissionParams = {
   resultRowValues: RecordsetRowValue[]
 }
 
-export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean) => {
+export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean, timeout?: number) => {
   await RecordeditLocators.getSubmitRecordButton(page).click();
   await expect.soft(AlertLocators.getErrorAlert(page)).not.toBeAttached();
 
-  // TODO playwright: in protractor we wated for the upload-table.. should we?
+  await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
 
   if (params.resultRowValues.length === 1) {
     await page.waitForURL('**/record/**');
