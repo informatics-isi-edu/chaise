@@ -15,10 +15,6 @@ import { clearInput } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils
 
 const testParams = {
   table_name: 'main',
-  minInputClass: 'range-min',
-  minInputClearClass: 'min-clear',
-  maxInputClass: 'range-max',
-  maxInputClearClass: 'max-clear',
   firstSavedQueryName: 'main with int_col ( 11 to 22)',
   secondSavedQueryName: 'main with int_col ( 11 to 22); one',
   key: {
@@ -64,7 +60,7 @@ test.describe('View recordset page and form a query,', () => {
     });
   });
 
-  test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => {
+  test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => { 
 
     await test.step('should load recordset page', async() => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}`;
@@ -90,30 +86,24 @@ test.describe('View recordset page and form a query,', () => {
       const facetIdx = 1;
       const facet = RecordsetLocators.getFacetById(page, facetIdx);
 
-      // inputs
-      const minInput = RecordsetLocators.getRangeInput(facet, testParams.minInputClass);
-      const maxInput = RecordsetLocators.getRangeInput(facet, testParams.maxInputClass);
-
-      // clear buttons
-      const minClear = RecordsetLocators.getInputClear(facet, testParams.minInputClearClass);
-      const maxClear = RecordsetLocators.getInputClear(facet, testParams.maxInputClearClass);
+      // inputs, clear buttons, and submit
+      const inputLocators = RecordsetLocators.getFacetRangeInputs(facet);
 
       // facet should be open on page load
       await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-      await expect.soft(RecordsetLocators.getRangeSubmit(facet)).toBeVisible();
+      await expect.soft(inputLocators.submit).toBeVisible();
 
       // wait for histogram
-      await expect.soft(RecordsetLocators.getHistogram(facet)).toBeVisible();
+      await expect.soft(RecordsetLocators.getFacetHistogram(facet)).toBeVisible();
 
       // first clear the min and max
-      await expect.soft(minClear).toBeVisible();
-      await minClear.click();
-      await maxClear.click();
+      await inputLocators.minClear.click();
+      await inputLocators.maxClear.click();
       
-      await minInput.fill('11');
-      await maxInput.fill('22');
+      await inputLocators.minInput.fill('11');
+      await inputLocators.maxInput.fill('22');
 
-      await RecordsetLocators.getRangeSubmit(facet).click();
+      await inputLocators.submit.click();
       
       // wait for table rows to load and check count
       await expect(RecordsetLocators.getRows(page)).toHaveCount(12);
@@ -132,10 +122,10 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await expect.soft(ModalLocators.getModalTitle(createSavedQueryModal)).toHaveText('Save current search criteria for table main');
 
-      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveAttribute('value', testParams.firstSavedQueryName);
+      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
 
       const textAreaVal = 'main with:\n  - int_col (1 choice): int_col ( 11 to 22);';
-      await expect.soft(RecordeditLocators.getTextAreaForAColumn(page, 'description', 1)).toHaveText(textAreaVal);
+      await expect.soft(RecordeditLocators.getTextAreaForAColumn(page, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
       
@@ -181,7 +171,7 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await expect.soft(ModalLocators.saveQuerySubmit(createSavedQueryModal)).toBeVisible();
 
-      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveAttribute('value', testParams.secondSavedQueryName);
+      await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toHaveValue(testParams.secondSavedQueryName);
     });
 
     await test.step('change name and description then save the query', async () => {
@@ -218,37 +208,37 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordsetLocators.getFacetFilter(page, 0)).toHaveText('int_col11 to 22');
     });
   });
+});
 
-  test('should have proper citation in share cite modal', async ({ page, baseURL }, testInfo) => {
-    const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
-    const entityRow = getEntityRow(testInfo, 'saved_query', testParams.table_name, keyValues);
-    const ridValue = entityRow.RID, rctValue = entityRow.RCT;
-    const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/RID=${ridValue}`;
+test('should have proper citation in share cite modal', async ({ page, baseURL }, testInfo) => {
+  const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
+  const entityRow = getEntityRow(testInfo, 'saved_query', testParams.table_name, keyValues);
+  const ridValue = entityRow.RID, rctValue = entityRow.RCT;
+  const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/RID=${ridValue}`;
 
-    await test.step('should load record page', async () => {
-      const keys = [];
-      keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-      const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/${keys.join('')}`;
-  
-      await page.goto(`${baseURL}${PAGE_URL}`);
-  
-      await RecordLocators.waitForRecordPageReady(page);
-    });
+  await test.step('should load record page', async () => {
+    const keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/${keys.join('')}`;
 
-    await testShareCiteModal(
-      page,
-      testInfo,
-      {
-        title: 'Share and Cite',
-        link,
-        hasVersionedLink: true, // the table has history-capture: true
-        verifyVersionedLink: false,
-        citation: [
-          'Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data ', 
-          `${link} (${moment(rctValue).format('YYYY')}).`
-        ].join('')
-      }
-    );
+    await page.goto(`${baseURL}${PAGE_URL}`);
+
+    await RecordLocators.waitForRecordPageReady(page);
   });
+
+  await testShareCiteModal(
+    page,
+    testInfo,
+    {
+      title: 'Share and Cite',
+      link,
+      hasVersionedLink: true, // the table has history-capture: true
+      verifyVersionedLink: false,
+      citation: [
+        'Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data ', 
+        `${link} (${moment(rctValue).format('YYYY')}).`
+      ].join('')
+    }
+  );
 });
 
