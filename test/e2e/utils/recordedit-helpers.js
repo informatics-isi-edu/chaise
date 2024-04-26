@@ -305,20 +305,41 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             if (arrayCols.length > 0) {
                 describe("Array fields, ", function () {
 
-                  it("should show ArrayField input with correct value.", function () {
+                  it("should show ArrayField input with correct value.", async function () {
+                    for(let col of arrayCols){
+                        let recordVals = getRecordValue(col.name)
 
-                      arrayCols.forEach((col)=>{
+                        if(recordVals === null ) continue;
+
                         // Check if ArrayField is rendered correctly
-                        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`1-${col.name}`);
+                        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+                        let arrayFieldVals = await arrayField.getArrayFieldValues();
+
                         arrayField.click()
-
                         expect(arrayField.isDisplayed()).toBeTruthy(colError(col.name, "element not visible"));
-                        // const addNewValField = arrayField.element(by.className("add-element-container"))
+                        
                         const addNewValField = arrayField.getAddNewElementContainer()
-
+                        
                         expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
+                        
+                        expect(arrayFieldVals.length).toBe(recordVals.length, colError(col.name , "Doesn't have the expected values."))
 
-                      })
+                        if(/timestamp|timestamptz/.test(col.baseType) ){
+
+                          for(let i = 0; i < recordVals.length; i++){
+                            let testDateValue = recordVals[i].slice(0, 10)
+                            let testTimeValue = recordVals[i].slice(11, 19)
+
+                            expect(testDateValue).toBe(arrayFieldVals[i][0])
+                            expect(testTimeValue).toBe(arrayFieldVals[i][1])
+                          }
+                        }else{
+
+                          for(let i = 0; i < recordVals.length; i++){
+                            expect(arrayFieldVals[i]).toBe(recordVals[i])
+                          }
+                        }
+                      }
                   });
 
                   // test the invalid values once
@@ -363,10 +384,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                       it ("should validate invalid array input.", async function(){
                         for(let col of arrayCols){
+
+                          if (col.skipValidation) return;
+
+                          if (col.generated || col.immutable) return;
+
                           const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
 
                           const addNewValField = arrayField.getAddNewElementContainer()
                           expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
+
+                          // Ensure Add button is disbled when input has no/null value
+                          expect(arrayField.isAddButtonDisabled()).toBe(true);
 
                           let errorElement,clearInput;
                           switch (col.baseType) {
@@ -420,20 +449,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         }
 
                       })
-
                   }
-
-
+                  
                   it ("should be able to set the correct value.", async function () {
-                    var validArrayValues = {
-                      "time":  new Date().toString().split(' ')[4],
-                      "date":  new Date().toISOString().slice(0, 10),
-                      "integer":"235",
-                      "number":"1.2556",
-                      "text": "sample text"
-                    };
-
+                    
                     for(let col of arrayCols){
+                      if (col.generated || col.immutable) continue;
+
                       const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
 
                       const addNewValField = arrayField.getAddNewElementContainer();
@@ -444,37 +466,62 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         case 'date':
                         case 'integer':
                         case 'number':
-                          let addNewValInput, arrItem;
+                        case 'text':
+                          let addNewValInput;
+
                           addNewValInput = arrayField.getAddNewValueInputElement();
+                          const valuesToAdd = getRecordInput(col.name);
 
-                          await addNewValInput.sendKeys(validArrayValues[col.baseType]);
+                          if(valuesToAdd === null) continue;
 
-                          addButton = arrayField.getAddButton()
-                          await addButton.click();
+                          for(let value of valuesToAdd){
+                            await addNewValInput.sendKeys(value);
+                            addButton = arrayField.getAddButton()
+                            await addButton.click();
+                          }
+                          
+                          const valuesRendered = await arrayField.getArrayFieldValues()
+                          
+                          expect(valuesRendered.length).toBeGreaterThanOrEqual(valuesToAdd.length, colError(col.name , "Doesn't have the expected values."))
 
-                          arrItem = await arrayField.getArrayItem();
+                          for(let i = 0;i < valuesToAdd.length;i++){
+                            expect(valuesToAdd[i]).toBe(valuesRendered[valuesRendered.length - valuesToAdd.length + i]);
+                          }
 
-                          expect(arrItem.getAttribute('value')).toBe(validArrayValues[col.baseType])
                           break;
-
                         case 'timestamp':
                         case 'timestamptz':
-                          let addNewValDateInput, addNewValTimeInput, arrItemDate, arrItemTime;
+                          let addNewValDateInput, addNewValTimeInput;
 
                           [addNewValDateInput, addNewValTimeInput] = arrayField.getAddNewValueInputElement();
+                          const timeStampsToAdd = getRecordInput(col.name)
+                          
+                          if(timeStampsToAdd === null) continue;
 
-                          // Input Valid Date and Time
-                          await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]);
-                          await addNewValTimeInput.sendKeys(validArrayValues["time"])
+                          for(let timeStamp of timeStampsToAdd){
 
-                          addButton = arrayField.getAddButton();
-                          await addButton.click();
+                            let dateValue = timeStamp.slice(0, 10)
+                            let timeValue = timeStamp.slice(11, 19)
 
-                          [arrItemDate, arrItemTime] = await arrayField.getArrayItem();
+                            // Input Valid Date and Time
+                            await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,dateValue);
+                            await addNewValTimeInput.sendKeys(timeValue)
 
-                          expect(arrItemDate.getAttribute('value')).toBe(validArrayValues["date"])
-                          expect(arrItemTime.getAttribute('value')).toBe(validArrayValues["time"])
+                            addButton = arrayField.getAddButton();
+                            await addButton.click();
+                          }
 
+                          const timeStampsRendered = await arrayField.getArrayFieldValues()
+                          
+                          expect(timeStampsRendered.length).toBeGreaterThanOrEqual(timeStampsToAdd.length, colError(col.name , "Doesn't have the expected values."))
+
+                          for(let i = 0;i < timeStampsToAdd.length;i++){
+                            let dateValue = timeStampsToAdd[i].slice(0, 10)
+                            let timeValue = timeStampsToAdd[i].slice(11, 19)
+
+                            expect(dateValue).toBe(timeStampsRendered[timeStampsRendered.length - timeStampsToAdd.length + i][0]);
+                            expect(timeValue).toBe(timeStampsRendered[timeStampsRendered.length - timeStampsToAdd.length + i][1]);
+                          }
                           break;
                       }
                     }

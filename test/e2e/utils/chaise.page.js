@@ -509,7 +509,9 @@ var recordEditPage = function() {
      * @property {Function} getClearInputButton - returns clear button for the current input
      * @property {Function} getErrorMessageElement - returns error message element for the current input
      * @property {Function} getAddButton - returns add button for a given array field
-     * @property {Function} getArrayItem - returns the element added to the array
+     * @property {Function} getLastArrayItem - returns the element added to the array
+     * @property {Function} getArrayFieldValues - returns values of the arrayfield as an array
+     * @property {Function} isAddButtonDisabled - returns true if Add button is disabled, false if otherwise
      */
 
     /**
@@ -537,18 +539,37 @@ var recordEditPage = function() {
         return addNewContainer.element(by.className("input-switch-error"));
       }
 
+      elem.isAddButtonDisabled = async function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        const addButton = await addNewContainer.element(by.css('.chaise-btn-sm.add-button'))
+        return !(await addButton.isEnabled());
+      }
+      
       switch(baseType){
         case 'date':
         case 'integer':
         case 'number':
         case 'text':
+        case 'boolean':
           elem.getAddNewValueInputElement = function(){
             const addNewContainer = this.getAddNewElementContainer()
             return addNewContainer.element(by.className(" input-switch"))
           }
 
-          elem.getArrayItem = function(){
+          elem.getLastArrayItem = function(){
             return this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`)).last();
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(/boolean|number|integer/.test(baseType) ? JSON.parse(val) : val)
+            }
+
+            return extractedValues.length ? extractedValues : null;
           }
 
           elem.getClearInputButton = function () {
@@ -567,11 +588,26 @@ var recordEditPage = function() {
           ]
           }
 
-          elem.getArrayItem = function(){
+          elem.getLastArrayItem = function(){
             const dateInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`)).last();
             const timeInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`)).last();
             
             return [dateInput, timeInput];
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const dateInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`));
+            const timeInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`));
+            
+            let dateTimeValues = []
+            
+            for(let i =0; i< dateInputs.length; i++){
+              let dateVal = await dateInputs[i].getAttribute('value')
+              let timeVal = await timeInputs[i].getAttribute('value')
+              dateTimeValues.push([dateVal,timeVal])
+            }
+
+            return dateTimeValues.length ? dateTimeValues : null;
           }
 
           elem.getClearInputButton = function () {

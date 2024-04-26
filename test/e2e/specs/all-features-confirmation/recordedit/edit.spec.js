@@ -45,9 +45,9 @@ var testParams = {
              "summary": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
              "description": "**CARING. SHARING. DARING.**",  "json_col": null, "no_of_rooms": "23", "opened_on": moment("12/9/2008, 12:00:00 AM", "MM/DD/YYYY, HH:mm:ss A"),
              "date_col": "2008-12-09", "luxurious": "true",
-             "text_array": "[\n  \"v2\",\n  \"v3\"\n]", "boolean_array": "[\n  false\n]", "int4_array": "[\n  1\n]", "float4_array": "[\n  1.1,\n  2.2\n]",
-             "date_array": null, "timestamp_array": "[\n  \"2003-03-03T03:03:03\"\n]",
-             "timestamptz_array": "[\n  \""+moment("2002-02-02T02:02:02-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ")+"\"\n]",
+             "text_array": ["v2","v3"], "boolean_array": [false], "int4_array": [1], "float4_array": [1.1,2.2],
+             "date_array": null, "timestamp_array": ["2003-03-03T03:03:03"],
+             "timestamptz_array": [moment("2002-02-02T02:02:02-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ")],
              "color_rgb_hex_column": "#623456"
             }
         ],
@@ -56,9 +56,9 @@ var testParams = {
                 "title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
                 "rating": "1e0", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
-                "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
-                "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
-                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
+                "text_array": ["v1", "v2"], "boolean_array": [true], "int4_array": [1, 2], "float4_array": [1, 2.2],
+                "date_array": ["2001-01-01", "2002-02-02"], "timestamp_array": ["2001-03-02T01:01:01" , "2001-01-01T01:01:01"],
+                "timestamptz_array": ["2001-01-01T01:01:01-08:00"],
                 "color_rgb_hex_column": "#723456"
             }
         ],
