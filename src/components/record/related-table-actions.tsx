@@ -899,7 +899,7 @@ const RelatedTableActions = ({
           onClose={closeUnlinkPureBinaryModal}
           displayname={relatedModel.initialReference.displayname}
           comment={pureAndBinaryTitleComment}
-          closeLabel='Close'
+          closeButtonLabel='Close'
         />
       )}
 

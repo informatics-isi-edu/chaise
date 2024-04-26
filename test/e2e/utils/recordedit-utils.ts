@@ -298,6 +298,7 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
   await expect.soft(AlertLocators.getErrorAlert(page)).not.toBeAttached();
 
   await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
+  await expect.soft(RecordeditLocators.getSubmitSpinner(page)).not.toBeAttached({ timeout: timeout });
 
   if (params.resultRowValues.length === 1) {
     await page.waitForURL('**/record/**');

@@ -70,7 +70,7 @@ export type RecordestModalProps = {
   /**
    * the label that should be used for close button (default: Cancel)
    */
-  closeLabel?: string
+  closeButtonLabel?: string
 }
 
 /**
@@ -92,7 +92,7 @@ const RecordsetModal = ({
   onSubmit,
   showSubmitSpinner,
   onClose,
-  closeLabel
+  closeButtonLabel: closeLabel
 }: RecordestModalProps) => {
 
   /**

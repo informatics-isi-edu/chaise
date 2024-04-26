@@ -108,6 +108,9 @@ export default class RecordeditLocators {
     return RecordeditLocators.getAllDeleteRowButtons(container).nth(index);
   }
 
+  static getSubmitSpinner(container: Locator | Page): Locator {
+    return container.locator('.submit-spinner');
+  }
 
   // ---------------- input-level selectors -------------- //
 
