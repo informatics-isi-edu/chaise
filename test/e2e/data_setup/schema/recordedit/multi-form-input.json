@@ -86,7 +86,7 @@
           "type": {"typename": "text"},
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/multi-form-input/{{{_asset_col.md5_hex}}}",
+              "url_pattern":"/hatrac/js/chaise/multi-form-input/{{{asset_col_filename}}}/{{{_asset_col.md5_hex}}}",
               "filename_column" : "asset_col_filename",
               "byte_count_column": "asset_col_bytes",
               "md5": "asset_col_md5"
