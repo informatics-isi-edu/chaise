@@ -509,6 +509,7 @@ var recordEditPage = function() {
      * @property {Function} getClearInputButton - returns clear button for the current input
      * @property {Function} getErrorMessageElement - returns error message element for the current input
      * @property {Function} getAddButton - returns add button for a given array field
+     * @property {Function} getRemoveLastElementButton - returns remove button for last element in the arrayField
      * @property {Function} getLastArrayItem - returns the element added to the array
      * @property {Function} getArrayFieldValues - returns values of the arrayfield as an array
      * @property {Function} isAddButtonDisabled - returns true if Add button is disabled, false if otherwise
@@ -534,9 +535,22 @@ var recordEditPage = function() {
         return addNewContainer.element(by.className("add-button"))
       }
 
-      elem.getErrorMessageElement = function(){
-        const addNewContainer = this.getAddNewElementContainer()
-        return addNewContainer.element(by.className("input-switch-error"));
+      elem.getRemoveLastElementButton = async function(){
+        try{
+          const buttons = this.all(by.css(".action-buttons .fa-trash"));
+
+          if(await buttons.count()){
+            return buttons.last()
+          }
+          return null
+          
+        }catch (err){
+          return null
+        }
+      }
+
+      elem.getErrorMessageElement = function(){        
+        return this.element(by.className("input-switch-error"));
       }
 
       elem.isAddButtonDisabled = async function(){
@@ -550,7 +564,6 @@ var recordEditPage = function() {
         case 'integer':
         case 'number':
         case 'text':
-        case 'boolean':
           elem.getAddNewValueInputElement = function(){
             const addNewContainer = this.getAddNewElementContainer()
             return addNewContainer.element(by.className(" input-switch"))
@@ -566,7 +579,7 @@ var recordEditPage = function() {
 
             for( let item of arrElems){
               let val = await item.getAttribute('value')
-              extractedValues.push(/boolean|number|integer/.test(baseType) ? JSON.parse(val) : val)
+              extractedValues.push(/number|integer/.test(baseType) ? JSON.parse(val) : val)
             }
 
             return extractedValues.length ? extractedValues : null;
@@ -578,6 +591,19 @@ var recordEditPage = function() {
           }
           
         break;
+        case 'boolean':
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(JSON.parse(val))
+            }
+
+            return extractedValues.length ? extractedValues : null;
+          }
+          break;
         case 'timestamp':
         case 'timestamptz' :
           elem.getAddNewValueInputElement = function(){

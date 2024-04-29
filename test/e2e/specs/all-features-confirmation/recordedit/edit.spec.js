@@ -31,7 +31,7 @@ var testParams = {
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false, inline_comment: "The exact time and date where this accommodation became available!" },
             { name: "date_col", title: "date_col", type: "date"},
             { name: "luxurious", title: "Is Luxurious", type: "boolean" },
-            { name: "text_array", title: "text_array", type: "array", baseType: "text" },
+            { name: "text_array", title: "text_array", type: "array", baseType: "text", nullok:false },
             { name: "boolean_array", title: "boolean_array", type: "array", baseType: "boolean" },
             { name: "int4_array", title: "int4_array", type: "array", baseType: "integer" },
             { name: "float4_array", title: "float4_array", type: "array", baseType: "number" },
@@ -56,7 +56,7 @@ var testParams = {
                 "title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
                 "rating": "1e0", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
-                "text_array": ["v1", "v2"], "boolean_array": [true], "int4_array": [1, 2], "float4_array": [1, 2.2],
+                "text_array": ["v1", "v2"], "boolean_array": [true,false], "int4_array": [1, 2], "float4_array": [1, 2.2],
                 "date_array": ["2001-01-01", "2002-02-02"], "timestamp_array": ["2001-03-02T01:01:01" , "2001-01-01T01:01:01"],
                 "timestamptz_array": ["2001-01-01T01:01:01-08:00"],
                 "color_rgb_hex_column": "#723456"
@@ -74,7 +74,7 @@ var testParams = {
                 {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-edit:category/id=10004`, "value":"Castle"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#723456"
+                "v1, v2", "true, false", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#723456"
             ]
         ],
         files: []

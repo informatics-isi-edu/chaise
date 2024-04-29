@@ -358,7 +358,8 @@
             "base_type": {
               "typename": "text"
             }
-          }
+          },
+          "nullok":false
         },
         {
           "name": "boolean_array",

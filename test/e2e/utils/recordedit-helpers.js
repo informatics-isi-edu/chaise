@@ -344,7 +344,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                   // test the invalid values once
                   if (recordIndex === 0) {
-                      var invalidArrayValues = {
+                      let invalidArrayValues = {
                           "time":
                               {
                                   "value": "200113",
@@ -382,12 +382,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                       };
 
+                      let validArrayValues = {
+                        "time":  new Date().toString().split(' ')[4],
+                        "date":  new Date().toISOString().slice(0, 10),
+                        "integer":"235",
+                        "number":"1.2556",
+                        "text": "sample text"
+                      };
+
                       it ("should validate invalid array input.", async function(){
                         for(let col of arrayCols){
 
-                          if (col.skipValidation) return;
+                          if (col.skipValidation) continue;
 
-                          if (col.generated || col.immutable) return;
+                          if (col.generated || col.immutable) continue;
 
                           const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
 
@@ -414,8 +422,34 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                               // clear input after test
                               await clearInput.click()
-                              break;
 
+
+                              break;
+                            case 'text':
+                              
+                              let addInput = await arrayField.getAddNewValueInputElement();
+                              
+                              if(col?.nullok === false){
+                                await addInput.sendKeys(validArrayValues[col.baseType])
+                                const addButton = await arrayField.getAddButton()
+                                await addButton.click();
+
+                                let deleteButton = await arrayField.getRemoveLastElementButton();
+
+                                
+                                await expect(deleteButton.isDisplayed()).toBeTruthy(colError(col.name, 'Adding sample value to array failed'));
+                                
+                                
+                                while(deleteButton !== null){
+                                  await deleteButton.click()
+                                  deleteButton = await arrayField.getRemoveLastElementButton();
+                                }
+                                
+                                let err = arrayField.getErrorMessageElement();
+                                expect(err.getText()).toBe("Please enter a value for this Array field")
+
+                              }
+                            break;
                             case 'timestamp':
                             case 'timestamptz':
                               let addNewValDateInput, addNewValTimeInput;
@@ -434,7 +468,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                               await clearInput.click();
 
                               // Input valid date and invalid time
-                              await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,new Date().toISOString().slice(0, 10));
+                              await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,validArrayValues["date"]);
                               await addNewValTimeInput.sendKeys("11111");
 
                               errorElement = await arrayField.getErrorMessageElement()
@@ -488,6 +522,25 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(valuesToAdd[i]).toBe(valuesRendered[valuesRendered.length - valuesToAdd.length + i]);
                           }
 
+                          break;
+                        case 'boolean':
+                            const boolsToAdd = getRecordInput(col.name);
+                            
+                            const addNewValueDropDown = await chaisePage.recordEditPage.getDropdownElementByName(`${col.name}-new-item`, 1);
+                            addButton = await arrayField.getAddButton();
+
+                            expect(addNewValueDropDown.isDisplayed()).toBeTruthy();
+
+                            for(let value of boolsToAdd){
+                              await chaisePage.recordEditPage.selectDropdownValue(addNewValueDropDown, value);
+                              await addButton.click()
+                            }
+                            
+                            const boolsRendered = await arrayField.getArrayFieldValues();
+
+                            for(let i = 0;i < boolsToAdd.length;i++){
+                              expect(boolsToAdd[i]).toBe(boolsRendered[boolsRendered.length - boolsToAdd.length + i]);
+                            }
                           break;
                         case 'timestamp':
                         case 'timestamptz':
