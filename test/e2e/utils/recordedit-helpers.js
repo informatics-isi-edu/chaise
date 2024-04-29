@@ -309,7 +309,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     for(let col of arrayCols){
                         let recordVals = getRecordValue(col.name)
 
-                        if(recordVals === null ) continue;
+                        if(!recordVals) continue;
 
                         // Check if ArrayField is rendered correctly
                         const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
