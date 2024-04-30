@@ -119,6 +119,7 @@ jobs:
           cd chaise
           make deps-test
           make dist-wo-deps
+          make lint
           sudo make deploy
       - name: Add tests users
         run: |
@@ -216,7 +217,7 @@ jobs:
       - name: Check on delete prohibited test spec (protractor)
         if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
         run: exit 1
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report

@@ -24,6 +24,30 @@ export default class ModalLocators {
     return page.locator('.modal-error');
   }
 
+  static getLoginModal(page: Page): Locator {
+    return page.locator('.modal-login-instruction');
+  }
+
+  static getExportModal(page: Page): Locator {
+    return page.locator('.export-progress');
+  }
+
+  static getUploadProgressModal(page: Page): Locator {
+    return page.locator('.modal-upload-progress');
+  }
+
+  static getCreateSavedQueryModal(page: Page): Locator {
+    return page.locator('.create-saved-query');
+  }
+
+  static getSavedQueriesModal(page: Page): Locator {
+    return page.locator('.saved-query-popup');
+  }
+
+  static getDuplicateSavedQueryModal(page: Page): Locator {
+    return page.locator('.duplicate-saved-query-modal');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
@@ -93,4 +117,12 @@ export default class ModalLocators {
     return modal.locator('.bibtex-download-btn');
   }
 
+  // --------- saved query modals functions ------------ //
+  static getApplySavedQueryButtons(modal: Locator, idx: number): Locator {
+    return modal.locator('.apply-saved-query-button').nth(idx);
+  }
+
+  static saveQuerySubmit(modal: Locator): Locator {
+    return modal.locator('#modal-submit-record-btn');
+  }
 }

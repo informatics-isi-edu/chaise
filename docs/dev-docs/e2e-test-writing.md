@@ -169,6 +169,12 @@ This section summarizes the best practices for writing test cases in Chaise.
   await expect(page.locator('ul > li')).toHaveText(['Text 1', 'Text 2', 'Text 3']);
   ```
 
+- Alternative for testing inner text of an element ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-text)):
+  ```ts
+  // partial match using contains
+  await expect.soft(title).toContainText('Data Collect');
+  ```
+
 - If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-class)):
 
   ```ts
@@ -179,17 +185,34 @@ This section summarizes the best practices for writing test cases in Chaise.
   await expect.soft(input).toHaveClass('input-disabled');
   ```
 
+- If you want to test value inside of an input ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-value)):
+
+  ```ts
+  // partial regex match
+  await expect.soft(input).toHaveValue(/input\-value/);
+
+  // full match
+  await expect.soft(input).toHaveValue('input-value');
+
+  // this works too but avoid using it if possible
+  await expect.soft(input).toHaveAttribute('value', 'input-value');
+  ```
+
 - Test DOM attributes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-attribute)):
 
   ```ts
   // prefered
   await expect(link).toHaveAttribute('href', regexOrFullString);
+
   // if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
   expect(await link.getAttribute('href')).toContain(partialExpected)
+  ```
 
-  // avoid using `.innerHTML` or getAttribute('innerHTML'
+- Test `innerHTML`:
+
+  ```ts
   expect(await link.innerHTML()).toContain(partialExpected);
-  expect(await link.innerHTML()).toBe(fullString);
+  expect(await link.innerHTML()).toBe(expected);
   ```
 
 ### Actions

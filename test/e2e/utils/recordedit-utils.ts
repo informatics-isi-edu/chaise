@@ -77,7 +77,7 @@ export const selectDropdownValue = async (dropdownEl: Locator, value: string) =>
   await dropdownEl.click();
 
   const optionsContainer = RecordeditLocators.getOpenDropdownOptionsContainer(dropdownEl.page());
-  await optionsContainer.waitFor({ state: 'visible' });
+  await expect.soft(optionsContainer).toBeVisible();
 
   const options = RecordeditLocators.getDropdownOptions(dropdownEl.page());
   await options.getByText(value).click();
@@ -293,11 +293,12 @@ type TestSubmissionParams = {
   resultRowValues: RecordsetRowValue[]
 }
 
-export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean) => {
+export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean, timeout?: number) => {
   await RecordeditLocators.getSubmitRecordButton(page).click();
   await expect.soft(AlertLocators.getErrorAlert(page)).not.toBeAttached();
 
-  // TODO playwright: in protractor we wated for the upload-table.. should we?
+  await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
+  await expect.soft(RecordeditLocators.getSubmitSpinner(page)).not.toBeAttached({ timeout: timeout });
 
   if (params.resultRowValues.length === 1) {
     await page.waitForURL('**/record/**');

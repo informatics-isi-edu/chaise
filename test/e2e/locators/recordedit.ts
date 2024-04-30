@@ -59,6 +59,10 @@ export default class RecordeditLocators {
     return container.locator('#page-title a');
   }
 
+  static getPageTitleLinkInner(container: Locator | Page): Locator {
+    return container.locator('#page-title a span');
+  }
+
   static getRequiredInfoEl(container: Locator | Page): Locator {
     return container.locator('.required-info');
   }
@@ -91,6 +95,22 @@ export default class RecordeditLocators {
     return container.locator('.resultset-tables');
   }
 
+  static getAllColumnPermissionOverlays(container: Locator | Page): Locator {
+    return container.locator('.column-permission-overlay');
+  }
+
+  static getAllDeleteRowButtons(container: Locator | Page): Locator {
+    return container.locator('button.remove-form-btn');
+  }
+
+  static getDeleteRowButton(container: Locator | Page, index: number): Locator {
+    index = index || 0;
+    return RecordeditLocators.getAllDeleteRowButtons(container).nth(index);
+  }
+
+  static getSubmitSpinner(container: Locator | Page): Locator {
+    return container.locator('.submit-spinner');
+  }
 
   // ---------------- input-level selectors -------------- //
 
@@ -145,6 +165,18 @@ export default class RecordeditLocators {
   static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
     return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.input-switch-error.text-danger');
+  }
+
+  static getColumnPermissionOverlay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    columnDisplayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.column-permission-overlay-${formNumber}-${columnDisplayName}`)
+  }
+
+  static getColumnPermissionError(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    columnDisplayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.column-permission-warning-${formNumber}-${columnDisplayName}`)
   }
 
   // -------------- file input selectors --------------- //

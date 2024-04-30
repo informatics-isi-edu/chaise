@@ -1,6 +1,14 @@
 import { Locator, Page } from '@playwright/test';
 
 export default class AlertLocators {
+  static getAlerts(container: Page | Locator): Locator {
+    return container.locator('.alerts-container .alert');
+  }
+  
+  static getSuccessAlert(container: Page | Locator): Locator {
+    return container.locator('.alert-success');
+  }
+
   static getWarningAlert(container: Page | Locator): Locator {
     return container.locator('.alert-warning');
   }

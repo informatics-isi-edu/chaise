@@ -991,10 +991,6 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
-    this.getExportDropdownMenu = () => {
-        return element(by.css('.export-menu dropdown-menu'));
-    }
-
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
     };
