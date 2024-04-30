@@ -159,6 +159,18 @@
     }
   }
 
+  .modal-header-context {
+    color: map-get(variables.$color-map, 'modal-header-context');
+
+    .modal-header-context-separator {
+      padding: 0 0.3em;
+      font-size: 0.8em;
+    }
+    .modal-header-context-colon {
+      padding-left: 1px;
+    }
+  }
+
   .side-panel-container {
     overflow-y: auto;
     overflow-x: hidden;

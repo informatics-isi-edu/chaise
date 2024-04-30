@@ -100,7 +100,6 @@ const RecordsetApp = (): JSX.Element => {
       const chaiseConfig = ConfigService.chaiseConfig;
       const modifyEnabled = chaiseConfig.editRecord !== false;
       const deleteEnabled = chaiseConfig.deleteRecord === true;
-      const showFaceting = chaiseConfig.showFaceting === true;
 
       const recordsetConfig: RecordsetConfig = {
         viewable: true,
@@ -108,7 +107,7 @@ const RecordsetApp = (): JSX.Element => {
         deletable: modifyEnabled && deleteEnabled,
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
-        showFaceting,
+        showFaceting: true,
         disableFaceting: false,
         displayMode: RecordsetDisplayMode.FULLSCREEN,
         // TODO

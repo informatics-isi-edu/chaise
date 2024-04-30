@@ -245,6 +245,10 @@ div.modal-title {
     .modal-header {
       padding: 0;
       padding-top: 20px;
+      &.modal-header-reduced-top-padding {
+        padding-top: 10px;
+      }
+
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
     }

@@ -34,3 +34,10 @@ export function isObjectAndNotNull(obj: any): boolean {
 export function isInteger(data: any): boolean {
   return (typeof data === 'number') && (data % 1 === 0);
 }
+
+/**
+ * Returns true if the input is array and has at least one item, otherwise false.
+ */
+export function isNonEmptyArray(obj: any) : boolean {
+  return Array.isArray(obj) && obj.length !== 0;
+}

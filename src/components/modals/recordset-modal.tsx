@@ -205,6 +205,7 @@ const RecordsetModal = ({
   // get the modal elements based on the available ref
   const modalContainerEl = modalContainer.current ? modalContainer.current.dialog.querySelector('.modal-content') as HTMLDivElement : undefined;
   const modalHeaderEl = modalHeader.current ? modalHeader.current : undefined;
+  const showUIContextTitles = displayMode === RecordsetDisplayMode.FACET_POPUP && recordsetProps.uiContextTitles;
 
   /**
    * figure out the modal size.
@@ -308,7 +309,7 @@ const RecordsetModal = ({
       case RecordsetDisplayMode.FACET_POPUP:
         return (
           <div>
-            <span>Search by </span>
+            <span>Select </span>
             <Title displayname={displayname} comment={comment} />
           </div>);
       case RecordsetDisplayMode.SAVED_QUERY_POPUP:
@@ -328,8 +329,8 @@ const RecordsetModal = ({
 
   return (
     <Modal
-      backdropClassName={`search-popup-backdrop ${modalBackdropClassName}`}
-      className={`search-popup ${modalClassName}`}
+      backdropClassName={`search-popup-backdrop ${modalBackdropClassName ? modalBackdropClassName : ''}`}
+      className={`search-popup ${modalClassName ? modalClassName : ''}`}
       size={modalSize}
       show={true}
       onHide={onClose}
@@ -341,11 +342,21 @@ const RecordsetModal = ({
           <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
         </div>
       }
-      <Modal.Header ref={modalHeader}>
+      <Modal.Header ref={modalHeader} className={showUIContextTitles ? 'modal-header-reduced-top-padding': ''}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
             <div className={`top-left-panel also-resizable ${panelClassName}`}></div>
             <div className='top-right-panel'>
+              {showUIContextTitles && recordsetProps.uiContextTitles &&
+                <h4 className='modal-header-context'>{
+                  // the last one is the current context which we don't want to show here
+                  recordsetProps.uiContextTitles.map((titleProps, i, arr) => ((i !== arr.length - 1) && <span key={i}>
+                    {i > 0 && <i className='fa-solid fa-chevron-right modal-header-context-separator'></i>}
+                    {<Title {...titleProps} />}
+                    {i === arr.length - 2 && <span className='modal-header-context-colon'>:</span>}
+                  </span>))
+                }</h4>
+              }
               <div className='recordset-title-container title-container'>
                 <div className='search-popup-controls recordset-title-buttons title-buttons'>
                   {selectMode === RecordsetSelectMode.MULTI_SELECT &&
