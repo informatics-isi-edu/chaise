@@ -83,7 +83,11 @@ test.describe('Regarding multi form input button', () => {
     });
 
     await test.step('user should be able to submit and save data.', async () => {
-      await testSubmission(page, testParams.multiEdit.submission, true);
+      /**
+       * increse the timeout because of upload modal
+       * 2 records, 10 seconds for each
+       */
+      await testSubmission(page, testParams.multiEdit.submission, true, 2 * 20 * 1000);
     });
   });
 

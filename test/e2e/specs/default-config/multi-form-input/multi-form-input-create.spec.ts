@@ -727,7 +727,11 @@ test.describe('multi form input in create mode', () => {
     }
 
     await test.step('user should be able to submit and save data.', async () => {
-      await testSubmission(page, testParams.apply_tests.submission);
+      /**
+       * increse the timeout because of upload modal
+       * 4 records, 20 seconds for each
+       */
+      await testSubmission(page, testParams.apply_tests.submission, false, 4 * 20 * 1000);
     })
   });
 
