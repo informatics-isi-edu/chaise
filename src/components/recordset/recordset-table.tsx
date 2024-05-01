@@ -425,7 +425,7 @@ const RecordsetTable = ({
     return classNameString + ' ' + tableSchemaNames;
   }
   return (
-    <div id={`table-${reference.table.name}`} className='recordset-table-container' ref={tableContainer}>
+    <div className='recordset-table-container' ref={tableContainer}>
       <div className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
