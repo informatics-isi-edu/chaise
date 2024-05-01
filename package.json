@@ -29,10 +29,10 @@
   "devDependencies": {
     "@isrd-isi-edu/ermrest-data-utils": "0.0.5",
     "@playwright/test": "latest",
-    "@typescript-eslint/eslint-plugin": "~7.1.0",
-    "@typescript-eslint/parser": "~7.1.0",
+    "@typescript-eslint/eslint-plugin": "~7.8.0",
+    "@typescript-eslint/parser": "~7.8.0",
     "chance": "x",
-    "eslint": "^8.10.0",
+    "eslint": "^9.1.1",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.31.11",
