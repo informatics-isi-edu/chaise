@@ -2,24 +2,24 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React from 'react';
 
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import Spinner from 'react-bootstrap/Spinner';
 import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
-import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, SortColumn } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
-import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -46,7 +46,7 @@ const RecordsetTable = ({
     logRecordsetClientAction
   } = useRecordset();
 
-  const tableContainer = useRef<any>(null);
+  const tableContainer = useRef<HTMLDivElement>(null);
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
@@ -123,8 +123,23 @@ const RecordsetTable = ({
     // log the request if it was successful
     if (success) {
       logRecordsetClientAction(action, null, null, ref);
+      scrollToTable();
     }
   };
+
+  /**
+   * To maintain scroll position after next/previous button click on table
+   */
+  const scrollToTable = () => {
+    /* defer scrollIntoView behavior by 100ms so the content can have just enough to get 
+    updated after applying pagination to give smooth user experience*/
+    setTimeout(() => {
+    if (!tableContainer.current) return;
+    //scrollIntoView is used to bring an element(here current table) into view.
+    tableContainer.current.scrollIntoView();
+    }, 100);
+  };
+
 
   /**
    * select all the rows that are displayed and are not disabled
@@ -409,9 +424,8 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
-
   return (
-    <div className='recordset-table-container' ref={tableContainer}>
+    <div id={`table-${reference.table.name}`} className='recordset-table-container' ref={tableContainer}>
       <div className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
