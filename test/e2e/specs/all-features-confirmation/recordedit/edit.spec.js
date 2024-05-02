@@ -78,7 +78,8 @@ var testParams = {
             ]
         ],
         files: []
-    }, {
+    },
+    {
        schema_name: "product-edit",
        table_name: "file",
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
@@ -111,7 +112,8 @@ var testParams = {
            path: "testfile500kb.png",
            tooltip: "- testfile500kb.png\n- 500 kB"
        }]
-    }]
+    }
+  ]
 };
 
 if (!process.env.CI) {

@@ -17,11 +17,11 @@ const testParams = {
       tableDisplayname: 'main',
       resultColumnNames: [
         'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
+        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
       ],
       resultRowValues: [
-        ['markdown value 9001', 'text value 9001', '666', '', '', '', '', '', ''],
-        ['markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', ''],
+        ['markdown value 9001', 'text value 9001', '666', '', '', '', '', '', '', ''],
+        ['markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', '', ''],
       ]
     }
   },

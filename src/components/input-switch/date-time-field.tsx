@@ -97,11 +97,6 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     }
     // otherwise validate the time value
     else {
-          if (!timeVal) {
-            setError(name, { type: 'custom', message: 'Please enter a valid time' });
-            setValue(name, 'invalid-value');
-            return;
-          }
       if (!timeVal) {
         setError(props.name, { type: 'custom', message: 'Please enter a valid time' });
         setValue(props.name, 'invalid-value');
@@ -232,14 +227,17 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons && <div className={`chaise-btn-group ${getFieldState(props.name)?.invalid ? 'translateY' : ''}`}> {/*'translateY' - Prevents overlap of error message and button group in case of arrayField by moving the button group lower*/}
-            <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
-              Now
-            </button>
-            <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
-              Clear
-            </button>
-          </div>}
+          {/*'translateY' - Prevents overlap of error message and button group in case of arrayField by moving the button group lower*/}
+          {!props.disableInput && props.displayExtraDateTimeButtons &&
+            <div className={`chaise-btn-group ${getFieldState(props.name)?.error ? 'translateY' : ''}`}>
+              <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
+                Now
+              </button>
+              <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
+                Clear
+              </button>
+            </div>
+          }
           <input {...field} type='hidden' />
         </div>
       )}

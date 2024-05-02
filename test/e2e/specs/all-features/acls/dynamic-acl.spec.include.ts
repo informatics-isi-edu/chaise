@@ -585,7 +585,6 @@ const testRecordSetEditAndDeleteButtons = async (
   });
 
   await test.step(`should ${displayBulkEdit ? '' : 'not'} display the buld edit link`, async () => {
-    await page.pause();
     const link = RecordsetLocators.getBulkEditLink(page);
     if (displayBulkEdit) {
       await expect.soft(link).toBeVisible();

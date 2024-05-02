@@ -125,7 +125,7 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
-  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number | (string | number)[] ) => void
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: any) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
   const dstKey = `${destFormValue}-${column.name}`;
@@ -214,7 +214,7 @@ function _copyOrClearValueForColumn(
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
-  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: any) => void
 ) {
 
   const column = columnModel.column;
@@ -418,22 +418,22 @@ function _populateEditInitialValueForAColumn(
 
   // stringify the returned array value
   if (column.type.isArray) {
-    
+
     if (usedValue !== null) {
-      
-      values[`${formValue}-${column.name}`] = usedValue.map((value:any) => {
+
+      values[`${formValue}-${column.name}`] = usedValue.map((value: any) => {
         let valueToAdd: any = {
           'val': value
         }
-    
+
         if (getInputType({ name: column.type.baseType.name }) === 'timestamp') {
           const DATE_TIME_FORMAT = column.type.rootName === 'timestamptz' ? dataFormats.datetime.return : dataFormats.timestamp;
           const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
-    
+
           valueToAdd = {
-            'val' : v?.datetime,
-            'val-date' : v?.date,
-            'val-time' : v?.time
+            'val': v?.datetime,
+            'val-date': v?.date,
+            'val-time': v?.time
           }
         }
 
@@ -611,7 +611,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
   const submissionRow: any = {};
   const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
     let v = formData[formNumber + '-' + col.name];
-    
+
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
       if (col.isAsset) {
@@ -628,8 +628,9 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
 
         v = tempVal;
       } else if (col.type?.isArray) {
-        v = v.length ? v.map((i:any) => i.val) : ''
-      }else {
+        // array-field encodes the values inside '.val' prop
+        v = v.length ? v.map((i: any) => i.val) : '';
+      } else {
         // Special cases for formatting data
         switch (col.type.name) {
           case 'json':

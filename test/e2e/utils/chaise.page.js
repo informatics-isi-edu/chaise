@@ -320,7 +320,7 @@ var recordEditPage = function() {
     this.getFormInputCell = (name, index, isArray) => {
       index = index || 1;
       const inputName = index + '-' + name;
-       
+
       if(isArray){
         return element(by.className('array-input-field-container ' + inputName)).element(by.xpath('..'));
       }
@@ -502,13 +502,14 @@ var recordEditPage = function() {
     // ArrayField Selectors
 
     /**
-     * 
+     *
      * @typedef {Object} ArrayFieldContainerElement
      * @property {Function} getAddNewElementContainer - returns the add new element container for the given array field
      * @property {Function} getAddNewValueInputElement - returns add new element input element for a given array field
      * @property {Function} getClearInputButton - returns clear button for the current input
      * @property {Function} getErrorMessageElement - returns error message element for the current input
      * @property {Function} getAddButton - returns add button for a given array field
+     * @property {Function} getRemoveButton - returns remove button for a given array field
      * @property {Function} getRemoveLastElementButton - returns remove button for last element in the arrayField
      * @property {Function} getLastArrayItem - returns the element added to the array
      * @property {Function} getArrayFieldValues - returns values of the arrayfield as an array
@@ -516,16 +517,19 @@ var recordEditPage = function() {
      */
 
     /**
-     * 
-     * @param {string} fieldName - Arrayfield Name
+     *
+     * @param {string} fieldName - name of the column
+     * @param {string} formNumber - form number
      * @param {string} baseType - baseType of the Array
      * @return {ArrayFieldContainerElement} arrayFieldContainer
-     * 
+     *
      */
-    this.getArrayFieldContainer = function(fieldName, baseType){
-      const elem = element(by.css(`.array-input-field-container[class$="${fieldName}"]`));
+    this.getArrayFieldContainer = function(colName, formNumber, baseType){
+      formNumber = formNumber || 1;
+      const fieldName = `${formNumber}-${colName}`;
 
-      
+      const elem = element(by.css(`.array-input-field-container-${fieldName}`));
+
       elem.getAddNewElementContainer = function(){
         return this.element(by.className("add-element-container"));
       }
@@ -533,6 +537,10 @@ var recordEditPage = function() {
       elem.getAddButton = function(){
         const addNewContainer = this.getAddNewElementContainer()
         return addNewContainer.element(by.className("add-button"))
+      }
+
+      elem.getRemoveButton = function () {
+        return this.element(by.css('.array-remove-button'));
       }
 
       elem.getRemoveLastElementButton = async function(){
@@ -543,13 +551,13 @@ var recordEditPage = function() {
             return buttons.last()
           }
           return null
-          
+
         }catch (err){
           return null
         }
       }
 
-      elem.getErrorMessageElement = function(){        
+      elem.getErrorMessageElement = function(){
         return this.element(by.className("input-switch-error"));
       }
 
@@ -558,7 +566,7 @@ var recordEditPage = function() {
         const addButton = await addNewContainer.element(by.css('.chaise-btn-sm.add-button'))
         return !(await addButton.isEnabled());
       }
-      
+
       switch(baseType){
         case 'date':
         case 'integer':
@@ -589,7 +597,7 @@ var recordEditPage = function() {
             const addNewContainer = this.getAddNewElementContainer();
             return addNewContainer.element(by.className('remove-input-btn'));
           }
-          
+
         break;
         case 'boolean':
           elem.getArrayFieldValues = async function(){
@@ -617,16 +625,16 @@ var recordEditPage = function() {
           elem.getLastArrayItem = function(){
             const dateInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`)).last();
             const timeInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`)).last();
-            
+
             return [dateInput, timeInput];
           }
 
           elem.getArrayFieldValues = async function(){
             const dateInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`));
             const timeInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`));
-            
+
             let dateTimeValues = []
-            
+
             for(let i =0; i< dateInputs.length; i++){
               let dateVal = await dateInputs[i].getAttribute('value')
               let timeVal = await timeInputs[i].getAttribute('value')
@@ -646,7 +654,7 @@ var recordEditPage = function() {
       return  elem;
     };
 
-    
+
 };
 
 var recordPage = function() {
