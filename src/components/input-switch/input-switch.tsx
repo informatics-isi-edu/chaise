@@ -70,7 +70,7 @@ export type InputSwitchProps = {
   displayErrors?: boolean,
   /**
    * display required error regardless of whether the form has been submitted or not.
-   */ 
+   */
   displayRequiredErrorBeforeSubmit?: boolean
   /**
    * the handler function called on input change
@@ -148,7 +148,7 @@ export type RuleWithMessage = {
   message: string
 };
 
-const InputSwitch = forwardRef(({
+const InputSwitch = ({
   type,
   name,
   placeholder,
@@ -176,7 +176,7 @@ const InputSwitch = forwardRef(({
   displayDateTimeLabels,
   additionalControllerRules,
   foreignKeyCallbacks
-}: InputSwitchProps, ref:ForwardedRef<any>): JSX.Element | null => {
+}: InputSwitchProps ): JSX.Element | null => {
 
 
   return (() => {
@@ -203,7 +203,7 @@ const InputSwitch = forwardRef(({
           parentReference={parentReference}
           parentTuple={parentTuple}
         />;
-      case 'array':        
+      case 'array':
         return <ArrayField
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
@@ -444,38 +444,6 @@ const InputSwitch = forwardRef(({
         />
     }
   })();
-});
-
-InputSwitch.displayName = 'InputSwitch';
-
-InputSwitch.propTypes = {
-  type: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
-  classes: PropTypes.string,
-  inputClasses: PropTypes.string,
-  containerClasses: PropTypes.string,
-  timeClasses: PropTypes.string,
-  clearClasses: PropTypes.string,
-  clearTimeClasses: PropTypes.string,
-  disableInput: PropTypes.bool,
-  requiredInput: PropTypes.bool,
-  displayErrors: PropTypes.bool,
-  displayRequiredErrorBeforeSubmit: PropTypes.bool,
-  styles: PropTypes.object,
-  columnModel: PropTypes.any,
-  appMode: PropTypes.string,
-  formNumber: PropTypes.number,
-  parentReference: PropTypes.any,
-  parentTuple: PropTypes.any,
-  parentLogStack: PropTypes.any,
-  parentLogStackPath: PropTypes.string,
-  foreignKeyData: PropTypes.any,
-  waitingForForeignKeyData: PropTypes.bool,
-  displayExtraDateTimeButtons: PropTypes.bool,
-  displayDateTimeLabels: PropTypes.bool,
-  additionalControllerRules: PropTypes.any,
-  foreignKeyCallbacks: PropTypes.object
 };
 
 export default React.memo(InputSwitch);

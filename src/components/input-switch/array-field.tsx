@@ -42,15 +42,25 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
    * We use this to keep track of errors in array field
    */
   const arrayFormState = useFormState({ name: name });
+
+  const addNewValueInputName = `${name}-new-item`;
+
   /**
    * We use this to keep track of errors in new value input box
    */
-  const formState = useFormState({ name: `${name}-new-item` });
+  const formState = useFormState({ name: addNewValueInputName });
   /**
    * We use this to keep track of value in new value input box
    */
-  const addNewValue = useWatch({ name: `${name}-new-item` });
+  const addNewValue = useWatch({ name: addNewValueInputName });
 
+  // register the input that is used for adding new value
+  register(addNewValueInputName, {
+    value: '',
+    onChange: () => trigger(addNewValueInputName),
+  });
+
+  //-------------------  callbacks:   --------------------//
 
   const handleOnDragEnd = (result: DropResult) => {
     if (result.destination) {
@@ -80,19 +90,25 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const clearAddNewField = () => {
-    setValue(`${name}-new-item`, '')
+    setValue(addNewValueInputName, '')
 
     if (getInputType({ name: baseArrayType }) === 'timestamp') {
-      setValue(`${name}-new-item-date`, '')
-      setValue(`${name}-new-item-time`, '')
+      setValue(`${addNewValueInputName}-date`, '')
+      setValue(`${addNewValueInputName}-time`, '')
     }
   }
 
+  //-------------------  render logic:   --------------------//
 
   const DraggableItemRenderer = (item: any, index: number, disableInput: boolean | undefined) => {
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
+          const { name: inputName } = register(`${name}.${index}.val`, {
+            value: item.val,
+            onChange: () => trigger(`${name}.${index}.val`)
+          });
+
           return (
             <li
               className={`item item-${getInputType({ name: baseArrayType })} ${!disableInput ? 'add-padding-bottom' : ''}`}
@@ -103,16 +119,12 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <i className='fa-solid fa-grip-vertical'></i>
               </div>
 
-
               <div className='item-input'>
                 <InputSwitch
                   {...props}
+                  name={inputName}
                   type={getInputType({ name: baseArrayType })}
                   key={item.id}
-                  {...register(`${name}.${index}.val`, {
-                    value: item.val,
-                    onChange: () => trigger(`${name}.${index}.val`)
-                  })}
                   displayExtraDateTimeButtons={true}
                   displayDateTimeLabels={baseArrayType === 'date' ? false : true}
                   requiredInput={true}
@@ -177,10 +189,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
           <div className={addContainerClassName.join(' ')}>
             <InputSwitch
               type={getInputType({ name: baseArrayType })}
-              {...register(`${name}-new-item`, {
-                value: '',
-                onChange: () => trigger(`${name}-new-item`),
-              })}
+              name={addNewValueInputName}
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}
@@ -196,7 +205,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                * 1. There are validation errors in the addNewValue field.
                * 2. The addNewValue field value is empty
                */
-              disabled={Object.keys(formState.errors).includes(`${name}-new-item`) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+              disabled={Object.keys(formState.errors).includes(addNewValueInputName) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
             >Add</button>
           </div>
         </div>
