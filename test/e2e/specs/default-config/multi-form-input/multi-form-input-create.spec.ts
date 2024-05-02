@@ -453,72 +453,20 @@ const testParams = {
             ''
           ]
         }
-      },
-      // TODO array: uncomment this to also test arrays
-      // {
-      //   type: RecordeditInputType.ARRAY,
-      //   column_displayname: 'array_text',
-      //   column_name: 'array_text',
-      //   apply_to_all: {
-      //     baseType: 'text',
-      //     value: 'text-value',
-      //     column_values_after: [
-      //       'text-value',
-      //       'text-value',
-      //       'text-value',
-      //       'text-value',
-      //       'text-value'
-      //     ]
-      //   },
-      //   apply_to_some: {
-      //     baseType: 'text',
-      //     value: 'some text-value',
-      //     deselected_forms: [1, 3],
-      //     column_values_after: [
-      //       'text-value',
-      //       'some text-value',
-      //       'text-value',
-      //       'some text-value',
-      //       'some text-value'
-      //     ],
-      //   },
-      //   clear_some: {
-      //     baseType: 'text',
-      //     deselected_forms: [4, 5],
-      //     column_values_after: [
-      //       'text-value',
-      //       '',
-      //       'text-value',
-      //       'some text-value',
-      //       'some text-value',
-      //     ]
-      //   },
-      //   manual_test: {
-      //     baseType: 'text',
-      //     value: 'manual value',
-      //     formNumber: 5,
-      //     column_values_after: [
-      //       'text-value',
-      //       '',
-      //       'text-value',
-      //       'some text-value',
-      //       'manual value',
-      //     ]
-      //   }
-      // }
+      }
     ],
     submission: {
       tableDisplayname: 'main',
       resultColumnNames: [
         'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
+        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
       ],
       resultRowValues: [
-        ['markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', 'testfile128kb_1.png', ''],
-        ['markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', 'testfile128kb_1.png', ''],
-        ['some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', 'testfile128kb_2.png', ''],
-        ['manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', 'testfile128kb_3.png', ''],
-        ['', 'manual', '2', '', '', '', 'true', '', '', ''],
+        ['markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', 'testfile128kb_1.png'],
+        ['markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', 'testfile128kb_1.png'],
+        ['some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', 'testfile128kb_2.png'],
+        ['manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', 'testfile128kb_3.png'],
+        ['', 'manual', '2', '', '', '', 'true', '', ''],
       ]
 
     }
