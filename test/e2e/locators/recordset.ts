@@ -1,5 +1,27 @@
 import { Locator, Page } from '@playwright/test';
 
+type DefaultRangeInputLocators = {
+  minInput: Locator;
+  maxInput: Locator;
+  minClear: Locator;
+  maxClear: Locator;
+  submit: Locator;
+}
+
+type TimestampRangeInputLocators = {
+  // date
+  minDateInput: Locator;
+  maxDateInput: Locator;
+  minDateClear: Locator;
+  maxDateClear: Locator;
+  // time
+  minTimeInput: Locator;
+  maxTimeInput: Locator;
+  minTimeClear: Locator;
+  maxTimeClear: Locator;
+  submit: Locator;
+}
+
 export default class RecordsetLocators {
 
   static async waitForRecordsetPageReady(container: Page | Locator, timeout?: number): Promise<void> {
@@ -27,6 +49,10 @@ export default class RecordsetLocators {
 
   static getFacetFilters(container: Page | Locator): Locator {
     return container.locator('.chiclets-container .filter-chiclet');
+  }
+
+  static getFacetFilter(container: Page | Locator, idx: number): Locator {
+    return container.locator('.chiclets-container .filter-chiclet').nth(idx);
   }
 
   static getClearAllFilters(container: Page | Locator): Locator {
@@ -161,6 +187,83 @@ export default class RecordsetLocators {
     return container.locator('.side-panel-resizable');
   }
 
+  static getFacetById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fc-${idx}`);
+  }
 
+  static getFacetHeaderButtonById(facet: Locator, idx: number): Locator {
+    return facet.locator(`.fc-heading-${idx} button`);
+  }
+
+  // get child of accordion group, sibling to accordion heading
+  static getFacetCollapse(facet: Locator): Locator {
+    return facet.locator('.accordion-collapse');
+  }
+
+  static getFacetOptions(facet: Locator): Locator {
+    return facet.locator('.chaise-checkbox label')
+  }
+
+  static getFacetOption(facet: Locator, optionIdx: number) {
+    return facet.locator(`.checkbox-${optionIdx}`);
+  }
+
+  /* range facet selectors */
+
+  // there's integer/float/date/timestamp inputs
+  static getFacetRangeInputs(facet: Locator): DefaultRangeInputLocators {
+    return {
+      minInput: facet.locator('.range-min'),
+      maxInput: facet.locator('.range-max'),
+      minClear: facet.locator('.min-clear'),
+      maxClear: facet.locator('.max-clear'),
+      submit: facet.locator('.range-input-submit-btn')
+    }
+  }
+
+  static getFacetRangeTimestampInputs(facet: Locator): TimestampRangeInputLocators {
+    return {
+      // date
+      minDateInput: facet.locator('ts-date-range-min'),
+      maxDateInput: facet.locator('ts-date-range-max'),
+      minDateClear: facet.locator('min-date-clear'),
+      maxDateClear: facet.locator('max-date-clear'),
+
+      // time
+      minTimeInput: facet.locator('ts-time-range-min'),
+      maxTimeInput: facet.locator('ts-time-range-max'),
+      minTimeClear: facet.locator('min-time-clear'),
+      maxTimeClear: facet.locator('max-time-clear'),
+      submit: facet.locator('.range-input-submit-btn')
+    }
+  }
+
+  /* histogram selectors */
+  static getFacetHistogram(facet: Locator): Locator {
+    return facet.locator('.js-plotly-plot');
+  };
+
+
+  // ---------------- saved query selector ------------------- //
+
+  static getSavedQueryDropdown(container: Page | Locator): Locator {
+    return container.locator('.saved-query-menu button')
+  }
+
+  // all dropdown menu items
+  static getSavedQueryOptions(container: Page | Locator): Locator {
+    return container.locator('.saved-query-menu-item');
+  }
+
+  // recordedit option to save a query
+  static getSaveQueryOption(container: Page | Locator): Locator {
+    // substring matching
+    return container.getByText('Save current search criteria');
+  }
+
+  static getSavedQueriesOption(container: Page | Locator) {
+    // substring matching
+    return container.getByText('Show saved search criteria');
+  }
 
 }

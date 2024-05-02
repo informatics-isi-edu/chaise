@@ -17,11 +17,11 @@ const testParams = {
       tableDisplayname: 'main',
       resultColumnNames: [
         'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
+        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
       ],
       resultRowValues: [
-        ['markdown value 9001', 'text value 9001', '666', '', '', '', '', '', ''],
-        ['markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', ''],
+        ['markdown value 9001', 'text value 9001', '666', '', '', '', '', '', '', ''],
+        ['markdown value 9002', '', '9,002', '', '2023-11-11', '', '', '', '', ''],
       ]
     }
   },
@@ -83,7 +83,11 @@ test.describe('Regarding multi form input button', () => {
     });
 
     await test.step('user should be able to submit and save data.', async () => {
-      await testSubmission(page, testParams.multiEdit.submission, true);
+      /**
+       * increse the timeout because of upload modal
+       * 2 records, 10 seconds for each
+       */
+      await testSubmission(page, testParams.multiEdit.submission, true, 2 * 20 * 1000);
     });
   });
 

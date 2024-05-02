@@ -312,16 +312,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         if(!recordVals) continue;
 
                         // Check if ArrayField is rendered correctly
-                        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+                        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(col.name, recordIndex+1, col.baseType);
                         let arrayFieldVals = await arrayField.getArrayFieldValues();
 
                         arrayField.click()
                         expect(arrayField.isDisplayed()).toBeTruthy(colError(col.name, "element not visible"));
-                        
+
                         const addNewValField = arrayField.getAddNewElementContainer()
-                        
+
                         expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
-                        
+
                         expect(arrayFieldVals.length).toBe(recordVals.length, colError(col.name , "Doesn't have the expected values."))
 
                         if(/timestamp|timestamptz/.test(col.baseType) ){
@@ -397,7 +397,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                           if (col.generated || col.immutable) continue;
 
-                          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+                          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(col.name, recordIndex + 1, col.baseType);
 
                           const addNewValField = arrayField.getAddNewElementContainer()
                           expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
@@ -426,9 +426,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                               break;
                             case 'text':
-                              
+
                               let addInput = await arrayField.getAddNewValueInputElement();
-                              
+
                               if(col?.nullok === false){
                                 await addInput.sendKeys(validArrayValues[col.baseType])
                                 const addButton = await arrayField.getAddButton()
@@ -436,15 +436,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                 let deleteButton = await arrayField.getRemoveLastElementButton();
 
-                                
+
                                 await expect(deleteButton.isDisplayed()).toBeTruthy(colError(col.name, 'Adding sample value to array failed'));
-                                
-                                
+
+
                                 while(deleteButton !== null){
                                   await deleteButton.click()
                                   deleteButton = await arrayField.getRemoveLastElementButton();
                                 }
-                                
+
                                 let err = arrayField.getErrorMessageElement();
                                 expect(err.getText()).toBe("Please enter a value for this Array field")
 
@@ -484,16 +484,24 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                       })
                   }
-                  
+
                   it ("should be able to set the correct value.", async function () {
-                    
+
                     for(let col of arrayCols){
                       if (col.generated || col.immutable) continue;
 
-                      const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${col.name}`,col.baseType);
+                      const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(col.name, recordIndex + 1, col.baseType);
 
                       const addNewValField = arrayField.getAddNewElementContainer();
-                      expect(addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
+                      expect(await addNewValField.isDisplayed()).toBeTruthy(colError(col.name, 'add new value field not visible'));
+                      const valuesToAdd = getRecordInput(col.name);
+                      if (valuesToAdd === null) continue;
+
+                      // make sure the input doesn't have any values before setting the new one
+                      const removeValBtn = arrayField.getRemoveButton();
+                      while (await removeValBtn.isPresent()) {
+                        await removeValBtn.click();
+                      }
 
                       let addButton;
                       switch (col.baseType) {
@@ -501,45 +509,36 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         case 'integer':
                         case 'number':
                         case 'text':
-                          let addNewValInput;
-
-                          addNewValInput = arrayField.getAddNewValueInputElement();
-                          const valuesToAdd = getRecordInput(col.name);
-
-                          if(valuesToAdd === null) continue;
+                          const addNewValInput = arrayField.getAddNewValueInputElement();
 
                           for(let value of valuesToAdd){
                             await addNewValInput.sendKeys(value);
                             addButton = arrayField.getAddButton()
                             await addButton.click();
                           }
-                          
-                          const valuesRendered = await arrayField.getArrayFieldValues()
-                          
-                          expect(valuesRendered.length).toBeGreaterThanOrEqual(valuesToAdd.length, colError(col.name , "Doesn't have the expected values."))
 
+                          const valuesRendered = await arrayField.getArrayFieldValues();
+                          expect(valuesRendered.length).toBe(valuesToAdd.length);
                           for(let i = 0;i < valuesToAdd.length;i++){
-                            expect(valuesToAdd[i]).toBe(valuesRendered[valuesRendered.length - valuesToAdd.length + i]);
+                            expect(valuesToAdd[i]).toBe(valuesRendered[i]);
                           }
 
                           break;
                         case 'boolean':
-                            const boolsToAdd = getRecordInput(col.name);
-                            
-                            const addNewValueDropDown = await chaisePage.recordEditPage.getDropdownElementByName(`${col.name}-new-item`, 1);
+                            const addNewValueDropDown = await chaisePage.recordEditPage.getDropdownElementByName(`${col.name}-new-item`, recordIndex + 1);
                             addButton = await arrayField.getAddButton();
 
                             expect(addNewValueDropDown.isDisplayed()).toBeTruthy();
 
-                            for(let value of boolsToAdd){
+                            for(let value of valuesToAdd){
                               await chaisePage.recordEditPage.selectDropdownValue(addNewValueDropDown, value);
                               await addButton.click()
                             }
-                            
-                            const boolsRendered = await arrayField.getArrayFieldValues();
 
-                            for(let i = 0;i < boolsToAdd.length;i++){
-                              expect(boolsToAdd[i]).toBe(boolsRendered[boolsRendered.length - boolsToAdd.length + i]);
+                            const boolsRendered = await arrayField.getArrayFieldValues();
+                            await expect(boolsRendered.length).toBe(valuesToAdd.length);
+                            for(let i = 0;i < valuesToAdd.length;i++){
+                              expect(valuesToAdd[i]).toBe(boolsRendered[i]);
                             }
                           break;
                         case 'timestamp':
@@ -547,11 +546,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           let addNewValDateInput, addNewValTimeInput;
 
                           [addNewValDateInput, addNewValTimeInput] = arrayField.getAddNewValueInputElement();
-                          const timeStampsToAdd = getRecordInput(col.name)
-                          
-                          if(timeStampsToAdd === null) continue;
 
-                          for(let timeStamp of timeStampsToAdd){
+                          for(let timeStamp of valuesToAdd){
 
                             let dateValue = timeStamp.slice(0, 10)
                             let timeValue = timeStamp.slice(11, 19)
@@ -565,15 +561,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           }
 
                           const timeStampsRendered = await arrayField.getArrayFieldValues()
-                          
-                          expect(timeStampsRendered.length).toBeGreaterThanOrEqual(timeStampsToAdd.length, colError(col.name , "Doesn't have the expected values."))
-
-                          for(let i = 0;i < timeStampsToAdd.length;i++){
-                            let dateValue = timeStampsToAdd[i].slice(0, 10)
-                            let timeValue = timeStampsToAdd[i].slice(11, 19)
-
-                            expect(dateValue).toBe(timeStampsRendered[timeStampsRendered.length - timeStampsToAdd.length + i][0]);
-                            expect(timeValue).toBe(timeStampsRendered[timeStampsRendered.length - timeStampsToAdd.length + i][1]);
+                          expect(timeStampsRendered.length).toBe(valuesToAdd.length);
+                          for(let i = 0;i < valuesToAdd.length;i++){
+                            let dateValue = valuesToAdd[i].slice(0, 10);
+                            let timeValue = valuesToAdd[i].slice(11, 19);
+                            expect(dateValue).toBe(timeStampsRendered[i][0]);
+                            expect(timeValue).toBe(timeStampsRendered[i][1]);
                           }
                           break;
                       }
@@ -2189,7 +2182,7 @@ exports.setInputValue = (formNumber, name, displayname, displayType, valueProps)
         break;
       case 'array':
         // NOTE we're assuming it's array of text
-        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${formNumber}-${displayname}`,valueProps.baseType);
+        const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(name, formNumber,valueProps.baseType);
 
         arrayField.getArrayItem().isPresent().then((isPresent)=>{
 
@@ -2293,7 +2286,7 @@ exports.testFormValuesForAColumn = (name, displayname, displayType, allDisabled,
           break;
         case 'array':
 
-          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(`${formNumber}-${displayname}`,'text');
+          const arrayField = chaisePage.recordEditPage.getArrayFieldContainer(name, formNumber, 'text');
 
           arrayField.getArrayItem().isPresent().then((isPresent)=>{
             if(isPresent){

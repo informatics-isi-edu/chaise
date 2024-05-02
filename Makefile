@@ -68,7 +68,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
-E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.js
+E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.ts
 
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/playwright.config.ts
@@ -94,7 +94,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
 RECORD_TESTS_PROTRACTOR=$(E2EDrecord) $(E2EDrecordLinks)
-RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2ErecordsetSavedQuery)
+RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter) $(E2ErecordEditInputIframe)
 ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
@@ -108,7 +108,7 @@ ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
-RECORDSET_TESTS=
+RECORDSET_TESTS=$(E2ErecordsetSavedQuery)
 RECORDADD_TESTS=$(E2EDIrecordMultiFormInput)
 RECORDEDIT_TESTS=
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
