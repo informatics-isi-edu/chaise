@@ -17,7 +17,8 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import React from 'react';
+import React, { ForwardedRef, forwardRef } from 'react';
+import PropTypes from 'prop-types';
 
 export type InputSwitchProps = {
   /**
@@ -147,7 +148,7 @@ export type RuleWithMessage = {
   message: string
 };
 
-const InputSwitch = ({
+const InputSwitch = forwardRef(({
   type,
   name,
   placeholder,
@@ -175,7 +176,7 @@ const InputSwitch = ({
   displayDateTimeLabels,
   additionalControllerRules,
   foreignKeyCallbacks
-}: InputSwitchProps): JSX.Element | null => {
+}: InputSwitchProps, ref:ForwardedRef<any>): JSX.Element | null => {
 
 
   return (() => {
@@ -443,6 +444,38 @@ const InputSwitch = ({
         />
     }
   })();
+});
+
+InputSwitch.displayName = 'InputSwitch';
+
+InputSwitch.propTypes = {
+  type: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  classes: PropTypes.string,
+  inputClasses: PropTypes.string,
+  containerClasses: PropTypes.string,
+  timeClasses: PropTypes.string,
+  clearClasses: PropTypes.string,
+  clearTimeClasses: PropTypes.string,
+  disableInput: PropTypes.bool,
+  requiredInput: PropTypes.bool,
+  displayErrors: PropTypes.bool,
+  displayRequiredErrorBeforeSubmit: PropTypes.bool,
+  styles: PropTypes.object,
+  columnModel: PropTypes.any,
+  appMode: PropTypes.string,
+  formNumber: PropTypes.number,
+  parentReference: PropTypes.any,
+  parentTuple: PropTypes.any,
+  parentLogStack: PropTypes.any,
+  parentLogStackPath: PropTypes.string,
+  foreignKeyData: PropTypes.any,
+  waitingForForeignKeyData: PropTypes.bool,
+  displayExtraDateTimeButtons: PropTypes.bool,
+  displayDateTimeLabels: PropTypes.bool,
+  additionalControllerRules: PropTypes.any,
+  foreignKeyCallbacks: PropTypes.object
 };
 
 export default React.memo(InputSwitch);

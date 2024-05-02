@@ -38,7 +38,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   // NOTE: Including these context properties causes this component to redraw every time a change to the form occurs
   //   Can this functionality be done in a different way with react-hook-form to prevent so much rerendering when the component hasn't changed?
-  const { setValue, control, clearErrors, setError, getFieldState, getValues } = useFormContext();
+  const { setValue, control, clearErrors, setError, getFieldState } = useFormContext();
   const dateTimeVal = useWatch({ name: props.name });
   const dateVal = useWatch({ name: `${props.name}-date` });
   const timeVal = useWatch({ name: `${props.name}-time` });
@@ -138,6 +138,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const formInputDate = useController({
     name: `${props.name}-date`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
@@ -150,6 +151,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const formInputTime = useController({
     name: `${props.name}-time`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
