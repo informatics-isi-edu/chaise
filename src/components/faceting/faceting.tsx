@@ -232,12 +232,17 @@ const Faceting = ({
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
+
+  /**
+   * Allows us to Uniquely identify and access facet order for a given table
+   */
+  const facetListKey = `facet-order-${reference.table.schema.catalog.id}_${reference.table.schema.name}_${reference.table.name}`;
   /**
    * Fetch custom facet order from localStorage and update the orderedFacets state
    */
   useEffect(() => {
     // Get Facet Order from LocalStorage
-    const facetOrder = localStorage.getItem('facet-order') || undefined;
+    const facetOrder = localStorage.getItem(facetListKey) || undefined;
 
     // If facet order is not stored in localStorage, display items in default order
     if (!facetOrder) {
@@ -246,13 +251,32 @@ const Faceting = ({
     }
 
     // If facet order is present in localStorage, rearrange the items according to the stored order
-    const facetsInOrder: any[] = [];
-
-    JSON.parse(facetOrder).forEach((index: number) => facetsInOrder.push([reference.facetColumns[index], index]))
+    const facetsInOrder = reorderFacets(reference.facetColumns, JSON.parse(facetOrder))
+    
     setOrderedFacets(facetsInOrder)
-
   }, [])
 
+  const reorderFacets = (defaultFacetColumns:any[], newOrder:string[]) => {
+    // Create a map to store the indices of elements in array `newOrder`
+    const indexMap = new Map();
+    for (let i = 0; i < newOrder.length; i++) {
+        indexMap.set(newOrder[i], i);
+    }
+
+    const facetsInNewOrder = defaultFacetColumns.map((item: any, index: number) => [item, index])
+
+    // Sort array `defaultFacetColumns` based on the indices in array `newOrder`
+    facetsInNewOrder.sort((a, b) => {
+        const indexA = indexMap.get(a[0].sourceObjectWrapper.name);
+        const indexB = indexMap.get(b[0].sourceObjectWrapper.name);
+        // If either element is not found in `newOrder`, move it to the end
+        if (indexA === undefined) return 1;
+        if (indexB === undefined) return -1;
+        return indexA - indexB;
+    });
+
+    return facetsInNewOrder;
+}
   //-------------------  flow-control related functions:   --------------------//
 
   const updateFacetStates = (flowControl: any, resetAllOpenFacets?: boolean, cause?: string) => {
@@ -675,8 +699,7 @@ const Faceting = ({
     }
 
     // Save facet order to localStorage
-    localStorage.setItem('facet-order', JSON.stringify(items.map(i => i[1])))
-    console.log(items);
+    localStorage.setItem(facetListKey, JSON.stringify(items.map(i => i[0].sourceObjectWrapper.name)))
     
     setOrderedFacets(items);
   }
