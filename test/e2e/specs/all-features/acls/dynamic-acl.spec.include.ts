@@ -380,6 +380,19 @@ export const runDynamicACLTests = () => {
       });
     });
 
+    test('when none of the rows can be deleted', async ({ page, baseURL }, testInfo) => {
+      await test.step('should load the page properly', async () => {
+        await page.goto(getRecordeditURL('id=7;id=9', baseURL, testInfo));
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      await test.step('Bulk delete button should be disabled.', async () => {
+        const btn = RecordeditLocators.getBulkDeleteButton(page);
+        await expect.soft(btn).toBeVisible();
+        await expect.soft(btn).toBeDisabled();
+      });
+    });
+
     test('when some rows cannot be deleted', async ({ page, baseURL }, testInfo) => {
       await test.step('should load the page properly', async () => {
         await page.goto(getRecordeditURL('id=7;id=8;id=9', baseURL, testInfo));

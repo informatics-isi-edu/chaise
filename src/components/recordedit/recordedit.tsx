@@ -169,6 +169,10 @@ const RecordeditInner = ({
   });
 
   const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+  /**
+   * enable the button if at least one row can be deleted
+   */
+  const canEnableBulkDelete = canShowBulkDelete && tuples.some((t: any) => t.canDelete);
 
   /**
    * form is ready when,
@@ -486,8 +490,9 @@ const RecordeditInner = ({
 
   const renderBulkDeleteButton = () => {
     if (!canShowBulkDelete) return;
-    return <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-      <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.': 'None of the displayed records can be deleted.';
+    return <ChaiseTooltip placement='bottom' tooltip={tooltip}>
+      <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick} disabled={!canEnableBulkDelete}>
         <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
         <span>Delete</span>
       </button>

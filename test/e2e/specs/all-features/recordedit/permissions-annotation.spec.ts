@@ -22,10 +22,16 @@ test.describe('Viewing Recordedit app with permission related annotations', () =
     await testUnauthorizedAccess(page);
   });
 
-  test('for a table that allows create and edit', async ({ page, baseURL }, testInfo) => {
+  test('for a table that allows create and edit and not delete', async ({ page, baseURL }, testInfo) => {
     await test.step('should load the page without any errors', async () => {
       await openThePage('main_update_table', page, baseURL, testInfo);
       await RecordeditLocators.waitForRecordeditPageReady(page);
+    });
+
+    await test.step('should disable the bulk delete button', async () => {
+      const btn = RecordeditLocators.getBulkDeleteButton(page);
+      await expect.soft(btn).toBeVisible();
+      await expect.soft(btn).toBeDisabled();
     });
 
     await test.step('foreignkey popups', async () => {

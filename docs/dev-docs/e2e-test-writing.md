@@ -221,15 +221,13 @@ In here we've listed all the actions that we encountered and we found useful. Pl
 
 - To change value of a input
   ```ts
+  // set the value of an input or textarea
+  // https://playwright.dev/docs/api/class-locator#locator-fill
   await locator.fill('new value');
 
-  // clear the value of input
-  await locator.fill('');
-
-  /**
-   * In some cases .fill('') might not work as expected so use the `clearInput` function in `recordedit-utils.ts` instead.
-   */
-  await clearInput(locator);
+  // clear the value of input or textaraea
+  // https://playwright.dev/docs/api/class-locator#locator-clear
+  await locator.clear();
   ```
 
 - Mouse actions:

@@ -48,6 +48,14 @@ export default class ModalLocators {
     return page.locator('.duplicate-saved-query-modal');
   }
 
+  static getIframeFieldModal(page: Page) : Locator {
+    return page.locator('.iframe-field-popup');
+  }
+
+  static getIframeFieldCloseConfirmModal(page: Page) : Locator {
+    return page.locator('.confirm-iframe-close-modal');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
@@ -64,6 +72,10 @@ export default class ModalLocators {
 
   static getOkButton(modal: Locator): Locator {
     return modal.locator('.ok-button');
+  }
+
+  static getCancelButton(modal: Locator): Locator {
+    return modal.locator('.cancel-button');
   }
 
   static getSubmitButton(modal: Locator): Locator {
@@ -124,5 +136,10 @@ export default class ModalLocators {
 
   static saveQuerySubmit(modal: Locator): Locator {
     return modal.locator('#modal-submit-record-btn');
+  }
+
+  // --------- iframe-field-modal functions ------------ //
+  static getIframeFieldModalSpinner(modal: Locator): Locator {
+    return modal.locator('.iframe-field-modal-spinner')
   }
 }
