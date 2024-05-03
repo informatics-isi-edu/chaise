@@ -10,6 +10,32 @@ import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/ch
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 
+export type RecordeditExpectedColumn = {
+  name: string,
+  title: string,
+  nullok?: boolean
+};
+
+/**
+ * make sure recordedit is showing the correct columns
+ */
+export const testRecordeditColumnNames = async (container: Locator | Page, columns: RecordeditExpectedColumn[]) => {
+  const cols = RecordeditLocators.getAllColumnNames(container)
+  await expect.soft(cols).toHaveCount(columns.length);
+
+  let index = 0;
+  for (const expectation of columns) {
+    const col = cols.nth(index);
+    await expect.soft(col).toHaveText(expectation.title);
+    const req = RecordeditLocators.getColumnRequiredIcon(col);
+    if (expectation.nullok) {
+      await expect.soft(req).not.toBeAttached();
+    } else {
+      await expect.soft(req).toBeVisible();
+    }
+    index++;
+  }
+}
 
 export type RecordeditFile = {
   name: string,
