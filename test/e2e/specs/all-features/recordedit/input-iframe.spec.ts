@@ -1,15 +1,13 @@
 import { test, expect, TestInfo } from '@playwright/test';
 import { execSync } from 'child_process';
 import { resolve } from 'path';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
-import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 
-import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clearInput, setInputValue, testRecordeditColumnNames, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { setInputValue, testRecordeditColumnNames, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
   schema_table: 'input-iframe:main',
@@ -253,10 +251,10 @@ const copyIframeToLocation = () => {
 }
 
 const setIframeInputValues = async (iframeElementProps: any, values: any) => {
-  await clearInput(iframeElementProps.creator);
+  await iframeElementProps.creator.clear();
   await iframeElementProps.creator.fill(values.creator);
-  await clearInput(iframeElementProps.file_content);
+  await iframeElementProps.file_content.clear();
   await iframeElementProps.file_content.fill(values.file_content);
-  await clearInput(iframeElementProps.notes);
+  await iframeElementProps.notes.clear();
   await iframeElementProps.notes.fill(values.notes);
 }

@@ -118,18 +118,6 @@ type SetInputValueProps = string | RecordeditFile | {
 };
 
 /**
- * while `inputEl.fill('')` is supposed to clear the input, in some cases (textarea for example) it might not work
- * as expected. In those cases you can use this function.
- *
- * https://github.com/microsoft/playwright/issues/12828#issuecomment-1341129233
- */
-export const clearInput = async (inputEl: Locator) => {
-  await inputEl.focus();
-  await inputEl.page().keyboard.press('Meta+A');
-  await inputEl.page().keyboard.press('Backspace');
-}
-
-/**
  *
  * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', any other string
  *
@@ -195,9 +183,9 @@ export const setInputValue = async (
 
       const inputs = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       await inputs.clearBtn.click();
-      await inputs.date.fill('');
+      await inputs.date.clear();
       await inputs.date.fill(valueProps.date_value);
-      await inputs.time.fill('');
+      await inputs.time.clear();
       await inputs.time.fill(valueProps.time_value);
       break;
 
@@ -218,8 +206,9 @@ export const setInputValue = async (
       } else {
         inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
       }
-      await clearInput(inputEl);
+      await inputEl.clear();
       await inputEl.fill(valueProps);
+      await expect.soft(inputEl).toHaveValue(valueProps);
       break;
   }
 };
