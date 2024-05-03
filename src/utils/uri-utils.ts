@@ -3,9 +3,10 @@
  */
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { BUILD_VARIABLES, HELP_PAGES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { BUILD_VARIABLES, HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 /**
 * @function
@@ -211,13 +212,26 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   };
 }
 
+/**
+ * return the catalog id that should be used.
+ * if the url has catalog id, it will return that. otherwise will return the chaise-config's defaultCatalog
+ */
 export function getCatalogId() {
   let catalogId = '';
-  try {
-    catalogId += chaiseURItoErmrestURI(windowRef.location).catalogId;
-  } catch (err) {
-    const cc = ConfigService.chaiseConfig;
-    if (cc.defaultCatalog) catalogId += cc.defaultCatalog;
+  const location = windowRef.location;
+
+  let hash = location.hash;
+  // allow ? to be used in place of #
+  if (!hash && location.href.indexOf('?') !== -1) {
+    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
+  }
+
+  if (isStringAndNotEmpty(hash)) {
+    catalogId = hash.substring(1).split('/')[0];
+  }
+
+  if (!isStringAndNotEmpty(catalogId) && ConfigService.chaiseConfig.defaultCatalog) {
+    catalogId = ConfigService.chaiseConfig.defaultCatalog;
   }
 
   return catalogId;
