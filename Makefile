@@ -80,7 +80,6 @@ E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel test scripts (protractor)
-AllFeaturesParallel_PROTRACTOR=test/e2e/specs/all-features/protractor.conf.js
 AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel_PROTRACTOR=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel_PROTRACTOR=test/e2e/specs/default-config/protractor.conf.js
@@ -101,8 +100,7 @@ ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
-ALL_FEATURES_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesParallel_PROTRACTOR)
-PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(AllFeaturesParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
+PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
 ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
 
 # playwright tests
@@ -196,9 +194,6 @@ testparallel-protractor: test_protractor-PARALLEL_TESTS_PROTRACTOR
 #Rule to run the All features chaise configuration tests in parallel
 .PHONY: testallfeatures
 testallfeatures: test-ALL_FEATURES_PARALLEL_TESTS
-
-.PHONY: testallfeatures-protractor
-testallfeatures-protractor: test_protractor-ALL_FEATURES_PARALLEL_TESTS_PROTRACTOR
 
 #Rule to run the All features chaise configuration tests in parallel
 .PHONY: testallfeaturesconfirmation
