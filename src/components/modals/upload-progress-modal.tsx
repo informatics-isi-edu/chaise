@@ -14,6 +14,7 @@ import { FileObject, UploadFileObject } from '@isrd-isi-edu/chaise/src/models/re
 
 // utils
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export interface UploadProgressModalProps {
   /**
@@ -36,7 +37,7 @@ export interface UploadProgressModalProps {
 
 const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgressModalProps) => {
 
-  const { reference } = useRecordedit();
+  const { reference, setLastContiguousChunk, lastContiguousChunkRef } = useRecordedit();
 
   const [title, setTitle] = useState<string>('');
 
@@ -116,7 +117,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     let tempFilesCt = 0,
       tempTotalSize = 0;
     // Iterate over all rows that are passed as parameters to the modal controller
-    rows.forEach((row: any) => {
+    rows.forEach((row: any, rowIdx: number) => {
 
       // Create a tuple for the row
       const tuple: UploadFileObject[] = [];
@@ -145,7 +146,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
             tempFilesCt++;
             tempTotalSize += row[k].file.size;
 
-            tuple.push(createUploadFileObject(row[k], column, row));
+            tuple.push(createUploadFileObject(row[k], column, row, rowIdx));
           } else {
             row[k] = (row[k] && row[k].url && row[k].url.length) ? row[k].url : null;
           }
@@ -209,7 +210,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsFileExists(true);
     uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
       row.forEach((item: UploadFileObject) => {
-        item.hatracObj.fileExists().then(
+        let jobUrl = null;
+        if (item.partialUpload) jobUrl = lastContiguousChunkRef?.current?.[item.uploadKey].jobUrl;
+
+        item.hatracObj.fileExists(jobUrl).then(
           () => onFileExistSuccess(item),
           onError);
       });
@@ -271,7 +275,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     const item = queueRef.current.shift();
     if (!item) return;
 
-    item.hatracObj.start().then(
+    let startChunkIdx = 0;
+    if (item.partialUpload) startChunkIdx = lastContiguousChunkRef.current?.[item.uploadKey].lastChunkIdx + 1;
+
+    item.hatracObj.start(startChunkIdx).then(
       () => onUploadCompleted(item),
       onError,
       (size: number) => onProgressChanged(item, size));
@@ -331,7 +338,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
    * @desc
    * Creates an uploadFile obj to keep track of file and its upload.
    */
-  const createUploadFileObject = (data: FileObject, column: any, row: any): UploadFileObject => {
+  const createUploadFileObject = (data: FileObject, column: any, row: any, rowIdx: number): UploadFileObject => {
     const file = data.file;
 
     const uploadFileObject: UploadFileObject = {
@@ -341,6 +348,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       checksumProgress: 0,
       checksumPercent: 0,
       checksumCompleted: false,
+      partialUpload: false,
+      uploadKey: `_${column.name}_${rowIdx}`,
       jobCreateDone: false,
       fileExistsDone: false,
       uploadCompleted: false,
@@ -352,7 +361,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       url: '',
       column: column,
       reference: reference,
-      row: row
+      row: row,
+      rowIdx: rowIdx
     }
 
     return uploadFileObject;
@@ -400,6 +410,26 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       ufo.checksumCompleted = true;
       ufo.url = url;
       setChecksumCompleted((prev: number) => prev + 1);
+
+      // update uploadKey
+      // use the calculated md5 to see if we have a partial upload in case of a timeout
+      ufo.uploadKey = `${ufo.hatracObj.hash.md5_base64}_${ufo.column.name}_${ufo.rowIdx}`
+      // lastContiguousChunk initailized to null, make sure it has been defined (meaning an upload didn't complete)
+      if (lastContiguousChunkRef?.current) {
+        const lccMap = lastContiguousChunkRef.current[ufo.uploadKey];
+
+        // the 'jobUrl' we stored in lastContiguousChunkRef is what was returned from the server where each part of the path is url encoded
+        // do the same for the newly generated url only for comparison (we will let the server handle this later in the upload process)
+        const urlParts = url.split('/');
+        urlParts.forEach((part: string, idx: number) => {
+          urlParts[idx] = fixedEncodeURIComponent(part);
+        })
+        const newUrl = urlParts.join('/');
+
+        if (lccMap?.jobUrl.indexOf(newUrl) > -1 && lccMap.lastChunkIdx > -1) {
+          ufo.partialUpload = true;
+        }
+      }
     }
   };
 
@@ -489,6 +519,31 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   const onProgressChanged = (ufo: UploadFileObject, uploadedSize: number) => {
 
     if (erred.current || aborted.current) return;
+
+    // when the chunks array is created at hatracObj, chunkTracker is initialized with n `empty` values where n is the number of chunks
+    if (ufo.hatracObj.chunkTracker.length > 0) {
+      for(let i = 0; i < ufo.hatracObj.chunkTracker.length; i++) {
+        if(ufo.hatracObj.chunkTracker[i] === null || ufo.hatracObj.chunkTracker[i] === undefined) {
+          setLastContiguousChunk((prevVal: any) => {
+            let tempMap: any;
+            // lastContiguousChunk (prevVal) is null until a chunk has been uploaded
+            if (prevVal) {
+              tempMap = {...prevVal}
+            } else {
+              tempMap = {};
+            }
+
+            tempMap[ufo.uploadKey] = {
+              lastChunkIdx: i-1,
+              jobUrl: ufo.hatracObj.chunkUrl
+            }
+            return tempMap;
+          });
+
+          break;
+        }
+      }
+    }
 
     // This code updates the individual progress bar for uploading file
     ufo.uploadStarted = true;

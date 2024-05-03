@@ -151,6 +151,8 @@ export interface UploadFileObject {
   checksumProgress: number;
   checksumPercent: number;
   checksumCompleted: boolean;
+  partialUpload: boolean;
+  uploadKey: string;
   skipUploadJob?: boolean;
   jobCreateDone: boolean;
   fileExistsDone: boolean;
@@ -164,7 +166,8 @@ export interface UploadFileObject {
   versionedUrl?: string;
   column: any,
   reference: any,
-  row: any
+  row: any,
+  rowIdx: number
 }
 
 export interface PrefillObject {

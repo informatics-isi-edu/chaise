@@ -98,6 +98,8 @@ export const RecordeditContext = createContext<{
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
+  setLastContiguousChunk: (val: any) => void, 
+  lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
   /**
@@ -224,6 +226,26 @@ export default function RecordeditProvider({
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
+  /*
+   * Object for keeping track of each file and their existing upload jobs so we can resume on interruption
+   * 
+   * For example, we have the following 3 scenarios:
+   *   1. contiguous offset: 1; chunks in flight with index 2, 3; chunk completed with index 4 (after chunk at index 4 is acknowledged w/ 204)
+   *     - [0, 1, empty, empty, 4]
+   *   2. contiguous offset: 1; chunks in flight with index 2; chunks completed with index 3, 4 (after chunk at index 3 is acknowledged w/ 204)
+   *     - [0, 1, empty, 3, 4]
+   *   3. contiguous offset: 4; (after chunk at index 2 is acknowledged w/ 204)
+   *     - [0, 1, 2, 3, 4]
+   * 
+   * Object structure is as follows where index is the index of the last contiguous chunk that was uploaded.
+   * {
+   *   `${file.md5_base64}_${column_name}_${record_index}`: {
+   *     lastChunkIdx: index
+   *     jobUrl: uploadJob.hash ( in the form of '/hatrac/path/to/file.png;upload/somehash')
+   *   }
+   * }
+   */
+  const [lastContiguousChunk, setLastContiguousChunk, lastContiguousChunkRef] = useStateRef<any | null>(null);
 
   const [tuples, setTuples, tuplesRef] = useStateRef<any[]>(Array.isArray(initialTuples) ? initialTuples : []);
 
@@ -1058,6 +1080,8 @@ export default function RecordeditProvider({
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
+      setLastContiguousChunk, 
+      lastContiguousChunkRef,
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
       // log related:
