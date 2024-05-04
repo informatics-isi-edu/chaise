@@ -509,7 +509,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 </button>
               </div>}
             </Dropdown.Toggle>
-            {!props.disableInput && dropdownReference && <Dropdown.Menu className='responsive-dropdown-menu' ref={dropdownMenuRef}>
+            {!props.disableInput && dropdownReference && <Dropdown.Menu flip={false} className='responsive-dropdown-menu' ref={dropdownMenuRef}>
               <li className='search-row'>
                 <SearchInput
                   initialSearchTerm=''

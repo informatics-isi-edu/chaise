@@ -122,8 +122,7 @@
           ],
           "annotations": {
             "tag:isrd.isi.edu,2016:visible-columns": {
-              "entry": [
-                "id",
+              "*": [
                 {
                     "source": [{"outbound": ["fk-display-mode", "fk_w_fk_annotation"]}, "id"],
                     "markdown_name": "fk1 dropdown"
