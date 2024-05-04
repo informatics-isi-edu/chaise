@@ -19,6 +19,31 @@ export function fixedEncodeURIComponent(str: string) {
 }
 
 /**
+ * processed the url hash fragment. used by multiple functions in this file
+ */
+export function getURLHashFragment(location: Location): {
+  /**
+   * fragment that it has (if it was using `?`, this will return it with `#`)
+   */
+  hash: string,
+  /**
+   * the following are used for logging purposes
+   * whether the hash was using `?` originally
+   */
+  isQueryParameter: boolean,
+} {
+  let hash = location.hash, isQueryParameter = false;
+
+  // allow ? to be used in place of #
+  if (!hash && location.href.indexOf('?') !== -1) {
+    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
+    isQueryParameter = true;
+  }
+
+  return { hash, isQueryParameter };
+}
+
+/**
 * @function
 * @param {Object} location - location Object from the $window resource
 * @param {boolean} returnObject - Whether we should just return the url
@@ -52,16 +77,8 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
     catalogMissing = MESSAGE_MAP.catalogMissing,
     chaiseConfig = ConfigService.chaiseConfig;
 
-  let hash = location.hash,
-    isQueryParameter = false;
-
-  // allow ? to be used in place of #
-  if (!hash && location.href.indexOf('?') !== -1) {
-    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
-    isQueryParameter = true;
-  }
-  // capture the hash before it's split for use in ermrestURI generation
-  const originalHash = hash;
+  const { hash: originalHash, isQueryParameter } = getURLHashFragment(location);
+  let hash = originalHash;
 
   // eslint-disable-next-line prefer-const
   let queryParams: any = {},
@@ -217,21 +234,36 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
  * if the url has catalog id, it will return that. otherwise will return the chaise-config's defaultCatalog
  */
 export function getCatalogId() {
-  let catalogId = '';
   const location = windowRef.location;
 
-  let hash = location.hash;
-  // allow ? to be used in place of #
-  if (!hash && location.href.indexOf('?') !== -1) {
-    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
-  }
+  const { hash, isQueryParameter } = getURLHashFragment(location);
 
+  let catalogId = '';
   if (isStringAndNotEmpty(hash)) {
     catalogId = hash.substring(1).split('/')[0];
   }
 
-  if (!isStringAndNotEmpty(catalogId) && ConfigService.chaiseConfig.defaultCatalog) {
-    catalogId = ConfigService.chaiseConfig.defaultCatalog;
+  if (!isStringAndNotEmpty(catalogId)) {
+    if (ConfigService.chaiseConfig.defaultCatalog) {
+      return ConfigService.chaiseConfig.defaultCatalog;
+    }
+    return '';
+  }
+
+  // there is no '/' character (only a catalog id) or a trailing '/' after the id
+  if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
+    /**
+    * if the hash was actually just query parameter, don't even attempt the default logic
+    *
+    * this function is used in every react app as part of config.ts. in some cases (like help app),
+    * the url doesn't have any hash fragment and has only query parameter. so don't try
+    */
+    if (isQueryParameter) {
+      if (ConfigService.chaiseConfig.defaultCatalog) {
+        return ConfigService.chaiseConfig.defaultCatalog;
+      }
+    }
+    return '';
   }
 
   return catalogId;
@@ -328,21 +360,6 @@ export function resolvePermalink(tuple: any, reference: any, version?: string) {
   // if resolverId is false or undefined OR any other values that are not allowed use the default
   // default is to show the fully qualified resolveable link for permalink
   return `${windowRef.location.origin}/id/${currCatalog}/${tuple.data.RID}${version || ''}`;
-}
-
-/**
- * if '?' is used instead of '#' (?catalog/schema:table), return in the proper form (#catalog/schema:table)
- * @param location
- */
-export function getURLHashFragment(location: Location) {
-  let hash = location.hash;
-
-  // allow ? to be used in place of #
-  if (!hash && location.href.indexOf('?') !== -1) {
-    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
-  }
-
-  return hash;
 }
 
 /**
