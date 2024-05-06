@@ -105,7 +105,9 @@ export const clearInput = async (inputEl: Locator) => {
 
 /**
  *
- * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', any other string
+ * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', 'array' , or any other string
+ *
+ * NOTE: 'array' only supports array of texts for now.
  *
  * expected valueProps:
  * {
@@ -126,7 +128,8 @@ export const clearInput = async (inputEl: Locator) => {
  * @returns
  */
 export const setInputValue = async (
-  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType, valueProps: SetInputValueProps
+  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
+  valueProps: SetInputValueProps | SetInputValueProps[]
 ) => {
   switch (inputType) {
     case RecordeditInputType.BOOLEAN:
@@ -183,6 +186,23 @@ export const setInputValue = async (
       await selectFile(valueProps, fileInputBtn, fileTextInput);
       break;
 
+    case RecordeditInputType.ARRAY:
+      if (!Array.isArray(valueProps)) return;
+      const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
+
+      // remove the existing value if there are any
+      while (await elems.removeItemButtons.count() > 0) {
+        await elems.removeItemButtons.nth(0).click();
+      }
+
+      // add the values one by one.
+      for (const val of valueProps) {
+        if (typeof val !== 'string') continue;
+        await elems.addItemInput.fill(val);
+        await elems.addItemButton.click();
+      }
+      break;
+
     default:
       if (typeof valueProps !== 'string') return;
 
@@ -204,16 +224,20 @@ export const setInputValue = async (
  * expectedValues expected type will be different depending on the input type. for all the types expect the following
  * it should be an array of strings.
  * - timestamp: array of objects with date_value and time_value props
+ * - array: array of array of texts.
+ *
+ * NOTE: 'array' only supports array of texts for now.
  *
  * @param {string} name the column name
- * @param {string}} displayname the column displayname
+ * @param {string}}displayname the column displayname
  * @param {string} displayType the display type (boolean, fk, timestamp, upload, "any other string")
  * @param {boolean} allDisabled whether we should test that all the inputs are disabled or not
  * @param {any[]} expectedValues the expected values
  * @returns
  */
 export const testFormValuesForAColumn = async (
-  page: Page, name: string, displayname: string, inputType: RecordeditInputType, allDisabled: boolean, expectedValues: SetInputValueProps[]
+  page: Page, name: string, displayname: string, inputType: RecordeditInputType, allDisabled: boolean,
+  expectedValues: (SetInputValueProps |SetInputValueProps[])[]
 ) => {
 
   let formNumber = 1, input;
@@ -259,6 +283,23 @@ export const testFormValuesForAColumn = async (
           await expect.soft(inputControl).toHaveClass(/input-disabled/);
         }
         await expect.soft(input).toHaveText(value);
+        break;
+
+      case RecordeditInputType.ARRAY:
+        if (!Array.isArray(value)) return;
+        const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
+
+        let index = 0;
+        for (const val of value) {
+          if (typeof val !== 'string') continue;
+          input = elems.inputs.nth(index);
+          if (allDisabled) {
+            await expect.soft(input).toBeDisabled();
+          }
+          await expect.soft(input).toHaveValue(val);
+          index++;
+        }
+
         break;
 
       default:

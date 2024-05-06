@@ -110,17 +110,27 @@
           "type": {
             "typename": "text"
           }
+        },
+        {
+          "name": "array_text",
+          "type": {
+            "is_array": true,
+            "typename": "text[]",
+            "base_type": {
+                "typename": "text"
+            }
+          }
         }
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": [
             "id", "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
-            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col"
+            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "array_text"
           ],
           "compact": [
             "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
-            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col"
+            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "array_text"
           ]
         }
       }
