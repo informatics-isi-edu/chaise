@@ -137,7 +137,7 @@ The rules that should be followed while writing code.
     - better for accessing mutable values that are independent of the React component state
     - useful when mutating a value that is used in another function later in the stack before a rerender would occur
       - for instance, in a function used as a callback for a promise
-    - `<ref>.current` is a mutable value 
+    - `<ref>.current` is a mutable value
   - `useStateRef`:
     - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
     - intended to be synchronous
@@ -282,7 +282,7 @@ The rules that should be followed while writing code.
 
 #### Supporting styles and classes in configuration
 There are multiple places in chaise and deriva-webapps that we want to allow for users to be able to customize the look and feel of different apps and features. Below are some of the guidelines for when to expose a style property in configuration, attach ids and classes to elements that are made available for custom.css, and define other special classes for use in configs and annotations.
-  - style properties that are directly exposed in configuration documents are usually quantifiable values or boolean values. 
+  - style properties that are directly exposed in configuration documents are usually quantifiable values or boolean values.
     - For instance width, max-width, font-size are all quatifiable properties that expect a specific numeric value (usually a number, decimal, or percentage)
   - there is a defined set of [special classes](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#special-classes) that can be attached to elements using markdown in annotations or certain configurations that allow for a list of classes to be defined
     - we want to include these classes when a style property might have multiple values (like an enum) instead of an integer. Think about the `align-items` or `overflow` CSS properties that could have multiple values
@@ -684,7 +684,7 @@ React will behave differently in case of errors in development and production mo
 
 #### Error boundary
 
-As we mentioned JavaScript errors in any part of the UI will break the whole app. To solve this problem, React 16 introduces a new concept of [error boundaries](https://reactjs.org/docs/error-boundaries.html).
+As we mentioned, JavaScript errors in any part of the UI will break the whole app. To solve this problem, React 16 introduces a new concept of [error boundaries](https://reactjs.org/docs/error-boundaries.html).
 
 Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. Error boundaries catch errors during rendering, in lifecycle methods, and in constructors of the whole tree below them.
 
@@ -694,7 +694,7 @@ Error boundaries do not catch errors for:
   - Server-side rendering
   - Errors thrown in the error boundary itself (rather than its children)
 
-That being said, instead of just using the built-in error boundary class component, we're using [react-error-boundary](https://github.com/bvaughn/react-error-boundary) instead. With this component,
+Therefore, instead of just using the built-in error boundary class component, we're using [react-error-boundary](https://github.com/bvaughn/react-error-boundary). With this component,
 
 - We can use error boundaries in functional components.
 - We can use the `useError` hook to manually call the error boundary in order to offer a uniform error handling for a component (we can catch the errors in async calls that the error boundary doesn't support and manually call the error boundary logic).
@@ -720,7 +720,7 @@ const ParentComponent = () : JSX.Element => {
 
 // a component that might throw some errors
 function ChildComponent = (): JSX.Element => {
-  const handleError = useErrorHandler();
+  const { showBoundary }  = useErrorBoundary();
   ...
 
   // somewhere in a async call
@@ -728,7 +728,7 @@ function ChildComponent = (): JSX.Element => {
     ...
   }).catch(function (err) {
     // call the closest error boundary
-    handleError(err);
+    showBoundary(err);
   })
 
   ...
@@ -1031,11 +1031,11 @@ export default CounterDisplay;
 
 ## Performance
 
-In this section, we should summarize everything related to performance. This includes how to debug performance issues and common practices to fix issues. 
+In this section, we should summarize everything related to performance. This includes how to debug performance issues and common practices to fix issues.
 
 ### Debugging
 
-Before jumping into solutions, consider debugging and finding the root of the problem. 
+Before jumping into solutions, consider debugging and finding the root of the problem.
 
 - You should install official [React developer tools](https://react.dev/learn/react-developer-tools). With this, you can look at components and see when/why each rerenders.
   - By default, the "Profiler" tab only works in development mode. To use this tab in the production mode, you need to uncomment the `'react-dom$': 'react-dom/profiling',` alias in the [app.config.js](https://github.com/informatics-isi-edu/chaise/blob/master/webpack/app.config.js) file.
