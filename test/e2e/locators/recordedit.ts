@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 /**
@@ -93,6 +93,14 @@ export default class RecordeditLocators {
 
   static getRecoreditResultsetTables(container: Locator | Page): Locator {
     return container.locator('.resultset-tables');
+  }
+
+  static getAllColumnNames(container: Locator | Page): Locator {
+    return container.locator('.entity-key-column > .entity-key > span.column-displayname > span');
+  }
+
+  static getColumnRequiredIcon(colNameElement: Locator): Locator {
+    return colNameElement.locator('xpath=./../..').locator('.text-danger');
   }
 
   static getAllColumnPermissionOverlays(container: Locator | Page): Locator {
@@ -310,6 +318,34 @@ export default class RecordeditLocators {
     return container.locator('.dropdown-menu.show').locator('li');
   }
 
+  // ------------- iframe-field selectors ----------------- //
+
+  /**
+   * all the props that are needed for testing iframe field
+   */
+  static getIframeFieldProps(container: Locator | Page, name: string, formNumber?: number) {
+    formNumber = formNumber || 1;
+    const inputSwitchContainer = container.locator(`.input-switch-container-${formNumber}-${name}`);
+    return {
+      container: inputSwitchContainer.locator('.input-switch-iframe'),
+      popupButton: inputSwitchContainer.locator('.chaise-input-group-append button'),
+      clearButton: inputSwitchContainer.locator('.input-switch-clear'),
+      display: inputSwitchContainer.locator('.chaise-input-control')
+    };
+  }
+
+  /**
+   * these are based on the test/e2e/utils/input-iframe-test.html file
+   */
+  static getInputIframeTestProps(iframe: FrameLocator) {
+    return {
+      alertButton: iframe.locator('#iframe-alert-btn'),
+      submitButton: iframe.locator('#iframe-submit-btn'),
+      creator: iframe.locator('#creator'),
+      file_content: iframe.locator('#file-content'),
+      notes: iframe.locator('#notes'),
+    }
+  }
 
   // ------------- array selectors ----------------- //
   static getArrayFieldContainer(container: Locator | Page, name: string, formNumber: number) {

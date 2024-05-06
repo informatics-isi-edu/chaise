@@ -729,6 +729,7 @@ test.describe('multi form input in create mode', () => {
 
           // change one value manually
           await setInputValue(page, params.manual_test.formNumber, params.column_name, colDisplayname, params.type, params.manual_test.value);
+          // make sure the value shows up properly in the form.
           await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, false, params.manual_test.column_values_after);
         });
 
