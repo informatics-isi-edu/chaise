@@ -453,20 +453,82 @@ const testParams = {
             ''
           ]
         }
-      }
+      },
+      {
+        type: RecordeditInputType.ARRAY,
+        column_name: 'array_text',
+        column_displayname: 'array_text',
+        apply_to_all: {
+          value: ['all array text input 1', 'all array text input 2'],
+          column_values_after: [
+            ['all array text input 1', 'all array text input 2'],
+            ['all array text input 1', 'all array text input 2'],
+            ['all array text input 1', 'all array text input 2'],
+            ['all array text input 1', 'all array text input 2'],
+            ['all array text input 1', 'all array text input 2']
+          ]
+        },
+        apply_to_some: {
+          value: ['some value'],
+          deselected_forms: [1, 3],
+          column_values_after: [
+            ['all array text input 1', 'all array text input 2'],
+            ['some value'],
+            ['all array text input 1', 'all array text input 2'],
+            ['some value'],
+            ['some value']
+          ]
+        },
+        clear_some: {
+          deselected_forms: [4, 5],
+          column_values_after: [
+            ['all array text input 1', 'all array text input 2'],
+            '',
+            ['all array text input 1', 'all array text input 2'],
+            ['some value'],
+            ['some value']
+          ]
+        },
+        manual_test: {
+          value: ['manual1', 'manual2', 'manual3'],
+          formNumber: 5,
+          column_values_after: [
+            ['all array text input 1', 'all array text input 2'],
+            '',
+            ['all array text input 1', 'all array text input 2'],
+            ['some value'],
+            ['manual1', 'manual2', 'manual3']
+          ]
+        }
+      },
     ],
     submission: {
       tableDisplayname: 'main',
       resultColumnNames: [
         'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
-        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col'
+        'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
       ],
       resultRowValues: [
-        ['markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1', 'testfile128kb_1.png'],
-        ['markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1', 'testfile128kb_1.png'],
-        ['some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3', 'testfile128kb_2.png'],
-        ['manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4', 'testfile128kb_3.png'],
-        ['', 'manual', '2', '', '', '', 'true', '', ''],
+        [
+          'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1',
+          'testfile128kb_1.png', 'all array text input 1, all array text input 2'
+        ],
+        [
+          'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1',
+          'testfile128kb_1.png', ''
+        ],
+        [
+          'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3',
+          'testfile128kb_2.png', 'all array text input 1, all array text input 2'
+        ],
+        [
+          'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4',
+          'testfile128kb_3.png', 'some value'
+        ],
+        [
+          '', 'manual', '2', '', '', '', 'true', '',
+          '', 'manual1, manual2, manual3'
+        ],
       ]
 
     }
@@ -619,7 +681,7 @@ test.describe('multi form input in create mode', () => {
           await expect.soft(applybtn).toBeVisible();
 
           // deselect the first form that is selected by default
-          const cell = RecordeditLocators.getFormInputCell(page, params.column_name, 1);
+          const cell = RecordeditLocators.getFormInputCell(page, params.column_name, 1, params.type === RecordeditInputType.ARRAY);
           await cell.click();
           await expect.soft(cell).not.toHaveClass(/entity-active/);
 
@@ -642,7 +704,7 @@ test.describe('multi form input in create mode', () => {
         await test.step('when some forms are selected, clicking on apply should apply change to selected forms', async () => {
           // deselect some forms
           for (const f of params.apply_to_some.deselected_forms) {
-            await RecordeditLocators.getFormInputCell(page, params.column_name, f).click();
+            await RecordeditLocators.getFormInputCell(page, params.column_name, f, params.type === RecordeditInputType.ARRAY).click();
           }
 
           await setInputValue(page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_some.value);
@@ -653,7 +715,7 @@ test.describe('multi form input in create mode', () => {
         await test.step('when some forms are selected, clicking on clear should clear values in selected forms', async () => {
           // deselect some forms
           for (const f of params.clear_some.deselected_forms) {
-            await RecordeditLocators.getFormInputCell(page, params.column_name, f).click();
+            await RecordeditLocators.getFormInputCell(page, params.column_name, f, params.type === RecordeditInputType.ARRAY).click();
           }
 
           await clearBtn.click();

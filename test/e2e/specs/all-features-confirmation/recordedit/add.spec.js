@@ -42,9 +42,9 @@ var testParams = {
                 "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
                 "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
-                "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
-                "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
-                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
+                "text_array": ["v1", "v2"], "boolean_array": [true], "int4_array": [1, 2], "float4_array": [1, 2.2],
+                "date_array": ["2001-01-01", "2002-02-02"], "timestamp_array": ["2001-01-01T01:01:01"],
+                "timestamptz_array": ["2001-01-01T01:01:01-08:00"],
                 "color_rgb_hex_column": "#123456"
             },
             {
@@ -52,9 +52,9 @@ var testParams = {
                 "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
                 "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true,
-                "text_array": "[\"v2\", \"v3\"]", "boolean_array": "[false]", "int4_array": "[1, 2]", "float4_array": "[2, 3.3]",
-                "date_array": "[\"2002-02-02\", null]", "timestamp_array": "[\"2002-02-02T02:02:02\"]",
-                "timestamptz_array": "[\"2002-02-02T02:02:02-08:00\"]",
+                "text_array": ["v2", "v3"], "boolean_array": [false], "int4_array": [1, 2], "float4_array": [2, 3.3],
+                "date_array": ["2002-02-02"], "timestamp_array": ["2002-02-02T02:02:02"],
+                "timestamptz_array": ["2002-02-02T02:02:02-08:00"],
                 "color_rgb_hex_column": "#654321"
             }
         ],
@@ -70,17 +70,18 @@ var testParams = {
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-add:category/term=Hotel`, "value":"Hotel"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01 01:01:01", "No value, 2001-01-01 01:01:01", "#123456"
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "2001-01-01 01:01:01", "2001-01-01 01:01:01", "#123456"
             ],
             [
                 "new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-add:category/term=Ranch`, "value":"Ranch"},
                 "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "2", "2017-02-02 02:02:02", "2017-02-02", "true",
-                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02 02:02:02", "2002-02-02 02:02:02", "#654321"
+                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02", "2002-02-02 02:02:02", "2002-02-02 02:02:02", "#654321"
             ]
         ],
         files: []
-    }, {
+    },
+    {
        comment: "uploading new files",
        schema_name: "product-add",
        table_name: "file",
@@ -128,7 +129,8 @@ var testParams = {
            path: "testfile5MB.txt",
            tooltip: "- testfile5MB.txt\n- 5 MB"
        }]
-   }, {
+   },
+   {
       comment: "uploader when one file exists in hatrac and the other one is new",
       schema_name: "product-add",
       table_name: "file",
@@ -170,7 +172,8 @@ var testParams = {
           path: "testfile500kb.png",
           tooltip: "- testfile500kb.png\n- 500 kB"
       }]
-   }, {
+   },
+   {
       comment: "uploader when all the files already exist in hatrac",
       schema_name: "product-add",
       table_name: "file",
@@ -212,7 +215,8 @@ var testParams = {
           path: "testfile500kb.png",
           tooltip: "- testfile500kb.png\n- 500 kB"
       }]
-   }]
+   }
+  ]
 };
 
 // keep track of namespaces that we use, so we can delete them afterwards

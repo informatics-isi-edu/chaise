@@ -126,9 +126,11 @@ export default class RecordeditLocators {
     * returns the cell (entity-value).
     * this is useful if we want to test the extra classes attached to it.
     */
-  static getFormInputCell(container: Locator | Page, name: string, formNumber: number): Locator {
+  static getFormInputCell(container: Locator | Page, name: string, formNumber: number, isArray?: boolean): Locator {
     formNumber = formNumber || 1;
-    // TODO does this work?
+    if (isArray) {
+      return container.locator(`.array-input-field-container-${formNumber}-${name}`).locator('xpath=..');
+    }
     return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('xpath=..')
   }
 
@@ -343,5 +345,28 @@ export default class RecordeditLocators {
       file_content: iframe.locator('#file-content'),
       notes: iframe.locator('#notes'),
     }
+  }
+
+  // ------------- array selectors ----------------- //
+  static getArrayFieldContainer(container: Locator | Page, name: string, formNumber: number) {
+    formNumber = formNumber || 1;
+    return container.locator(`.array-input-field-container-${formNumber}-${name}`);
+  }
+
+  /**
+   * TODO this only supports array of texts for now and should be changed later for other types.
+   */
+  static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number, baseType: string) {
+    formNumber = formNumber || 1;
+    const fieldName = `${formNumber}-${name}`;
+    const elem = container.locator(`.array-input-field-container-${fieldName}`);
+    return {
+      container: elem,
+      addItemContainer: elem.locator('.add-element-container'),
+      addItemInput: elem.locator('.add-element-container input'),
+      addItemButton: elem.locator('.add-button'),
+      removeItemButtons: elem.locator('.array-remove-button'),
+      inputs: elem.locator('li input')
+    };
   }
 }

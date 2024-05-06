@@ -13,6 +13,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
+
 type DateTimeFieldProps = InputFieldProps & {
   /**
    * classes for styling the input time element
@@ -38,13 +39,24 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
   // NOTE: Including these context properties causes this component to redraw every time a change to the form occurs
   //   Can this functionality be done in a different way with react-hook-form to prevent so much rerendering when the component hasn't changed?
   const { setValue, control, clearErrors, setError, getFieldState } = useFormContext();
+  const dateTimeVal = useWatch({ name: props.name });
   const dateVal = useWatch({ name: `${props.name}-date` });
   const timeVal = useWatch({ name: `${props.name}-time` });
 
   const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
 
+
   useEffect(() => {
-    /**
+    // Set default values if they exists
+    if (!dateVal && !timeVal && dateTimeVal) {
+      const v = formatDatetime(dateTimeVal, { outputMomentFormat: DATE_TIME_FORMAT })
+
+      setValue(`${props.name}-date`, v?.date);
+      setValue(`${props.name}-time`, v?.time);
+    }
+  }, [])
+
+  useEffect(() => {/**
      * this will make sure we're updating the underlying value after
      * each update to the date and time fields.
      *
@@ -121,6 +133,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const formInputDate = useController({
     name: `${props.name}-date`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
@@ -133,6 +146,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const formInputTime = useController({
     name: `${props.name}-time`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
@@ -170,6 +184,8 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const showTimeClear = () => Boolean(timeFieldValue);
 
+
+
   return (
     <InputField {...props}
       // make sure to mark the whole input as "touched" if any of the inputs are touched
@@ -179,7 +195,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
        * (it's basically just validating the watch above and not the user action)
        */
       controllerRules={{
-        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')]
+        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')],
       }}
     >
       {(field) => (
@@ -213,14 +229,17 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons && <div className='chaise-btn-group'>
-            <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
-              Now
-            </button>
-            <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
-              Clear
-            </button>
-          </div>}
+          {/*'translateY' - Prevents overlap of error message and button group in case of arrayField by moving the button group lower*/}
+          {!props.disableInput && props.displayExtraDateTimeButtons &&
+            <div className={`chaise-btn-group ${getFieldState(props.name)?.error ? 'translateY' : ''}`}>
+              <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
+                Now
+              </button>
+              <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
+                Clear
+              </button>
+            </div>
+          }
           <input {...field} type='hidden' />
         </div>
       )}
