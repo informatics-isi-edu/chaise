@@ -139,7 +139,7 @@ function addCanonicalTag() {
     canonicalTag.setAttribute('rel', 'canonical');
 
     // the hash returned from this function handles the case when '#' is switched with '?'
-    const hash = getURLHashFragment(windowRef.location);
+    const { hash } = getURLHashFragment(windowRef.location);
     const canonicalURL = windowRef.location.origin + windowRef.location.pathname + stripSortAndQueryParams(hash);
     canonicalTag.setAttribute('href', canonicalURL);
     document.getElementsByTagName('head')[0].appendChild(canonicalTag);

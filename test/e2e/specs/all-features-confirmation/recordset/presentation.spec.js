@@ -1118,7 +1118,13 @@ describe('View recordset,', function () {
         });
 
         it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
-            chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getViewActionButtons().count().then(function (ct) {
+                    return ct > 0;
+                });
+            }).then(() => {
+                return chaisePage.recordsetPage.getViewActionButtons()
+            }).then(function (viewButtons) {
                 return chaisePage.clickButton(viewButtons[0]);
             }).then(function () {
                 return chaisePage.recordPageReady();
@@ -1134,9 +1140,14 @@ describe('View recordset,', function () {
 
         it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
             var allWindows;
-
-            chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
-                return editButtons[0].click();
+            browser.wait(function () {
+              return chaisePage.recordsetPage.getEditActionButtons().count().then(function (ct) {
+                  return ct > 0;
+              });
+            }).then(() => {
+                return chaisePage.recordsetPage.getEditActionButtons();
+            }).then(function (editButtons) {
+                return chaisePage.clickButton(editButtons[0]);
             }).then(function () {
                 return browser.getAllWindowHandles();
             }).then(function (handles) {
@@ -1144,11 +1155,12 @@ describe('View recordset,', function () {
                 return browser.switchTo().window(allWindows[1]);
             }).then(function () {
                 return chaisePage.recordeditPageReady();
-            }).finally(function () {
+            }).then(function () {
                 expect(chaisePage.getWindowName()).not.toBe(windowId);
                 // pageId should change when a new window is opened
                 expect(chaisePage.getPageId()).not.toBe(pageId);
-                browser.close();
+                return browser.close();
+            }).then(() => {
                 return browser.switchTo().window(allWindows[0]);
             }).then(function () {
                 expect(chaisePage.getWindowName()).toBe(windowId);
@@ -1196,7 +1208,15 @@ describe('View recordset,', function () {
                     }).then(function (title) {
                         expect(title).toBe("Dataset");
                     });
-                });
+                })
+                /**
+                 * TODO we should fix this when we migrate to playwright
+                 * originally we had defaultCatalog:1 in the chaise-config.js for this test. there are two issues with this:
+                 * - we assumed catalog:1 is always on the dev.derivacloud server. this is not a big deal though as it's a safe assumption.
+                 * - we assumed assuming that catalog=1 is created by CI. this is not the case anymore for the playwright test cases as we
+                 *   change the order of specs and also we want to make sure we can run test cases on multiple borwsers.
+                 */
+                .pend('removed because we cannot assume the catalog number anymore')
 
                 it("should use the default schema:table defined in chaise config if no schema:table is present in the uri.", function () {
                     chaisePage.navigate(process.env.CHAISE_BASE_URL + "/recordset/#1");
