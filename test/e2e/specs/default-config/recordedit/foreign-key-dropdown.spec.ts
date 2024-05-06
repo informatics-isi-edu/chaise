@@ -18,67 +18,64 @@ const testParams = {
   column_values: [['two', 'five', 'six']]
 };
 
-test.describe(`Create a record, For table ${testParams.table_name}`, () => {
+test('Presentation and functionality of foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
+  await test.step('should load recordedit page', async () => {
+    const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
 
-  test('Presentation for an entity with a foreign key dropdown input,', async ({ page, baseURL }, testInfo) => {
-    await test.step('should load recordedit page', async() => {
-      const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+    await page.goto(`${baseURL}${PAGE_URL}`);
+    await RecordeditLocators.waitForRecordeditPageReady(page);
+  });
 
-      await page.goto(`${baseURL}${PAGE_URL}`);
-      await RecordeditLocators.waitForRecordeditPageReady(page);
-    });
+  await test.step('should have 3 fkey dropdowns on the page', async () => {
+    await expect.soft(RecordeditLocators.getFkeyDropdowns(page)).toHaveCount(3);
+  });
 
-    await test.step('should have 3 fkey dropdowns on the page', async() => {
-      await expect.soft(RecordeditLocators.getFkeyDropdowns(page)).toHaveCount(3);
-    });
+  await test.step('fk1 should have 25+ values', async () => {
+    await RecordeditLocators.getDropdownElementByName(page, testParams.fk1_name, 1).click();
+    await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(25);
+  });
 
-    await test.step('fk1 should have 25+ values', async() => {
-      await RecordeditLocators.getDropdownElementByName(page, testParams.fk1_name, 1).click();
-      await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(25);
-    });
+  await test.step('clicking "... load more" should load 15 more options (40 total)', async () => {
+    await RecordeditLocators.getDropdownLoadMoreRow(page).click();
+    await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(40);
+  });
 
-    await test.step('clicking "... load more" should load 15 more options (40 total)', async() => {
-      await RecordeditLocators.getDropdownLoadMoreRow(page).click();
-      await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(40);
-    });
+  await test.step('adding a search term of twenty should limit the displayed set to 10', async () => {
+    await RecordeditLocators.getDropdownSearch(page).fill('twenty');
+    await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(10);
+  });
 
-    await test.step('adding a search term of twenty should limit the displayed set to 10', async() => {
-      await RecordeditLocators.getDropdownSearch(page).fill('twenty');
-      await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(10);
-    });
+  await test.step('clearing the search term should show the first set of 25 rows again and select option 2', async () => {
+    await RecordeditLocators.getDropdownSearch(page).clear();
 
-    await test.step('clearing the search term should show the first set of 25 rows again and select option 2', async() => {
-      await RecordeditLocators.getDropdownSearch(page).clear();
+    const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
+    await expect.soft(dropdownOptions).toHaveCount(25);
 
-      const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
-      await expect.soft(dropdownOptions).toHaveCount(25);
-          
-      await dropdownOptions.nth(1).click();
-    });
+    await dropdownOptions.nth(1).click();
+  });
 
-    await test.step('fk2 should have 20 values and select option 5', async() => {
-      await RecordeditLocators.getDropdownElementByName(page, testParams.fk2_name, 1).click();
+  await test.step('fk2 should have 20 values and select option 5', async () => {
+    await RecordeditLocators.getDropdownElementByName(page, testParams.fk2_name, 1).click();
 
-      const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
-      await expect.soft(dropdownOptions).toHaveCount(20);
+    const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
+    await expect.soft(dropdownOptions).toHaveCount(20);
 
-      await dropdownOptions.nth(4).click();
-    });
+    await dropdownOptions.nth(4).click();
+  });
 
-    await test.step('fk3 should have 20 values and select option 6', async() => {
-      await RecordeditLocators.getDropdownElementByName(page, testParams.fk3_name, 1).click();
+  await test.step('fk3 should have 20 values and select option 6', async () => {
+    await RecordeditLocators.getDropdownElementByName(page, testParams.fk3_name, 1).click();
 
-      const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
-      await expect.soft(dropdownOptions).toHaveCount(20);
-      await dropdownOptions.nth(5).click();
-    });
+    const dropdownOptions = RecordeditLocators.getDropdownSelectableOptions(page);
+    await expect.soft(dropdownOptions).toHaveCount(20);
+    await dropdownOptions.nth(5).click();
+  });
 
-    await test.step('submit the record', async() => {
-      await testSubmission(page, {
-        tableDisplayname: testParams.table_displayname,
-        resultColumnNames: testParams.column_names,
-        resultRowValues: testParams.column_values
-      })
-    });
+  await test.step('submit the record', async () => {
+    await testSubmission(page, {
+      tableDisplayname: testParams.table_displayname,
+      resultColumnNames: testParams.column_names,
+      resultRowValues: testParams.column_values
+    })
   });
 });
