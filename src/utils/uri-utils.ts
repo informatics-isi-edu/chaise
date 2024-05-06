@@ -234,39 +234,32 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
  * if the url has catalog id, it will return that. otherwise will return the chaise-config's defaultCatalog
  */
 export function getCatalogId() {
-  const location = windowRef.location;
+  const { hash, isQueryParameter } = getURLHashFragment(windowRef.location);
+  const defaultValue = isStringAndNotEmpty(ConfigService.chaiseConfig.defaultCatalog) ? ConfigService.chaiseConfig.defaultCatalog : '';
 
-  const { hash, isQueryParameter } = getURLHashFragment(location);
+  /**
+   * if there is no '/' character (only a catalog id) or a trailing '/' after the id, we are assuming the whole hash
+   * is the catalog id.
+   *
+   * But we cannot make that assumption if the hash was actually just a query parameter. the given "hash" might actually
+   * be a query paramater that the app needs/expects (like the help or login app).
+   *
+   * that's why in this case we're returning the default value
+  */
+  if (isQueryParameter && (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1)) {
+    return defaultValue;
+  }
 
   let catalogId = '';
   if (isStringAndNotEmpty(hash)) {
     catalogId = hash.substring(1).split('/')[0];
   }
 
-  if (!isStringAndNotEmpty(catalogId)) {
-    if (ConfigService.chaiseConfig.defaultCatalog) {
-      return ConfigService.chaiseConfig.defaultCatalog;
-    }
-    return '';
+  if (isStringAndNotEmpty(catalogId)) {
+    return catalogId;
   }
 
-  // there is no '/' character (only a catalog id) or a trailing '/' after the id
-  if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
-    /**
-    * if the hash was actually just query parameter, don't even attempt the default logic
-    *
-    * this function is used in every react app as part of config.ts. in some cases (like help app),
-    * the url doesn't have any hash fragment and has only query parameter. so don't try
-    */
-    if (isQueryParameter) {
-      if (ConfigService.chaiseConfig.defaultCatalog) {
-        return ConfigService.chaiseConfig.defaultCatalog;
-      }
-    }
-    return '';
-  }
-
-  return catalogId;
+  return defaultValue;
 }
 
 /**
