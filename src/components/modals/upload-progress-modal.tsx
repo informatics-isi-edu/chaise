@@ -335,6 +335,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
    * @param {FileObject} data - FileObject for the file column
    * @param {Ermrest.Column} column - Column Object
    * @param {Object} row - Json key value Object of row values from the recordedit form
+   * @param {number} rowIdx - index of the record form this UploadFileObject is associated with (the attached `row`'s index)
    * @desc
    * Creates an uploadFile obj to keep track of file and its upload.
    */
@@ -349,6 +350,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       checksumPercent: 0,
       checksumCompleted: false,
       partialUpload: false,
+      // a key for storing in `lastContiguousChunk` map made up of the file checksum, column name, and form index
+      // initialized without a checksum value since none has been calculated yet
       uploadKey: `_${column.name}_${rowIdx}`,
       jobCreateDone: false,
       fileExistsDone: false,
@@ -523,6 +526,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     // when the chunks array is created at hatracObj, chunkTracker is initialized with n `empty` values where n is the number of chunks
     if (ufo.hatracObj.chunkTracker.length > 0) {
       for(let i = 0; i < ufo.hatracObj.chunkTracker.length; i++) {
+        // once we've found the first null or undefined value, set the lastChunkIdx to the index before the first null/undefined
+        // this could be index 0 which sets the value to -1, meaning no chunks have been uploaded yet
         if(ufo.hatracObj.chunkTracker[i] === null || ufo.hatracObj.chunkTracker[i] === undefined) {
           setLastContiguousChunk((prevVal: any) => {
             let tempMap: any;
