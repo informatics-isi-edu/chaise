@@ -509,7 +509,10 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 </button>
               </div>}
             </Dropdown.Toggle>
-            {!props.disableInput && dropdownReference && <Dropdown.Menu className='responsive-dropdown-menu' ref={dropdownMenuRef}>
+            {/* when there are very few columns in recordedit, foreign key dropdowns were opening 
+              up causing them to open "behind" the top container and making some options unclickable
+              https://github.com/informatics-isi-edu/chaise/pull/2455 */}
+            {!props.disableInput && dropdownReference && <Dropdown.Menu flip={false} className='responsive-dropdown-menu' ref={dropdownMenuRef}>
               <li className='search-row'>
                 <SearchInput
                   initialSearchTerm=''

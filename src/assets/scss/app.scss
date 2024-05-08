@@ -1154,6 +1154,34 @@ html {
     --bs-table-active-color: var(--bs-body-color);
     --bs-table-hover-color: var(--bs-body-color);
   }
+
+  /****** classes referenced by webapps ******/
+
+  /** horizontal alignment **/
+  .chaise-content-left {
+    text-align: start;
+  }
+
+  .chaise-content-center {
+    text-align: center;
+  }
+
+  .chaise-content-right {
+    text-align: end;
+  }
+
+  /** vertical alignment **/
+  .chaise-content-top {
+    align-items: start;
+  }
+
+  .chaise-content-middle {
+    align-items: center;
+  }
+
+  .chaise-content-bottom {
+    align-items: end;
+  }
 }
 
 // change default bootstap variables
