@@ -429,7 +429,16 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         })
         const newUrl = urlParts.join('/');
 
-        if (lccMap?.jobUrl.indexOf(newUrl) > -1 && lccMap.lastChunkIdx > -1) {
+        // check for the following:
+        //  - newUrl being part of a tracked partial upload job
+        //  - lastChunkIdx is 0 or greater meaning partial upload job has some chunks uploaded
+        //  - file size for partial upload job matches file to upload
+        //  - there is no upload version set
+        if (lccMap?.jobUrl.indexOf(newUrl) > -1 && 
+          lccMap.lastChunkIdx > -1 && 
+          lccMap.fileSize === ufo.size &&
+          !lccMap.uploadVersion
+        ) {
           ufo.partialUpload = true;
         }
       }
@@ -525,10 +534,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     // when the chunks array is created at hatracObj, chunkTracker is initialized with n `empty` values where n is the number of chunks
     if (ufo.hatracObj.chunkTracker.length > 0) {
-      for(let i = 0; i < ufo.hatracObj.chunkTracker.length; i++) {
+      for (let i = 0; i < ufo.hatracObj.chunkTracker.length; i++) {
         // once we've found the first null or undefined value, set the lastChunkIdx to the index before the first null/undefined
         // this could be index 0 which sets the value to -1, meaning no chunks have been uploaded yet
-        if(ufo.hatracObj.chunkTracker[i] === null || ufo.hatracObj.chunkTracker[i] === undefined) {
+        if (ufo.hatracObj.chunkTracker[i] === null || ufo.hatracObj.chunkTracker[i] === undefined) {
           setLastContiguousChunk((prevVal: any) => {
             let tempMap: any;
             // lastContiguousChunk (prevVal) is null until a chunk has been uploaded
@@ -538,10 +547,16 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
               tempMap = {};
             }
 
-            tempMap[ufo.uploadKey] = {
-              lastChunkIdx: i-1,
-              jobUrl: ufo.hatracObj.chunkUrl
+            if (!tempMap[ufo.uploadKey]) {
+              // intiialize the object for the uploadKey
+              tempMap[ufo.uploadKey] = {
+                jobUrl: ufo.hatracObj.chunkUrl,
+                fileSize: ufo.size
+              }
             }
+
+            // // update the last chunk index
+            tempMap[ufo.uploadKey].lastChunkIdx = i-1;
             return tempMap;
           });
 
@@ -618,6 +633,15 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     ufo.completeUploadJob = true;
     ufo.versionedUrl = url;
+    ufo.partialUpload = false;
+    setLastContiguousChunk((prevVal: any) => {
+      const tempMap = {...prevVal}
+
+      // set the uploadVersion to communicate the job has completed
+      // ensures an upload won't resume and instead be skipped to finished
+      tempMap[ufo.uploadKey].uploadVersion = url;
+      return tempMap;
+    });
 
     // This code updates the main progress bar for job completion progress for all files
     let progress = 0;

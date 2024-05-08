@@ -242,6 +242,8 @@ export default function RecordeditProvider({
    *   `${file.md5_base64}_${column_name}_${record_index}`: {
    *     lastChunkIdx: index
    *     jobUrl: uploadJob.hash ( in the form of '/hatrac/path/to/file.png;upload/somehash')
+   *     fileSize: size_in_bytes,
+   *     uploadVersion: versioned_url ( in the form of '/hatrac/path/to/file.png:version')
    *   }
    * }
    */
