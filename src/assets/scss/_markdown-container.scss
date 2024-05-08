@@ -101,10 +101,10 @@
     margin: 2px;
   }
 
-  // in atlas-d2k, some iframe content has a <h3> then <p> tag before the iframe
+  // some iframe content has a <h3> then <p> tag before the iframe
   // the following 2 classes can be used to reduce the space between the content
   // <h3> has margin-bottom: 16px; by default
-  .chaise-reduce-margin-after-header {
+  .chaise-reduce-header-margin {
     margin-bottom: 5px;
   }
 
