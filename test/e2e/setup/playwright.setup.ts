@@ -302,7 +302,7 @@ function copyChaiseConfig(chaiseConfigFilePath?: string) {
   if (typeof remoteChaiseDirPath === 'string') {
     // since we're copying to a folder which might or might not exist, we have to use rsync and cannot use scp
     cmd = `rsync -v ${chaiseFilePath} ${remoteChaiseDirPath}/config/`;
-    console.log('Copying using scp');
+    console.log('Copying using rsync');
   } else {
     const configFolder = '/var/www/html/chaise/config';
     // make sure the config folder is defined and then copy the chaise-config.js

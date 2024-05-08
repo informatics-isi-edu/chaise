@@ -1,7 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
-import { memo } from 'react';
-
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -19,6 +17,8 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import React, { ForwardedRef, forwardRef } from 'react';
+import PropTypes from 'prop-types';
 
 export type InputSwitchProps = {
   /**
@@ -68,6 +68,10 @@ export type InputSwitchProps = {
    * flag to show error below the input switch component
    */
   displayErrors?: boolean,
+  /**
+   * display required error regardless of whether the form has been submitted or not.
+   */
+  displayRequiredErrorBeforeSubmit?: boolean
   /**
    * the handler function called on input change
    */
@@ -130,6 +134,18 @@ export type InputSwitchProps = {
    * whether we should display the date/time labels
    */
   displayDateTimeLabels?: boolean
+  /**
+   * `optional`additional controller rules for the input field.
+   *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
+   */
+  additionalControllerRules?: {
+    [key: string]: (string | number | boolean | RegExp | Function | Object) | RuleWithMessage
+  }
+};
+
+export type RuleWithMessage = {
+  value: (boolean | number | RegExp),
+  message: string
 };
 
 const InputSwitch = ({
@@ -145,6 +161,7 @@ const InputSwitch = ({
   disableInput,
   requiredInput,
   displayErrors = true,
+  displayRequiredErrorBeforeSubmit = false,
   styles = {},
   columnModel,
   appMode,
@@ -157,8 +174,9 @@ const InputSwitch = ({
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
   displayDateTimeLabels,
+  additionalControllerRules,
   foreignKeyCallbacks
-}: InputSwitchProps): JSX.Element | null => {
+}: InputSwitchProps ): JSX.Element | null => {
 
 
   return (() => {
@@ -190,6 +208,7 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          columnModel={columnModel?.column.type.rootName === 'timestamptz' ? columnModel : undefined}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -198,6 +217,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
         />;
@@ -216,6 +236,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -226,6 +247,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          additionalControllerRules={additionalControllerRules}
           foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'dropdown-select':
@@ -243,6 +265,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -270,8 +293,10 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />
       case 'timestamp':
         return <DateTimeField
@@ -288,9 +313,11 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'date':
         return <DateField
@@ -304,9 +331,11 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'integer2':
       case 'integer4':
@@ -323,7 +352,9 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'boolean':
         return <BooleanField
@@ -337,8 +368,10 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'markdown':
       case 'longtext':
@@ -353,8 +386,10 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'json':
       case 'jsonb':
@@ -369,8 +404,10 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'color':
         return <ColorField
@@ -384,7 +421,9 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'text':
       default:
@@ -399,10 +438,12 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />
     }
   })();
 };
 
-export default memo(InputSwitch);
+export default React.memo(InputSwitch);

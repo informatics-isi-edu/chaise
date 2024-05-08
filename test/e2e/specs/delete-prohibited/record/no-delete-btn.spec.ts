@@ -77,7 +77,7 @@ test.describe('record page with specific chaise-config properties', () => {
   test('should show an error dialog if an improper RID is typed into the RID search box', async ({ page }) => {
     test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
-    await NavbarLocators.getGoToRIDInput(page).fill('');
+    await NavbarLocators.getGoToRIDInput(page).clear();
     await NavbarLocators.getGoToRIDInput(page).fill('someobviouslywrongRID');
     await NavbarLocators.getGoToRIDButton(page).click();
 

@@ -101,6 +101,18 @@
     margin: 2px;
   }
 
+  // some iframe content has a <h3> then <p> tag before the iframe
+  // the following 2 classes can be used to reduce the space between the content
+  // <h3> has margin-bottom: 16px; by default
+  .chaise-reduce-header-margin {
+    margin-bottom: 5px;
+  }
+
+  // reduce the margin to a negative number to "pull" the iframe content closer to the text
+  .chaise-iframe-after {
+    margin-bottom: -8px;
+  }
+
   ul.chaise-list-csv {
     list-style: none;
     display: inline;

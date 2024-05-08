@@ -168,12 +168,6 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run all features test spec  (protractor)
-        id: test-protractor-all-features
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeatures-protractor
       - name: Run all features confirmation test spec (protractor)
         id: test-protractor-all-features-confirmation
         continue-on-error: true
@@ -203,9 +197,6 @@ jobs:
         run: exit 1
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
-      - name: Check on all features test spec (protractor)
-        if: always() && steps.test-protractor-all-features.outcome != 'success'
         run: exit 1
       - name: Check on all features confirmation test spec (protractor)
         if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'

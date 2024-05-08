@@ -25,8 +25,6 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnNames.length);
   await expect(RecordLocators.getAllColumnNames(page)).toHaveText(expectedColumnNames);
 
-  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnValues.length);
-
   const allValues = RecordLocators.getAllColumnValues(page);
   let index = 0;
   for (const expectedValue of expectedColumnValues) {

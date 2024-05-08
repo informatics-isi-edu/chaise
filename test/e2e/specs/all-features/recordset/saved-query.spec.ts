@@ -11,7 +11,6 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { clearInput } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
   table_name: 'main',
@@ -60,7 +59,7 @@ test.describe('View recordset page and form a query,', () => {
     });
   });
 
-  test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => { 
+  test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => {
 
     await test.step('should load recordset page', async() => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}`;
@@ -68,7 +67,7 @@ test.describe('View recordset page and form a query,', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
-    
+
     await test.step('should show a saved query dropdown', async () => {
       const sqDropdown = RecordsetLocators.getSavedQueryDropdown(page);
       const savedQueryMenuItems = RecordsetLocators.getSavedQueryOptions(page);
@@ -99,15 +98,15 @@ test.describe('View recordset page and form a query,', () => {
       // first clear the min and max
       await inputLocators.minClear.click();
       await inputLocators.maxClear.click();
-      
+
       await inputLocators.minInput.fill('11');
       await inputLocators.maxInput.fill('22');
 
       await inputLocators.submit.click();
-      
+
       // wait for table rows to load and check count
       await expect(RecordsetLocators.getRows(page)).toHaveCount(12);
-        
+
         // close the facet
       await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
 
@@ -128,7 +127,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
-      
+
       await expect.soft(AlertLocators.getSuccessAlert(page)).toHaveText('SuccessSearch criteria saved.');
     });
 
@@ -160,7 +159,7 @@ test.describe('View recordset page and form a query,', () => {
 
       const facet = RecordsetLocators.getFacetById(page, facetIdx);
       await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
-      
+
       // wait for facet checkboxes to load
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(6);
       await RecordsetLocators.getFacetOption(facet, optionIdx).click();
@@ -178,11 +177,11 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
 
       const queryNameInput = RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1);
-      await queryNameInput.fill('');
+      await queryNameInput.clear();
       await queryNameInput.fill('Second saved query');
 
       const descriptionInput = RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1);
-      await clearInput(descriptionInput);
+      await descriptionInput.clear();
       await descriptionInput.fill('Second query description');
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
@@ -236,7 +235,7 @@ test('should have proper citation in share cite modal', async ({ page, baseURL }
       hasVersionedLink: true, // the table has history-capture: true
       verifyVersionedLink: false,
       citation: [
-        'Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data ', 
+        'Joshua Chudy, Aref Shafaei. This is long text so it can be used in a title. Journal of Front End Faceting Test Data ',
         `${link} (${moment(rctValue).format('YYYY')}).`
       ].join('')
     }

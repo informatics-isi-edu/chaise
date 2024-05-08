@@ -317,9 +317,13 @@ var recordEditPage = function() {
      * returns the cell (entity-value).
      * this is useful if we want to test the extra classes attached to it.
      */
-    this.getFormInputCell = (name, index) => {
+    this.getFormInputCell = (name, index, isArray) => {
       index = index || 1;
       const inputName = index + '-' + name;
+
+      if(isArray){
+        return element(by.className('array-input-field-container ' + inputName)).element(by.xpath('..'));
+      }
       return element(by.className('input-switch-container-' + inputName)).element(by.xpath('..'));
     };
 
@@ -494,6 +498,163 @@ var recordEditPage = function() {
     this.getRecordSetTable = function() {
         return element(by.className('recordset-table'));
     };
+
+    // ArrayField Selectors
+
+    /**
+     *
+     * @typedef {Object} ArrayFieldContainerElement
+     * @property {Function} getAddNewElementContainer - returns the add new element container for the given array field
+     * @property {Function} getAddNewValueInputElement - returns add new element input element for a given array field
+     * @property {Function} getClearInputButton - returns clear button for the current input
+     * @property {Function} getErrorMessageElement - returns error message element for the current input
+     * @property {Function} getAddButton - returns add button for a given array field
+     * @property {Function} getRemoveButton - returns remove button for a given array field
+     * @property {Function} getRemoveLastElementButton - returns remove button for last element in the arrayField
+     * @property {Function} getLastArrayItem - returns the element added to the array
+     * @property {Function} getArrayFieldValues - returns values of the arrayfield as an array
+     * @property {Function} isAddButtonDisabled - returns true if Add button is disabled, false if otherwise
+     */
+
+    /**
+     *
+     * @param {string} fieldName - name of the column
+     * @param {string} formNumber - form number
+     * @param {string} baseType - baseType of the Array
+     * @return {ArrayFieldContainerElement} arrayFieldContainer
+     *
+     */
+    this.getArrayFieldContainer = function(colName, formNumber, baseType){
+      formNumber = formNumber || 1;
+      const fieldName = `${formNumber}-${colName}`;
+
+      const elem = element(by.css(`.array-input-field-container-${fieldName}`));
+
+      elem.getAddNewElementContainer = function(){
+        return this.element(by.className("add-element-container"));
+      }
+
+      elem.getAddButton = function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        return addNewContainer.element(by.className("add-button"))
+      }
+
+      elem.getRemoveButton = function () {
+        return this.element(by.css('.array-remove-button'));
+      }
+
+      elem.getRemoveLastElementButton = async function(){
+        try{
+          const buttons = this.all(by.css(".action-buttons .fa-trash"));
+
+          if(await buttons.count()){
+            return buttons.last()
+          }
+          return null
+
+        }catch (err){
+          return null
+        }
+      }
+
+      elem.getErrorMessageElement = function(){
+        return this.element(by.className("input-switch-error"));
+      }
+
+      elem.isAddButtonDisabled = async function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        const addButton = await addNewContainer.element(by.css('.chaise-btn-sm.add-button'))
+        return !(await addButton.isEnabled());
+      }
+
+      switch(baseType){
+        case 'date':
+        case 'integer':
+        case 'number':
+        case 'text':
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return addNewContainer.element(by.className(" input-switch"))
+          }
+
+          elem.getLastArrayItem = function(){
+            return this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`)).last();
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(/number|integer/.test(baseType) ? JSON.parse(val) : val)
+            }
+
+            return extractedValues.length ? extractedValues : null;
+          }
+
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className('remove-input-btn'));
+          }
+
+        break;
+        case 'boolean':
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(JSON.parse(val))
+            }
+
+            return extractedValues.length ? extractedValues : null;
+          }
+          break;
+        case 'timestamp':
+        case 'timestamptz' :
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return [
+              addNewContainer.element(by.className("input-switch-date")).element(by.className(" input-switch")),
+              addNewContainer.element(by.className("input-switch-time")).element(by.className(" input-switch"))
+          ]
+          }
+
+          elem.getLastArrayItem = function(){
+            const dateInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`)).last();
+            const timeInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`)).last();
+
+            return [dateInput, timeInput];
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const dateInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`));
+            const timeInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`));
+
+            let dateTimeValues = []
+
+            for(let i =0; i< dateInputs.length; i++){
+              let dateVal = await dateInputs[i].getAttribute('value')
+              let timeVal = await timeInputs[i].getAttribute('value')
+              dateTimeValues.push([dateVal,timeVal])
+            }
+
+            return dateTimeValues.length ? dateTimeValues : null;
+          }
+
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className("date-time-clear-btn"));
+          }
+
+        break;
+      }
+      return  elem;
+    };
+
+
 };
 
 var recordPage = function() {
