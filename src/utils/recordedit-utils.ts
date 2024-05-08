@@ -125,16 +125,16 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 function _copyOrClearValueForColumn(
   column: any, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
-  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: any) => void
 ) {
   const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
   const dstKey = `${destFormValue}-${column.name}`;
 
   if (clearValue) {
     if (setValue) {
-      setValue(dstKey, '');
+      setValue(dstKey, column.type?.isArray ? [] : '');
     } else {
-      values[dstKey] = '';
+      values[dstKey] = column.type?.isArray ? [] : '';
     }
   } else if (srcKey) {
     const tempVal = replaceNullOrUndefined(values[srcKey], '')
@@ -214,7 +214,7 @@ function _copyOrClearValueForColumn(
 export function copyOrClearValue(
   columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
-  skipFkColumns?: boolean, setValue?: (formKey: string, value: string | number) => void
+  skipFkColumns?: boolean, setValue?: (formKey: string, value: any) => void
 ) {
 
   const column = columnModel.column;
@@ -418,8 +418,27 @@ function _populateEditInitialValueForAColumn(
 
   // stringify the returned array value
   if (column.type.isArray) {
+
     if (usedValue !== null) {
-      values[`${formValue}-${column.name}`] = JSON.stringify(usedValue, undefined, 2);
+
+      values[`${formValue}-${column.name}`] = usedValue.map((value: any) => {
+        let valueToAdd: any = {
+          'val': value
+        }
+
+        if (getInputType({ name: column.type.baseType.name }) === 'timestamp') {
+          const DATE_TIME_FORMAT = column.type.rootName === 'timestamptz' ? dataFormats.datetime.return : dataFormats.timestamp;
+          const v = formatDatetime(value, { outputMomentFormat: DATE_TIME_FORMAT })
+
+          valueToAdd = {
+            'val': v?.datetime,
+            'val-date': v?.date,
+            'val-time': v?.time
+          }
+        }
+
+        return valueToAdd
+      });
     }
     return;
   }
@@ -595,9 +614,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
 
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
-      if (col.type.isArray) {
-        v = JSON.parse(v);
-      } else if (col.isAsset) {
+      if (col.isAsset) {
         // dereference formData so we aren't modifying content in react-hook-form
         // v is an object with `file`, `filename`, `filesize`, and `url` defined
         const tempVal = { ...v };
@@ -610,6 +627,9 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
         }
 
         v = tempVal;
+      } else if (col.type?.isArray) {
+        // array-field encodes the values inside '.val' prop
+        v = v.length ? v.map((i: any) => i.val) : '';
       } else {
         // Special cases for formatting data
         switch (col.type.name) {

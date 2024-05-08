@@ -118,6 +118,7 @@ jobs:
           cd chaise
           make deps-test
           make dist-wo-deps
+          make lint
           sudo make deploy
       - name: Add tests users
         run: |
@@ -167,12 +168,6 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run all features test spec  (protractor)
-        id: test-protractor-all-features
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeatures-protractor
       - name: Run all features confirmation test spec (protractor)
         id: test-protractor-all-features-confirmation
         continue-on-error: true
@@ -203,9 +198,6 @@ jobs:
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
-      - name: Check on all features test spec (protractor)
-        if: always() && steps.test-protractor-all-features.outcome != 'success'
-        run: exit 1
       - name: Check on all features confirmation test spec (protractor)
         if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
         run: exit 1
@@ -215,7 +207,7 @@ jobs:
       - name: Check on delete prohibited test spec (protractor)
         if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
         run: exit 1
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report

@@ -65,7 +65,12 @@ export type RecordestModalProps = {
    * Note: the modal won't close by itself and if that's the expected behavior,
    * you should do it in this callback.
    */
-  onClose: () => void
+  onClose: () => void,
+
+  /**
+   * the label that should be used for close button (default: Cancel)
+   */
+  closeButtonLabel?: string
 }
 
 /**
@@ -86,7 +91,8 @@ const RecordsetModal = ({
   onSelectedRowsChanged,
   onSubmit,
   showSubmitSpinner,
-  onClose
+  onClose,
+  closeButtonLabel: closeLabel
 }: RecordestModalProps) => {
 
   /**
@@ -283,7 +289,7 @@ const RecordsetModal = ({
         return (
           <div>
             <span>Link </span>
-            <Title reference={recordsetProps.initialReference} />
+            <Title displayname={displayname} comment={comment} />
             <span> to </span>
             <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
@@ -293,7 +299,7 @@ const RecordsetModal = ({
         return (
           <div>
             <span>Unlink </span>
-            <Title reference={recordsetProps.initialReference} />
+            <Title displayname={displayname} comment={comment} />
             <span> from </span>
             <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
@@ -369,7 +375,7 @@ const RecordsetModal = ({
                       onClick={() => onCancelClick()} disabled={showSubmitSpinner}
                     >
                       <strong className='chaise-btn-icon'>X</strong>
-                      <span>Cancel</span>
+                      <span>{closeLabel ? closeLabel : 'Cancel'}</span>
                     </button>
                   </ChaiseTooltip>
                 </div>

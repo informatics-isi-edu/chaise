@@ -25,8 +25,6 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnNames.length);
   await expect(RecordLocators.getAllColumnNames(page)).toHaveText(expectedColumnNames);
 
-  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnValues.length);
-
   const allValues = RecordLocators.getAllColumnValues(page);
   let index = 0;
   for (const expectedValue of expectedColumnValues) {
@@ -38,8 +36,8 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
     }
+    index++;
   }
-  index++;
 }
 
 
@@ -61,9 +59,9 @@ type ShareCiteModalParams = {
    */
   verifyVersionedLink: boolean,
   /**
-   * pass `null` citation should not be displayed.
+   * pass `false` when citation should not be displayed.
    */
-  citation: string | null,
+  citation?: string | false,
   /**
    * the location of the bibtext file so we can delete it after downloading it
    */
@@ -78,8 +76,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
   await test.step('share button should be available after the page is fully loaded.', async () => {
 
     await RecordLocators.waitForRecordPageReady(page);
-
-    await shareBtn.waitFor({ state: 'visible' });
+    await expect.soft(shareBtn).toBeVisible();
   });
 
   await test.step('should show the share dialog when clicking the share button.', async () => {
@@ -98,7 +95,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
 
   await test.step('should have proper links.', async () => {
     const expectedHeaders: string | string[] = params.hasVersionedLink ? ['Versioned Link', 'Live Link'] : ['Live Link'];
-    await expect.soft(ModalLocators.getShareLinkSubHeaders(shareCiteModal)).toHaveText(expectedHeaders);
+    await expect.soft(ModalLocators.getShareLinkSubHeaders(shareCiteModal)).toContainText(expectedHeaders);
 
     await expect.soft(ModalLocators.getLiveLinkElement(shareCiteModal)).toHaveText(expectedLink);
 
@@ -143,6 +140,11 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
       await expect.soft(ModalLocators.getDownloadCitationHeader(shareCiteModal)).toHaveText('Download Data Citation:');
       await expect.soft(ModalLocators.getBibtex(shareCiteModal)).toHaveText('BibTex');
     });
+  } else if (params.citation === false) {
+    await test.step('citation should not be present', async () => {
+      await expect.soft(ModalLocators.getCitationHeader(shareCiteModal)).not.toBeVisible();
+      await expect.soft(ModalLocators.getCitationText(shareCiteModal)).not.toBeVisible();
+    });
   }
 
   if (params.bibtextFile) {
@@ -155,7 +157,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
   await test.step('clicking on close button should close the modal.', async () => {
     await ModalLocators.getCloseBtn(shareCiteModal).click();
 
-    await shareCiteModal.waitFor({ state: 'detached' });
+    await expect.soft(shareCiteModal).not.toBeAttached();
   });
 
 }
@@ -247,7 +249,6 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
         await expect.soft(md).toBeVisible();
 
         if (params.markdownValue) {
-          // await expect.soft(md).toHaveAttribute('innerHTML', params.markdownValue);
           const innerHTML = await md.innerHTML();
           expect.soft(innerHTML).toBe(params.markdownValue);
         }

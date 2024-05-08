@@ -44,6 +44,7 @@ html {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
     sans-serif;
   background-color: map-get(variables.$color-map, 'white');
+  color: map-get(variables.$color-map, 'black');
   font-size: variables.$font-size;
   font-weight: 400;
   line-height: 1.428;
@@ -1146,4 +1147,17 @@ html {
       }
     }
   }
+
+  // make sure bootstrap table is using the same color as body
+  .table {
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-color: var(--bs-body-color);
+  }
+}
+
+// change default bootstap variables
+:root {
+  // interpolation (#{}) is needed here, more info: https://sass-lang.com/documentation/breaking-changes/css-vars/
+  --bs-body-color: #{map-get(variables.$color-map, 'black')};
 }

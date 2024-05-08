@@ -16,4 +16,8 @@ export type TestOptions = {
 
   manualTestConfig?: boolean,
 
+  /**
+   * limit the number of workers to one and run all sequentally
+   */
+  runSequentially?: boolean
 }

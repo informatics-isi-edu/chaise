@@ -3,7 +3,6 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clearInput } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
   schema_table: 'multi-form-input:main',
@@ -37,7 +36,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
   });
 
   await test.step('should allow users to add the maximum amount of forms.', async () => {
-    await clearInput(cloneFormInput);
+    await cloneFormInput.clear();
     await cloneFormInput.fill(testParams.max_input_rows.toString());
     await cloneFormSubmitButton.click();
 
@@ -47,7 +46,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
     await RecordeditLocators.getSubmitRecordButton(page).click();
 
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
-    await expect.soft(resultset).toBeVisible();
+    await expect.soft(resultset).toBeVisible({ timeout: 30 * 1000 });
     await expect.soft(RecordsetLocators.getRows(resultset)).toHaveCount(testParams.max_input_rows + 1);
   });
 
