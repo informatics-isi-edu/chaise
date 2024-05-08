@@ -26,7 +26,8 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
-import ChaiseDroppable from '../chaise-droppable';
+import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
+import { reorderFacets } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 
 type FacetingProps = {
@@ -241,7 +242,13 @@ const Faceting = ({
    * Fetch custom facet order from localStorage and update the orderedFacets state
    */
   useEffect(() => {
-    // Get Facet Order from LocalStorage
+
+    // Disable dev warnings for facets for this component
+    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
+
+    /**
+     * Get Facet Order from LocalStorage
+     */ 
     const facetOrder = localStorage.getItem(facetListKey) || undefined;
 
     // If facet order is not stored in localStorage, display items in default order
@@ -250,33 +257,19 @@ const Faceting = ({
       return;
     }
 
-    // If facet order is present in localStorage, rearrange the items according to the stored order
+    /**
+     * If facet order is present in localStorage, rearrange the items according to the stored order
+     */
     const facetsInOrder = reorderFacets(reference.facetColumns, JSON.parse(facetOrder))
     
     setOrderedFacets(facetsInOrder)
+
+    return () =>{
+      // Enable Dev warnings when the component unmounts
+      (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
+    }
   }, [])
 
-  const reorderFacets = (defaultFacetColumns:any[], newOrder:string[]) => {
-    // Create a map to store the indices of elements in array `newOrder`
-    const indexMap = new Map();
-    for (let i = 0; i < newOrder.length; i++) {
-        indexMap.set(newOrder[i], i);
-    }
-
-    const facetsInNewOrder = defaultFacetColumns.map((item: any, index: number) => [item, index])
-
-    // Sort array `defaultFacetColumns` based on the indices in array `newOrder`
-    facetsInNewOrder.sort((a, b) => {
-        const indexA = indexMap.get(a[0].sourceObjectWrapper.name);
-        const indexB = indexMap.get(b[0].sourceObjectWrapper.name);
-        // If either element is not found in `newOrder`, move it to the end
-        if (indexA === undefined) return 1;
-        if (indexB === undefined) return -1;
-        return indexA - indexB;
-    });
-
-    return facetsInNewOrder;
-}
   //-------------------  flow-control related functions:   --------------------//
 
   const updateFacetStates = (flowControl: any, resetAllOpenFacets?: boolean, cause?: string) => {
@@ -307,7 +300,7 @@ const Faceting = ({
         }
       }
       // otherwise we don't need to process it and should just mark
-      // it as "not initialized"
+      // it as 'not initialized'
       else {
         frm.processed = true;
         modifiedAttrs[index] = { initialized: false };
@@ -647,6 +640,25 @@ const Faceting = ({
 
   };
 
+  /**
+   * Handle drag and drop events for draggable facets
+   */
+  const handleOnDragEnd = (result: DropResult) => {
+    const items = Array.from(orderedFacets);
+
+    if (!result.destination) {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(orderedFacets.length - 1, 0, reorderedItem);
+    } else {
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
+    }
+
+    // Save facet order to localStorage
+    localStorage.setItem(facetListKey, JSON.stringify(items.map(i => i[0].sourceObjectWrapper.name)))
+    
+    setOrderedFacets(items);
+  }
   //-------------------  render logic:   --------------------//
 
   const renderFacet = (fc: any, index: number) => {
@@ -687,35 +699,18 @@ const Faceting = ({
     return <></>
   }
 
-  const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(orderedFacets);
-
-    if (!result.destination) {
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(orderedFacets.length - 1, 0, reorderedItem);
-    } else {
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
-    }
-
-    // Save facet order to localStorage
-    localStorage.setItem(facetListKey, JSON.stringify(items.map(i => i[0].sourceObjectWrapper.name)))
-    
-    setOrderedFacets(items);
-  }
-
   return (
     <div className='side-panel-container' ref={sidePanelContainer}>
       <div className='faceting-columns-container'>
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <ChaiseDroppable droppableId={`facet-droppable`}>
+          <ChaiseDroppable droppableId={'facet-droppable'}>
             {
               (provided: DroppableProvided) => (
                 <Accordion
                   className='panel-group' activeKey={activeKeys} alwaysOpen
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  key={`facet-list`}
+                  key={'facet-list'}
                 >
                   {orderedFacets.map(([fc, index]: [any, number], idx) => {
                     return <Draggable key={index} draggableId={`facet-${index}`} index={idx}>
@@ -758,30 +753,6 @@ const Faceting = ({
             }
           </ChaiseDroppable>
         </DragDropContext>
-
-        {/* -------------- */}
-        {/* <Accordion className='panel-group' activeKey={activeKeys} alwaysOpen >
-          {reference.facetColumns.map((fc: any, index: number) => (
-            <Accordion.Item
-              eventKey={index + ''} key={index}
-              className={`facet-panel fc-${index}${facetModels[index].isOpen ? ' panel-open' : ''}`}
-            >
-              <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
-                <FacetHeader
-                  displayname={fc.displayname}
-                  showTooltipIcon={fc.comment ? true : false}
-                  comment={fc.comment}
-                  isLoading={facetModels[index].isLoading}
-                  facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
-                  noConstraints={facetModels[index].noConstraints}
-                />
-              </Accordion.Header>
-              <Accordion.Body>
-                {renderFacet(fc, index)}
-              </Accordion.Body>
-            </Accordion.Item>
-          ))}
-        </Accordion> */}
       </div>
     </div>
   )
