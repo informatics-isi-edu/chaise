@@ -639,7 +639,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
       // set the uploadVersion to communicate the job has completed
       // ensures an upload won't resume and instead be skipped to finished
-      tempMap[ufo.uploadKey].uploadVersion = url;
+      if (tempMap[ufo.uploadKey]) tempMap[ufo.uploadKey].uploadVersion = url;
       return tempMap;
     });
 
