@@ -98,6 +98,10 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     }
   }
 
+  const addNewInputhasValue = (): Boolean => {
+    return baseArrayType === 'boolean' ? typeof addNewValue === 'boolean' : addNewValue
+  }
+
   //-------------------  render logic:   --------------------//
 
   const DraggableItemRenderer = (item: any, index: number, disableInput: boolean | undefined) => {
@@ -209,11 +213,18 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
             >Add</button>
           </div>
         </div>
-        {Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
+        {addNewInputhasValue() && !Object.keys(formState.errors).includes(addNewValueInputName) ?
           <DisplayValue
-            internal as='span' className='input-switch-error text-danger'
-            value={{ isHTML: true, value: 'Please enter a value for this Array field' }}
+            internal as='span' className='input-switch-error text-primary'
+            value={{ isHTML: true, value: 'Click Add to append value to array' }}
           />
+          :
+          (Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
+            <DisplayValue
+              internal as='span' className='input-switch-error text-danger'
+              value={{ isHTML: true, value: 'Please enter a value for this Array field' }}
+            />
+          )
         }
       </div>
     </>
