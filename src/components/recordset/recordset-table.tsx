@@ -20,15 +20,18 @@ import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES } from '../../utils/constants';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
+  mainContainerRef?: any,
   initialSortObject: any,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
+  mainContainerRef,
   initialSortObject
 }: RecordsetTableProps): JSX.Element => {
 
@@ -123,23 +126,22 @@ const RecordsetTable = ({
     // log the request if it was successful
     if (success) {
       logRecordsetClientAction(action, null, null, ref);
-      scrollToTable();
+      scrollToTableTop();
     }
   };
 
   /**
    * To maintain scroll position after next/previous button click on table
    */
-  const scrollToTable = () => {
-    /* defer scrollIntoView behavior by 100ms so the content can have just enough to get 
-    updated after applying pagination to give smooth user experience*/
-    setTimeout(() => {
-    if (!tableContainer.current) return;
-    //scrollIntoView is used to bring an element(here current table) into view.
-    tableContainer.current.scrollIntoView();
-    }, 100);
+  const scrollToTableTop = () => {
+    if (!mainContainerRef || !mainContainerRef?.current ) return;
+    const element = document.querySelector(`#rt-heading-${makeSafeIdAttr(reference.table.name)}:not(.${CLASS_NAMES.HIDDEN})`) as HTMLDivElement;
+    //TODO: To see if this works for all he cases
+    mainContainerRef.current.scrollTo({
+      top: element.offsetTop,
+      behavior: 'smooth',
+    });
   };
-
 
   /**
    * select all the rows that are displayed and are not disabled

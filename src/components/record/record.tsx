@@ -2,26 +2,26 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import Accordion from 'react-bootstrap/Accordion';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record-main-section';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableHeader from '@isrd-isi-edu/chaise/src/components/record/related-table-header';
 import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-button';
-import Spinner from 'react-bootstrap/Spinner';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Accordion from 'react-bootstrap/Accordion';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -32,20 +32,20 @@ import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type RecordProps = {
   /**
@@ -663,6 +663,7 @@ const RecordInner = ({
                   </Accordion.Button>
                   <Accordion.Body>
                     <RelatedTable
+                      mainContainerRef={mainContainer}
                       relatedModel={rm}
                       tableContainerID={`rt-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                     />
