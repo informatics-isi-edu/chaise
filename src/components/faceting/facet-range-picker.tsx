@@ -60,7 +60,7 @@ const FacetRangePicker = ({
   /**
    * We must create references for the state and local variables that
    * are used in the flow-control related functions. This is to ensure the
-   * functions are using thier latest values.
+   * functions are using their latest values.
    */
   const facetColumnRef = useVarRef(facetColumn);
 
@@ -1001,7 +1001,7 @@ const FacetRangePicker = ({
     <div className='range-picker' ref={rangePickerContainer}>
       {!facetModel.facetHasTimeoutError && renderPickerContainer()}
       <RangeInputs
-        name={`${facetIndex}`}
+        name={`chaise-${facetColumn.column.RID}`}
         inputType={getInputType(facetColumn.column.type)}
         classes='facet-range-input'
         addRange={addFilter}

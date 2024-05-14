@@ -64,6 +64,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
 
   const renderInput = (columnModel: RecordeditColumnModel) => {
     const colName = columnModel.column.name;
+    const colRid = columnModel.column.RID;
 
     const isDisabled = getIsDisabled(columnModel);
 
@@ -80,7 +81,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
         displayDateTimeLabels
         disableInput={isDisabled}
         requiredInput={columnModel.isRequired}
-        name={`${formNumber}-${colName}`}
+        name={`chaise-${formNumber}-${colRid}`}
         type={columnModel.inputType}
         classes='column-cell-input'
         placeholder={placeholder}

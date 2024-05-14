@@ -263,6 +263,7 @@ const FormRow = ({
 
   const renderInput = (formNumber: number, formIndex?: number) => {
     const colName = columnModel.column.name;
+    const colRid = columnModel.column.RID;
 
     const isDisabled = getIsDisabled(formNumber, formNumber === MULTI_FORM_INPUT_FORM_VALUE);
 
@@ -299,7 +300,7 @@ const FormRow = ({
           displayDateTimeLabels
           disableInput={isDisabled}
           requiredInput={columnModel.isRequired}
-          name={`${formNumber}-${colName}`}
+          name={`chaise-${formNumber}-${colRid}`}
           type={columnModel.inputType}
           classes='column-cell-input'
           placeholder={placeholder}

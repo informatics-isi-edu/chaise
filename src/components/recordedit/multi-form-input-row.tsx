@@ -56,7 +56,8 @@ const MultiFormInputRow = ({
   const isForeignKey = cm.column.isForeignKey;
 
   const colName = cm.column.name;
-  const inputName = `${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
+  const colRid = cm.column.RID;
+  const inputName = `chaise-${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`;
 
   const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect

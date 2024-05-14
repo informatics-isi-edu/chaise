@@ -610,7 +610,7 @@ export function populateEditInitialValues(
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
   const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
-    let v = formData[formNumber + '-' + col.name];
+    let v = formData['chaise-' + formNumber + '-' + col.RID];
 
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
