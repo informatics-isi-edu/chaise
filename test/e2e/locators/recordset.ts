@@ -134,6 +134,10 @@ export default class RecordsetLocators {
     return container.locator('.chaise-table-row');
   }
 
+  static getRowCells(container: Page | Locator): Locator {
+    return container.locator('td');
+  }
+
   static getDisabledRows(container: Page | Locator): Locator {
     return container.locator('tr.disabled-row');
   }
@@ -146,11 +150,15 @@ export default class RecordsetLocators {
   }
 
   static getCheckboxInputs(container: Page | Locator): Locator {
-    return RecordsetLocators.getRows(container).locator('.chaise-checkbox input');
+    return container.locator('.recordset-table').locator('.chaise-checkbox input');
   }
 
   static getDisabledCheckboxInputs(container: Page | Locator): Locator {
-    return RecordsetLocators.getRows(container).locator('.chaise-checkbox input[disabled]');
+    return container.locator('.recordset-table').locator('.chaise-checkbox input[disabled]');
+  }
+
+  static getCheckedCheckboxInputs(container: Page | Locator): Locator {
+    return container.locator('.recordset-table').locator('.chaise-checkbox input.checked');
   }
 
   static getRowFirstCell(container: Page | Locator, rowIndex: number, isDisabled?: boolean): Locator {
@@ -166,11 +174,9 @@ export default class RecordsetLocators {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.view-action-button');
   }
 
-
   static getRowEditButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.edit-action-button');
   }
-
 
   static getRowDeleteButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
@@ -187,9 +193,33 @@ export default class RecordsetLocators {
     return container.locator('.side-panel-resizable');
   }
 
+  static getAllFacets(container: Page | Locator): Locator {
+    return container.locator('.panel-group .facet-panel');
+  }
+
+  static getOpenFacets(container: Page | Locator): Locator {
+    return container.locator('.panel-open');
+  }
+
+  static getClosedFacets(container: Page | Locator): Locator {
+    return container.locator('.facet-panel button.collapsed');
+  }
+
+  static getFacetTitles(container: Page | Locator): Locator {
+    return container.locator('.accordion-header .facet-header-text');
+  }
+
+  static getOpenFacetTitles(container: Page | Locator): Locator {
+    return container.locator('.panel-open .facet-header-text');
+  }
+
   static getFacetById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-${idx}`);
   }
+
+  static getFacetHeaderById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fc-heading-${idx}`).locator('.facet-header-text');
+  };
 
   static getFacetHeaderButtonById(facet: Locator, idx: number): Locator {
     return facet.locator(`.fc-heading-${idx} button`);
@@ -204,8 +234,24 @@ export default class RecordsetLocators {
     return facet.locator('.chaise-checkbox label')
   }
 
-  static getFacetOption(facet: Locator, optionIdx: number) {
+  static getCheckedFacetOptions(facet: Locator): Locator {
+    return facet.locator('.chaise-checkbox input.checked');
+  }
+
+  static getFacetOption(facet: Locator, optionIdx: number): Locator {
     return facet.locator(`.checkbox-${optionIdx}`);
+  }
+
+  static getFacetSearchBox(facet: Locator): Locator {
+    return facet.locator('.facet-search-input');
+  }
+
+  static getFacetSearchBoxClear(facet: Locator): Locator {
+    return facet.locator('.remove-search-btn');
+  }
+
+  static getShowMore(facet: Locator): Locator {
+    return facet.locator('.show-more-btn');
   }
 
   /* range facet selectors */

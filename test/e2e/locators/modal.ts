@@ -20,6 +20,10 @@ export default class ModalLocators {
     return page.locator('.search-popup');
   }
 
+  static getScalarPopup(page: Page): Locator {
+    return page.locator('.scalar-show-details-popup');
+  }
+
   static getErrorModal(page: Page): Locator {
     return page.locator('.modal-error');
   }

@@ -25,7 +25,7 @@ const testParams = {
 
 test.describe('View recordset page and form a query,', () => {
 
-  test.beforeAll(async ({}, testInfo) => {
+  test.beforeAll('update the catalog annotation', async ({}, testInfo) => {
     const catalogId = getCatalogID(testInfo.project.name);
 
     await updateCatalogAnnotation(catalogId, {
@@ -61,7 +61,7 @@ test.describe('View recordset page and form a query,', () => {
 
   test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => {
 
-    await test.step('should load recordset page', async() => {
+    await test.step('should load recordset page', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}`;
 
       await page.goto(`${baseURL}${PAGE_URL}`);
