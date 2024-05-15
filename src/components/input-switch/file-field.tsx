@@ -180,7 +180,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}
-            className={`${props.inputClasses} chaise-input-hidden`}
+            className={`${props.inputClasses} chaise-input-hidden ${props.inputName}`}
             name={props.name}
             type='file'
             accept={fileExtensions}

@@ -168,7 +168,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 <textarea
                   placeholder={props.placeholder}
                   rows={5}
-                  className={`${props.inputClasses} input-switch ${
+                  className={`${props.inputClasses} input-switch ${props.inputName} ${
                     hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
                   }`}
                   {...field}

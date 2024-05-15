@@ -56,7 +56,7 @@ export const RecordeditContext = createContext<{
   /**
    * the raw data of outbound foreign keys. used in foreignkey-field to support domain-filter
    * it's a key-value object and follows the same format as the form values.
-   * the key is in the format of `${formNumber}-{colName}` and value is an object.
+   * the key is in the format of `c_${formNumber}-{col.RID}` and value is an object.
    */
   foreignKeyData: any,
   waitingForForeignKeyData: boolean,
@@ -886,12 +886,13 @@ export default function RecordeditProvider({
     const formValue = 1;
 
     // update the displayed value
-    prefillObj.fkColumnNames.forEach(function (cn: string) {
-      setValue(`${formValue}-${cn}`, prefillObj.rowname.value);
+    prefillObj.fkColumnRIDs.forEach(function (RID: string) {
+      setValue(`c_${formValue}-${RID}`, prefillObj.rowname.value);
     });
 
     // update the raw data that will be sent to ermrsetjs
     Object.keys(prefillObj.keys).forEach((k: string) => {
+      // TODO: verify this is working as expected
       setValue(`${formValue}-${k}`, prefillObj.keys[k]);
     });
 
@@ -947,6 +948,7 @@ export default function RecordeditProvider({
 
     // we should get the fk data since it might be used for rowname
     fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
+      // TODO: colNames should be ColRIDs
       colNames.forEach(function (colName) {
         // we should not set the raw default values since we want ermrest to handle those for us.
         // so we're just setting the displayed rowname to users
@@ -954,11 +956,11 @@ export default function RecordeditProvider({
 
         // default value is validated
         if (page.tuples.length > 0) {
-          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
+          foreignKeyData.current[`c_${formValue}-${colName}`] = page.tuples[0].data;
+          setValue(`c_${formValue}-${colName}`, page.tuples[0].displayname.value);
         } else {
-          foreignKeyData.current[`${formValue}-${colName}`] = {};
-          setValue(`${formValue}-${colName}`, '');
+          foreignKeyData.current[`c_${formValue}-${colName}`] = {};
+          setValue(`c_${formValue}-${colName}`, '');
         }
       });
     }).catch(function (err: any) {

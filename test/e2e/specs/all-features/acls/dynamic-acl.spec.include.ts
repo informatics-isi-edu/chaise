@@ -353,6 +353,7 @@ export const runDynamicACLTests = () => {
         const input = RecordeditLocators.getInputForAColumn(page, 'name', 2);
         await expect.soft(input).toBeDisabled();
         await expect.soft(input).toHaveValue('six');
+        // await page.pause();
       });
 
       await test.step('Trying to edit a column in another row should display a warning', async () => {

@@ -43,21 +43,22 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
    */
   const arrayFormState = useFormState({ name: name });
 
-  const addNewValueInputName = `${name}-new-item`;
+  const addNewValueName = `${name}-new-item`;
+  const addNewValueInputName = `${props.inputName}-new-item`;
 
   /**
    * We use this to keep track of errors in new value input box
    */
-  const formState = useFormState({ name: addNewValueInputName });
+  const formState = useFormState({ name: addNewValueName });
   /**
    * We use this to keep track of value in new value input box
    */
-  const addNewValue = useWatch({ name: addNewValueInputName });
+  const addNewValue = useWatch({ name: addNewValueName });
 
   // register the input that is used for adding new value
-  register(addNewValueInputName, {
+  register(addNewValueName, {
     value: '',
-    onChange: () => trigger(addNewValueInputName),
+    onChange: () => trigger(addNewValueName),
   });
 
   //-------------------  callbacks:   --------------------//
@@ -90,21 +91,21 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   }
 
   const clearAddNewField = () => {
-    setValue(addNewValueInputName, '')
+    setValue(addNewValueName, '')
 
     if (getInputType({ name: baseArrayType }) === 'timestamp') {
-      setValue(`${addNewValueInputName}-date`, '')
-      setValue(`${addNewValueInputName}-time`, '')
+      setValue(`${addNewValueName}-date`, '')
+      setValue(`${addNewValueName}-time`, '')
     }
   }
 
   //-------------------  render logic:   --------------------//
 
-  const DraggableItemRenderer = (item: any, index: number, disableInput: boolean | undefined) => {
+  const DraggableItemRenderer = (item: any, index: number, inputName: string, disableInput: boolean | undefined) => {
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
-          const { name: inputName } = register(`${name}.${index}.val`, {
+          const { name: newInputName } = register(`${name}.${index}.val`, {
             value: item.val,
             onChange: () => trigger(`${name}.${index}.val`)
           });
@@ -122,7 +123,8 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               <div className='item-input'>
                 <InputSwitch
                   {...props}
-                  name={inputName}
+                  name={newInputName}
+                  inputName={`${inputName}-${index}`}
                   type={getInputType({ name: baseArrayType })}
                   key={item.id}
                   displayExtraDateTimeButtons={true}
@@ -179,7 +181,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                     ref={provided.innerRef}
                     key={`${name}-list`}
                   >
-                    {fields.map((item: object & { id: string }, index: number) => DraggableItemRenderer(item, index, disableInput))}
+                    {fields.map((item: object & { id: string }, index: number) => DraggableItemRenderer(item, index, props.inputName, disableInput))}
                     {provided.placeholder}
                   </ul>
                 )
@@ -189,7 +191,8 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
           <div className={addContainerClassName.join(' ')}>
             <InputSwitch
               type={getInputType({ name: baseArrayType })}
-              name={addNewValueInputName}
+              name={addNewValueName}
+              inputName={addNewValueInputName}
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}
@@ -205,7 +208,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                * 1. There are validation errors in the addNewValue field.
                * 2. The addNewValue field value is empty
                */
-              disabled={Object.keys(formState.errors).includes(addNewValueInputName) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+              disabled={Object.keys(formState.errors).includes(addNewValueName) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
             >Add</button>
           </div>
         </div>

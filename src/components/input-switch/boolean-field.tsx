@@ -111,7 +111,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
               ))}
             </Dropdown.Menu>}
           </Dropdown>
-          <input className={props.inputClasses} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputName}`} {...field} type='hidden' />
         </div>
       )}
     </InputField>

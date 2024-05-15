@@ -74,7 +74,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
     const mapping = props.columnModel.column.inputIframeProps.fieldMapping;
     for (const k in mapping) {
       const col = mapping[k];
-      setValue(`${usedFormNumber}-${col.name}`, '');
+      setValue(props.inputName, '');
     }
   }
 
@@ -122,7 +122,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
               </button>
             </div>}
           </div>
-          <input className={props.inputClasses} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputName}`} {...field} type='hidden' />
           {
             showModal && iframeProps &&
             <AlertsProvider>

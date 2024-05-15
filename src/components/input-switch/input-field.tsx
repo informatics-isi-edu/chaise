@@ -19,9 +19,13 @@ export type InputFieldProps = {
    */
   type: string,
   /**
-   *  the name of the field
+   * the name of the field for react hook form (with no special characters)
    */
   name: string,
+  /**
+   * the name of the field for attaching a specific class to input-switch-container and the input
+   */
+  inputName: string,
   /**
   * placeholder text
   */
@@ -118,6 +122,7 @@ export type InputFieldCompProps = InputFieldProps & {
 const InputField = ({
   children,
   name,
+  inputName,
   requiredInput,
   displayErrors,
   containerClasses = '',
@@ -203,7 +208,7 @@ const InputField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles} onKeyDown={handleKeyDown}>
+    <div className={`${containerClasses} input-switch-container-${inputName}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message &&
         <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />

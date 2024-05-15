@@ -204,13 +204,14 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             type={'date'}
             name={`${props.name}-date`}
             classes={props.classes ? props.classes : ''}
-            inputClasses={props.inputClasses}
+            inputClasses={`${props.inputClasses} ${props.inputName}-date`}
             clearClasses={props.clearClasses}
             placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.date}
             disableInput={props.disableInput}
             displayErrors={false}
             displayExtraDateTimeButtons={false}
             displayDateTimeLabels={props.displayDateTimeLabels}
+            inputName=''
           />
           <div className='chaise-input-group input-switch-time'>
             {props.displayDateTimeLabels && <div className='chaise-input-group-prepend'>
@@ -218,8 +219,13 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             </div>}
             <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
               <input
-                className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
-                type='text' disabled={props.disableInput} {...timeField} onChange={handleTimeChange}
+                className={`${props.timeClasses} input-switch ${props.inputName}-time ${
+                  showTimeClear() ? 'time-input-show-clear' : ''
+                }`}
+                type='text' 
+                disabled={props.disableInput} 
+                {...timeField} 
+                onChange={handleTimeChange}
                 placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.time}
               />
               <ClearInputBtn

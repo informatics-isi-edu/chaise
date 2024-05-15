@@ -187,7 +187,7 @@ const FormRow = ({
    */
   const handleFormClick = (formNumber: number) => {
     // disallow users to click on the disabled inputs (although this is not possible anymore as we're removing these forms on load)
-    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`]) {
+    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`]) {
       return;
     }
 
@@ -236,7 +236,7 @@ const FormRow = ({
     }
 
     if (typeof formNumber === 'number') {
-      const valName = `${formNumber}-${columnModel.column.name}`;
+      const valName = `c_${formNumber}-${columnModel.column.RID}`;
       if (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false) {
         return true;
       }
@@ -250,7 +250,7 @@ const FormRow = ({
    */
   const getEntityValueClass = (formNumber: number) => {
     const classes = [];
-    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
+    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`])
     if (!cannotBeUpdated && isActiveForm) {
       classes.push('clickable-form-overlay');
       if (activeForms.includes(formNumber)) {
@@ -300,7 +300,8 @@ const FormRow = ({
           displayDateTimeLabels
           disableInput={isDisabled}
           requiredInput={columnModel.isRequired}
-          name={`chaise-${formNumber}-${colRid}`}
+          name={`c_${formNumber}-${colRid}`}
+          inputName={`c_${formNumber}-${makeSafeIdAttr(colName)}`}
           type={columnModel.inputType}
           classes='column-cell-input'
           placeholder={placeholder}

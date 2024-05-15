@@ -94,8 +94,8 @@ const RangeInputs = ({
   const className = (type === 'timestamp') ? 'range-inputs-timestamp-width' : '';
   const inputWrapperClassName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
 
-  const minName = `${name}-min`;
-  const maxName = `${name}-max`;
+  const minName = `c_${name}-min`;
+  const maxName = `c_${name}-max`;
 
   const timestampOptions = { outputMomentFormat: dataFormats.timestamp }
   if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.datetime.return;
@@ -243,6 +243,7 @@ const RangeInputs = ({
                   displayErrors={false}
                   disableInput={disabled}
                   name={minName}
+                  inputName={minName}
                   type={inputType}
                   // when it's timestamp, we don't want to show placeholder as it could
                   // be confusing when users only enter only time or date.
@@ -260,6 +261,7 @@ const RangeInputs = ({
                   displayErrors={false}
                   disableInput={disabled}
                   name={maxName}
+                  inputName={maxName}
                   type={inputType}
                   // when it's timestamp, we don't want to show placeholder as it could
                   // be confusing when users enter only time or date.

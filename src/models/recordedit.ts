@@ -177,6 +177,10 @@ export interface PrefillObject {
    */
   fkColumnNames: string[];
   /**
+   * the RIDs for the foreignkey columns that should be prefilled
+   */
+  fkColumnRIDs: string[];
+  /**
    * the URL to fetch the fk
    */
   origUrl: string;

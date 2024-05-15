@@ -322,9 +322,13 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
    */
   origUrl: string,
   /**
-   * the foreignkey columns that should be prefileld
+   * the foreignkey columns that should be prefilled
    */
   fkColumnNames: string[],
+  /**
+   * the RIDs for foreignkey columns that should be prefilled
+   */
+  fkColumnRIDs: string[],
   /**
    * raw values of the foreign key columns
    */
@@ -342,10 +346,12 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
   }
 
   const prefilledFks: string[] = [];
+  const prefilledFkRIDs: string[] = [];
   const keys: { [key: string]: any } = {};
   origTable.foreignKeys.all().forEach((fk: any) => {
     if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) return;
     prefilledFks.push(fk.name);
+    prefilledFkRIDs.push(fk.RID);
 
     // add foreign key column data
     fk.mapping._from.forEach((fromColumn: any, i: number) => {
@@ -357,6 +363,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
     rowname: mainTuple.displayname,
     origUrl: mainTuple.reference.uri,
     fkColumnNames: prefilledFks,
+    fkColumnRIDs: prefilledFkRIDs,
     keys: keys
   };
 }

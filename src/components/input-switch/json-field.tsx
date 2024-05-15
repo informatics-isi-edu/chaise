@@ -29,10 +29,14 @@ const JsonField = (props: InputFieldProps): JSX.Element => {
         <div className='input-switch-json'>
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <textarea
-              placeholder={props.placeholder} rows={5} className={`${props.inputClasses} input-switch ${
+              placeholder={props.placeholder} 
+              rows={5} 
+              className={`${props.inputClasses} input-switch ${props.inputName} ${
                 hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
               }`}
-              {...field} onChange={onChange} disabled={props.disableInput}
+              {...field} 
+              onChange={onChange} 
+              disabled={props.disableInput}
               ref={textAreaRef}
             />
             <ClearInputBtn

@@ -31,9 +31,13 @@ export type InputSwitchProps = {
    */
   type: string,
   /**
-   *  the name of the field
+   *  the name of the field for react hook form (with no special characters)
    */
   name: string,
+  /**
+   *  the name of the field for attaching a specific class to input-switch-container and the input
+   */
+  inputName: string,
   /**
    * placeholder text for numeric and date fields
    */
@@ -151,6 +155,7 @@ export type RuleWithMessage = {
 const InputSwitch = ({
   type,
   name,
+  inputName,
   placeholder,
   classes = '',
   inputClasses = '',
@@ -188,6 +193,7 @@ const InputSwitch = ({
         return <IframeField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -208,6 +214,7 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          inputName={inputName}
           columnModel={columnModel?.column.type.rootName === 'timestamptz' ? columnModel : undefined}
           classes={classes}
           inputClasses={inputClasses}
@@ -228,6 +235,7 @@ const InputSwitch = ({
         return <ForeignkeyField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -257,6 +265,7 @@ const InputSwitch = ({
         return <ForeignkeyDropdownField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -285,6 +294,7 @@ const InputSwitch = ({
         return <FileField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -305,6 +315,7 @@ const InputSwitch = ({
           type={type}
           hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -323,6 +334,7 @@ const InputSwitch = ({
         return <DateField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -344,6 +356,7 @@ const InputSwitch = ({
         return <NumericField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -360,6 +373,7 @@ const InputSwitch = ({
         return <BooleanField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -378,6 +392,7 @@ const InputSwitch = ({
         return <LongtextField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -396,6 +411,7 @@ const InputSwitch = ({
         return <JsonField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -413,6 +429,7 @@ const InputSwitch = ({
         return <ColorField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -430,6 +447,7 @@ const InputSwitch = ({
         return <TextField
           type={type}
           name={name}
+          inputName={inputName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
