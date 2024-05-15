@@ -809,7 +809,7 @@ export default function RecordeditProvider({
       }
 
       // TODO assuming this is the first form!
-      const defaultValue = initialValues[`1-${column.name}`];
+      const defaultValue = initialValues[`c_1-${column.RID}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
       if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
@@ -891,9 +891,8 @@ export default function RecordeditProvider({
     });
 
     // update the raw data that will be sent to ermrsetjs
-    Object.keys(prefillObj.keys).forEach((k: string) => {
-      // TODO: verify this is working as expected
-      setValue(`${formValue}-${k}`, prefillObj.keys[k]);
+    Object.keys(prefillObj.keys).forEach((k: string, index: number) => {
+      setValue(`c_${formValue}-${prefillObj.fkColumnRIDs[index]}`, prefillObj.keys[k]);
     });
 
     // get the actual foreignkey data
