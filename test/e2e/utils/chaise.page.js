@@ -529,7 +529,7 @@ var recordEditPage = function() {
      */
     this.getArrayFieldContainer = function(colName, formNumber, baseType){
       formNumber = formNumber || 1;
-      const fieldName = `${formNumber}-${colName}`;
+      const fieldName = `c_${formNumber}-${colName}`;
 
       const elem = element(by.css(`.array-input-field-container-${fieldName}`));
 
