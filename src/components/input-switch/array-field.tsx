@@ -124,7 +124,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <InputSwitch
                   {...props}
                   name={newInputName}
-                  inputName={`${inputName}-${index}`}
+                  inputName={`${inputName}-${index}-val`}
                   type={getInputType({ name: baseArrayType })}
                   key={item.id}
                   displayExtraDateTimeButtons={true}
