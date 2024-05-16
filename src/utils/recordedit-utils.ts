@@ -567,8 +567,7 @@ export function populateEditInitialValues(
 
     // attach the foreign key data of the tuple
     Object.keys(tuple.linkedData).forEach((k) => {
-      // TODO: do I need to change this?
-      foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
+      foreignKeyData[`c_${formValue}-${tuple.linkedDataRIDs[k]}`] = tuple.linkedData[k];
     });
 
     columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
