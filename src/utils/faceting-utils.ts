@@ -52,11 +52,11 @@ export function getInitialFacetPanelOpen(config: RecordsetConfig, initialReferen
  * @param newOrder order in which the facets should be rendered 
  * @returns facet columns in newOrder
  */
-export const reorderFacets = (defaultFacetColumns:any[], newOrder:string[]) => {
+export const reorderFacets = (defaultFacetColumns:any[], newOrder:{name:string, open: boolean}[]) => {
   // Create a map to store the indices of elements in array `newOrder`
   const indexMap = new Map();
   for (let i = 0; i < newOrder.length; i++) {
-      indexMap.set(newOrder[i], i);
+      indexMap.set(newOrder[i].name, i);
   }
 
   const facetsInNewOrder = defaultFacetColumns.map((item: any, index: number) => [item, index])

@@ -28,6 +28,7 @@ import {
 } from 'react-beautiful-dnd';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 import { reorderFacets } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
 
 type FacetingProps = {
@@ -249,10 +250,10 @@ const Faceting = ({
     /**
      * Get Facet Order from LocalStorage
      */ 
-    const facetOrder = localStorage.getItem(facetListKey) || undefined;
+     const facetOrder = LocalStorage.getStorage(facetListKey) || undefined;
 
     // If facet order is not stored in localStorage, display items in default order
-    if (!facetOrder) {
+    if (!facetOrder) {      
       setOrderedFacets(reference.facetColumns.map((item: any, index: number) => [item, index]))
       return;
     }
@@ -260,8 +261,23 @@ const Faceting = ({
     /**
      * If facet order is present in localStorage, rearrange the items according to the stored order
      */
-    const facetsInOrder = reorderFacets(reference.facetColumns, JSON.parse(facetOrder))
+    const facetsInOrder = reorderFacets(reference.facetColumns, facetOrder)
     
+    /**
+     * Update isOpen state for facets based on stored state
+     */
+    if(facetModels && facetModels.length){
+      let copyOfFacetModels = Array.from(facetModels);
+
+      for(let i=0; i < facetsInOrder.length;i++){
+        let facetIndex = facetsInOrder[i][1];
+
+        copyOfFacetModels[facetIndex].isOpen = facetOrder[i].open
+      }
+
+      setFacetModels(copyOfFacetModels)
+    }
+
     setOrderedFacets(facetsInOrder)
 
     return () =>{
@@ -269,6 +285,16 @@ const Faceting = ({
       (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
     }
   }, [])
+
+  useEffect(()=>{
+    
+    if(!orderedFacets || !orderedFacets.length) return;
+
+    /**
+     * store isOpen state for facets to localStorage
+     */
+    LocalStorage.setStorage(facetListKey, orderedFacets.map(i => ({name : i[0].sourceObjectWrapper.name, open:facetModels[i[1]].isOpen})))
+  },[facetModels])
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -644,7 +670,7 @@ const Faceting = ({
    * Handle drag and drop events for draggable facets
    */
   const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(orderedFacets);
+    const items = Array.from(orderedFacets);    
 
     if (!result.destination) {
       const [reorderedItem] = items.splice(result.source.index, 1);
@@ -655,8 +681,7 @@ const Faceting = ({
     }
 
     // Save facet order to localStorage
-    localStorage.setItem(facetListKey, JSON.stringify(items.map(i => i[0].sourceObjectWrapper.name)))
-    
+    LocalStorage.setStorage(facetListKey, items.map(i => ({name : i[0].sourceObjectWrapper.name, open:facetModels[i[1]].isOpen})))
     setOrderedFacets(items);
   }
   //-------------------  render logic:   --------------------//
