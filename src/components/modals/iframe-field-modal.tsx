@@ -184,7 +184,7 @@ const IframeFieldModal = ({
                 continue;
               }
 
-              values[fieldName] = {
+              values[`c_${formNumber}-${col.RID}`] = {
                 file: colData,
                 url: URL.createObjectURL(colData),
                 filename: colData.name,
@@ -192,7 +192,7 @@ const IframeFieldModal = ({
               };
 
             } else {
-              values[fieldName] = colData;
+              values[`c_${formNumber}-${col.RID}`] = colData;
             }
           }
 
@@ -216,13 +216,13 @@ const IframeFieldModal = ({
      */
     const setEmpty = (col: any, values: any) => {
       if (col.isAsset) {
-        values[fieldName] = {
+        values[`c_${formNumber}-${col.RID}`] = {
           url: '',
           filename: '',
           filesize: 0
         }
       } else {
-        values[fieldName] = '';
+        values[`c_${formNumber}-${col.RID}`] = '';
       }
     };
 

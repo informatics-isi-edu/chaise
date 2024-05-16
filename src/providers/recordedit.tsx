@@ -865,7 +865,7 @@ export default function RecordeditProvider({
         action: getRecordeditLogAction(fkReq.logAction, cm.logStackPathChild),
         stack: getRecordeditLogStack(cm.logStackNode)
       };
-      fetchForeignKeyData([cm.column.name], fkReq.reference, logObj, flowControl.current.setValue);
+      fetchForeignKeyData([cm.column.RID], fkReq.reference, logObj, flowControl.current.setValue);
     });
   }
 
@@ -890,9 +890,9 @@ export default function RecordeditProvider({
       setValue(`c_${formValue}-${RID}`, prefillObj.rowname.value);
     });
 
-    // update the raw data that will be sent to ermrsetjs
-    Object.keys(prefillObj.keys).forEach((k: string, index: number) => {
-      setValue(`c_${formValue}-${prefillObj.fkColumnRIDs[index]}`, prefillObj.keys[k]);
+    // update the raw data that will be sent to ermrestjs
+    Object.keys(prefillObj.keys).forEach((k: string) => {
+      setValue(`c_${formValue}-${k}`, prefillObj.keys[k]);
     });
 
     // get the actual foreignkey data
@@ -922,7 +922,7 @@ export default function RecordeditProvider({
         stack: getRecordeditLogStack(stackNode)
       }
 
-      fetchForeignKeyData(prefillObj.fkColumnNames, ref, logObj, setValue);
+      fetchForeignKeyData(prefillObj.fkColumnRIDs, ref, logObj, setValue);
     }).catch(function (err: any) {
       $log.warn(err);
     });
@@ -936,30 +936,29 @@ export default function RecordeditProvider({
  * that's why after fetching the data we're only changing the displayed rowname
  * and the foreignKeyData, not the raw values sent to ermrestjs.
  * @param formValue which form it is
- * @param colNames the column names that will use this data
+ * @param colRIDs the columns RIDs that will use this data
  * @param fkRef the foreignkey reference that should be used for fetching data
  * @param logObject
  */
-  function fetchForeignKeyData(colNames: string[], fkRef: any, logObject: any, setValue: any) {
+  function fetchForeignKeyData(colRIDs: string[], fkRef: any, logObject: any, setValue: any) {
     // NOTE since this is create mode and we're disabling the addForm,
     // we can assume this is the first form
     const formValue = 1;
 
     // we should get the fk data since it might be used for rowname
     fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
-      // TODO: colNames should be ColRIDs
-      colNames.forEach(function (colName) {
+      colRIDs.forEach(function (RID) {
         // we should not set the raw default values since we want ermrest to handle those for us.
         // so we're just setting the displayed rowname to users
         // and also the foreignkeyData used for the domain-filter logic.
 
         // default value is validated
         if (page.tuples.length > 0) {
-          foreignKeyData.current[`c_${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`c_${formValue}-${colName}`, page.tuples[0].displayname.value);
+          foreignKeyData.current[`c_${formValue}-${RID}`] = page.tuples[0].data;
+          setValue(`c_${formValue}-${RID}`, page.tuples[0].displayname.value);
         } else {
-          foreignKeyData.current[`c_${formValue}-${colName}`] = {};
-          setValue(`c_${formValue}-${colName}`, '');
+          foreignKeyData.current[`c_${formValue}-${RID}`] = {};
+          setValue(`c_${formValue}-${RID}`, '');
         }
       });
     }).catch(function (err: any) {

@@ -246,7 +246,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               </button>
             </div>
           }
-          <input {...field} type='hidden' />
+          <input className={props.inputName} {...field} type='hidden' />
         </div>
       )}
     </InputField>

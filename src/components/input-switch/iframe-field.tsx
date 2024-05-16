@@ -74,7 +74,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
     const mapping = props.columnModel.column.inputIframeProps.fieldMapping;
     for (const k in mapping) {
       const col = mapping[k];
-      setValue(props.inputName, '');
+      setValue(`c_${usedFormNumber}-${col.RID}`, '');
     }
   }
 
@@ -141,7 +141,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                         <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
                     </span>}
                 </>}
-                fieldName={props.name}
+                fieldName={props.inputName}
                 columnModel={props.columnModel}
                 submissionRowValues={iframeProps.submissionRow}
                 formNumber={usedFormNumber}

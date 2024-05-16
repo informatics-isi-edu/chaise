@@ -156,7 +156,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   // used in scss:
   containerClassName.push(`array-input-field-container-${getInputType({ name: baseArrayType })}`);
   // used in testing:
-  containerClassName.push(`array-input-field-container-${name}`);
+  containerClassName.push(`array-input-field-container-${props.inputName}`);
 
   const addContainerClassName = ['add-element-container'];
   addContainerClassName.push(`add-element-container-${getInputType({ name: baseArrayType })}`);

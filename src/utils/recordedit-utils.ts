@@ -612,8 +612,11 @@ export function populateEditInitialValues(
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
-  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
+  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean, prefilled?: boolean) => {
     let v = formData['c_' + formNumber + '-' + col.RID];
+    
+    // TODO: this should be done different
+    if ((v === undefined || v === null) && prefilled) v = formData['c_' + formNumber + '-' + col.name];
 
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
@@ -657,7 +660,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
   reference.activeList.allOutBounds.forEach((col: any) => {
     col.foreignKey.colset.columns.forEach((fkCol: any) => {
       // set the submission only if it has value
-      setSubmission(fkCol, true);
+      setSubmission(fkCol);
     });
   });
 
@@ -667,7 +670,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       // the difference between here and above is that if a fk input is
       // visible and empty, we have to treat it as "null" instead of skipping it.
       col.foreignKey.colset.columns.forEach((fkCol: any) => {
-        setSubmission(fkCol);
+        setSubmission(fkCol, undefined, undefined, true);
       });
     } else if (col.isAsset) {
       // if due to copy the metadata values are set, use them
