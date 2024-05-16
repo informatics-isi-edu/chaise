@@ -319,48 +319,34 @@ describe('Record Add', function() {
     }
 
     describe('When url has a prefill query string param set, ', function() {
-        var testCookie = {};
         beforeAll(function() {
-            // Refresh the page
-            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
-                // Write a dummy cookie for creating a record in Accommodation table
-                testCookie = {
-                    fkColumnNames: ['npH9l-Il-ZAadyQ8VTPStA'], // A FK that Accommodation table has with Category table, column._name
-                    rowname: {
-                        value: "Castle"
-                    },
-                    keys: {id: 10007},
-                    origUrl: process.env.ERMREST_URL + "/catalog/" + browser.params.catalogId + "/entity/product-add:category/id=10007"
-                };
-                // NOTE: if origUrl is improper, the rowname value above is set in the input field
-                // origUrl is used to fetch the entity after the fact to get other data that may be used by domain-filter-pattern
-                // the input field value is updated when this entity returns
-                // NOTE: this test was updated to fix the constraint name, and include a proper url, key, and rowname
-                browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
+            var dataRow = browser.params.entities['product-add']['category'].find(function (entity) {
+                return entity.id == 10007;
             });
 
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/product-add:category/RID=" + dataRow.RID)
+            chaisePage.recordPageReady();
         });
 
-        it('should pre-fill fields from the prefill cookie', function() {
-            // Reload the page with prefill query param in url
-            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
+        it('should pre-fill fields from the prefill cookie', function(done) {
+            var addBtn = element(by.css('#rt-heading-Accommodations .add-records-link'))
 
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                return browser.manage().getCookie('test');
-            }).then(function(cookie) {
-                if (cookie) {
-                    var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
-                    expect(field.getText()).toBe(testCookie.rowname.value);
-                } else {
-                    // Fail the test
-                    expect('Cookie did not load').toEqual('but cookie should have loaded');
-                }
+            chaisePage.waitForClickableElement(addBtn).then(() => {
+                return addBtn.click();
+            }).then(() => {
+                return browser.getAllWindowHandles();
+            }).then((handles) => {
+                return browser.switchTo().window(handles[1]);
+            }).then(() => {
+                return chaisePage.recordeditPageReady();
+            }).then(() => {
+                var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
+                expect(field.getText()).toBe('Castle');
+
+                done();
+            }).catch((error) => {
+                done.fail(error);
             });
-        });
-
-        afterAll(function() {
-            browser.manage().deleteCookie('test');
         });
     });
 

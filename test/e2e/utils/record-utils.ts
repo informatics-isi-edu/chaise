@@ -503,7 +503,6 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
     await test.step('the opened form should have the proper prefilled values.', async () => {
       if (!newPage) return;
 
-      await page.pause();
       for await (const colName of Object.keys(params.prefilledValues)) {
         const expectedCol = params.prefilledValues[colName];
 
