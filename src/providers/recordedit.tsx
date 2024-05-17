@@ -813,7 +813,7 @@ export default function RecordeditProvider({
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
       if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
-        const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+        const defaultDisplay = column.getDefaultDisplay(prefillObj.valuesByColumnName);
 
         // if the data is missing, ermrestjs will return null
         // although the previous allPrefilled should already guard against this.
@@ -890,9 +890,6 @@ export default function RecordeditProvider({
       setValue(`c_${formValue}-${RID}`, prefillObj.rowname.value);
     });
 
-    // TODO: think about this more. Should the "keys" be what is stored?
-    //   are the keys 1 to 1 with the fkColumnRIDs?
-    //   fkColumnNames were fine to use before since those were the calculated displayname for pseudo columns...?
     // update the raw data that will be sent to ermrestjs
     Object.keys(prefillObj.keys).forEach((k: string) => {
       setValue(`c_${formValue}-${k}`, prefillObj.keys[k]);

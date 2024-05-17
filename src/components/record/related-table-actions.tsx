@@ -399,7 +399,7 @@ const RelatedTableActions = ({
       const submissionRows: any[] = [];
       selectedRows.forEach((sr: SelectedRow, index: number) => {
         // add the values from the main table key
-        submissionRows[index] = { ...fkDetails.keys };
+        submissionRows[index] = { ...fkDetails.valuesByColumnName };
 
         // add the values from the related table key (selected rows)
         fkToRelated.key.colset.columns.forEach((col: any) => {

@@ -169,9 +169,13 @@ export interface UploadFileObject {
 
 export interface PrefillObject {
   /**
-   * the raw value of keys that should be prefilled
+   * the raw values of each column that should be prefilled keyed by column RID
    */
   keys: any;
+  /**
+   * the raw values of each column that should be prefilled keyed by column name
+   */
+  valuesByColumnName: any;
   /**
    * the foreignkey columns that should be prefilled
    */

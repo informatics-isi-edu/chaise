@@ -69,7 +69,7 @@ export function columnToColumnModel(column: any, isHidden?: boolean, queryParams
         isPrefilled = true;
       }
 
-    } else if (column.name in prefillObj.keys) {
+    } else if (column.RID in prefillObj.keys) {
       isPrefilled = true;
     }
   }
@@ -285,8 +285,8 @@ export function populateCreateInitialValues(
       }
 
       // if the column is prefilled, get the prefilled value instead of default
-      if (prefillObj && column.name in prefillObj.keys) {
-        defaultValue = prefillObj.keys[column.name];
+      if (prefillObj && column.RID in prefillObj.keys) {
+        defaultValue = prefillObj.keys[column.RID];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
@@ -347,7 +347,7 @@ export function populateCreateInitialValues(
             });
 
             if (allPrefilled || allInitialized) {
-              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
+              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.valuesByColumnName : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -611,11 +611,8 @@ export function populateEditInitialValues(
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
-  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean, prefilled?: boolean) => {
+  const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
     let v = formData['c_' + formNumber + '-' + col.RID];
-    
-    // TODO: this should be done different
-    if ((v === undefined || v === null) && prefilled) v = formData['c_' + formNumber + '-' + col.name];
 
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
@@ -670,7 +667,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       // the difference between here and above is that if a fk input is
       // visible and empty, we have to treat it as "null" instead of skipping it.
       col.foreignKey.colset.columns.forEach((fkCol: any) => {
-        setSubmission(fkCol, undefined, undefined, true);
+        setSubmission(fkCol);
       });
     } else if (col.isAsset) {
       // if due to copy the metadata values are set, use them
@@ -744,7 +741,11 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
   }
 
   // make sure all the keys are in the object
-  if (!(('keys' in cookie) && ('fkColumnNames' in cookie) && ('fkColumnRIDs' in cookie) && ('origUrl' in cookie) && ('rowname' in cookie))) {
+  if (!(
+    ('keys' in cookie) && ('valuesByColumnName' in cookie) && 
+    ('fkColumnNames' in cookie) && ('fkColumnRIDs' in cookie) && 
+    ('origUrl' in cookie) && ('rowname' in cookie)
+  )) {
     return null;
   }
 
@@ -755,6 +756,7 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
 
   return {
     keys: cookie.keys,
+    valuesByColumnName: cookie.valuesByColumnName,
     fkColumnNames: cookie.fkColumnNames,
     fkColumnRIDs: cookie.fkColumnRIDs,
     origUrl: cookie.origUrl,
@@ -779,7 +781,7 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
   return column.foreignKey.colset.columns.every((col: any) => (
     // != to guard against both null and undefined
     // eslint-disable-next-line eqeqeq
-    col.name in prefillObj.keys && prefillObj.keys[col.name] != null
+    col.RID in prefillObj.keys && prefillObj.keys[col.RID] != null
   ));
 }
 
