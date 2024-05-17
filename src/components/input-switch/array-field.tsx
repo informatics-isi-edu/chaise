@@ -203,7 +203,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               additionalControllerRules={{
                 validate: {
                   addOrDiscardValue: (v: any) => {
-                    return !addNewInputhasValue(baseArrayType, v) || `Click 'Add' to append value to array  OR  discard it before saving the form`
+                    return !addNewInputhasValue(baseArrayType, v) || 'Click \'Add\' to append value to array  OR  discard it before saving the form'
                   }
                 }
               }}
