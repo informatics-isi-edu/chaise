@@ -65,15 +65,7 @@ export type InputFieldProps = {
    * `optional`additional controller rules for the input field.
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
    */
-   additionalControllerRules?: {
-    [key: string]: (string | number | boolean | RegExp | Function | Object) | {
-      value: (boolean | number | RegExp),
-      /**
-       * Error message
-       */
-      message: string
-    }
-  }
+   additionalControllerRules? : any
 }
 
 
@@ -138,7 +130,21 @@ const InputField = ({
   if (requiredInput) {
     controllerRules.required = ERROR_MESSAGES.REQUIRED;
   }
-
+  
+  // Combine validation rules
+  if(additionalControllerRules?.validate){
+    if(controllerRules.validate){
+      if(typeof controllerRules.validate === 'function'){
+        controllerRules.validate = {invalidValue : controllerRules.validate, ...additionalControllerRules.validate}
+      }else{
+        controllerRules.validate = {...controllerRules.validate, ...additionalControllerRules.validate}
+      }
+    }else{
+      controllerRules.validate = {...additionalControllerRules.validate}
+    }
+    delete additionalControllerRules.validate;
+  }
+  
   const formInput = useController({
     name,
     control,

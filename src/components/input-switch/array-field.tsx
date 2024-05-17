@@ -38,6 +38,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
       required: requiredInput
     }
   });
+
   /**
    * We use this to keep track of errors in array field
    */
@@ -49,6 +50,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
    * We use this to keep track of errors in new value input box
    */
   const formState = useFormState({ name: addNewValueInputName });
+
   /**
    * We use this to keep track of value in new value input box
    */
@@ -57,7 +59,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   // register the input that is used for adding new value
   register(addNewValueInputName, {
     value: '',
-    onChange: () => trigger(addNewValueInputName),
+    onChange: () => trigger(addNewValueInputName)
   });
 
   //-------------------  callbacks:   --------------------//
@@ -96,10 +98,11 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
       setValue(`${addNewValueInputName}-date`, '')
       setValue(`${addNewValueInputName}-time`, '')
     }
+    trigger(addNewValueInputName)
   }
 
-  const addNewInputhasValue = (): Boolean => {
-    return baseArrayType === 'boolean' ? typeof addNewValue === 'boolean' : addNewValue
+  const addNewInputhasValue = (baseType: any, v: any): boolean => {
+    return baseType === 'boolean' ? typeof v === 'boolean' : !!v
   }
 
   //-------------------  render logic:   --------------------//
@@ -197,6 +200,13 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}
+              additionalControllerRules={{
+                validate: {
+                  addOrDiscardValue: (v: any) => {
+                    return !addNewInputhasValue(baseArrayType, v) || `Click 'Add' to append value to array  OR  discard it before saving the form`
+                  }
+                }
+              }}
             />
             <button
               type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
@@ -209,22 +219,16 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                * 1. There are validation errors in the addNewValue field.
                * 2. The addNewValue field value is empty
                */
-              disabled={Object.keys(formState.errors).includes(addNewValueInputName) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+              disabled={(formState.errors[addNewValueInputName] as any)?.type !== 'addOrDiscardValue' || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
             >Add</button>
           </div>
         </div>
-        {addNewInputhasValue() && !Object.keys(formState.errors).includes(addNewValueInputName) ?
+        {
+          Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
           <DisplayValue
-            internal as='span' className='input-switch-error text-primary'
-            value={{ isHTML: true, value: 'Click Add to append value to array' }}
+            internal as='span' className='input-switch-error text-danger'
+            value={{ isHTML: true, value: 'Please enter a value for this Array field' }}
           />
-          :
-          (Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
-            <DisplayValue
-              internal as='span' className='input-switch-error text-danger'
-              value={{ isHTML: true, value: 'Please enter a value for this Array field' }}
-            />
-          )
         }
       </div>
     </>
