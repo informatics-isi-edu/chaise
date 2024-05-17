@@ -330,18 +330,25 @@ describe('Record Add', function() {
 
         it('should pre-fill fields from the prefill cookie', function(done) {
             var addBtn = element(by.css('#rt-heading-Accommodations .add-records-link'))
+            var allWindows;
 
             chaisePage.waitForClickableElement(addBtn).then(() => {
                 return addBtn.click();
             }).then(() => {
                 return browser.getAllWindowHandles();
             }).then((handles) => {
-                return browser.switchTo().window(handles[1]);
+                allWindows = handles
+                return browser.switchTo().window(allWindows[1]);
             }).then(() => {
                 return chaisePage.recordeditPageReady();
             }).then(() => {
                 var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
                 expect(field.getText()).toBe('Castle');
+
+                // - Go back to initial Record page
+                browser.close();
+                return browser.switchTo().window(allWindows[0]);
+            }).then(() => {
 
                 done();
             }).catch((error) => {
@@ -372,11 +379,11 @@ describe('Record Add', function() {
                 expect(element(by.id('rBold1')).getText()).toBe("**Something Bold**",'first row, first column missmatch');
                 expect(element(by.id('rBold2')).getText()).toBe("__Something Bold__",'first row, second column missmatch');
                 expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe("<strong>Something Bold</strong>",'first row, third column missmatch');
-                done();
             }).then(function() {
                 // - Go back to initial Record page
                 browser.close();
                 browser.switchTo().window(allWindows[0]);
+                done();
             }).catch(function(error) {
                 done.fail(error);
             });
