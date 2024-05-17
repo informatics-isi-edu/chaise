@@ -656,8 +656,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
   reference.activeList.allOutBounds.forEach((col: any) => {
     col.foreignKey.colset.columns.forEach((fkCol: any) => {
       // set the submission only if it has value
-      // TODO: why was this changed
-      setSubmission(fkCol);
+      setSubmission(fkCol, true);
     });
   });
 
