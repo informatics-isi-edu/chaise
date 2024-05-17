@@ -503,7 +503,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         await removeValBtn.click();
                       }
 
-                      let addButton;
+                      let addButton, errorElement;
+                      const addOrDiscardError = 'Click \'Add\' to append value to array OR discard it before saving the form';
+
                       switch (col.baseType) {
                         case 'date':
                         case 'integer':
@@ -513,7 +515,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                           for(let value of valuesToAdd){
                             await addNewValInput.sendKeys(value);
-                            addButton = arrayField.getAddButton()
+
+                            errorElement = await arrayField.getErrorMessageElement()
+                            await expect(errorElement.getText()).toBe(addOrDiscardError)
+                            addButton = await arrayField.getAddButton()
                             await addButton.click();
                           }
 
@@ -532,6 +537,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             for(let value of valuesToAdd){
                               await chaisePage.recordEditPage.selectDropdownValue(addNewValueDropDown, value);
+                              errorElement = await arrayField.getErrorMessageElement()
+                              await expect(errorElement.getText()).toBe(addOrDiscardError)
                               await addButton.click()
                             }
 
@@ -546,6 +553,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                           let addNewValDateInput, addNewValTimeInput;
 
                           [addNewValDateInput, addNewValTimeInput] = arrayField.getAddNewValueInputElement();
+                          let clrBttn = await arrayField.getClearInputButton()
 
                           for(let timeStamp of valuesToAdd){
 
@@ -553,13 +561,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             let timeValue = timeStamp.slice(11, 19)
 
                             // Input Valid Date and Time
+                            await clrBttn.click()
                             await addNewValDateInput.sendKeys(protractor.Key.BACK_SPACE,dateValue);
                             await addNewValTimeInput.sendKeys(timeValue)
 
                             addButton = arrayField.getAddButton();
                             await addButton.click();
                           }
-
                           const timeStampsRendered = await arrayField.getArrayFieldValues()
                           expect(timeStampsRendered.length).toBe(valuesToAdd.length);
                           for(let i = 0;i < valuesToAdd.length;i++){

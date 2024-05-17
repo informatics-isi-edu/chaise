@@ -191,14 +191,18 @@ const MultiFormInputRow = ({
      * adjust width to leave enough space for 'Add' button
      */
     if (textareaArrayField) {
+      const addButton = document.querySelector('.multi-form-input .array-input-field-container-longtext .add-element-container .add-button') as HTMLElement
+      const addButtonWidth = addButton.getBoundingClientRect().width + addButton.offsetWidth;
+      
+      let newContainerWidth;
       if (windowRef.innerWidth < 1800) {
-        const newContainerWidth = nonScrollableDiv.offsetWidth - 66;
-        textareaArrayField.style.width = `${newContainerWidth}px`;
-        textareaArrayField.style.maxWidth = `${newContainerWidth}px`;
+        newContainerWidth = nonScrollableDiv.offsetWidth - addButtonWidth;
       } else {
-        textareaArrayField.style.width = '1134px';
-        textareaArrayField.style.maxWidth = '1134px';
+        newContainerWidth = 1200 - addButtonWidth;
       }
+
+      textareaArrayField.style.width = `${newContainerWidth}px`;
+      textareaArrayField.style.maxWidth = `${newContainerWidth}px`;
     }
   };
 
