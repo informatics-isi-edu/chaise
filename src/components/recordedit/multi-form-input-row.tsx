@@ -52,7 +52,7 @@ const MultiFormInputRow = ({
   } = useRecordedit();
 
   const cm = columnModels[columnModelIndex];
-  const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext';
+  const isTextArea = cm.inputType === 'markdown' || cm.inputType === 'longtext' || (cm.inputType === 'array' && cm.column.type.baseType.name === 'longtext');
   const isForeignKey = cm.column.isForeignKey;
 
   const colName = cm.column.name;
@@ -173,13 +173,31 @@ const MultiFormInputRow = ({
   */
   const updateTextareaWidth = () => {
     const textarea = document.querySelector('.input-switch-multi-textarea') as HTMLElement;
+    const textareaArrayField = document.querySelector('.multi-form-input .array-input-field-container-longtext .add-element-container textarea') as HTMLElement
+
     const nonScrollableDiv = document.querySelector('.multi-form-input-row') as HTMLElement;
+
     if (textarea) {
       if (windowRef.innerWidth < 1800) {
         const newContainerWidth = nonScrollableDiv.offsetWidth;
         textarea.style.width = `${newContainerWidth}px`;
       } else {
         textarea.style.width = '1200px';
+      }
+    }
+
+    /**
+     * Applicable to textarea input of an ArrayField
+     * adjust width to leave enough space for 'Add' button
+     */
+    if (textareaArrayField) {
+      if (windowRef.innerWidth < 1800) {
+        const newContainerWidth = nonScrollableDiv.offsetWidth - 66;
+        textareaArrayField.style.width = `${newContainerWidth}px`;
+        textareaArrayField.style.maxWidth = `${newContainerWidth}px`;
+      } else {
+        textareaArrayField.style.width = '1134px';
+        textareaArrayField.style.maxWidth = '1134px';
       }
     }
   };
