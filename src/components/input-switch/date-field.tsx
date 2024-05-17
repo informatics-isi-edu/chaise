@@ -9,6 +9,7 @@ import { useFormContext } from 'react-hook-form';
 // utils
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type DateFieldProps = InputFieldProps & {
@@ -19,8 +20,7 @@ type DateFieldProps = InputFieldProps & {
   /**
    * whether we should show the label or not
    */
-  displayDateTimeLabels?: boolean,
-  inputName?: string
+  displayDateTimeLabels?: boolean
 }
 
 
@@ -47,7 +47,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <IMaskInput
               // ------------ input props ----------- //
-              className={`${props.inputClasses} input-switch ${props.inputName} ${showClear ? 'date-input-show-clear' : ''}`}
+              className={`${props.inputClasses} input-switch ${makeSafeIdAttr(props.inputName)} ${showClear ? 'date-input-show-clear' : ''}`}
               disabled={props.disableInput}
               placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.date}
               /**

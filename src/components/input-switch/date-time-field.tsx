@@ -10,9 +10,8 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 // utils
 import { ERROR_MESSAGES, formatDatetime, VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
-
 
 type DateTimeFieldProps = InputFieldProps & {
   /**
@@ -204,14 +203,14 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             type={'date'}
             name={`${props.name}-date`}
             classes={props.classes ? props.classes : ''}
-            inputClasses={`${props.inputClasses} ${props.inputName}-date`}
+            inputClasses={props.inputClasses}
             clearClasses={props.clearClasses}
             placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.date}
             disableInput={props.disableInput}
             displayErrors={false}
             displayExtraDateTimeButtons={false}
             displayDateTimeLabels={props.displayDateTimeLabels}
-            inputName=''
+            inputName={`${props.inputName}-date`}
           />
           <div className='chaise-input-group input-switch-time'>
             {props.displayDateTimeLabels && <div className='chaise-input-group-prepend'>
@@ -219,7 +218,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             </div>}
             <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
               <input
-                className={`${props.timeClasses} input-switch ${props.inputName}-time ${
+                className={`${props.timeClasses} input-switch ${makeSafeIdAttr(props.inputName)}-time ${
                   showTimeClear() ? 'time-input-show-clear' : ''
                 }`}
                 type='text' 
@@ -246,7 +245,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               </button>
             </div>
           }
-          <input className={props.inputName} {...field} type='hidden' />
+          <input className={makeSafeIdAttr(props.inputName)} {...field} type='hidden' />
         </div>
       )}
     </InputField>

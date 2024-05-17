@@ -4,7 +4,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 
 // utils
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const NumericField = (props: InputFieldProps): JSX.Element => {
   const rules = {
@@ -16,7 +16,7 @@ const NumericField = (props: InputFieldProps): JSX.Element => {
       {(field, onChange, showClear, clearInput) => (
         <div className={`chaise-input-control has-feedback input-switch-numeric ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
           <input
-            className={`${props.inputClasses} input-switch ${props.inputName}`} 
+            className={`${props.inputClasses} input-switch ${makeSafeIdAttr(props.inputName)}`} 
             {...field}
             disabled={props.disableInput} 
             placeholder={props.placeholder} 

@@ -14,7 +14,6 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue, createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { asyncTimeout } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type MultiFormInputRowProps = {
@@ -57,8 +56,9 @@ const MultiFormInputRow = ({
   const isForeignKey = cm.column.isForeignKey;
 
   const colName = cm.column.name;
-  const colRid = cm.column.RID;
-  const inputName = `c_${MULTI_FORM_INPUT_FORM_VALUE}-${colRid}`;
+  const colRID = cm.column.RID;
+  
+  const inputName = `c_${MULTI_FORM_INPUT_FORM_VALUE}-${colRID}`;
 
   const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
   // Since this is used as part of a useEffect, useWatch hook needs to be used to keep the value updated to trigger the useEffect
@@ -466,7 +466,7 @@ const MultiFormInputRow = ({
             disableInput={false}
             requiredInput={false}
             name={inputName}
-            inputName={`c_${MULTI_FORM_INPUT_FORM_VALUE}-${makeSafeIdAttr(colName)}`}
+            inputName={`c_${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`}
             inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
             type={cm.inputType}
             classes='column-cell-input'

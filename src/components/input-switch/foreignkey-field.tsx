@@ -1,24 +1,23 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
 import {
-  appModes, MULTI_FORM_INPUT_FORM_VALUE, RecordeditColumnModel, RecordeditForeignkeyCallbacks
+  appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -227,7 +226,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               </button>
             </div>}
           </div>
-          <input className={`${props.inputClasses} ${props.inputName}`} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} {...field} type='hidden' />
           {
             recordsetModalProps &&
             <RecordsetModal

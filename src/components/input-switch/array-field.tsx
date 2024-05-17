@@ -15,6 +15,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
 type ArrayFieldProps = InputFieldProps & {
@@ -156,7 +157,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   // used in scss:
   containerClassName.push(`array-input-field-container-${getInputType({ name: baseArrayType })}`);
   // used in testing:
-  containerClassName.push(`array-input-field-container-${props.inputName}`);
+  containerClassName.push(`array-input-field-container-${makeSafeIdAttr(props.inputName)}`);
 
   const addContainerClassName = ['add-element-container'];
   addContainerClassName.push(`add-element-container-${getInputType({ name: baseArrayType })}`);

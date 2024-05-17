@@ -1,11 +1,15 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+
 //hooks
 import { useRef } from 'react';
+
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+
 const JsonField = (props: InputFieldProps): JSX.Element => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const jsonFieldValidation = (value: string) => {
@@ -31,7 +35,7 @@ const JsonField = (props: InputFieldProps): JSX.Element => {
             <textarea
               placeholder={props.placeholder} 
               rows={5} 
-              className={`${props.inputClasses} input-switch ${props.inputName} ${
+              className={`${props.inputClasses} input-switch ${makeSafeIdAttr(props.inputName)} ${
                 hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
               }`}
               {...field} 

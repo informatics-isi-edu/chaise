@@ -20,6 +20,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { populateSubmissionRow, populateLinkedData } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type IframeFieldProps = InputFieldProps & {
   /**
@@ -122,7 +123,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
               </button>
             </div>}
           </div>
-          <input className={`${props.inputClasses} ${props.inputName}`} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} {...field} type='hidden' />
           {
             showModal && iframeProps &&
             <AlertsProvider>

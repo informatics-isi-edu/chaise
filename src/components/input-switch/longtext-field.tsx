@@ -7,8 +7,8 @@ import MarkdownPreviewModal from '@isrd-isi-edu/chaise/src/components/modals/mar
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
-import { useFormContext, useController } from 'react-hook-form';
+import { useState, useRef } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 // utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
@@ -168,7 +168,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 <textarea
                   placeholder={props.placeholder}
                   rows={5}
-                  className={`${props.inputClasses} input-switch ${props.inputName} ${
+                  className={`${props.inputClasses} input-switch ${makeSafeIdAttr(props.inputName)} ${
                     hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
                   }`}
                   {...field}

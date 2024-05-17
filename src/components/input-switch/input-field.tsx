@@ -208,7 +208,7 @@ const InputField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${inputName}`} style={styles} onKeyDown={handleKeyDown}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(inputName)}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message &&
         <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />

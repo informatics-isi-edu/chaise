@@ -6,8 +6,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react';
-import { useFormContext, useController } from 'react-hook-form';
+import { ChangeEvent, useRef, useState } from 'react';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -16,6 +15,7 @@ import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/mode
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type FileFieldProps = InputFieldProps & {
@@ -180,7 +180,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}
-            className={`${props.inputClasses} chaise-input-hidden ${props.inputName}`}
+            className={`${props.inputClasses} chaise-input-hidden ${makeSafeIdAttr(props.inputName)}`}
             name={props.name}
             type='file'
             accept={fileExtensions}
