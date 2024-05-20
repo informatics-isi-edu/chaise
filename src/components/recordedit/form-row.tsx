@@ -321,6 +321,25 @@ const FormRow = ({
     );
   };
 
+
+  useEffect(()=>{
+    /**
+     * This modifies row width when the multi-form-row is enabled for the field
+     * We set the width of the row to match the form width to avoid inputs from rendering beyond the limits of the form.
+     */
+    const anotherRow = document.querySelector('.form-inputs-row:not(.highlighted-row)') as HTMLElement
+    const highlightedRow = document.querySelector('.form-inputs-row.highlighted-row') as HTMLElement
+    
+    
+    if(isActiveForm && highlightedRow && highlightedRow.scrollWidth){
+      highlightedRow.style.minWidth = 'none';
+      highlightedRow.style.maxWidth = 'none';
+      highlightedRow.style.width = `${anotherRow?.scrollWidth}px`;
+    } 
+  },[isActiveForm])
+  
+
+
   return (
     <div className={`form-inputs-row${isActiveForm ? ' highlighted-row' : ''}${hasInlineComment ? ' with-inline-tooltip' : ''}`} ref={container}>
       {hasInlineComment &&
