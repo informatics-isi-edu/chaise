@@ -225,6 +225,10 @@ export default class RecordsetLocators {
     return facet.locator(`.fc-heading-${idx} button`);
   }
 
+  static getFacetSpinner(facet: Locator): Locator {
+    return facet.locator('.facet-header-icon .facet-spinner')
+  }
+
   // get child of accordion group, sibling to accordion heading
   static getFacetCollapse(facet: Locator): Locator {
     return facet.locator('.accordion-collapse');
@@ -246,8 +250,20 @@ export default class RecordsetLocators {
     return facet.locator('.facet-search-input');
   }
 
+  static getFacetSearchBoxById(facet: Locator): Locator {
+    return facet.locator('.chaise-search-box');
+  }
+
+  static getFacetSearchPlaceholderById(facet: Locator): Locator {
+    return RecordsetLocators.getFacetSearchBoxById(facet).locator('.chaise-input-placeholder');
+  }
+
   static getFacetSearchBoxClear(facet: Locator): Locator {
     return facet.locator('.remove-search-btn');
+  }
+
+  static getList(facet: Locator): Locator {
+    return facet.locator('.chaise-list-container');
   }
 
   static getShowMore(facet: Locator): Locator {
@@ -270,18 +286,22 @@ export default class RecordsetLocators {
   static getFacetRangeTimestampInputs(facet: Locator): TimestampRangeInputLocators {
     return {
       // date
-      minDateInput: facet.locator('ts-date-range-min'),
-      maxDateInput: facet.locator('ts-date-range-max'),
-      minDateClear: facet.locator('min-date-clear'),
-      maxDateClear: facet.locator('max-date-clear'),
+      minDateInput: facet.locator('.ts-date-range-min'),
+      maxDateInput: facet.locator('.ts-date-range-max'),
+      minDateClear: facet.locator('.min-date-clear'),
+      maxDateClear: facet.locator('.max-date-clear'),
 
       // time
-      minTimeInput: facet.locator('ts-time-range-min'),
-      maxTimeInput: facet.locator('ts-time-range-max'),
-      minTimeClear: facet.locator('min-time-clear'),
-      maxTimeClear: facet.locator('max-time-clear'),
+      minTimeInput: facet.locator('.ts-time-range-min'),
+      maxTimeInput: facet.locator('.ts-time-range-max'),
+      minTimeClear: facet.locator('.min-time-clear'),
+      maxTimeClear: facet.locator('.max-time-clear'),
       submit: facet.locator('.range-input-submit-btn')
     }
+  }
+
+  static getRangeInputValidationError(facet: Locator): Locator {
+    return facet.locator('.range-input-error');
   }
 
   /* histogram selectors */

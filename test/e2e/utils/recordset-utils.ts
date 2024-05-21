@@ -37,3 +37,60 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
     index++;
   }
 }
+
+/**
+ * Opens the facet and checks the title of filter options
+ * @param  {string}   name          title of facet
+ * @param  {int}   facetIdx         facet index
+ * @param  {Array}   filterOptions   array of filter titles
+ */
+export async function openFacetAndTestFilterOptions(facet: Locator, name: string, facetIdx: number, filterOptions: string[]) {
+  // open facet
+  await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
+  // wait for facet to open
+  await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+
+  // wait for facet checkboxes to load
+  await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(filterOptions.length);
+
+  // wait for list to be fully visible
+  await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+
+  const facetOptions = RecordsetLocators.getFacetOptions(facet);
+  const numFacets = await facetOptions.count();
+
+  for (let i = 0; i < numFacets; i++) {
+    await expect.soft(facetOptions.nth(i)).toHaveText(filterOptions[i]);
+  }
+}
+
+/**
+ * It will select the given filter, and then clear all the filters.
+ * Assumptions:
+ * - Only the current facet column can have filters.
+ * - Current facet column is already open.
+ * @param  {int}   facetIdx     facet index
+ * @param  {int}   filterIdx    filter index
+ * @param  {string}   facetName    facet title
+ * @param  {string}   filterName   filter title in the main content
+ * @param  {int}   numRowsAfter number of rows after applying the filter
+ * @param  {Function} done
+ */
+// eslint-disable-next-line max-len
+export async function testSelectFacetOption(container: Page | Locator, facetIdx: number, filterIdx: number, facetName: string, filterName: string, numRowsAfter: number) {
+  const facet = RecordsetLocators.getFacetById(container, facetIdx);
+  const facetOption = RecordsetLocators.getFacetOption(facet, filterIdx);
+  const clearAll = RecordsetLocators.getClearAllFilters(container);
+
+  await facetOption.click()
+  await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRowsAfter);
+
+  // wait for facet filters to load
+  const facetFilters = RecordsetLocators.getFacetFilters(container);
+  await expect.soft(facetFilters).toHaveCount(1);
+  await expect.soft(facetFilters.nth(0)).toHaveText(filterName);
+      
+  await clearAll.click();
+  await expect.soft(clearAll).not.toBeVisible();
+  await expect.soft(facetOption).not.toBeChecked();
+};
