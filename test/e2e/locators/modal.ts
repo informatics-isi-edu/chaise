@@ -48,11 +48,11 @@ export default class ModalLocators {
     return page.locator('.duplicate-saved-query-modal');
   }
 
-  static getIframeFieldModal(page: Page) : Locator {
+  static getIframeFieldModal(page: Page): Locator {
     return page.locator('.iframe-field-popup');
   }
 
-  static getIframeFieldCloseConfirmModal(page: Page) : Locator {
+  static getIframeFieldCloseConfirmModal(page: Page): Locator {
     return page.locator('.confirm-iframe-close-modal');
   }
 
@@ -82,6 +82,14 @@ export default class ModalLocators {
     return modal.locator('#multi-select-submit-btn');
   }
 
+  // --------- error modal  functions ------------ //
+  static getToggleErrorDetailsButton(modal: Locator): Locator {
+    return modal.locator('.toggle-error-details');
+  }
+
+  static getErrorDetails(modal: Locator): Locator {
+    return modal.locator('.error-details');
+  }
 
   // --------- share cite related functions ------------ //
 
