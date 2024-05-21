@@ -69,7 +69,7 @@ export function columnToColumnModel(column: any, isHidden?: boolean, queryParams
         isPrefilled = true;
       }
 
-    } else if (column.RID in prefillObj.keys) {
+    } else if (column.name in prefillObj.keys) {
       isPrefilled = true;
     }
   }
@@ -285,8 +285,9 @@ export function populateCreateInitialValues(
       }
 
       // if the column is prefilled, get the prefilled value instead of default
-      if (prefillObj && column.RID in prefillObj.keys) {
-        defaultValue = prefillObj.keys[column.RID];
+      if (prefillObj && column.name in prefillObj.keys) {
+        const columnRID = prefillObj.columnNameToRID[column.name]
+        defaultValue = prefillObj.keys[columnRID];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
@@ -347,7 +348,7 @@ export function populateCreateInitialValues(
             });
 
             if (allPrefilled || allInitialized) {
-              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.valuesByColumnName : initialValues);
+              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -734,30 +735,29 @@ export function populateLinkedData(reference: any, formNumber: number, foreignKe
  */
 export function getPrefillObject(queryParams: any): null | PrefillObject {
   if (!queryParams.prefill) return null;
-  const cookie = CookieService.getCookie(queryParams.prefill, true);
+  const cookie = CookieService.getCookie(queryParams.prefill, true) as PrefillObject;
   if (cookie == null || typeof cookie !== 'object') {
     return null;
   }
 
   // make sure all the keys are in the object
   if (!(
-    ('keys' in cookie) && ('valuesByColumnName' in cookie) && 
-    ('fkColumnNames' in cookie) && ('fkColumnRIDs' in cookie) && 
+    ('keys' in cookie) && ('columnNameToRID' in cookie) && 
+    ('fkColumnNames' in cookie) && 
     ('origUrl' in cookie) && ('rowname' in cookie)
   )) {
     return null;
   }
 
-  // valide the values
-  if (!Array.isArray(cookie.fkColumnNames) || !Array.isArray(cookie.fkColumnRIDs) || typeof cookie.origUrl !== 'string') {
+  // validate the values
+  if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
     return null;
   }
 
   return {
     keys: cookie.keys,
-    valuesByColumnName: cookie.valuesByColumnName,
     fkColumnNames: cookie.fkColumnNames,
-    fkColumnRIDs: cookie.fkColumnRIDs,
+    columnNameToRID: cookie.columnNameToRID,
     origUrl: cookie.origUrl,
     rowname: cookie.rowname
   }
@@ -780,7 +780,7 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
   return column.foreignKey.colset.columns.every((col: any) => (
     // != to guard against both null and undefined
     // eslint-disable-next-line eqeqeq
-    col.RID in prefillObj.keys && prefillObj.keys[col.RID] != null
+    col.name in prefillObj.keys && prefillObj.keys[col.name] != null
   ));
 }
 

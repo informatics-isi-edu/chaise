@@ -813,7 +813,7 @@ export default function RecordeditProvider({
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
       if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
-        const defaultDisplay = column.getDefaultDisplay(prefillObj.valuesByColumnName);
+        const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
 
         // if the data is missing, ermrestjs will return null
         // although the previous allPrefilled should already guard against this.
@@ -886,13 +886,15 @@ export default function RecordeditProvider({
     const formValue = 1;
 
     // update the displayed value
-    prefillObj.fkColumnRIDs.forEach(function (RID: string) {
-      setValue(`c_${formValue}-${RID}`, prefillObj.rowname.value);
+    prefillObj.fkColumnNames.forEach((name: string) => {
+      const colRID = prefillObj.columnNameToRID[name];
+      setValue(`c_${formValue}-${colRID}`, prefillObj.rowname.value);
     });
 
     // update the raw data that will be sent to ermrestjs
-    Object.keys(prefillObj.keys).forEach((k: string) => {
-      setValue(`c_${formValue}-${k}`, prefillObj.keys[k]);
+    Object.keys(prefillObj.keys).forEach((columnName: string) => {
+      const colRID = prefillObj.columnNameToRID[columnName];
+      setValue(`c_${formValue}-${colRID}`, prefillObj.keys[columnName]);
     });
 
     // get the actual foreignkey data
@@ -922,7 +924,11 @@ export default function RecordeditProvider({
         stack: getRecordeditLogStack(stackNode)
       }
 
-      fetchForeignKeyData(prefillObj.fkColumnRIDs, ref, logObj, setValue);
+      const fkColumnRIDs: string[] = []
+      prefillObj.fkColumnNames.forEach((name: string) => {
+        fkColumnRIDs.push(prefillObj.columnNameToRID[name]);
+      });
+      fetchForeignKeyData(fkColumnRIDs, ref, logObj, setValue);
     }).catch(function (err: any) {
       $log.warn(err);
     });

@@ -44,7 +44,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const arrayFormState = useFormState({ name: name });
 
   const addNewValueName = `${name}-new-item`;
-  const addNewValueInputName = `${props.inputClassName}-new-item`;
+  const addNewValueInputClassName = `${props.inputClassName}-new-item`;
 
   /**
    * We use this to keep track of errors in new value input box
@@ -194,7 +194,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
             <InputSwitch
               type={getInputType({ name: baseArrayType })}
               name={addNewValueName}
-              inputClassName={addNewValueInputName}
+              inputClassName={addNewValueInputClassName}
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}
