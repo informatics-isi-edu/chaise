@@ -301,6 +301,16 @@ export class ConfigService {
       ConfigService._applyHostConfigRules(catalogAnnotation, cc, true);
     }
 
+    // make sure defaultCatalog is a string even if it's defined as a number.
+    if (typeof cc.defaultCatalog === 'number') {
+      cc.defaultCatalog = `${cc.defaultCatalog}`;
+    }
+
+    // make sure resolverImplicitCatalog is a string even if it's defined as a number.
+    if (typeof cc.resolverImplicitCatalog === 'number') {
+      cc.resolverImplicitCatalog = `${cc.resolverImplicitCatalog}`;
+    }
+
     // make sure shareCite has the proper structure
     if (!isObjectAndNotNull(cc.shareCite)) {
       cc.shareCite = DEFAULT_CHAISE_CONFIG.shareCite;

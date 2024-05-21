@@ -1467,7 +1467,7 @@ var errorModal = function () {
     }
 
     this.getOKButton = function () {
-        return element(by.css('.modal-error .error-ok-button'));
+        return element(by.css('.modal-error .ok-button'));
     }
 
     this.getCloseButton = function () {
