@@ -35,18 +35,6 @@ const testParams: any = {
     term3: 'evens',
     term3Rows: 1
   },
-  minInputClass: 'range-min',
-  minInputClearClass: 'min-clear',
-  maxInputClass: 'range-max',
-  maxInputClearClass: 'max-clear',
-  tsMinDateInputClass: 'ts-date-range-min',
-  tsMinDateInputClearClass: 'min-date-clear',
-  tsMinTimeInputClass: 'ts-time-range-min',
-  tsMinTimeInputClearClass: 'min-time-clear',
-  tsMaxDateInputClass: 'ts-date-range-max',
-  tsMaxDateInputClearClass: 'max-date-clear',
-  tsMaxTimeInputClass: 'ts-time-range-max',
-  tsMaxTimeInputClearClass: 'max-time-clear',
   facetComments: [
     'ID comment', 'int comment', null, null, 'timestamp column', null,
     'A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet.',
