@@ -40,11 +40,10 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
 
 /**
  * Opens the facet and checks the title of filter options
- * @param  {string}   name          title of facet
  * @param  {int}   facetIdx         facet index
  * @param  {Array}   filterOptions   array of filter titles
  */
-export async function openFacetAndTestFilterOptions(facet: Locator, name: string, facetIdx: number, filterOptions: string[]) {
+export async function openFacetAndTestFilterOptions(facet: Locator, facetIdx: number, filterOptions: string[]) {
   // open facet
   await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
   // wait for facet to open
@@ -71,13 +70,12 @@ export async function openFacetAndTestFilterOptions(facet: Locator, name: string
  * - Current facet column is already open.
  * @param  {int}   facetIdx     facet index
  * @param  {int}   filterIdx    filter index
- * @param  {string}   facetName    facet title
  * @param  {string}   filterName   filter title in the main content
  * @param  {int}   numRowsAfter number of rows after applying the filter
  * @param  {Function} done
  */
 // eslint-disable-next-line max-len
-export async function testSelectFacetOption(container: Page | Locator, facetIdx: number, filterIdx: number, facetName: string, filterName: string, numRowsAfter: number) {
+export async function testSelectFacetOption(container: Page | Locator, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number) {
   const facet = RecordsetLocators.getFacetById(container, facetIdx);
   const facetOption = RecordsetLocators.getFacetOption(facet, filterIdx);
   const clearAll = RecordsetLocators.getClearAllFilters(container);

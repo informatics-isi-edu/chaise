@@ -351,15 +351,12 @@ test.describe('Testing individual facet types', () => {
       switch (facetParams.type) {
         case 'choice':
           await test.step('for choice facet,', async () => {
-            await test.step('should open the facet, select a value to filter on, and update the search criteria.', async () => {
+            const facet = RecordsetLocators.getFacetById(page, index);
+            await test.step('open the facet and check the available options.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-
-              const facet = RecordsetLocators.getFacetById(page, index);
-              const facetHeader = RecordsetLocators.getFacetHeaderButtonById(facet, index);
-              // open facet
-              await facetHeader.click();
-              await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-
+              // // open facet
+              await openFacetAndTestFilterOptions(facet, index, facetParams.options)
+              
               if (!facetParams.isBoolean) {
                 // make sure search placeholder is correct
                 let placeholder = 'Search';
@@ -371,38 +368,15 @@ test.describe('Testing individual facet types', () => {
 
                 await expect.soft(RecordsetLocators.getFacetSearchPlaceholderById(facet)).toHaveText(placeholder);
               }
+            });
 
-              await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
-              // wait for facet checkboxes to load
-              await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(facetParams.totalNumOptions);
-              // wait for list to be fully visible
-              await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+            await test.step('select a value to filter on and update the search criteria', async () => {
+              await testSelectFacetOption(page, index, facetParams.option, facetParams.filter, facetParams.numRows);
 
-              const facetOptions = RecordsetLocators.getFacetOptions(facet);
-              const numFacets = await facetOptions.count();
-
-              for (let i = 0; i < numFacets; i++) {
-                await expect.soft(facetOptions.nth(i)).toHaveText(facetParams.options[i]);
-              }
-
-              await RecordsetLocators.getFacetOption(facet, facetParams.option).click();
-
-              // wait for request to return
-              await expect.soft(clearAll).toBeVisible();
-              // wait for filters to load
-              const facetFilters = RecordsetLocators.getFacetFilters(page);
-              await expect.soft(facetFilters).toHaveCount(1);
-              await expect.soft(facetFilters.nth(0)).toHaveText(facetParams.filter);
-
-              // wait for table rows to load
-              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(facetParams.numRows);
-
-              await clearAll.click();
-              await expect.soft(clearAll).not.toBeVisible();
               await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
 
               // close the facet
-              await facetHeader.click();
+              await RecordsetLocators.getFacetHeaderButtonById(facet, index).click();
             });
           });
           break;
@@ -730,15 +704,15 @@ test.describe('Testing individual facet types', () => {
             await test.step('should open the facet and the two options should be available.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
 
-              await openFacetAndTestFilterOptions(facet, testParams.name, index, ['All records with value', 'No value']);
+              await openFacetAndTestFilterOptions(facet, index, ['All records with value', 'No value']);
             });
 
             await test.step('selecting the not-null option, should only show the applicable rows.', async () => {
-              await testSelectFacetOption(page, index, 0, facetParams.name, facetParams.notNullFilter, facetParams.notNullNumRows);
+              await testSelectFacetOption(page, index, 0, facetParams.notNullFilter, facetParams.notNullNumRows);
             });
 
             await test.step('selecting the null option, should only show the applicable rows.', async () => {
-              await testSelectFacetOption(page, index, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows);
+              await testSelectFacetOption(page, index, 1, facetParams.nullFilter, facetParams.nullNumRows);
 
               await RecordsetLocators.getFacetHeaderButtonById(facet, index).click();
             });

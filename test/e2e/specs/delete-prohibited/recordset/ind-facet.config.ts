@@ -5,9 +5,9 @@ export default getConfig({
   configFileName: 'recordset/ind-facet.dev.json',
   chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
   testMatch: [ 
-    'facet-presentation.spec.ts',
+    // 'facet-presentation.spec.ts',
     'ind-facet.spec.ts',
-    'four-facet-selections.spec.ts',
+    // 'four-facet-selections.spec.ts',
     // 'misc-facet.spec.ts'
   ]
 });

@@ -44,8 +44,6 @@ const testParams: any = {
 };
 
 test('Viewing Recordset with Faceting, ', async ({ page, baseURL }, testInfo) => {
-  test.slow();
-
   await test.step('should load recordset page', async () => {
     const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
 
