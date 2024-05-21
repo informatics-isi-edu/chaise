@@ -286,8 +286,7 @@ export function populateCreateInitialValues(
 
       // if the column is prefilled, get the prefilled value instead of default
       if (prefillObj && column.name in prefillObj.keys) {
-        const columnRID = prefillObj.columnNameToRID[column.name]
-        defaultValue = prefillObj.keys[columnRID];
+        defaultValue = prefillObj.keys[column.name];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
