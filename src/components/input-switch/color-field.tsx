@@ -11,7 +11,6 @@ import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 
 // utils
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -78,7 +77,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
    */
   const renderInput = (fieldValue: any, onChange: any) => {
     return <HexColorInput
-      className={`sp-input${' ' + props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} placeholder={props.placeholder}
+      className={`sp-input${' ' + props.inputClasses} ${props.inputClassName}`} placeholder={props.placeholder}
       disabled={props.disableInput} color={fieldValue} onChange={onChange} prefixed
     />;
   };

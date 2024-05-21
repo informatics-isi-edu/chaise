@@ -226,7 +226,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               </button>
             </div>}
           </div>
-          <input className={`${props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
           {
             recordsetModalProps &&
             <RecordsetModal

@@ -15,7 +15,6 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
 type ArrayFieldProps = InputFieldProps & {
@@ -45,7 +44,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   const arrayFormState = useFormState({ name: name });
 
   const addNewValueName = `${name}-new-item`;
-  const addNewValueInputName = `${props.inputName}-new-item`;
+  const addNewValueInputName = `${props.inputClassName}-new-item`;
 
   /**
    * We use this to keep track of errors in new value input box
@@ -102,7 +101,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   //-------------------  render logic:   --------------------//
 
-  const DraggableItemRenderer = (item: any, index: number, inputName: string, disableInput: boolean | undefined) => {
+  const DraggableItemRenderer = (item: any, index: number, inputClassName: string, disableInput: boolean | undefined) => {
     return <Draggable key={item.id} draggableId={name + '-' + item.id.toString()} index={index} isDragDisabled={disableInput}>
       {
         (provided: DraggableProvided) => {
@@ -125,7 +124,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 <InputSwitch
                   {...props}
                   name={newInputName}
-                  inputName={`${inputName}-${index}-val`}
+                  inputClassName={`${inputClassName}-${index}-val`}
                   type={getInputType({ name: baseArrayType })}
                   key={item.id}
                   displayExtraDateTimeButtons={true}
@@ -157,7 +156,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
   // used in scss:
   containerClassName.push(`array-input-field-container-${getInputType({ name: baseArrayType })}`);
   // used in testing:
-  containerClassName.push(`array-input-field-container-${makeSafeIdAttr(props.inputName)}`);
+  containerClassName.push(`array-input-field-container-${props.inputClassName}`);
 
   const addContainerClassName = ['add-element-container'];
   addContainerClassName.push(`add-element-container-${getInputType({ name: baseArrayType })}`);
@@ -182,7 +181,9 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                     ref={provided.innerRef}
                     key={`${name}-list`}
                   >
-                    {fields.map((item: object & { id: string }, index: number) => DraggableItemRenderer(item, index, props.inputName, disableInput))}
+                    {fields.map((item: object & { id: string }, index: number) => {
+                      return DraggableItemRenderer(item, index, props.inputClassName, disableInput)
+                    })}
                     {provided.placeholder}
                   </ul>
                 )
@@ -193,7 +194,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
             <InputSwitch
               type={getInputType({ name: baseArrayType })}
               name={addNewValueName}
-              inputName={addNewValueInputName}
+              inputClassName={addNewValueInputName}
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}

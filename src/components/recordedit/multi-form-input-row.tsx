@@ -13,6 +13,7 @@ import { appModes, MULTI_FORM_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/
 // utils
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { copyOrClearValue, createForeignKeyReference } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { asyncTimeout } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -466,7 +467,7 @@ const MultiFormInputRow = ({
             disableInput={false}
             requiredInput={false}
             name={inputName}
-            inputName={`c_${MULTI_FORM_INPUT_FORM_VALUE}-${colName}`}
+            inputClassName={`c_${MULTI_FORM_INPUT_FORM_VALUE}-${makeSafeIdAttr(colName)}`}
             inputClasses={`${isTextArea ? 'input-switch-multi-textarea' : ''}`}
             type={cm.inputType}
             classes='column-cell-input'

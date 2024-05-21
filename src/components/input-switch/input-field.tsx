@@ -9,7 +9,6 @@ import { useFormContext, useController, ControllerRenderProps, FieldValues, UseC
 
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 
@@ -25,7 +24,7 @@ export type InputFieldProps = {
   /**
    * the name of the field for attaching a specific class to input-switch-container and the input
    */
-  inputName: string,
+  inputClassName: string,
   /**
   * placeholder text
   */
@@ -34,6 +33,9 @@ export type InputFieldProps = {
   * classes for styling the input element
   */
   classes?: string,
+  /**
+   * Optional string of classes to attach to the input/textarea etc element
+   */
   inputClasses?: string,
   containerClasses?: string,
   /**
@@ -122,7 +124,7 @@ export type InputFieldCompProps = InputFieldProps & {
 const InputField = ({
   children,
   name,
-  inputName,
+  inputClassName,
   requiredInput,
   displayErrors,
   containerClasses = '',
@@ -208,7 +210,7 @@ const InputField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(inputName)}`} style={styles} onKeyDown={handleKeyDown}>
+    <div className={`${containerClasses} input-switch-container-${inputClassName}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message &&
         <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />

@@ -14,6 +14,7 @@ import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const ViewerAnnotationFormContainer = (): JSX.Element => {
 
@@ -82,7 +83,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
         disableInput={isDisabled}
         requiredInput={columnModel.isRequired}
         name={`c_${formNumber}-${colRID}`}
-        inputName={`c_${formNumber}-${colName}`}
+        inputClassName={`c_${formNumber}-${makeSafeIdAttr(colName)}`}
         type={columnModel.inputType}
         classes='column-cell-input'
         placeholder={placeholder}

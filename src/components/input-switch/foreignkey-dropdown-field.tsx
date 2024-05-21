@@ -533,7 +533,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
               </div>
             </Dropdown.Menu>}
           </Dropdown>
-          <input className={`${props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
         </div>
       )}
     </InputField>

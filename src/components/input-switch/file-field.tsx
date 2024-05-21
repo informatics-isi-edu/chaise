@@ -15,7 +15,6 @@ import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/mode
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type FileFieldProps = InputFieldProps & {
@@ -180,7 +179,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}
-            className={`${props.inputClasses} chaise-input-hidden ${makeSafeIdAttr(props.inputName)}`}
+            className={`${props.inputClasses} chaise-input-hidden ${props.inputClassName}`}
             name={props.name}
             type='file'
             accept={fileExtensions}

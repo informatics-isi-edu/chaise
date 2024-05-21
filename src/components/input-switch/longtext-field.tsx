@@ -11,7 +11,6 @@ import { useState, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // utils
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -168,7 +167,7 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 <textarea
                   placeholder={props.placeholder}
                   rows={5}
-                  className={`${props.inputClasses} input-switch ${makeSafeIdAttr(props.inputName)} ${
+                  className={`${props.inputClasses} input-switch ${props.inputClassName} ${
                     hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
                   }`}
                   {...field}

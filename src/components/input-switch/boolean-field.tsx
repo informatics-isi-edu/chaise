@@ -110,7 +110,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
               ))}
             </Dropdown.Menu>}
           </Dropdown>
-          <input className={`${props.inputClasses} ${makeSafeIdAttr(props.inputName)}`} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
         </div>
       )}
     </InputField>
