@@ -141,7 +141,6 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                         <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
                     </span>}
                 </>}
-                // TODO: test this
                 fieldName={props.name}
                 columnModel={props.columnModel}
                 submissionRowValues={iframeProps.submissionRow}
