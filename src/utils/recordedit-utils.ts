@@ -127,8 +127,8 @@ function _copyOrClearValueForColumn(
   destFormValue: number, srcFormValue?: number, clearValue?: boolean,
   skipFkColumns?: boolean, setValue?: (formKey: string, value: any) => void
 ) {
-  const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
-  const dstKey = `${destFormValue}-${column.name}`;
+  const srcKey = typeof srcFormValue === 'number' ? `c_${srcFormValue}-${column.RID}` : null;
+  const dstKey = `c_${destFormValue}-${column.RID}`;
 
   if (clearValue) {
     if (setValue) {
@@ -183,14 +183,14 @@ function _copyOrClearValueForColumn(
       if (clearValue) {
         val = '';
       } else if (typeof srcFormValue === 'number') {
-        val = values[`${srcFormValue}-${col.name}`];
+        val = values[`c_${srcFormValue}-${col.RID}`];
       }
       if (val === null || val === undefined) return;
 
       if (setValue) {
-        setValue(`${destFormValue}-${col.name}`, val);
+        setValue(`c_${destFormValue}-${col.RID}`, val);
       } else {
-        values[`${destFormValue}-${col.name}`] = val;
+        values[`c_${destFormValue}-${col.RID}`] = val;
       }
     });
   }
@@ -325,16 +325,16 @@ export function populateCreateInitialValues(
              * (same thing is done in copy mode)
              */
             if (metadata.filename) {
-              values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+              values[`c_${formValue}-${column.filenameColumn.RID}`] = metadata.filename;
             }
             if (metadata.byteCount) {
-              values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+              values[`c_${formValue}-${column.byteCountColumn.RID}`] = metadata.byteCount;
             }
             if (metadata.md5) {
-              values[`${formValue}-${column.md5.name}`] = metadata.md5;
+              values[`c_${formValue}-${column.md5.RID}`] = metadata.md5;
             }
             if (metadata.sha256) {
-              values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+              values[`c_${formValue}-${column.sha256.RID}`] = metadata.sha256;
             }
 
           } else if (column.isForeignKey) {
@@ -352,14 +352,14 @@ export function populateCreateInitialValues(
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
               // initialize foreignKey data
-              foreignKeyData[`${formValue}-${column.name}`] = defaultDisplay.values;
+              foreignKeyData[`c_${formValue}-${column.RID}`] = defaultDisplay.values;
 
               shouldWaitForForeignKeyData = true;
 
             } else if (defaultValue !== null) {
               initialModelValue = defaultValue;
               // initialize foreignKey data
-              foreignKeyData[`${formValue}-${column.name}`] = column.defaultValues;
+              foreignKeyData[`c_${formValue}-${column.RID}`] = column.defaultValues;
 
               shouldWaitForForeignKeyData = true;
             }
@@ -372,22 +372,22 @@ export function populateCreateInitialValues(
       }
 
       if (isTimestamp) {
-        values[`${formValue}-${column.name}`] = initialModelValue?.datetime || '';
-        values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
-        values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
+        values[`c_${formValue}-${column.RID}`] = initialModelValue?.datetime || '';
+        values[`c_${formValue}-${column.RID}-date`] = initialModelValue?.date || '';
+        values[`c_${formValue}-${column.RID}-time`] = initialModelValue?.time || '';
 
         // add the multi form input value
         if (formIndex === 0) {
-          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
-          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-date`] = '';
-          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}-time`] = '';
+          values[`c_${MULTI_FORM_INPUT_FORM_VALUE}-${column.RID}`] = '';
+          values[`c_${MULTI_FORM_INPUT_FORM_VALUE}-${column.RID}-date`] = '';
+          values[`c_${MULTI_FORM_INPUT_FORM_VALUE}-${column.RID}-time`] = '';
         }
       } else {
-        values[`${formValue}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
+        values[`c_${formValue}-${column.RID}`] = replaceNullOrUndefined(initialModelValue, '');
 
         // add the multi form input value
         if (formIndex === 0) {
-          values[`${MULTI_FORM_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`c_${MULTI_FORM_INPUT_FORM_VALUE}-${column.RID}`] = '';
         }
       }
     }
@@ -416,12 +416,14 @@ function _populateEditInitialValueForAColumn(
 ) {
   let value;
 
+  const inputName = `c_${formValue}-${column.RID}`;
+
   // stringify the returned array value
   if (column.type.isArray) {
 
     if (usedValue !== null) {
 
-      values[`${formValue}-${column.name}`] = usedValue.map((value: any) => {
+      values[inputName] = usedValue.map((value: any) => {
         let valueToAdd: any = {
           'val': value
         }
@@ -493,16 +495,16 @@ function _populateEditInitialValueForAColumn(
          */
         if (appMode === appModes.COPY) {
           if (metadata.filename) {
-            values[`${formValue}-${column.filenameColumn.name}`] = metadata.filename;
+            values[`c_${formValue}-${column.filenameColumn.RID}`] = metadata.filename;
           }
           if (metadata.byteCount) {
-            values[`${formValue}-${column.byteCountColumn.name}`] = metadata.byteCount;
+            values[`c_${formValue}-${column.byteCountColumn.RID}`] = metadata.byteCount;
           }
           if (metadata.md5) {
-            values[`${formValue}-${column.md5.name}`] = metadata.md5;
+            values[`c_${formValue}-${column.md5.RID}`] = metadata.md5;
           }
           if (metadata.sha256) {
-            values[`${formValue}-${column.sha256.name}`] = metadata.sha256;
+            values[`c_${formValue}-${column.sha256.RID}`] = metadata.sha256;
           }
         }
 
@@ -515,11 +517,11 @@ function _populateEditInitialValueForAColumn(
 
   // no need to check for copy here because the case above guards against the negative case for copy
   if (isTimestamp) {
-    values[`${formValue}-${column.name}`] = value?.datetime || '';
-    values[`${formValue}-${column.name}-date`] = value?.date || '';
-    values[`${formValue}-${column.name}-time`] = value?.time || '';
+    values[inputName] = value?.datetime || '';
+    values[`${inputName}-date`] = value?.date || '';
+    values[`${inputName}-time`] = value?.time || '';
   } else {
-    values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
+    values[inputName] = replaceNullOrUndefined(value, '');
   }
 
   // capture the raw values of the columns that create the fk relationship
@@ -528,7 +530,7 @@ function _populateEditInitialValueForAColumn(
   if (column.isForeignKey) {
     if (value !== null || value !== undefined) {
       column.foreignKey.colset.columns.forEach((col: any) => {
-        values[`${formValue}-${col.name}`] = tuple.data[col.name];
+        values[`c_${formValue}-${col.RID}`] = tuple.data[col.name];
       });
     }
   }
@@ -565,7 +567,7 @@ export function populateEditInitialValues(
 
     // attach the foreign key data of the tuple
     Object.keys(tuple.linkedData).forEach((k) => {
-      foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
+      foreignKeyData[`c_${formValue}-${tuple.linkedDataRIDs[k]}`] = tuple.linkedData[k];
     });
 
     columnModels.forEach((colModel: RecordeditColumnModel, colModelIndex: number) => {
@@ -584,7 +586,7 @@ export function populateEditInitialValues(
 
       if (appMode !== appModes.COPY) {
         // whether certain columns are disabled or not
-        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[colModelIndex];
+        canUpdateValues[`c_${formValue}-${column.RID}`] = tuple.canUpdate && tuple.canUpdateValues[colModelIndex];
 
         // while we cannot change the isDisabled state, this will be
         // taken care of by calling getInputTypeOrDisabled in other places
@@ -610,7 +612,7 @@ export function populateEditInitialValues(
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any, initialValues?: any[]) {
   const submissionRow: any = {};
   const setSubmission = (col: any, skipEmpty?: boolean, includeDisabled?: boolean) => {
-    let v = formData[formNumber + '-' + col.name];
+    let v = formData['c_' + formNumber + '-' + col.RID];
 
     // TODO col.isDisabled is wrong. it's always returning false
     if (v && !col.isDisabled) {
@@ -706,14 +708,14 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
 
 /**
  * convert the foreignKeyData to something that ermrestjs expects.
- * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
+ * foreignKeyData currently is a flat list of object with `c_${formNumber}-{col.RID}` keys.
  * the following will extract the foreignKeyData of the row that we need.
  */
 export function populateLinkedData(reference: any, formNumber: number, foreignKeyData: any) {
   const linkedData: any = {};
   if (isObjectAndNotNull(foreignKeyData)) {
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const k = `${formNumber}-${col.name}`;
+      const k = `c_${formNumber}-${col.RID}`;
       if (k in foreignKeyData) {
         linkedData[col.name] = foreignKeyData[k];
       }
@@ -732,17 +734,21 @@ export function populateLinkedData(reference: any, formNumber: number, foreignKe
  */
 export function getPrefillObject(queryParams: any): null | PrefillObject {
   if (!queryParams.prefill) return null;
-  const cookie = CookieService.getCookie(queryParams.prefill, true);
+  const cookie = CookieService.getCookie(queryParams.prefill, true) as PrefillObject;
   if (cookie == null || typeof cookie !== 'object') {
     return null;
   }
 
   // make sure all the keys are in the object
-  if (!(('keys' in cookie) && ('fkColumnNames' in cookie) && ('origUrl' in cookie) && ('rowname' in cookie))) {
+  if (!(
+    ('keys' in cookie) && ('columnNameToRID' in cookie) && 
+    ('fkColumnNames' in cookie) && 
+    ('origUrl' in cookie) && ('rowname' in cookie)
+  )) {
     return null;
   }
 
-  // valide the values
+  // validate the values
   if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
     return null;
   }
@@ -750,6 +756,7 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
   return {
     keys: cookie.keys,
     fkColumnNames: cookie.fkColumnNames,
+    columnNameToRID: cookie.columnNameToRID,
     origUrl: cookie.origUrl,
     rowname: cookie.rowname
   }
@@ -822,7 +829,7 @@ export function callOnChangeAfterSelection(
   column.foreignKey.colset.columns.forEach((col: any) => {
     const referencedCol = column.foreignKey.mapping.get(col);
 
-    setFunction(`${formNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
+    setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
   });
 
   // for now this is just changing the displayed tuple displayname
@@ -838,7 +845,7 @@ export function clearForeignKeyData(
 ): void {
   // clear the raw values
   column.foreignKey.colset.columns.forEach((col: any) => {
-    setFunction(`${formNumber}-${col.name}`, '');
+    setFunction(`c_${formNumber}-${col.RID}`, '');
   });
 
   // clear the foreignkey data

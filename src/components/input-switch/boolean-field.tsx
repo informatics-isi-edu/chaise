@@ -3,7 +3,6 @@ import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -111,7 +110,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
               ))}
             </Dropdown.Menu>}
           </Dropdown>
-          <input className={props.inputClasses} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
         </div>
       )}
     </InputField>
