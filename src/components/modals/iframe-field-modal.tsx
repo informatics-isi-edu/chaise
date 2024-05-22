@@ -30,7 +30,7 @@ type IframeFieldModalProps = {
    */
   title: JSX.Element,
   /**
-   * the name of the filed (props.name)
+   * the name of the field (props.name)
    */
   fieldName: string,
   /**
@@ -184,7 +184,7 @@ const IframeFieldModal = ({
                 continue;
               }
 
-              values[`${formNumber}-${col.name}`] = {
+              values[`c_${formNumber}-${col.RID}`] = {
                 file: colData,
                 url: URL.createObjectURL(colData),
                 filename: colData.name,
@@ -192,7 +192,7 @@ const IframeFieldModal = ({
               };
 
             } else {
-              values[`${formNumber}-${col.name}`] = colData;
+              values[`c_${formNumber}-${col.RID}`] = colData;
             }
           }
 
@@ -216,13 +216,13 @@ const IframeFieldModal = ({
      */
     const setEmpty = (col: any, values: any) => {
       if (col.isAsset) {
-        values[`${formNumber}-${col.name}`] = {
+        values[`c_${formNumber}-${col.RID}`] = {
           url: '',
           filename: '',
           filesize: 0
         }
       } else {
-        values[`${formNumber}-${col.name}`] = '';
+        values[`c_${formNumber}-${col.RID}`] = '';
       }
     };
 

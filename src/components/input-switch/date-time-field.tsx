@@ -12,8 +12,6 @@ import { ERROR_MESSAGES, formatDatetime, VALIDATE_VALUE_BY_TYPE } from '@isrd-is
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-
-
 type DateTimeFieldProps = InputFieldProps & {
   /**
    * classes for styling the input time element
@@ -211,6 +209,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             displayErrors={false}
             displayExtraDateTimeButtons={false}
             displayDateTimeLabels={props.displayDateTimeLabels}
+            inputClassName={`${props.inputClassName}-date`}
           />
           <div className='chaise-input-group input-switch-time'>
             {props.displayDateTimeLabels && <div className='chaise-input-group-prepend'>
@@ -218,8 +217,13 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             </div>}
             <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
               <input
-                className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
-                type='text' disabled={props.disableInput} {...timeField} onChange={handleTimeChange}
+                className={`${props.timeClasses} input-switch ${props.inputClassName}-time ${
+                  showTimeClear() ? 'time-input-show-clear' : ''
+                }`}
+                type='text' 
+                disabled={props.disableInput} 
+                {...timeField} 
+                onChange={handleTimeChange}
                 placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.time}
               />
               <ClearInputBtn
@@ -240,7 +244,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               </button>
             </div>
           }
-          <input {...field} type='hidden' />
+          <input className={props.inputClassName} {...field} type='hidden' />
         </div>
       )}
     </InputField>

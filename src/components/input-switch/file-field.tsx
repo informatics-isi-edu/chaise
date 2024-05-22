@@ -6,8 +6,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react';
-import { useFormContext, useController } from 'react-hook-form';
+import { ChangeEvent, useRef, useState } from 'react';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -180,7 +179,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}
-            className={`${props.inputClasses} chaise-input-hidden`}
+            className={`${props.inputClasses} chaise-input-hidden ${props.inputClassName}`}
             name={props.name}
             type='file'
             accept={fileExtensions}

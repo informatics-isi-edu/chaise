@@ -14,6 +14,7 @@ import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const ViewerAnnotationFormContainer = (): JSX.Element => {
 
@@ -43,7 +44,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
       return true;
     }
 
-    const valName = `${formNumber}-${columnModel.column.name}`;
+    const valName = `c_${formNumber}-${columnModel.column.RID}`;
     if (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false) {
       return true;
     }
@@ -64,6 +65,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
 
   const renderInput = (columnModel: RecordeditColumnModel) => {
     const colName = columnModel.column.name;
+    const colRID = columnModel.column.RID;
 
     const isDisabled = getIsDisabled(columnModel);
 
@@ -80,7 +82,8 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
         displayDateTimeLabels
         disableInput={isDisabled}
         requiredInput={columnModel.isRequired}
-        name={`${formNumber}-${colName}`}
+        name={`c_${formNumber}-${colRID}`}
+        inputClassName={`c_${formNumber}-${makeSafeIdAttr(colName)}`}
         type={columnModel.inputType}
         classes='column-cell-input'
         placeholder={placeholder}

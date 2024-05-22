@@ -18,6 +18,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // utils
 import { formatDatetime, replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
@@ -94,8 +95,8 @@ const RangeInputs = ({
   const className = (type === 'timestamp') ? 'range-inputs-timestamp-width' : '';
   const inputWrapperClassName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
 
-  const minName = `${name}-min`;
-  const maxName = `${name}-max`;
+  const minName = `c_${name}-min`;
+  const maxName = `c_${name}-max`;
 
   const timestampOptions = { outputMomentFormat: dataFormats.timestamp }
   if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.datetime.return;
@@ -243,6 +244,7 @@ const RangeInputs = ({
                   displayErrors={false}
                   disableInput={disabled}
                   name={minName}
+                  inputClassName={makeSafeIdAttr(minName)}
                   type={inputType}
                   // when it's timestamp, we don't want to show placeholder as it could
                   // be confusing when users only enter only time or date.
@@ -260,6 +262,7 @@ const RangeInputs = ({
                   displayErrors={false}
                   disableInput={disabled}
                   name={maxName}
+                  inputClassName={makeSafeIdAttr(maxName)}
                   type={inputType}
                   // when it's timestamp, we don't want to show placeholder as it could
                   // be confusing when users enter only time or date.
