@@ -565,7 +565,7 @@ Use this property to modify the display setting for the "Configurations" submenu
 ### Share and Cite Configuration:
  #### resolverImplicitCatalog
  Set to a catalog id, `N`, if your resolver accepts `/id/X` instead of `/id/N/X` and you prefer to share records with this shorter URL. If the property is `null`, the resolver functionality will be turned off and the default permalink will be used. Anything else will be ignored and the default behavior will be applied which is to always use the catalog-qualified form, `/id/N/X`.
-   - Type: String
+   - Type: String || null
    - Default behavior: assume the resolver service uses the catalog-qualified form, `/id/N/X`
    - Sample syntax:
      ```

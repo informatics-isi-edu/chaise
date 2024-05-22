@@ -17,8 +17,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import React, { ForwardedRef, forwardRef } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 
 export type InputSwitchProps = {
   /**
@@ -31,9 +30,13 @@ export type InputSwitchProps = {
    */
   type: string,
   /**
-   *  the name of the field
+   *  the name of the field for react hook form (with no special characters)
    */
   name: string,
+  /**
+   *  the name of the field for attaching a specific class to input-switch-container and the input
+   */
+  inputClassName: string,
   /**
    * placeholder text for numeric and date fields
    */
@@ -42,6 +45,9 @@ export type InputSwitchProps = {
    * classes for styling the numeric and date input element
    */
   classes?: string,
+  /**
+   * Optional string of classes to attach to the input/textarea etc element
+   */
   inputClasses?: string,
   containerClasses?: string,
   /**
@@ -151,6 +157,7 @@ export type RuleWithMessage = {
 const InputSwitch = ({
   type,
   name,
+  inputClassName,
   placeholder,
   classes = '',
   inputClasses = '',
@@ -188,6 +195,7 @@ const InputSwitch = ({
         return <IframeField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -208,6 +216,7 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          inputClassName={inputClassName}
           columnModel={columnModel?.column.type.rootName === 'timestamptz' ? columnModel : undefined}
           classes={classes}
           inputClasses={inputClasses}
@@ -228,6 +237,7 @@ const InputSwitch = ({
         return <ForeignkeyField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -257,6 +267,7 @@ const InputSwitch = ({
         return <ForeignkeyDropdownField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -285,6 +296,7 @@ const InputSwitch = ({
         return <FileField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -305,6 +317,7 @@ const InputSwitch = ({
           type={type}
           hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -323,6 +336,7 @@ const InputSwitch = ({
         return <DateField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -344,6 +358,7 @@ const InputSwitch = ({
         return <NumericField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -360,6 +375,7 @@ const InputSwitch = ({
         return <BooleanField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -378,6 +394,7 @@ const InputSwitch = ({
         return <LongtextField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -396,6 +413,7 @@ const InputSwitch = ({
         return <JsonField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -413,6 +431,7 @@ const InputSwitch = ({
         return <ColorField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -430,6 +449,7 @@ const InputSwitch = ({
         return <TextField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}

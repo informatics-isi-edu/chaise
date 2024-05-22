@@ -220,12 +220,7 @@ export const setInputValue = async (
     default:
       if (typeof valueProps !== 'string') return;
 
-      let inputEl;
-      if (inputType === RecordeditInputType.MARKDOWN || inputType === RecordeditInputType.LONGTEXT) {
-        inputEl = RecordeditLocators.getTextAreaForAColumn(page, name, formNumber);
-      } else {
-        inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
-      }
+      const inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
       await inputEl.clear();
       await inputEl.fill(valueProps);
       await expect.soft(inputEl).toHaveValue(valueProps);
@@ -320,11 +315,7 @@ export const testFormValuesForAColumn = async (
       default:
         if (typeof value !== 'string') return;
 
-        if (inputType === RecordeditInputType.LONGTEXT || inputType === RecordeditInputType.MARKDOWN) {
-          input = RecordeditLocators.getTextAreaForAColumn(page, name, formNumber)
-        } else {
-          input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
-        }
+        input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
         if (allDisabled) {
           await expect.soft(input).toBeDisabled();
         }
