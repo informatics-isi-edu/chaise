@@ -446,7 +446,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 }
 
                                 let err = arrayField.getErrorMessageElement();
-                                expect(err.getText()).toBe("Please enter a value for this Array field")
+                                expect(err.getText()).toBe("Please enter a value for this field.")
 
                               }
                             break;

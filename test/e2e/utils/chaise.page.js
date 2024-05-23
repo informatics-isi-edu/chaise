@@ -409,16 +409,16 @@ var recordEditPage = function() {
     this.getErrorMessageForAColumn = (name, index) => {
         index = index || 1;
         const inputName = 'c_' + index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error.text-danger'));
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error'));
     }
 
     this.getInputErrorMessage = function(el, type) {
-        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error'));
     };
 
     this.getJSONInputErrorMessage = function(el) {
         // similar input structure as array detailed below
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getArrayInputErrorMessage = function(el) {
@@ -433,7 +433,7 @@ var recordEditPage = function() {
          *    <span class='input-switch-error'>...</span>]
          *  </div>
          */
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getDeleteRowButton = function(index) {
