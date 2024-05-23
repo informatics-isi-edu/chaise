@@ -24,6 +24,10 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RecordMainSectionProps = {
+  /**
+   * main container for record app that contains the main section and related tables section
+   * used for scrolling the main container for some elements to be now in view
+   */
   mainContainerRef: any
 };
 
