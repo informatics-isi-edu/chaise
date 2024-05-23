@@ -2,23 +2,26 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
+import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 import SavedQueryDropdown from '@isrd-isi-edu/chaise/src/components/recordset/saved-query-dropdown';
-import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
+import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
+import React, { useEffect, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import React, { useEffect, useRef, useState } from 'react';
 
 // models
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -36,9 +39,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import Footer from '@isrd-isi-edu/chaise/src/components/footer';
-import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
@@ -797,7 +797,6 @@ const RecordsetInner = ({
         <div className={`main-body${hasSpinner ? ' with-spinner' : ''}`}>
           <RecordsetTable
             config={config}
-            mainContainerRef={mainContainer}
             initialSortObject={initialReference.location.sortObject}
           />
         </div>

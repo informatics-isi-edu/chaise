@@ -2,11 +2,11 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React from 'react';
 
 // components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
+import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -17,21 +17,19 @@ import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, SortColumn } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CLASS_NAMES } from '../../utils/constants';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
-  mainContainerRef?: any,
   initialSortObject: any,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
-  mainContainerRef,
   initialSortObject
 }: RecordsetTableProps): JSX.Element => {
 
@@ -126,22 +124,21 @@ const RecordsetTable = ({
     // log the request if it was successful
     if (success) {
       logRecordsetClientAction(action, null, null, ref);
-      scrollToTableTop();
     }
   };
 
   /**
    * To maintain scroll position after next/previous button click on table
    */
-  const scrollToTableTop = () => {
-    if (!mainContainerRef || !mainContainerRef?.current ) return;
-    const element = document.querySelector(`#rt-heading-${makeSafeIdAttr(reference.table.name)}:not(.${CLASS_NAMES.HIDDEN})`) as HTMLDivElement;
-    //TODO: To see if this works for all he cases
-    mainContainerRef.current.scrollTo({
-      top: element.offsetTop,
-      behavior: 'smooth',
-    });
-  };
+  // const scrollToTableTop = () => {
+  //   if (!mainContainerRef || !mainContainerRef?.current ) return;
+  //   const element = document.querySelector(`#rt-heading-${makeSafeIdAttr(reference.table.name)}:not(.${CLASS_NAMES.HIDDEN})`) as HTMLDivElement;
+  //   //TODO: To see if this works for all he cases
+  //   mainContainerRef.current.scrollTo({
+  //     top: element.offsetTop,
+  //     behavior: 'smooth',
+  //   });
+  // };
 
   /**
    * select all the rows that are displayed and are not disabled

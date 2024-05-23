@@ -76,6 +76,14 @@ const RelatedTableInner = ({
   }, [page, isInitialized, hasTimeoutError, isLoading]);
 
   /**
+   * When isLoading changes to false, related table has returned data and we should scroll to top
+   */
+  useEffect(() => {
+    if (isLoading) return;
+    console.log(isLoading);
+  }, [isLoading])
+
+  /**
    * register the recordset functions in the recordProvider
    * This function will capture references to the functions, that's why we don't need to
    * repeat this registration.
@@ -108,7 +116,6 @@ const RelatedTableInner = ({
         <div id={tableContainerID}>
           <RecordsetTable
             config={relatedModel.recordsetProps.config}
-            mainContainerRef={mainContainerRef}
             initialSortObject={usedRef.location.sortObject}
           />
         </div>
