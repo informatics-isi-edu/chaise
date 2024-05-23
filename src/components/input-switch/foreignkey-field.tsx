@@ -4,6 +4,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import { useState } from 'react';
@@ -189,55 +190,63 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   return (
     <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
-        <div className='input-switch-foreignkey'>
-          {(showSpinnerOnLoad || showSpinner) &&
-            <div className='foreignkey-input-spinner-container'>
-              <div className='foreignkey-input-spinner-backdrop'></div>
-              <Spinner animation='border' size='sm' />
-            </div>
-          }
-          <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
-            <div
-              id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
-              className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
-            >
-              {isStringAndNotEmpty(field?.value) ?
-                <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-                <span
-                  className='chaise-input-placeholder popup-select-value'
-                  contentEditable={false}
-                >
-                  {props.placeholder ? props.placeholder : 'Select a value'}
-                </span>
-              }
-              <ClearInputBtn
-                btnClassName={`${props.clearClasses} input-switch-clear`}
-                clickCallback={clearInput} show={!props.disableInput && showClear}
-              />
-            </div>
-            {!props.disableInput && <div className='chaise-input-group-append'>
-              <button
-                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
-                className='chaise-btn chaise-btn-primary modal-popup-btn'
-                role='button'
-                type='button'
+        <EllipsisWrapper
+          inputType={props.type}
+          inputName={props.name}
+          inputClassName={props.inputClassName}
+        >
+          <div className='input-switch-foreignkey'>
+            {(showSpinnerOnLoad || showSpinner) &&
+              <div className='foreignkey-input-spinner-container'>
+                <div className='foreignkey-input-spinner-backdrop'></div>
+                <Spinner animation='border' size='sm' />
+              </div>
+            }
+            <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
+
+              <div
+                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
+                className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
               >
-                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-              </button>
-            </div>}
+                {isStringAndNotEmpty(field?.value) ?
+                  <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
+                  <span
+                    className='chaise-input-placeholder popup-select-value'
+                    contentEditable={false}
+                  >
+                    {props.placeholder ? props.placeholder : 'Select a value'}
+                  </span>
+                }
+                <ClearInputBtn
+                  btnClassName={`${props.clearClasses} input-switch-clear`}
+                  clickCallback={clearInput} show={!props.disableInput && showClear}
+                />
+              </div>
+
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button
+                  id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
+                  className='chaise-btn chaise-btn-primary modal-popup-btn'
+                  role='button'
+                  type='button'
+                >
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
+            </div>
+            <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
+            {
+              recordsetModalProps &&
+              <RecordsetModal
+                modalClassName='foreignkey-popup'
+                recordsetProps={recordsetModalProps}
+                onClose={hideRecordsetModal}
+                onSubmit={onDataSelected(onChange)}
+                displayname={props.columnModel.column.displayname}
+              />
+            }
           </div>
-          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
-          {
-            recordsetModalProps &&
-            <RecordsetModal
-              modalClassName='foreignkey-popup'
-              recordsetProps={recordsetModalProps}
-              onClose={hideRecordsetModal}
-              onSubmit={onDataSelected(onChange)}
-              displayname={props.columnModel.column.displayname}
-            />
-          }
-        </div>
+        </EllipsisWrapper>
       )}
     </InputField>
   );

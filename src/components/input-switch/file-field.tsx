@@ -3,6 +3,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -102,7 +103,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   }
 
   const fileTooltip = (fileObj: FileObject) => {
-    return (fileObj.filesize ? '- ' + fileObj.filename + '\n- ' + humanFileSize(fileObj.filesize) : fileObj.filename);
+    return (typeof fileObj.filesize === 'number' ? 'size : ' + humanFileSize(fileObj.filesize) : fileObj.filename);
   }
 
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
@@ -120,16 +121,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           clickCallback={clearInput} show={showClear && !props.disableInput}
         />
       </div>
-    )
-  }
-
-  const renderInputWithTooltip = (fieldValue: any, showClear: any, clearInput: any) => {
-    if (!fileObject || !fileObject.filename) return renderInput(fieldValue, showClear, clearInput);
-
-    return (
-      <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip(fileObject)}>
-        {renderInput(fieldValue, showClear , clearInput)}
-      </ChaiseTooltip>
     )
   }
 
@@ -164,30 +155,37 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
-        <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
-          <div className='chaise-input-group'>
-            {renderInputWithTooltip(field.value, showClear, clearInput)}
-            {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
-              <div className='chaise-input-group-append' tabIndex={0}>
-                <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
-                  <span className='fa-solid fa-folder-open'></span>
-                  <span className='button-text'>Select file</span>
-                </label>
-              </div>
-            </ChaiseTooltip>}
-          </div>
-          {renderImagePreview(field.value)}
-          <input
-            id={fileElementId}
-            className={`${props.inputClasses} chaise-input-hidden ${props.inputClassName}`}
-            name={props.name}
-            type='file'
-            accept={fileExtensions}
-            tabIndex={-1}
-            onChange={(e) => handleChange(field, e)}
-            ref={fileInputRef}
-          />
-        </div >
+        <EllipsisWrapper
+          inputType={props.type}
+          inputName={props.name}
+          inputClassName={props.inputClassName}
+          additionalTooltips={(!fileObject || !fileObject.filename) ? [] : [fileTooltip(fileObject)]}
+        >
+          <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
+            <div className='chaise-input-group'>
+              {renderInput(field.value, showClear, clearInput)}
+              {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
+                <div className='chaise-input-group-append' tabIndex={0}>
+                  <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
+                    <span className='fa-solid fa-folder-open'></span>
+                    <span className='button-text'>Select file</span>
+                  </label>
+                </div>
+              </ChaiseTooltip>}
+            </div>
+            {renderImagePreview(field.value)}
+            <input
+              id={fileElementId}
+              className={`${props.inputClasses} chaise-input-hidden ${props.inputClassName}`}
+              name={props.name}
+              type='file'
+              accept={fileExtensions}
+              tabIndex={-1}
+              onChange={(e) => handleChange(field, e)}
+              ref={fileInputRef}
+            />
+          </div >
+        </EllipsisWrapper>
       )}
     </InputField>
   );
