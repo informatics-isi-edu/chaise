@@ -375,13 +375,13 @@ const RecordeditInner = ({
       // but we cannot go basd on visible columns since some of these data might be for invisible fks.
       reference.activeList.allOutBounds.forEach((col: any) => {
         // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
-        foreignKeyData.current[`${formValue}-${col.name}`] = simpleDeepCopy(foreignKeyData.current[`${lastFormValue}-${col.name}`]);
+        foreignKeyData.current[`c_${formValue}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
 
         // copy the raw data (submitted to ermrestjs)
         col.foreignKey.colset.columns.forEach((col: any) => {
-          const val = tempFormValues[`${lastFormValue}-${col.name}`];
+          const val = tempFormValues[`c_${lastFormValue}-${col.RID}`];
           if (val === null || val === undefined) return;
-          tempFormValues[`${formValue}-${col.name}`] = val;
+          tempFormValues[`c_${formValue}-${col.RID}`] = val;
         });
       });
     }

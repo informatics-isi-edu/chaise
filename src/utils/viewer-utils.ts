@@ -302,7 +302,7 @@ export const readAllAnnotations = (
       `${fixedEncodeURIComponent(annotConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageID)}`
     ].join('/');
 
-    if (defaultZIndex !== undefined) {
+    if (defaultZIndex !== null && defaultZIndex !== undefined) {
       imageAnnotationURL += `&${fixedEncodeURIComponent(annotConfig.z_index_column_name)}=${fixedEncodeURIComponent(defaultZIndex.toString())}`;
     }
 
@@ -783,7 +783,7 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
 
     // TODO does this make sense?
     let url = pImageReference.location.uri;
-    if (defaultZIndex !== undefined && pImageConfig.z_index_column_name) {
+    if (defaultZIndex !== null && defaultZIndex !== undefined && pImageConfig.z_index_column_name) {
       url += '&' + fixedEncodeURIComponent(pImageConfig.z_index_column_name);
       url += '=' + fixedEncodeURIComponent(defaultZIndex.toString());
     }
@@ -797,7 +797,7 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
 
       const logObj = {
         action: LogService.getActionString(LogActions.LOAD, zPlaneEntityLogStackPath),
-        stack: defaultZIndex !== undefined ?
+        stack: (defaultZIndex !== null && defaultZIndex !== undefined) ?
           LogService.addExtraInfoToStack(zPlaneLogStack, { 'z_index': defaultZIndex, 'default_z': true }) : zPlaneLogStack
       };
 

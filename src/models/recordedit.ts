@@ -1,5 +1,5 @@
 import {
-  RecordsetProviderGetDisabledTuples, RecordsetProviderOnSelectedRowsChanged
+  RecordsetProviderGetDisabledTuples
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 export enum appModes {
@@ -172,7 +172,7 @@ export interface UploadFileObject {
 
 export interface PrefillObject {
   /**
-   * the raw value of keys that should be prefilled
+   * the raw values of each column that should be prefilled keyed by column name
    */
   keys: any;
   /**
@@ -180,13 +180,17 @@ export interface PrefillObject {
    */
   fkColumnNames: string[];
   /**
+   * map of column names as keys to column RIDs as values
+   */
+  columnNameToRID: { [key: string]: string };
+  /**
    * the URL to fetch the fk
    */
   origUrl: string;
   /**
    * the rowname of the fk
    */
-  rowname: any
+  rowname: any;
 }
 
 export interface UploadProgressProps {
