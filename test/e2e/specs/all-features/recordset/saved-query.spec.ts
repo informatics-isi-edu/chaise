@@ -124,7 +124,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
 
       const textAreaVal = 'main with:\n  - int_col (1 choice): int_col ( 11 to 22);';
-      await expect.soft(RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
+      await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
 
@@ -180,7 +180,7 @@ test.describe('View recordset page and form a query,', () => {
       await queryNameInput.clear();
       await queryNameInput.fill('Second saved query');
 
-      const descriptionInput = RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1);
+      const descriptionInput = RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'description', 1);
       await descriptionInput.clear();
       await descriptionInput.fill('Second query description');
 

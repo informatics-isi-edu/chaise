@@ -187,7 +187,7 @@ const FormRow = ({
    */
   const handleFormClick = (formNumber: number) => {
     // disallow users to click on the disabled inputs (although this is not possible anymore as we're removing these forms on load)
-    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`]) {
+    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`]) {
       return;
     }
 
@@ -236,7 +236,7 @@ const FormRow = ({
     }
 
     if (typeof formNumber === 'number') {
-      const valName = `${formNumber}-${columnModel.column.name}`;
+      const valName = `c_${formNumber}-${columnModel.column.RID}`;
       if (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false) {
         return true;
       }
@@ -250,7 +250,7 @@ const FormRow = ({
    */
   const getEntityValueClass = (formNumber: number) => {
     const classes = [];
-    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
+    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`])
     if (!cannotBeUpdated && isActiveForm) {
       classes.push('clickable-form-overlay');
       if (activeForms.includes(formNumber)) {
@@ -263,6 +263,7 @@ const FormRow = ({
 
   const renderInput = (formNumber: number, formIndex?: number) => {
     const colName = columnModel.column.name;
+    const colRID = columnModel.column.RID;
 
     const isDisabled = getIsDisabled(formNumber, formNumber === MULTI_FORM_INPUT_FORM_VALUE);
 
@@ -299,7 +300,8 @@ const FormRow = ({
           displayDateTimeLabels
           disableInput={isDisabled}
           requiredInput={columnModel.isRequired}
-          name={`${formNumber}-${colName}`}
+          name={`c_${formNumber}-${colRID}`}
+          inputClassName={`c_${formNumber}-${makeSafeIdAttr(colName)}`}
           type={columnModel.inputType}
           classes='column-cell-input'
           placeholder={placeholder}

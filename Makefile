@@ -79,7 +79,7 @@ E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
-E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
+E2Eerrors=test/e2e/specs/all-features-confirmation/errors/errors.config.ts
 ## Parallel test scripts (protractor)
 AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel_PROTRACTOR=test/e2e/specs/delete-prohibited/protractor.conf.js
@@ -97,12 +97,11 @@ RECORD_TESTS_PROTRACTOR=$(E2EDrecord) $(E2EDrecordLinks)
 RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacetProt) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
-ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
 PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
-ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
+ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR)
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
@@ -112,7 +111,7 @@ RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown)
 RECORDEDIT_TESTS=$(E2ErecordEditInputIframe)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
-ERRORS_TESTS=
+ERRORS_TESTS=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(AllFeaturesConfirmationParallel)
@@ -184,6 +183,14 @@ testrecordset: test-RECORDSET_TESTS
 .PHONY: testrecordset-protractor
 testrecordset-protractor: test_protractor-RECORDSET_TESTS_PROTRACTOR
 
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testfooter
+testfooter: test-FOOTER_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testerrors
+testerrors: test-ERRORS_TESTS
+
 #### Parallel make commands - these commands will run tests in parallel
 #Rule to run all parallel test configurations
 .PHONY: testparallel
@@ -210,24 +217,12 @@ testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
 .PHONY: testdeleteprohibited-protractor
 testdeleteprohibited-protractor: test_protractor-DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR
 
-
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testdefaultconfig
 testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
 .PHONY: testdefaultconfig-protractor
 testdefaultconfig-protractor: test_protractor-DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testfooter
-testfooter: test-FOOTER_TESTS
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testerrors
-testerrors: test-ERRORS_TESTS
-
-.PHONY: testerrors-protractor
-testerrors-protractor: test_protractor-ERRORS_TESTS_PROTRACTOR
 
 # Rule to setup schema and data for manual tests
 .PHONY: testmanually

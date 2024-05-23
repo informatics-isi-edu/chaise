@@ -1,11 +1,14 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+
 //hooks
 import { useRef } from 'react';
+
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+
 const JsonField = (props: InputFieldProps): JSX.Element => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const jsonFieldValidation = (value: string) => {
@@ -29,10 +32,14 @@ const JsonField = (props: InputFieldProps): JSX.Element => {
         <div className='input-switch-json'>
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <textarea
-              placeholder={props.placeholder} rows={5} className={`${props.inputClasses} input-switch ${
+              placeholder={props.placeholder} 
+              rows={5} 
+              className={`${props.inputClasses} input-switch ${props.inputClassName} ${
                 hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
               }`}
-              {...field} onChange={onChange} disabled={props.disableInput}
+              {...field} 
+              onChange={onChange} 
+              disabled={props.disableInput}
               ref={textAreaRef}
             />
             <ClearInputBtn
