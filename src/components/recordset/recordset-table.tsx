@@ -38,6 +38,7 @@ const RecordsetTable = ({
     isInitialized,
     hasTimeoutError,
     page,
+    setPagingSuccess,
     columnModels,
     colValues,
     selectedRows,
@@ -124,21 +125,9 @@ const RecordsetTable = ({
     // log the request if it was successful
     if (success) {
       logRecordsetClientAction(action, null, null, ref);
+      setPagingSuccess(true);
     }
   };
-
-  /**
-   * To maintain scroll position after next/previous button click on table
-   */
-  // const scrollToTableTop = () => {
-  //   if (!mainContainerRef || !mainContainerRef?.current ) return;
-  //   const element = document.querySelector(`#rt-heading-${makeSafeIdAttr(reference.table.name)}:not(.${CLASS_NAMES.HIDDEN})`) as HTMLDivElement;
-  //   //TODO: To see if this works for all he cases
-  //   mainContainerRef.current.scrollTo({
-  //     top: element.offsetTop,
-  //     behavior: 'smooth',
-  //   });
-  // };
 
   /**
    * select all the rows that are displayed and are not disabled
@@ -423,6 +412,7 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
+
   return (
     <div className='recordset-table-container' ref={tableContainer}>
       <div className='chaise-table-top-scroll-wrapper'>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 // components
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
@@ -17,10 +17,13 @@ import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
+// services
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
 // utils
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import React from 'react';
+import { determineScrollElement, displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type RelatedTableProps = {
   /**
@@ -28,9 +31,9 @@ type RelatedTableProps = {
    */
   relatedModel: RecordRelatedModel,
   /**
-   * the id attached to the container
+   * the displayname for the reference to be used in the id attached to the container
    */
-  tableContainerID: string
+  displaynameForID: string
   mainContainerRef: any,
 };
 
@@ -41,7 +44,7 @@ type RelatedTableProps = {
  */
 const RelatedTable = ({
   relatedModel,
-  tableContainerID,
+  displaynameForID,
   mainContainerRef
 }: RelatedTableProps): JSX.Element => {
   return (
@@ -49,21 +52,25 @@ const RelatedTable = ({
       initialReference={relatedModel.initialReference}
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} mainContainerRef={mainContainerRef}/>
+      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} mainContainerRef={mainContainerRef} />
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
-  tableContainerID,
+  displaynameForID,
   mainContainerRef
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
+    pagingSuccess, setPagingSuccess
   } = useRecordset();
+
   const {
-    reference: recordReference, page : recordPage, updateRelatedRecordsetState, registerRelatedModel
+    reference: recordReference, page: recordPage,
+    relatedSectionInitialized,
+    updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
   /**
@@ -79,8 +86,35 @@ const RelatedTableInner = ({
    * When isLoading changes to false, related table has returned data and we should scroll to top
    */
   useEffect(() => {
-    if (isLoading) return;
-    console.log(isLoading);
+    // return if:
+    //    related section not initialized
+    //    recordset content for related table is still loading
+    //    there's no main container ref (should not happen)
+    //    pagingSuccess is set to false
+    if (!relatedSectionInitialized || isLoading || !mainContainerRef.current) return;
+
+    if (!pagingSuccess) return;
+    setPagingSuccess(false);
+
+    const scrollElement = determineScrollElement(displaynameForID);
+    if (!scrollElement) {
+      $log.debug(`section '${displaynameForID}' not found for scrolling to!`);
+      return;
+    }
+
+    const element = scrollElement as HTMLElement;
+    mainContainerRef.current?.scrollTo({
+      top: element.offsetTop,
+      behavior: 'smooth',
+    });
+
+    // flash the activeness
+    setTimeout(() => {
+      element.classList.add('row-focus');
+      setTimeout(() => {
+        element.classList.remove('row-focus');
+      }, 1600);
+    }, 100);
   }, [isLoading])
 
   /**
@@ -113,7 +147,7 @@ const RelatedTableInner = ({
       }
       <div className={`related-table-content${displayCustomMode ? (' ' + CLASS_NAMES.HIDDEN) : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
-        <div id={tableContainerID}>
+        <div id={`rt-${makeSafeIdAttr(displaynameForID)}`}>
           <RecordsetTable
             config={relatedModel.recordsetProps.config}
             initialSortObject={usedRef.location.sortObject}

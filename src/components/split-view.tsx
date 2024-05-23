@@ -1,7 +1,11 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_split-view.scss';
-import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
-import { convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+
+// hooks
 import { useEffect, useRef, useState } from 'react';
+import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
+
+// utils
+import { convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type LeftPaneProps = {
   /**

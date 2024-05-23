@@ -118,6 +118,8 @@ export const RecordsetContext = createContext<{
    * The displayed page
    */
   page: any,
+  pagingSuccess: boolean,
+  setPagingSuccess: (arg0: boolean) => void
   /**
    * An array of column values
    * NOTE we're using colValues instead of rowValues to make the aggregate logic easier.
@@ -300,6 +302,7 @@ export default function RecordsetProvider({
   const [isLoading, setIsLoading, isLoadingRef] = useStateRef<boolean>(!initialPage);
   const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEFAULT_PAGE_SIZE);
   const [page, setPage, pageRef] = useStateRef<any>(initialPage ? initialPage : null);
+  const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
   const [savedQueryReference, setSavedQueryReference] = useState(null);
   const [colValues, setColValues] = useState<any>(initialPage ? getColumnValuesFromPage(initialPage) : []);
   /**
@@ -1141,6 +1144,8 @@ export default function RecordsetProvider({
       update,
       pageLimit,
       page,
+      pagingSuccess,
+      setPagingSuccess,
       colValues,
       disabledRows,
       selectedRows,
@@ -1162,7 +1167,7 @@ export default function RecordsetProvider({
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
-    isInitialized, page, colValues,
+    isInitialized, page, pagingSuccess, colValues,
     disabledRows, selectedRows, columnModels, totalRowCount, savedQueryReference
   ]);
 

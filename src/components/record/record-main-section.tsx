@@ -23,10 +23,16 @@ import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-util
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
+type RecordMainSectionProps = {
+  mainContainerRef: any
+};
+
 /**
  * Returns Main Section of the record page.
  */
-const RecordMainSection = (): JSX.Element => {
+const RecordMainSection = ({
+  mainContainerRef
+}: RecordMainSectionProps): JSX.Element => {
 
   const { errors } = useError();
   const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections } = useRecord();
@@ -123,8 +129,9 @@ const RecordMainSection = (): JSX.Element => {
                     <div className='inline-tooltip'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable
+                    mainContainerRef={mainContainerRef}
                     relatedModel={cm.relatedModel}
-                    tableContainerID={`rt-${idSafeDisplayname}`}
+                    displaynameForID={cm.column.displayname.value}
                   />
                 </div>
               </span>

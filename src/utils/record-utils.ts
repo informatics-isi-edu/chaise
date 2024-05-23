@@ -1,16 +1,17 @@
 // models
-import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { CLASS_NAMES, RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 /**
@@ -359,4 +360,25 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
     fkColumnNames: prefilledFks,
     keys: keys
   };
+}
+
+export function determineScrollElement(displayname: string): Element | false {
+  // id encode query param
+  const htmlId = makeSafeIdAttr(displayname);
+  // "entity-" is used for record entity section
+  // we have to make sure the row is visible on the page
+  let el = document.querySelector(`tr:not(.${CLASS_NAMES.HIDDEN}) #entity-${htmlId}`);
+
+  if (el) {
+    // if in entity section, grab parent
+    el = el.parentElement;
+  } else {
+    // "rt-heading-" is used for related table section
+    // we have to make sure the section is visible on the page
+    el = document.querySelector(`#rt-heading-${htmlId}:not(.${CLASS_NAMES.HIDDEN})`);
+  }
+
+  if (!el) return false;
+
+  return el;
 }
