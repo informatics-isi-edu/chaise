@@ -208,9 +208,9 @@ html {
     // the icon is directly next to the text.
     content: "\00A6";
   }
-  .chaise-icon-for-tooltip.align-center-icon {
-    line-height: 20px;
-    vertical-align: middle;
+  .chaise-icon-for-tooltip.chaise-accordion-header-icon-for-tooltip {
+    // this used to make the icon centered, but we want the icon to be text-top like any other places
+    // we're just adding more space between this icon and other content on the header
     margin: 4px;
   }
 
