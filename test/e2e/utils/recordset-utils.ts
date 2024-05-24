@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test'
+import { expect, Locator, Page, test } from '@playwright/test'
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 export type RecordsetRowValue = ({
@@ -87,8 +87,47 @@ export async function testSelectFacetOption(container: Page | Locator, facetIdx:
   const facetFilters = RecordsetLocators.getFacetFilters(container);
   await expect.soft(facetFilters).toHaveCount(1);
   await expect.soft(facetFilters.nth(0)).toHaveText(filterName);
-      
+
   await clearAll.click();
   await expect.soft(clearAll).not.toBeVisible();
   await expect.soft(facetOption).not.toBeChecked();
 };
+
+
+/**
+ * this is done in multiple places for facet specs. it will reset the state of the page.
+ * @param page the page object
+ * @param url the url of the page
+ * @param totalNumFacets how many facets there are
+ * @param openedFacets facets that are opened and should be closed
+ * @param pageSizeAfterClear the page size after clear is clicked
+ */
+export async function openRecordsetAndResetFacetState(
+  page: Page, url: string, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number
+) {
+  const clearAll = RecordsetLocators.getClearAllFilters(page);
+  const closedFacets = RecordsetLocators.getClosedFacets(page);
+
+  await test.step('should load recordset page', async () => {
+    await page.goto(url);
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+
+    // without this the test might fail
+    // wait for the default facets to open first
+    await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
+  });
+
+  await test.step('close default open facets', async () => {
+    for await (const [i, facetIndex] of openedFacets.entries()) {
+      const facet = RecordsetLocators.getFacetById(page, facetIndex);
+      await RecordsetLocators.getFacetHeaderButtonById(facet, facetIndex).click();
+      await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
+    }
+  });
+
+  await test.step('clear all filters', async () => {
+    await clearAll.click();
+    await expect.soft(clearAll).not.toBeVisible();
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
+  });
+}

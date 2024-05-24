@@ -5,6 +5,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { openRecordsetAndResetFacetState } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 const testParams: any = {
   schema_name: 'faceting',
@@ -24,32 +25,12 @@ const testParams: any = {
 }
 
 test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, testInfo) => {
-  const clearAll = RecordsetLocators.getClearAllFilters(page);
-  await test.step('should load recordset page', async () => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}`);
-    await RecordsetLocators.waitForRecordsetPageReady(page);
-  });
-
-  await test.step('close default open facets', async () => {
-    let facet = RecordsetLocators.getFacetById(page, 11);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 11).click();
-    await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 2);
-
-    facet = RecordsetLocators.getFacetById(page, 1);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 1).click();
-    await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 1);
-
-    facet = RecordsetLocators.getFacetById(page, 0);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 0).click();
-  });
-
-  await test.step('clear all filters', async () => {
-    await clearAll.click();
-    await expect.soft(clearAll).not.toBeVisible();
-    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
-  });
+  await openRecordsetAndResetFacetState(page,
+    `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
+    testParams.totalNumFacets,
+    [0, 1, 11],
+    testParams.defaults.pageSize
+  );
 
   await test.step('selecting facet options and verifying row after each selection', async () => {
     for await (const [index, facetParams] of testParams.multipleFacets.entries()) {
@@ -83,32 +64,13 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
 });
 
 test('Testing four facet selections in quick sequence and verifying data after all selections', async ({ page, baseURL }, testInfo) => {
-  const clearAll = RecordsetLocators.getClearAllFilters(page);
-  await test.step('should load recordset page', async () => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
 
-    await page.goto(`${baseURL}${PAGE_URL}`);
-    await RecordsetLocators.waitForRecordsetPageReady(page);
-  });
-
-  await test.step('close default open facets', async () => {
-    let facet = RecordsetLocators.getFacetById(page, 11);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 11).click();
-    await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 2);
-
-    facet = RecordsetLocators.getFacetById(page, 1);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 1).click();
-    await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 1);
-
-    facet = RecordsetLocators.getFacetById(page, 0);
-    await RecordsetLocators.getFacetHeaderButtonById(facet, 0).click();
-  });
-
-  await test.step('clear all filters', async () => {
-    await clearAll.click();
-    await expect.soft(clearAll).not.toBeVisible();
-    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
-  });
+  await openRecordsetAndResetFacetState(page,
+    `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
+    testParams.totalNumFacets,
+    [0, 1, 11],
+    testParams.defaults.pageSize
+  );
 
   await test.step('should open facets, click an option in each, and verify the data after', async () => {
     const numFacets = testParams.multipleFacets.length;
