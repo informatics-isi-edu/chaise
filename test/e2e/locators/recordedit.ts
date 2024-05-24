@@ -172,7 +172,7 @@ export default class RecordeditLocators {
   static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
-    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error.text-danger');
+    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error');
   }
 
   static getColumnPermissionOverlay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {

@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils
-import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { CUSTOM_ERROR_TYPES, ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 
@@ -71,15 +71,7 @@ export type InputFieldProps = {
    * `optional`additional controller rules for the input field.
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
    */
-   additionalControllerRules?: {
-    [key: string]: (string | number | boolean | RegExp | Function | Object) | {
-      value: (boolean | number | RegExp),
-      /**
-       * Error message
-       */
-      message: string
-    }
-  }
+   additionalControllerRules? : any
 }
 
 
@@ -146,6 +138,20 @@ const InputField = ({
     controllerRules.required = ERROR_MESSAGES.REQUIRED;
   }
 
+  // Combine validation rules
+  if(additionalControllerRules?.validate){
+    if(controllerRules.validate){
+      if(typeof controllerRules.validate === 'function'){
+        controllerRules.validate = {invalidValue : controllerRules.validate, ...additionalControllerRules.validate}
+      }else{
+        controllerRules.validate = {...controllerRules.validate, ...additionalControllerRules.validate}
+      }
+    }else{
+      controllerRules.validate = {...additionalControllerRules.validate}
+    }
+    delete additionalControllerRules.validate;
+  }
+
   const formInput = useController({
     name,
     control,
@@ -199,13 +205,18 @@ const InputField = ({
   /**
    * we don't want to show the required error until it's submitted
    */
-  let showError = !!error?.message && displayErrors;
+  let showError = !!error?.message && displayErrors, errorClass = 'input-switch-error-danger';
   if (showError) {
     if (error?.type === 'required') {
       // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
-      showError = formInput.formState.isSubmitted || displayRequiredErrorBeforeSubmit; 
+      showError = formInput.formState.isSubmitted || displayRequiredErrorBeforeSubmit;
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
+    }
+
+    // while this is an error, we want to show a different color for it.
+    if (error?.type === CUSTOM_ERROR_TYPES.ARRAY_ADD_OR_DISCARD_VALUE) {
+      errorClass = 'input-switch-error-warning';
     }
   }
 
@@ -213,7 +224,7 @@ const InputField = ({
     <div className={`${containerClasses} input-switch-container-${inputClassName}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message &&
-        <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />
+        <DisplayValue internal as='span' className={`input-switch-error ${errorClass}`} value={{ isHTML: true, value: error.message }} />
       }
     </div>
   );
