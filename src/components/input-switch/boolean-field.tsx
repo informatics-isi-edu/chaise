@@ -8,12 +8,16 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { useRef } from 'react';
 
 type BooleanFieldProps = InputFieldProps & {
   columnModel?: any,
 }
 
 const BooleanField = (props: BooleanFieldProps): JSX.Element => {
+
+
+  const ellipsisRef = useRef(null);
 
   /**
    * input-field checks for falsy values, but "false" is a
@@ -80,15 +84,13 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
       }}
     >
       {(field, onChange, showClear, clearInput) => (
-        <EllipsisWrapper
-          inputType={props.type}
-          inputName={props.name}
-          inputClassName={props.inputClassName}
-        >
-          <div className='input-switch-boolean'>
-            <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
-              <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
-                <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
+        <div className='input-switch-boolean'>
+          <Dropdown onToggle={onToggle} aria-disabled={props.disableInput}>
+            <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
+              <EllipsisWrapper
+                elementRef={ellipsisRef}
+              >
+                <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`} ref={ellipsisRef}>
                   {typeof field?.value === 'boolean' ?
                     displayedOptions[rawOptions.indexOf(field?.value)] :
                     <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>
@@ -98,27 +100,27 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
                     clickCallback={clearInput} show={!props.disableInput && showClear}
                   />
                 </div>
-                {!props.disableInput && <div className='chaise-input-group-append'>
-                  <button className='chaise-btn chaise-btn-primary' role='button' type='button'>
-                    <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-                  </button>
-                </div>}
-              </Dropdown.Toggle>
-              {!props.disableInput && <Dropdown.Menu>
-                {displayedOptions.map((option: any, index: number) => (
-                  <Dropdown.Item
-                    as='li'
-                    key={`boolean-val-${makeSafeIdAttr(props.name)}-${index}`}
-                    onClick={() => onChange(rawOptions[index])}
-                  >
-                    {option}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>}
-            </Dropdown>
-            <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
-          </div>
-        </EllipsisWrapper>
+              </EllipsisWrapper>
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button className='chaise-btn chaise-btn-primary' role='button' type='button'>
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
+            </Dropdown.Toggle>
+            {!props.disableInput && <Dropdown.Menu>
+              {displayedOptions.map((option: any, index: number) => (
+                <Dropdown.Item
+                  as='li'
+                  key={`boolean-val-${makeSafeIdAttr(props.name)}-${index}`}
+                  onClick={() => onChange(rawOptions[index])}
+                >
+                  {option}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>}
+          </Dropdown>
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
+        </div>
       )}
     </InputField>
 

@@ -62,7 +62,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   } | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
-
+  const ellipsisRef = useRef(null);
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
   const isEditMode = props.appMode === appModes.EDIT;
@@ -98,15 +98,15 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   return (
     <InputField {...props} onClear={onClear}>
       {(field, onChange, showClear, clearInput) => (
-        <EllipsisWrapper
-          inputType={props.type}
-          inputName={props.name}
-          inputClassName={props.inputClassName}
-        >
-          <div className='input-switch-iframe'>
-            <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
+
+        <div className='input-switch-iframe'>
+          <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
+            <EllipsisWrapper
+              elementRef={ellipsisRef}
+            >
               <div
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+                ref={ellipsisRef}
               >
                 {isStringAndNotEmpty(field?.value) ?
                   <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
@@ -122,43 +122,43 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                   clickCallback={clearInput} show={!props.disableInput && showClear}
                 />
               </div>
-              {!props.disableInput && <div className='chaise-input-group-append'>
-                <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
-                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-                </button>
-              </div>}
-            </div>
-            <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
-            {
-              showModal && iframeProps &&
-              <AlertsProvider>
-                <IframeFieldModal
-                  iframeLocation={iframeProps.url}
-                  showModal={showModal}
-                  setShowModal={setShowModal}
-                  title={<>
-                    <span>Select </span>
-                    <Title displayname={props.columnModel.column.displayname} />
-                    {props.parentReference &&
-                      <span>
-                        <span> for {!isEditMode ? 'new ' : ''}</span>
-                        <Title reference={props.parentReference} />
-                        {isEditMode && props.parentTuple &&
-                          <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
-                      </span>}
-                  </>}
-                  fieldName={props.name}
-                  columnModel={props.columnModel}
-                  submissionRowValues={iframeProps.submissionRow}
-                  formNumber={usedFormNumber}
-                  clearErrors={clearErrors}
-                  setValue={setValue}
-                  confirmClose={!field?.value}
-                />
-              </AlertsProvider>
-            }
+            </EllipsisWrapper>
+            {!props.disableInput && <div className='chaise-input-group-append'>
+              <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
+                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+              </button>
+            </div>}
           </div>
-        </EllipsisWrapper>
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
+          {
+            showModal && iframeProps &&
+            <AlertsProvider>
+              <IframeFieldModal
+                iframeLocation={iframeProps.url}
+                showModal={showModal}
+                setShowModal={setShowModal}
+                title={<>
+                  <span>Select </span>
+                  <Title displayname={props.columnModel.column.displayname} />
+                  {props.parentReference &&
+                    <span>
+                      <span> for {!isEditMode ? 'new ' : ''}</span>
+                      <Title reference={props.parentReference} />
+                      {isEditMode && props.parentTuple &&
+                        <span>: <Title displayname={props.parentTuple.displayname}></Title></span>}
+                    </span>}
+                </>}
+                fieldName={props.name}
+                columnModel={props.columnModel}
+                submissionRowValues={iframeProps.submissionRow}
+                formNumber={usedFormNumber}
+                clearErrors={clearErrors}
+                setValue={setValue}
+                confirmClose={!field?.value}
+              />
+            </AlertsProvider>
+          }
+        </div>
       )}
     </InputField>
   );

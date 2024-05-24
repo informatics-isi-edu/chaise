@@ -1,81 +1,57 @@
-import { useEffect, useState } from "react"
-import { useWatch } from "react-hook-form"
-import useRecordedit from "../hooks/recordedit"
-import ChaiseTooltip from "./tooltip"
-
+import { useState } from 'react'
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip'
 
 
 export type EllipsisWrapperProps = {
   children: JSX.Element
   /**
-   * the typename of the input
+   * This is a ref to the element we want to watch for text overflow
    */
-  inputType: string
-  /**
-   * the name of the field for react hook form
-   */
-  inputName: string
-  /**
-   * the name of the field for attaching a specific class to input-switch-container and the input
-   */
-  inputClassName: string
-  /**
-   * List of additional tooltips to be shown apart from the behavior exhibited by this component
-   */
-  additionalTooltips?: string[]
+  elementRef : React.MutableRefObject<any>
 }
 
 const EllipsisWrapper = ({
   children,
-  inputType,
-  inputName,
-  inputClassName,
-  additionalTooltips
+  elementRef,
 }: EllipsisWrapperProps) => {
 
   const [showToolTip, setShowTooltip] = useState<boolean>(false);
-  const [tooltip, setTooltip] = useState('tooltip');
+  const [tooltip, setTooltip] = useState('');
 
-  const inputFieldValue = useWatch({ name: inputName });
-  const { forms } = useRecordedit();
-
-  useEffect(() => {
-    const valueDiv = document.querySelector(`.input-switch-container-${inputClassName} .ellipsis`) as HTMLElement;
-    let tt = [];
-
-    if (valueDiv && inputFieldValue && valueDiv.clientWidth < valueDiv.scrollWidth) {
-      tt.push((inputType === 'file' ? inputFieldValue.filename : inputFieldValue));
+  /**
+   * Function to check the text overflow.
+   */
+   const isTextOverflow = (element: HTMLElement) => {
+    if (element) {
+      return element.offsetWidth < element.scrollWidth;
     }
+    return false;
+  };
 
-    if (additionalTooltips && additionalTooltips.length) {
-      for (let additionalTooltip of additionalTooltips) {
-        if (!tt.includes(additionalTooltip)) {
-          tt.push(additionalTooltip)
-        }
-      }
-    }
+  /**
+   * Handle rendering of tooltip on Element hover
+   * @param isHovering is user hovering over the element
+   */
+  const onHover = (isHovering : boolean)=>{  
 
-    if (tt.length) {
-      let tooltipString = '- '+ tt.reduce((prev, curr) => prev + '\n- ' + curr).trim();
-
-      setTooltip(tooltipString);
+    if(elementRef && elementRef.current && isTextOverflow(elementRef.current) && isHovering && elementRef.current.textContent){
+           
+      setTooltip(elementRef.current.textContent);
       setShowTooltip(true);
-    } else {
-      setShowTooltip(false);
+      return;
     }
-
-  }, [inputFieldValue, forms])
+    setShowTooltip(false);
+  }
 
   return (
-    showToolTip ?
       <ChaiseTooltip
         tooltip={tooltip}
         placement={'top-start'}
+        onToggle={onHover}
+        show={showToolTip}
       >
         {children}
       </ChaiseTooltip>
-      :
-      children
   );
 }
 
