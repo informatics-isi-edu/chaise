@@ -504,7 +504,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                       }
 
                       let addButton, errorElement;
-                      const addOrDiscardError = 'Click \'Add\' to append value to array OR discard it before saving the form';
+                      const addOrDiscardError = 'Click \'Add\' to include the value or clear the entry to discard.';
 
                       switch (col.baseType) {
                         case 'date':
