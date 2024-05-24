@@ -1,6 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 
-type DefaultRangeInputLocators = {
+export type DefaultRangeInputLocators = {
   minInput: Locator;
   maxInput: Locator;
   minClear: Locator;
@@ -8,7 +8,7 @@ type DefaultRangeInputLocators = {
   submit: Locator;
 }
 
-type TimestampRangeInputLocators = {
+export type TimestampRangeInputLocators = {
   // date
   minDateInput: Locator;
   maxDateInput: Locator;
@@ -272,7 +272,7 @@ export default class RecordsetLocators {
 
   /* range facet selectors */
 
-  // there's integer/float/date/timestamp inputs
+  // there's integer/float/date inputs
   static getFacetRangeInputs(facet: Locator): DefaultRangeInputLocators {
     return {
       minInput: facet.locator('.range-min'),
