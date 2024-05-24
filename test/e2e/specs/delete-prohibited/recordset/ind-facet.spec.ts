@@ -440,7 +440,7 @@ test.describe('Testing individual facet types', () => {
             if (facetParams.notNullNumRows) {
               await test.step('should be able to filter not-null values.', async () => {
                 const notNullOption = RecordsetLocators.getFacetOption(facet, 0);
-                await notNullOption.click();
+                await notNullOption.check();
 
                 // wait for table rows to load
                 await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(facetParams.notNullNumRows)
@@ -595,7 +595,7 @@ test.describe('Testing individual facet types', () => {
             if (facetParams.notNullNumRows) {
               await test.step('should be able to filter not-null values.', async () => {
                 const notNulloption = RecordsetLocators.getFacetOption(facet, 0);
-                await notNulloption.click();
+                await notNulloption.check();
 
                 // wait for table rows to load
                 await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(facetParams.notNullNumRows)

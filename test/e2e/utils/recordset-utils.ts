@@ -75,16 +75,16 @@ export async function openFacetAndTestFilterOptions(facet: Locator, facetIdx: nu
  * @param  {Function} done
  */
 // eslint-disable-next-line max-len
-export async function testSelectFacetOption(container: Page | Locator, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number) {
-  const facet = RecordsetLocators.getFacetById(container, facetIdx);
+export async function testSelectFacetOption(page: Page, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number) {
+  const facet = RecordsetLocators.getFacetById(page, facetIdx);
   const facetOption = RecordsetLocators.getFacetOption(facet, filterIdx);
-  const clearAll = RecordsetLocators.getClearAllFilters(container);
+  const clearAll = RecordsetLocators.getClearAllFilters(page);
 
-  await facetOption.click()
-  await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRowsAfter);
+  await facetOption.check();
+  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRowsAfter);
 
   // wait for facet filters to load
-  const facetFilters = RecordsetLocators.getFacetFilters(container);
+  const facetFilters = RecordsetLocators.getFacetFilters(page);
   await expect.soft(facetFilters).toHaveCount(1);
   await expect.soft(facetFilters.nth(0)).toHaveText(filterName);
 

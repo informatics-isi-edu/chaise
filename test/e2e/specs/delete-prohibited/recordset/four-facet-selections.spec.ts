@@ -47,7 +47,7 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
         // wait for list to be fully visible
         await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
 
-        await RecordsetLocators.getFacetOption(facet, facetParams.option).click();
+        await RecordsetLocators.getFacetOption(facet, facetParams.option).check();
 
         // wait for request to return
         await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
@@ -101,19 +101,19 @@ test('Testing four facet selections in quick sequence and verifying data after a
     await expect.soft(RecordsetLocators.getFacetOption(facet1, testParams.multipleFacets[0].option)).toBeVisible();
     await page.waitForTimeout(50);
 
-    await RecordsetLocators.getFacetOption(facet1, testParams.multipleFacets[0].option).click();
+    await RecordsetLocators.getFacetOption(facet1, testParams.multipleFacets[0].option).check();
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.multipleFacets[0].numRows);
     await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(1);
 
-    await RecordsetLocators.getFacetOption(facet2, testParams.multipleFacets[1].option).click();
+    await RecordsetLocators.getFacetOption(facet2, testParams.multipleFacets[1].option).check();
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.multipleFacets[1].numRows);
     await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(2);
 
-    await RecordsetLocators.getFacetOption(facet3, testParams.multipleFacets[2].option).click();
+    await RecordsetLocators.getFacetOption(facet3, testParams.multipleFacets[2].option).check();
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.multipleFacets[2].numRows);
     await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(3);
 
-    await RecordsetLocators.getFacetOption(facet4, testParams.multipleFacets[3].option).click();
+    await RecordsetLocators.getFacetOption(facet4, testParams.multipleFacets[3].option).check();
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.multipleFacets[3].numRows);
     await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(numFacets);
   });

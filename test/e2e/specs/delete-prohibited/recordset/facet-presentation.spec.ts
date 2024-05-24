@@ -204,7 +204,7 @@ test('Viewing Recordset with Faceting, ', async ({ page, baseURL }, testInfo) =>
     await test.step('should have 1 row selected in show more popup for entity.', async () => {
       const facet = RecordsetLocators.getFacetById(page, 11);
       await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
-      await RecordsetLocators.getFacetOption(facet, 0).click();
+      await RecordsetLocators.getFacetOption(facet, 0).check();
 
       // open show more, verify only 1 row checked, check another and submit
       await RecordsetLocators.getShowMore(facet).click();
