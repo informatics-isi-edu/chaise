@@ -103,6 +103,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
           <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
             <EllipsisWrapper
               elementRef={ellipsisRef}
+              tooltip={field?.value}
             >
               <div
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}

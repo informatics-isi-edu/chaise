@@ -201,7 +201,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
           }
           <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
             <EllipsisWrapper
-            elementRef={ellipsisRef}
+              elementRef={ellipsisRef}
+              tooltip={field?.value}
             >
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}

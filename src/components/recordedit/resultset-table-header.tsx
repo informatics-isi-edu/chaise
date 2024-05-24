@@ -1,5 +1,6 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // models
 import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -21,26 +22,11 @@ const ResultsetTableHeader = ({
   editLink
 }: ResultsetTableHeaderProps): JSX.Element => {
   /**
-   * state variable to control whether to show tooltip or not
-   */
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  /**
    * variable to store ref of facet header text
    */
   const contentRef = useRef(null);
 
   const adj = appMode === appModes.EDIT ? 'updated' : 'created';
-
-  /**
-   * Function to check the text overflow.
-   */
-  const isTextOverflow = (element: HTMLElement) => {
-    if (element) {
-      return element.offsetWidth < element.scrollWidth;
-    }
-    return false;
-  };
 
   /**
    * this is to avoid the accordion header to recieve the click
@@ -51,22 +37,12 @@ const ResultsetTableHeader = ({
 
   return (
     <div className='chaise-accordion-header'>
-      <ChaiseTooltip
-        placement='top-start'
+      <EllipsisWrapper
+        elementRef={contentRef}
         tooltip={header}
-        onToggle={(nextshow: boolean) => {
-          // Bootstrap onToggle prop to make tooltip visible or hidden
-          if (contentRef && contentRef.current) {
-            const isOverflow = isTextOverflow(contentRef.current);
-
-            // If either text overflow or hasTooltip is true, show tooltip to right of the content
-            setShowTooltip((isOverflow) && nextshow);
-          }
-        }}
-        show={showTooltip}
       >
         <div className='chaise-accordion-displayname' ref={contentRef}>{header}</div>
-      </ChaiseTooltip>
+      </EllipsisWrapper>
 
       <div className='chaise-accordion-header-buttons'>
         {editLink &&

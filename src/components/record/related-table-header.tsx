@@ -4,6 +4,7 @@ import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-com
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import Spinner from 'react-bootstrap/Spinner';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import { useRef, useState } from 'react';
@@ -45,8 +46,8 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;
 
-  const renderTooltipContent = () => {
-    if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
+  const renderTooltipContent = (isOverflowing: boolean) => {
+    if (isOverflowing && hasTooltip) {
       return (
         <>
           {renderedDisplayname}: {renderedTooltip}
@@ -61,25 +62,15 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
 
   return (
     <div className='chaise-accordion-header'>
-      <ChaiseTooltip
-        placement='top'
-        tooltip={renderTooltipContent()}
-        onToggle={(nextshow: boolean) => {
-          // Bootstrap onToggle prop to make tooltip visible or hidden
-          if (contentRef && contentRef.current) {
-            const isOverflow = isTextOverflow(contentRef.current);
-
-            // If either text overflow or hasTooltip is true, show tooltip to right of the content
-            setShowTooltip((isOverflow || hasTooltip) && nextshow);
-          }
-        }}
-        show={showTooltip}
+      <EllipsisWrapper
+        elementRef={contentRef}
+        tooltip={renderTooltipContent}
       >
         <div className='chaise-accordion-displayname' ref={contentRef}>
           {renderedDisplayname}
           {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
         </div>
-      </ChaiseTooltip>
+      </EllipsisWrapper>
 
       <div className='chaise-accordion-header-buttons'>
         <div className='chaise-accordion-header-icons'>

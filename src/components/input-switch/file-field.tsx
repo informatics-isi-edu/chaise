@@ -108,10 +108,24 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     return (typeof fileObj.filesize === 'number' ? 'size : ' + humanFileSize(fileObj.filesize) : fileObj.filename);
   }
 
+  const renderFileTooltip = (fieldValue: any) => (isOverflowing: boolean) => {
+    let tt = ''
+
+    if (isOverflowing && fieldValue) {
+      tt += '\n - ' + fieldValue.filename;
+    }
+    if (fileObject) {
+      tt += '\n - ' + fileTooltip(fileObject);
+    }
+
+    return tt.trim();
+  }
+
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
     return (
       <EllipsisWrapper
         elementRef={ellipsisRef}
+        tooltip={renderFileTooltip(fieldValue)}
       >
         <div
           className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
