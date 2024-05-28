@@ -101,7 +101,7 @@ const RecordsetTable = ({
     }
   }, [currSortColumn]);
 
-  // once the page is no longer loading and we had a previous/next click event for this table, fire a custom even for scrolling
+  // once the page is no longer loading and we had a previous/next click event for this table, fire a custom event for scrolling
   useEffect(() => {
     if (isLoading || !pagingSuccess) return;
     setPagingSuccess(false);
