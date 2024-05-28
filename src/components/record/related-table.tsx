@@ -34,7 +34,6 @@ type RelatedTableProps = {
    * the displayname for the reference to be used in the id attached to the container
    */
   displaynameForID: string
-  mainContainerRef: any,
 };
 
 /**
@@ -45,31 +44,27 @@ type RelatedTableProps = {
 const RelatedTable = ({
   relatedModel,
   displaynameForID,
-  mainContainerRef
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} mainContainerRef={mainContainerRef} />
+      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} />
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
-  displaynameForID,
-  mainContainerRef
+  displaynameForID
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
-    pagingSuccess, setPagingSuccess
   } = useRecordset();
 
   const {
     reference: recordReference, page: recordPage,
-    relatedSectionInitialized,
     updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
@@ -81,50 +76,6 @@ const RelatedTableInner = ({
   useEffect(() => {
     updateRelatedRecordsetState(relatedModel.index, relatedModel.isInline, { page, isInitialized, hasTimeoutError, isLoading });
   }, [page, isInitialized, hasTimeoutError, isLoading]);
-
-  /**
-   * When isLoading changes to false, related table has returned data and we should scroll to top
-   */
-  useEffect(() => {
-    // return if:
-    //    related section not initialized
-    //    recordset content for related table is still loading
-    //    there's no main container ref (should not happen)
-    //    pagingSuccess is set to false
-    if (!relatedSectionInitialized || isLoading || !mainContainerRef.current) return;
-
-    if (!pagingSuccess) return;
-    setPagingSuccess(false);
-
-    const scrollElement = determineScrollElement(displaynameForID);
-    if (!scrollElement) {
-      $log.debug(`section '${displaynameForID}' not found for scrolling to!`);
-      return;
-    }
-
-    const scrollElTop = scrollElement.getBoundingClientRect().top;
-    const mainContainerTop = mainContainerRef.current.getBoundingClientRect().top;
-
-    // return if related table header is at the top of main container or below the top (it's already visible)
-    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next 
-    //    for the related table we are looking at, meaning prev/next is above the bottom of main container and
-    //    therefore the related table header is either visible or above the top of main container top
-    if (scrollElTop >= mainContainerTop) return;
-
-    const element = scrollElement as HTMLElement;
-    mainContainerRef.current?.scrollTo({
-      top: element.offsetTop,
-      behavior: 'smooth',
-    });
-
-    // flash the activeness
-    setTimeout(() => {
-      element.classList.add('row-focus');
-      setTimeout(() => {
-        element.classList.remove('row-focus');
-      }, 1600);
-    }, 100);
-  }, [isLoading])
 
   /**
    * register the recordset functions in the recordProvider

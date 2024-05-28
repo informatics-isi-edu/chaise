@@ -17,10 +17,10 @@ import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, SortColumn } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -36,9 +36,9 @@ const RecordsetTable = ({
   const {
     reference,
     isInitialized,
+    isLoading,
     hasTimeoutError,
     page,
-    setPagingSuccess,
     columnModels,
     colValues,
     selectedRows,
@@ -55,6 +55,7 @@ const RecordsetTable = ({
   );
 
   const [showAllRows, setShowAllRows] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
+  const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
   /**
    * capture the state of selected and disabled of rows in here so
@@ -100,6 +101,18 @@ const RecordsetTable = ({
     }
   }, [currSortColumn]);
 
+  // once the page is no longer loading and we had a previous/next click event for this table, fire a custom even for scrolling
+  useEffect(() => {
+    if (isLoading || !pagingSuccess) return;
+    setPagingSuccess(false);
+
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0 && !!tableContainer.current) {
+      fireCustomEvent(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, tableContainer.current, {
+        displayname: reference.displayname.value
+      });
+    }
+  }, [isLoading]);
+
   //------------------- UI related callbacks: --------------------//
 
   const changeSort = (col: any) => {
@@ -125,6 +138,8 @@ const RecordsetTable = ({
     // log the request if it was successful
     if (success) {
       logRecordsetClientAction(action, null, null, ref);
+      // change state variable so the event can be fired once isLoading === false
+      // success here doesn't mean the content is fetched/loaded yet because of aggregate requests etc
       setPagingSuccess(true);
     }
   };
