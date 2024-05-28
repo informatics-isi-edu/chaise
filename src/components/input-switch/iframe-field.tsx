@@ -95,6 +95,20 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
     }
   };
 
+  // TODO - Multiple fields use a similar function and few other components in a similar way. Refactor to consolidate and create reusable helper(s) to eliminate code redundancy.
+  /**
+   * returns the value to be rendered for the provided field
+   */
+  const existingValuePresentation = (field: any): JSX.Element => isStringAndNotEmpty(field?.value) ?
+    <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
+    <span
+      className='chaise-input-placeholder popup-select-value'
+      contentEditable={false}
+    >
+      {props.placeholder ? props.placeholder : 'Select a value'}
+    </span>
+    ;
+
   return (
     <InputField {...props} onClear={onClear}>
       {(field, onChange, showClear, clearInput) => (
@@ -103,21 +117,13 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
           <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
             <EllipsisWrapper
               elementRef={ellipsisRef}
-              tooltip={field?.value}
+              tooltip={existingValuePresentation(field)}
             >
               <div
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
                 ref={ellipsisRef}
               >
-                {isStringAndNotEmpty(field?.value) ?
-                  <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-                  <span
-                    className='chaise-input-placeholder popup-select-value'
-                    contentEditable={false}
-                  >
-                    {props.placeholder ? props.placeholder : 'Select a value'}
-                  </span>
-                }
+                {existingValuePresentation(field)}
                 <ClearInputBtn
                   btnClassName={`${props.clearClasses} input-switch-clear`}
                   clickCallback={clearInput} show={!props.disableInput && showClear}

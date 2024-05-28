@@ -47,16 +47,20 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;
 
   const renderTooltipContent = (isOverflowing: boolean) => {
-    if (isOverflowing && hasTooltip) {
-      return (
-        <>
-          {renderedDisplayname}: {renderedTooltip}
-        </>
-      );
+    if (isOverflowing) {
+      if (hasTooltip) {
+        return (
+          <>
+            {renderedDisplayname}: {renderedTooltip}
+          </>
+        );
+      } else {
+        return renderedDisplayname;
+      }
     } else if (hasTooltip) {
       return renderedTooltip;
     } else {
-      return renderedDisplayname;
+      return null;
     }
   };
 

@@ -189,6 +189,20 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
   }
 
+  // TODO - Multiple fields use a similar function and few other components in a similar way. Refactor to consolidate and create reusable helper(s) to eliminate code redundancy.
+  /**
+   * returns the value to be rendered for the provided field
+   */
+  const existingValuePresentation = (field: any): JSX.Element => isStringAndNotEmpty(field?.value) ?
+    <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
+    <span
+      className='chaise-input-placeholder popup-select-value'
+      contentEditable={false}
+    >
+      {props.placeholder ? props.placeholder : 'Select a value'}
+    </span>
+    ;
+
   return (
     <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
@@ -202,22 +216,14 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
           <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
             <EllipsisWrapper
               elementRef={ellipsisRef}
-              tooltip={field?.value}
+              tooltip={existingValuePresentation(field)}
             >
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
                 ref={ellipsisRef}
               >
-                {isStringAndNotEmpty(field?.value) ?
-                  <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-                  <span
-                    className='chaise-input-placeholder popup-select-value'
-                    contentEditable={false}
-                  >
-                    {props.placeholder ? props.placeholder : 'Select a value'}
-                  </span>
-                }
+                {existingValuePresentation(field)}
                 <ClearInputBtn
                   btnClassName={`${props.clearClasses} input-switch-clear`}
                   clickCallback={clearInput} show={!props.disableInput && showClear}

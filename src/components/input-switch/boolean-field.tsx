@@ -76,6 +76,14 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
   const rawOptions = [true, false];
   const displayedOptions = rawOptions.map((op) => props.columnModel ? formatBoolean(props.columnModel.column, op) : op.toString());
 
+  // TODO - Multiple fields use a similar function and few other components in a similar way. Refactor to consolidate and create reusable helper(s) to eliminate code redundancy.
+  /**
+   * returns the value to be rendered for the provided field
+   */
+  const existingValuePresentation = (field: any): JSX.Element => typeof field?.value === 'boolean' ?
+    displayedOptions[rawOptions.indexOf(field?.value)] :
+    <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>;
+
   return (
     <InputField {...props}
       requiredInput={false} checkHasValue={hasValue}
@@ -89,13 +97,10 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
             <Dropdown.Toggle as='div' className='chaise-input-group no-caret' disabled={props.disableInput} aria-disabled={props.disableInput}>
               <EllipsisWrapper
                 elementRef={ellipsisRef}
-                tooltip={field?.value}
+                tooltip={existingValuePresentation(field)}
               >
                 <div className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`} ref={ellipsisRef}>
-                  {typeof field?.value === 'boolean' ?
-                    displayedOptions[rawOptions.indexOf(field?.value)] :
-                    <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>
-                  }
+                  {existingValuePresentation(field)}
                   <ClearInputBtn
                     btnClassName={`${props.clearClasses} input-switch-clear`}
                     clickCallback={clearInput} show={!props.disableInput && showClear}

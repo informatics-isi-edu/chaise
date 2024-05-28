@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip'
+import { Placement } from 'react-bootstrap/types';
 
 
 export type EllipsisWrapperProps = {
@@ -12,13 +13,24 @@ export type EllipsisWrapperProps = {
    * Tooltip to display.
    * It can be a value or a callback function with a boolean prop returning a value.
    */
-  tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => (string | JSX.Element))
+  tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => (string | JSX.Element | null))
+  /**
+   * where the tooltip should be.
+   * Default is 'top-start'
+   */
+  placement?: Placement,
 }
 
+
+/**
+ * A component that wraps its children and displays a tooltip if the content overflows its container.
+ * The tooltip is displayed when the user hovers over the wrapped content.
+ */
 const EllipsisWrapper = ({
   children,
   elementRef,
-  tooltip
+  tooltip,
+  placement = 'top-start'
 }: EllipsisWrapperProps) => {
 
   const [showToolTip, setShowTooltip] = useState<boolean>(false);
@@ -38,10 +50,12 @@ const EllipsisWrapper = ({
    * Get tooltip value based on type of prop passed
    */
   const getTooltipValue = () => {
+    const isOverflowing = isTextOverflow(elementRef.current);
+
     if (typeof tooltip === 'function') {
-      return tooltip(isTextOverflow(elementRef.current));
+      return tooltip(isOverflowing);
     } else {
-      return isTextOverflow(elementRef.current) ? tooltip : null;
+      return isOverflowing ? tooltip : null;
     }
   }
 
@@ -65,7 +79,7 @@ const EllipsisWrapper = ({
   return (
     <ChaiseTooltip
       tooltip={tooltipValue}
-      placement={'top-start'}
+      placement={placement}
       onToggle={onHover}
       show={showToolTip}
     >
