@@ -42,9 +42,9 @@ var testParams = {
                 "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
                 "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
-                "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
-                "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
-                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
+                "text_array": ["v1", "v2"], "boolean_array": [true], "int4_array": [1, 2], "float4_array": [1, 2.2],
+                "date_array": ["2001-01-01", "2002-02-02"], "timestamp_array": ["2001-01-01T01:01:01"],
+                "timestamptz_array": ["2001-01-01T01:01:01-08:00"],
                 "color_rgb_hex_column": "#123456"
             },
             {
@@ -52,9 +52,9 @@ var testParams = {
                 "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
                 "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true,
-                "text_array": "[\"v2\", \"v3\"]", "boolean_array": "[false]", "int4_array": "[1, 2]", "float4_array": "[2, 3.3]",
-                "date_array": "[\"2002-02-02\", null]", "timestamp_array": "[\"2002-02-02T02:02:02\"]",
-                "timestamptz_array": "[\"2002-02-02T02:02:02-08:00\"]",
+                "text_array": ["v2", "v3"], "boolean_array": [false], "int4_array": [1, 2], "float4_array": [2, 3.3],
+                "date_array": ["2002-02-02"], "timestamp_array": ["2002-02-02T02:02:02"],
+                "timestamptz_array": ["2002-02-02T02:02:02-08:00"],
                 "color_rgb_hex_column": "#654321"
             }
         ],
@@ -70,17 +70,18 @@ var testParams = {
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-add:category/term=Hotel`, "value":"Hotel"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01 01:01:01", "No value, 2001-01-01 01:01:01", "#123456"
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "2001-01-01 01:01:01", "2001-01-01 01:01:01", "#123456"
             ],
             [
                 "new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":`${process.env.CHAISE_BASE_URL}/record/#${process.env.catalogId}/product-add:category/term=Ranch`, "value":"Ranch"},
                 "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "2", "2017-02-02 02:02:02", "2017-02-02", "true",
-                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02 02:02:02", "2002-02-02 02:02:02", "#654321"
+                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02", "2002-02-02 02:02:02", "2002-02-02 02:02:02", "#654321"
             ]
         ],
         files: []
-    }, {
+    },
+    {
        comment: "uploading new files",
        schema_name: "product-add",
        table_name: "file",
@@ -128,7 +129,8 @@ var testParams = {
            path: "testfile5MB.txt",
            tooltip: "- testfile5MB.txt\n- 5 MB"
        }]
-   }, {
+   },
+   {
       comment: "uploader when one file exists in hatrac and the other one is new",
       schema_name: "product-add",
       table_name: "file",
@@ -170,7 +172,8 @@ var testParams = {
           path: "testfile500kb.png",
           tooltip: "- testfile500kb.png\n- 500 kB"
       }]
-   }, {
+   },
+   {
       comment: "uploader when all the files already exist in hatrac",
       schema_name: "product-add",
       table_name: "file",
@@ -212,7 +215,8 @@ var testParams = {
           path: "testfile500kb.png",
           tooltip: "- testfile500kb.png\n- 500 kB"
       }]
-   }]
+   }
+  ]
 };
 
 // keep track of namespaces that we use, so we can delete them afterwards
@@ -315,48 +319,41 @@ describe('Record Add', function() {
     }
 
     describe('When url has a prefill query string param set, ', function() {
-        var testCookie = {};
         beforeAll(function() {
-            // Refresh the page
-            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
-                // Write a dummy cookie for creating a record in Accommodation table
-                testCookie = {
-                    fkColumnNames: ['npH9l-Il-ZAadyQ8VTPStA'], // A FK that Accommodation table has with Category table, column._name
-                    rowname: {
-                        value: "Castle"
-                    },
-                    keys: {id: 10007},
-                    origUrl: process.env.ERMREST_URL + "/catalog/" + browser.params.catalogId + "/entity/product-add:category/id=10007"
-                };
-                // NOTE: if origUrl is improper, the rowname value above is set in the input field
-                // origUrl is used to fetch the entity after the fact to get other data that may be used by domain-filter-pattern
-                // the input field value is updated when this entity returns
-                // NOTE: this test was updated to fix the constraint name, and include a proper url, key, and rowname
-                browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
+            var dataRow = browser.params.entities['product-add']['category'].find(function (entity) {
+                return entity.id == 10007;
             });
 
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/product-add:category/RID=" + dataRow.RID)
+            chaisePage.recordPageReady();
         });
 
-        it('should pre-fill fields from the prefill cookie', function() {
-            // Reload the page with prefill query param in url
-            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
+        it('should pre-fill fields from the prefill cookie', function(done) {
+            var addBtn = element(by.css('#rt-heading-Accommodations .add-records-link'))
+            var allWindows;
 
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                return browser.manage().getCookie('test');
-            }).then(function(cookie) {
-                if (cookie) {
-                    var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
-                    expect(field.getText()).toBe(testCookie.rowname.value);
-                } else {
-                    // Fail the test
-                    expect('Cookie did not load').toEqual('but cookie should have loaded');
-                }
+            chaisePage.waitForClickableElement(addBtn).then(() => {
+                return addBtn.click();
+            }).then(() => {
+                return browser.getAllWindowHandles();
+            }).then((handles) => {
+                allWindows = handles
+                return browser.switchTo().window(allWindows[1]);
+            }).then(() => {
+                return chaisePage.recordeditPageReady();
+            }).then(() => {
+                var field = chaisePage.recordEditPage.getForeignKeyInputDisplay('Category', 1);
+                expect(field.getText()).toBe('Castle');
+
+                // - Go back to initial Record page
+                browser.close();
+                return browser.switchTo().window(allWindows[0]);
+            }).then(() => {
+
+                done();
+            }).catch((error) => {
+                done.fail(error);
             });
-        });
-
-        afterAll(function() {
-            browser.manage().deleteCookie('test');
         });
     });
 
@@ -382,11 +379,11 @@ describe('Record Add', function() {
                 expect(element(by.id('rBold1')).getText()).toBe("**Something Bold**",'first row, first column missmatch');
                 expect(element(by.id('rBold2')).getText()).toBe("__Something Bold__",'first row, second column missmatch');
                 expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe("<strong>Something Bold</strong>",'first row, third column missmatch');
-                done();
             }).then(function() {
                 // - Go back to initial Record page
                 browser.close();
                 browser.switchTo().window(allWindows[0]);
+                done();
             }).catch(function(error) {
                 done.fail(error);
             });

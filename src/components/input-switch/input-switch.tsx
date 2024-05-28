@@ -1,7 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
-import { memo } from 'react';
-
 // components
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
@@ -19,6 +17,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import React from 'react';
 
 export type InputSwitchProps = {
   /**
@@ -31,9 +30,13 @@ export type InputSwitchProps = {
    */
   type: string,
   /**
-   *  the name of the field
+   *  the name of the field for react hook form (with no special characters)
    */
   name: string,
+  /**
+   *  the name of the field for attaching a specific class to input-switch-container and the input
+   */
+  inputClassName: string,
   /**
    * placeholder text for numeric and date fields
    */
@@ -42,6 +45,9 @@ export type InputSwitchProps = {
    * classes for styling the numeric and date input element
    */
   classes?: string,
+  /**
+   * Optional string of classes to attach to the input/textarea etc element
+   */
   inputClasses?: string,
   containerClasses?: string,
   /**
@@ -68,6 +74,10 @@ export type InputSwitchProps = {
    * flag to show error below the input switch component
    */
   displayErrors?: boolean,
+  /**
+   * display required error regardless of whether the form has been submitted or not.
+   */
+  displayRequiredErrorBeforeSubmit?: boolean
   /**
    * the handler function called on input change
    */
@@ -130,11 +140,24 @@ export type InputSwitchProps = {
    * whether we should display the date/time labels
    */
   displayDateTimeLabels?: boolean
+  /**
+   * `optional`additional controller rules for the input field.
+   *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
+   */
+  additionalControllerRules?: {
+    [key: string]: (string | number | boolean | RegExp | Function | Object) | RuleWithMessage
+  }
+};
+
+export type RuleWithMessage = {
+  value: (boolean | number | RegExp),
+  message: string
 };
 
 const InputSwitch = ({
   type,
   name,
+  inputClassName,
   placeholder,
   classes = '',
   inputClasses = '',
@@ -145,6 +168,7 @@ const InputSwitch = ({
   disableInput,
   requiredInput,
   displayErrors = true,
+  displayRequiredErrorBeforeSubmit = false,
   styles = {},
   columnModel,
   appMode,
@@ -157,8 +181,9 @@ const InputSwitch = ({
   waitingForForeignKeyData,
   displayExtraDateTimeButtons,
   displayDateTimeLabels,
+  additionalControllerRules,
   foreignKeyCallbacks
-}: InputSwitchProps): JSX.Element | null => {
+}: InputSwitchProps ): JSX.Element | null => {
 
 
   return (() => {
@@ -170,6 +195,7 @@ const InputSwitch = ({
         return <IframeField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -190,6 +216,8 @@ const InputSwitch = ({
           baseArrayType={columnModel?.column.type.baseType.name}
           type={type}
           name={name}
+          inputClassName={inputClassName}
+          columnModel={columnModel?.column.type.rootName === 'timestamptz' ? columnModel : undefined}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -198,6 +226,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
         />;
@@ -208,6 +237,7 @@ const InputSwitch = ({
         return <ForeignkeyField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -216,6 +246,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -226,6 +257,7 @@ const InputSwitch = ({
           parentLogStackPath={parentLogStackPath}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
+          additionalControllerRules={additionalControllerRules}
           foreignKeyCallbacks={foreignKeyCallbacks}
         />
       case 'dropdown-select':
@@ -235,6 +267,7 @@ const InputSwitch = ({
         return <ForeignkeyDropdownField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -243,6 +276,7 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
           appMode={appMode}
@@ -262,6 +296,7 @@ const InputSwitch = ({
         return <FileField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -270,8 +305,10 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />
       case 'timestamp':
         return <DateTimeField
@@ -280,6 +317,7 @@ const InputSwitch = ({
           type={type}
           hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -288,14 +326,17 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'date':
         return <DateField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -304,9 +345,11 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
           displayDateTimeLabels={displayDateTimeLabels}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'integer2':
       case 'integer4':
@@ -315,6 +358,7 @@ const InputSwitch = ({
         return <NumericField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -323,12 +367,15 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'boolean':
         return <BooleanField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -337,14 +384,17 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           columnModel={columnModel}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'markdown':
       case 'longtext':
         return <LongtextField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -353,14 +403,17 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'json':
       case 'jsonb':
         return <JsonField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -369,13 +422,16 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
           allowEnter={true}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'color':
         return <ColorField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -384,13 +440,16 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />;
       case 'text':
       default:
         return <TextField
           type={type}
           name={name}
+          inputClassName={inputClassName}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -399,10 +458,12 @@ const InputSwitch = ({
           requiredInput={requiredInput}
           styles={styles}
           displayErrors={displayErrors}
+          displayRequiredErrorBeforeSubmit={displayRequiredErrorBeforeSubmit}
           placeholder={placeholder as string}
+          additionalControllerRules={additionalControllerRules}
         />
     }
   })();
 };
 
-export default memo(InputSwitch);
+export default React.memo(InputSwitch);

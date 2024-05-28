@@ -119,7 +119,7 @@ const RecordMainSection = (): JSX.Element => {
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
                   {cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <div className='inline-tooltip'><DisplayCommentValue comment={cm.column.comment} /></div>
+                    <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable
                     relatedModel={cm.relatedModel}

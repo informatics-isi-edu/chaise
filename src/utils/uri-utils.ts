@@ -3,9 +3,10 @@
  */
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { BUILD_VARIABLES, HELP_PAGES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { BUILD_VARIABLES, HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 /**
 * @function
@@ -15,6 +16,31 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 */
 export function fixedEncodeURIComponent(str: string) {
   return encodeURIComponent(str).replace(/[!'()*]/g, (c: string) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
+/**
+ * processed the url hash fragment. used by multiple functions in this file
+ */
+export function getURLHashFragment(location: Location): {
+  /**
+   * fragment that it has (if it was using `?`, this will return it with `#`)
+   */
+  hash: string,
+  /**
+   * the following are used for logging purposes
+   * whether the hash was using `?` originally
+   */
+  isQueryParameter: boolean,
+} {
+  let hash = location.hash, isQueryParameter = false;
+
+  // allow ? to be used in place of #
+  if (!hash && location.href.indexOf('?') !== -1) {
+    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
+    isQueryParameter = true;
+  }
+
+  return { hash, isQueryParameter };
 }
 
 /**
@@ -51,16 +77,8 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
     catalogMissing = MESSAGE_MAP.catalogMissing,
     chaiseConfig = ConfigService.chaiseConfig;
 
-  let hash = location.hash,
-    isQueryParameter = false;
-
-  // allow ? to be used in place of #
-  if (!hash && location.href.indexOf('?') !== -1) {
-    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
-    isQueryParameter = true;
-  }
-  // capture the hash before it's split for use in ermrestURI generation
-  const originalHash = hash;
+  const { hash: originalHash, isQueryParameter } = getURLHashFragment(location);
+  let hash = originalHash;
 
   // eslint-disable-next-line prefer-const
   let queryParams: any = {},
@@ -211,16 +229,37 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   };
 }
 
+/**
+ * return the catalog id that should be used.
+ * if the url has catalog id, it will return that. otherwise will return the chaise-config's defaultCatalog
+ */
 export function getCatalogId() {
-  let catalogId = '';
-  try {
-    catalogId += chaiseURItoErmrestURI(windowRef.location).catalogId;
-  } catch (err) {
-    const cc = ConfigService.chaiseConfig;
-    if (cc.defaultCatalog) catalogId += cc.defaultCatalog;
+  const { hash, isQueryParameter } = getURLHashFragment(windowRef.location);
+  const defaultValue = isStringAndNotEmpty(ConfigService.chaiseConfig.defaultCatalog) ? ConfigService.chaiseConfig.defaultCatalog : '';
+
+  /**
+   * if there is no '/' character (only a catalog id) or a trailing '/' after the id, we are assuming the whole hash
+   * is the catalog id.
+   *
+   * But we cannot make that assumption if the hash was actually just a query parameter. the given "hash" might actually
+   * be a query paramater that the app needs/expects (like the help or login app).
+   *
+   * that's why in this case we're returning the default value
+  */
+  if (isQueryParameter && (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1)) {
+    return defaultValue;
   }
 
-  return catalogId;
+  let catalogId = '';
+  if (isStringAndNotEmpty(hash)) {
+    catalogId = hash.substring(1).split('/')[0];
+  }
+
+  if (isStringAndNotEmpty(catalogId)) {
+    return catalogId;
+  }
+
+  return defaultValue;
 }
 
 /**
@@ -314,21 +353,6 @@ export function resolvePermalink(tuple: any, reference: any, version?: string) {
   // if resolverId is false or undefined OR any other values that are not allowed use the default
   // default is to show the fully qualified resolveable link for permalink
   return `${windowRef.location.origin}/id/${currCatalog}/${tuple.data.RID}${version || ''}`;
-}
-
-/**
- * if '?' is used instead of '#' (?catalog/schema:table), return in the proper form (#catalog/schema:table)
- * @param location
- */
-export function getURLHashFragment(location: Location) {
-  let hash = location.hash;
-
-  // allow ? to be used in place of #
-  if (!hash && location.href.indexOf('?') !== -1) {
-    hash = `#${location.href.substring(location.href.indexOf('?') + 1)}`;
-  }
-
-  return hash;
 }
 
 /**

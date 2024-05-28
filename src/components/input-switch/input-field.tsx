@@ -4,12 +4,11 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils
-import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { CUSTOM_ERROR_TYPES, ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 
@@ -19,9 +18,13 @@ export type InputFieldProps = {
    */
   type: string,
   /**
-   *  the name of the field
+   * the name of the field for react hook form (with no special characters)
    */
   name: string,
+  /**
+   * the name of the field for attaching a specific class to input-switch-container and the input
+   */
+  inputClassName: string,
   /**
   * placeholder text
   */
@@ -30,6 +33,9 @@ export type InputFieldProps = {
   * classes for styling the input element
   */
   classes?: string,
+  /**
+   * Optional string of classes to attach to the input/textarea etc element
+   */
   inputClasses?: string,
   containerClasses?: string,
   /**
@@ -57,6 +63,15 @@ export type InputFieldProps = {
    * by default, we are capturing the "enter" key event and stopping it
    */
   allowEnter?: boolean
+  /**
+   * display required error regardless of whether the form has been submitted or not.
+   */
+  displayRequiredErrorBeforeSubmit? : boolean
+  /**
+   * `optional`additional controller rules for the input field.
+   *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
+   */
+   additionalControllerRules? : any
 }
 
 
@@ -101,29 +116,46 @@ export type InputFieldCompProps = InputFieldProps & {
 const InputField = ({
   children,
   name,
+  inputClassName,
   requiredInput,
   displayErrors,
   containerClasses = '',
   styles,
   allowEnter = false,
+  displayRequiredErrorBeforeSubmit,
   onClear,
   controllerRules,
   checkHasValue,
   handleChange,
-  checkIsTouched
+  checkIsTouched,
+  additionalControllerRules,
 }: InputFieldCompProps): JSX.Element => {
 
-  const { setValue, control, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors ,trigger} = useFormContext();
 
   controllerRules = isObjectAndNotNull(controllerRules) ? controllerRules : {};
   if (requiredInput) {
     controllerRules.required = ERROR_MESSAGES.REQUIRED;
   }
 
+  // Combine validation rules
+  if(additionalControllerRules?.validate){
+    if(controllerRules.validate){
+      if(typeof controllerRules.validate === 'function'){
+        controllerRules.validate = {invalidValue : controllerRules.validate, ...additionalControllerRules.validate}
+      }else{
+        controllerRules.validate = {...controllerRules.validate, ...additionalControllerRules.validate}
+      }
+    }else{
+      controllerRules.validate = {...additionalControllerRules.validate}
+    }
+    delete additionalControllerRules.validate;
+  }
+
   const formInput = useController({
     name,
     control,
-    rules: controllerRules,
+    rules: {...controllerRules, ...additionalControllerRules},
   });
 
   const field = formInput?.field;
@@ -145,10 +177,10 @@ const InputField = ({
     e.preventDefault();
     clearErrors(name);
     setValue(name, '');
+    trigger(name); // triggers validation on the form field
   }
 
   useEffect(() => {
-
     const hasValue = checkHasValue ? checkHasValue(fieldValue) : Boolean(fieldValue);
     if (showClear != hasValue) {
       setShowClear(hasValue);
@@ -173,24 +205,30 @@ const InputField = ({
   /**
    * we don't want to show the required error until it's submitted
    */
-  let showError = !!error?.message && displayErrors;
+  let showError = !!error?.message && displayErrors, errorClass = 'input-switch-error-danger';
   if (showError) {
     if (error?.type === 'required') {
-      showError = formInput.formState.isSubmitted;
+      // We always show this error for array-input fields. In case of other fields, we show this once form submit event is triggered.
+      showError = formInput.formState.isSubmitted || displayRequiredErrorBeforeSubmit;
     } else {
       showError = checkIsTouched ? checkIsTouched() : isTouched;
+    }
+
+    // while this is an error, we want to show a different color for it.
+    if (error?.type === CUSTOM_ERROR_TYPES.ARRAY_ADD_OR_DISCARD_VALUE) {
+      errorClass = 'input-switch-error-warning';
     }
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles} onKeyDown={handleKeyDown}>
+    <div className={`${containerClasses} input-switch-container-${inputClassName}`} style={styles} onKeyDown={handleKeyDown}>
       {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message &&
-        <DisplayValue internal as='span' className='input-switch-error text-danger' value={{ isHTML: true, value: error.message }} />
+        <DisplayValue internal as='span' className={`input-switch-error ${errorClass}`} value={{ isHTML: true, value: error.message }} />
       }
     </div>
   );
 };
 
 
-export default InputField;
+export default React.memo(InputField);

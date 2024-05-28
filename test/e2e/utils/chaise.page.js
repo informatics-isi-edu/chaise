@@ -76,7 +76,7 @@ var recordEditPage = function() {
 
     /* input selectors */
     this.getInputRemoveButton = function (name, index) {
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.remove-input-btn'));
     }
 
@@ -91,8 +91,8 @@ var recordEditPage = function() {
 
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('input[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     this.getInputById = function (index, displayName) {
@@ -100,28 +100,30 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
 
+    // NOTE: duplicate of getInputForAColumn, not removing this and refactoring tests since protractor tests will be deprecated soon
     this.getTextAreaForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('textarea[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         const inputObj = {};
-        inputObj.date = element(by.css('input[name="' + inputName + '"]'));
+        // NOTE: duplicate of getInputForAColumn, not changing this since protractor tests will be deprecated soon
+        inputObj.date = element(by.className(inputName));
         inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
         return inputObj;
     };
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         var inputObj = {};
         const container =  element(by.className(`input-switch-container-${inputName}`));
-        inputObj.date = element(by.css('input[name="' + inputName + '-date"]'));
-        inputObj.time = element(by.css('input[name="' + inputName + '-time"]'));
+        inputObj.date = element(by.className(`${inputName}-date`));
+        inputObj.time = element(by.className(`${inputName}-time`));
         inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
         inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
         return inputObj;
@@ -129,26 +131,26 @@ var recordEditPage = function() {
 
     this.getInputControlForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
     }
 
     this.getTextFileInputForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
     }
 
     /* Color input selectors */
     this.getColorInputForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
     }
 
     this.getColorInputBackground = function (name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         var script = "var color = document.querySelector('.input-switch-container-" + inputName + " .chaise-color-picker-preview').style.backgroundColor;";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
@@ -157,7 +159,7 @@ var recordEditPage = function() {
 
     this.getColorInputBtn = function (name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.css('.input-switch-container-' + inputName + ' button'));
     }
 
@@ -206,7 +208,7 @@ var recordEditPage = function() {
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.css('.input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
 
@@ -317,20 +319,25 @@ var recordEditPage = function() {
      * returns the cell (entity-value).
      * this is useful if we want to test the extra classes attached to it.
      */
-    this.getFormInputCell = (name, index) => {
+    this.getFormInputCell = (name, index, isArray) => {
       index = index || 1;
-      const inputName = index + '-' + name;
+      const inputName = 'c_' + index + '-' + name;
+
+      if(isArray){
+        return element(by.className('array-input-field-container ' + inputName)).element(by.xpath('..'));
+      }
       return element(by.className('input-switch-container-' + inputName)).element(by.xpath('..'));
     };
 
     this.getInputSwitchContainer = (name, index) => {
       index = index || 1;
-      const inputName = index + '-' + name;
+      const inputName = 'c_' + index + '-' + name;
       return element(by.className('input-switch-container-' + inputName))
     }
+    // TODO: This is BAD, no column name should be hardcoded
     this.getInputSwitchContainerFK = (index) => {
         index = index || 1;
-        const inputName = index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
+        const inputName = 'c_' + index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
         return element(by.className('input-switch-container-' + inputName))
       }
 
@@ -401,17 +408,17 @@ var recordEditPage = function() {
     /* error message selectors */
     this.getErrorMessageForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error.text-danger'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error'));
     }
 
     this.getInputErrorMessage = function(el, type) {
-        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error'));
     };
 
     this.getJSONInputErrorMessage = function(el) {
         // similar input structure as array detailed below
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getArrayInputErrorMessage = function(el) {
@@ -420,13 +427,13 @@ var recordEditPage = function() {
          *  <div class='input-switch-container-{index}-{name}'>
          *    <div class='input-switch-array'>
          *      <div class='chaise-input-control'>
-         *        <textarea name='{index}-{name}' />
+         *        <textarea class='c_{index}-{name}' />
          *      </div>
          *    </div>
          *    <span class='input-switch-error'>...</span>]
          *  </div>
          */
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getDeleteRowButton = function(index) {
@@ -494,6 +501,163 @@ var recordEditPage = function() {
     this.getRecordSetTable = function() {
         return element(by.className('recordset-table'));
     };
+
+    // ArrayField Selectors
+
+    /**
+     *
+     * @typedef {Object} ArrayFieldContainerElement
+     * @property {Function} getAddNewElementContainer - returns the add new element container for the given array field
+     * @property {Function} getAddNewValueInputElement - returns add new element input element for a given array field
+     * @property {Function} getClearInputButton - returns clear button for the current input
+     * @property {Function} getErrorMessageElement - returns error message element for the current input
+     * @property {Function} getAddButton - returns add button for a given array field
+     * @property {Function} getRemoveButton - returns remove button for a given array field
+     * @property {Function} getRemoveLastElementButton - returns remove button for last element in the arrayField
+     * @property {Function} getLastArrayItem - returns the element added to the array
+     * @property {Function} getArrayFieldValues - returns values of the arrayfield as an array
+     * @property {Function} isAddButtonDisabled - returns true if Add button is disabled, false if otherwise
+     */
+
+    /**
+     *
+     * @param {string} fieldName - name of the column
+     * @param {string} formNumber - form number
+     * @param {string} baseType - baseType of the Array
+     * @return {ArrayFieldContainerElement} arrayFieldContainer
+     *
+     */
+    this.getArrayFieldContainer = function(colName, formNumber, baseType){
+      formNumber = formNumber || 1;
+      const fieldName = `c_${formNumber}-${colName}`;
+
+      const elem = element(by.css(`.array-input-field-container-${fieldName}`));
+
+      elem.getAddNewElementContainer = function(){
+        return this.element(by.className("add-element-container"));
+      }
+
+      elem.getAddButton = function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        return addNewContainer.element(by.className("add-button"))
+      }
+
+      elem.getRemoveButton = function () {
+        return this.element(by.css('.array-remove-button'));
+      }
+
+      elem.getRemoveLastElementButton = async function(){
+        try{
+          const buttons = this.all(by.css(".action-buttons .fa-trash"));
+
+          if(await buttons.count()){
+            return buttons.last()
+          }
+          return null
+
+        }catch (err){
+          return null
+        }
+      }
+
+      elem.getErrorMessageElement = function(){
+        return this.element(by.className("input-switch-error"));
+      }
+
+      elem.isAddButtonDisabled = async function(){
+        const addNewContainer = this.getAddNewElementContainer()
+        const addButton = await addNewContainer.element(by.css('.chaise-btn-sm.add-button'))
+        return !(await addButton.isEnabled());
+      }
+
+      switch(baseType){
+        case 'date':
+        case 'integer':
+        case 'number':
+        case 'text':
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return addNewContainer.element(by.className(" input-switch"))
+          }
+
+          elem.getLastArrayItem = function(){
+            return this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`)).last();
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(/number|integer/.test(baseType) ? JSON.parse(val) : val)
+            }
+
+            return extractedValues.length ? extractedValues : null;
+          }
+
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className('remove-input-btn'));
+          }
+
+        break;
+        case 'boolean':
+          elem.getArrayFieldValues = async function(){
+            const arrElems = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] input`));
+            const extractedValues = []
+
+            for( let item of arrElems){
+              let val = await item.getAttribute('value')
+              extractedValues.push(JSON.parse(val))
+            }
+
+            return extractedValues.length ? extractedValues : null;
+          }
+          break;
+        case 'timestamp':
+        case 'timestamptz' :
+          elem.getAddNewValueInputElement = function(){
+            const addNewContainer = this.getAddNewElementContainer()
+            return [
+              addNewContainer.element(by.className("input-switch-date")).element(by.className(" input-switch")),
+              addNewContainer.element(by.className("input-switch-time")).element(by.className(" input-switch"))
+          ]
+          }
+
+          elem.getLastArrayItem = function(){
+            const dateInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`)).last();
+            const timeInput = this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`)).last();
+
+            return [dateInput, timeInput];
+          }
+
+          elem.getArrayFieldValues = async function(){
+            const dateInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-date input`));
+            const timeInputs = await this.all(by.css(`li [class*="${fieldName}-"][class$="-val"] .input-switch-time input`));
+
+            let dateTimeValues = []
+
+            for(let i =0; i< dateInputs.length; i++){
+              let dateVal = await dateInputs[i].getAttribute('value')
+              let timeVal = await timeInputs[i].getAttribute('value')
+              dateTimeValues.push([dateVal,timeVal])
+            }
+
+            return dateTimeValues.length ? dateTimeValues : null;
+          }
+
+          elem.getClearInputButton = function () {
+            const addNewContainer = this.getAddNewElementContainer();
+            return addNewContainer.element(by.className("date-time-clear-btn"));
+          }
+
+        break;
+      }
+      return  elem;
+    };
+
+
 };
 
 var recordPage = function() {
@@ -937,8 +1101,8 @@ var recordsetPage = function() {
     // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('input[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
@@ -1303,7 +1467,7 @@ var errorModal = function () {
     }
 
     this.getOKButton = function () {
-        return element(by.css('.modal-error .error-ok-button'));
+        return element(by.css('.modal-error .ok-button'));
     }
 
     this.getCloseButton = function () {

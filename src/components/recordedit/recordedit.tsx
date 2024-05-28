@@ -169,6 +169,10 @@ const RecordeditInner = ({
   });
 
   const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+  /**
+   * enable the button if at least one row can be deleted
+   */
+  const canEnableBulkDelete = canShowBulkDelete && tuples.some((t: any) => t.canDelete);
 
   /**
    * form is ready when,
@@ -371,13 +375,13 @@ const RecordeditInner = ({
       // but we cannot go basd on visible columns since some of these data might be for invisible fks.
       reference.activeList.allOutBounds.forEach((col: any) => {
         // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
-        foreignKeyData.current[`${formValue}-${col.name}`] = simpleDeepCopy(foreignKeyData.current[`${lastFormValue}-${col.name}`]);
+        foreignKeyData.current[`c_${formValue}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
 
         // copy the raw data (submitted to ermrestjs)
         col.foreignKey.colset.columns.forEach((col: any) => {
-          const val = tempFormValues[`${lastFormValue}-${col.name}`];
+          const val = tempFormValues[`c_${lastFormValue}-${col.RID}`];
           if (val === null || val === undefined) return;
-          tempFormValues[`${formValue}-${col.name}`] = val;
+          tempFormValues[`c_${formValue}-${col.RID}`] = val;
         });
       });
     }
@@ -486,8 +490,9 @@ const RecordeditInner = ({
 
   const renderBulkDeleteButton = () => {
     if (!canShowBulkDelete) return;
-    return <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-      <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.': 'None of the displayed records can be deleted.';
+    return <ChaiseTooltip placement='bottom' tooltip={tooltip}>
+      <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick} disabled={!canEnableBulkDelete}>
         <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
         <span>Delete</span>
       </button>

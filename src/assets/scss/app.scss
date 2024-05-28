@@ -44,6 +44,7 @@ html {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
     sans-serif;
   background-color: map-get(variables.$color-map, 'white');
+  color: map-get(variables.$color-map, 'black');
   font-size: variables.$font-size;
   font-weight: 400;
   line-height: 1.428;
@@ -207,9 +208,9 @@ html {
     // the icon is directly next to the text.
     content: "\00A6";
   }
-  .chaise-icon-for-tooltip.align-center-icon {
-    line-height: 20px;
-    vertical-align: middle;
+  .chaise-icon-for-tooltip.chaise-accordion-header-icon-for-tooltip {
+    // this used to make the icon centered, but we want the icon to be text-top like any other places
+    // we're just adding more space between this icon and other content on the header
     margin: 4px;
   }
 
@@ -1146,4 +1147,45 @@ html {
       }
     }
   }
+
+  // make sure bootstrap table is using the same color as body
+  .table {
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-color: var(--bs-body-color);
+  }
+
+  /****** classes referenced by webapps ******/
+
+  /** horizontal alignment **/
+  .chaise-content-left {
+    text-align: start;
+  }
+
+  .chaise-content-center {
+    text-align: center;
+  }
+
+  .chaise-content-right {
+    text-align: end;
+  }
+
+  /** vertical alignment **/
+  .chaise-content-top {
+    align-items: start;
+  }
+
+  .chaise-content-middle {
+    align-items: center;
+  }
+
+  .chaise-content-bottom {
+    align-items: end;
+  }
+}
+
+// change default bootstap variables
+:root {
+  // interpolation (#{}) is needed here, more info: https://sass-lang.com/documentation/breaking-changes/css-vars/
+  --bs-body-color: #{map-get(variables.$color-map, 'black')};
 }

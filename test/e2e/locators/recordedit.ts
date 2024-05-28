@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 /**
@@ -95,6 +95,14 @@ export default class RecordeditLocators {
     return container.locator('.resultset-tables');
   }
 
+  static getAllColumnNames(container: Locator | Page): Locator {
+    return container.locator('.entity-key-column > .entity-key > span.column-displayname > span');
+  }
+
+  static getColumnRequiredIcon(colNameElement: Locator): Locator {
+    return colNameElement.locator('xpath=./../..').locator('.text-danger');
+  }
+
   static getAllColumnPermissionOverlays(container: Locator | Page): Locator {
     return container.locator('.column-permission-overlay');
   }
@@ -118,27 +126,25 @@ export default class RecordeditLocators {
     * returns the cell (entity-value).
     * this is useful if we want to test the extra classes attached to it.
     */
-  static getFormInputCell(container: Locator | Page, name: string, formNumber: number): Locator {
+  static getFormInputCell(container: Locator | Page, name: string, formNumber: number, isArray?: boolean): Locator {
     formNumber = formNumber || 1;
-    // TODO does this work?
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('xpath=..')
+    const inputName = `c_${formNumber}-${name}`;
+    if (isArray) {
+      return container.locator(`.array-input-field-container-${inputName}`).locator('xpath=..');
+    }
+    return container.locator(`.input-switch-container-${inputName}`).locator('xpath=..')
   }
 
   static getInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`input[name="${formNumber}-${name}"]`);
-  }
-
-  static getTextAreaForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
-    formNumber = formNumber || 1;
-    return container.locator(`textarea[name="${formNumber}-${name}"]`);
+    return container.locator(`.c_${formNumber}-${name}`);
   }
 
   static getDateInputsForAColumn(container: Locator | Page, name: string, formNumber: number): { date: Locator, todayBtn: Locator } {
     formNumber = formNumber || 1;
-    const inputName = `${formNumber}-${name}`;
+    const inputName = `c_${formNumber}-${name}`;
     return {
-      date: container.locator(`input[name="${inputName}"]`),
+      date: container.locator(`.${inputName}`),
       todayBtn: container.locator(`.input-switch-container-${inputName} .date-today-btn`)
     }
   }
@@ -147,11 +153,11 @@ export default class RecordeditLocators {
     date: Locator, time: Locator, nowBtn: Locator, clearBtn: Locator
   } {
     formNumber = formNumber || 1;
-    const inputName = `${formNumber}-${name}`;
+    const inputName = `c_${formNumber}-${name}`;
     const wrapper = container.locator(`.input-switch-container-${inputName}`);
     return {
-      date: wrapper.locator(`input[name="${inputName}-date"]`),
-      time: wrapper.locator(`input[name="${inputName}-time"]`),
+      date: wrapper.locator(`.${inputName}-date`),
+      time: wrapper.locator(`.${inputName}-time`),
       nowBtn: wrapper.locator('.date-time-now-btn'),
       clearBtn: wrapper.locator('.date-time-clear-btn')
     };
@@ -159,12 +165,14 @@ export default class RecordeditLocators {
 
   static getInputControlForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-control');
   }
 
   static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.input-switch-error.text-danger');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error');
   }
 
   static getColumnPermissionOverlay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
@@ -182,24 +190,28 @@ export default class RecordeditLocators {
   // -------------- file input selectors --------------- //
   static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control > span');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-control > span');
   }
 
   static getFileInputButtonForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-group-append');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-group-append');
   }
 
   // -------------- color input selectors -------------- //
   static getColorInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('input');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('input');
   }
 
   static async getColorInputBackground(page: Page, name: string, formNumber: number): Promise<string> {
     formNumber = formNumber || 1;
     return await page.evaluate(async () => {
-      const el = document.querySelector(`.input-switch-container-${formNumber}-${name} .chaise-color-picker-preview`) as HTMLElement;
+      const inputName = `c_${formNumber}-${name}`;
+      const el = document.querySelector(`.input-switch-container-${inputName} .chaise-color-picker-preview`) as HTMLElement;
       const ctx = document.createElement('canvas').getContext('2d');
       if (!ctx || !el) return '';
       ctx.fillStyle = el.style.backgroundColor;
@@ -209,7 +221,8 @@ export default class RecordeditLocators {
 
   static getColorInputBtn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name} button`);
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName} button`);
   }
 
   static getColorInputPopup(container: Locator | Page): Locator {
@@ -274,7 +287,9 @@ export default class RecordeditLocators {
 
   // ------------------ dropdown selectors  --------------------- //
   static getDropdownElementByName = (container: Locator | Page, name: string, formNumber: number) => {
-    return container.locator(`.input-switch-container-${formNumber}-${name} .dropdown-toggle`);
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName} .dropdown-toggle`);
   }
 
   // --------------- foreign key dropdown selectors ------------- //
@@ -306,5 +321,59 @@ export default class RecordeditLocators {
   // Gets the boolean dropdown options after the input is opened and attached to input container
   static getDropdownOptions(container: Locator | Page): Locator {
     return container.locator('.dropdown-menu.show').locator('li');
+  }
+
+  // ------------- iframe-field selectors ----------------- //
+
+  /**
+   * all the props that are needed for testing iframe field
+   */
+  static getIframeFieldProps(container: Locator | Page, name: string, formNumber?: number) {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    const inputSwitchContainer = container.locator(`.input-switch-container-${inputName}`);
+    return {
+      container: inputSwitchContainer.locator('.input-switch-iframe'),
+      popupButton: inputSwitchContainer.locator('.chaise-input-group-append button'),
+      clearButton: inputSwitchContainer.locator('.input-switch-clear'),
+      display: inputSwitchContainer.locator('.chaise-input-control')
+    };
+  }
+
+  /**
+   * these are based on the test/e2e/utils/input-iframe-test.html file
+   */
+  static getInputIframeTestProps(iframe: FrameLocator) {
+    return {
+      alertButton: iframe.locator('#iframe-alert-btn'),
+      submitButton: iframe.locator('#iframe-submit-btn'),
+      creator: iframe.locator('#creator'),
+      file_content: iframe.locator('#file-content'),
+      notes: iframe.locator('#notes'),
+    }
+  }
+
+  // ------------- array selectors ----------------- //
+  static getArrayFieldContainer(container: Locator | Page, name: string, formNumber: number) {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.array-input-field-container-${inputName}`);
+  }
+
+  /**
+   * TODO this only supports array of texts for now and should be changed later for other types.
+   */
+  static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number, baseType: string) {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    const elem = container.locator(`.array-input-field-container-${inputName}`);
+    return {
+      container: elem,
+      addItemContainer: elem.locator('.add-element-container'),
+      addItemInput: elem.locator('.add-element-container input'),
+      addItemButton: elem.locator('.add-button'),
+      removeItemButtons: elem.locator('.array-remove-button'),
+      inputs: elem.locator('li input')
+    };
   }
 }

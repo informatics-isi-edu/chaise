@@ -12,7 +12,7 @@ import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
   manuallyTriggerFocus, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { RecordsetColValue, RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
 /**
@@ -24,8 +24,6 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
 
   await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnNames.length);
   await expect(RecordLocators.getAllColumnNames(page)).toHaveText(expectedColumnNames);
-
-  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnValues.length);
 
   const allValues = RecordLocators.getAllColumnValues(page);
   let index = 0;
@@ -42,33 +40,54 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   }
 }
 
+/**
+ * similar to testRecordMainSectionValues but instead of making sure all values have the expected values, it will
+ * only test the given columns
+ */
+export const testRecordMainSectionPartialValues = async (page: Page, numCols: number, expectedValues: { [colName: string]: RecordsetColValue }) => {
+  await RecordLocators.waitForRecordPageReady(page);
+  await expect(RecordLocators.getColumns(page)).toHaveCount(numCols);
+  for (const colName of Object.keys(expectedValues)) {
+    const value = RecordLocators.getColumnValue(page, colName);
+    const expectedValue = expectedValues[colName];
+
+    if (typeof expectedValue === 'string') {
+      await expect.soft(value).toHaveText(expectedValue);
+    } else {
+      const link = value.locator('a');
+      expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
+      await expect.soft(link).toHaveText(expectedValue.caption);
+    }
+  }
+}
+
 
 type ShareCiteModalParams = {
-  /**
-   * the modal title
-   */
-  title: string,
-  /**
-   * the main link
-   */
-  link: string,
-  /**
-   * whether versioned link is present or not
-   */
-  hasVersionedLink: boolean,
-  /**
-   * if true, we will test the versioned link too.
-   */
-  verifyVersionedLink: boolean,
-  /**
-   * pass `false` when citation should not be displayed.
-   */
-  citation?: string | false,
-  /**
-   * the location of the bibtext file so we can delete it after downloading it
-   */
-  bibtextFile?: string,
-}
+    /**
+     * the modal title
+     */
+    title: string,
+    /**
+     * the main link
+     */
+    link: string,
+    /**
+     * whether versioned link is present or not
+     */
+    hasVersionedLink: boolean,
+    /**
+     * if true, we will test the versioned link too.
+     */
+    verifyVersionedLink: boolean,
+    /**
+     * pass `false` when citation should not be displayed.
+     */
+    citation?: string | false,
+    /**
+     * the location of the bibtext file so we can delete it after downloading it
+     */
+    bibtextFile?: string,
+  }
 
 export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params: ShareCiteModalParams) => {
   const expectedLink = params.link;

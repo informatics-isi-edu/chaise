@@ -10,6 +10,32 @@ import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/ch
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 
+export type RecordeditExpectedColumn = {
+  name: string,
+  title: string,
+  nullok?: boolean
+};
+
+/**
+ * make sure recordedit is showing the correct columns
+ */
+export const testRecordeditColumnNames = async (container: Locator | Page, columns: RecordeditExpectedColumn[]) => {
+  const cols = RecordeditLocators.getAllColumnNames(container)
+  await expect.soft(cols).toHaveCount(columns.length);
+
+  let index = 0;
+  for (const expectation of columns) {
+    const col = cols.nth(index);
+    await expect.soft(col).toHaveText(expectation.title);
+    const req = RecordeditLocators.getColumnRequiredIcon(col);
+    if (expectation.nullok) {
+      await expect.soft(req).not.toBeAttached();
+    } else {
+      await expect.soft(req).toBeVisible();
+    }
+    index++;
+  }
+}
 
 export type RecordeditFile = {
   name: string,
@@ -92,20 +118,10 @@ type SetInputValueProps = string | RecordeditFile | {
 };
 
 /**
- * while `inputEl.fill('')` is supposed to clear the input, in some cases (textarea for example) it might not work
- * as expected. In those cases you can use this function.
  *
- * https://github.com/microsoft/playwright/issues/12828#issuecomment-1341129233
- */
-export const clearInput = async (inputEl: Locator) => {
-  await inputEl.focus();
-  await inputEl.page().keyboard.press('Meta+A');
-  await inputEl.page().keyboard.press('Backspace');
-}
-
-/**
+ * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', 'array' , or any other string
  *
- * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', any other string
+ * NOTE: 'array' only supports array of texts for now.
  *
  * expected valueProps:
  * {
@@ -126,7 +142,8 @@ export const clearInput = async (inputEl: Locator) => {
  * @returns
  */
 export const setInputValue = async (
-  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType, valueProps: SetInputValueProps
+  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
+  valueProps: SetInputValueProps | SetInputValueProps[]
 ) => {
   switch (inputType) {
     case RecordeditInputType.BOOLEAN:
@@ -143,7 +160,7 @@ export const setInputValue = async (
       }
 
       await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
-      const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+      const rsModal = ModalLocators.getForeignKeyPopup(page);
       await expect.soft(rsModal).toBeVisible();
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(valueProps.modal_num_rows);
       await RecordsetLocators.getRowSelectButton(rsModal, valueProps.modal_option_index).click();
@@ -169,9 +186,9 @@ export const setInputValue = async (
 
       const inputs = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       await inputs.clearBtn.click();
-      await inputs.date.fill('');
+      await inputs.date.clear();
       await inputs.date.fill(valueProps.date_value);
-      await inputs.time.fill('');
+      await inputs.time.clear();
       await inputs.time.fill(valueProps.time_value);
       break;
 
@@ -183,17 +200,30 @@ export const setInputValue = async (
       await selectFile(valueProps, fileInputBtn, fileTextInput);
       break;
 
+    case RecordeditInputType.ARRAY:
+      if (!Array.isArray(valueProps)) return;
+      const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
+
+      // remove the existing value if there are any
+      while (await elems.removeItemButtons.count() > 0) {
+        await elems.removeItemButtons.nth(0).click();
+      }
+
+      // add the values one by one.
+      for (const val of valueProps) {
+        if (typeof val !== 'string') continue;
+        await elems.addItemInput.fill(val);
+        await elems.addItemButton.click();
+      }
+      break;
+
     default:
       if (typeof valueProps !== 'string') return;
 
-      let inputEl;
-      if (inputType === RecordeditInputType.MARKDOWN || inputType === RecordeditInputType.LONGTEXT) {
-        inputEl = RecordeditLocators.getTextAreaForAColumn(page, name, formNumber);
-      } else {
-        inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
-      }
-      await clearInput(inputEl);
+      const inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+      await inputEl.clear();
       await inputEl.fill(valueProps);
+      await expect.soft(inputEl).toHaveValue(valueProps);
       break;
   }
 };
@@ -204,16 +234,20 @@ export const setInputValue = async (
  * expectedValues expected type will be different depending on the input type. for all the types expect the following
  * it should be an array of strings.
  * - timestamp: array of objects with date_value and time_value props
+ * - array: array of array of texts.
+ *
+ * NOTE: 'array' only supports array of texts for now.
  *
  * @param {string} name the column name
- * @param {string}} displayname the column displayname
+ * @param {string}}displayname the column displayname
  * @param {string} displayType the display type (boolean, fk, timestamp, upload, "any other string")
  * @param {boolean} allDisabled whether we should test that all the inputs are disabled or not
  * @param {any[]} expectedValues the expected values
  * @returns
  */
 export const testFormValuesForAColumn = async (
-  page: Page, name: string, displayname: string, inputType: RecordeditInputType, allDisabled: boolean, expectedValues: SetInputValueProps[]
+  page: Page, name: string, displayname: string, inputType: RecordeditInputType, allDisabled: boolean,
+  expectedValues: (SetInputValueProps |SetInputValueProps[])[]
 ) => {
 
   let formNumber = 1, input;
@@ -261,14 +295,27 @@ export const testFormValuesForAColumn = async (
         await expect.soft(input).toHaveText(value);
         break;
 
+      case RecordeditInputType.ARRAY:
+        if (!Array.isArray(value)) return;
+        const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
+
+        let index = 0;
+        for (const val of value) {
+          if (typeof val !== 'string') continue;
+          input = elems.inputs.nth(index);
+          if (allDisabled) {
+            await expect.soft(input).toBeDisabled();
+          }
+          await expect.soft(input).toHaveValue(val);
+          index++;
+        }
+
+        break;
+
       default:
         if (typeof value !== 'string') return;
 
-        if (inputType === RecordeditInputType.LONGTEXT || inputType === RecordeditInputType.MARKDOWN) {
-          input = RecordeditLocators.getTextAreaForAColumn(page, name, formNumber)
-        } else {
-          input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
-        }
+        input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
         if (allDisabled) {
           await expect.soft(input).toBeDisabled();
         }
