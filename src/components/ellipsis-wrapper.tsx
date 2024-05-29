@@ -10,8 +10,15 @@ export type EllipsisWrapperProps = {
    */
   elementRef: React.MutableRefObject<any>
   /**
-   * Tooltip to display.
-   * It can be a value or a callback function with a boolean prop returning a value.
+   * - Tooltip to display.
+   * - It can be a value or a callback function with a boolean prop returning a value.
+   * - For a tooltip that is always visible on hover use a callback to pass value like so - 
+   * ```ts
+   * <EllipsisWrapper 
+   *  tooltip={() => val}
+   * >
+   * </EllipsisWrapper>
+   * ```
    */
   tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => (string | JSX.Element | null))
   /**
