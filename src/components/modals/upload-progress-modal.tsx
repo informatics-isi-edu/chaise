@@ -10,7 +10,10 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { FileObject, UploadFileObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { 
+  FileObject, LastChunkMap, 
+  LastChunkObject, UploadFileObject 
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -210,10 +213,11 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsFileExists(true);
     uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
       row.forEach((item: UploadFileObject) => {
-        let jobUrl = null;
-        if (item.partialUpload) jobUrl = lastContiguousChunkRef?.current?.[item.uploadKey].jobUrl;
+        let previousJobUrl = null;
+        if (item.partialUpload) previousJobUrl = lastContiguousChunkRef?.current?.[item.uploadKey].jobUrl;
 
-        item.hatracObj.fileExists(jobUrl).then(
+        // if there is a previous upload job that was tracked, send the url and use it for the upload job
+        item.hatracObj.fileExists(previousJobUrl).then(
           () => onFileExistSuccess(item),
           onError);
       });
@@ -262,7 +266,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     speedIntervalTimer = setInterval(() => {
       const diff = sizeTransferredRef.current - lastByteTransferredRef.current;
       setLastByteTransferred(sizeTransferredRef.current);
-      
+
       if (diff > 0) setSpeed(humanFileSize(diff) + 'ps');
     }, 1000);
   };
@@ -419,10 +423,11 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       ufo.uploadKey = `${ufo.hatracObj.hash.md5_base64}_${ufo.column.name}_${ufo.rowIdx}`
       // lastContiguousChunk initailized to null, make sure it has been defined (meaning an upload didn't complete)
       if (lastContiguousChunkRef?.current) {
-        const lccMap = lastContiguousChunkRef.current[ufo.uploadKey];
+        const lccMap: LastChunkObject = lastContiguousChunkRef.current[ufo.uploadKey];
 
         // the 'jobUrl' we stored in lastContiguousChunkRef is what was returned from the server where each part of the path is url encoded
-        // do the same for the newly generated url only for comparison (we will let the server handle this later in the upload process)
+        // do the same for the newly generated url only for comparison 
+        // NOTE: handling the file upload path encoding is done per each folder in the path and is handled by the server
         const urlParts = url.split('/');
         urlParts.forEach((part: string, idx: number) => {
           urlParts[idx] = fixedEncodeURIComponent(part);
@@ -434,8 +439,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         //  - lastChunkIdx is 0 or greater meaning partial upload job has some chunks uploaded
         //  - file size for partial upload job matches file to upload
         //  - there is no upload version set
-        if (lccMap?.jobUrl.indexOf(newUrl) > -1 && 
-          lccMap.lastChunkIdx > -1 && 
+        // NOTE: newUrl and jobUrl should be almost the same,
+        //    with jobUrl having more info appended about the existing uploadJob
+        if (lccMap?.jobUrl.indexOf(newUrl) > -1 &&
+          lccMap.lastChunkIdx > -1 &&
           lccMap.fileSize === ufo.size &&
           !lccMap.uploadVersion
         ) {
@@ -538,11 +545,11 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         // once we've found the first null or undefined value, set the lastChunkIdx to the index before the first null/undefined
         // this could be index 0 which sets the value to -1, meaning no chunks have been uploaded yet
         if (ufo.hatracObj.chunkTracker[i] === null || ufo.hatracObj.chunkTracker[i] === undefined) {
-          setLastContiguousChunk((prevVal: any) => {
-            let tempMap: any;
+          setLastContiguousChunk((prevVal: LastChunkMap) => {
+            let tempMap: LastChunkMap;
             // lastContiguousChunk (prevVal) is null until a chunk has been uploaded
             if (prevVal) {
-              tempMap = {...prevVal}
+              tempMap = { ...prevVal }
             } else {
               tempMap = {};
             }
@@ -550,13 +557,15 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
             if (!tempMap[ufo.uploadKey]) {
               // intiialize the object for the uploadKey
               tempMap[ufo.uploadKey] = {
+                lastChunkIdx: i - 1,
                 jobUrl: ufo.hatracObj.chunkUrl,
                 fileSize: ufo.size
               }
+            } else {
+              // update the last chunk index
+              tempMap[ufo.uploadKey].lastChunkIdx = i - 1;
             }
 
-            // // update the last chunk index
-            tempMap[ufo.uploadKey].lastChunkIdx = i-1;
             return tempMap;
           });
 
@@ -634,8 +643,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     ufo.completeUploadJob = true;
     ufo.versionedUrl = url;
     ufo.partialUpload = false;
-    setLastContiguousChunk((prevVal: any) => {
-      const tempMap = {...prevVal}
+    setLastContiguousChunk((prevVal: LastChunkMap) => {
+      const tempMap: LastChunkMap = { ...prevVal }
 
       // set the uploadVersion to communicate the job has completed
       // ensures an upload won't resume and instead be skipped to finished

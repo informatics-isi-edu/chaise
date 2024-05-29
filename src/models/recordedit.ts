@@ -103,7 +103,7 @@ export type RecordeditForeignkeyCallbacks = {
    * - domainFilterFormNumber: The formNumber that should be used for generating the filteredRef
    *   (this is useful for multi-form input where we're not necessarily have the first form selected)
    */
-  onAttemptToChange?: () => Promise<{allowed: boolean, domainFilterFormNumber?: number}>;
+  onAttemptToChange?: () => Promise<{ allowed: boolean, domainFilterFormNumber?: number }>;
 }
 
 export interface RecordeditColumnModel {
@@ -191,6 +191,22 @@ export interface PrefillObject {
    * the rowname of the fk
    */
   rowname: any;
+}
+
+export interface LastChunkMap {
+  /* key in the form of `${file.md5_base64}_${column_name}_${record_index}` */
+  [key: string]: LastChunkObject;
+}
+
+export interface LastChunkObject {
+  /* the index of the last chunk that was uploaded */
+  lastChunkIdx: number;
+  /* the path to the file being uploaded and it's specific upload job */
+  jobUrl: string;
+  /* the size of the file being uploaded */
+  fileSize: number;
+  /* the path to the file after it's been uploaded and version info is generated */
+  uploadVersion?: string;
 }
 
 export interface UploadProgressProps {

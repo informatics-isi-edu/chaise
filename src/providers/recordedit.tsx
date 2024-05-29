@@ -7,7 +7,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import {
-  appModes, PrefillObject, RecordeditColumnModel,
+  appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -98,7 +98,9 @@ export const RecordeditContext = createContext<{
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
-  setLastContiguousChunk: (val: any) => void, 
+  /* for updating the last contiguous chunk tracking info */
+  setLastContiguousChunk: (arg0: any) => void, 
+  /* useRef react hook to current value */
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
@@ -247,7 +249,7 @@ export default function RecordeditProvider({
    *   }
    * }
    */
-  const [lastContiguousChunk, setLastContiguousChunk, lastContiguousChunkRef] = useStateRef<any | null>(null);
+  const [lastContiguousChunk, setLastContiguousChunk, lastContiguousChunkRef] = useStateRef<LastChunkMap | null>(null);
 
   const [tuples, setTuples, tuplesRef] = useStateRef<any[]>(Array.isArray(initialTuples) ? initialTuples : []);
 
