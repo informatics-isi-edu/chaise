@@ -1,26 +1,29 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 // components
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
-import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
-import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
+// services
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
 // utils
-import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import React from 'react';
+import { determineScrollElement, displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type RelatedTableProps = {
   /**
@@ -28,9 +31,9 @@ type RelatedTableProps = {
    */
   relatedModel: RecordRelatedModel,
   /**
-   * the id attached to the container
+   * the displayname for the reference to be used in the id attached to the container
    */
-  tableContainerID: string
+  displaynameForID: string
 };
 
 /**
@@ -40,27 +43,29 @@ type RelatedTableProps = {
  */
 const RelatedTable = ({
   relatedModel,
-  tableContainerID
+  displaynameForID,
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} />
+      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} />
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
-  tableContainerID
+  displaynameForID
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
   } = useRecordset();
+
   const {
-    reference: recordReference, page : recordPage, updateRelatedRecordsetState, registerRelatedModel
+    reference: recordReference, page: recordPage,
+    updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
   /**
@@ -102,7 +107,7 @@ const RelatedTableInner = ({
       }
       <div className={`related-table-content${displayCustomMode ? (' ' + CLASS_NAMES.HIDDEN) : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
-        <div id={tableContainerID}>
+        <div id={`rt-${makeSafeIdAttr(displaynameForID)}`}>
           <RecordsetTable
             config={relatedModel.recordsetProps.config}
             initialSortObject={usedRef.location.sortObject}
