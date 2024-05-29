@@ -1,8 +1,8 @@
 import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configuration';
 
 export default getConfig({
-  testName: 'default-config/recordedit/foreign-key-dropdown',
-  configFileName: 'recordedit/foreign-key-dropdown.dev.json',
+  testName: 'default-config/recordedit/composite-key',
+  configFileName: 'recordedit/composite-key.dev.json',
   chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
-  testMatch: [ 'foreign-key-dropdown.spec.ts' ]
+  testMatch: [ 'composite-key.spec.ts' ]
 });
