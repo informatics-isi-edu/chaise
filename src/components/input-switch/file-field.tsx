@@ -30,8 +30,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   const { addAlert } = useAlert();
   const fileInputRef = useRef(null);
 
-  const [fileObject, setFileObject] = useState<FileObject | null>(null);
-
   const fileElementId = 'fileInput' + Math.round(Math.random() * 100000);
   const fileExtensionFilter = props.columnModel.column.filenameExtFilter;
   // needs to be a comma separated list, i.e. ".jpg", ".png", ...
@@ -71,8 +69,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       tempFileObject.url = tempFileObject.filename = tempFileObject.file.name;
       tempFileObject.filesize = tempFileObject.file.size;
 
-      setFileObject(tempFileObject);
-
       field.onChange(tempFileObject);
       field.onBlur();
     }
@@ -85,16 +81,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     return v?.url && v.url !== '';
   };
 
-  const onClear = (e: MouseEvent) => {
-    const tempFileObject: FileObject = {
-      url: '',
-      filename: '',
-      filesize: 0
-    }
-
-    setFileObject(tempFileObject);
-  }
-
   const openFilePicker = () => {
     const fileInputElement = fileInputRef.current;
     if (!fileInputElement) return;
@@ -104,21 +90,17 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     (fileInputElement as HTMLInputElement).click();
   }
 
-  const fileTooltip = (fileObj: FileObject) => {
-    return (typeof fileObj.filesize === 'number' ? 'size : ' + humanFileSize(fileObj.filesize) : fileObj.filename);
-  }
-
-  const renderFileTooltip = (fieldValue: any) => (isOverflowing: boolean) => {
-    let tt = ''
-
-    if (isOverflowing && fieldValue) {
-      tt += '\n - ' + fieldValue.filename;
+  const renderFileTooltip = (fieldValue: any) => {
+    return () => {
+      if (fieldValue && isStringAndNotEmpty(fieldValue.filename)) {
+        if (fieldValue.filesize) {
+          return `- ${fieldValue.filename} \n- size: ${humanFileSize(fieldValue.filesize)}`;
+        } else {
+          return fieldValue.filename;
+        }
+      }
+      return null;
     }
-    if (fileObject) {
-      tt += '\n - ' + fileTooltip(fileObject);
-    }
-
-    return tt.trim();
   }
 
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
@@ -134,7 +116,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
         >
           {isStringAndNotEmpty(fieldValue?.filename) ?
             <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-            <span className='chaise-input-placeholder'>{props.placeholder}</span>
+            <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a file'}</span>
           }
           <ClearInputBtn
             btnClassName={`${props.clearClasses} input-switch-clear`}
@@ -173,7 +155,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   }
 
   return (
-    <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
+    <InputField {...props} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
         <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>

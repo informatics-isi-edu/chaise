@@ -439,7 +439,7 @@ const testParams = {
             testFiles[0].name,
             testFiles[1].name,
             testFiles[1].name,
-            'No file Selected'
+            'Select a file'
           ]
         },
         manual_test: {
