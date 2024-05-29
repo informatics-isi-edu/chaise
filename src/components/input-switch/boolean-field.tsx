@@ -80,9 +80,14 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
   /**
    * returns the value to be rendered for the provided field
    */
-  const existingValuePresentation = (field: any): JSX.Element => typeof field?.value === 'boolean' ?
-    displayedOptions[rawOptions.indexOf(field?.value)] :
-    <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>;
+  const existingValuePresentation = (field: any): JSX.Element => {
+
+    if(typeof field?.value === 'boolean'){
+      return displayedOptions[rawOptions.indexOf(field?.value)];
+    }
+
+    return <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>;
+  }
 
   return (
     <InputField {...props}

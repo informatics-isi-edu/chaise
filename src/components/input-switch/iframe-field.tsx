@@ -99,15 +99,21 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   /**
    * returns the value to be rendered for the provided field
    */
-  const existingValuePresentation = (field: any): JSX.Element => isStringAndNotEmpty(field?.value) ?
-    <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-    <span
-      className='chaise-input-placeholder popup-select-value'
-      contentEditable={false}
-    >
-      {props.placeholder ? props.placeholder : 'Select a value'}
-    </span>
-    ;
+  const existingValuePresentation = (field: any): JSX.Element => {
+
+    if (isStringAndNotEmpty(field?.value)) {
+      return <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} />
+    }
+
+    return (
+      <span
+        className='chaise-input-placeholder popup-select-value'
+        contentEditable={false}
+      >
+        {props.placeholder ? props.placeholder : 'Select a value'}
+      </span>
+    )
+  }
 
   return (
     <InputField {...props} onClear={onClear}>
