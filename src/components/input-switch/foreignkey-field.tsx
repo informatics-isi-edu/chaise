@@ -219,11 +219,11 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               <Spinner animation='border' size='sm' />
             </div>
           }
-          <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
-            <EllipsisWrapper
-              elementRef={ellipsisRef}
-              tooltip={existingValuePresentation(field)}
-            >
+          <EllipsisWrapper 
+            elementRef={ellipsisRef}
+            tooltip={existingValuePresentation(field)}
+          >
+            <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
               <div
                 id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
@@ -235,18 +235,18 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
                   clickCallback={clearInput} show={!props.disableInput && showClear}
                 />
               </div>
-            </EllipsisWrapper>
-            {!props.disableInput && <div className='chaise-input-group-append'>
-              <button
-                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
-                className='chaise-btn chaise-btn-primary modal-popup-btn'
-                role='button'
-                type='button'
-              >
-                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-              </button>
-            </div>}
-          </div>
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button
+                  id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
+                  className='chaise-btn chaise-btn-primary modal-popup-btn'
+                  role='button'
+                  type='button'
+                >
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
+            </div>
+          </EllipsisWrapper>
           <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
           {
             recordsetModalProps &&

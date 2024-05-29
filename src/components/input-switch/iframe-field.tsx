@@ -120,11 +120,12 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
       {(field, onChange, showClear, clearInput) => (
 
         <div className='input-switch-iframe'>
-          <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
-            <EllipsisWrapper
-              elementRef={ellipsisRef}
-              tooltip={existingValuePresentation(field)}
-            >
+          <EllipsisWrapper 
+            elementRef={ellipsisRef}
+            tooltip={existingValuePresentation(field)}
+          >
+            <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
+
               <div
                 className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
                 ref={ellipsisRef}
@@ -135,13 +136,13 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
                   clickCallback={clearInput} show={!props.disableInput && showClear}
                 />
               </div>
-            </EllipsisWrapper>
-            {!props.disableInput && <div className='chaise-input-group-append'>
-              <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
-                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-              </button>
-            </div>}
-          </div>
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
+            </div>
+          </EllipsisWrapper>
           <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
           {
             showModal && iframeProps &&

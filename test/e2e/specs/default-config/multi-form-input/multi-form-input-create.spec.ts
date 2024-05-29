@@ -450,7 +450,7 @@ const testParams = {
             testFiles[0].name,
             testFiles[1].name,
             testFiles[2].name,
-            ''
+            'Select a file'
           ]
         }
       },

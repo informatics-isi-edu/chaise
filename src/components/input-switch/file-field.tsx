@@ -105,25 +105,20 @@ const FileField = (props: FileFieldProps): JSX.Element => {
 
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
     return (
-      <EllipsisWrapper
-        elementRef={ellipsisRef}
-        tooltip={renderFileTooltip(fieldValue)}
+      <div
+        className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+        {... (!props.disableInput && { onClick: openFilePicker })}
+        ref={ellipsisRef}
       >
-        <div
-          className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
-          {... (!props.disableInput && { onClick: openFilePicker })}
-          ref={ellipsisRef}
-        >
-          {isStringAndNotEmpty(fieldValue?.filename) ?
-            <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-            <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a file'}</span>
-          }
-          <ClearInputBtn
-            btnClassName={`${props.clearClasses} input-switch-clear`}
-            clickCallback={clearInput} show={showClear && !props.disableInput}
-          />
-        </div>
-      </EllipsisWrapper>
+        {isStringAndNotEmpty(fieldValue?.filename) ?
+          <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
+          <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a file'}</span>
+        }
+        <ClearInputBtn
+          btnClassName={`${props.clearClasses} input-switch-clear`}
+          clickCallback={clearInput} show={showClear && !props.disableInput}
+        />
+      </div>
     )
   }
 
@@ -159,17 +154,22 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
         <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
-          <div className='chaise-input-group'>
-            {renderInput(field.value, showClear, clearInput)}
-            {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
-              <div className='chaise-input-group-append' tabIndex={0}>
-                <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
-                  <span className='fa-solid fa-folder-open'></span>
-                  <span className='button-text'>Select file</span>
-                </label>
-              </div>
-            </ChaiseTooltip>}
-          </div>
+          <EllipsisWrapper
+            elementRef={ellipsisRef}
+            tooltip={renderFileTooltip(field.value)}
+          >
+            <div className='chaise-input-group'>
+              {renderInput(field.value, showClear, clearInput)}
+              {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
+                <div className='chaise-input-group-append' tabIndex={0}>
+                  <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
+                    <span className='fa-solid fa-folder-open'></span>
+                    <span className='button-text'>Select file</span>
+                  </label>
+                </div>
+              </ChaiseTooltip>}
+            </div>
+          </EllipsisWrapper>
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}
