@@ -55,6 +55,8 @@ const RecordsetTable = ({
   );
 
   const [showAllRows, setShowAllRows] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
+  // tracks whether a paging action has successfully occurred for this table
+  // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
   /**
