@@ -1,8 +1,8 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 // components
-import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import Accordion from 'react-bootstrap/Accordion';
+import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
@@ -32,20 +32,20 @@ import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { canShowInlineRelated, canShowRelated, determineScrollElement } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type RecordProps = {
   /**
@@ -245,11 +245,15 @@ const RecordInner = ({
 
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
+
+    windowRef.removeEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
+    windowRef.addEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
     return () => {
       windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
+      windowRef.removeEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
     };
   }, [updateRecordPage]);
 
@@ -496,35 +500,7 @@ const RecordInner = ({
     });
   };
 
-  // sectionId is displayname.value
-  const scrollToSection = (displayname: string, dontLog?: boolean) => {
-    if (!mainContainer.current) return;
-
-    const relatedObj = determineScrollElement(displayname);
-    if (!relatedObj) {
-      $log.debug(`section '${displayname}' not found for scrolling to!`);
-      return;
-    }
-
-    if (!dontLog) {
-      LogService.logClientAction({
-        action: LogService.getActionString(LogActions.TOC_SCROLL_RELATED, relatedObj.rtm.recordsetProps.logInfo.logStackPath),
-        stack: relatedObj.rtm.recordsetProps.logInfo.logStack
-      }, relatedObj.rtm.initialReference.defaultLogInfo);
-    }
-
-    let delayScroll = 0;
-    // if not inline and the related table is closed, add it to the set of open related sections to be opened
-    if (!relatedObj.rtm.isInline && openRelatedSections.indexOf(relatedObj.rtm.index.toString()) === -1) {
-      delayScroll = 200;
-      setOpenRelatedSections((currState: string[]) => {
-        // const action = LogActions.OPEN;
-
-        return currState.concat(relatedObj.rtm.index.toString());
-      });
-    }
-
-    const element = relatedObj.element as HTMLElement;
+  const scrollToRelatedTable = (element: HTMLElement, delayScroll?: number) => {
     // defer scrollTo behavior so the accordion has time to open
     // 200 seems like a good amount of time based on testing
     setTimeout(() => {
@@ -543,38 +519,81 @@ const RecordInner = ({
     }, delayScroll);
   }
 
-  const determineScrollElement = (displayname: string): { element: Element, rtm: RecordRelatedModel } | false => {
-    let matchingRtm;
-    // id enocde query param
-    const htmlId = makeSafeIdAttr(displayname);
-    // "entity-" is used for record entity section
-    // we have to make sure the row is visible on the page
-    let el = document.querySelector(`tr:not(.${CLASS_NAMES.HIDDEN}) #entity-${htmlId}`);
+  // sectionId is displayname.value
+  const scrollToSection = (displayname: string, dontLog?: boolean) => {
+    if (!mainContainer.current) return;
 
-    if (el) {
-      // if in entity section, grab parent
-      el = el.parentElement;
+    const scrollElement = determineScrollElement(displayname);
+    if (!scrollElement) {
+      $log.debug(`section '${displayname}' not found for scrolling to!`);
+      return;
+    }
 
-      matchingRtm = columnModels.filter((cm) => {
-        return cm.column.displayname.value === displayname;
-      })[0].relatedModel;
-    } else {
-      // "rt-heading-" is used for related table section
-      // we have to make sure the section is visible on the page
-      el = document.querySelector(`#rt-heading-${htmlId}:not(.${CLASS_NAMES.HIDDEN})`);
+    // column model or related table model
+    let rtm = columnModels.filter((cm) => {
+      return cm.column.displayname.value === displayname;
+    })[0]?.relatedModel;
 
-      matchingRtm = relatedModels.filter(function (rm) {
+    // if not inline, check related section
+    if (!rtm) {
+      rtm = relatedModels.filter(function (rm) {
         return rm.initialReference.displayname.value === displayname;
       })[0];
     }
 
-    if (!el || !matchingRtm) return false;
-
-    return {
-      element: el,
-      rtm: matchingRtm
+    // if no column or related model is found, log a debug error and return
+    // NOTE: should not happen if we have a scroll element
+    if (!rtm) {
+      $log.debug(`section '${displayname}' does not have a related model!`);
+      return;
     }
+
+    if (!dontLog) {
+      LogService.logClientAction({
+        action: LogService.getActionString(LogActions.TOC_SCROLL_RELATED, rtm.recordsetProps.logInfo.logStackPath),
+        stack: rtm.recordsetProps.logInfo.logStack
+      }, rtm.initialReference.defaultLogInfo);
+    }
+
+    let delayScroll = 0;
+    // if not inline and the related table is closed, add it to the set of open related sections to be opened
+    if (!rtm.isInline && openRelatedSections.indexOf(rtm.index.toString()) === -1) {
+      delayScroll = 200;
+      setOpenRelatedSections((currState: string[]) => {
+        // const action = LogActions.OPEN;
+
+        return currState.concat(rtm.index.toString());
+      });
+    }
+
+    scrollToRelatedTable(scrollElement as HTMLElement, delayScroll);
   }
+
+  /**
+   * When a user clicks previous/next for a related table, after the table has "updated" successfully, an
+   * event is emitted with the related table's displayname for scrolling to
+   */
+  const onPagingSuccess = ((event: CustomEvent) => {
+    if (!mainContainer.current) return;
+
+    const displaynameForID = event.detail.displayname;
+    const scrollElement = determineScrollElement(displaynameForID);
+    if (!scrollElement) {
+      $log.debug(`section '${displaynameForID}' not found for scrolling to!`);
+      return;
+    }
+
+    const scrollElTop = scrollElement.getBoundingClientRect().top;
+    const mainContainerTop = mainContainer.current.getBoundingClientRect().top;
+
+    // return if related table header is at the top of main container or below the top (it's already visible)
+    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next 
+    //    for the related table we are looking at, meaning prev/next is above the bottom of main container and
+    //    therefore the related table header is either visible or above the top of main container top
+    if (scrollElTop >= mainContainerTop) return;
+
+    scrollToRelatedTable(scrollElement as HTMLElement);
+  }) as EventListener;
 
   const renderTableOfContentsItem = (isInline: boolean, index: number) => {
     if (isInline && !canShowInlineRelated(columnModels[index], showEmptySections)) {
@@ -606,7 +625,7 @@ const RecordInner = ({
         >
           <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
             <DisplayValue value={displayname} />
-            {relatedPage && <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>}
+            {relatedPage && <span> ({relatedPage.length}{(relatedPage.hasNext || relatedPage.hasPrevious) ? '+' : ''})</span>}
           </a>
         </ChaiseTooltip>
       </li>
@@ -664,7 +683,7 @@ const RecordInner = ({
                   <Accordion.Body>
                     <RelatedTable
                       relatedModel={rm}
-                      tableContainerID={`rt-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
+                      displaynameForID={rm.initialReference.displayname.value}
                     />
                   </Accordion.Body>
                 </Accordion.Item>
