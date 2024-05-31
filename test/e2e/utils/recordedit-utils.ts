@@ -160,7 +160,7 @@ export const setInputValue = async (
       }
 
       await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
-      const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+      const rsModal = ModalLocators.getForeignKeyPopup(page);
       await expect.soft(rsModal).toBeVisible();
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(valueProps.modal_num_rows);
       await RecordsetLocators.getRowSelectButton(rsModal, valueProps.modal_option_index).click();

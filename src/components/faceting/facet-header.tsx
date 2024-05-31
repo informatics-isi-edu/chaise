@@ -104,7 +104,7 @@ const FacetHeader = ({
             <DisplayValue value={displayname} />
             {/* Condition to show tooltip icon */}
             {showTooltipIcon && (
-              <span className='chaise-icon-for-tooltip align-center-icon'></span>
+              <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>
             )}
           </div>
         </div>

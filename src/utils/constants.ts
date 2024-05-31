@@ -189,10 +189,11 @@ export const DEFAULT_DISPLAYNAME = {
 };
 
 export const CUSTOM_EVENTS = {
-  ROW_EDIT_INTEND: 'row-edit-intend',
-  ROW_DELETE_SUCCESS: 'row-delete-success',
   ADD_INTEND: 'add-intend',
   FORCE_UPDATE_RECORDSET: 'force-update-recordset-data',
+  RELATED_TABLE_PAGING_SUCCESS: 'related-table-paging-success',
+  ROW_DELETE_SUCCESS: 'row-delete-success',
+  ROW_EDIT_INTEND: 'row-edit-intend',
 };
 
 export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
