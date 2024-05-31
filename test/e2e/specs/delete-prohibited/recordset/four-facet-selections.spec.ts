@@ -45,7 +45,8 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
         const facet = RecordsetLocators.getFacetById(page, facetParams.facetIdx);
 
         // numOptionsCumulative meaning the number of options is constrained by each previous facet selection
-        await openFacet(page,facet, facetParams.facetIdx, facetParams.numOptionsCumulative, 1);
+        await openFacet(page, facet, facetParams.facetIdx, facetParams.numOptionsCumulative, 1);
+        await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
         await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, index + 1);
         
         // close the facet

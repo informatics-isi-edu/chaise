@@ -130,82 +130,82 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      # - name: Run all features test spec
-      #   id: test-all-features
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeatures
-      # - name: Run all features confirmation test spec
-      #   id: test-all-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeaturesconfirmation
-      # - name: Run default config test spec
-      #   id: test-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig
+      - name: Run all features test spec
+        id: test-all-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeatures
+      - name: Run all features confirmation test spec
+        id: test-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
       - name: Run delete prohibited test spec
         id: test-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
           make testdeleteprohibited
-      # - name: Setup and connect to saucelabs
-      #   timeout-minutes: 2
-      #   run: |
-      #     curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
-      #     tar -xzf saucelabs.tar.gz
-      #     cd sc-*
-      #     bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
-      # - name: Check sauce connect
-      #   run: |
-      #     while [ ! -f /tmp/sc_ready ]; do
-      #       echo "Waiting for Sauce Connect..."
-      #       sleep 5;
-      #     done;
-      # - name: Run all features confirmation test spec (protractor)
-      #   id: test-protractor-all-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeaturesconfirmation-protractor
-      # - name: Run default config test spec  (protractor)
-      #   id: test-protractor-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig-protractor
-      # - name: Run delete prohibited test spec  (protractor)
-      #   id: test-protractor-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited-protractor
-      # - name: Check on all features test spec
-      #   if: always() && steps.test-all-features.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on all features confirmation test spec
-      #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec
-      #   if: always() && steps.test-default-config.outcome != 'success'
-      #   run: exit 1
+      - name: Setup and connect to saucelabs
+        timeout-minutes: 2
+        run: |
+          curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
+          tar -xzf saucelabs.tar.gz
+          cd sc-*
+          bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
+      - name: Check sauce connect
+        run: |
+          while [ ! -f /tmp/sc_ready ]; do
+            echo "Waiting for Sauce Connect..."
+            sleep 5;
+          done;
+      - name: Run all features confirmation test spec (protractor)
+        id: test-protractor-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation-protractor
+      - name: Run default config test spec  (protractor)
+        id: test-protractor-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig-protractor
+      - name: Run delete prohibited test spec  (protractor)
+        id: test-protractor-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited-protractor
+      - name: Check on all features test spec
+        if: always() && steps.test-all-features.outcome != 'success'
+        run: exit 1
+      - name: Check on all features confirmation test spec
+        if: always() && steps.test-all-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
-      # - name: Check on all features confirmation test spec (protractor)
-      #   if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec (protractor)
-      #   if: always() && steps.test-protractor-default-config.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited test spec (protractor)
-      #   if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+      - name: Check on all features confirmation test spec (protractor)
+        if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec (protractor)
+        if: always() && steps.test-protractor-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec (protractor)
+        if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
+        run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:

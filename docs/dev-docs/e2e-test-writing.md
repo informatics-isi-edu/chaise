@@ -225,9 +225,18 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   // https://playwright.dev/docs/api/class-locator#locator-fill
   await locator.fill('new value');
 
-  // clear the value of input or textaraea
+  // clear the value of input or textaraea (PREFERRED)
   // https://playwright.dev/docs/api/class-locator#locator-clear
   await locator.clear();
+
+  // will accomplish the same thing as `clear()`
+  await locator.fill('');
+  ```
+
+- When filling a value in an input, we want to ensure it is filled afterwards:
+  ```ts
+  await locator.fill(value);
+  await expect.soft(locator).toHaveValue(value);
   ```
 
 - Mouse actions:
@@ -235,6 +244,12 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   ```ts
   await locator.click();
   await locator.hover();
+  ```
+
+- Checkbox specific:
+  ```ts
+  // https://playwright.dev/docs/input#checkboxes-and-radio-buttons
+  await locator.check();
   ```
 
 ### Managing page

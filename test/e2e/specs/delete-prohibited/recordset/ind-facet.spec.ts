@@ -341,7 +341,9 @@ test.describe('Testing individual facet types', () => {
             await test.step('open the facet and check the available options.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
               // open facet
-              await openFacetAndTestFilterOptions(page, facet, index, facetParams.options, 1)
+              await openFacetAndTestFilterOptions(page, facet, index, facetParams.options, 1);
+
+              await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
               
               if (!facetParams.isBoolean) {
                 // make sure search placeholder is correct
@@ -382,6 +384,7 @@ test.describe('Testing individual facet types', () => {
               
               // wait for facet to open              
               await expect.soft(rangeInputs.submit).toBeVisible();
+              await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
 
               // wait for intial values to be set
               await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
@@ -492,6 +495,7 @@ test.describe('Testing individual facet types', () => {
               
               // wait for facet to open
               await expect.soft(rangeInputs.submit).toBeVisible();
+              await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
 
               // wait for intial values to be set
               await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
@@ -610,6 +614,8 @@ test.describe('Testing individual facet types', () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
 
               await openFacetAndTestFilterOptions(page, facet, index, ['All records with value', 'No value'], 1);
+
+              await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
             });
 
             await test.step('selecting the not-null option, should only show the applicable rows.', async () => {
