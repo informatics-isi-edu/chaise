@@ -43,7 +43,7 @@ const testParams: any = {
   ]
 };
 
-test('Viewing Recordset with Faceting, ', async ({ page, baseURL }, testInfo) => {
+test('Viewing Recordset with Faceting, default presentation based on facets annotation', async ({ page, baseURL }, testInfo) => {
   await test.step('should load recordset page', async () => {
     const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
 
@@ -51,199 +51,197 @@ test('Viewing Recordset with Faceting, ', async ({ page, baseURL }, testInfo) =>
     await RecordsetLocators.waitForRecordsetPageReady(page);
   });
 
-  await test.step('default presentation based on facets annotation', async () => {
-    await test.step('verify the text is truncated properly on load, then not truncated after clicking "more"', async () => {
-      // default config: maxRecordsetRowHeight = 100
-      // 100 for max height, 10 for padding, 1 for border
-      const cellHeight = 110;
-      let testCellDimensions;
+  await test.step('verify the text is truncated properly on load, then not truncated after clicking "more"', async () => {
+    // default config: maxRecordsetRowHeight = 100
+    // 100 for max height, 10 for padding, 1 for border
+    const cellHeight = 110;
+    let testCellDimensions;
 
-      const firstRow = RecordsetLocators.getRows(page).nth(0)
-      const testCell = RecordsetLocators.getRowCells(firstRow).nth(2);
+    const firstRow = RecordsetLocators.getRows(page).nth(0)
+    const testCell = RecordsetLocators.getRowCells(firstRow).nth(2);
 
-      await expect.soft(testCell).toContainText('... more');
-      testCellDimensions = await testCell.boundingBox();
-      expect.soft(Math.trunc(testCellDimensions?.height || 0)).toBe(cellHeight);
+    await expect.soft(testCell).toContainText('... more');
+    testCellDimensions = await testCell.boundingBox();
+    expect.soft(Math.trunc(testCellDimensions?.height || 0)).toBe(cellHeight);
 
-      await testCell.locator('.readmore').click()
+    await testCell.locator('.readmore').click()
 
-      await expect.soft(testCell).toContainText('... less');
-      testCellDimensions = await testCell.boundingBox();
-      expect.soft(testCellDimensions?.height).toBeGreaterThan(cellHeight);
-    });
+    await expect.soft(testCell).toContainText('... less');
+    testCellDimensions = await testCell.boundingBox();
+    expect.soft(testCellDimensions?.height).toBeGreaterThan(cellHeight);
+  });
 
-    await test.step('should have ' + testParams.totalNumFacets + ' facets', async () => {
-      await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(testParams.totalNumFacets);
+  await test.step('should have ' + testParams.totalNumFacets + ' facets', async () => {
+    await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(testParams.totalNumFacets);
 
-      const titles = RecordsetLocators.getFacetTitles(page);
-      const count = await titles.count();
-      for (let i = 0; i < count; i++) {
-        await expect.soft(titles.nth(i)).toHaveText(testParams.facetNames[i])
-      }
-    });
+    const titles = RecordsetLocators.getFacetTitles(page);
+    const count = await titles.count();
+    for (let i = 0; i < count; i++) {
+      await expect.soft(titles.nth(i)).toHaveText(testParams.facetNames[i])
+    }
+  });
 
-    await test.step('should have 3 facets open', async () => {
-      await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(testParams.defaults.openFacetNames.length);
+  await test.step('should have 3 facets open', async () => {
+    await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(testParams.defaults.openFacetNames.length);
 
-      const titles = RecordsetLocators.getOpenFacetTitles(page);
-      const count = await titles.count();
-      for (let i = 0; i < count; i++) {
-        await expect.soft(titles.nth(i)).toHaveText(testParams.defaults.openFacetNames[i])
-      }
-    });
+    const titles = RecordsetLocators.getOpenFacetTitles(page);
+    const count = await titles.count();
+    for (let i = 0; i < count; i++) {
+      await expect.soft(titles.nth(i)).toHaveText(testParams.defaults.openFacetNames[i])
+    }
+  });
 
-    // test defaults and values shown
-    await test.step('"id" facet should have 1 row checked', async () => {
-      // use 0 index
-      const facet = RecordsetLocators.getFacetById(page, 0);
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
-    });
+  // test defaults and values shown
+  await test.step('"id" facet should have 1 row checked', async () => {
+    // use 0 index
+    const facet = RecordsetLocators.getFacetById(page, 0);
+    await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
+  });
 
-    await test.step('"int_col" facet should not show the histogram', async () => {
-      // use 1 index
-      const facet = RecordsetLocators.getFacetById(page, 1);
-      await expect.soft(RecordsetLocators.getFacetHistogram(facet)).not.toBeVisible();
-    });
+  await test.step('"int_col" facet should not show the histogram', async () => {
+    // use 1 index
+    const facet = RecordsetLocators.getFacetById(page, 1);
+    await expect.soft(RecordsetLocators.getFacetHistogram(facet)).not.toBeVisible();
+  });
 
-    await test.step('should have 2 filters selected', async () => {
-      await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(testParams.defaults.numFilters);
-    });
+  await test.step('should have 2 filters selected', async () => {
+    await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(testParams.defaults.numFilters);
+  });
 
-    await test.step('should have 1 row visible', async () => {
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.numRows);
-    });
+  await test.step('should have 1 row visible', async () => {
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.numRows);
+  });
 
-    await test.step('should have 1 row selected in show more popup for scalar picker and should be able to search in popup.', async () => {
-      const facet = RecordsetLocators.getFacetById(page, 0);
+  await test.step('should have 1 row selected in show more popup for scalar picker and should be able to search in popup.', async () => {
+    const facet = RecordsetLocators.getFacetById(page, 0);
 
-      // open show more, verify only 1 row checked, check another and submit
-      await RecordsetLocators.getShowMore(facet).click();
+    // open show more, verify only 1 row checked, check another and submit
+    await RecordsetLocators.getShowMore(facet).click();
 
-      const facetPopup = ModalLocators.getScalarPopup(page);
-      // one row is selected
-      await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(facetPopup)).toHaveCount(1);
+    const facetPopup = ModalLocators.getScalarPopup(page);
+    // one row is selected
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(facetPopup)).toHaveCount(1);
 
-      // search
-      const searchInp = RecordsetLocators.getMainSearchInput(facetPopup),
-        searchSubmitBtn = RecordsetLocators.getSearchSubmitButton(facetPopup);
+    // search
+    const searchInp = RecordsetLocators.getMainSearchInput(facetPopup),
+      searchSubmitBtn = RecordsetLocators.getSearchSubmitButton(facetPopup);
 
-      await searchInp.fill('1|2');
-      await searchSubmitBtn.click();
+    await searchInp.fill('1|2');
+    await searchSubmitBtn.click();
 
-      const modalOptions = RecordsetLocators.getCheckboxInputs(facetPopup);
-      // make sure search result is displayed
-      await expect.soft(modalOptions).toHaveCount(13);
+    const modalOptions = RecordsetLocators.getCheckboxInputs(facetPopup);
+    // make sure search result is displayed
+    await expect.soft(modalOptions).toHaveCount(13);
 
-      // make sure the first row is selected
-      await expect(modalOptions.nth(0)).toBeChecked();
+    // make sure the first row is selected
+    await expect(modalOptions.nth(0)).toBeChecked();
 
-      const optionsCount = await modalOptions.count();
-      for (let i = 0; i < optionsCount; i++) {
-        if (i === 0) continue;
-        await expect.soft(modalOptions.nth(i)).not.toBeChecked();
-      }
+    const optionsCount = await modalOptions.count();
+    for (let i = 0; i < optionsCount; i++) {
+      if (i === 0) continue;
+      await expect.soft(modalOptions.nth(i)).not.toBeChecked();
+    }
 
-      // click the 2nd option
-      await modalOptions.nth(1).check();
-      await ModalLocators.getSubmitButton(facetPopup).click();
+    // click the 2nd option
+    await modalOptions.nth(1).check();
+    await ModalLocators.getSubmitButton(facetPopup).click();
 
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(2);
+    await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(2);
 
-      // make sure the number of rows is correct
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2)
+    // make sure the number of rows is correct
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2)
 
-      // search string too
-      await RecordsetLocators.getFacetSearchBox(facet).fill('11');
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(3);
+    // search string too
+    await RecordsetLocators.getFacetSearchBox(facet).fill('11');
+    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(3);
 
-      await RecordsetLocators.getFacetSearchBoxClear(facet).click();
-    });
+    await RecordsetLocators.getFacetSearchBoxClear(facet).click();
+  });
 
-    await test.step('boolean facet should not have a search box present', async () => {
-      // idx 8 is for boolean facet
-      const facet = RecordsetLocators.getFacetById(page, 8);
-      const facetHeader = RecordsetLocators.getFacetHeaderButtonById(facet, 8);
+  await test.step('boolean facet should not have a search box present', async () => {
+    // idx 8 is for boolean facet
+    const facet = RecordsetLocators.getFacetById(page, 8);
+    const facetHeader = RecordsetLocators.getFacetHeaderButtonById(facet, 8);
 
-      await facetHeader.click();
-      await expect.soft(RecordsetLocators.getFacetSearchBox(facet)).not.toBeAttached();
+    await facetHeader.click();
+    await expect.soft(RecordsetLocators.getFacetSearchBox(facet)).not.toBeAttached();
 
-      // close the facet
-      await facetHeader.click();
-    });
+    // close the facet
+    await facetHeader.click();
+  });
 
-    await test.step('main search box should show the search columns.', async () => {
-      await expect.soft(RecordsetLocators.getMainSearchPlaceholder(page)).toHaveText('Search text, long column');
-    });
+  await test.step('main search box should show the search columns.', async () => {
+    await expect.soft(RecordsetLocators.getMainSearchPlaceholder(page)).toHaveText('Search text, long column');
+  });
 
-    // eslint-disable-next-line max-len
-    await test.step('search using the global search box should search automatically, show the search phrase as a filter, and show the set of results', async () => {
-      const mainSearch = RecordsetLocators.getMainSearchInput(page);
+  // eslint-disable-next-line max-len
+  await test.step('search using the global search box should search automatically, show the search phrase as a filter, and show the set of results', async () => {
+    const mainSearch = RecordsetLocators.getMainSearchInput(page);
 
-      await RecordsetLocators.getClearAllFilters(page).click();
-      // await expect.soft(page.locator('.recordest-main-spinner')).not.toBeAttached();
-      await page.locator('.recordest-main-spinner').waitFor({ state: 'detached' });
+    await RecordsetLocators.getClearAllFilters(page).click();
+    // await expect.soft(page.locator('.recordest-main-spinner')).not.toBeAttached();
+    await page.locator('.recordest-main-spinner').waitFor({ state: 'detached' });
 
-      await mainSearch.fill(testParams.searchBox.term);
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.numRows);
+    await mainSearch.fill(testParams.searchBox.term);
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.numRows);
 
-      await RecordsetLocators.getSearchClearButton(page).click();
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
-      await expect.soft(mainSearch).toHaveText('');
+    await RecordsetLocators.getSearchClearButton(page).click();
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
+    await expect.soft(mainSearch).toHaveText('');
 
-      await mainSearch.fill(testParams.searchBox.term2);
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.term2Rows);
+    await mainSearch.fill(testParams.searchBox.term2);
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.term2Rows);
 
-      // fill replaces all content, term3 changed to be term2 + oldTerm3 (eve + ns)
-      await mainSearch.fill(testParams.searchBox.term3);
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.term3Rows);
+    // fill replaces all content, term3 changed to be term2 + oldTerm3 (eve + ns)
+    await mainSearch.fill(testParams.searchBox.term3);
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.term3Rows);
 
-      await RecordsetLocators.getSearchClearButton(page).click();
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
-    });
+    await RecordsetLocators.getSearchClearButton(page).click();
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.defaults.pageSize);
+  });
 
-    await test.step('should have 1 row selected in show more popup for entity.', async () => {
-      const facet = RecordsetLocators.getFacetById(page, 11);
-      await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
-      await RecordsetLocators.getFacetOption(facet, 0).check();
+  await test.step('should have 1 row selected in show more popup for entity.', async () => {
+    const facet = RecordsetLocators.getFacetById(page, 11);
+    await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
+    await RecordsetLocators.getFacetOption(facet, 0).check();
 
-      // open show more, verify only 1 row checked, check another and submit
-      await RecordsetLocators.getShowMore(facet).click();
+    // open show more, verify only 1 row checked, check another and submit
+    await RecordsetLocators.getShowMore(facet).click();
 
-      const facetPopup = ModalLocators.getRecordsetSearchPopup(page);
-      // one row is selected
-      await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(facetPopup)).toHaveCount(1);
+    const facetPopup = ModalLocators.getRecordsetSearchPopup(page);
+    // one row is selected
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(facetPopup)).toHaveCount(1);
 
-      const modalOptions = RecordsetLocators.getCheckboxInputs(facetPopup);
-      // click the 2nd option
-      await modalOptions.nth(1).check();
+    const modalOptions = RecordsetLocators.getCheckboxInputs(facetPopup);
+    // click the 2nd option
+    await modalOptions.nth(1).check();
 
-      await ModalLocators.getSubmitButton(facetPopup).click();
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(2);
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(15);
+    await ModalLocators.getSubmitButton(facetPopup).click();
+    await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(2);
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(15);
 
-      await RecordsetLocators.getClearAllFilters(page).click();
-    });
+    await RecordsetLocators.getClearAllFilters(page).click();
+  });
 
-    await test.step('should show correct tooltip for the facets.', async () => {
-      const testFacetTooltip = async (idx: number) => {
+  await test.step('should show correct tooltip for the facets.', async () => {
+    const testFacetTooltip = async (idx: number) => {
 
-        // if we reached the end of the list, then finish the test case
-        if (idx === testParams.facetComments.length) return;
+      // if we reached the end of the list, then finish the test case
+      if (idx === testParams.facetComments.length) return;
 
-        const comment = testParams.facetComments[idx];
+      const comment = testParams.facetComments[idx];
 
-        // if the facet doesn't have any comment, go to the next
-        if (!comment) {
-          await testFacetTooltip(idx + 1);
-          return;
-        }
-
-        await testTooltip(RecordsetLocators.getFacetHeaderById(page, idx), comment, APP_NAMES.RECORDSET, true)
+      // if the facet doesn't have any comment, go to the next
+      if (!comment) {
         await testFacetTooltip(idx + 1);
+        return;
       }
 
-      // go one by one over facets and test their tooltip
-      await testFacetTooltip(0);
-    });
+      await testTooltip(RecordsetLocators.getFacetHeaderById(page, idx), comment, APP_NAMES.RECORDSET, true)
+      await testFacetTooltip(idx + 1);
+    }
+
+    // go one by one over facets and test their tooltip
+    await testFacetTooltip(0);
   });
 });
