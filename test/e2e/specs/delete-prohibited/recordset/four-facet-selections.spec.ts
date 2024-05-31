@@ -26,7 +26,7 @@ const testParams: any = {
     // f3 (term)
     { facetIdx: 12, option: 1, numOptionsLoad: 3, numOptionsCumulative: 2, numRows: 5 },
     // from_name
-    { facetIdx: 13, option: 2, numOptionsLoad: 11, numOptionsCumulative: 6, numRows: 1 }
+    { facetIdx: 13, option: 1, numOptionsLoad: 11, numOptionsCumulative: 6, numRows: 1 }
   ]
 }
 
@@ -45,9 +45,10 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
         const facet = RecordsetLocators.getFacetById(page, facetParams.facetIdx);
 
         // numOptionsCumulative meaning the number of options is constrained by each previous facet selection
-        await openFacet(facet, facetParams.facetIdx, facetParams.numOptionsCumulative);
+        await openFacet(page,facet, facetParams.facetIdx, facetParams.numOptionsCumulative, 1);
         await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, index + 1);
         
+        // close the facet
         await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.facetIdx).click();
       });
     };
@@ -72,16 +73,16 @@ test('Testing four facet selections in quick sequence and verifying data after a
     const facet4 = RecordsetLocators.getFacetById(page, testParams.multipleFacets[3].facetIdx);
 
     // open the four facets in reverse order (from bottom to top)
-    await openFacet(facet4, testParams.multipleFacets[3].facetIdx, testParams.multipleFacets[3].numOptionsLoad);
+    await openFacet(page, facet4, testParams.multipleFacets[3].facetIdx, testParams.multipleFacets[3].numOptionsLoad, 1);
     await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 1);
 
-    await openFacet(facet3, testParams.multipleFacets[2].facetIdx, testParams.multipleFacets[2].numOptionsLoad);
+    await openFacet(page, facet3, testParams.multipleFacets[2].facetIdx, testParams.multipleFacets[2].numOptionsLoad, 2);
     await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 2);
 
-    await openFacet(facet2, testParams.multipleFacets[1].facetIdx, testParams.multipleFacets[1].numOptionsLoad);
+    await openFacet(page, facet2, testParams.multipleFacets[1].facetIdx, testParams.multipleFacets[1].numOptionsLoad, 3);
     await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - 3);
 
-    await openFacet(facet1, testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].numOptionsLoad);
+    await openFacet(page, facet1, testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].numOptionsLoad, 4);
     await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(numFacets);
 
     // make sure facets are loaded first then select facet optins 1 by 1

@@ -8,7 +8,7 @@ import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils'
 import {
   clearRangeInput, fillRangeInput, openFacet, openFacetAndTestFilterOptions,
   openRecordsetAndResetFacetState, testClearAllFilters, testDefaultRangePickerInitialValues,
-  testRangeInputSubmit, testRangeInputSubmitThenClear, testSelectFacetOption,
+  testRangeInputSubmitThenClear, testSelectFacetOption,
   testSelectFacetOptionThenClear, testTimestampRangePickerInitialValues
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
@@ -326,7 +326,6 @@ test.describe('Testing individual facet types', () => {
 
   for (const [index, facetParams] of testParams.facets.entries()) {
     test(`Testing facet: ${facetParams.name},`, async ({ page, baseURL }, testInfo) => {
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
 
       await openRecordsetAndResetFacetState(page,
         `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
@@ -341,8 +340,8 @@ test.describe('Testing individual facet types', () => {
             const facet = RecordsetLocators.getFacetById(page, index);
             await test.step('open the facet and check the available options.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-              // // open facet
-              await openFacetAndTestFilterOptions(facet, index, facetParams.options)
+              // open facet
+              await openFacetAndTestFilterOptions(page, facet, index, facetParams.options, 1)
               
               if (!facetParams.isBoolean) {
                 // make sure search placeholder is correct
@@ -379,7 +378,7 @@ test.describe('Testing individual facet types', () => {
             const rangeInputs = RecordsetLocators.getFacetRangeInputs(facet);
             await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-              await openFacet(facet, index, facetParams.listElems + 1);
+              await openFacet(page, facet, index, facetParams.listElems + 1, 1);
               
               // wait for facet to open              
               await expect.soft(rangeInputs.submit).toBeVisible();
@@ -489,7 +488,7 @@ test.describe('Testing individual facet types', () => {
             const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(facet);
             await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-              await openFacet(facet, index, facetParams.listElems + 1);
+              await openFacet(page, facet, index, facetParams.listElems + 1, 1);
               
               // wait for facet to open
               await expect.soft(rangeInputs.submit).toBeVisible();
@@ -610,7 +609,7 @@ test.describe('Testing individual facet types', () => {
             await test.step('should open the facet and the two options should be available.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
 
-              await openFacetAndTestFilterOptions(facet, index, ['All records with value', 'No value']);
+              await openFacetAndTestFilterOptions(page, facet, index, ['All records with value', 'No value'], 1);
             });
 
             await test.step('selecting the not-null option, should only show the applicable rows.', async () => {

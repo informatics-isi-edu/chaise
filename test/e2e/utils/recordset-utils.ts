@@ -44,8 +44,10 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
  * @param facetIdx facet index
  * @param numOptions the total number of options visble on load for this facet
  */
-export async function openFacet(facet: Locator, facetIdx: number, numOptions: number) {
+export async function openFacet(page: Page, facet: Locator, facetIdx: number, numOptions: number, numOpenFacets: number) {
   await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
+
+  await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(numOpenFacets);
 
   await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
   await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
@@ -57,8 +59,8 @@ export async function openFacet(facet: Locator, facetIdx: number, numOptions: nu
  * @param facetIdx facet index
  * @param filterOptions array of filter option labels
  */
-export async function openFacetAndTestFilterOptions(facet: Locator, facetIdx: number, filterOptions: string[]) {
-  await openFacet(facet, facetIdx, filterOptions.length);
+export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, facetIdx: number, filterOptions: string[], numOpenFacets: number) {
+  await openFacet(page, facet, facetIdx, filterOptions.length, numOpenFacets);
 
   const facetOptions = RecordsetLocators.getFacetOptions(facet);
   const numFacets = await facetOptions.count();
@@ -216,17 +218,17 @@ export async function openRecordsetAndResetFacetState(
     await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
   });
 
+  await test.step('clear all filters', async () => {
+    await clearAll.click();
+    await expect.soft(clearAll).not.toBeVisible();
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
+  });
+
   await test.step('close default open facets', async () => {
     for await (const [i, facetIndex] of openedFacets.entries()) {
       const facet = RecordsetLocators.getFacetById(page, facetIndex);
       await RecordsetLocators.getFacetHeaderButtonById(facet, facetIndex).click();
       await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
     }
-  });
-
-  await test.step('clear all filters', async () => {
-    await clearAll.click();
-    await expect.soft(clearAll).not.toBeVisible();
-    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
   });
 }
