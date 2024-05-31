@@ -49,6 +49,7 @@ export async function openFacet(page: Page, facet: Locator, facetIdx: number, nu
 
   await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(numOpenFacets);
 
+  await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
   await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
   await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(numOptions);

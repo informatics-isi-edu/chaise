@@ -61,14 +61,14 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
     const cellHeight = 110;
     let testCellDimensions;
 
-    const firstRow = RecordsetLocators.getRows(page).nth(0)
+    const firstRow = RecordsetLocators.getRows(page).nth(0);
     const testCell = RecordsetLocators.getRowCells(firstRow).nth(2);
 
     await expect.soft(testCell).toContainText('... more');
     testCellDimensions = await testCell.boundingBox();
     expect.soft(Math.trunc(testCellDimensions?.height || 0)).toBe(cellHeight);
 
-    await testCell.locator('.readmore').click()
+    await testCell.locator('.readmore').click();
 
     await expect.soft(testCell).toContainText('... less');
     testCellDimensions = await testCell.boundingBox();
@@ -99,12 +99,14 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
   await test.step('"id" facet should have 1 facet option checked', async () => {
     // use 0 index
     const facet = RecordsetLocators.getFacetById(page, 0);
+    await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
     await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
   });
 
   await test.step('"int_col" facet should not show the histogram with 1 facet options checked', async () => {
     // use 1 index
     const facet = RecordsetLocators.getFacetById(page, 1);
+    await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
     await expect.soft(RecordsetLocators.getFacetHistogram(facet)).not.toBeVisible();
     await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
   });
@@ -180,7 +182,6 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
     const mainSearch = RecordsetLocators.getMainSearchInput(page);
 
     await RecordsetLocators.getClearAllFilters(page).click();
-    // await expect.soft(page.locator('.recordest-main-spinner')).not.toBeAttached();
     await page.locator('.recordest-main-spinner').waitFor({ state: 'detached' });
 
     await mainSearch.fill(testParams.searchBox.term);
