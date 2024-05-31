@@ -77,6 +77,8 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * @param numFilters number of recordset filters after clicking facet option 
  */
 export async function testSelectFacetOption(page: Page, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
+  // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
+  await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
 
   // wait for request to return

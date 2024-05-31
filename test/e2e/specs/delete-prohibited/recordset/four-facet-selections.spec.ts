@@ -87,14 +87,8 @@ test('Testing four facet selections in quick sequence and verifying data after a
 
     // make sure facets are loaded first then select facet optins 1 by 1
     await testSelectFacetOption(page, facet1, testParams.multipleFacets[0].option, testParams.multipleFacets[0].numRows, 1);
-
-    // wait for spinner to dissappear
-    await expect.soft(RecordsetLocators.getFacetSpinner(facet2)).not.toBeVisible();
     await testSelectFacetOption(page, facet2, testParams.multipleFacets[1].option, testParams.multipleFacets[1].numRows, 2);
     await testSelectFacetOption(page, facet3, testParams.multipleFacets[2].option, testParams.multipleFacets[2].numRows, 3);
-
-    // wait for spinner to dissappear
-    await expect.soft(RecordsetLocators.getFacetSpinner(facet4)).not.toBeVisible();
     await testSelectFacetOption(page, facet4, testParams.multipleFacets[3].option, testParams.multipleFacets[3].numRows, numFacets);
   });
 });
