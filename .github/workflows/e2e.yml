@@ -167,24 +167,24 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run all features confirmation test spec (protractor)
-        id: test-protractor-all-features-confirmation
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeaturesconfirmation-protractor
-      - name: Run default config test spec  (protractor)
-        id: test-protractor-default-config
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdefaultconfig-protractor
-      - name: Run delete prohibited test spec  (protractor)
-        id: test-protractor-delete-prohibited
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited-protractor
+      # - name: Run all features confirmation test spec (protractor)
+      #   id: test-protractor-all-features-confirmation
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testallfeaturesconfirmation-protractor
+      # - name: Run default config test spec  (protractor)
+      #   id: test-protractor-default-config
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdefaultconfig-protractor
+      # - name: Run delete prohibited test spec  (protractor)
+      #   id: test-protractor-delete-prohibited
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited-protractor
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
@@ -197,15 +197,15 @@ jobs:
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
-      - name: Check on all features confirmation test spec (protractor)
-        if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
-        run: exit 1
-      - name: Check on default config test spec (protractor)
-        if: always() && steps.test-protractor-default-config.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited test spec (protractor)
-        if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
-        run: exit 1
+      # - name: Check on all features confirmation test spec (protractor)
+      #   if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on default config test spec (protractor)
+      #   if: always() && steps.test-protractor-default-config.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on delete prohibited test spec (protractor)
+      #   if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
+      #   run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
