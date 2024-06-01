@@ -22,6 +22,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
+
 type RecordsetTableProps = {
   config: RecordsetConfig,
   initialSortObject: any,
@@ -430,12 +431,73 @@ const RecordsetTable = ({
     return classNameString + ' ' + tableSchemaNames;
   }
 
+  const el = useRef<HTMLDivElement>(null);
+  const startEl = useRef<HTMLDivElement>(null);
+  const endEl = useRef<HTMLDivElement>(null);
+  const scrollbar = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+    const bottomPanelContainer = document.querySelector('.split-view.bottom-panel-container');
+
+    if (!tableContainer.current) return;
+    const show = () => {
+      if (!scrollbar.current) {
+        return;
+      }
+
+      scrollbar.current.style.position = 'fixed';
+      scrollbar.current.style.top = `${bottomPanelContainer?.getBoundingClientRect().top || 0}px`;
+      scrollbar.current.style.width = `${tableContainer.current?.clientWidth}px`;
+    }
+
+    const hide = () => {
+      if (!scrollbar.current) {
+        return;
+      }
+      scrollbar.current.style.position = 'inherit';
+    }
+
+    if (startEl.current && endEl.current) {
+
+      const states = new Map();
+
+      const observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(e => {
+            states.set(e.target, e.boundingClientRect);
+          });
+
+          const { top: offsetTop } = bottomPanelContainer?.getBoundingClientRect() || { top: 0 };
+          const { top } = states.get(startEl.current) || {};
+          const { top: bottom } = states.get(endEl.current) || {};
+
+          if (top < offsetTop && bottom > offsetTop) {
+            show();
+          } else {
+            hide();
+          }
+        },
+        {
+          threshold: [0],
+          root: bottomPanelContainer
+        }
+      );
+      observer.observe(startEl.current);
+      observer.observe(endEl.current);
+    }
+
+
+  }, []);
+
   return (
     <div className='recordset-table-container' ref={tableContainer}>
-      <div className='chaise-table-top-scroll-wrapper'>
+      <div className='chaise-table-top-scroll-wrapper' ref={scrollbar}>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
+
+        <div ref={startEl} />
         <table className='table chaise-table table-hover'>
           <thead className='table-heading'>
             <tr>
@@ -447,6 +509,9 @@ const RecordsetTable = ({
             {renderRows()}
           </tbody>
         </table>
+        <div className="end-buffer-area" ref={endEl} />
+
+
       </div>
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
