@@ -22,6 +22,19 @@ export type TimestampRangeInputLocators = {
   submit: Locator;
 }
 
+export type HistogramLocators = {
+  zoom: Locator;
+  zoomDisabled: Locator;
+  unzoom: Locator;
+  unzoomDisabled: Locator;
+  reset: Locator;
+}
+
+export type TimestampMinMax = {
+  date: string;
+  time: string;
+}
+
 export default class RecordsetLocators {
 
   static async waitForRecordsetPageReady(container: Page | Locator, timeout?: number): Promise<void> {
@@ -308,6 +321,16 @@ export default class RecordsetLocators {
   static getFacetHistogram(facet: Locator): Locator {
     return facet.locator('.js-plotly-plot');
   };
+
+  static getFacetHistogramButtons(facet: Locator): HistogramLocators {
+    return {
+      zoom: facet.locator('.zoom-plotly-button'),
+      zoomDisabled: facet.locator('.zoom-plotly-button[disabled]'),
+      unzoom: facet.locator('.unzoom-plotly-button'),
+      unzoomDisabled: facet.locator('.unzoom-plotly-button[disabled]'),
+      reset: facet.locator('.reset-plotly-button'),
+    }
+  }
 
 
   // ---------------- saved query selector ------------------- //

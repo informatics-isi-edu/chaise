@@ -124,8 +124,8 @@ export async function testSelectFacetOptionThenClear(page: Page, facetIdx: numbe
 
 /**
  * verify the initial values of default range inputs
- * @param rangeInputs rangeInputs object wiht minInput and maxInput
- * @param facetParams 
+ * @param rangeInputs rangeInputs object for int, float, and date facets
+ * @param facetParams the test params object for this facet
  */
 export async function testDefaultRangePickerInitialValues(rangeInputs: DefaultRangeInputLocators, facetParams: any) {
   await expect.soft(rangeInputs.minInput).toHaveValue(facetParams.initialMin);
@@ -134,8 +134,8 @@ export async function testDefaultRangePickerInitialValues(rangeInputs: DefaultRa
 
 /**
  * verify the initial values of timestamp range inputs
- * @param rangeInputs rangeInputs object wiht minInput and maxInput
- * @param facetParams 
+ * @param rangeInputs rangeInputs object for timestamp facets
+ * @param facetParams the test params object for this facet
  */
 export async function testTimestampRangePickerInitialValues(rangeInputs: TimestampRangeInputLocators, facetParams: any) {
   await expect.soft(rangeInputs.minDateInput).toHaveValue(facetParams.initialMin.date);
@@ -185,7 +185,7 @@ export async function testRangeInputSubmit(page: Page, submit: Locator, filter: 
 
 /**
  * test submitting the range inputs values, the page updates properly, and then clear that submission
- * @param submit the range inuts submit button
+ * @param submit the range inputs submit button
  * @param filter the value of the recordset facet filter
  * @param numRows the number of recordset rows
  * @param pageSize the recordset page size for comparing with after clear
@@ -196,6 +196,45 @@ export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, 
   const optionsCount = await RecordsetLocators.getFacetOptions(facet).count();
   // get last item in range inputs list to test it's unchecked
   await testClearAllFilters(page, facet, optionsCount - 1, pageSize);
+}
+
+/**
+ * used to test the input value that is set by chaise on load or after zoom/unzoom
+ * @param isFloat if the facet being tested is a float facet
+ * @param input the input to check the value of
+ * @param expectedVal the expected value of the input
+ */
+const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: string) => {
+  let val = await input.getAttribute('value');
+  if (isFloat && val) {
+    val = parseFloat(val).toFixed(2);
+  }
+
+  await expect.soft(val).toEqual(expectedVal);
+}
+
+/**
+ * test the value in min and max inputs after page load or zoom/unzoom
+ * @param rangeInputs rangeInputs object for int, float, and date facets
+ * @param isFloat if the facet being tested is a float facet
+ * @param min min input expected value
+ * @param max max input expected value
+ */
+export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeInputLocators, isFloat: boolean, min: string, max: string) {
+  await testInputValue(isFloat, rangeInputs.minInput, min);
+  await testInputValue(isFloat, rangeInputs.maxInput, max);
+}
+
+export async function testTimestampRangePickerInputsAfterZoom(
+  rangeInputs: TimestampRangeInputLocators, 
+  min: {date: string, time: string}, 
+  max: {date: string, time: string}
+) {
+  await testInputValue(false, rangeInputs.minDateInput, min.date);
+  await testInputValue(false, rangeInputs.maxDateInput, max.date);
+  
+  await testInputValue(false, rangeInputs.minTimeInput, min.time);
+  await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }
 
 /**
