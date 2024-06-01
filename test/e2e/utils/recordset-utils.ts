@@ -225,6 +225,12 @@ export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeIn
   await testInputValue(isFloat, rangeInputs.maxInput, max);
 }
 
+/**
+ * test the value in min and max inputs for timestamp facets after page load or zoom/unzoom
+ * @param rangeInputs rangeInputs object for timestamp facets
+ * @param min object with date and time expected values for min inputs
+ * @param max object with date and time expected values for max inputs
+ */
 export async function testTimestampRangePickerInputsAfterZoom(
   rangeInputs: TimestampRangeInputLocators, 
   min: {date: string, time: string}, 
