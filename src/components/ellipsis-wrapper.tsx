@@ -10,15 +10,18 @@ export type EllipsisWrapperProps = {
    */
   elementRef: React.MutableRefObject<any>
   /**
-   * - Tooltip to display.
+   * Tooltip to display.
+   *
+   * Notes:
    * - It can be a value or a callback function with a boolean prop returning a value.
-   * - For a tooltip that is always visible on hover use a callback to pass value like so - 
+   * - For a tooltip that is always visible on hover use a callback to pass value like so -
    * ```ts
-   * <EllipsisWrapper 
+   * <EllipsisWrapper
    *  tooltip={() => val}
    * >
    * </EllipsisWrapper>
    * ```
+   * - Return `null` in the callback if you don't want the tooltip to show up.
    */
   tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => (string | JSX.Element | null))
   /**
@@ -66,16 +69,9 @@ const EllipsisWrapper = ({
     }
   }
 
-  /**
-   * Handle rendering of tooltip on Element hover
-   * @param isHovering is user hovering over the element
-   */
-  const onHover = (isHovering: boolean) => {
-
-    let tt = getTooltipValue();
-
-    if (elementRef && elementRef.current && tt && isHovering) {
-
+  const onToggle = (nextShow: boolean) => {
+    const tt = getTooltipValue();
+    if (elementRef && elementRef.current && tt && nextShow) {
       setTooltipValue(tt);
       setShowTooltip(true);
       return;
@@ -87,7 +83,7 @@ const EllipsisWrapper = ({
     <ChaiseTooltip
       tooltip={tooltipValue}
       placement={placement}
-      onToggle={onHover}
+      onToggle={onToggle}
       show={showToolTip}
     >
       {children}

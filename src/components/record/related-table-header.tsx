@@ -7,7 +7,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
@@ -25,20 +25,6 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
    * variable to store ref of header text
    */
   const contentRef = useRef(null);
-  /**
-   * state variable to control whether to show tooltip or not
-   */
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  /**
-   * Function to check the text overflow.
-   */
-  const isTextOverflow = (element: HTMLElement) => {
-    if (element) {
-      return element.offsetWidth < element.scrollWidth;
-    }
-    return false;
-  };
 
   const usedRef = relatedModel.initialReference;
   const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
@@ -49,11 +35,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const renderTooltipContent = (isOverflowing: boolean) => {
     if (isOverflowing) {
       if (hasTooltip) {
-        return (
-          <>
-            {renderedDisplayname}: {renderedTooltip}
-          </>
-        );
+        return <>{renderedDisplayname}: {renderedTooltip}</>
       } else {
         return renderedDisplayname;
       }

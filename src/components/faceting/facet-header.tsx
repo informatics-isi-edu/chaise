@@ -6,7 +6,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 // models
 import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -16,10 +16,6 @@ type FacetHeaderProps = {
    * content to be displayed as panel header
    */
   displayname: Displayname;
-  /**
-   * Optional prop to enable tooltip for displayname
-   */
-  showTooltipIcon?: boolean;
   /**
    * Optional text to be shown on hover of displayname
    */
@@ -43,7 +39,6 @@ type FacetHeaderProps = {
  */
 const FacetHeader = ({
   displayname,
-  showTooltipIcon = false,
   comment,
   isLoading,
   facetHasTimeoutError,
@@ -54,19 +49,27 @@ const FacetHeader = ({
    * variable to store ref of facet header text
    */
   const contentRef = useRef(null);
-  
+
+  const hasTooltip = !!comment;
+  const renderedDisplayname = <DisplayValue value={displayname} />;
+  const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={comment} /> : <></>;
+
   /**
    * If header text overflowed, display tooltip on hover of header.
    * If comment is present and header text overflowed, then display tooltip in <header text>: <comment> format
    * @returns tooltip content that needs to be displayed on hover of panel header text
    */
   const renderTooltipContent = (isOverflowing : boolean) => {
-    if (contentRef && contentRef.current && isOverflowing && comment) {
-      return <><DisplayValue value={displayname} />: <DisplayCommentValue comment={comment} /></>;
-    } else if (comment) {
-      return <DisplayCommentValue comment={comment} />;
+    if (isOverflowing) {
+      if (hasTooltip) {
+        return <>{renderedDisplayname}: {renderedTooltip}</>
+      } else {
+        return renderedDisplayname;
+      }
+    } else if (hasTooltip) {
+      return renderedTooltip;
     } else {
-      return <DisplayValue value={displayname} />;
+      return null;
     }
   }
 
@@ -79,11 +82,8 @@ const FacetHeader = ({
       >
         <div className='accordion-toggle ellipsis'>
           <div ref={contentRef} className='facet-header-text ellipsis'>
-            <DisplayValue value={displayname} />
-            {/* Condition to show tooltip icon */}
-            {showTooltipIcon && (
-              <span className='chaise-icon-for-tooltip align-center-icon'></span>
-            )}
+            {renderedDisplayname}
+            {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
           </div>
         </div>
       </EllipsisWrapper>
