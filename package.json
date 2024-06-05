@@ -43,7 +43,7 @@
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
-    "prettier": "^2.8.4",
+    "prettier": "^3.2.5",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",
     "ts-node": "^10.9.1",

@@ -83,7 +83,7 @@ const FacetHeader = ({
         <div className='accordion-toggle ellipsis'>
           <div ref={contentRef} className='facet-header-text ellipsis'>
             {renderedDisplayname}
-            {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
+            {hasTooltip && <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>}
           </div>
         </div>
       </EllipsisWrapper>

@@ -165,7 +165,13 @@ export const ERROR_MESSAGES = {
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
   INVALID_COLOR: 'Please enter a valid color value.',
   INVALID_JSON: 'Please enter a valid JSON value.',
-  INVALID_BOOLEAN: 'Please enter a valid boolean value.'
+  INVALID_BOOLEAN: 'Please enter a valid boolean value.',
+  ARRAY_ADD_OR_DISCARD_VALUE: 'Click \'Add\' to include the value or clear the entry to discard.',
+}
+
+export const CUSTOM_ERROR_TYPES = {
+  ARRAY_ADD_OR_DISCARD_VALUE: 'addOrDiscardValue',
+  INVALID_DATE_TIME: 'invalid-date-time'
 }
 
 export function formatInt(value: string) {

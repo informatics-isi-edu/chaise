@@ -54,7 +54,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
       >
         <div className='chaise-accordion-displayname' ref={contentRef}>
           {renderedDisplayname}
-          {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
+          {hasTooltip && <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>}
         </div>
       </EllipsisWrapper>
 

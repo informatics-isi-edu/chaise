@@ -323,3 +323,12 @@
     cursor: text;
   }
 }
+
+.input-switch-error {
+  &.input-switch-error-danger {
+    color: map-get(variables.$color-map, 'input-error-message-danger');
+  }
+  &.input-switch-error-warning {
+    color: map-get(variables.$color-map, 'input-error-message-warning');
+  }
+}

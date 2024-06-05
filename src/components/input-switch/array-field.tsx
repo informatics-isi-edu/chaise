@@ -5,7 +5,7 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 
 // utils
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
-import { formatDatetime, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { CUSTOM_ERROR_TYPES, ERROR_MESSAGES, formatDatetime, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import React from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
@@ -38,6 +38,7 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
       required: requiredInput
     }
   });
+
   /**
    * We use this to keep track of errors in array field
    */
@@ -92,11 +93,15 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
 
   const clearAddNewField = () => {
     setValue(addNewValueName, '')
-
     if (getInputType({ name: baseArrayType }) === 'timestamp') {
-      setValue(`${addNewValueName}-date`, '')
-      setValue(`${addNewValueName}-time`, '')
+      setValue(`${addNewValueName}-date`, '');
+      setValue(`${addNewValueName}-time`, '');
     }
+    trigger(addNewValueName);
+  }
+
+  const addNewInputhasValue = (baseType: any, v: any): boolean => {
+    return baseType === 'boolean' ? typeof v === 'boolean' : !!v
   }
 
   //-------------------  render logic:   --------------------//
@@ -167,6 +172,15 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
     addContainerClassName.push('add-margin-top');
   }
 
+  /**
+   * disable the add button if there aren't any valid value in it.
+   * we also have to make sure to ignore the ARRAY_ADD_OR_DISCARD_VALUE error
+   */
+  let disableAddNewBtn = !addNewInputhasValue(baseArrayType, addNewValue);
+  if (formState.errors[addNewValueName] && formState.errors[addNewValueName].type !== CUSTOM_ERROR_TYPES.ARRAY_ADD_OR_DISCARD_VALUE) {
+    disableAddNewBtn = true;
+  }
+
   return (
     <>
       <div className={containerClassName.join(' ')}>
@@ -198,6 +212,13 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
               displayExtraDateTimeButtons={true}
               displayDateTimeLabels={baseArrayType === 'date' ? false : true}
               disableInput={disableInput}
+              additionalControllerRules={{
+                validate: {
+                  addOrDiscardValue: (v: any) => {
+                    return !addNewInputhasValue(baseArrayType, v) || ERROR_MESSAGES.ARRAY_ADD_OR_DISCARD_VALUE
+                  }
+                }
+              }}
             />
             <button
               type='button' className='chaise-btn chaise-btn-secondary chaise-btn-sm add-button'
@@ -205,19 +226,15 @@ const ArrayField = (props: ArrayFieldProps): JSX.Element => {
                 addItem(addNewValue)
                 clearAddNewField()
               }}
-              /**
-               * We disable the Add button when -
-               * 1. There are validation errors in the addNewValue field.
-               * 2. The addNewValue field value is empty
-               */
-              disabled={Object.keys(formState.errors).includes(addNewValueName) || (typeof addNewValue === 'boolean' ? false : !addNewValue)}
+              disabled={disableAddNewBtn}
             >Add</button>
           </div>
         </div>
-        {Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
+        {
+          Object.keys(arrayFormState.errors).includes(name) && requiredInput &&
           <DisplayValue
-            internal as='span' className='input-switch-error text-danger'
-            value={{ isHTML: true, value: 'Please enter a value for this Array field' }}
+            internal as='span' className='input-switch-error input-switch-error-danger'
+            value={{ isHTML: true, value: ERROR_MESSAGES.REQUIRED }}
           />
         }
       </div>

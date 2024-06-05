@@ -5,13 +5,17 @@ import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
 // services
 import { ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
+
 const navbarLibSettings: ConfigServiceSettings = {
-  appName: APP_NAMES.NAVBAR
+  appName: APP_NAMES.NAVBAR,
+  // we don't know what the url would look like on static sites that are using this
+  skipParsingURLForCatalogID: true
 };
 
 /**
@@ -32,5 +36,7 @@ waitForElementToLoad(NAVBAR_SELECTOR).then(() => {
       <></>
     </AppWrapper>
   );
-
+}).catch((error) => {
+  $log.error('<navbar> element is either missing or never loaded.')
+  $log.error(error);
 });

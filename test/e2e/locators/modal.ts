@@ -20,6 +20,10 @@ export default class ModalLocators {
     return page.locator('.search-popup');
   }
 
+  static getForeignKeyPopup(page: Page): Locator {
+    return page.locator('.foreignkey-popup');
+  }
+
   static getErrorModal(page: Page): Locator {
     return page.locator('.modal-error');
   }
