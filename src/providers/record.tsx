@@ -576,6 +576,8 @@ export default function RecordProvider({
    */
   const initializeModels = (tuple: any) => {
 
+    // if users have create permission to at least one of the inline or related entities,
+    // we should show all  empty sections by default.
     let canCreateAtLeastOne = false;
 
     // NOTE: when the read is called, reference.activeList will be generated
@@ -639,6 +641,10 @@ export default function RecordProvider({
           col.reference.contextualize.compactBriefInline, index, true, tuple, reference
         );
 
+        if (!canCreateAtLeastOne && cm.relatedModel.canCreate) {
+          canCreateAtLeastOne = true;
+        }
+
         flowControl.current.inlineRelatedRequestModels[index] = {
           index,
           // whether we should do the waitfor logic:
@@ -665,8 +671,6 @@ export default function RecordProvider({
       const ref = item.contextualize.compactBrief;
       const canCreate = canCreateRelated(ref);
 
-      // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
-      // TODO does this even make sense?
       if (!canCreateAtLeastOne && canCreate) {
         canCreateAtLeastOne = true;
       }
