@@ -24,14 +24,14 @@ export const CHAISE_ALERT_TYPE_MAPPING: { [key: string]: string } = {
 
 
 export type ChaiseAlert = {
-  message: string,
+  message: string | JSX.Element,
   type: ChaiseAlertType
   onRemove?: () => void,
   isSessionExpiredAlert?: boolean
 };
 
 type AddAlertFunction = (
-  message: string,
+  message: string | JSX.Element,
   type: ChaiseAlertType,
   onRemove?: () => void,
   isSessionExpiredAlert?: boolean,
@@ -76,7 +76,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * @param onRemove the callback that will be called when the users remove the alert.
    * @return the newly created alert
    */
-  const addAlert: AddAlertFunction = (message: string, type: ChaiseAlertType, onRemove?: () => void, isSessionExpiredAlert?: boolean) => {
+  const addAlert: AddAlertFunction = (
+    message: string | JSX.Element, type: ChaiseAlertType, onRemove?: () => void, isSessionExpiredAlert?: boolean
+  ) => {
     const newAlert = { message, type, onRemove, isSessionExpiredAlert };
     setAlerts((alerts) => [...alerts, newAlert]);
     return newAlert;

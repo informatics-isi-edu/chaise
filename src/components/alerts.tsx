@@ -40,6 +40,13 @@ export const Alerts = (): JSX.Element => {
         </ChaiseTooltip>
       </span>
     </>)
+  };
+
+  const renderMessage = (alert: ChaiseAlert) => {
+    if (typeof alert.message === 'string') {
+      return <DisplayValue internal value={{isHTML: true, value: alert.message}} />
+    }
+    return alert.message;
   }
 
   const renderAlerts = () => {
@@ -50,7 +57,7 @@ export const Alerts = (): JSX.Element => {
           {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) :
             <>
               <strong className='alert-title'>{toTitlecase(alert.type)}</strong>
-              <DisplayValue internal value={{isHTML: true, value: alert.message}} />
+              {renderMessage(alert)}
             </>
           }
         </Alert>

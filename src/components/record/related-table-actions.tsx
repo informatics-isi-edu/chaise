@@ -421,7 +421,9 @@ const RelatedTableActions = ({
           .then(() => {
             setAddPureBinaryModalProps(null);
             addAlert(
-              'Your data has been submitted. Showing you the result set...',
+              <>
+                <code><DisplayValue value={usedRef.displayname}></DisplayValue></code> records have been successfully linked.
+              </>,
               ChaiseAlertType.SUCCESS
             );
 
