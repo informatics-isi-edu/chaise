@@ -232,11 +232,16 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
 /**
  * return the catalog id that should be used.
  * if the url has catalog id, it will return that. otherwise will return the chaise-config's defaultCatalog
+ * @param dontParseURL pass true if we shouldn't attempt to parse the window.location to find the catalog id
  */
-export function getCatalogId() {
-  const { hash, isQueryParameter } = getURLHashFragment(windowRef.location);
+export function getCatalogId(dontParseURL?: boolean) {
   const defaultValue = isStringAndNotEmpty(ConfigService.chaiseConfig.defaultCatalog) ? ConfigService.chaiseConfig.defaultCatalog : '';
 
+  if (dontParseURL) {
+    return defaultValue;
+  }
+
+  const { hash, isQueryParameter } = getURLHashFragment(windowRef.location);
   /**
    * if there is no '/' character (only a catalog id) or a trailing '/' after the id, we are assuming the whole hash
    * is the catalog id.

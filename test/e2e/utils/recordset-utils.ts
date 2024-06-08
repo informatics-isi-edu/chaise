@@ -62,13 +62,7 @@ export async function openFacet(page: Page, facet: Locator, facetIdx: number, nu
  */
 export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, facetIdx: number, filterOptions: string[], numOpenFacets: number) {
   await openFacet(page, facet, facetIdx, filterOptions.length, numOpenFacets);
-
-  const facetOptions = RecordsetLocators.getFacetOptions(facet);
-  const numFacets = await facetOptions.count();
-
-  for (let i = 0; i < numFacets; i++) {
-    await expect.soft(facetOptions.nth(i)).toHaveText(filterOptions[i]);
-  }
+  await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions);
 }
 
 /**
