@@ -1,6 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 
-type DefaultRangeInputLocators = {
+export type DefaultRangeInputLocators = {
   minInput: Locator;
   maxInput: Locator;
   minClear: Locator;
@@ -8,7 +8,7 @@ type DefaultRangeInputLocators = {
   submit: Locator;
 }
 
-type TimestampRangeInputLocators = {
+export type TimestampRangeInputLocators = {
   // date
   minDateInput: Locator;
   maxDateInput: Locator;
@@ -134,6 +134,10 @@ export default class RecordsetLocators {
     return container.locator('.chaise-table-row');
   }
 
+  static getRowCells(container: Page | Locator): Locator {
+    return container.locator('td');
+  }
+
   static getDisabledRows(container: Page | Locator): Locator {
     return container.locator('tr.disabled-row');
   }
@@ -146,11 +150,15 @@ export default class RecordsetLocators {
   }
 
   static getCheckboxInputs(container: Page | Locator): Locator {
-    return RecordsetLocators.getRows(container).locator('.chaise-checkbox input');
+    return container.locator('.recordset-table').locator('.chaise-checkbox input');
   }
 
   static getDisabledCheckboxInputs(container: Page | Locator): Locator {
-    return RecordsetLocators.getRows(container).locator('.chaise-checkbox input[disabled]');
+    return container.locator('.recordset-table').locator('.chaise-checkbox input[disabled]');
+  }
+
+  static getCheckedCheckboxInputs(container: Page | Locator): Locator {
+    return container.locator('.recordset-table').locator('.chaise-checkbox input.checked');
   }
 
   static getRowFirstCell(container: Page | Locator, rowIndex: number, isDisabled?: boolean): Locator {
@@ -166,11 +174,9 @@ export default class RecordsetLocators {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.view-action-button');
   }
 
-
   static getRowEditButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.edit-action-button');
   }
-
 
   static getRowDeleteButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
@@ -187,12 +193,40 @@ export default class RecordsetLocators {
     return container.locator('.side-panel-resizable');
   }
 
+  static getAllFacets(container: Page | Locator): Locator {
+    return container.locator('.panel-group .facet-panel');
+  }
+
+  static getOpenFacets(container: Page | Locator): Locator {
+    return container.locator('.panel-open');
+  }
+
+  static getClosedFacets(container: Page | Locator): Locator {
+    return container.locator('.facet-panel button.collapsed');
+  }
+
+  static getFacetTitles(container: Page | Locator): Locator {
+    return container.locator('.accordion-header .facet-header-text');
+  }
+
+  static getOpenFacetTitles(container: Page | Locator): Locator {
+    return container.locator('.panel-open .facet-header-text');
+  }
+
   static getFacetById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-${idx}`);
   }
 
+  static getFacetHeaderById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fc-heading-${idx}`).locator('.facet-header-text');
+  };
+
   static getFacetHeaderButtonById(facet: Locator, idx: number): Locator {
     return facet.locator(`.fc-heading-${idx} button`);
+  }
+
+  static getFacetSpinner(facet: Locator): Locator {
+    return facet.locator('.facet-header-icon .facet-spinner')
   }
 
   // get child of accordion group, sibling to accordion heading
@@ -204,13 +238,41 @@ export default class RecordsetLocators {
     return facet.locator('.chaise-checkbox label')
   }
 
-  static getFacetOption(facet: Locator, optionIdx: number) {
+  static getCheckedFacetOptions(facet: Locator): Locator {
+    return facet.locator('.chaise-checkbox input.checked');
+  }
+
+  static getFacetOption(facet: Locator, optionIdx: number): Locator {
     return facet.locator(`.checkbox-${optionIdx}`);
+  }
+
+  static getFacetSearchBox(facet: Locator): Locator {
+    return facet.locator('.facet-search-input');
+  }
+
+  static getFacetSearchBoxById(facet: Locator): Locator {
+    return facet.locator('.chaise-search-box');
+  }
+
+  static getFacetSearchPlaceholderById(facet: Locator): Locator {
+    return RecordsetLocators.getFacetSearchBoxById(facet).locator('.chaise-input-placeholder');
+  }
+
+  static getFacetSearchBoxClear(facet: Locator): Locator {
+    return facet.locator('.remove-search-btn');
+  }
+
+  static getList(facet: Locator): Locator {
+    return facet.locator('.chaise-list-container');
+  }
+
+  static getShowMore(facet: Locator): Locator {
+    return facet.locator('.show-more-btn');
   }
 
   /* range facet selectors */
 
-  // there's integer/float/date/timestamp inputs
+  // there's integer/float/date inputs
   static getFacetRangeInputs(facet: Locator): DefaultRangeInputLocators {
     return {
       minInput: facet.locator('.range-min'),
@@ -224,18 +286,22 @@ export default class RecordsetLocators {
   static getFacetRangeTimestampInputs(facet: Locator): TimestampRangeInputLocators {
     return {
       // date
-      minDateInput: facet.locator('ts-date-range-min'),
-      maxDateInput: facet.locator('ts-date-range-max'),
-      minDateClear: facet.locator('min-date-clear'),
-      maxDateClear: facet.locator('max-date-clear'),
+      minDateInput: facet.locator('.ts-date-range-min'),
+      maxDateInput: facet.locator('.ts-date-range-max'),
+      minDateClear: facet.locator('.min-date-clear'),
+      maxDateClear: facet.locator('.max-date-clear'),
 
       // time
-      minTimeInput: facet.locator('ts-time-range-min'),
-      maxTimeInput: facet.locator('ts-time-range-max'),
-      minTimeClear: facet.locator('min-time-clear'),
-      maxTimeClear: facet.locator('max-time-clear'),
+      minTimeInput: facet.locator('.ts-time-range-min'),
+      maxTimeInput: facet.locator('.ts-time-range-max'),
+      minTimeClear: facet.locator('.min-time-clear'),
+      maxTimeClear: facet.locator('.max-time-clear'),
       submit: facet.locator('.range-input-submit-btn')
     }
+  }
+
+  static getRangeInputValidationError(facet: Locator): Locator {
+    return facet.locator('.range-input-error');
   }
 
   /* histogram selectors */

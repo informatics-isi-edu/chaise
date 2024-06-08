@@ -66,7 +66,8 @@ E2EDrecordLinks=test/e2e/specs/default-config/record/links.conf.js
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
-E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+E2EDrecordsetIndFacetProt=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
 
@@ -93,7 +94,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
 RECORD_TESTS_PROTRACTOR=$(E2EDrecord) $(E2EDrecordLinks)
-RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacetProt) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
@@ -105,7 +106,7 @@ ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
-RECORDSET_TESTS=$(E2ErecordsetSavedQuery)
+RECORDSET_TESTS=$(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet)
 RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
 RECORDEDIT_TESTS=$(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
