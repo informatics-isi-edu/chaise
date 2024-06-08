@@ -32,7 +32,9 @@ const helpSettings: ConfigServiceSettings = {
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,    // links in navbar might need this
-  overrideExternalLinkBehavior: true      // links in navbar might need this
+  overrideExternalLinkBehavior: true,      // links in navbar might need this
+  // the url for this app doesn't follow other chaise apps.
+  skipParsingURLForCatalogID: true
 };
 
 const HelpApp = (): JSX.Element => {
