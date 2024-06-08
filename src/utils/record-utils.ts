@@ -142,10 +142,13 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     ref.table,
     { source: ref.compressedDataSource, entity: true }
   );
+  let almostPB = false;
+  if (isObjectAndNotNull(ref.derivedAssociationReference)) almostPB = ref.derivedAssociationReference.table.isAlmostPureBinaryAssociation;
   return {
     index,
     isInline,
     isPureBinary: isObjectAndNotNull(ref.derivedAssociationReference),
+    isAlmostPureBinary: almostPB,
     initialReference: ref,
     isTableDisplay: ref.display.type === 'table',
     tableMarkdownContentInitialized: false,
@@ -333,7 +336,11 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
   /**
    * map of column names as keys to column RIDs as values
    */
-  columnNameToRID: { [key: string]: string }
+  columnNameToRID: { [key: string]: string },
+  /**
+   * boolean to trigger add association popup when loading recordedit before showing the forms
+   */
+  hasUniqueAssociation: boolean
 } {
 
   let origTable;
@@ -366,7 +373,8 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
     origUrl: mainTuple.reference.uri,
     fkColumnNames: prefilledFks,
     columnNameToRID: columnNameToRID,
-    keys: keys
+    keys: keys,
+    hasUniqueAssociation: origTable.isAssociation
   };
 }
 

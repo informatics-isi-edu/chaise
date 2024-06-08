@@ -79,6 +79,12 @@ export enum RecordeditDisplayMode {
   VIEWER_ANNOTATION = 'viewer-annotation',
 }
 
+export enum RecordeditAppState {
+  ASSOCIATION_PICKER = 'association_picker',
+  FORM_INPUT = 'form_input',
+  RESULTSET = 'resultset'
+}
+
 export type RecordeditConfig = {
   displayMode: RecordeditDisplayMode
 }
@@ -191,6 +197,10 @@ export interface PrefillObject {
    * the rowname of the fk
    */
   rowname: any;
+  /**
+   * boolean to trigger add association popup when loading recordedit before showing the forms
+   */
+  hasUniqueAssociation: boolean;
 }
 
 export interface LastChunkMap {

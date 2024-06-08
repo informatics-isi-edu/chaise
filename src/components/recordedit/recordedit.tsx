@@ -9,13 +9,15 @@ import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
+import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
+import Spinner from 'react-bootstrap/Spinner';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -24,11 +26,15 @@ import { FormProvider, useForm } from 'react-hook-form';
 import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  RecordeditConfig, RecordeditDisplayMode,
-  RecordeditModalOptions, RecordeditProps
+  appModes, RecordeditAppState, RecordeditColumnModel,
+  RecordeditDisplayMode, RecordeditProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  RecordsetConfig, RecordsetDisplayMode,
+  RecordsetProps, RecordsetSelectMode, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -39,12 +45,12 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { copyOrClearValue, getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const Recordedit = ({
   appMode,
@@ -102,10 +108,14 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
-    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
+    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams, reference, tuples, waitingForForeignKeyData,
+    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, setAppState,
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
+
+  const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
+  const [selectedRowsSubmitted, setSelectedRowsSubmitted] = useState<boolean>(false);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
@@ -296,6 +306,81 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
+    // `hasUniqueAssociation` is set right before `initialized` is set in the provider
+    console.log('initialized', appState);
+    if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
+      console.log(reference);
+      let domainRef: any;
+      reference.columns.forEach((column: any) => {
+        if (!column.isForeignKey) return;
+
+        const prefillObject = getPrefillObject(queryParams);
+        if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
+          return;
+        }
+
+        console.log(column.table.name);
+        domainRef = column.reference;
+      });
+      if (!domainRef) {
+        setSelectedRowsSubmitted(true);
+        return;
+      }
+
+      // TODO: createFacets blob
+      const modalReference = domainRef.unfilteredReference.contextualize.compactSelectAssociationLink;
+
+      const recordsetConfig: RecordsetConfig = {
+        viewable: false,
+        editable: false,
+        deletable: false,
+        sortable: true,
+        selectMode: RecordsetSelectMode.MULTI_SELECT,
+        showFaceting: true,
+        disableFaceting: false,
+        // TODO: a new case should be added
+        displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
+      };
+
+      const stackElement = LogService.getStackNode(
+        LogStackTypes.RELATED,
+        domainRef.table,
+        { source: domainRef.compressedDataSource, entity: true, picker: 1 }
+      );
+
+      const logInfo = {
+        logObject: null,
+        logStack: [stackElement],
+        // logStack: getRecordLogStack(stackElement),
+        logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
+      };
+
+      // set recordset select view then set selected rows on "submit"
+      setAssociationRecordsetProps({
+        initialReference: modalReference,
+        initialPageLimit: modalReference.display.defaultPageSize
+          ? modalReference.display.defaultPageSize
+          : RECORDSET_DEFAULT_PAGE_SIZE,
+        config: recordsetConfig,
+        logInfo
+        // getDisabledTuples
+      });
+    } else {
+      setSelectedRowsSubmitted(true);
+    }
+  }, [initialized]);
+
+  const onSelectedRowsChanged = (selectedRows: SelectedRow[]) => {
+    setSelectedRows(selectedRows);
+    
+    // allow the selected rows to change and UI shows the selected
+    return true;
+  };
+
+  useEffect(() => {
+    // selectedRowsSubmitted is initialized to false and set to true once we have rows selected that are submitted (or row selection is not needed)
+    if (!selectedRowsSubmitted) return;
+
     const initialValues = getInitialFormValues(forms, columnModels);
     methods.reset(initialValues);
 
@@ -305,8 +390,14 @@ const RecordeditInner = ({
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
-    setFormProviderInitialized(true)
-  }, [initialized]);
+    // iterate selected rows and push the data into the fields
+    if (selectedRows.length > 0) {
+
+    }
+
+    setAppState(RecordeditAppState.FORM_INPUT);
+    setFormProviderInitialized(true);
+  }, [selectedRowsSubmitted]);
 
   /**
    * - properly set scrollable section height
@@ -334,7 +425,7 @@ const RecordeditInner = ({
 
     setAddFormsEffect(false);
     callAddForm();
-  }, [addFormsEffect])
+  }, [addFormsEffect]);
 
   const callAddForm = () => {
     // converts to number type. If NaN is returned, 1 is used instead
@@ -490,7 +581,7 @@ const RecordeditInner = ({
 
   const renderBulkDeleteButton = () => {
     if (!canShowBulkDelete) return;
-    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.': 'None of the displayed records can be deleted.';
+    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.' : 'None of the displayed records can be deleted.';
     return <ChaiseTooltip placement='bottom' tooltip={tooltip}>
       <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick} disabled={!canEnableBulkDelete}>
         <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
@@ -505,13 +596,13 @@ const RecordeditInner = ({
       <div className='side-panel-resizable close-panel'></div>
       {/* <!-- Form section --> */}
       <div className='main-container' ref={mainContainer}>
-        {columnModels.length > 0 && !resultsetProps &&
+        {appState === RecordeditAppState.FORM_INPUT && columnModels.length > 0 &&
           <div className='main-body'>
             <KeyColumn activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
             <FormContainer activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
           </div>
         }
-        {resultsetProps &&
+        {appState === RecordeditAppState.RESULTSET && resultsetProps &&
           <div className='resultset-tables chaise-accordions'>
             <Accordion alwaysOpen defaultActiveKey={['0', '1']} className='panel-group'>
               <Accordion.Item eventKey='0' className='chaise-accordion'>
@@ -677,6 +768,38 @@ const RecordeditInner = ({
 
   return (
     <div className='recordedit-container app-content-container'>
+      {appState === RecordeditAppState.ASSOCIATION_PICKER && associationRecordsetProps &&
+        <div className='recordset-title-container title-container'>
+          <div className='recordset-title-buttons title-buttons'>
+          {/* <ChaiseTooltip
+            placement='bottom'
+            tooltip={submitTooltip}
+            onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
+            show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
+          > */}
+            {/* <div style={{display: 'flex', justifyContent: 'flex-end'}}> */}
+              <button
+                id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
+                type='button' onClick={() => setSelectedRowsSubmitted(true)}
+                style={{marginRight: '20px'}}
+                // disabled={disableSubmit || showSubmitSpinner}
+              >
+                {/* {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
+                {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>} */}
+                <span>Submit</span>
+              </button>
+            </div>
+            <h1 id='page-title' style={{marginLeft: '20px', marginBottom: '10px'}}>
+              <Title 
+                addLink={false} 
+                reference={associationRecordsetProps.initialReference} 
+                displayname={{value: 'Select Person for Protocol', isHTML: false}} 
+              />
+            </h1>
+          {/* </ChaiseTooltip> */}
+          <Recordset {...associationRecordsetProps} onSelectedRowsChanged={onSelectedRowsChanged} />
+        </div>
+      }
       {formProviderInitialized && <FormProvider {...methods}>
         {renderSpinner()}
         <div className='top-panel-container'>
@@ -687,13 +810,13 @@ const RecordeditInner = ({
             <div className='top-left-panel close-panel'></div>
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
-                {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
+                {appState === RecordeditAppState.FORM_INPUT && <div className='recordedit-title-buttons title-buttons'>
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
-              {!resultsetProps && <div className='form-controls'>
+              {appState === RecordeditAppState.FORM_INPUT && <div className='form-controls'>
                 {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
                 <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
                 <div className='add-forms chaise-input-group'>

@@ -7,7 +7,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import {
-  appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
+  appModes, LastChunkMap, PrefillObject, RecordeditAppState, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -47,8 +47,11 @@ type ResultsetProps = {
 export const RecordeditContext = createContext<{
   /* which mode of recordedit we are in */
   appMode: string,
+  appState: RecordeditAppState,
+  setAppState: any, 
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
+  queryParams: any,
   /* the main entity reference */
   reference: any,
   /* the tuples correspondeing to the displayed form */
@@ -222,6 +225,9 @@ export default function RecordeditProvider({
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
+  
+  // the current view that the recordedit app is showing: association picker, form input, or resultset
+  const [appState, setAppState] = useState<RecordeditAppState>(RecordeditAppState.FORM_INPUT);
 
   const [showCloneSpinner, setShowCloneSpinner] = useState(false);
   const [showApplyAllSpinner, setShowApplyAllSpinner] = useState(false);
@@ -401,6 +407,11 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
+        const prefillObject = getPrefillObject(queryParams);
+        console.log(prefillObject);
+        // used to trigger recordset select view
+        if (prefillObject?.hasUniqueAssociation) setAppState(RecordeditAppState.ASSOCIATION_PICKER);
+
         setInitialized(true);
       } else if (session) {
         const errMessage = MESSAGE_MAP.unauthorizedMessage + MESSAGE_MAP.reportErrorToAdmin;
@@ -570,6 +581,7 @@ export default function RecordeditProvider({
             }
 
             // resultset view
+            setAppState(RecordeditAppState.RESULTSET);
             setResultsetProps({
               success: {
                 page,
@@ -1062,6 +1074,8 @@ export default function RecordeditProvider({
     return {
       // main entity:
       appMode,
+      appState,
+      setAppState,
       canUpdateValues,
       columnModels,
       columnPermissionErrors,
@@ -1069,6 +1083,7 @@ export default function RecordeditProvider({
       foreignKeyData,
       initialized,
       modalOptions,
+      queryParams,
       reference,
       tuples,
       waitingForForeignKeyData,
@@ -1101,7 +1116,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
+    appState, columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
   ]);
 

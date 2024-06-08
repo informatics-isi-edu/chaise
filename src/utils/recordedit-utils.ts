@@ -758,7 +758,8 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
     fkColumnNames: cookie.fkColumnNames,
     columnNameToRID: cookie.columnNameToRID,
     origUrl: cookie.origUrl,
-    rowname: cookie.rowname
+    rowname: cookie.rowname,
+    hasUniqueAssociation: cookie.hasUniqueAssociation
   }
 }
 

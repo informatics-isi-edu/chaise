@@ -186,6 +186,7 @@ export enum LogStackPaths {
   FACET= 'facet',
   RELATED= 'related',
   RELATED_INLINE= 'related-inline',
+  ADD_ASSOCIATION= 'related-association-add',
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
