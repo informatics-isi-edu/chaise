@@ -135,6 +135,7 @@ const RecordsetInner = ({
     setSelectedRows,
     update,
     forceShowSpinner,
+    parentPageReference,
     savedQueryConfig,
     savedQueryReference,
     setSavedQueryReference
@@ -839,40 +840,54 @@ const RecordsetInner = ({
           </div>
 
           <div className='top-right-panel' ref={topRightContainer}>
-            {config.displayMode === RecordsetDisplayMode.FULLSCREEN &&
+            {(config.displayMode === RecordsetDisplayMode.FULLSCREEN || config.displayMode === RecordsetDisplayMode.RE_ASSOCIATION) &&
               <div className='recordset-title-container title-container'>
-                <div className='recordset-title-buttons title-buttons'>
-                  <Export
-                    reference={reference}
-                    disabled={isLoading || !page || page.length === 0}
-                  />
-                  <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
-                    <a
-                      id='permalink'
-                      className='chaise-btn chaise-btn-primary'
-                      href={recordsetLink}
-                      onClick={copyPermalink}
-                    >
-                      <span className='chaise-btn-icon fa-solid fa-bookmark' />
-                      <span>Permalink</span>
-                    </a>
-                  </ChaiseTooltip>
-                  {savedQueryConfig?.showUI && savedQueryReference &&
-                    <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
-                  }
-
-                </div>
-                <h1 id='page-title'>
-                  <Title addLink={false} reference={initialReference} />
-                  {versionInfo &&
-                    <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
-                      <small className='h3-class'>({versionInfo.humanized})</small>
-                    </ChaiseTooltip>
-                  }
-                  {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
-                  }
-                </h1>
+                {config.displayMode === RecordsetDisplayMode.RE_ASSOCIATION ?
+                  <h1 id='page-title'>
+                    <div>
+                      <span>Select a set of </span>
+                      <Title reference={initialReference} />
+                      <span>
+                        <span> for </span>
+                        <Title reference={parentPageReference} />
+                      </span>
+                    </div>
+                  </h1>
+                  :
+                  <>
+                    <div className='recordset-title-buttons title-buttons'>
+                      <Export
+                        reference={reference}
+                        disabled={isLoading || !page || page.length === 0}
+                      />
+                      <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
+                        <a
+                          id='permalink'
+                          className='chaise-btn chaise-btn-primary'
+                          href={recordsetLink}
+                          onClick={copyPermalink}
+                        >
+                          <span className='chaise-btn-icon fa-solid fa-bookmark' />
+                          <span>Permalink</span>
+                        </a>
+                      </ChaiseTooltip>
+                      {savedQueryConfig?.showUI && savedQueryReference &&
+                        <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
+                      }
+                    </div>
+                    <h1 id='page-title'>
+                      <Title addLink={false} reference={initialReference} />
+                      {versionInfo &&
+                        <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
+                          <small className='h3-class'>({versionInfo.humanized})</small>
+                        </ChaiseTooltip>
+                      }
+                      {reference.comment && reference.comment.displayMode === CommentDisplayModes.INLINE &&
+                        <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
+                      }
+                    </h1>
+                  </>
+                }
               </div>
             }
             {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 &&

@@ -113,6 +113,7 @@ const RecordeditInner = ({
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
+  const [showBreadcrumb, setShowBreadcrumb] = useState<boolean>(false);
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
   const [selectedRowsSubmitted, setSelectedRowsSubmitted] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
@@ -309,17 +310,19 @@ const RecordeditInner = ({
     // `hasUniqueAssociation` is set right before `initialized` is set in the provider
     console.log('initialized', appState);
     if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
-      console.log(reference);
+      setShowBreadcrumb(true);
+
+      let mainRef: any;
       let domainRef: any;
       reference.columns.forEach((column: any) => {
         if (!column.isForeignKey) return;
 
         const prefillObject = getPrefillObject(queryParams);
         if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
+          mainRef = column.reference;
           return;
         }
 
-        console.log(column.table.name);
         domainRef = column.reference;
       });
       if (!domainRef) {
@@ -338,7 +341,7 @@ const RecordeditInner = ({
         selectMode: RecordsetSelectMode.MULTI_SELECT,
         showFaceting: true,
         disableFaceting: false,
-        // TODO: a new case should be added
+        // TODO: should a new case be added?
         displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
       };
 
@@ -362,7 +365,8 @@ const RecordeditInner = ({
           ? modalReference.display.defaultPageSize
           : RECORDSET_DEFAULT_PAGE_SIZE,
         config: recordsetConfig,
-        logInfo
+        logInfo: logInfo,
+        parentReference: mainRef
         // getDisabledTuples
       });
     } else {
@@ -590,6 +594,33 @@ const RecordeditInner = ({
     </ChaiseTooltip>
   };
 
+  const renderBreadcrumb = () => {
+    if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
+      return (<h2 style={{color: '#4674a7'}}>
+        <span><b>1. Select Rows</b></span>{' > '}
+        <span>2. Input Values</span>
+      </h2>)
+    }
+
+    if (appState === RecordeditAppState.FORM_INPUT) {
+      return(
+        <h2 style={{color: '#4674a7'}}>
+          <span>1. Select Rows</span>{' > '}
+          <span><b>2. Input Values</b></span>
+        </h2>
+      )
+    }
+
+    // should be RESULTSET state
+    return(
+      <h2 style={{color: '#4674a7'}}>
+        <span>1. Select Rows</span>{' > '}
+        <span>2. Input Values</span>{' > '}
+        <span><b>3. Resultset</b></span>
+      </h2>
+    )
+  }
+
   const renderBottomPanel = () => {
     return (<div className='bottom-panel-container'>
       {/* This is here so the spacing can be done in one place for all the apps */}
@@ -769,36 +800,30 @@ const RecordeditInner = ({
   return (
     <div className='recordedit-container app-content-container'>
       {appState === RecordeditAppState.ASSOCIATION_PICKER && associationRecordsetProps &&
-        <div className='recordset-title-container title-container'>
-          <div className='recordset-title-buttons title-buttons'>
-          {/* <ChaiseTooltip
-            placement='bottom'
-            tooltip={submitTooltip}
-            onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
-            show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
-          > */}
-            {/* <div style={{display: 'flex', justifyContent: 'flex-end'}}> */}
-              <button
-                id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
-                type='button' onClick={() => setSelectedRowsSubmitted(true)}
-                style={{marginRight: '20px'}}
-                // disabled={disableSubmit || showSubmitSpinner}
+        <>
+          <div style={{marginLeft: '20px', marginRight: '20px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+              {renderBreadcrumb()}
+              <ChaiseTooltip
+                placement='bottom'
+                tooltip={'Continue to form input with selected rows'}
+                // onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
+                // show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
               >
-                {/* {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
-                {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>} */}
-                <span>Submit</span>
-              </button>
+                <button
+                  id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
+                  type='button' onClick={() => setSelectedRowsSubmitted(true)}
+                  disabled={selectedRows.length === 0}
+                >
+                  {/* {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
+                  {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>} */}
+                  <span>Continue</span>
+                </button>
+              </ChaiseTooltip>
             </div>
-            <h1 id='page-title' style={{marginLeft: '20px', marginBottom: '10px'}}>
-              <Title 
-                addLink={false} 
-                reference={associationRecordsetProps.initialReference} 
-                displayname={{value: 'Select Person for Protocol', isHTML: false}} 
-              />
-            </h1>
-          {/* </ChaiseTooltip> */}
+          </div>
           <Recordset {...associationRecordsetProps} onSelectedRowsChanged={onSelectedRowsChanged} />
-        </div>
+        </>
       }
       {formProviderInitialized && <FormProvider {...methods}>
         {renderSpinner()}
@@ -814,6 +839,7 @@ const RecordeditInner = ({
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
+                {renderBreadcrumb()}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
               {appState === RecordeditAppState.FORM_INPUT && <div className='form-controls'>
