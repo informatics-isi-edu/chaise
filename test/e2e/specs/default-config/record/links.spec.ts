@@ -91,6 +91,8 @@ test.describe('show/hide empty section button state', () => {
 
 
 test('export button', async ({ page, baseURL }, testInfo) => {
+  test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
+
   await goToPage(page, baseURL, testInfo, testParams.table_name);
 
   await test.step('first option must be `This record (CSV)` and user should be able to download the file.', async () => {
