@@ -3,7 +3,7 @@ import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configurat
 export default getConfig({
   testName: 'all-features-confirmation/errors',
   configFileName: 'errors/dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/all-features-confirmation/chaise-config.js',
+  mainSpecName: 'all-features-confirmation',
   testMatch: [
     'errors.spec.ts'
   ]

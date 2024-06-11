@@ -354,7 +354,7 @@ exports.updateCatalogAnnotation = function (catalogId, annotation) {
         id: catalogId
     };
 
-    ermrestUtils.createOrModifyCatalog(catalogObj, annotation, null).then(function () {
+    ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, annotation).then(function () {
         console.log("successfully updated the catalog annotation");
         defer.resolve();
     }).catch(function (err) {
@@ -363,4 +363,23 @@ exports.updateCatalogAnnotation = function (catalogId, annotation) {
         defer.reject(err);
     });
     return defer.promise;
+}
+
+exports.updateCatalogAlias = function (catalogId, alias) {
+  var defer = Q.defer();
+
+  var catalogObj = {
+      url: process.env.ERMREST_URL,
+      id: catalogId
+  };
+
+  ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, undefined, undefined, alias).then(function () {
+      console.log("successfully updated the catalog annotation");
+      defer.resolve();
+  }).catch(function (err) {
+      console.log("error while trying to update catalog annotation");
+      console.dir(err);
+      defer.reject(err);
+  });
+  return defer.promise;
 }

@@ -2,6 +2,7 @@
 
 var chaiseConfig = {
     name: "Delete Prohibited",
+    defaultCatalog: 'delete-prohibited-chrome',
     editRecord: true,
     deleteRecord: false,
     showFaceting: true,
@@ -20,7 +21,3 @@ var chaiseConfig = {
         markdownPattern: "This is a banner with [link](https://example.com)"
     }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}

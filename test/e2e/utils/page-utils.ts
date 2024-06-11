@@ -39,11 +39,16 @@ export async function clickNewTabLink(locator: Locator) {
  * click on the given element and verify that it initiated a download
  * @param locator the button that will be clicked
  * @param expectedFileName pass undefined if you don't want to test the actual file path and just test that something was downloaded.
- * @param page the page object
+ * @param waitCond if the page takes some time to trigger the download, add the proper wait condition.
  */
-export async function clickAndVerifyDownload(locator: Locator, expectedFileName: string | undefined) {
+export async function clickAndVerifyDownload(locator: Locator, expectedFileName: string | undefined, waitCond?: () => Promise<void>) {
   const downloadPromise = locator.page().waitForEvent('download');
   await locator.click();
+
+  if (waitCond) {
+    await waitCond();
+  }
+
   const download = await downloadPromise;
   const filename = download.suggestedFilename();
 

@@ -3,7 +3,7 @@ import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configurat
 export default getConfig({
   testName: 'all-features/recordedit/input-iframe',
   configFileName: 'recordedit/input-iframe.dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/all-features/chaise-config.js',
+  mainSpecName: 'all-features',
   testMatch: [
     'input-iframe.spec.ts'
   ]
