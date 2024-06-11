@@ -37,6 +37,7 @@ const ConfirmationModal = ({
 
   return (
     <Modal
+      scrollable
       className={modalClassName}
       show={show}
       onHide={onCancel}
