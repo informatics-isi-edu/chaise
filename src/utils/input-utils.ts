@@ -117,7 +117,7 @@ export function getDisabledInputValue(column: any) {
   } else if (column.isForeignKey) {
     return 'Select a value';
   } else if (column.isAsset) {
-    return 'No file Selected';
+    return 'Select a file';
   }
 }
 

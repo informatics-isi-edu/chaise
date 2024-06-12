@@ -643,7 +643,6 @@ const Faceting = ({
               <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
                 <FacetHeader
                   displayname={fc.displayname}
-                  showTooltipIcon={fc.comment ? true : false}
                   comment={fc.comment}
                   isLoading={facetModels[index].isLoading}
                   facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
