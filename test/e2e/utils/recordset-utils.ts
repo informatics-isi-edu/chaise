@@ -199,8 +199,11 @@ export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, 
  * @param expectedVal the expected value of the input
  */
 const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: string) => {
+  // NOTE: getting a value this way should be avoided
   let val = await input.getAttribute('value');
   if (isFloat && val) {
+    // Depending on the server/OS, the float value can be calculated slightly differently. These values come back with 
+    // 4 decimal places and then get rounded to 2 for consistency across test environments
     val = parseFloat(val).toFixed(2);
   }
 
