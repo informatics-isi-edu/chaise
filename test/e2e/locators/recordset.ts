@@ -30,7 +30,7 @@ export type HistogramLocators = {
   reset: Locator;
 }
 
-export type TimestampMinMax = {
+export type TimestampDateTime = {
   date: string;
   time: string;
 }

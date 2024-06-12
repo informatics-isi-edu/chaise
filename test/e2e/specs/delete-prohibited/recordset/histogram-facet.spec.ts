@@ -84,12 +84,8 @@ test.describe('Testing features for range picker facet types with histograms', (
         await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
       });
 
-      await test.step(`should have ${testParams.totalNumFacets} facets`, async () => {
-        const titles = RecordsetLocators.getFacetTitles(page);
-        const count = await titles.count();
-        for (let i = 0; i < count; i++) {
-          await expect.soft(titles.nth(i)).toHaveText(testParams.facetNames[i]);
-        }
+      await test.step(`should have ${testParams.totalNumFacets} facets with correct names`, async () => {
+        await expect.soft(RecordsetLocators.getFacetTitles(page)).toHaveText(testParams.facetNames);
       });
 
       await test.step('open the facet', async () => {
