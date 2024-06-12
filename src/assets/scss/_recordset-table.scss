@@ -193,6 +193,10 @@
       margin-bottom: $_space-around-buttons;
     }
 
+    .chaise-btn.select-action-button {
+      border-radius: 10px;
+    }
+
     // make the button smaller (only visible for primary buttons. for others won't make a difference in UI and that's fine)
     .chaise-checkbox, .chaise-btn {
       padding: 0;
