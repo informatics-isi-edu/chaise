@@ -168,6 +168,35 @@ const FormRow = ({
     }
   }, [forms, removeClicked]);
 
+  useEffect(() => {
+    /**
+     * This modifies row width when the multi-form-row is enabled for the field
+     * We set the width of the row to match the form width to avoid inputs from rendering beyond the limits of the form.
+     */
+    if (!columnModel.inputType.match(/iframe|file|boolean|popup-select/)) return;
+
+    const formHeader = document.querySelector('.form-header-row') as HTMLElement
+
+    let rowWidth = formHeader.scrollWidth;
+
+    if (container.current) {
+      container.current.style.minWidth = 'none';
+      container.current.style.maxWidth = 'none';
+      container.current.style.width = `${rowWidth}px`;
+    }
+
+    // Ensure the row widths are updated on window resize event
+    window.addEventListener('resize', () => {
+      let rowWidth = formHeader.scrollWidth;
+
+      if (container.current) {
+        container.current.style.minWidth = 'none';
+        container.current.style.maxWidth = 'none';
+        container.current.style.width = `${rowWidth}px`;
+      }
+    })
+  }, [isActiveForm, forms])
+
   // ------------------------ callbacks -----------------------------------//
 
   /**
