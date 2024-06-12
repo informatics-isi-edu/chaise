@@ -4,6 +4,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import IframeFieldModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-field-modal';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import { useState, useRef } from 'react';
@@ -61,7 +62,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
   } | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
-
+  const ellipsisRef = useRef(null);
 
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
   const isEditMode = props.appMode === appModes.EDIT;
@@ -94,34 +95,54 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
     }
   };
 
+  // TODO - Multiple fields use a similar function and few other components in a similar way. Refactor to consolidate and create reusable helper(s) to eliminate code redundancy.
+  /**
+   * returns the value to be rendered for the provided field
+   */
+  const existingValuePresentation = (field: any): JSX.Element => {
+
+    if (isStringAndNotEmpty(field?.value)) {
+      return <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} />
+    }
+
+    return (
+      <span
+        className='chaise-input-placeholder popup-select-value'
+        contentEditable={false}
+      >
+        {props.placeholder ? props.placeholder : 'Select a value'}
+      </span>
+    )
+  }
+
   return (
     <InputField {...props} onClear={onClear}>
       {(field, onChange, showClear, clearInput) => (
+
         <div className='input-switch-iframe'>
-          <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
-            <div
-              className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
-            >
-              {isStringAndNotEmpty(field?.value) ?
-                <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-                <span
-                  className='chaise-input-placeholder popup-select-value'
-                  contentEditable={false}
-                >
-                  {props.placeholder ? props.placeholder : 'Select a value'}
-                </span>
-              }
-              <ClearInputBtn
-                btnClassName={`${props.clearClasses} input-switch-clear`}
-                clickCallback={clearInput} show={!props.disableInput && showClear}
-              />
+          <EllipsisWrapper 
+            elementRef={ellipsisRef}
+            tooltip={existingValuePresentation(field)}
+          >
+            <div className='chaise-input-group' ref={inputRef} {... (!props.disableInput && { onClick: openIframeModal })}>
+
+              <div
+                className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+                ref={ellipsisRef}
+              >
+                {existingValuePresentation(field)}
+                <ClearInputBtn
+                  btnClassName={`${props.clearClasses} input-switch-clear`}
+                  clickCallback={clearInput} show={!props.disableInput && showClear}
+                />
+              </div>
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
             </div>
-            {!props.disableInput && <div className='chaise-input-group-append'>
-              <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
-                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-              </button>
-            </div>}
-          </div>
+          </EllipsisWrapper>
           <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
           {
             showModal && iframeProps &&

@@ -4,9 +4,10 @@ import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-com
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import Spinner from 'react-bootstrap/Spinner';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
@@ -24,20 +25,6 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
    * variable to store ref of header text
    */
   const contentRef = useRef(null);
-  /**
-   * state variable to control whether to show tooltip or not
-   */
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  /**
-   * Function to check the text overflow.
-   */
-  const isTextOverflow = (element: HTMLElement) => {
-    if (element) {
-      return element.offsetWidth < element.scrollWidth;
-    }
-    return false;
-  };
 
   const usedRef = relatedModel.initialReference;
   const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
@@ -45,41 +32,31 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;
 
-  const renderTooltipContent = () => {
-    if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
-      return (
-        <>
-          {renderedDisplayname}: {renderedTooltip}
-        </>
-      );
+  const renderTooltipContent = (isOverflowing: boolean) => {
+    if (isOverflowing) {
+      if (hasTooltip) {
+        return <>{renderedDisplayname}: {renderedTooltip}</>
+      } else {
+        return renderedDisplayname;
+      }
     } else if (hasTooltip) {
       return renderedTooltip;
     } else {
-      return renderedDisplayname;
+      return null;
     }
   };
 
   return (
     <div className='chaise-accordion-header'>
-      <ChaiseTooltip
-        placement='top'
-        tooltip={renderTooltipContent()}
-        onToggle={(nextshow: boolean) => {
-          // Bootstrap onToggle prop to make tooltip visible or hidden
-          if (contentRef && contentRef.current) {
-            const isOverflow = isTextOverflow(contentRef.current);
-
-            // If either text overflow or hasTooltip is true, show tooltip to right of the content
-            setShowTooltip((isOverflow || hasTooltip) && nextshow);
-          }
-        }}
-        show={showTooltip}
+      <EllipsisWrapper
+        elementRef={contentRef}
+        tooltip={renderTooltipContent}
       >
         <div className='chaise-accordion-displayname' ref={contentRef}>
           {renderedDisplayname}
           {hasTooltip && <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>}
         </div>
-      </ChaiseTooltip>
+      </EllipsisWrapper>
 
       <div className='chaise-accordion-header-buttons'>
         <div className='chaise-accordion-header-icons'>
