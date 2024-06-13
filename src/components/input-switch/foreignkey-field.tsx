@@ -169,6 +169,9 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       const selectedRow = selectedRows[0];
 
+      console.log(props.name);
+      console.log(props.columnModel.column);
+      console.log(props.foreignKeyData);
       callOnChangeAfterSelection(
         selectedRow,
         onChange,

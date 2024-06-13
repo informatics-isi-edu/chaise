@@ -131,7 +131,7 @@ const InputField = ({
   additionalControllerRules,
 }: InputFieldCompProps): JSX.Element => {
 
-  const { setValue, control, clearErrors ,trigger} = useFormContext();
+  const { getValues, setValue, control, clearErrors, trigger} = useFormContext();
 
   controllerRules = isObjectAndNotNull(controllerRules) ? controllerRules : {};
   if (requiredInput) {
@@ -191,6 +191,8 @@ const InputField = ({
     if (handleChange && !handleChange(e)) {
       return;
     }
+
+    console.log(getValues());
     field.onChange(e);
     field.onBlur();
   };

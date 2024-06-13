@@ -113,11 +113,12 @@ const RecordeditInner = ({
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
-  const [showBreadcrumb, setShowBreadcrumb] = useState<boolean>(false);
+  const [columnForAssociation, setColumnForAssociation] = useState<any>(null);
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
   const [selectedRowsSubmitted, setSelectedRowsSubmitted] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
+  const [initialFormValues, setInitialFormValues] = useState<any>(null)
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
@@ -310,7 +311,6 @@ const RecordeditInner = ({
     // `hasUniqueAssociation` is set right before `initialized` is set in the provider
     console.log('initialized', appState);
     if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
-      setShowBreadcrumb(true);
 
       let mainRef: any;
       let domainRef: any;
@@ -323,14 +323,44 @@ const RecordeditInner = ({
           return;
         }
 
+        setColumnForAssociation(column);
         domainRef = column.reference;
       });
+
       if (!domainRef) {
         setSelectedRowsSubmitted(true);
         return;
       }
 
-      // TODO: createFacets blob
+      // const andFilters: any[] = [];
+      // NOTE: we don't have a derivedAssociationReference here
+      // const fkToRelated = domainRef.derivedAssociationReference.associationToRelatedFKR;
+      // // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+      // fkToRelated.key.colset.columns.forEach(function (col: any) {
+      //   andFilters.push({
+      //     source: col.name,
+      //     hidden: true,
+      //     not_null: true,
+      //   });
+      // });
+      // // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
+      // let customFacets: any = null;
+      // if (
+      //   domainRef.pseudoColumn &&
+      //   domainRef.pseudoColumn.filterProps &&
+      //   domainRef.pseudoColumn.filterProps.leafFilterString
+      // ) {
+      //   // NOTE should we display the filters or not?
+      //   customFacets = {
+      //     ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
+      //     removable: false,
+      //   };
+      // }
+
+      // const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets)
+      //   .contextualize.compactSelectAssociationLink;
+
+      // TODO: addFacets, how do we get fkToRelated?
       const modalReference = domainRef.unfilteredReference.contextualize.compactSelectAssociationLink;
 
       const recordsetConfig: RecordsetConfig = {
@@ -376,7 +406,7 @@ const RecordeditInner = ({
 
   const onSelectedRowsChanged = (selectedRows: SelectedRow[]) => {
     setSelectedRows(selectedRows);
-    
+
     // allow the selected rows to change and UI shows the selected
     return true;
   };
@@ -386,7 +416,6 @@ const RecordeditInner = ({
     if (!selectedRowsSubmitted) return;
 
     const initialValues = getInitialFormValues(forms, columnModels);
-    methods.reset(initialValues);
 
     // in create mode, we need to fetch the foreignkey data
     // for prefilled and foreignkeys that have default values
@@ -394,14 +423,47 @@ const RecordeditInner = ({
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
+    setInitialFormValues(initialValues);
+
+  }, [selectedRowsSubmitted]);
+
+  useEffect(() => {
+    if (!initialFormValues || waitingForForeignKeyData) return;
+
     // iterate selected rows and push the data into the fields
     if (selectedRows.length > 0) {
+      console.log(selectedRows);
 
+      // clone
+      const initialValues = createNewForms(initialFormValues, selectedRows.length - 1);
+
+      selectedRows.forEach((row, index) => {
+        if (foreignKeyData && foreignKeyData.current) {
+          foreignKeyData.current[`c_${index + 1}-${columnForAssociation.RID}`] = row.data;
+        }
+
+        // find the raw value of the fk columns that correspond to the selected row
+        // since we've already added a not-null hidden filter, the values will be not-null.
+        columnForAssociation.foreignKey.colset.columns.forEach((col: any) => {
+          const referencedCol = columnForAssociation.foreignKey.mapping.get(col);
+
+          // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
+          initialValues[`c_${index + 1}-${col.RID}`] = row.data[referencedCol.name];
+        });
+
+        // update "display" value
+        initialValues[`c_${index + 1}-${columnForAssociation.RID}`] = row.displayname.value;
+      });
+
+      methods.reset(initialValues);
+
+      console.log(initialValues);
+      console.log(foreignKeyData);
     }
 
     setAppState(RecordeditAppState.FORM_INPUT);
     setFormProviderInitialized(true);
-  }, [selectedRowsSubmitted]);
+  }, [initialFormValues, waitingForForeignKeyData]);
 
   /**
    * - properly set scrollable section height
@@ -495,6 +557,40 @@ const RecordeditInner = ({
      */
     methods.reset(tempFormValues);
   };
+
+  const createNewForms = (formValues: any, numberFormsToAdd: number) => {
+    // the indices used for tracking input values in react-hook-form
+    const newFormValues: number[] = addForm(numberFormsToAdd);
+
+    // the index for the data from last form being cloned
+    const lastFormValue = newFormValues[0] - 1;
+
+    const tempFormValues: any = { ...formValues };
+    // add data to tempFormValues to initailize new forms
+    for (let i = 0; i < newFormValues.length; i++) {
+      const formValue = newFormValues[i];
+      columnModels.forEach((cm: RecordeditColumnModel) => {
+        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
+      });
+
+      // the code above is just copying the displayed rowname for foreignkeys,
+      // we still need to copy the raw values
+      // but we cannot go basd on visible columns since some of these data might be for invisible fks.
+      reference.activeList.allOutBounds.forEach((col: any) => {
+        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+        foreignKeyData.current[`c_${formValue}-${col.RID}`] = simpleDeepCopy(foreignKeyData[`c_${lastFormValue}-${col.RID}`]);
+
+        // copy the raw data (submitted to ermrestjs)
+        col.foreignKey.colset.columns.forEach((col: any) => {
+          const val = tempFormValues[`c_${lastFormValue}-${col.RID}`];
+          if (val === null || val === undefined) return;
+          tempFormValues[`c_${formValue}-${col.RID}`] = val;
+        });
+      });
+    }
+
+    return tempFormValues;
+  }
 
   const renderSpinner = () => {
     if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner || showApplyAllSpinner)) {
@@ -593,33 +689,6 @@ const RecordeditInner = ({
       </button>
     </ChaiseTooltip>
   };
-
-  const renderBreadcrumb = () => {
-    if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
-      return (<h2 style={{color: '#4674a7'}}>
-        <span><b>1. Select Rows</b></span>{' > '}
-        <span>2. Input Values</span>
-      </h2>)
-    }
-
-    if (appState === RecordeditAppState.FORM_INPUT) {
-      return(
-        <h2 style={{color: '#4674a7'}}>
-          <span>1. Select Rows</span>{' > '}
-          <span><b>2. Input Values</b></span>
-        </h2>
-      )
-    }
-
-    // should be RESULTSET state
-    return(
-      <h2 style={{color: '#4674a7'}}>
-        <span>1. Select Rows</span>{' > '}
-        <span>2. Input Values</span>{' > '}
-        <span><b>3. Resultset</b></span>
-      </h2>
-    )
-  }
 
   const renderBottomPanel = () => {
     return (<div className='bottom-panel-container'>
@@ -801,14 +870,13 @@ const RecordeditInner = ({
     <div className='recordedit-container app-content-container'>
       {appState === RecordeditAppState.ASSOCIATION_PICKER && associationRecordsetProps &&
         <>
-          <div style={{marginLeft: '20px', marginRight: '20px'}}>
-            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-              {renderBreadcrumb()}
+          <div style={{ margin: '0px 20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <ChaiseTooltip
                 placement='bottom'
                 tooltip={'Continue to form input with selected rows'}
-                // onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
-                // show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
+              // onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
+              // show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
               >
                 <button
                   id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
@@ -839,7 +907,6 @@ const RecordeditInner = ({
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
-                {renderBreadcrumb()}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
               {appState === RecordeditAppState.FORM_INPUT && <div className='form-controls'>
