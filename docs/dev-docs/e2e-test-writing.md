@@ -60,6 +60,11 @@ This section summarizes the best practices for writing test cases in Chaise.
           });
         });
         ```
+    - If your file has multiple independent `test`s that can run in parallel, you can ask playwright to run them in parallel by adding the following:
+        ```ts
+        test.describe.configure({ mode: 'parallel' });
+        ```
+      - Don't use this configuration if you have a `beforeAll` or `afterAll` that you want to run only once. Because in this case each worker will run their own `beforeAll` and `afterAll` instead of running it once (https://github.com/microsoft/playwright/issues/28201).
     - If your tests must run in order and on the same browser, use the `test.step` method.
       - Don't forget to include `await` before each `test.step`.
       - Playwright will not run the remaining steps if any of the steps fail. To get around this, you should use `expect.soft`.

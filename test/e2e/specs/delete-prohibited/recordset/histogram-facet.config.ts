@@ -3,8 +3,8 @@ import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configurat
 export default getConfig({
   testName: 'delete-prohibited/recordset/histogram-facet',
   configFileName: 'recordset/histogram-facet.dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
-  testMatch: [ 
+  mainSpecName: 'delete-prohibited',
+  testMatch: [
     'histogram-facet.spec.ts'
   ]
 });
