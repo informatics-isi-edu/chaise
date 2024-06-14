@@ -10,9 +10,9 @@ import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-c
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
-import Spinner from 'react-bootstrap/Spinner';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
@@ -118,9 +118,12 @@ const RecordeditInner = ({
   const [selectedRowsSubmitted, setSelectedRowsSubmitted] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
-  const [initialFormValues, setInitialFormValues] = useState<any>(null)
+  const [valuesInitialized, setValuesInitialized] = useState<boolean>(false)
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
+
+  const [showAssociationModal, setShowAssociationModal] = useState<any>(null);
+
 
   /**
    * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason
@@ -416,26 +419,30 @@ const RecordeditInner = ({
     if (!selectedRowsSubmitted) return;
 
     const initialValues = getInitialFormValues(forms, columnModels);
+    methods.reset(initialValues);
 
     // in create mode, we need to fetch the foreignkey data
     // for prefilled and foreignkeys that have default values
     if (appMode === appModes.CREATE) {
+      // updates React hook form state with `setValue`
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
-    setInitialFormValues(initialValues);
-
+    setValuesInitialized(true);
   }, [selectedRowsSubmitted]);
 
   useEffect(() => {
-    if (!initialFormValues || waitingForForeignKeyData) return;
+    if (!valuesInitialized || waitingForForeignKeyData) return;
 
     // iterate selected rows and push the data into the fields
     if (selectedRows.length > 0) {
-      console.log(selectedRows);
+      // since getPrefilledDefaultForeignKeyData updates react hook form, we have to get the state from react hook form
+      // again to ensure foreign data is updated and current
+      const tempFormValues = methods.getValues();
 
       // clone
-      const initialValues = createNewForms(initialFormValues, selectedRows.length - 1);
+      const newFormsObj = createNewForms(tempFormValues, selectedRows.length - 1);
+      const initialValues = newFormsObj.tempFormValues;
 
       selectedRows.forEach((row, index) => {
         if (foreignKeyData && foreignKeyData.current) {
@@ -455,15 +462,13 @@ const RecordeditInner = ({
         initialValues[`c_${index + 1}-${columnForAssociation.RID}`] = row.displayname.value;
       });
 
+      // required to update value ni first form and set values in all subsequent forms
       methods.reset(initialValues);
-
-      console.log(initialValues);
-      console.log(foreignKeyData);
     }
 
     setAppState(RecordeditAppState.FORM_INPUT);
     setFormProviderInitialized(true);
-  }, [initialFormValues, waitingForForeignKeyData]);
+  }, [valuesInitialized, waitingForForeignKeyData]);
 
   /**
    * - properly set scrollable section height
@@ -589,7 +594,42 @@ const RecordeditInner = ({
       });
     }
 
-    return tempFormValues;
+    return { tempFormValues, lastFormValue};
+  }
+
+  const submitAssociationCB = (modalSelectedRows: SelectedRow[]) => {
+    if (!modalSelectedRows) return;
+
+    console.log(modalSelectedRows);
+    setShowAssociationModal(false);
+
+    const tempFormValues = methods.getValues();
+
+    // clone
+    const newFormsObj = createNewForms(tempFormValues, modalSelectedRows.length);
+    const initialValues = newFormsObj.tempFormValues;
+    const nextFormValue = newFormsObj.lastFormValue + 1;
+
+    modalSelectedRows.forEach((row: any, index: number) => {
+      if (foreignKeyData && foreignKeyData.current) {
+        foreignKeyData.current[`c_${nextFormValue + index}-${columnForAssociation.RID}`] = row.data;
+      }
+
+      // find the raw value of the fk columns that correspond to the selected row
+      // since we've already added a not-null hidden filter, the values will be not-null.
+      columnForAssociation.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = columnForAssociation.foreignKey.mapping.get(col);
+
+        // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
+        initialValues[`c_${nextFormValue + index}-${col.RID}`] = row.data[referencedCol.name];
+      });
+
+      // update "display" value
+      initialValues[`c_${nextFormValue + index}-${columnForAssociation.RID}`] = row.displayname.value;
+    });
+
+    // required to update value ni first form and set values in all subsequent forms
+    methods.reset(initialValues);
   }
 
   const renderSpinner = () => {
@@ -769,6 +809,17 @@ const RecordeditInner = ({
           onCancel={uploadProgressModalProps.onCancel}
         />
       }
+      {showAssociationModal && associationRecordsetProps &&
+        <RecordsetModal
+          modalClassName='association-popup'
+          recordsetProps={associationRecordsetProps}
+          onSubmit={submitAssociationCB}
+          // showSubmitSpinner={showPureBinarySpinner}
+          onClose={() => setShowAssociationModal(false)}
+          displayname={associationRecordsetProps.initialReference.displayname}
+        // comment={pureAndBinaryTitleComment}
+        />
+      }
     </>);
   }
 
@@ -921,42 +972,57 @@ const RecordeditInner = ({
                       </button>
                     </ChaiseTooltip>
                     :
-                    <div className='chaise-input-group'>
-                      <span className='chaise-input-group-prepend'>
-                        <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
-                      </span>
-                      <input
-                        id='copy-rows-input'
-                        ref={copyFormRef}
-                        type='number'
-                        className='chaise-input-control chaise-input-control-sm add-rows-input'
-                        placeholder='1'
-                        min='1'
-                      />
-                      <span className='chaise-input-group-append'>
-                        <ChaiseTooltip
-                          tooltip={
-                            allFormDataLoaded ?
-                              'Duplicate rightmost form the specified number of times.' :
-                              'Waiting for some columns to properly load.'
-                          }
-                          placement='bottom-end'
-                        >
-                          <button
-                            id='copy-rows-submit'
-                            className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                            onClick={() => {
-                              setShowCloneSpinner(true);
-                              setAddFormsEffect(true);
-                            }}
-                            type='button'
-                            disabled={!allFormDataLoaded}
+                    <>
+                      <div className='chaise-input-group' style={{width: 'auto'}}>
+                        <span className='chaise-input-group-prepend'>
+                          <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
+                        </span>
+                        <input
+                          id='copy-rows-input'
+                          ref={copyFormRef}
+                          type='number'
+                          className='chaise-input-control chaise-input-control-sm add-rows-input'
+                          placeholder='1'
+                          min='1'
+                        />
+                        <span className='chaise-input-group-append'>
+                          <ChaiseTooltip
+                            tooltip={
+                              allFormDataLoaded ?
+                                'Duplicate rightmost form the specified number of times.' :
+                                'Waiting for some columns to properly load.'
+                            }
+                            placement='bottom-end'
                           >
-                            <span>Clone</span>
-                          </button>
-                        </ChaiseTooltip>
-                      </span>
-                    </div>
+                            <button
+                              id='copy-rows-submit'
+                              className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
+                              onClick={() => {
+                                setShowCloneSpinner(true);
+                                setAddFormsEffect(true);
+                              }}
+                              type='button'
+                              disabled={!allFormDataLoaded}
+                            >
+                              <span>Clone</span>
+                            </button>
+                          </ChaiseTooltip>
+                        </span>
+                      </div>
+                      {associationRecordsetProps &&
+                        // only show association modal button if we started with an association picker
+                        <button
+                          id='recordedit-add-more'
+                          className='chaise-btn chaise-btn-sm chaise-btn-secondary'
+                          onClick={() => setShowAssociationModal(true)}
+                          type='button'
+                          style={{marginLeft: '10px'}}
+                        >
+                          <span className='chaise-btn-icon fa-solid fa-plus' />
+                          <span>Add more</span>
+                        </button>
+                      }
+                    </>
                   }
                 </div>
               </div>}
