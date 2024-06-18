@@ -214,10 +214,13 @@
   }
 
   // highlight the recordedit input for visual clarity
-  .dropdown.show {
-
-    >.chaise-input-group,
-    .dropdown-menu {
+  .dropdown.show {    
+    /**
+    * Select the input groups that are not disabled. react-bootstrap tends to toggle the `show` class for Dropdown toggles with a custom element type. 
+    * this check avoid unexpected highlighting of disabled elements.
+    */
+    >.chaise-input-group:not([aria-disabled="true"]),
+    .dropdown-menu{
       border: 2px solid map-get(variables.$color-map, 'primary');
       border-radius: 6px;
     }

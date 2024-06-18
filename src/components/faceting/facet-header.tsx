@@ -3,9 +3,10 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 // models
 import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -15,10 +16,6 @@ type FacetHeaderProps = {
    * content to be displayed as panel header
    */
   displayname: Displayname;
-  /**
-   * Optional prop to enable tooltip for displayname
-   */
-  showTooltipIcon?: boolean;
   /**
    * Optional text to be shown on hover of displayname
    */
@@ -42,7 +39,6 @@ type FacetHeaderProps = {
  */
 const FacetHeader = ({
   displayname,
-  showTooltipIcon = false,
   comment,
   isLoading,
   facetHasTimeoutError,
@@ -53,62 +49,44 @@ const FacetHeader = ({
    * variable to store ref of facet header text
    */
   const contentRef = useRef(null);
-  /**
-   * state variable to control whether to show tooltip or not
-   */
-  const [show, setShow] = useState(false);
 
-  /**
-   * Function to check the text overflow.
-   */
-  const isTextOverflow = (element: HTMLElement) => {
-    if (element) {
-      return element.offsetWidth < element.scrollWidth;
-    }
-    return false;
-  };
+  const hasTooltip = !!comment;
+  const renderedDisplayname = <DisplayValue value={displayname} />;
+  const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={comment} /> : <></>;
 
   /**
    * If header text overflowed, display tooltip on hover of header.
    * If comment is present and header text overflowed, then display tooltip in <header text>: <comment> format
    * @returns tooltip content that needs to be displayed on hover of panel header text
    */
-  const renderTooltipContent = () => {
-    if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && comment) {
-      return <><DisplayValue value={displayname} />: <DisplayCommentValue comment={comment} /></>;
-    } else if (comment) {
-      return <DisplayCommentValue comment={comment} />;
+  const renderTooltipContent = (isOverflowing : boolean) => {
+    if (isOverflowing) {
+      if (hasTooltip) {
+        return <>{renderedDisplayname}: {renderedTooltip}</>
+      } else {
+        return renderedDisplayname;
+      }
+    } else if (hasTooltip) {
+      return renderedTooltip;
     } else {
-      return <DisplayValue value={displayname} />;
+      return null;
     }
   }
 
   return (
     <>
-      <ChaiseTooltip
+      <EllipsisWrapper
         placement='right'
-        tooltip={renderTooltipContent()}
-        onToggle={(nextshow: boolean) => {
-          // Bootstrap onToggle prop to make tooltip visible or hidden
-          if (contentRef && contentRef.current) {
-            const isOverflow = isTextOverflow(contentRef.current);
-
-            // If either text overflow or showtooltip is true, show tooltip to right of the content
-            setShow((isOverflow || showTooltipIcon) && nextshow);
-          }
-        }}
-        show={show}
+        tooltip={renderTooltipContent}
+        elementRef={contentRef}
       >
         <div className='accordion-toggle ellipsis'>
           <div ref={contentRef} className='facet-header-text ellipsis'>
-            <DisplayValue value={displayname} />
-            {/* Condition to show tooltip icon */}
-            {showTooltipIcon && (
-              <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>
-            )}
+            {renderedDisplayname}
+            {hasTooltip && <span className='chaise-icon-for-tooltip chaise-accordion-header-icon-for-tooltip'></span>}
           </div>
         </div>
-      </ChaiseTooltip>
+      </EllipsisWrapper>
       <span className='facet-header-icon'>
         {
           (isLoading && (!facetHasTimeoutError || noConstraints)) &&

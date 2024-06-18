@@ -3,6 +3,7 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -67,7 +68,6 @@ const SearchInput = ({
 
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(false);
   const placeholderEl = useRef<HTMLSpanElement>(null);
   const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
@@ -172,19 +172,10 @@ const SearchInput = ({
     }
 
     return (
-      <ChaiseTooltip
-        placement='bottom-start'
-        tooltip={<>{inner}</>}
-        onToggle={(nextshow: boolean) => {
-          if (!placeholderEl.current) return;
-
-          const el = placeholderEl.current;
-          const overflow = el && el.scrollWidth > el.offsetWidth;
-
-          // placeholder should be displayed if we're showing ellipsis
-          setShowPlaceholderTooltip(nextshow && overflow);
-        }}
-        show={showPlaceholderTooltip}
+      <EllipsisWrapper
+      placement='bottom-start'
+      tooltip={<>{inner}</>}
+      elementRef={placeholderEl}
       >
         <span
           ref={placeholderEl}
@@ -193,7 +184,7 @@ const SearchInput = ({
         >
           {inner}
         </span>
-      </ChaiseTooltip>
+      </EllipsisWrapper>
     );
   }
 

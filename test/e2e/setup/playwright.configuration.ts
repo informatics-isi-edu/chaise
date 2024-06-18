@@ -74,6 +74,9 @@ const getConfig = (options: TestOptions) => {
 
       // Collect trace when retrying the failed test.
       trace: 'on-first-retry',
+
+      // screenshots will be added to the playwright-report folder
+      screenshot: 'only-on-failure'
     },
     // Configure projects for major browsers.
     projects: [

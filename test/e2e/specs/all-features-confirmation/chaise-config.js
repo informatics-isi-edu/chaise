@@ -114,7 +114,3 @@ var chaiseConfig = {
        ]
    }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}
