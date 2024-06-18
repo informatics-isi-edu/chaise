@@ -1,4 +1,4 @@
-import { test, expect, Locator } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 // locators
 import RecordsetLocators, { TimestampDateTime } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';

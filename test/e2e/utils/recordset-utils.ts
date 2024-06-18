@@ -1,4 +1,7 @@
 import { expect, Locator, Page, test } from '@playwright/test'
+
+// locators
+import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordsetLocators, {
   DefaultRangeInputLocators,
   TimestampRangeInputLocators
@@ -240,6 +243,8 @@ export async function testTimestampRangePickerInputsAfterZoom(
   await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }
 
+/** Reusable Test Steps **/
+
 /**
  * this is done in multiple places for facet specs. it will reset the state of the page.
  * @param page the page object
@@ -275,5 +280,31 @@ export async function openRecordsetAndResetFacetState(
       await RecordsetLocators.getFacetHeaderButtonById(facet, facetIndex).click();
       await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
     }
+  });
+}
+
+export async function testFacetOptions(page: Page, facetIdx: number, filterOptions: string[], modalOptions: string[]) {
+  const facet = RecordsetLocators.getFacetById(page, facetIdx);
+
+  await test.step('the facet options should be correct', async () => {
+    // wait for facet to open
+    await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+    // wait for list to be fully visible
+    await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+    // wait for facet checkboxes to load
+    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions)
+  });
+
+  await test.step('opening the facet modal should show the correct rows.', async () => {
+    // click on show more
+    await RecordsetLocators.getShowMore(facet).click();
+
+    const modal = ModalLocators.getRecordsetSearchPopup(page);
+    await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+    // this will wait for the list to be the same as expected, otherwise will timeout
+    await expect.soft(RecordsetLocators.getFirstColumn(modal)).toHaveText(modalOptions);
+
+    await ModalLocators.getCloseBtn(modal).click();
   });
 }

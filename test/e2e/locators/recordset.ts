@@ -40,7 +40,7 @@ export default class RecordsetLocators {
   static async waitForRecordsetPageReady(container: Page | Locator, timeout?: number): Promise<void> {
     await RecordsetLocators.getRecordSetTable(container).waitFor({ state: 'visible', timeout });
 
-    await container.locator('.recordest-main-spinner').waitFor({ state: 'detached', timeout });
+    await container.locator('.recordset-main-spinner').waitFor({ state: 'detached', timeout });
   }
 
 
@@ -155,6 +155,19 @@ export default class RecordsetLocators {
     return container.locator('tr.disabled-row');
   }
 
+  static getColumnNames(container: Page | Locator): Locator {
+    return container.locator('.table-column-displayname > span');
+};
+
+  static getFirstColumn(container: Page | Locator): Locator {
+    return container.locator('.chaise-table-row td:nth-child(2)');
+  }
+
+  /* sort selectors */
+  static getColumnSortButton(container: Page | Locator, rawColumnName: string): Locator {
+    return container.locator(`.c_${rawColumnName} .not-sorted-icon`);
+  };
+
 
   // -------------------- row-level selectors ------------------------ //
 
@@ -172,6 +185,10 @@ export default class RecordsetLocators {
 
   static getCheckedCheckboxInputs(container: Page | Locator): Locator {
     return container.locator('.recordset-table').locator('.chaise-checkbox input.checked');
+  }
+
+  static getClearSelectedRows(container: Page | Locator): Locator {
+    return container.locator('.clear-all-btn');
   }
 
   static getRowFirstCell(container: Page | Locator, rowIndex: number, isDisabled?: boolean): Locator {
@@ -205,6 +222,14 @@ export default class RecordsetLocators {
   static getSidePanel(container: Page | Locator): Locator {
     return container.locator('.side-panel-resizable');
   }
+
+  static getHideFilterPanelBtn(container: Page | Locator): Locator {
+    return container.locator('.hide-filter-panel-btn');
+  }
+
+  static getShowFilterPanelBtn(container: Page | Locator): Locator {
+    return container.locator('.show-filter-panel-btn');
+}
 
   static getAllFacets(container: Page | Locator): Locator {
     return container.locator('.panel-group .facet-panel');
@@ -253,6 +278,14 @@ export default class RecordsetLocators {
 
   static getCheckedFacetOptions(facet: Locator): Locator {
     return facet.locator('.chaise-checkbox input.checked');
+  }
+
+  static getDisabledFacetOptions(facet: Locator): Locator {
+    return facet.locator('.chaise-checkbox input[disabled]');
+  }
+
+  static getFacetMoreFiltersText(facet: Locator): Locator {
+    return facet.locator('.more-filters');
   }
 
   static getFacetOption(facet: Locator, optionIdx: number): Locator {
