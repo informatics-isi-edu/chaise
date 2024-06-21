@@ -253,10 +253,13 @@ export function populateCreateInitialValues(
 
   let shouldWaitForForeignKeyData = false;
 
-  // get the prefilled values
-  const prefillObj = getPrefillObject(queryParams);
-  if (prefillObj) {
-    shouldWaitForForeignKeyData = true;
+  let prefillObj = null;
+  if (queryParams) {
+    // get the prefilled values
+    prefillObj = getPrefillObject(queryParams);
+    if (prefillObj) {
+      shouldWaitForForeignKeyData = true;
+    }
   }
 
   // the data associated with the foreignkeys
@@ -347,7 +350,7 @@ export function populateCreateInitialValues(
             });
 
             if (allPrefilled || allInitialized) {
-              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
+              const defaultDisplay = column.getDefaultDisplay((allPrefilled && prefillObj) ? prefillObj.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -741,8 +744,8 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
 
   // make sure all the keys are in the object
   if (!(
-    ('keys' in cookie) && ('columnNameToRID' in cookie) && 
-    ('fkColumnNames' in cookie) && 
+    ('keys' in cookie) && ('columnNameToRID' in cookie) &&
+    ('fkColumnNames' in cookie) &&
     ('origUrl' in cookie) && ('rowname' in cookie)
   )) {
     return null;

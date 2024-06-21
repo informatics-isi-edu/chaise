@@ -192,7 +192,6 @@ const InputField = ({
       return;
     }
 
-    console.log(getValues());
     field.onChange(e);
     field.onBlur();
   };

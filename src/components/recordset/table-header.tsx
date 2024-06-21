@@ -175,7 +175,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
    */
   const shouldShowCreateButton = () => {
     const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0
-      && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK && config.displayMode !== RecordsetDisplayMode.RE_ASSOCIATION;
+      && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
 
     return isAddableDisplayMode && reference && reference.canCreate;
   }

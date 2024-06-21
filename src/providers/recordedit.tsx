@@ -52,6 +52,7 @@ export const RecordeditContext = createContext<{
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
   queryParams: any,
+  prefillRowData?: any[],
   /* the main entity reference */
   reference: any,
   /* the tuples correspondeing to the displayed form */
@@ -408,7 +409,6 @@ export default function RecordeditProvider({
         }
 
         const prefillObject = getPrefillObject(queryParams);
-        console.log(prefillObject);
         // used to trigger recordset select view
         if (prefillObject?.hasUniqueAssociation) setAppState(RecordeditAppState.ASSOCIATION_PICKER);
 
@@ -803,17 +803,14 @@ export default function RecordeditProvider({
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
-
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
-
-
       // using page.tuples here instead of forms
       initialModel = populateEditInitialValues(reference, columnModels, forms, tuplesRef.current, appMode);
 
       setCanUpdateValues(initialModel.canUpdateValues);
     }
 
-    foreignKeyData.current = initialModel.foreignKeyData;
+    foreignKeyData.current = initialModel.foreignKeyData
 
     return initialModel.values;
   };
@@ -1084,6 +1081,7 @@ export default function RecordeditProvider({
       initialized,
       modalOptions,
       queryParams,
+      prefillRowData,
       reference,
       tuples,
       waitingForForeignKeyData,
