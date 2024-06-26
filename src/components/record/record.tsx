@@ -171,6 +171,8 @@ const RecordInner = ({
   // this is to guard against it
   const setupStarted = useRef<boolean>(false);
 
+  const fullPageLoadTimeReported = useRef(false);
+
   // initialize the page
   useEffect(() => {
     if (setupStarted.current) return;
@@ -587,7 +589,7 @@ const RecordInner = ({
     const mainContainerTop = mainContainer.current.getBoundingClientRect().top;
 
     // return if related table header is at the top of main container or below the top (it's already visible)
-    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next 
+    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next
     //    for the related table we are looking at, meaning prev/next is above the bottom of main container and
     //    therefore the related table header is either visible or above the top of main container top
     if (scrollElTop >= mainContainerTop) return;
@@ -661,8 +663,16 @@ const RecordInner = ({
     </div>
   );
 
-  const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
+
+  const renderMainContainer = () => {
+    const showRelatedSectionSpinner = errors.length === 0 && (showMainSectionSpinner || relatedModels.some((rm) => rm.recordsetState.isLoading));
+
+    if (!showRelatedSectionSpinner && !fullPageLoadTimeReported.current) {
+      console.log(`full_page_load_chaise_manual: ${window.performance.now()}`);
+      fullPageLoadTimeReported.current = true;
+    }
+
+    return <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
         <RecordMainSection />
         {/* related section */}
@@ -693,7 +703,7 @@ const RecordInner = ({
         }
         {/* the related-section-spinner must be inside the main-body to ensure proper positioning */}
         {/* we want to show the spinner if there's any update is happening on the page. */}
-        {errors.length === 0 && (showMainSectionSpinner || relatedModels.some((rm) => rm.recordsetState.isLoading)) &&
+        {showRelatedSectionSpinner &&
           <ChaiseSpinner
             className='related-section-spinner bottom-left-spinner' spinnerSize='sm'
             message={relatedSectionInitialized ? 'Updating...' : 'Loading...'}
@@ -709,7 +719,7 @@ const RecordInner = ({
       </div>
       {initialized && relatedSectionInitialized && <Footer />}
     </div>
-  );
+  };
 
   /**
    * The left panels that should be resized together

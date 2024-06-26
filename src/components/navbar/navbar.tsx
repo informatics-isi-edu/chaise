@@ -306,7 +306,13 @@ const ChaiseNavbar = (): JSX.Element => {
     return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };
 
+  const timeReported = useRef(false);
   const renderRidSearch = () => {
+    if (!timeReported.current) {
+      console.log(`navbar_load_chaise_manual: ${window.performance.now()}`);
+      timeReported.current = true;
+    }
+
     if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
 
     return (

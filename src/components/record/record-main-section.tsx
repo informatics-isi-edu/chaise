@@ -22,6 +22,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { useRef } from 'react';
 
 /**
  * Returns Main Section of the record page.
@@ -141,6 +142,12 @@ const RecordMainSection = (): JSX.Element => {
       );
     });
   };
+
+  const mainDataLoadTimeReported = useRef(false);
+  if (!mainDataLoadTimeReported.current) {
+    console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
+    mainDataLoadTimeReported.current = true;
+  }
 
   const hasSpinner = errors.length === 0 && showMainSectionSpinner;
   return (

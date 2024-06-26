@@ -785,8 +785,14 @@ const RecordsetInner = ({
     </div>
   );
 
+  const mainDataLoadTimeReported = useRef(false);
   const renderMainContainer = () => {
     const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
+    if (!hasSpinner && config.displayMode === RecordsetDisplayMode.FULLSCREEN && !mainDataLoadTimeReported.current) {
+      console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
+      mainDataLoadTimeReported.current = true;
+    }
+
     return (
       <div className='main-container dynamic-padding' ref={mainContainer}>
         {hasSpinner &&
