@@ -4,11 +4,14 @@ import chance from 'chance';
 // locators
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
+import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { openFacetAndTestFilterOptions, testFacetOptions } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { openFacet, openFacetAndTestFilterOptions, testFacetOptions } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 const testParams = {
   schema_name: 'faceting',
@@ -124,22 +127,16 @@ const testParams = {
   },
   recordColumns: [
     'text_col', 'longtext_col', 'markdown_col', 'int_col', 'float_col', 'date_col', 'timestamp_col',
-    'boolean_col', 'jsonb_col', '1-o7Ye2EkulrWcCVFNHi3A', 'hmZyP_Ufo3E5v_nmdTXyyA'
+    'boolean_col', 'jsonb_col', 'fk_to_f1', 'to_name'
   ],
-  recordValues: {
-    text_col: 'one',
+  recordValues: [
+    'one',
     // eslint-disable-next-line max-len
-    longtext_col: 'lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.',
-    markdown_col: 'one',
-    int_col: '11',
-    float_col: '11.1100',
-    date_col: '2001-01-01',
-    timestamp_col: '2001-01-01 00:01:01',
-    boolean_col: 'true',
-    jsonb_col: JSON.stringify({ 'key': 'one' }, undefined, 2),
-    '1-o7Ye2EkulrWcCVFNHi3A': 'one', // faceting_main_fk1
-    'hmZyP_Ufo3E5v_nmdTXyyA': 'one' // faceting_main_fk2
-  },
+    'lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.',
+    'one', '11', '11.1100', '2001-01-01', '2001-01-01 00:01:01',
+    'true', JSON.stringify({ 'key': 'one' }, undefined, 2), 'one', // faceting_main_fk1
+    'one' // faceting_main_fk2
+  ],
   shared_path_prefix: {
     facetObject: {
       'and': [
@@ -244,9 +241,9 @@ const testParams = {
   },
   hideFilterPanelClass: 'chaise-sidebar-close',
   showFilterPanelClass: 'chaise-sidebar-open',
-  foreignKeyPopupFacetFilter: 'term\neight',
+  foreignKeyPopupFacetFilter: 'termeight',
   associationRTName: 'main_f3_assoc',
-  associationPopupFacetFilter: 'term\nfive',
+  associationPopupFacetFilter: 'termfive',
   associationPopupSelectedRowsFilter: 'five'
 };
 
@@ -814,13 +811,14 @@ test.describe('Other facet features', () => {
   test('regarding URL limitation check', async ({ page, baseURL }, testInfo) => {
     const params = testParams.maximumLength;
     const alert = AlertLocators.getWarningAlert(page);
+    const facet1 = RecordsetLocators.getFacetById(page, params.facetIdx);
 
     const checkAlert = async (alert: Locator) => {
       await expect.soft(alert).toBeVisible();
       await expect.soft(alert).toHaveText('WarningMaximum URL length reached. Cannot perform the requested action.');
     };
 
-    await test.step('should load recordset page, clear all filters,, and close the open facets', async () => {
+    await test.step('should load recordset page, clear all filters, and close the open facets', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
 
       await page.goto(`${baseURL}${PAGE_URL}`);
@@ -851,23 +849,278 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('in facet modal', async () => {
-      const facet = RecordsetLocators.getFacetById(page, params.facetIdx);
       const modal = ModalLocators.getRecordsetSearchPopup(page);
       const modalAlert = AlertLocators.getWarningAlert(modal);
+      const modalSubmit = ModalLocators.getSubmitButton(modal);
 
       await test.step('open the facet then open the show more modal', async () => {
-        await RecordsetLocators.getFacetHeaderButtonById(facet, params.facetIdx).click();
-        await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+        await RecordsetLocators.getFacetHeaderButtonById(facet1, params.facetIdx).click();
+        await expect.soft(RecordsetLocators.getFacetCollapse(facet1)).toBeVisible();
 
-        await RecordsetLocators.getShowMore(facet).click();
+        await RecordsetLocators.getShowMore(facet1).click();
         await RecordsetLocators.waitForRecordsetPageReady(modal);
       });
 
       await test.step('after opening the modal, the existing url limit alert should be removed.', async () => {
         await expect.soft(modalAlert).not.toBeAttached();
       });
-
       
+      await test.step('alert should be displayed upon reaching the URL limit and submit button should be disabled.', async () => {
+        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(25);
+
+        await RecordsetLocators.getSelectAllBtn(modal).click();
+        await checkAlert(modalAlert);
+
+        await expect.soft(modalSubmit).toHaveAttribute('disabled');
+      });
+
+      await test.step('changing filters and going below the URL limit should hide the alert and enable the submit button.', async () => {
+        await RecordsetLocators.getCheckboxInputs(modal).nth(0).uncheck();
+
+        await expect.soft(modalAlert).not.toBeAttached();
+        await expect.soft(modalSubmit).not.toHaveAttribute('disabled');
+        
+        await modalSubmit.click();
+        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.filteredNumRows);
+      });
     });
+
+    await test.step('in main container', async () => {
+      const secondFacetIdx = params.secondFacetIdx;
+      const facet2 = RecordsetLocators.getFacetById(page, params.secondFacetIdx);
+
+      await test.step('alert should be displayed upon reaching the URL limit and the request should not be completed.', async () => {
+        await openFacet(page, facet2, secondFacetIdx, params.secondFacetNumOptions, 5);
+
+        const facetOption = RecordsetLocators.getFacetOption(facet2, params.secondFacetOption);
+        // trying to "click" this option will result in the alert being shown and the checkbox NOT being checked
+        //   using .click() since .check() verifies the state of the checkbox has changed and we don't allow the state to change
+        await facetOption.click();
+        await checkAlert(alert);
+        await expect.soft(facetOption).not.toBeChecked();
+      });
+
+      await test.step('changing filters and going below the URL limit should hide the alert.', async () => {
+        await RecordsetLocators.getFacetOption(facet1, params.option).uncheck();
+        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.maximumLength.filteredNumRows - 1);
+          
+        await expect.soft(alert).not.toBeAttached();
+      });
+    });
+  });
+
+  test.describe('navigating to record and recordedit app with facets', () => {
+    test('from recordset app with multiple records', async ({ page, baseURL }, testInfo) => {
+      await test.step('should load recordset page and clear all filters', async () => {
+        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+
+        await page.goto(`${baseURL}${PAGE_URL}`);
+        await RecordsetLocators.waitForRecordsetPageReady(page);
+  
+        const clearAll = RecordsetLocators.getClearAllFilters(page);
+        await clearAll.click();
+        await expect.soft(clearAll).not.toBeVisible();
+  
+        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      });
+
+      await test.step('clicking bulk edit should show the same number of forms in RE as rows in RS.', async () => {
+        await RecordsetLocators.getBulkEditLink(page).click();
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+        
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(25);
+      });
+    });
+
+    test('in recordedit app, foreign key popup should have facets available', async ({ page, baseURL }, testInfo) => {
+      const modal = ModalLocators.getRecordsetSearchPopup(page);
+
+      await test.step('should load recordset page, wait for `facets` to be added to the url, and change to recordedit app', async () => {
+        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+
+        await page.goto(`${baseURL}${PAGE_URL}`);
+        await RecordsetLocators.waitForRecordsetPageReady(page);
+        await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
+
+        await expect.soft(page).toHaveURL(/facets/);
+
+        const url = page.url();
+        await page.goto(url.replace('recordset', 'recordedit'));
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      await test.step('should click the foreign key popup button and have the facet collapse button visible in search popup', async () => {
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(1);
+
+        // open the first fk popup
+        await RecordeditLocators.getModalPopupButtons(page).nth(0).click();
+
+        await expect.soft(ModalLocators.getModalTitle(modal)).toBeVisible();
+        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(13);
+
+        // make sure side bar is hidden
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).not.toBeVisible();
+        // make sure 'show' filter panel button is shown
+        await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
+      });
+
+      // NOTE: identical to a test below
+      await test.step('clicking the side panel button should open the facet panel', async () => {
+        await RecordsetLocators.getShowFilterPanelBtn(modal).click();
+
+        // make sure side bar is shown
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).toBeVisible();
+        // make sure 'hide' filter panel button is shown 
+        await expect.soft(RecordsetLocators.getHideFilterPanelBtn(modal)).toBeVisible();
+      });
+
+      await test.step('select a facet option and select a row for the input', async () => {
+        const facet = RecordsetLocators.getFacetById(modal, 0);
+        await RecordsetLocators.getFacetOption(facet, 0).click();
+
+        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(1);
+        await expect.soft(RecordsetLocators.getFacetFilters(modal).nth(0)).toHaveText(testParams.foreignKeyPopupFacetFilter);
+
+        const selectButtons = RecordsetLocators.getRows(modal).locator('.select-action-button');
+        await expect.soft(selectButtons).toHaveCount(1);
+
+        await selectButtons.nth(0).click();
+        await expect.soft(RecordeditLocators.getPageTitle(page)).toBeVisible();
+        
+        await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(page,'fk_to_f1', 1)).toHaveText('eight');
+      });
+    });
+
+    test('in record app, association add popup should have facets available', async ({ page, baseURL }, testInfo) => {
+      const modal = ModalLocators.getRecordsetSearchPopup(page);
+
+      await test.step('should load recordset page, wait for `facets` to be added to the url, and change to record app', async () => {
+        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+
+        await page.goto(`${baseURL}${PAGE_URL}`);
+        await RecordsetLocators.waitForRecordsetPageReady(page);
+        await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
+
+        await expect.soft(page).toHaveURL(/facets/);
+
+        const url = page.url();
+        await page.goto(url.replace('recordset', 'record'));
+        await RecordLocators.waitForRecordPageReady(page);
+      });
+
+      await test.step('navigating to record with a facet url', async () => {
+        await testRecordMainSectionValues(page, testParams.recordColumns, testParams.recordValues);
+      });
+
+      await test.step('should click the add button for an association table and have the facet collapse button visible', async () => {
+        await RecordLocators.getRelatedTableAddButton(page, testParams.associationRTName, false).click();
+        
+        await expect.soft(ModalLocators.getModalTitle(modal)).toBeVisible();
+        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(5);
+
+        // make sure side bar is hidden
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).not.toBeVisible();    
+        // make sure 'show' filter panel button is shown
+        await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
+      });
+
+      // NOTE: identical to a test above
+      await test.step('clicking the side panel button should open the facet panel', async () => {
+        await RecordsetLocators.getShowFilterPanelBtn(modal).click();
+
+        // make sure side bar is shown
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).toBeVisible();
+        // make sure 'hide' filter panel button is shown 
+        await expect.soft(RecordsetLocators.getHideFilterPanelBtn(modal)).toBeVisible();
+      });
+
+      await test.step('select a facet option and select a row to associate', async () => {
+        const facet = RecordsetLocators.getFacetById(modal, 0);
+        await RecordsetLocators.getFacetOption(facet, 0).click();
+
+        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(1);
+        await expect.soft(RecordsetLocators.getFacetFilters(modal).nth(0)).toHaveText(testParams.associationPopupFacetFilter);
+
+        await RecordsetLocators.getCheckboxInputs(modal).check();
+        
+        // verify selected row filter
+        await expect.soft(RecordsetLocators.getSelectedRowsFilters(modal).nth(0)).toHaveText(testParams.associationPopupSelectedRowsFilter);
+        // NOTE: we don't test add here because we aren't trying to test mutating data, but rather that the popup behaves appropriately with faceting
+      });
+    });
+  });
+
+  test('navigating to recordset with custom facet', async ({ page, baseURL }, testInfo) => {
+    const params = testParams.customFacet;
+
+    await test.step('should load recordset page', async () => {
+      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+
+      await page.goto(`${baseURL}${PAGE_URL}/*::facets::${params.cfacetBlob}`);
+      await page.pause();
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+    });
+
+    await test.step('should show the applied filter and clear all button.', async () => {
+      const facetFilters = RecordsetLocators.getFacetFilters(page);
+      await expect.soft(facetFilters).toHaveCount(1);
+      
+      await expect.soft(facetFilters.nth(0)).toHaveText(`Custom Filter${params.cfacet.displayname}`);
+      await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
+    });
+
+    // await test.step('main and faceting data should be based on the filter, and be able to apply new filters.', async () => {
+    //   browser.wait(function () {
+    //       return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+    //           return ct == customFacetParams.numRows;
+    //       });
+    //   }, browser.params.defaultTimeout);
+    //   // main
+    //   expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
+
+    //   chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
+    //       browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+    //       // wait for facet checkboxes to load
+    //       browser.wait(function () {
+    //           return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+    //               return ct == customFacetParams.totalNumOptions;
+    //           });
+    //       }, browser.params.defaultTimeout);
+
+    //       // wait for list to be fully visible
+    //       browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+    //       /**
+    //        * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+    //        * value for the rows that are hidden because of the height logic
+    //        * so I changed it to directly get the text from javascript.
+    //        */
+    //       return chaisePage.recordsetPage.getFacetOptionsText(idx);
+    //   }).then(function (opts) {
+    //       opts.forEach(function (option, i) {
+    //           expect(option).toEqual(customFacetParams.options[i], `options missmatch, index=${i}`);
+    //       });
+
+    //       // select a new facet
+    //       return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFacetParams.option));
+    //   }).then(function () {
+    //       // wait for table rows to load
+    //       browser.wait(function () {
+    //           return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+    //               return ct == customFacetParams.numRowsWFacet;
+    //           });
+    //       }, browser.params.defaultTimeout);
+
+    //       // make sure data has been updated
+    //       expect(chaisePage.recordsetPage.getRows().count()).toBe(customFacetParams.numRowsWFacet, "");
+
+    //       // make sure filter is there
+    //       expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
+
+
+    //       done();
+    //   }).catch(chaisePage.catchTestError(done));
+    // });
   });
 });

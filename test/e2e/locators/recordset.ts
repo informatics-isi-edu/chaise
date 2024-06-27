@@ -163,6 +163,11 @@ export default class RecordsetLocators {
     return container.locator('.chaise-table-row td:nth-child(2)');
   }
 
+  // Currently only in modals but could be part of recordset in different contexts/views
+  static getSelectAllBtn(container: Page | Locator): Locator {
+    return container.locator('.table-select-all-rows')
+  };
+
   /* sort selectors */
   static getColumnSortButton(container: Page | Locator, rawColumnName: string): Locator {
     return container.locator(`.c_${rawColumnName} .not-sorted-icon`);
