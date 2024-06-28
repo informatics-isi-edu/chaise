@@ -116,10 +116,8 @@ const RecordeditInner = ({
 
   const [columnForAssociation, setColumnForAssociation] = useState<any>(null);
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
-  const [shouldGetInitialFormValues, setShouldGetInitialFormValues] = useState<boolean>(false);
-  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
 
-  const [valuesInitialized, setValuesInitialized] = useState<boolean>(false)
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
@@ -312,17 +310,18 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
-    // `hasUniqueAssociation` is set right before `initialized` is set in the provider
-    console.log('initialized', appState);
     if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
       let domainRef: any;
       const prefillObject = getPrefillObject(queryParams);
       console.log(prefillObject);
       // TODO: this should be done differently
+
+      let mainRefColumn: any;
       reference.columns.forEach((column: any) => {
         if (!column.isForeignKey) return;
 
         if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
+          mainRefColumn = column;
           return;
         }
 
@@ -331,10 +330,18 @@ const RecordeditInner = ({
         domainRef = column.reference;
       });
 
-      if (!domainRef) {
-        setShouldGetInitialFormValues(true);
-        return;
-      }
+      if (!domainRef) return;
+
+      // TODO: we want to filter domainRef so that it is based on the selected Protocol so getting disabled rows works as expected
+      //   we want to modify domainRef to have a join to protocol_author then a join to protocol with the protocol filter applied:
+      //   (Unique_ID)=(Protocol:Protocol_Author:Author)/(Protocol)=(Protocol:Protocol:RID)/RID=<RID>/$M
+
+      // NOTE: THIS IS WRONG, the following will create a filter for the association table but we have the leaf table that we are showing
+      //   colName = Object.keys(prefillObject.keys)[0]
+      //   andFilters.push({
+      //     source: colName
+      //     choices: [prefillObject.keys[colName]]
+      //   })
 
       const andFilters: any[] = [];
       // NOTE: we don't have a derivedAssociationReference here
@@ -361,18 +368,10 @@ const RecordeditInner = ({
         };
       }
 
-      // const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets)
-      //   .contextualize.compactSelectAssociationLink;
-
       // TODO: addFacets, how do we get fkToRelated?
       const modalReference = domainRef.contextualize.compactSelectAssociationLink;
-
-      // if (prefillObject) {
-      //   andFilters.push({
-      //     source: Object.keys(prefillObject.keys)[0],
-      //   });
-      //   domainRef = domainRef.addFacets(andFilters);
-      // }
+      // const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets)
+      //   .contextualize.compactSelectAssociationLink;
 
       const recordsetConfig: RecordsetConfig = {
         viewable: false,
@@ -460,14 +459,7 @@ const RecordeditInner = ({
       });
 
       setShowAssociationModal(true);
-    } else {
-      setShouldGetInitialFormValues(true);
     }
-  }, [initialized]);
-
-  useEffect(() => {
-    // shouldGetInitialFormValues is initialized to false and set to true once we have rows selected that are submitted (or row selection is not needed)
-    if (!shouldGetInitialFormValues) return;
 
     const initialValues = getInitialFormValues(forms, columnModels);
     methods.reset(initialValues);
@@ -479,42 +471,9 @@ const RecordeditInner = ({
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
-    setValuesInitialized(true);
-  }, [shouldGetInitialFormValues]);
-
-  /**
-   * when values are intiialized in above hook AND we are no longer waiting for foreignkey data
-   *   - if 1 selected row, update the first form with the selected row information
-   *   - if >1 selected rows, update the first form and add new forms using default values 
-   *     - clone first form since user hasn't changed any input values yet from their defaults
-   *   - update RHF state, app state, and form proivder initialized
-   */
-  useEffect(() => {
-    if (!valuesInitialized || waitingForForeignKeyData) return;
-
-    // iterate selected rows and push the data into the fields
-    if (selectedRows.length > 0) {
-      // since getPrefilledDefaultForeignKeyData updates react hook form, we have to get the state from react hook form
-      // again to ensure foreign key data is updated and current
-      const tempFormValues = methods.getValues();
-
-      // no user input in the form inputs yet so forms are intiialized by cloning the first form that was set with default values
-      const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, selectedRows.length - 1);
-      // const initialValues = newFormsObj.tempFormValues;
-
-      // iterate selectedRows to fill in the fkey information
-      const initialValues = setSelectedForeignKeyData(newFormsObj.tempFormValues, selectedRows, newFormsObj.lastFormValue);
-
-      // required to update values in first form and set values in all subsequent forms
-      methods.reset(initialValues);
-
-      // TODO: when the association does not have a key with a unique pair, reset selectedRows
-      // if (notUnique) setSelectedRows([]);
-    }
-
     setAppState(RecordeditAppState.FORM_INPUT);
     setFormProviderInitialized(true);
-  }, [valuesInitialized, waitingForForeignKeyData]);
+  }, [initialized]);
 
   /**
    * - properly set scrollable section height
@@ -656,39 +615,40 @@ const RecordeditInner = ({
 
   // user closes the modal without making any selections
   const closeAssociationCB = () => {
-    if (!shouldGetInitialFormValues) {
-      // if the page was loaded with a modal showing and it is dismissed, continue to set up recordedit app
-      setSelectedRows([]);
-      setShouldGetInitialFormValues(true);
-    }
+    // if the page was loaded with a modal showing and it is dismissed, update app state variable and do nothing else
+    if (selectionsFillFirstForm) setSelectionsFillFirstForm(false);
 
     setShowAssociationModal(false);
   }
 
   const submitAssociationCB = (modalSelectedRows: SelectedRow[]) => {
-    if (!modalSelectedRows || !shouldGetInitialFormValues) {
-      // if shouldGetInitialFormValues === false, flip boolean to trigger useEffect logic above for initializing recordedit
-      setSelectedRows(modalSelectedRows);
-      setShouldGetInitialFormValues(true);
-      setShowAssociationModal(false);
-      return;
-    }
-
-    // recordedit has already been initialized so start adding new forms
     setShowAssociationModal(false);
 
+    // should not happen since submit button is greyed out
+    if (!modalSelectedRows || modalSelectedRows.length === 0) return;
+
+    // recordedit has already been initialized so start adding new forms
     const tempFormValues = methods.getValues();
     let initialValues: any = tempFormValues,
-      nextFormValue: number;
+      startFormNumber: number;
 
-    let newFormsObj: { tempFormValues: any, lastFormValue: number };
+    if (selectionsFillFirstForm) {
+      
+      if (modalSelectedRows.length === 1) {
+        initialValues = tempFormValues;  
+      } else {
+        initialValues = createNewForms(tempFormValues, modalSelectedRows.length - 1).tempFormValues;
+      }
 
-    // TODO: when configurable through annotation, allow for clone if configured
-    if (false) {
-      // clone
-      newFormsObj = createNewForms(tempFormValues, modalSelectedRows.length);
+      startFormNumber = 1;
 
-      nextFormValue = newFormsObj.lastFormValue + 1;
+      setSelectionsFillFirstForm(false);
+    } else if (false) {
+    // } else if (annotation.doClone) {
+      // TODO: when configurable through annotation, allow for clone if configured
+      const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
+
+      startFormNumber = newFormsObj.lastFormValue + 1;
       initialValues = newFormsObj.tempFormValues;
     } else {
       // use default values to fill new forms
@@ -703,7 +663,7 @@ const RecordeditInner = ({
 
       // NOTE: should we call getPrefilledDefaultForeignKeyData here instead of checking the prefillObject?
 
-      nextFormValue = newFormValues[0];
+      startFormNumber = newFormValues[0];
       newFormValues.forEach((formNumber: number) => {
         // copy values to object we want to use for RHF
         Object.keys(newValues).forEach((key: string) => {
@@ -713,12 +673,12 @@ const RecordeditInner = ({
           }
         });
 
-        initialValues = setOutboundForeignKeyValues(initialValues, formNumber, nextFormValue - 1, true);
+        initialValues = setOutboundForeignKeyValues(initialValues, formNumber, startFormNumber - 1, true);
       });
     }
 
     // iterate selectedRows to fill in the fkey information
-    initialValues = setSelectedForeignKeyData(initialValues, modalSelectedRows, nextFormValue);
+    initialValues = setSelectedForeignKeyData(initialValues, modalSelectedRows, startFormNumber);
 
     // required to set values in all new forms in the RHF model
     methods.reset(initialValues);
@@ -899,6 +859,16 @@ const RecordeditInner = ({
           rows={uploadProgressModalProps.rows}
           onSuccess={uploadProgressModalProps.onSuccess}
           onCancel={uploadProgressModalProps.onCancel}
+        />
+      }
+      {showAssociationModal && associationRecordsetProps &&
+        // This is outside of form provider since it will show before the forms are initialized
+        <RecordsetModal
+          modalClassName='association-popup'
+          recordsetProps={associationRecordsetProps}
+          onSubmit={submitAssociationCB}
+          onClose={closeAssociationCB}
+          displayname={columnForAssociation.displayname}
         />
       }
     </>);
@@ -1096,21 +1066,6 @@ const RecordeditInner = ({
         {renderBottomPanel()}
         {renderModals()}
       </FormProvider>}
-      {showAssociationModal && associationRecordsetProps &&
-        // This is outside of form provider since it will show before the forms are initialized
-        <RecordsetModal
-          modalClassName='association-popup'
-          recordsetProps={associationRecordsetProps}
-          onSubmit={(rows: SelectedRow[]) => {
-            setValuesInitialized(false);
-            submitAssociationCB(rows);
-          }}
-          // showSubmitSpinner={showPureBinarySpinner}
-          onClose={closeAssociationCB}
-          displayname={columnForAssociation.displayname}
-        // comment={pureAndBinaryTitleComment}
-        />
-      }
     </div>
   );
 }
