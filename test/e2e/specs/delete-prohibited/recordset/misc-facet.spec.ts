@@ -1056,7 +1056,7 @@ test.describe('Other facet features', () => {
     await test.step('should load recordset page', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
 
-      await page.goto(`${baseURL}${PAGE_URL}/*::facets::${params.cfacetBlob}`);
+      await page.goto(`${baseURL}${PAGE_URL}/*::cfacets::${params.cfacetBlob}`);
       await page.pause();
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
