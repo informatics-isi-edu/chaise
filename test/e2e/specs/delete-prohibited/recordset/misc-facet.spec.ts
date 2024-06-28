@@ -547,7 +547,7 @@ test.describe('Other facet features', () => {
   });
 
   /***********************************************************  local test cases ***********************************************************/
-  if (process.env.CI) return;
+  // if (process.env.CI) return;
   // NOTE the following test cases will only run locally.
 
   test('regarding the logic to show only certain number of selected items', async ({ page, baseURL }, testInfo) => {
@@ -839,11 +839,11 @@ test.describe('Other facet features', () => {
 
     await test.step('searching a lenghty string should show the `Maximum URL length reached` warning.', async () => {
       const mainSearch = RecordsetLocators.getMainSearchInput(page);
-      
+
       const chanceObj = new chance();
-      await mainSearch.fill(chanceObj.string({length: 4000}));
+      await mainSearch.fill(chanceObj.string({ length: 4000 }));
       await RecordsetLocators.waitForRecordsetPageReady(page);
-      
+
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
       await checkAlert(alert);
     });
@@ -864,7 +864,7 @@ test.describe('Other facet features', () => {
       await test.step('after opening the modal, the existing url limit alert should be removed.', async () => {
         await expect.soft(modalAlert).not.toBeAttached();
       });
-      
+
       await test.step('alert should be displayed upon reaching the URL limit and submit button should be disabled.', async () => {
         await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(25);
 
@@ -879,7 +879,7 @@ test.describe('Other facet features', () => {
 
         await expect.soft(modalAlert).not.toBeAttached();
         await expect.soft(modalSubmit).not.toHaveAttribute('disabled');
-        
+
         await modalSubmit.click();
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.filteredNumRows);
       });
@@ -903,7 +903,7 @@ test.describe('Other facet features', () => {
       await test.step('changing filters and going below the URL limit should hide the alert.', async () => {
         await RecordsetLocators.getFacetOption(facet1, params.option).uncheck();
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.maximumLength.filteredNumRows - 1);
-          
+
         await expect.soft(alert).not.toBeAttached();
       });
     });
@@ -916,18 +916,18 @@ test.describe('Other facet features', () => {
 
         await page.goto(`${baseURL}${PAGE_URL}`);
         await RecordsetLocators.waitForRecordsetPageReady(page);
-  
+
         const clearAll = RecordsetLocators.getClearAllFilters(page);
         await clearAll.click();
         await expect.soft(clearAll).not.toBeVisible();
-  
+
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
       });
 
       await test.step('clicking bulk edit should show the same number of forms in RE as rows in RS.', async () => {
         await RecordsetLocators.getBulkEditLink(page).click();
         await RecordeditLocators.waitForRecordeditPageReady(page);
-        
+
         await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(25);
       });
     });
@@ -986,8 +986,8 @@ test.describe('Other facet features', () => {
 
         await selectButtons.nth(0).click();
         await expect.soft(RecordeditLocators.getPageTitle(page)).toBeVisible();
-        
-        await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(page,'fk_to_f1', 1)).toHaveText('eight');
+
+        await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(page, 'fk_to_f1', 1)).toHaveText('eight');
       });
     });
 
@@ -1014,12 +1014,12 @@ test.describe('Other facet features', () => {
 
       await test.step('should click the add button for an association table and have the facet collapse button visible', async () => {
         await RecordLocators.getRelatedTableAddButton(page, testParams.associationRTName, false).click();
-        
+
         await expect.soft(ModalLocators.getModalTitle(modal)).toBeVisible();
         await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(5);
 
         // make sure side bar is hidden
-        await expect.soft(RecordsetLocators.getSidePanel(modal)).not.toBeVisible();    
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).not.toBeVisible();
         // make sure 'show' filter panel button is shown
         await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
       });
@@ -1042,7 +1042,7 @@ test.describe('Other facet features', () => {
         await expect.soft(RecordsetLocators.getFacetFilters(modal).nth(0)).toHaveText(testParams.associationPopupFacetFilter);
 
         await RecordsetLocators.getCheckboxInputs(modal).check();
-        
+
         // verify selected row filter
         await expect.soft(RecordsetLocators.getSelectedRowsFilters(modal).nth(0)).toHaveText(testParams.associationPopupSelectedRowsFilter);
         // NOTE: we don't test add here because we aren't trying to test mutating data, but rather that the popup behaves appropriately with faceting
@@ -1052,6 +1052,7 @@ test.describe('Other facet features', () => {
 
   test('navigating to recordset with custom facet', async ({ page, baseURL }, testInfo) => {
     const params = testParams.customFacet;
+    const facet = RecordsetLocators.getFacetById(page, params.facet);
 
     await test.step('should load recordset page', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
@@ -1064,63 +1065,51 @@ test.describe('Other facet features', () => {
     await test.step('should show the applied filter and clear all button.', async () => {
       const facetFilters = RecordsetLocators.getFacetFilters(page);
       await expect.soft(facetFilters).toHaveCount(1);
-      
+
       await expect.soft(facetFilters.nth(0)).toHaveText(`Custom Filter${params.cfacet.displayname}`);
       await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
     });
 
-    // await test.step('main and faceting data should be based on the filter, and be able to apply new filters.', async () => {
-    //   browser.wait(function () {
-    //       return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //           return ct == customFacetParams.numRows;
-    //       });
-    //   }, browser.params.defaultTimeout);
-    //   // main
-    //   expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
+    await test.step('main and faceting data should be based on the filter, and be able to apply new filters.', async () => {
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
 
-    //   chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
-    //       browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+      await RecordsetLocators.getFacetHeaderButtonById(facet, params.facet).click();
+      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
 
-    //       // wait for facet checkboxes to load
-    //       browser.wait(function () {
-    //           return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-    //               return ct == customFacetParams.totalNumOptions;
-    //           });
-    //       }, browser.params.defaultTimeout);
+      // wait for facet checkboxes to load
+      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(params.totalNumOptions);
+      // wait for list to be fully visible
+      await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
 
-    //       // wait for list to be fully visible
-    //       browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+      /**
+       * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
+       *   value for the rows that are hidden because of the height logic
+       * 
+       * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
+       */
+      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options);
 
-    //       /**
-    //        * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
-    //        * value for the rows that are hidden because of the height logic
-    //        * so I changed it to directly get the text from javascript.
-    //        */
-    //       return chaisePage.recordsetPage.getFacetOptionsText(idx);
-    //   }).then(function (opts) {
-    //       opts.forEach(function (option, i) {
-    //           expect(option).toEqual(customFacetParams.options[i], `options missmatch, index=${i}`);
-    //       });
+      await RecordsetLocators.getFacetOption(facet, params.option).check();
+      // wait for table rows to load
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRowsWFacet);
+      // make sure filter is there
+      await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(2);
+    });
 
-    //       // select a new facet
-    //       return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFacetParams.option));
-    //   }).then(function () {
-    //       // wait for table rows to load
-    //       browser.wait(function () {
-    //           return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //               return ct == customFacetParams.numRowsWFacet;
-    //           });
-    //       }, browser.params.defaultTimeout);
-
-    //       // make sure data has been updated
-    //       expect(chaisePage.recordsetPage.getRows().count()).toBe(customFacetParams.numRowsWFacet, "");
-
-    //       // make sure filter is there
-    //       expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
-
-
-    //       done();
-    //   }).catch(chaisePage.catchTestError(done));
-    // });
+    await test.step('clicking on `x` for Custom Filter should only clear the filter.', async () => {
+      await RecordsetLocators.getClearCustomFacets(page).click();
+      // wait for table rows to load
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRowsWOCustomFacet);
+      // wait for list to be fully visible
+      await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+        
+      /**
+       * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
+       *   value for the rows that are hidden because of the height logic
+       * 
+       * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
+       */
+      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.optionsWOCustomFacet);
+    });
   });
 });
