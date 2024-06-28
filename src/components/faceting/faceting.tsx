@@ -123,6 +123,8 @@ const Faceting = ({
    */
   const setupStarted = useRef(false);
 
+  const allFacetsLoadedTimeReported = useRef(false);
+
   /**
    * register the flow-control related callbacks and then show facets
    */
@@ -220,6 +222,17 @@ const Faceting = ({
     registerFacetCallbacks(updateFacetStates, updateFacets);
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
+
+
+  useEffect(() => {
+    if (!allFacetsRegistered || allFacetsLoadedTimeReported.current) return;
+    const allLoaded = facetModels.every((fm) => !fm.isLoading);
+    if (allLoaded) {
+      console.log(`all_facets_loaded_chaise_manual: ${window.performance.now()}`);
+      allFacetsLoadedTimeReported.current = true;
+    }
+
+  }, [facetModels, allFacetsRegistered]);
 
   //-------------------  flow-control related functions:   --------------------//
 

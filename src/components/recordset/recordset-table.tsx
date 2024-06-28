@@ -115,6 +115,17 @@ const RecordsetTable = ({
     }
   }, [isLoading]);
 
+  const allAggregatesAreLoaded = useRef(false);
+  useEffect(() => {
+    if (isLoading || config.displayMode !== RecordsetDisplayMode.FULLSCREEN || allAggregatesAreLoaded.current) return;
+    const allLoaded = columnModels.every((col: any) => !col.isLoading);
+    if (allLoaded) {
+      console.log(`all_aggregates_loaded_chaise_manual: ${window.performance.now()}`);
+      allAggregatesAreLoaded.current = true;
+    }
+
+  }, [columnModels, isLoading]);
+
   //------------------- UI related callbacks: --------------------//
 
   const changeSort = (col: any) => {
