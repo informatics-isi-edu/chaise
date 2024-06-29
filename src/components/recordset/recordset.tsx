@@ -170,6 +170,8 @@ const RecordsetInner = ({
   const topRightContainer = useRef<HTMLDivElement>(null);
   const topLeftContainer = useRef<HTMLDivElement>(null);
 
+  const mainDataLoadTimeReported = useRef(false);
+
   /**
    * The callbacks from faceting.tsx that we will use here
    */
@@ -405,6 +407,11 @@ const RecordsetInner = ({
   // after data loads, scroll to top and change the browser location
   useEffect(() => {
     if (isLoading) return;
+
+    if (config.displayMode === RecordsetDisplayMode.FULLSCREEN && !mainDataLoadTimeReported.current) {
+      console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
+      mainDataLoadTimeReported.current = true;
+    }
 
     // make sure the right padding is correct after data load
     // NOTE without this the padding stays the same until we interact with the page
@@ -785,13 +792,8 @@ const RecordsetInner = ({
     </div>
   );
 
-  const mainDataLoadTimeReported = useRef(false);
   const renderMainContainer = () => {
     const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
-    if (!hasSpinner && config.displayMode === RecordsetDisplayMode.FULLSCREEN && !mainDataLoadTimeReported.current) {
-      console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
-      mainDataLoadTimeReported.current = true;
-    }
 
     return (
       <div className='main-container dynamic-padding' ref={mainContainer}>

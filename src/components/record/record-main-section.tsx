@@ -143,12 +143,6 @@ const RecordMainSection = (): JSX.Element => {
     });
   };
 
-  const mainDataLoadTimeReported = useRef(false);
-  if (!mainDataLoadTimeReported.current) {
-    console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
-    mainDataLoadTimeReported.current = true;
-  }
-
   const hasSpinner = errors.length === 0 && showMainSectionSpinner;
   return (
     <div className={`record-main-section ${hasSpinner ? ' with-spinner' : ''}`}>

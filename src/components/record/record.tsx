@@ -222,9 +222,18 @@ const RecordInner = ({
     }
   }, [initialized]);
 
+  const mainDataLoadTimeReported = useRef(false);
+
   // make sure the right padding is correct regardless of scrollbar being there or not
   useLayoutEffect(() => {
     if (!initialized) return;
+
+    // when the main entity is initialized, report the time
+    if (!mainDataLoadTimeReported.current) {
+      console.log(`main_data_load_chaise_manual: ${window.performance.now()}`);
+      mainDataLoadTimeReported.current = true;
+    }
+
     const paddingSensor = attachMainContainerPaddingSensor(parentContainer);
 
     return () => { paddingSensor.detach(); }
@@ -279,6 +288,13 @@ const RecordInner = ({
    */
   useEffect(() => {
     if (showMainSectionSpinner || !relatedSectionInitialized) return;
+
+    // if everything is fully loaded, then report the full page load
+    if (!fullPageLoadTimeReported.current && relatedModels.every((rm) => !rm.recordsetState.isLoading)) {
+      console.log(`full_page_load_chaise_manual: ${window.performance.now()}`);
+      fullPageLoadTimeReported.current = true;
+    }
+
     setDisablePanel(
       columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
       relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
@@ -666,11 +682,6 @@ const RecordInner = ({
 
   const renderMainContainer = () => {
     const showRelatedSectionSpinner = errors.length === 0 && (showMainSectionSpinner || relatedModels.some((rm) => rm.recordsetState.isLoading));
-
-    if (!showRelatedSectionSpinner && !fullPageLoadTimeReported.current) {
-      console.log(`full_page_load_chaise_manual: ${window.performance.now()}`);
-      fullPageLoadTimeReported.current = true;
-    }
 
     return <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
