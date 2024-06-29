@@ -74,7 +74,7 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * @param numRows number of recordset rows after clicking facet option
  * @param numFilters number of recordset filters after clicking facet option 
  */
-export async function testSelectFacetOption(page: Page, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
+export async function testSelectFacetOption(page: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
@@ -90,12 +90,40 @@ export async function testSelectFacetOption(page: Page, facet: Locator, optionId
  * @param optionIdx facet option index to check is unchecked
  * @param pageSize the recordset page size for comparing with after clear
  */
-export async function testClearAllFilters(page: Page, facet: Locator, optionIdx: number, pageSize: number) {
+export async function testClearAllFilters(page: Page, pageSize: number, facet?: Locator, optionIdx?: number) {
   const clearAll = RecordsetLocators.getClearAllFilters(page);
   await clearAll.click();
   await expect.soft(clearAll).not.toBeVisible();
-  await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSize);
+
+  if (facet && optionIdx) await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
+}
+
+export async function testShowMoreClick(page: Page, facet: Locator, modal: Locator, numRows: number, numCheckedRows: number) {
+  await RecordsetLocators.getShowMore(facet).click();
+  await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+  await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(numRows);
+  await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(numCheckedRows);
+}
+
+export async function testColumnSort(modal: Locator, rawColumnName: string, expectedColumnValues: string[]) {
+  const sortBtn = RecordsetLocators.getColumnSortButton(modal, rawColumnName);
+  await expect.soft(sortBtn).toBeVisible();
+
+  await sortBtn.click();
+  await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+  const columnValues = RecordsetLocators.getFirstColumn(modal);
+  await expect.soft(columnValues).toHaveCount(expectedColumnValues.length);
+  await expect.soft(columnValues).toHaveText(expectedColumnValues);
+}
+
+export async function testSubmitModalSelection(page: Page, facet: Locator, submitBtn: Locator, numRows: number, numCheckedFacetOptions: number) {
+  await submitBtn.click();
+
+  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRows);
+  await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedFacetOptions);
 }
 
 /**
@@ -116,7 +144,7 @@ export async function testSelectFacetOptionThenClear(page: Page, facetIdx: numbe
 
   await expect.soft(RecordsetLocators.getFacetFilters(page).nth(0)).toHaveText(filterName);
 
-  await testClearAllFilters(page, facet, filterIdx, pageSize);
+  await testClearAllFilters(page, pageSize, facet, filterIdx);
 };
 
 /**
@@ -192,7 +220,7 @@ export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, 
 
   const optionsCount = await RecordsetLocators.getFacetOptions(facet).count();
   // get last item in range inputs list to test it's unchecked
-  await testClearAllFilters(page, facet, optionsCount - 1, pageSize);
+  await testClearAllFilters(page, pageSize, facet, optionsCount - 1);
 }
 
 /**
@@ -210,7 +238,7 @@ const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: str
     val = parseFloat(val).toFixed(2);
   }
 
-  await expect.soft(val).toEqual(expectedVal);
+  expect.soft(val).toEqual(expectedVal);
 }
 
 /**
@@ -232,13 +260,13 @@ export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeIn
  * @param max object with date and time expected values for max inputs
  */
 export async function testTimestampRangePickerInputsAfterZoom(
-  rangeInputs: TimestampRangeInputLocators, 
-  min: {date: string, time: string}, 
-  max: {date: string, time: string}
+  rangeInputs: TimestampRangeInputLocators,
+  min: { date: string, time: string },
+  max: { date: string, time: string }
 ) {
   await testInputValue(false, rangeInputs.minDateInput, min.date);
   await testInputValue(false, rangeInputs.maxDateInput, max.date);
-  
+
   await testInputValue(false, rangeInputs.minTimeInput, min.time);
   await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }

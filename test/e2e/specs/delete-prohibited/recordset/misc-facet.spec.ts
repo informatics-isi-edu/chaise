@@ -11,7 +11,11 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { openFacet, openFacetAndTestFilterOptions, testFacetOptions } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { 
+  openFacet, openFacetAndTestFilterOptions, 
+  testColumnSort, testClearAllFilters, testFacetOptions, 
+  testSelectFacetOption, testShowMoreClick, testSubmitModalSelection
+} from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 const testParams = {
   schema_name: 'faceting',
@@ -30,6 +34,8 @@ const testParams = {
     {
       title: 'facet with order and column_order false for scalar',
       facetIdx: 20,
+      numFacetOptions: 8,
+      numOpenFacets: 4,
       modalOptions: ['01', '02', '03', '04', '05', '06', '07'],
       sortable: false,
       modalOptionsSortedByScalar: [], // for type errors
@@ -40,6 +46,8 @@ const testParams = {
     {
       title: 'facet without order and hide_num_occurrences true',
       facetIdx: 21,
+      numFacetOptions: 11,
+      numOpenFacets: 5,
       modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
       sortable: true,
       modalOptionsSortedByScalar: ['13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01'],
@@ -260,11 +268,7 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     await test.step('Side panel should hide/show by clicking pull button', async () => {
@@ -285,27 +289,27 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('should open the facet, select a value to filter on.', async () => {
-      await RecordsetLocators.getFacetHeaderButtonById(facet, testParams.filter_secondary_key.facetIdx).click();
-
       // wait for facet to open
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-      // wait for facet checkboxes to load
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(testParams.filter_secondary_key.totalNumOptions);
-      // wait for list to be fully visible
-      await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+      await openFacet(
+        page, 
+        facet, 
+        testParams.filter_secondary_key.facetIdx,
+        testParams.filter_secondary_key.totalNumOptions,
+        4 // 3 facets open on page load
+      );
 
-      await RecordsetLocators.getFacetOption(facet, testParams.filter_secondary_key.option).click();
-
-      // wait for request to return
-      await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.filter_secondary_key.numRows);
+      await testSelectFacetOption(
+        page, 
+        facet, 
+        testParams.filter_secondary_key.option,
+        testParams.filter_secondary_key.numRows,
+        1
+      )
     });
 
-    await test.step('the selected value should be selected on the modal.', async () => {
-      await RecordsetLocators.getShowMore(facet).click();
-      await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(12);
-
-      await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(1);
+    await test.step('the selected value should be selected in the modal.', async () => {
+      await testShowMoreClick(page, facet, modal, 12, 1);
+      
       await expect.soft(RecordsetLocators.getCheckboxInputs(modal).nth(testParams.filter_secondary_key.selectedModalOption)).toBeChecked();
     });
 
@@ -314,23 +318,18 @@ test.describe('Other facet features', () => {
 
       const submit = ModalLocators.getSubmitButton(modal);
       await expect.soft(submit).toHaveText('Submit');
-      await submit.click();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.filter_secondary_key.numRowsAfterModal);
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(2);
+      await testSubmitModalSelection(page, facet, submit, testParams.filter_secondary_key.numRowsAfterModal, 2);
     });
 
     await test.step('removing values in the modal should allow for submitting to remove the set of selected options for that facet.', async () => {
-      await RecordsetLocators.getShowMore(facet).click();
-      await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(2);
+      await testShowMoreClick(page, facet, modal, 12, 2);
 
       // clear selections in modal to remove selections in facet
       await RecordsetLocators.getClearSelectedRows(modal).click();
       await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(0);
 
-      await ModalLocators.getSubmitButton(modal).click();
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.filter_secondary_key.removingOptionsNumRowsAfterModal);
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
+      const submit = ModalLocators.getSubmitButton(modal);
+      await testSubmitModalSelection(page, facet, submit, testParams.filter_secondary_key.removingOptionsNumRowsAfterModal, 0);
     });
   });
 
@@ -341,11 +340,7 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     for (const params of testParams.facet_order) {
@@ -353,13 +348,11 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       await test.step('the rows in the modal should honor the given order.', async () => {
-        await RecordsetLocators.getFacetHeaderButtonById(facet, params.facetIdx).click();
-
-        // wait for facet to open
-        await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+        await openFacet(page, facet, params.facetIdx, params.numFacetOptions, params.numOpenFacets);
 
         // click on show more
-        await RecordsetLocators.getShowMore(facet).click();
+        await testShowMoreClick(page, facet, modal, params.modalOptions.length, 0);
+
         const columnValues = RecordsetLocators.getFirstColumn(modal);
         await expect.soft(columnValues).toHaveCount(params.modalOptions.length);
 
@@ -372,14 +365,7 @@ test.describe('Other facet features', () => {
         });
       } else {
         await test.step('users should be able to change the sort to be based on the scalar column.', async () => {
-          const sortBtn = RecordsetLocators.getColumnSortButton(modal, '0');
-          await expect.soft(sortBtn).toBeVisible();
-
-          await sortBtn.click();
-          await RecordsetLocators.waitForRecordsetPageReady(modal);
-
-          const columnValues = RecordsetLocators.getFirstColumn(modal);
-          await expect.soft(columnValues).toHaveText(params.modalOptionsSortedByScalar);
+          await testColumnSort(modal, '0', params.modalOptionsSortedByScalar);
         });
       }
 
@@ -396,15 +382,7 @@ test.describe('Other facet features', () => {
 
       if (!params.hideNumOccurrences) {
         await test.step('numer of Occurrences column should be available and users should be able to sort based on that.', async () => {
-          const sortBtn = RecordsetLocators.getColumnSortButton(modal, 'count');
-          await expect.soft(sortBtn).toBeVisible();
-
-          await sortBtn.click();
-          await RecordsetLocators.waitForRecordsetPageReady(modal);
-
-          const columnValues = RecordsetLocators.getFirstColumn(modal);
-          await expect.soft(columnValues).toHaveCount(params.modalOptionsSortedByNumOfOccurences.length);
-          await expect.soft(columnValues).toHaveText(params.modalOptionsSortedByNumOfOccurences);
+          await testColumnSort(modal, 'count', params.modalOptionsSortedByNumOfOccurences);
         });
       }
 
@@ -415,7 +393,8 @@ test.describe('Other facet features', () => {
   });
 
   test('Records With Value (not-null) filter', async ({ page, baseURL }, testInfo) => {
-    const facet = RecordsetLocators.getFacetById(page, testParams.not_null.facetIdx);
+    const params = testParams.not_null;
+    const facet = RecordsetLocators.getFacetById(page, params.facetIdx);
 
     await test.step('should load recordset page and clear all filters', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
@@ -423,63 +402,48 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     await test.step('`All Records with value` option must be available in facet panel.', async () => {
-      await RecordsetLocators.getFacetHeaderButtonById(facet, testParams.not_null.facetIdx).click();
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-
-      // make sure facet is loaded
-      const facetOptions = RecordsetLocators.getFacetOptions(facet);
-      await expect.soft(facetOptions).toHaveCount(12);
-      await expect.soft(facetOptions).toHaveText(testParams.not_null.options_w_not_null);
+      await openFacetAndTestFilterOptions(
+        page,
+        facet,
+        params.facetIdx,
+        params.options_w_not_null,
+        4
+      );
     });
 
+    const testOptionChange = async (optionIdx: number, isCheck: boolean, numCheckedOptions: number, numDisabledOptions: number, numRows: number) => {
+      if (isCheck) {
+        await RecordsetLocators.getFacetOption(facet, optionIdx).check();
+      } else {
+        await RecordsetLocators.getFacetOption(facet, optionIdx).uncheck();
+      }
+
+      // don't need to be params since it's the same in all tests
+      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options_w_not_null);
+
+      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedOptions);
+      await expect.soft(RecordsetLocators.getDisabledFacetOptions(facet)).toHaveCount(numDisabledOptions);
+      await expect(RecordsetLocators.getRows(page)).toHaveCount(numRows);
+    }
+
     await test.step('After clicking on `All records with value`, the rest of options must be disabled', async () => {
-      await RecordsetLocators.getFacetOption(facet, 0).check();
-
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1)
-
-      // same check as previous test to make sure displayed options don't change
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(testParams.not_null.options_w_not_null);
-
-      await expect.soft(RecordsetLocators.getDisabledFacetOptions(facet)).toHaveCount(testParams.not_null.disabled_rows_w_not_null);
-      await expect(RecordsetLocators.getRows(page)).toHaveCount(testParams.not_null.result_num_w_not_null);
+      await testOptionChange(0, true, 1, params.disabled_rows_w_not_null, params.result_num_w_not_null);
     });
 
     await test.step('Deselecting `All records with value` should enable all the values on the list.', async () => {
-      await RecordsetLocators.getFacetOption(facet, 0).uncheck();
-
-      // same check as previous 2 tests to make sure displayed options don't change again
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(testParams.not_null.options_w_not_null);
-
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
-      await expect.soft(RecordsetLocators.getDisabledFacetOptions(facet)).toHaveCount(0);
+      await testOptionChange(0, false, 0, 0, 25);
     });
 
     await test.step('should be able to select other filters on the facet.', async () => {
-      await RecordsetLocators.getFacetOption(facet, 1).click();
-
-      // same check as previous 3 tests to make sure displayed options don't change again
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(testParams.not_null.options_w_not_null);
-
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
-      await expect.soft(RecordsetLocators.getDisabledFacetOptions(facet)).toHaveCount(0);
+      await testOptionChange(1, true, 1, 0, 25);
     });
 
     await test.step('Selecting `All records with value` in the list, should remove all the checked filters on facet.', async () => {
-      await RecordsetLocators.getFacetOption(facet, 0).check();
-
-      // same check as previous 4 tests to make sure displayed options don't change again
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(testParams.not_null.options_w_not_null);
-
-      await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
-      await expect.soft(RecordsetLocators.getDisabledFacetOptions(facet)).toHaveCount(testParams.not_null.disabled_rows_w_not_null);
+      await testOptionChange(0, true, 1, params.disabled_rows_w_not_null, 25);
     });
   });
 
@@ -490,32 +454,19 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     await test.step('null should be provided as an option and user should be able to select it.', async () => {
       const params = testParams.null_filter.panel;
       const facet = RecordsetLocators.getFacetById(page, params.facetIdx);
+      
+      await openFacet(page, facet, params.facetIdx, params.totalNumOptions, 4);
 
-      await RecordsetLocators.getFacetHeaderButtonById(facet, params.facetIdx).click();
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-      // wait for facet checkboxes to load
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(params.totalNumOptions);
-
-      await RecordsetLocators.getFacetOption(facet, params.option).click();
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
-
+      await testSelectFacetOption(page, facet, params.option, params.numRows, 1);
 
       // clear the selected facet
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     await test.step('regarding facets that require right join', async () => {
@@ -523,32 +474,16 @@ test.describe('Other facet features', () => {
 
       await test.step('null should be provided as an option and user should be able to select it.', async () => {
         const facet = RecordsetLocators.getFacetById(page, params.firstFacet.idx);
-        await RecordsetLocators.getFacetHeaderButtonById(facet, params.firstFacet.idx).click();
-
-        await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-        // wait for facet checkboxes to load
-        await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(params.firstFacet.totalNumOptions);
-
-        await RecordsetLocators.getFacetOption(facet, params.firstFacet.option).check();
-        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.firstFacet.numRows);
+        await openFacet(page, facet, params.firstFacet.idx, params.firstFacet.totalNumOptions, 5);
+        await testSelectFacetOption(page, facet, params.firstFacet.option, params.firstFacet.numRows, 1);
       });
 
       await test.step('after selecting one, other such facets should not provide null option.', async () => {
         const facet = RecordsetLocators.getFacetById(page, params.secondFacet.idx);
-        await openFacetAndTestFilterOptions(
-          page,
-          facet,
-          params.secondFacet.idx,
-          params.secondFacet.options,
-          6 // 6 open facets
-        );
+        await openFacetAndTestFilterOptions(page, facet, params.secondFacet.idx, params.secondFacet.options, 6);
       });
     });
   });
-
-  /***********************************************************  local test cases ***********************************************************/
-  // if (process.env.CI) return;
-  // NOTE the following test cases will only run locally.
 
   test('regarding the logic to show only certain number of selected items', async ({ page, baseURL }, testInfo) => {
     const params = testParams.hide_selected_items;
@@ -697,11 +632,7 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
     });
 
     await test.step('should hide the total count when hide_row_count=true', async () => {
@@ -710,10 +641,7 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       // facet is already open so we don't have to click to open
-      await RecordsetLocators.getShowMore(facet).click();
-      await RecordsetLocators.waitForRecordsetPageReady(modal);
-
-      await expect.soft(RecordsetLocators.getFirstColumn(modal)).toHaveCount(params.numModalOptions);
+      await testShowMoreClick(page, facet, modal, params.numModalOptions, 0);
       await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
 
       await ModalLocators.getCloseBtn(modal).click();
@@ -725,13 +653,9 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       // open the facet first and then open the modal
-      await RecordsetLocators.getFacetHeaderButtonById(facet, params.facetIdx).click();
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+      await openFacet(page, facet, params.facetIdx, 11, 4);
 
-      await RecordsetLocators.getShowMore(facet).click();
-      await RecordsetLocators.waitForRecordsetPageReady(modal);
-
-      await expect.soft(RecordsetLocators.getFirstColumn(modal)).toHaveCount(params.numModalOptions);
+      await testShowMoreClick(page, facet, modal, params.numModalOptions, 0);
       await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
 
       await ModalLocators.getCloseBtn(modal).click();
@@ -762,13 +686,7 @@ test.describe('Other facet features', () => {
       // main
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
 
-      await RecordsetLocators.getFacetHeaderButtonById(facet, params.facet).click();
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-
-      // wait for facet checkboxes to load
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(params.totalNumOptions);
-      // wait for list to be fully visible
-      await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+      await openFacet(page, facet, params.facet, params.totalNumOptions, 2);
 
       /**
        * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
@@ -779,13 +697,7 @@ test.describe('Other facet features', () => {
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options);
 
       // select a new facet
-      await RecordsetLocators.getFacetOption(facet, params.option).check();
-
-      // wait for table rows to load
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRowsWFacet);
-
-      // make sure filter is there
-      await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(2);
+      await testSelectFacetOption(page, facet, params.option, params.numRowsWFacet, 2);
     });
 
     await test.step('clicking on `x` for Custom Filter should only clear the filter.', async () => {
@@ -824,11 +736,7 @@ test.describe('Other facet features', () => {
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      const clearAll = RecordsetLocators.getClearAllFilters(page);
-      await clearAll.click();
-      await expect.soft(clearAll).not.toBeVisible();
-
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+      await testClearAllFilters(page, 25);
 
       const facet1 = RecordsetLocators.getFacetById(page, 0);
       await RecordsetLocators.getFacetHeaderButtonById(facet1, 0).click();
@@ -854,11 +762,9 @@ test.describe('Other facet features', () => {
       const modalSubmit = ModalLocators.getSubmitButton(modal);
 
       await test.step('open the facet then open the show more modal', async () => {
-        await RecordsetLocators.getFacetHeaderButtonById(facet1, params.facetIdx).click();
-        await expect.soft(RecordsetLocators.getFacetCollapse(facet1)).toBeVisible();
+        await openFacet(page, facet1, params.facetIdx, 11, 4);
 
-        await RecordsetLocators.getShowMore(facet1).click();
-        await RecordsetLocators.waitForRecordsetPageReady(modal);
+        await testShowMoreClick(page, facet1, modal, 25, 0)
       });
 
       await test.step('after opening the modal, the existing url limit alert should be removed.', async () => {
@@ -917,11 +823,7 @@ test.describe('Other facet features', () => {
         await page.goto(`${baseURL}${PAGE_URL}`);
         await RecordsetLocators.waitForRecordsetPageReady(page);
 
-        const clearAll = RecordsetLocators.getClearAllFilters(page);
-        await clearAll.click();
-        await expect.soft(clearAll).not.toBeVisible();
-
-        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(25);
+        await testClearAllFilters(page, 25);
       });
 
       await test.step('clicking bulk edit should show the same number of forms in RE as rows in RS.', async () => {
@@ -964,7 +866,6 @@ test.describe('Other facet features', () => {
         await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
       });
 
-      // NOTE: identical to a test below
       await test.step('clicking the side panel button should open the facet panel', async () => {
         await RecordsetLocators.getShowFilterPanelBtn(modal).click();
 
@@ -976,9 +877,7 @@ test.describe('Other facet features', () => {
 
       await test.step('select a facet option and select a row for the input', async () => {
         const facet = RecordsetLocators.getFacetById(modal, 0);
-        await RecordsetLocators.getFacetOption(facet, 0).click();
-
-        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(1);
+        await testSelectFacetOption(modal, facet, 0, 1, 1);
         await expect.soft(RecordsetLocators.getFacetFilters(modal).nth(0)).toHaveText(testParams.foreignKeyPopupFacetFilter);
 
         const selectButtons = RecordsetLocators.getRows(modal).locator('.select-action-button');
@@ -1024,7 +923,6 @@ test.describe('Other facet features', () => {
         await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
       });
 
-      // NOTE: identical to a test above
       await test.step('clicking the side panel button should open the facet panel', async () => {
         await RecordsetLocators.getShowFilterPanelBtn(modal).click();
 
@@ -1036,9 +934,7 @@ test.describe('Other facet features', () => {
 
       await test.step('select a facet option and select a row to associate', async () => {
         const facet = RecordsetLocators.getFacetById(modal, 0);
-        await RecordsetLocators.getFacetOption(facet, 0).click();
-
-        await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(1);
+        await testSelectFacetOption(modal, facet, 0, 1, 1);
         await expect.soft(RecordsetLocators.getFacetFilters(modal).nth(0)).toHaveText(testParams.associationPopupFacetFilter);
 
         await RecordsetLocators.getCheckboxInputs(modal).check();
@@ -1058,7 +954,6 @@ test.describe('Other facet features', () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
 
       await page.goto(`${baseURL}${PAGE_URL}/*::cfacets::${params.cfacetBlob}`);
-      await page.pause();
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 
@@ -1073,27 +968,9 @@ test.describe('Other facet features', () => {
     await test.step('main and faceting data should be based on the filter, and be able to apply new filters.', async () => {
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
 
-      await RecordsetLocators.getFacetHeaderButtonById(facet, params.facet).click();
-      await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
-
-      // wait for facet checkboxes to load
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(params.totalNumOptions);
-      // wait for list to be fully visible
-      await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
-
-      /**
-       * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
-       *   value for the rows that are hidden because of the height logic
-       * 
-       * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
-       */
-      await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options);
-
-      await RecordsetLocators.getFacetOption(facet, params.option).check();
-      // wait for table rows to load
-      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRowsWFacet);
-      // make sure filter is there
-      await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(2);
+      await openFacetAndTestFilterOptions(page, facet, params.facet, params.options, 2);
+      
+      await testSelectFacetOption(page, facet, params.option, params.numRowsWFacet, 2);
     });
 
     await test.step('clicking on `x` for Custom Filter should only clear the filter.', async () => {

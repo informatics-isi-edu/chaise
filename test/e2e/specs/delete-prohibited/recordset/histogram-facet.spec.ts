@@ -226,14 +226,14 @@ test.describe('Testing features for range picker facet types with histograms', (
           await histogramButtons.zoom.click();
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
+          await expect.soft(histogramButtons.unzoomDisabled).toHaveCount(0);
+
           await testRangePickerInputsAfterZoom(
             rangeInputs, 
             isFloat, 
             facetParams.zoom1.min as string, 
             facetParams.zoom1.max as string
           );
-
-          await expect.soft(histogramButtons.unzoomDisabled).toHaveCount(0);
         });
 
         await test.step('zoom in again and submit the range filter should display the proper resultset.', async () => {
