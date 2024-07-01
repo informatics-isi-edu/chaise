@@ -418,11 +418,14 @@ test.describe('Other facet features', () => {
     const testOptionChange = async (optionIdx: number, isCheck: boolean, numCheckedOptions: number, numDisabledOptions: number, numRows: number) => {
       if (isCheck) {
         await RecordsetLocators.getFacetOption(facet, optionIdx).check();
+
+        await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
       } else {
         await RecordsetLocators.getFacetOption(facet, optionIdx).uncheck();
+
+        await expect.soft(RecordsetLocators.getClearAllFilters(page)).not.toBeVisible();
       }
 
-      // don't need to be params since it's the same in all tests
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options_w_not_null);
 
       await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedOptions);
@@ -439,7 +442,7 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('should be able to select other filters on the facet.', async () => {
-      await testOptionChange(1, true, 1, 0, 25);
+      await testOptionChange(1, true, 1, 0,  5);
     });
 
     await test.step('Selecting `All records with value` in the list, should remove all the checked filters on facet.', async () => {
