@@ -314,20 +314,21 @@ const RecordeditInner = ({
       let domainRef: any;
       const prefillObject = getPrefillObject(queryParams);
       console.log(prefillObject);
-      // TODO: this should be done differently
 
-      let mainRefColumn: any;
+      if (!prefillObject) return;
+
+      // TODO: maybe this should be done differently?
       reference.columns.forEach((column: any) => {
+        // column is a foreignkey pseudo column
         if (!column.isForeignKey) return;
+        if (prefillObject.fkColumnNames.indexOf(column.name) !== -1) return;
 
-        if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
-          mainRefColumn = column;
-          return;
+        if (prefillObject.toFkColumnNames.indexOf(column.name) !== -1) {
+          
+          setColumnForAssociation(column);
+          // TODO: this is not filtered so disabled tuples won't work
+          domainRef = column.reference;
         }
-
-        setColumnForAssociation(column);
-        // TODO: this is not filtered so disabled tuples won't work
-        domainRef = column.reference;
       });
 
       if (!domainRef) return;

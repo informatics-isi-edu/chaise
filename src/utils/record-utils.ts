@@ -1,7 +1,7 @@
 // models
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { PrefillObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
@@ -316,32 +316,7 @@ function canRelatedForeignKeyBePrefilled(fk: any, origFKR: any) {
  * @param mainTuple the main tuple
  * @returns
  */
-export function getPrefillCookieObject(ref: any, mainTuple: any): {
-  /**
-   * the displayed value in the form
-   */
-  rowname: Displayname,
-  /**
-   * used for reading the actual foreign key data
-   */
-  origUrl: string,
-  /**
-   * the foreignkey columns that should be prefilled
-   */
-  fkColumnNames: string[],
-  /**
-   * raw values of the foreign key columns keyed by column name
-   */
-  keys: { [key: string]: any },
-  /**
-   * map of column names as keys to column RIDs as values
-   */
-  columnNameToRID: { [key: string]: string },
-  /**
-   * boolean to trigger add association popup when loading recordedit before showing the forms
-   */
-  hasUniqueAssociation: boolean
-} {
+export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject {
 
   let origTable;
   if (ref.derivedAssociationReference) {
@@ -354,10 +329,14 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
   }
 
   const prefilledFks: string[] = [];
+  const otherFks: string[] = [];
   const keys: { [key: string]: any } = {};
   const columnNameToRID: { [key: string]: string } = {}
   origTable.foreignKeys.all().forEach((fk: any) => {
-    if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) return;
+    if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) {
+      otherFks.push(fk.name);
+      return;
+    }
     prefilledFks.push(fk.name);
     columnNameToRID[fk.name] = fk.RID
 
@@ -372,6 +351,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
     rowname: mainTuple.displayname,
     origUrl: mainTuple.reference.uri,
     fkColumnNames: prefilledFks,
+    toFkColumnNames: otherFks,
     columnNameToRID: columnNameToRID,
     keys: keys,
     hasUniqueAssociation: origTable.isAssociation

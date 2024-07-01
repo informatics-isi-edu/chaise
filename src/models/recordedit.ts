@@ -186,6 +186,10 @@ export interface PrefillObject {
    */
   fkColumnNames: string[];
   /**
+   * the foreignkey columns that point to the leaf table
+   */
+  toFkColumnNames: string[],
+  /**
    * map of column names as keys to column RIDs as values
    */
   columnNameToRID: { [key: string]: string };

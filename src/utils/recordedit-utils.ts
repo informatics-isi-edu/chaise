@@ -745,20 +745,21 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
   // make sure all the keys are in the object
   if (!(
     ('keys' in cookie) && ('columnNameToRID' in cookie) &&
-    ('fkColumnNames' in cookie) &&
+    ('fkColumnNames' in cookie) && ('toFkColumnNames' in cookie) &&
     ('origUrl' in cookie) && ('rowname' in cookie)
   )) {
     return null;
   }
 
   // validate the values
-  if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
+  if (!Array.isArray(cookie.fkColumnNames) || !Array.isArray(cookie.toFkColumnNames) || typeof cookie.origUrl !== 'string') {
     return null;
   }
 
   return {
     keys: cookie.keys,
     fkColumnNames: cookie.fkColumnNames,
+    toFkColumnNames: cookie.toFkColumnNames,
     columnNameToRID: cookie.columnNameToRID,
     origUrl: cookie.origUrl,
     rowname: cookie.rowname,
