@@ -173,7 +173,7 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
     const mainSearch = RecordsetLocators.getMainSearchInput(page);
 
     await RecordsetLocators.getClearAllFilters(page).click();
-    await page.locator('.recordest-main-spinner').waitFor({ state: 'detached' });
+    await page.locator('.recordset-main-spinner').waitFor({ state: 'detached' });
 
     await mainSearch.fill(testParams.searchBox.term);
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.numRows);

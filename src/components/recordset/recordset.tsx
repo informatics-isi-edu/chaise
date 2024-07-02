@@ -791,7 +791,7 @@ const RecordsetInner = ({
       <div className='main-container dynamic-padding' ref={mainContainer}>
         {hasSpinner &&
           <div className='recordset-main-spinner-container sticky-spinner-outer-container'>
-            <ChaiseSpinner className='recordest-main-spinner manual-position-spinner' />
+            <ChaiseSpinner className='recordset-main-spinner manual-position-spinner' />
           </div>
         }
         <div className={`main-body${hasSpinner ? ' with-spinner' : ''}`}>

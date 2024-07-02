@@ -66,7 +66,6 @@ E2EDrecordLinks=test/e2e/specs/default-config/record/links.config.ts
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
-E2EDrecordsetIndFacetProt=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
@@ -82,7 +81,6 @@ E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/errors.config.ts
 ## Parallel test scripts (protractor)
 AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
-DeleteProhibitedParallel_PROTRACTOR=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel_PROTRACTOR=test/e2e/specs/default-config/protractor.conf.js
 ## Parallel test scripts
 AllFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
@@ -94,13 +92,12 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
 RECORD_TESTS_PROTRACTOR=$(E2EDrecord)
-RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacetProt)
+RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
-DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
-PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
+PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR)
 ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR)
 
 # playwright tests
@@ -213,9 +210,6 @@ testallfeaturesconfirmation-protractor: test_protractor-ALL_FEATURES_CONFIRMATIO
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited
 testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
-
-.PHONY: testdeleteprohibited-protractor
-testdeleteprohibited-protractor: test_protractor-DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testdefaultconfig

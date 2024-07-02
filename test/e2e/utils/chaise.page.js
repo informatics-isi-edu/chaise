@@ -1026,7 +1026,7 @@ var recordsetPage = function() {
     };
 
     /**
-     * TODO in playwright version, use rdsetLocators.getRows(rsModal)
+     * TODO in playwright version, use recordsetLocators.getRows(rsModal)
      */
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .chaise-table-row'));
@@ -1037,7 +1037,7 @@ var recordsetPage = function() {
     };
 
     this.waitForInverseModalSpinner = function () {
-        var locator = element(by.css(".modal-body .recordest-main-spinner"));
+        var locator = element(by.css(".modal-body .recordset-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
     };
 

@@ -179,12 +179,6 @@ jobs:
         run: |
           cd chaise
           make testdefaultconfig-protractor
-      - name: Run delete prohibited test spec  (protractor)
-        id: test-protractor-delete-prohibited
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited-protractor
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
@@ -202,9 +196,6 @@ jobs:
         run: exit 1
       - name: Check on default config test spec (protractor)
         if: always() && steps.test-protractor-default-config.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited test spec (protractor)
-        if: always() && steps.test-protractor-delete-prohibited.outcome != 'success'
         run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
