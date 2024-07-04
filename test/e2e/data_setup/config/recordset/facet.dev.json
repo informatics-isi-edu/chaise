@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordset/ind-facet.config.json"
+            "recordset/facet.config.json"
         ],
         "schema": "faceting"
     },

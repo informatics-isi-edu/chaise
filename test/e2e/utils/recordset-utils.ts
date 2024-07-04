@@ -99,7 +99,12 @@ export async function testClearAllFilters(page: Page, pageSize: number, facet?: 
   if (facet && optionIdx) await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
 }
 
-export async function testShowMoreClick(page: Page, facet: Locator, modal: Locator, numRows: number, numCheckedRows: number) {
+/**
+ * clicks show more button and makes sure modal has finished loading
+ * @param numRows number of recordset rows in modal on load
+ * @param numCheckedRows number of checked rows in modal on load
+ */
+export async function testShowMoreClick(facet: Locator, modal: Locator, numRows: number, numCheckedRows: number) {
   await RecordsetLocators.getShowMore(facet).click();
   await RecordsetLocators.waitForRecordsetPageReady(modal);
 
@@ -107,6 +112,19 @@ export async function testShowMoreClick(page: Page, facet: Locator, modal: Locat
   await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(numCheckedRows);
 }
 
+/**
+ * close the modal and make sure it's not attached anymore
+ */
+export async function testModalClose(modal: Locator) {
+  await ModalLocators.getCloseBtn(modal).click();
+  await expect.soft(modal).not.toBeAttached();
+}
+
+/**
+ * sort a column and make sure the values are as expected for the first column in the modal
+ * @param rawColumnName raw name of column we are sorting by
+ * @param expectedColumnValues all of the values for the first column in the table after sorted
+ */
 export async function testColumnSort(modal: Locator, rawColumnName: string, expectedColumnValues: string[]) {
   const sortBtn = RecordsetLocators.getColumnSortButton(modal, rawColumnName);
   await expect.soft(sortBtn).toBeVisible();
@@ -119,8 +137,14 @@ export async function testColumnSort(modal: Locator, rawColumnName: string, expe
   await expect.soft(columnValues).toHaveText(expectedColumnValues);
 }
 
-export async function testSubmitModalSelection(page: Page, facet: Locator, submitBtn: Locator, numRows: number, numCheckedFacetOptions: number) {
-  await submitBtn.click();
+/**
+ * submit the modal selections and make the recordset
+ * @param numRows number of recordset rows after submitting modal selection
+ * @param numCheckedFacetOptions number of checked facet options for `facet` after submitting modal selection
+ */
+export async function testSubmitModalSelection(page: Page, facet: Locator, modal: Locator, numRows: number, numCheckedFacetOptions: number) {
+  await ModalLocators.getSubmitButton(modal).click();
+  await expect.soft(modal).not.toBeAttached();
 
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRows);
   await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedFacetOptions);

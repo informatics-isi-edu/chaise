@@ -12,8 +12,8 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 import { 
-  openFacet, openFacetAndTestFilterOptions, 
-  testColumnSort, testClearAllFilters, testFacetOptions, 
+  openFacet, openFacetAndTestFilterOptions, testColumnSort,
+  testClearAllFilters, testFacetOptions, testModalClose,
   testSelectFacetOption, testShowMoreClick, testSubmitModalSelection
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
@@ -308,7 +308,7 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('the selected value should be selected in the modal.', async () => {
-      await testShowMoreClick(page, facet, modal, 12, 1);
+      await testShowMoreClick(facet, modal, 12, 1);
       
       await expect.soft(RecordsetLocators.getCheckboxInputs(modal).nth(testParams.filter_secondary_key.selectedModalOption)).toBeChecked();
     });
@@ -318,18 +318,17 @@ test.describe('Other facet features', () => {
 
       const submit = ModalLocators.getSubmitButton(modal);
       await expect.soft(submit).toHaveText('Submit');
-      await testSubmitModalSelection(page, facet, submit, testParams.filter_secondary_key.numRowsAfterModal, 2);
+      await testSubmitModalSelection(page, facet, modal, testParams.filter_secondary_key.numRowsAfterModal, 2);
     });
 
     await test.step('removing values in the modal should allow for submitting to remove the set of selected options for that facet.', async () => {
-      await testShowMoreClick(page, facet, modal, 12, 2);
+      await testShowMoreClick(facet, modal, 12, 2);
 
       // clear selections in modal to remove selections in facet
       await RecordsetLocators.getClearSelectedRows(modal).click();
       await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(0);
 
-      const submit = ModalLocators.getSubmitButton(modal);
-      await testSubmitModalSelection(page, facet, submit, testParams.filter_secondary_key.removingOptionsNumRowsAfterModal, 0);
+      await testSubmitModalSelection(page, facet, modal, testParams.filter_secondary_key.removingOptionsNumRowsAfterModal, 0);
     });
   });
 
@@ -351,7 +350,7 @@ test.describe('Other facet features', () => {
         await openFacet(page, facet, params.facetIdx, params.numFacetOptions, params.numOpenFacets);
 
         // click on show more
-        await testShowMoreClick(page, facet, modal, params.modalOptions.length, 0);
+        await testShowMoreClick(facet, modal, params.modalOptions.length, 0);
 
         const columnValues = RecordsetLocators.getFirstColumn(modal);
         await expect.soft(columnValues).toHaveCount(params.modalOptions.length);
@@ -387,7 +386,7 @@ test.describe('Other facet features', () => {
       }
 
       await test.step('should close the facet modal', async () => {
-        await ModalLocators.getCloseBtn(modal).click();
+        await testModalClose(modal);
       });
     }
   });
@@ -644,10 +643,10 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       // facet is already open so we don't have to click to open
-      await testShowMoreClick(page, facet, modal, params.numModalOptions, 0);
+      await testShowMoreClick(facet, modal, params.numModalOptions, 0);
       await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
 
-      await ModalLocators.getCloseBtn(modal).click();
+      await testModalClose(modal);
     });
 
     await test.step('otherwise should show the total count', async () => {
@@ -658,10 +657,10 @@ test.describe('Other facet features', () => {
       // open the facet first and then open the modal
       await openFacet(page, facet, params.facetIdx, 11, 4);
 
-      await testShowMoreClick(page, facet, modal, params.numModalOptions, 0);
+      await testShowMoreClick(facet, modal, params.numModalOptions, 0);
       await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
 
-      await ModalLocators.getCloseBtn(modal).click();
+      await testModalClose(modal);
     });
   });
 
@@ -767,7 +766,7 @@ test.describe('Other facet features', () => {
       await test.step('open the facet then open the show more modal', async () => {
         await openFacet(page, facet1, params.facetIdx, 11, 4);
 
-        await testShowMoreClick(page, facet1, modal, 25, 0)
+        await testShowMoreClick(facet1, modal, 25, 0)
       });
 
       await test.step('after opening the modal, the existing url limit alert should be removed.', async () => {
