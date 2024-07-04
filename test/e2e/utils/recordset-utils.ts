@@ -335,7 +335,13 @@ export async function openRecordsetAndResetFacetState(
   });
 }
 
-export async function testFacetOptions(page: Page, facetIdx: number, filterOptions: string[], modalOptions: string[]) {
+/**
+ * test facet options and and first column values in show more modal
+ * @param facetIdx index of the facet we are testing
+ * @param filterOptions all of the values of facet options in facet
+ * @param modalOptions all of the values for the first column in the modal table
+ */
+export async function testFacetOptionsAndModalRows(page: Page, facetIdx: number, filterOptions: string[], modalOptions: string[]) {
   const facet = RecordsetLocators.getFacetById(page, facetIdx);
 
   await test.step('the facet options should be correct', async () => {
@@ -358,5 +364,6 @@ export async function testFacetOptions(page: Page, facetIdx: number, filterOptio
     await expect.soft(RecordsetLocators.getFirstColumn(modal)).toHaveText(modalOptions);
 
     await ModalLocators.getCloseBtn(modal).click();
+    await expect.soft(modal).not.toBeAttached();
   });
 }

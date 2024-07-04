@@ -13,7 +13,7 @@ import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils'
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 import { 
   openFacet, openFacetAndTestFilterOptions, testColumnSort,
-  testClearAllFilters, testFacetOptions, testModalClose,
+  testClearAllFilters, testFacetOptionsAndModalRows, testModalClose,
   testSelectFacetOption, testShowMoreClick, testSubmitModalSelection
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
@@ -566,7 +566,7 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('for the facet with subset path', async () => {
-      await testFacetOptions(
+      await testFacetOptionsAndModalRows(
         page,
         params.firstFacet.index,
         params.firstFacet.options,
@@ -575,7 +575,7 @@ test.describe('Other facet features', () => {
     });
 
     await test.step('for the facet with superset path', async () => {
-      await testFacetOptions(
+      await testFacetOptionsAndModalRows(
         page,
         params.secondFacet.index,
         params.secondFacet.options,
