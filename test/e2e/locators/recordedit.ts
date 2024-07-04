@@ -256,6 +256,10 @@ export default class RecordeditLocators {
     return RecordeditLocators.getForeignKeyInputDisplay(container, columnDisplayName, formNumber).locator('.remove-input-btn');
   }
 
+  static getModalPopupButtons(container: Page | Locator): Locator {
+    return container.locator('.modal-popup-btn');
+  }
+
 
   // ----------------- multi form input selectors ------------------- //
 

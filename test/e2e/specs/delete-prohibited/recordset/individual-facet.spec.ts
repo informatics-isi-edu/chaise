@@ -432,7 +432,7 @@ test.describe('Testing individual facet types', () => {
                 // make sure submit is disabled
                 await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
 
-                await testClearAllFilters(page, facet, 0, testParams.defaults.pageSize);
+                await testClearAllFilters(page, testParams.defaults.pageSize, facet, 0);
                 await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
 
                 // clear inputs
@@ -547,7 +547,7 @@ test.describe('Testing individual facet types', () => {
                 // make sure submit is disabled
                 await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
 
-                await testClearAllFilters(page, facet, 0, testParams.defaults.pageSize);
+                await testClearAllFilters(page, testParams.defaults.pageSize, facet, 0);
                 await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
 
                 // clear the inputs

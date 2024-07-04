@@ -1,4 +1,7 @@
 import { expect, Locator, Page, test } from '@playwright/test'
+
+// locators
+import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordsetLocators, {
   DefaultRangeInputLocators,
   TimestampRangeInputLocators
@@ -71,7 +74,7 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * @param numRows number of recordset rows after clicking facet option
  * @param numFilters number of recordset filters after clicking facet option 
  */
-export async function testSelectFacetOption(page: Page, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
+export async function testSelectFacetOption(page: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
@@ -87,12 +90,64 @@ export async function testSelectFacetOption(page: Page, facet: Locator, optionId
  * @param optionIdx facet option index to check is unchecked
  * @param pageSize the recordset page size for comparing with after clear
  */
-export async function testClearAllFilters(page: Page, facet: Locator, optionIdx: number, pageSize: number) {
+export async function testClearAllFilters(page: Page, pageSize: number, facet?: Locator, optionIdx?: number) {
   const clearAll = RecordsetLocators.getClearAllFilters(page);
   await clearAll.click();
   await expect.soft(clearAll).not.toBeVisible();
-  await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSize);
+
+  if (facet && optionIdx) await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
+}
+
+/**
+ * clicks show more button and makes sure modal has finished loading
+ * @param numRows number of recordset rows in modal on load
+ * @param numCheckedRows number of checked rows in modal on load
+ */
+export async function testShowMoreClick(facet: Locator, modal: Locator, numRows: number, numCheckedRows: number) {
+  await RecordsetLocators.getShowMore(facet).click();
+  await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+  await expect.soft(RecordsetLocators.getRows(modal)).toHaveCount(numRows);
+  await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(numCheckedRows);
+}
+
+/**
+ * close the modal and make sure it's not attached anymore
+ */
+export async function testModalClose(modal: Locator) {
+  await ModalLocators.getCloseBtn(modal).click();
+  await expect.soft(modal).not.toBeAttached();
+}
+
+/**
+ * sort a column and make sure the values are as expected for the first column in the modal
+ * @param rawColumnName raw name of column we are sorting by
+ * @param expectedColumnValues all of the values for the first column in the table after sorted
+ */
+export async function testColumnSort(modal: Locator, rawColumnName: string, expectedColumnValues: string[]) {
+  const sortBtn = RecordsetLocators.getColumnSortButton(modal, rawColumnName);
+  await expect.soft(sortBtn).toBeVisible();
+
+  await sortBtn.click();
+  await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+  const columnValues = RecordsetLocators.getFirstColumn(modal);
+  await expect.soft(columnValues).toHaveCount(expectedColumnValues.length);
+  await expect.soft(columnValues).toHaveText(expectedColumnValues);
+}
+
+/**
+ * submit the modal selections and make the recordset
+ * @param numRows number of recordset rows after submitting modal selection
+ * @param numCheckedFacetOptions number of checked facet options for `facet` after submitting modal selection
+ */
+export async function testSubmitModalSelection(page: Page, facet: Locator, modal: Locator, numRows: number, numCheckedFacetOptions: number) {
+  await ModalLocators.getSubmitButton(modal).click();
+  await expect.soft(modal).not.toBeAttached();
+
+  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRows);
+  await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedFacetOptions);
 }
 
 /**
@@ -113,7 +168,7 @@ export async function testSelectFacetOptionThenClear(page: Page, facetIdx: numbe
 
   await expect.soft(RecordsetLocators.getFacetFilters(page).nth(0)).toHaveText(filterName);
 
-  await testClearAllFilters(page, facet, filterIdx, pageSize);
+  await testClearAllFilters(page, pageSize, facet, filterIdx);
 };
 
 /**
@@ -189,7 +244,7 @@ export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, 
 
   const optionsCount = await RecordsetLocators.getFacetOptions(facet).count();
   // get last item in range inputs list to test it's unchecked
-  await testClearAllFilters(page, facet, optionsCount - 1, pageSize);
+  await testClearAllFilters(page, pageSize, facet, optionsCount - 1);
 }
 
 /**
@@ -207,7 +262,7 @@ const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: str
     val = parseFloat(val).toFixed(2);
   }
 
-  await expect.soft(val).toEqual(expectedVal);
+  expect.soft(val).toEqual(expectedVal);
 }
 
 /**
@@ -229,16 +284,18 @@ export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeIn
  * @param max object with date and time expected values for max inputs
  */
 export async function testTimestampRangePickerInputsAfterZoom(
-  rangeInputs: TimestampRangeInputLocators, 
-  min: {date: string, time: string}, 
-  max: {date: string, time: string}
+  rangeInputs: TimestampRangeInputLocators,
+  min: { date: string, time: string },
+  max: { date: string, time: string }
 ) {
   await testInputValue(false, rangeInputs.minDateInput, min.date);
   await testInputValue(false, rangeInputs.maxDateInput, max.date);
-  
+
   await testInputValue(false, rangeInputs.minTimeInput, min.time);
   await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }
+
+/** Reusable Test Steps **/
 
 /**
  * this is done in multiple places for facet specs. it will reset the state of the page.
@@ -275,5 +332,38 @@ export async function openRecordsetAndResetFacetState(
       await RecordsetLocators.getFacetHeaderButtonById(facet, facetIndex).click();
       await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
     }
+  });
+}
+
+/**
+ * test facet options and and first column values in show more modal
+ * @param facetIdx index of the facet we are testing
+ * @param filterOptions all of the values of facet options in facet
+ * @param modalOptions all of the values for the first column in the modal table
+ */
+export async function testFacetOptionsAndModalRows(page: Page, facetIdx: number, filterOptions: string[], modalOptions: string[]) {
+  const facet = RecordsetLocators.getFacetById(page, facetIdx);
+
+  await test.step('the facet options should be correct', async () => {
+    // wait for facet to open
+    await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
+    // wait for list to be fully visible
+    await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
+    // wait for facet checkboxes to load
+    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions)
+  });
+
+  await test.step('opening the facet modal should show the correct rows.', async () => {
+    // click on show more
+    await RecordsetLocators.getShowMore(facet).click();
+
+    const modal = ModalLocators.getRecordsetSearchPopup(page);
+    await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+    // this will wait for the list to be the same as expected, otherwise will timeout
+    await expect.soft(RecordsetLocators.getFirstColumn(modal)).toHaveText(modalOptions);
+
+    await ModalLocators.getCloseBtn(modal).click();
+    await expect.soft(modal).not.toBeAttached();
   });
 }
