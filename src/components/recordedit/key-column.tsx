@@ -29,7 +29,7 @@ const KeyColumn = ({
 
   const {
     appMode, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction
+    config, forms, logRecordeditClientAction, prefillAssociationFkLeafColumn
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -74,6 +74,9 @@ const KeyColumn = ({
    */
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
+
+    console.log(cm.column);
+    console.log(prefillAssociationFkLeafColumn);
 
     // if we're already showing the multi form UI, then we have to show the button
     if (activeMultiForm === columnIndex) {
