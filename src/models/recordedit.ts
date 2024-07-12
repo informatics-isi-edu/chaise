@@ -1,5 +1,5 @@
 import {
-  RecordsetProviderGetDisabledTuples
+  RecordsetProviderGetDisabledTuples, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 export enum appModes {
@@ -96,6 +96,7 @@ export type RecordeditModalOptions = {
 
 export type RecordeditForeignkeyCallbacks = {
   getDisabledTuples?: RecordsetProviderGetDisabledTuples,
+  updateAssociationSelectedRows?: (oldValues: any, newRow?: SelectedRow) => void,
   /**
    * if defined, will be used for validating the foreign key value.
    *

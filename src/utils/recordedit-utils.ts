@@ -6,12 +6,12 @@
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   appModes, PrefillObject, RecordeditColumnModel, RecordeditForeignkeyCallbacks,
   MULTI_FORM_INPUT_FORM_VALUE, TimestampOptions
-
-} from '@isrd-isi-edu/chaise/src/models/recordedit'
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -895,4 +895,74 @@ export function validateForeignkeyValue(
 
     return foreignKeyCallbacks.onChange(column, data);
   }
+}
+
+export function disabledTuplesPromise (prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
+  /**
+   * The existing rows in this p&b association must be disabled
+   * so users doesn't resubmit them.
+   */
+  return (
+    page: any,
+    pageLimit: number,
+    logStack: any,
+    logStackPath: string,
+    requestCauses?: any,
+    reloadStartTime?: any
+  ): Promise<{ page: any, disabledRows?: any }> => {
+    return new Promise((resolve, reject) => {
+      const disabledRows: any = [];
+
+      const disabledRowsFilters: any[] = [];
+      Object.keys(prefillObject.keys).forEach((key: string) => {
+        disabledRowsFilters.push({
+          source: [
+            { 'inbound': fkToLeaf.foreignKey.constraint_names[0] },
+            { 'outbound': fkToMain.foreignKey.constraint_names[0] },
+            fkToMain.foreignKey.mapping._to[0].name
+          ],
+          choices: [prefillObject.keys[key]]
+        });
+      });
+
+      let action = LogActions.LOAD,
+        newStack = logStack;
+      if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+        action = LogActions.RELOAD;
+        newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
+      }
+      // using the service instead of the record one since this is called from the modal
+      const logObj = {
+        action: LogService.getActionString(action, logStackPath),
+        stack: newStack,
+      };
+      // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+      domainRef
+        .addFacets(disabledRowsFilters)
+        .setSamePaging(page)
+        .read(pageLimit, logObj, false, true)
+        .then(function (newPage: any) {
+          newPage.tuples.forEach(function (newTuple: any) {
+            const index = page.tuples.findIndex(function (tuple: any) {
+              return tuple.uniqueId === newTuple.uniqueId;
+            });
+            if (index > -1) disabledRows.push(page.tuples[index]);
+          });
+
+          // iterate through the current row selections in recordedit forms
+          // NOTE: this doesn't account for changed values or removed forms
+          rowsUsedInForm.forEach((row: SelectedRow) => {
+            const index = page.tuples.findIndex(function (tuple: any) {
+              return tuple.uniqueId === row.uniqueId;
+            });
+            if (index > -1) disabledRows.push(page.tuples[index]);
+          })
+
+          resolve({ disabledRows: disabledRows, page: page });
+        })
+        .catch(function (err: any) {
+          reject(err);
+        });
+    });
+  };
 }

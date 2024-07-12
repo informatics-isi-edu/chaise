@@ -9,7 +9,6 @@ import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
@@ -28,7 +27,7 @@ import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/r
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, RecordeditAppState, RecordeditColumnModel,
+  appModes, PrefillObject, RecordeditAppState, RecordeditColumnModel,
   RecordeditDisplayMode, RecordeditProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
@@ -48,7 +47,10 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { copyOrClearValue, getPrefillObject, populateCreateInitialValues } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { 
+  copyOrClearValue, disabledTuplesPromise, 
+  getPrefillObject, populateCreateInitialValues
+} from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -108,13 +110,16 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions,
-    queryParams, prefillRowData, reference, tuples, waitingForForeignKeyData,
+    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams, 
+    prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn,
+    prefillAssociationSelectedRows, setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, setAppState,
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
-  const [columnForAssociation, setColumnForAssociation] = useState<any>(null);
+  const [associationIsUnique, setAssociationIsUnique] = useState<boolean>(false);
+  const [modalDomainRef, setModalDomainRef] = useState<any>(null);
+
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
   const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
 
@@ -275,7 +280,8 @@ const RecordeditInner = ({
             removedForms.push(idx);
           }
         });
-        removeForm(removedForms, true);
+
+        removeForm(removedForms, methods.getValues(), true);
       };
       /**
        * will be called when all records were deleted
@@ -311,50 +317,43 @@ const RecordeditInner = ({
     if (!initialized) return;
 
     if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
-      let domainRef: any;
-      const prefillObject = getPrefillObject(queryParams);
-      console.log(prefillObject);
+      let domainRef: any,
+        fkColumnToLeaf: any,
+        fkColumnToMain: any;
 
+      const prefillObject = getPrefillObject(queryParams);
       if (!prefillObject) return;
 
       // TODO: maybe this should be done differently?
       reference.columns.forEach((column: any) => {
         // column is a foreignkey pseudo column
         if (!column.isForeignKey) return;
-        if (prefillObject.fkColumnNames.indexOf(column.name) !== -1) return;
+        if (prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
+          setPrefillAssociationFkMainColumn(column);
+          fkColumnToMain = column;
+        }
 
         if (prefillObject.toFkColumnNames.indexOf(column.name) !== -1) {
-          
-          setColumnForAssociation(column);
-          // TODO: this is not filtered so disabled tuples won't work
+          setPrefillAssociationFkLeafColumn(column);
+          fkColumnToLeaf = column;
+          setModalDomainRef(column.reference);
           domainRef = column.reference;
         }
       });
 
       if (!domainRef) return;
-
-      // TODO: we want to filter domainRef so that it is based on the selected Protocol so getting disabled rows works as expected
-      //   we want to modify domainRef to have a join to protocol_author then a join to protocol with the protocol filter applied:
-      //   (Unique_ID)=(Protocol:Protocol_Author:Author)/(Protocol)=(Protocol:Protocol:RID)/RID=<RID>/$M
-
-      // NOTE: THIS IS WRONG, the following will create a filter for the association table but we have the leaf table that we are showing
-      //   colName = Object.keys(prefillObject.keys)[0]
-      //   andFilters.push({
-      //     source: colName
-      //     choices: [prefillObject.keys[colName]]
-      //   })
+      setAssociationIsUnique(prefillObject.hasUniqueAssociation);
 
       const andFilters: any[] = [];
-      // NOTE: we don't have a derivedAssociationReference here
-      // const fkToRelated = domainRef.derivedAssociationReference.associationToRelatedFKR;
-      // // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-      // fkToRelated.key.colset.columns.forEach(function (col: any) {
-      //   andFilters.push({
-      //     source: col.name,
-      //     hidden: true,
-      //     not_null: true,
-      //   });
-      // });
+      // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+      fkColumnToLeaf.foreignKey.key.colset.columns.forEach((col: any) => {
+        andFilters.push({
+          source: col.name,
+          hidden: true,
+          not_null: true
+        });
+      });
+
       // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
       let customFacets: any = null;
       if (
@@ -369,10 +368,8 @@ const RecordeditInner = ({
         };
       }
 
-      // TODO: addFacets, how do we get fkToRelated?
-      const modalReference = domainRef.contextualize.compactSelectAssociationLink;
-      // const modalReference = domainRef.unfilteredReference.addFacets(andFilters, customFacets)
-      //   .contextualize.compactSelectAssociationLink;
+      const modalReference = domainRef.addFacets(andFilters, customFacets)
+        .contextualize.compactSelectAssociationLink;
 
       const recordsetConfig: RecordsetConfig = {
         viewable: false,
@@ -399,53 +396,13 @@ const RecordeditInner = ({
       };
 
       let getDisabledTuples;
-      // if (unique) {
-      //   /**
-      //    * The existing rows in this p&b association must be disabled
-      //    * so users doesn't resubmit them.
-      //    */
-      //   const getDisabledTuples = (
-      //     page: any,
-      //     pageLimit: number,
-      //     logStack: any,
-      //     logStackPath: string,
-      //     requestCauses?: any,
-      //     reloadStartTime?: any
-      //   ): Promise<{ page: any, disabledRows?: any }> => {
-      //     return new Promise((resolve, reject) => {
-      //       const disabledRows: any = [];
-
-      //       let action = LogActions.LOAD,
-      //         newStack = logStack;
-      //       if (Array.isArray(requestCauses) && requestCauses.length > 0) {
-      //         action = LogActions.RELOAD;
-      //         newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
-      //       }
-      //       // using the service instead of the record one since this is called from the modal
-      //       const logObj = {
-      //         action: LogService.getActionString(action, logStackPath),
-      //         stack: newStack,
-      //       };
-      //       // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
-      //       domainRef
-      //         .setSamePaging(page)
-      //         .read(pageLimit, logObj, false, true)
-      //         .then(function (newPage: any) {
-      //           newPage.tuples.forEach(function (newTuple: any) {
-      //             const index = page.tuples.findIndex(function (tuple: any) {
-      //               return tuple.uniqueId === newTuple.uniqueId;
-      //             });
-      //             if (index > -1) disabledRows.push(page.tuples[index]);
-      //           });
-
-      //           resolve({ disabledRows: disabledRows, page: page });
-      //         })
-      //         .catch(function (err: any) {
-      //           reject(err);
-      //         });
-      //     });
-      //   };
-      // }
+      if (prefillObject.hasUniqueAssociation) {
+        /**
+         * The existing rows in this p&b association must be disabled
+         * so users doesn't resubmit them.
+         */
+        getDisabledTuples = disabledTuplesPromise(prefillObject, domainRef, fkColumnToLeaf, fkColumnToMain, []);
+      }
 
       // set recordset select view then set selected rows on "submit"
       setAssociationRecordsetProps({
@@ -595,23 +552,47 @@ const RecordeditInner = ({
     const tempFormValues = { ...values };
     rows.forEach((row: SelectedRow, index: number) => {
       if (foreignKeyData && foreignKeyData.current) {
-        foreignKeyData.current[`c_${startFormValue + index}-${columnForAssociation.RID}`] = row.data;
+        foreignKeyData.current[`c_${startFormValue + index}-${prefillAssociationFkLeafColumn.RID}`] = row.data;
       }
 
       // find the raw value of the fk columns that correspond to the selected row
       // since we've already added a not-null hidden filter, the values will be not-null.
-      columnForAssociation.foreignKey.colset.columns.forEach((col: any) => {
-        const referencedCol = columnForAssociation.foreignKey.mapping.get(col);
+      prefillAssociationFkLeafColumn.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(col);
 
         // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
         tempFormValues[`c_${startFormValue + index}-${col.RID}`] = row.data[referencedCol.name];
       });
 
       // update "display" value
-      tempFormValues[`c_${startFormValue + index}-${columnForAssociation.RID}`] = row.displayname.value;
+      tempFormValues[`c_${startFormValue + index}-${prefillAssociationFkLeafColumn.RID}`] = row.displayname.value;
     });
 
     return tempFormValues;
+  }
+
+  const showPrefillAssociationModal = () => {
+    const prefillObject = getPrefillObject(queryParams);
+    if (associationRecordsetProps && prefillObject) {
+      const getDisabledTuples = disabledTuplesPromise(
+        prefillObject,
+        modalDomainRef,
+        prefillAssociationFkLeafColumn,
+        prefillAssociationFkMainColumn,
+        prefillAssociationSelectedRows
+      );
+
+      setAssociationRecordsetProps({
+        initialReference: associationRecordsetProps.initialReference,
+        initialPageLimit: associationRecordsetProps.initialPageLimit,
+        config: associationRecordsetProps.config,
+        logInfo: associationRecordsetProps.logInfo,
+        parentReference: associationRecordsetProps.parentReference,
+        getDisabledTuples
+      })
+    }
+
+    setShowAssociationModal(true);
   }
 
   // user closes the modal without making any selections
@@ -628,15 +609,19 @@ const RecordeditInner = ({
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
 
+    if (associationIsUnique) {
+      const newRows = [...modalSelectedRows, ...prefillAssociationSelectedRows]
+      setPrefillAssociationSelectedRows(newRows);
+    }
+
     // recordedit has already been initialized so start adding new forms
     const tempFormValues = methods.getValues();
     let initialValues: any = tempFormValues,
       startFormNumber: number;
 
     if (selectionsFillFirstForm) {
-      
       if (modalSelectedRows.length === 1) {
-        initialValues = tempFormValues;  
+        initialValues = tempFormValues;
       } else {
         initialValues = createNewForms(tempFormValues, modalSelectedRows.length - 1).tempFormValues;
       }
@@ -645,7 +630,7 @@ const RecordeditInner = ({
 
       setSelectionsFillFirstForm(false);
     } else if (false) {
-    // } else if (annotation.doClone) {
+      // } else if (annotation.doClone) {
       // TODO: when configurable through annotation, allow for clone if configured
       const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
 
@@ -869,7 +854,7 @@ const RecordeditInner = ({
           recordsetProps={associationRecordsetProps}
           onSubmit={submitAssociationCB}
           onClose={closeAssociationCB}
-          displayname={columnForAssociation.displayname}
+          displayname={prefillAssociationFkLeafColumn.displayname}
         />
       }
     </>);
@@ -1039,16 +1024,13 @@ const RecordeditInner = ({
                       {associationRecordsetProps &&
                         // only show association modal button if we started with an association picker
                         <ChaiseTooltip
-                          tooltip={`Select more ${columnForAssociation.displayname.value} for new forms`}
+                          tooltip={`Select more ${prefillAssociationFkLeafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
                         >
                           <button
                             id='recordedit-add-more'
                             className='chaise-btn chaise-btn-sm chaise-btn-secondary'
-                            onClick={() => {
-                              // TODO: update props to set "disabledTuples"
-                              setShowAssociationModal(true);
-                            }}
+                            onClick={showPrefillAssociationModal}
                             type='button'
                             style={{ marginLeft: '10px' }}
                           >

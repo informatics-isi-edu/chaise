@@ -29,8 +29,7 @@ const FormContainer = ({
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
-
-  const { handleSubmit } = useFormContext();
+  const { getValues, handleSubmit } = useFormContext();
 
   const formContainer = useRef<any>(null);
 
@@ -77,7 +76,7 @@ const FormContainer = ({
   const handleRemoveForm = (formIndex: number, formNumber: number) => {
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);
-    removeForm([formIndex]);
+    removeForm([formIndex], getValues());
   };
 
   return (

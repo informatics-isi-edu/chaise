@@ -98,6 +98,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
+    callUpdateAssocationRows();
+
     clearForeignKeyData(
       props.name,
       props.columnModel.column,
@@ -168,20 +170,35 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       hideRecordsetModal();
 
       const selectedRow = selectedRows[0];
+      const column = props.columnModel.column;
 
-      console.log(props.name);
-      console.log(props.columnModel.column);
-      console.log(props.foreignKeyData);
+      callUpdateAssocationRows(selectedRow);
+
       callOnChangeAfterSelection(
         selectedRow,
         onChange,
         props.name,
-        props.columnModel.column,
+        column,
         usedFormNumber,
         props.foreignKeyData,
         setValue
       );
     }
+  }
+
+  const callUpdateAssocationRows = (rowToAdd?: SelectedRow) => {
+    if (!props.foreignKeyCallbacks?.updateAssociationSelectedRows) return;
+
+    const column = props.columnModel.column;
+
+    const oldValues: any = {};
+    column.foreignKey.colset.columns.forEach((col: any) => {
+      const referencedCol = column.foreignKey.mapping.get(col);
+
+      oldValues[referencedCol.name] = getValues(`c_${usedFormNumber}-${col.RID}`);
+    });
+
+    props.foreignKeyCallbacks.updateAssociationSelectedRows(oldValues, rowToAdd);
   }
 
   const rules: any = {};
