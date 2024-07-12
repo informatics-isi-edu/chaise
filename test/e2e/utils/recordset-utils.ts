@@ -72,7 +72,7 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * Selects a facet option and verifies the row count and number of recordset filters
  * @param optionIdx facet option index to click
  * @param numRows number of recordset rows after clicking facet option
- * @param numFilters number of recordset filters after clicking facet option 
+ * @param numFilters number of recordset filters after clicking facet option
  */
 export async function testSelectFacetOption(page: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
@@ -86,7 +86,7 @@ export async function testSelectFacetOption(page: Page | Locator, facet: Locator
 }
 
 /**
- * clears all filters and tests that the UI updates 
+ * clears all filters and tests that the UI updates
  * @param optionIdx facet option index to check is unchecked
  * @param pageSize the recordset page size for comparing with after clear
  */
@@ -196,7 +196,7 @@ export async function testTimestampRangePickerInitialValues(rangeInputs: Timesta
 
 /**
  * fill the input and test the value is present
- * @param value 
+ * @param value
  */
 export async function fillRangeInput(input: Locator, value: string) {
   await input.fill(value);
@@ -254,16 +254,15 @@ export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, 
  * @param expectedVal the expected value of the input
  */
 const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: string) => {
-  // NOTE: getting a value this way should be avoided
-  let val = await input.getAttribute('value');
-  if (isFloat && val) {
-    // Depending on the server/OS, the float value can be calculated slightly differently. These values come back with 
-    // 4 decimal places and then get rounded to 2 for consistency across test environments
-    val = parseFloat(val).toFixed(2);
+  if (isFloat) {
+    // Depending on the server/OS, the float value can be calculated slightly differently. So we're truncating
+    // the number for consistency across test environments.
+    const truncatedVal = parseInt(expectedVal) + '';
+    await expect.soft(input).toHaveValue(new RegExp(truncatedVal));
+  } else {
+    await expect.soft(input).toHaveValue(expectedVal);
   }
-
-  expect.soft(val).toEqual(expectedVal);
-}
+};
 
 /**
  * test the value in min and max inputs after page load or zoom/unzoom
