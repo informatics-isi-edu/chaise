@@ -63,31 +63,31 @@ export const testRecordMainSectionPartialValues = async (page: Page, numCols: nu
 
 
 type ShareCiteModalParams = {
-    /**
-     * the modal title
-     */
-    title: string,
-    /**
-     * the main link
-     */
-    link: string,
-    /**
-     * whether versioned link is present or not
-     */
-    hasVersionedLink: boolean,
-    /**
-     * if true, we will test the versioned link too.
-     */
-    verifyVersionedLink: boolean,
-    /**
-     * pass `false` when citation should not be displayed.
-     */
-    citation?: string | false,
-    /**
-     * the location of the bibtext file so we can delete it after downloading it
-     */
-    bibtextFile?: string,
-  }
+  /**
+   * the modal title
+   */
+  title: string,
+  /**
+   * the main link
+   */
+  link: string,
+  /**
+   * whether versioned link is present or not
+   */
+  hasVersionedLink: boolean,
+  /**
+   * if true, we will test the versioned link too.
+   */
+  verifyVersionedLink: boolean,
+  /**
+   * pass `false` when citation should not be displayed.
+   */
+  citation?: string | false,
+  /**
+   * the location of the bibtext file so we can delete it after downloading it
+   */
+  bibtextFile?: string,
+}
 
 export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params: ShareCiteModalParams) => {
   const expectedLink = params.link;
@@ -737,4 +737,21 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
     });
 
   });
+}
+
+/**
+ * click on the given button to open the delete-confirm. make sure it looks good, and then confirm.
+ * @param btn the delete btn
+ * @param confirmText the confirm text
+ */
+export const testDeleteConfirm = async (page: Page, btn: Locator, confirmText: string) => {
+  await btn.click();
+
+  const modal = ModalLocators.getConfirmDeleteModal(page);
+  await expect.soft(ModalLocators.getModalTitle(modal)).toHaveText('Confirm Delete');
+
+  await expect.soft(ModalLocators.getModalText(modal)).toHaveText(confirmText);
+
+  await ModalLocators.getOkButton(modal).click();
+  await expect.soft(modal).not.toBeAttached();
 }
