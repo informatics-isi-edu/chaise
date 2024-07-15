@@ -12,6 +12,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
+import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
@@ -29,7 +30,8 @@ const KeyColumn = ({
 
   const {
     appMode, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction, prefillAssociationFkLeafColumn
+    config, forms, logRecordeditClientAction,
+    queryParams, prefillAssociationFkLeafColumn
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -75,8 +77,12 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    console.log(cm.column);
-    console.log(prefillAssociationFkLeafColumn);
+    if (cm.column.name === prefillAssociationFkLeafColumn.name) {
+      const prefillObject = getPrefillObject(queryParams);
+      if (prefillObject?.hasUniqueAssociation) {
+        return false
+      }
+    }
 
     // if we're already showing the multi form UI, then we have to show the button
     if (activeMultiForm === columnIndex) {

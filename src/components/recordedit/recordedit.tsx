@@ -47,8 +47,8 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { 
-  copyOrClearValue, disabledTuplesPromise, 
+import {
+  copyOrClearValue, disabledTuplesPromise,
   getPrefillObject, populateCreateInitialValues
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -110,7 +110,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams, 
+    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams,
     prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn,
     prefillAssociationSelectedRows, setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, setAppState,
@@ -498,16 +498,45 @@ const RecordeditInner = ({
     methods.reset(newFormsObj.tempFormValues);
   };
 
+  const createNewForms = (formValues: any, numberFormsToAdd: number) => {
+    // the indices used for tracking input values in react-hook-form
+    const newFormValues: number[] = addForm(numberFormsToAdd);
+
+    // the index for the data from last form being cloned
+    const lastFormValue = newFormValues[0] - 1;
+
+    let tempFormValues: any = { ...formValues };
+    // add data to tempFormValues to initailize new forms
+    for (let i = 0; i < newFormValues.length; i++) {
+      const formValue = newFormValues[i];
+      columnModels.forEach((cm: RecordeditColumnModel) => {
+        const prefillObject = getPrefillObject(queryParams);
+        if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) return;
+
+        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
+      });
+
+      // the code above is just copying the displayed rowname for foreignkeys,
+      // we still need to copy the raw values
+      // but we cannot go based on visible columns since some of this data might be for invisible fks.
+      tempFormValues = setOutboundForeignKeyValues(tempFormValues, formValue, lastFormValue);
+    }
+
+    return { tempFormValues, lastFormValue };
+  }
+
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
+      const prefillObject = getPrefillObject(queryParams);
+      if (prefillObject?.hasUniqueAssociation && col.name === prefillAssociationFkLeafColumn.name) return;
+
       // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
       foreignKeyData.current[`c_${formNumber}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
 
       if (checkPrefill) {
-        const prefillObject = getPrefillObject(queryParams);
         // check prefill object for the columns that are being prefilled to update the new forms since we aren't calling getPrefilledDefaultForeignKeyData()
-        if (prefillObject && prefillObject.fkColumnNames.indexOf(col.name) !== -1) {
+        if (prefillObject?.fkColumnNames.indexOf(col.name) !== -1) {
           tempFormValues[`c_${formNumber}-${col.RID}`] = formValues[`c_${lastFormValue}-${col.RID}`];
         }
       }
@@ -522,30 +551,6 @@ const RecordeditInner = ({
     });
 
     return tempFormValues;
-  }
-
-  const createNewForms = (formValues: any, numberFormsToAdd: number) => {
-    // the indices used for tracking input values in react-hook-form
-    const newFormValues: number[] = addForm(numberFormsToAdd);
-
-    // the index for the data from last form being cloned
-    const lastFormValue = newFormValues[0] - 1;
-
-    let tempFormValues: any = { ...formValues };
-    // add data to tempFormValues to initailize new forms
-    for (let i = 0; i < newFormValues.length; i++) {
-      const formValue = newFormValues[i];
-      columnModels.forEach((cm: RecordeditColumnModel) => {
-        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
-      });
-
-      // the code above is just copying the displayed rowname for foreignkeys,
-      // we still need to copy the raw values
-      // but we cannot go basd on visible columns since some of these data might be for invisible fks.
-      tempFormValues = setOutboundForeignKeyValues(tempFormValues, formValue, lastFormValue);
-    }
-
-    return { tempFormValues, lastFormValue };
   }
 
   const setSelectedForeignKeyData = (values: any, rows: SelectedRow[], startFormValue: number) => {
