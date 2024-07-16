@@ -273,7 +273,7 @@ export function populateCreateInitialValues(
       }
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (column.isForeignKey && prefillObject?.fkColumnNames.indexOf(column.name) !== -1) {
+      if (column.isForeignKey && prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
         continue;
       }
 

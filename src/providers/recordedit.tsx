@@ -903,7 +903,7 @@ export default function RecordeditProvider({
       if (!column.isForeignKey) return;
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (prefillObject?.fkColumnNames.indexOf(column.name) !== -1) {
+      if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
         return;
       }
 
