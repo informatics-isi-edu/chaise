@@ -296,10 +296,11 @@ export default function RecordeditProvider({
     if (!reference || setupStarted.current) return;
     setupStarted.current = true;
 
+    const prefillObj = getPrefillObject(queryParams);
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
-      const cm = columnToColumnModel(column, isHidden, prefillObject);
+      const cm = columnToColumnModel(column, isHidden, prefillObj);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -421,7 +422,7 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
-        setPrefillObject(getPrefillObject(queryParams));
+        if (prefillObj) setPrefillObject(prefillObj);
 
         setInitialized(true);
       } else if (session) {
