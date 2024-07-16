@@ -142,7 +142,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     ref.table,
     { source: ref.compressedDataSource, entity: true }
   );
-  let almostPB = false;
+
   return {
     index,
     isInline,
@@ -352,6 +352,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
     toFkColumnNames: otherFks,
     columnNameToRID: columnNameToRID,
     keys: keys,
+    // temporary function added in ermrestJS, maybe this should have a different name
     hasUniqueAssociation: origTable.isAssociation
   };
 }

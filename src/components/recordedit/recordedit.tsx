@@ -565,26 +565,29 @@ const RecordeditInner = ({
     return tempFormValues;
   }
 
+  // show the prefill association modal if we have a prefill object and association recordset props
   const showPrefillAssociationModal = () => {
     const prefillObject = getPrefillObject(queryParams);
-    if (associationRecordsetProps && prefillObject) {
-      const getDisabledTuples = disabledTuplesPromise(
-        prefillObject,
-        modalDomainRef,
-        prefillAssociationFkLeafColumn,
-        prefillAssociationFkMainColumn,
-        prefillAssociationSelectedRows
-      );
+    if (!associationRecordsetProps || !prefillObject) return;
 
-      setAssociationRecordsetProps({
-        initialReference: associationRecordsetProps.initialReference,
-        initialPageLimit: associationRecordsetProps.initialPageLimit,
-        config: associationRecordsetProps.config,
-        logInfo: associationRecordsetProps.logInfo,
-        parentReference: associationRecordsetProps.parentReference,
-        getDisabledTuples
-      })
-    }
+    // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
+    // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
+    const getDisabledTuples = disabledTuplesPromise(
+      prefillObject,
+      modalDomainRef,
+      prefillAssociationFkLeafColumn,
+      prefillAssociationFkMainColumn,
+      prefillAssociationSelectedRows
+    );
+
+    setAssociationRecordsetProps({
+      initialReference: associationRecordsetProps.initialReference,
+      initialPageLimit: associationRecordsetProps.initialPageLimit,
+      config: associationRecordsetProps.config,
+      logInfo: associationRecordsetProps.logInfo,
+      parentReference: associationRecordsetProps.parentReference,
+      getDisabledTuples
+    })
 
     setShowAssociationModal(true);
   }
@@ -597,6 +600,17 @@ const RecordeditInner = ({
     setShowAssociationModal(false);
   }
 
+  /**
+   * user makes selections in the multi select association modal and clicks submit
+   * this function updates the selected rows (if the association is unique) and fills in the new forms based
+   * on the state of the app and the number of selected rows
+   *
+   * if the first modal is submitted after load of app page, one of the selected values will
+   * fill in the first form. After that, the selections will copy the last form's values or use default
+   * values based on what is set in the annotation (pending annotation implementation)
+   *
+   * @param modalSelectedRows the selected rows from the association modal
+   */
   const submitAssociationCB = (modalSelectedRows: SelectedRow[]) => {
     setShowAssociationModal(false);
 
@@ -621,12 +635,12 @@ const RecordeditInner = ({
       startFormNumber = 1;
 
       setSelectionsFillFirstForm(false);
-    // } else if (annotation.doClone) {
-    // TODO: when configurable through annotation, allow for clone if configured
-    //   const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
+      // } else if (annotation.doClone) {
+      // TODO: when configurable through annotation, allow for clone if configured
+      //   const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
 
-    //   startFormNumber = newFormsObj.lastFormValue + 1;
-    //   initialValues = newFormsObj.tempFormValues;
+      //   startFormNumber = newFormsObj.lastFormValue + 1;
+      //   initialValues = newFormsObj.tempFormValues;
     } else {
       // use default values to fill new forms
       const newFormValues: number[] = addForm(modalSelectedRows.length);
@@ -972,13 +986,13 @@ const RecordeditInner = ({
             <div className='top-left-panel close-panel'></div>
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
-                {<div className='recordedit-title-buttons title-buttons'>
+                {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
-              {<div className='form-controls'>
+              {!resultsetProps && <div className='form-controls'>
                 {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
                 <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
                 <div className='add-forms chaise-input-group'>
