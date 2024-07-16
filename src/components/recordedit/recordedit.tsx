@@ -48,8 +48,7 @@ import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/cons
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import {
-  copyOrClearValue, disabledTuplesPromise,
-  getPrefillObject, populateCreateInitialValues
+  copyOrClearValue, disabledTuplesPromise, populateCreateInitialValues
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -110,7 +109,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams,
+    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, prefillObject,
     prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn,
     prefillAssociationSelectedRows, setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
@@ -315,7 +314,6 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
-    const prefillObject = getPrefillObject(queryParams);
     // used to trigger recordset select view
     if (prefillObject?.hasUniqueAssociation) {
       let domainRef: any,
@@ -513,7 +511,6 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        const prefillObject = getPrefillObject(queryParams);
         if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) return;
 
         copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
@@ -540,7 +537,6 @@ const RecordeditInner = ({
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const prefillObject = getPrefillObject(queryParams);
       if (prefillObject?.hasUniqueAssociation && col.name === prefillAssociationFkLeafColumn.name) return;
 
       // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
@@ -567,7 +563,6 @@ const RecordeditInner = ({
 
   // show the prefill association modal if we have a prefill object and association recordset props
   const showPrefillAssociationModal = () => {
-    const prefillObject = getPrefillObject(queryParams);
     if (!associationRecordsetProps || !prefillObject) return;
 
     // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
@@ -644,7 +639,7 @@ const RecordeditInner = ({
     } else {
       // use default values to fill new forms
       const newFormValues: number[] = addForm(modalSelectedRows.length);
-      const newRowsModel = populateCreateInitialValues(columnModels, newFormValues, queryParams, prefillRowData);
+      const newRowsModel = populateCreateInitialValues(columnModels, newFormValues, prefillObject, prefillRowData);
       const newValues = newRowsModel.values;
 
       foreignKeyData.current = {

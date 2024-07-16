@@ -13,7 +13,7 @@ import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { disabledTuplesPromise, getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { disabledTuplesPromise } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
@@ -57,7 +57,6 @@ const FormRow = ({
   const {
     forms,
     appMode,
-    queryParams,
     reference,
     columnModels,
     tuples,
@@ -65,6 +64,7 @@ const FormRow = ({
     columnPermissionErrors,
     foreignKeyData,
     waitingForForeignKeyData,
+    prefillObject,
     prefillAssociationFkLeafColumn,
     prefillAssociationFkMainColumn,
     prefillAssociationSelectedRows,
@@ -291,8 +291,6 @@ const FormRow = ({
     }
 
     const safeClassNameId = `${formNumber}-${makeSafeIdAttr(column.displayname.value)}`;
-
-    const prefillObject = getPrefillObject(queryParams);
 
     const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
     /**

@@ -31,7 +31,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any, isHidden?: boolean, queryParams?: any): RecordeditColumnModel {
+export function columnToColumnModel(column: any, isHidden?: boolean, prefillObject?: PrefillObject | null): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
   const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
@@ -54,22 +54,21 @@ export function columnToColumnModel(column: any, isHidden?: boolean, queryParams
   }
 
 
-  const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
   if (column.isForeignKey) hasDomainFilter = column.hasDomainFilter;
 
-  if (prefillObj) {
+  if (prefillObject) {
     if (column.isForeignKey) {
       if (
         // whether the fk is already marked as prefilled
-        prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||
+        prefillObject.fkColumnNames.indexOf(column.name) !== -1 ||
         // or all the columns have the prefilled value, and therefore it should be marked as prefilled.
-        allForeignKeyColumnsPrefilled(column, prefillObj)
+        allForeignKeyColumnsPrefilled(column, prefillObject)
       ) {
         isPrefilled = true;
       }
 
-    } else if (column.name in prefillObj.keys) {
+    } else if (column.name in prefillObject.keys) {
       isPrefilled = true;
     }
   }
@@ -243,7 +242,7 @@ export function copyOrClearValue(
 export function populateCreateInitialValues(
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  queryParams?: any,
+  prefillObject?: PrefillObject | null,
   prefillRowData?: any[]
 ) {
   const values: any = {};
@@ -251,16 +250,7 @@ export function populateCreateInitialValues(
   // only 1 row in the case of create
   if (prefillRowData) initialValues = prefillRowData[0];
 
-  let shouldWaitForForeignKeyData = false;
-
-  let prefillObj = null;
-  if (queryParams) {
-    // get the prefilled values
-    prefillObj = getPrefillObject(queryParams);
-    if (prefillObj) {
-      shouldWaitForForeignKeyData = true;
-    }
-  }
+  let shouldWaitForForeignKeyData = prefillObject ? true : false;
 
   // the data associated with the foreignkeys
   const foreignKeyData: any = {};
@@ -283,13 +273,13 @@ export function populateCreateInitialValues(
       }
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (column.isForeignKey && prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+      if (column.isForeignKey && prefillObject?.fkColumnNames.indexOf(column.name) !== -1) {
         continue;
       }
 
       // if the column is prefilled, get the prefilled value instead of default
-      if (prefillObj && column.name in prefillObj.keys) {
-        defaultValue = prefillObj.keys[column.name];
+      if (prefillObject && column.name in prefillObject.keys) {
+        defaultValue = prefillObject.keys[column.name];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
@@ -342,7 +332,7 @@ export function populateCreateInitialValues(
 
           } else if (column.isForeignKey) {
             // if all the columns of the foreignkey are prefilled, use that instead of default
-            const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
+            const allPrefilled = prefillObject && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObject);
 
             // if all the columns of the foreignkey are initialized, use that instead of default
             const allInitialized = isNonEmptyObject(initialValues) && column.foreignKey.colset.columns.every((col: any) => {
@@ -350,7 +340,7 @@ export function populateCreateInitialValues(
             });
 
             if (allPrefilled || allInitialized) {
-              const defaultDisplay = column.getDefaultDisplay((allPrefilled && prefillObj) ? prefillObj.keys : initialValues);
+              const defaultDisplay = column.getDefaultDisplay((allPrefilled && prefillObject) ? prefillObject.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -907,7 +897,7 @@ export function validateForeignkeyValue(
  * @param rowsUsedInForm
  * @returns a function that returns a promise
  */
-export function disabledTuplesPromise (prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
+export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
   /**
    * The existing rows in this p&b association must be disabled
    * so users doesn't resubmit them.

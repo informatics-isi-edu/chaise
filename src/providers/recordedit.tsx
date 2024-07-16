@@ -31,8 +31,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
-  allForeignKeyColumnsPrefilled,
-  columnToColumnModel, getPrefillObject,
+  allForeignKeyColumnsPrefilled, columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -107,6 +106,8 @@ export const RecordeditContext = createContext<{
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
+  /*  */
+  prefillObject: PrefillObject | null,
   /* the column to the leaf table for the association table if we have a prefill object */
   prefillAssociationFkLeafColumn: any,
   setPrefillAssociationFkLeafColumn: (val: any) => void,
@@ -270,6 +271,7 @@ export default function RecordeditProvider({
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
 
+  const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
   const [prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn] = useState<any>(null);
   const [prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn] = useState<any>(null);
   const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
@@ -297,7 +299,7 @@ export default function RecordeditProvider({
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
-      const cm = columnToColumnModel(column, isHidden, queryParams);
+      const cm = columnToColumnModel(column, isHidden, prefillObject);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -418,6 +420,8 @@ export default function RecordeditProvider({
         if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
+
+        setPrefillObject(getPrefillObject(queryParams));
 
         setInitialized(true);
       } else if (session) {
@@ -798,7 +802,6 @@ export default function RecordeditProvider({
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
 
-    const prefillObject = getPrefillObject(queryParams);
     if (prefillObject?.hasUniqueAssociation) {
       let tempSelectedRows = [...prefillAssociationSelectedRows];
       // TODO: this is ignoring composite foreign keys
@@ -861,7 +864,7 @@ export default function RecordeditProvider({
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
+      initialModel = populateCreateInitialValues(columnModels, forms, prefillObject, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
@@ -894,14 +897,12 @@ export default function RecordeditProvider({
       return;
     }
 
-    const prefillObj = getPrefillObject(queryParams);
-
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+      if (prefillObject?.fkColumnNames.indexOf(column.name) !== -1) {
         return;
       }
 
@@ -909,8 +910,8 @@ export default function RecordeditProvider({
       const defaultValue = initialValues[`c_1-${column.RID}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
-      if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
-        const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+      if (prefillObject && allForeignKeyColumnsPrefilled(column, prefillObject)) {
+        const defaultDisplay = column.getDefaultDisplay(prefillObject.keys);
 
         // if the data is missing, ermrestjs will return null
         // although the previous allPrefilled should already guard against this.
@@ -1168,6 +1169,7 @@ export default function RecordeditProvider({
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
       // prefill association modal
+      prefillObject,
       prefillAssociationFkLeafColumn,
       setPrefillAssociationFkLeafColumn,
       prefillAssociationFkMainColumn,
@@ -1185,7 +1187,7 @@ export default function RecordeditProvider({
     // main entity:
     columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
-    prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows
+    prefillObject, prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows
   ]);
 
   return (

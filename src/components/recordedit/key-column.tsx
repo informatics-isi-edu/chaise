@@ -12,7 +12,6 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
-import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
@@ -31,7 +30,7 @@ const KeyColumn = ({
   const {
     appMode, columnModels, columnPermissionErrors,
     config, forms, logRecordeditClientAction,
-    queryParams, prefillAssociationFkLeafColumn
+    prefillObject, prefillAssociationFkLeafColumn
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -77,7 +76,6 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    const prefillObject = getPrefillObject(queryParams);
     if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) {
       return false
     }
