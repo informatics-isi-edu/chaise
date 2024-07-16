@@ -288,10 +288,8 @@ const RelatedTableActions = ({
 
   const openAddPureBinaryModal = () => {
     // the reference that we're showing in the related section
-    // LEAF TABLE
     const domainRef = relatedModel.initialReference;
     // the reference that we're going to create rows from
-    // ASSOCATION TABLE
     const derivedRef = domainRef.derivedAssociationReference;
     const fkToRelated = derivedRef.associationToRelatedFKR;
 

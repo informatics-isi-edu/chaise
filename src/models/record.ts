@@ -20,7 +20,6 @@ export interface RecordRelatedModel {
   index: number,
   isInline: boolean,
   isPureBinary: boolean,
-  isAlmostPureBinary: boolean,
   initialReference: any,
   isTableDisplay: boolean,
   // this indicates that the tableMarkdownContent has been initialized:

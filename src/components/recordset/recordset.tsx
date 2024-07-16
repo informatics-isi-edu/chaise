@@ -135,7 +135,6 @@ const RecordsetInner = ({
     setSelectedRows,
     update,
     forceShowSpinner,
-    parentPageReference,
     savedQueryConfig,
     savedQueryReference,
     setSavedQueryReference
@@ -861,6 +860,7 @@ const RecordsetInner = ({
                   {savedQueryConfig?.showUI && savedQueryReference &&
                     <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
                   }
+
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />

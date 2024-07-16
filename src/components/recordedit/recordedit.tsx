@@ -27,7 +27,7 @@ import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/r
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, PrefillObject, RecordeditAppState, RecordeditColumnModel,
+  appModes, RecordeditColumnModel,
   RecordeditDisplayMode, RecordeditProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
@@ -110,24 +110,23 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, appState, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams,
+    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, queryParams,
     prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn,
     prefillAssociationSelectedRows, setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
-    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, setAppState,
+    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
-
-  const [associationIsUnique, setAssociationIsUnique] = useState<boolean>(false);
-  const [modalDomainRef, setModalDomainRef] = useState<any>(null);
-
-  const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
-  const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
-  const [showAssociationModal, setShowAssociationModal] = useState<any>(null);
-
+  // the next 5 props are used when there is a prefill object for starting recordedit with more than one form to associate on creation
+  const [modalDomainRef, setModalDomainRef] = useState<any>(null);
+  const [associationIsUnique, setAssociationIsUnique] = useState<boolean>(false);
+  const [showAssociationModal, setShowAssociationModal] = useState<boolean>(false);
+  const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
+  // when initializing the page, the selections in the modal that appears first should fill the first form
+  const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
 
   /**
    * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason
@@ -270,7 +269,7 @@ const RecordeditInner = ({
           // data is an object of key/value pairs for each piece of key information
           // { keycol1: val, keycol2: val2, ... }
           // TODO should be adjusted if we changed how we're tracking the tuples
-          const idx = tuples.findIndex(function (tuple: any) {
+          const idx = tuples.findIndex((tuple: any) => {
             return Object.keys(data).every(function (key) {
               return tuple.data[key] === data[key];
             });
@@ -316,15 +315,13 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
-    if (appState === RecordeditAppState.ASSOCIATION_PICKER) {
+    const prefillObject = getPrefillObject(queryParams);
+    // used to trigger recordset select view
+    if (prefillObject?.hasUniqueAssociation) {
       let domainRef: any,
         fkColumnToLeaf: any,
         fkColumnToMain: any;
 
-      const prefillObject = getPrefillObject(queryParams);
-      if (!prefillObject) return;
-
-      // TODO: maybe this should be done differently?
       reference.columns.forEach((column: any) => {
         // column is a foreignkey pseudo column
         if (!column.isForeignKey) return;
@@ -429,7 +426,6 @@ const RecordeditInner = ({
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
-    setAppState(RecordeditAppState.FORM_INPUT);
     setFormProviderInitialized(true);
   }, [initialized]);
 
@@ -498,6 +494,13 @@ const RecordeditInner = ({
     methods.reset(newFormsObj.tempFormValues);
   };
 
+  /**
+   * creates new forms by copying values from previous form
+   *
+   * @param formValues values for ALL forms
+   * @param numberFormsToAdd the number of forms to copy values for
+   * @returns an object with the new formValues and the form number for the last form
+   */
   const createNewForms = (formValues: any, numberFormsToAdd: number) => {
     // the indices used for tracking input values in react-hook-form
     const newFormValues: number[] = addForm(numberFormsToAdd);
@@ -505,7 +508,7 @@ const RecordeditInner = ({
     // the index for the data from last form being cloned
     const lastFormValue = newFormValues[0] - 1;
 
-    let tempFormValues: any = { ...formValues };
+    let tempFormValues = { ...formValues };
     // add data to tempFormValues to initailize new forms
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
@@ -525,6 +528,15 @@ const RecordeditInner = ({
     return { tempFormValues, lastFormValue };
   }
 
+  /**
+   * set values in foreignkey data and formValues for all out foreign key columns
+   *
+   * @param formValues the existing values in the form
+   * @param formNumber the form number we are setting values for
+   * @param lastFormValue the last form number that values are copied from
+   * @param checkPrefill if prefill should be checked for copying
+   * @returns updated form values to set in react hook form
+   */
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
@@ -548,29 +560,6 @@ const RecordeditInner = ({
 
         tempFormValues[`c_${formNumber}-${col.RID}`] = val;
       });
-    });
-
-    return tempFormValues;
-  }
-
-  const setSelectedForeignKeyData = (values: any, rows: SelectedRow[], startFormValue: number) => {
-    const tempFormValues = { ...values };
-    rows.forEach((row: SelectedRow, index: number) => {
-      if (foreignKeyData && foreignKeyData.current) {
-        foreignKeyData.current[`c_${startFormValue + index}-${prefillAssociationFkLeafColumn.RID}`] = row.data;
-      }
-
-      // find the raw value of the fk columns that correspond to the selected row
-      // since we've already added a not-null hidden filter, the values will be not-null.
-      prefillAssociationFkLeafColumn.foreignKey.colset.columns.forEach((col: any) => {
-        const referencedCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(col);
-
-        // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
-        tempFormValues[`c_${startFormValue + index}-${col.RID}`] = row.data[referencedCol.name];
-      });
-
-      // update "display" value
-      tempFormValues[`c_${startFormValue + index}-${prefillAssociationFkLeafColumn.RID}`] = row.displayname.value;
     });
 
     return tempFormValues;
@@ -621,26 +610,23 @@ const RecordeditInner = ({
 
     // recordedit has already been initialized so start adding new forms
     const tempFormValues = methods.getValues();
-    let initialValues: any = tempFormValues,
+    let initialValues = tempFormValues,
       startFormNumber: number;
 
     if (selectionsFillFirstForm) {
-      if (modalSelectedRows.length === 1) {
-        initialValues = tempFormValues;
-      } else {
+      if (modalSelectedRows.length > 1) {
         initialValues = createNewForms(tempFormValues, modalSelectedRows.length - 1).tempFormValues;
       }
 
       startFormNumber = 1;
 
       setSelectionsFillFirstForm(false);
-    } else if (false) {
-      // } else if (annotation.doClone) {
-      // TODO: when configurable through annotation, allow for clone if configured
-      const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
+    // } else if (annotation.doClone) {
+    // TODO: when configurable through annotation, allow for clone if configured
+    //   const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
 
-      startFormNumber = newFormsObj.lastFormValue + 1;
-      initialValues = newFormsObj.tempFormValues;
+    //   startFormNumber = newFormsObj.lastFormValue + 1;
+    //   initialValues = newFormsObj.tempFormValues;
     } else {
       // use default values to fill new forms
       const newFormValues: number[] = addForm(modalSelectedRows.length);
@@ -669,7 +655,23 @@ const RecordeditInner = ({
     }
 
     // iterate selectedRows to fill in the fkey information
-    initialValues = setSelectedForeignKeyData(initialValues, modalSelectedRows, startFormNumber);
+    modalSelectedRows.forEach((row: SelectedRow, index: number) => {
+      if (foreignKeyData && foreignKeyData.current) {
+        foreignKeyData.current[`c_${startFormNumber + index}-${prefillAssociationFkLeafColumn.RID}`] = row.data;
+      }
+
+      // find the raw value of the fk columns that correspond to the selected row
+      // since we've already added a not-null hidden filter, the values will be not-null.
+      prefillAssociationFkLeafColumn.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(col);
+
+        // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
+        initialValues[`c_${startFormNumber + index}-${col.RID}`] = row.data[referencedCol.name];
+      });
+
+      // update "display" value
+      initialValues[`c_${startFormNumber + index}-${prefillAssociationFkLeafColumn.RID}`] = row.displayname.value;
+    });
 
     // required to set values in all new forms in the RHF model
     methods.reset(initialValues);
@@ -779,13 +781,13 @@ const RecordeditInner = ({
       <div className='side-panel-resizable close-panel'></div>
       {/* <!-- Form section --> */}
       <div className='main-container' ref={mainContainer}>
-        {appState === RecordeditAppState.FORM_INPUT && columnModels.length > 0 &&
+        {columnModels.length > 0 && !resultsetProps &&
           <div className='main-body'>
             <KeyColumn activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
             <FormContainer activeMultiForm={activeMultiForm} toggleActiveMultiForm={toggleActiveMultiForm} />
           </div>
         }
-        {appState === RecordeditAppState.RESULTSET && resultsetProps &&
+        {resultsetProps &&
           <div className='resultset-tables chaise-accordions'>
             <Accordion alwaysOpen defaultActiveKey={['0', '1']} className='panel-group'>
               <Accordion.Item eventKey='0' className='chaise-accordion'>
@@ -853,7 +855,6 @@ const RecordeditInner = ({
         />
       }
       {showAssociationModal && associationRecordsetProps &&
-        // This is outside of form provider since it will show before the forms are initialized
         <RecordsetModal
           modalClassName='association-popup'
           recordsetProps={associationRecordsetProps}
@@ -971,13 +972,13 @@ const RecordeditInner = ({
             <div className='top-left-panel close-panel'></div>
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
-                {appState === RecordeditAppState.FORM_INPUT && <div className='recordedit-title-buttons title-buttons'>
+                {<div className='recordedit-title-buttons title-buttons'>
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
-              {appState === RecordeditAppState.FORM_INPUT && <div className='form-controls'>
+              {<div className='form-controls'>
                 {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
                 <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
                 <div className='add-forms chaise-input-group'>

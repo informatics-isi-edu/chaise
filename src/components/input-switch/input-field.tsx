@@ -131,7 +131,7 @@ const InputField = ({
   additionalControllerRules,
 }: InputFieldCompProps): JSX.Element => {
 
-  const { getValues, setValue, control, clearErrors, trigger} = useFormContext();
+  const { setValue, control, clearErrors, trigger} = useFormContext();
 
   controllerRules = isObjectAndNotNull(controllerRules) ? controllerRules : {};
   if (requiredInput) {

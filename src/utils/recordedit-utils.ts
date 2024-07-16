@@ -897,6 +897,16 @@ export function validateForeignkeyValue(
   }
 }
 
+/**
+ * Used to fetch the disabled tuples for a recordset modal picker used to associate rows of data
+ *
+ * @param prefillObject the prefill object in cookie storage fetched using queryParams
+ * @param domainRef the reference used in the modal picker that we want to disable rows for
+ * @param fkToLeaf the foreign key column from the association table that points to the leaf table
+ * @param fkToMain the foreign key column from the association table that points to the main table
+ * @param rowsUsedInForm
+ * @returns a function that returns a promise
+ */
 export function disabledTuplesPromise (prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
   /**
    * The existing rows in this p&b association must be disabled
@@ -931,28 +941,29 @@ export function disabledTuplesPromise (prefillObject: PrefillObject, domainRef: 
         action = LogActions.RELOAD;
         newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
       }
+
       // using the service instead of the record one since this is called from the modal
       const logObj = {
         action: LogService.getActionString(action, logStackPath),
         stack: newStack,
       };
+
       // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
       domainRef
         .addFacets(disabledRowsFilters)
         .setSamePaging(page)
         .read(pageLimit, logObj, false, true)
-        .then(function (newPage: any) {
-          newPage.tuples.forEach(function (newTuple: any) {
-            const index = page.tuples.findIndex(function (tuple: any) {
+        .then((newPage: any) => {
+          newPage.tuples.forEach((newTuple: any) => {
+            const index = page.tuples.findIndex((tuple: any) => {
               return tuple.uniqueId === newTuple.uniqueId;
             });
             if (index > -1) disabledRows.push(page.tuples[index]);
           });
 
           // iterate through the current row selections in recordedit forms
-          // NOTE: this doesn't account for changed values or removed forms
           rowsUsedInForm.forEach((row: SelectedRow) => {
-            const index = page.tuples.findIndex(function (tuple: any) {
+            const index = page.tuples.findIndex((tuple: any) => {
               return tuple.uniqueId === row.uniqueId;
             });
             if (index > -1) disabledRows.push(page.tuples[index]);
@@ -960,7 +971,7 @@ export function disabledTuplesPromise (prefillObject: PrefillObject, domainRef: 
 
           resolve({ disabledRows: disabledRows, page: page });
         })
-        .catch(function (err: any) {
+        .catch((err: any) => {
           reject(err);
         });
     });

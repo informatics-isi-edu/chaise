@@ -167,10 +167,10 @@ const FormRow = ({
      * NOTE: it appears this useEffect is triggering after the "full repaint" even if there was a delay
      */
     if (columnModelIndex === 0) {
-        // only run this on the first form row to keep track of total forms visible
-        if (!formsRef || !formsRef.current || !showCloneSpinner) return;
+      // only run this on the first form row to keep track of total forms visible
+      if (!formsRef || !formsRef.current || !showCloneSpinner) return;
 
-        if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
+      if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
     }
   }, [forms, removeClicked]);
 
@@ -294,19 +294,23 @@ const FormRow = ({
 
     const prefillObject = getPrefillObject(queryParams);
 
-    const tempForeignKeyCallbacks = {...foreignKeyCallbacks};
-    if (prefillObject?.hasUniqueAssociation && column.isForeignKey) {
-      if (prefillObject.toFkColumnNames.indexOf(column.name) !== -1) {
-        tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
-          prefillObject, 
-          column.reference, 
-          prefillAssociationFkLeafColumn, 
-          prefillAssociationFkMainColumn, 
-          prefillAssociationSelectedRows
-        );
+    const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
+    /**
+     * add foreginkey callbacks to generated input if:
+     *  - there is a pair of columns that create a unique assocation that use the prefill behavior
+     *  - the column is a foreignkey
+     *  - and the column is the one used for associating to the leaf table of the association
+     */
+    if (prefillObject?.hasUniqueAssociation && column.isForeignKey && prefillAssociationFkLeafColumn.name === colName) {
+      tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
+        prefillObject,
+        column.reference,
+        prefillAssociationFkLeafColumn,
+        prefillAssociationFkMainColumn,
+        prefillAssociationSelectedRows
+      );
 
-        tempForeignKeyCallbacks.updateAssociationSelectedRows = updateAssociationSelectedRows;
-      }
+      tempForeignKeyCallbacks.updateAssociationSelectedRows = updateAssociationSelectedRows;
     }
 
     return (

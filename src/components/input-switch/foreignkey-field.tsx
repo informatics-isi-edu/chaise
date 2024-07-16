@@ -186,6 +186,12 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     }
   }
 
+  /**
+   * calls function attached to props if it exists, intended to update selected rows
+   * that are used when the association modal is loaded in the case of prefill
+   *
+   * @param rowToAdd
+   */
   const callUpdateAssocationRows = (rowToAdd?: SelectedRow) => {
     if (!props.foreignKeyCallbacks?.updateAssociationSelectedRows) return;
 

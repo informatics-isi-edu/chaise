@@ -77,11 +77,9 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    if (cm.column.name === prefillAssociationFkLeafColumn.name) {
-      const prefillObject = getPrefillObject(queryParams);
-      if (prefillObject?.hasUniqueAssociation) {
-        return false
-      }
+    const prefillObject = getPrefillObject(queryParams);
+    if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) {
+      return false
     }
 
     // if we're already showing the multi form UI, then we have to show the button

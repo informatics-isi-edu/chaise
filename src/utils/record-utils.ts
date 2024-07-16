@@ -143,12 +143,10 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     { source: ref.compressedDataSource, entity: true }
   );
   let almostPB = false;
-  if (isObjectAndNotNull(ref.derivedAssociationReference)) almostPB = ref.derivedAssociationReference.table.isAlmostPureBinaryAssociation;
   return {
     index,
     isInline,
     isPureBinary: isObjectAndNotNull(ref.derivedAssociationReference),
-    isAlmostPureBinary: almostPB,
     initialReference: ref,
     isTableDisplay: ref.display.type === 'table',
     tableMarkdownContentInitialized: false,
@@ -361,7 +359,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
 /**
  * Takes the displayname for a related table (both inline and related), and tries to find it on the record page.
  *   used for table of contents click event and scrrolling on click of previous/next
- * 
+ *
  * @param displayname the displayname of the column to scroll to
  * @returns Element | false - returns the related table element to scroll to
  *      - false if no element with displayname is found

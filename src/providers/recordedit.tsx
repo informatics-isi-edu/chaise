@@ -7,7 +7,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import {
-  appModes, LastChunkMap, PrefillObject, RecordeditAppState, RecordeditColumnModel,
+  appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
   RecordeditModalOptions, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -48,8 +48,6 @@ type ResultsetProps = {
 export const RecordeditContext = createContext<{
   /* which mode of recordedit we are in */
   appMode: string,
-  appState: RecordeditAppState,
-  setAppState: any,
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
   queryParams: any,
@@ -109,12 +107,16 @@ export const RecordeditContext = createContext<{
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
+  /* the column to the leaf table for the association table if we have a prefill object */
   prefillAssociationFkLeafColumn: any,
   setPrefillAssociationFkLeafColumn: (val: any) => void,
+  /* the column tot he main table for the association table if we have a prefill object */
   prefillAssociationFkMainColumn: any,
   setPrefillAssociationFkMainColumn: (val: any) => void,
+  /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
   prefillAssociationSelectedRows: SelectedRow[],
   setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
+  /* function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique */
   updateAssociationSelectedRows: (oldValues: any, newRow?: SelectedRow) => void,
   /**
    * log client actions
@@ -235,9 +237,6 @@ export default function RecordeditProvider({
 
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
-  // the current view that the recordedit app is showing: association picker, form input, or resultset
-  const [appState, setAppState] = useState<RecordeditAppState>(RecordeditAppState.FORM_INPUT);
-
   const [showCloneSpinner, setShowCloneSpinner] = useState(false);
   const [showApplyAllSpinner, setShowApplyAllSpinner] = useState(false);
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
@@ -245,7 +244,7 @@ export default function RecordeditProvider({
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
   /*
    * Object for keeping track of each file and their existing upload jobs so we can resume on interruption
-   * 
+   *
    * For example, we have the following 3 scenarios:
    *   1. contiguous offset: 1; chunks in flight with index 2, 3; chunk completed with index 4 (after chunk at index 4 is acknowledged w/ 204)
    *     - [0, 1, empty, empty, 4]
@@ -253,7 +252,7 @@ export default function RecordeditProvider({
    *     - [0, 1, empty, 3, 4]
    *   3. contiguous offset: 4; (after chunk at index 2 is acknowledged w/ 204)
    *     - [0, 1, 2, 3, 4]
-   * 
+   *
    * Object structure is as follows where index is the index of the last contiguous chunk that was uploaded.
    * {
    *   `${file.md5_base64}_${column_name}_${record_index}`: {
@@ -271,10 +270,9 @@ export default function RecordeditProvider({
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
 
-  // array of selected rows for association picker. when forms are removed this needs to be updated
-  const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
   const [prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn] = useState<any>(null);
   const [prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn] = useState<any>(null);
+  const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
 
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
@@ -420,11 +418,6 @@ export default function RecordeditProvider({
         if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
-
-        // TODO: remove this and appState..?
-        const prefillObject = getPrefillObject(queryParams);
-        // used to trigger recordset select view
-        if (prefillObject?.hasUniqueAssociation) setAppState(RecordeditAppState.ASSOCIATION_PICKER);
 
         setInitialized(true);
       } else if (session) {
@@ -595,7 +588,6 @@ export default function RecordeditProvider({
             }
 
             // resultset view
-            setAppState(RecordeditAppState.RESULTSET);
             setResultsetProps({
               success: {
                 page,
@@ -796,9 +788,9 @@ export default function RecordeditProvider({
   };
 
   /**
-   * 
+   *
    * @param indexes array of indexes to remove from forms array (and tuples array)
-   * @param formValues formValuesused for cleaning up 
+   * @param formValues formValuesused for cleaning up
    * @param skipLogging boolean to skip logging the remove action
    */
   const removeForm = (indexes: number[], formValues: any, skipLogging?: boolean) => {
@@ -817,16 +809,16 @@ export default function RecordeditProvider({
           // RHF indexing starts at 1
           const RHFindex = `c_${forms[idx]}-${fkCol.RID}`;
           const valueToCompare = formValues[RHFindex];
-          
+
           const keyCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(fkCol)
-          
+
           tempSelectedRows = tempSelectedRows.filter((row: SelectedRow) => {
             return row.data[keyCol.name] !== valueToCompare;
           });
         });
-        
+
       });
-      
+
       setPrefillAssociationSelectedRows(tempSelectedRows);
     }
 
@@ -839,6 +831,13 @@ export default function RecordeditProvider({
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
   }
 
+  /**
+   * when a single foreignkey input field value is changed or removed, removes old row from association selected rows
+   * and adds the new one if a new value was selected. Used when there is a prefill object and the association is unique
+   *
+   * @param oldValues old values for finding which row to remove
+   * @param newRow the new row to keep track of
+   */
   const updateAssociationSelectedRows = (oldValues: any, newRow?: SelectedRow) => {
     let tempSelectedRows = [...prefillAssociationSelectedRows];
     tempSelectedRows = tempSelectedRows.filter((row: SelectedRow) => {
@@ -873,7 +872,7 @@ export default function RecordeditProvider({
       setCanUpdateValues(initialModel.canUpdateValues);
     }
 
-    foreignKeyData.current = initialModel.foreignKeyData
+    foreignKeyData.current = initialModel.foreignKeyData;
 
     return initialModel.values;
   };
@@ -1134,8 +1133,6 @@ export default function RecordeditProvider({
     return {
       // main entity:
       appMode,
-      appState,
-      setAppState,
       canUpdateValues,
       columnModels,
       columnPermissionErrors,
@@ -1186,7 +1183,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    appState, columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
+    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
     prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows
   ]);
