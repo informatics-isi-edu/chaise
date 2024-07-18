@@ -967,3 +967,26 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
     });
   };
 }
+
+/**
+   * calls function attached to props if it exists, intended to update selected rows
+   * that are used when the association modal is loaded in the case of prefill
+   *
+   * @param rowToAdd
+   */
+export function callUpdateAssocationRows(
+  column: any,
+  values: any,
+  formNumber: number,
+  updateAssociationSelectedRows: (oldValues: any, row?: SelectedRow) => void,
+  rowToAdd?: SelectedRow
+) {
+  const oldValues: any = {};
+  column.foreignKey.colset.columns.forEach((col: any) => {
+    const referencedCol = column.foreignKey.mapping.get(col);
+
+    oldValues[referencedCol.name] = values[`c_${formNumber}-${col.RID}`];
+  });
+
+  updateAssociationSelectedRows(oldValues, rowToAdd);
+}

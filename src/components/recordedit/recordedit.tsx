@@ -396,7 +396,13 @@ const RecordeditInner = ({
          * The existing rows in this p&b association must be disabled
          * so users doesn't resubmit them.
          */
-        getDisabledTuples = disabledTuplesPromise(prefillObject, domainRef, fkColumnToLeaf, fkColumnToMain, []);
+        getDisabledTuples = disabledTuplesPromise(
+          prefillObject,
+          domainRef.contextualize.compactSelectAssociationLink,
+          fkColumnToLeaf,
+          fkColumnToMain,
+          []
+        );
       }
 
       // set recordset select view then set selected rows on "submit"
@@ -569,7 +575,7 @@ const RecordeditInner = ({
     // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
     const getDisabledTuples = disabledTuplesPromise(
       prefillObject,
-      modalDomainRef,
+      modalDomainRef.contextualize.compactSelectAssociationLink,
       prefillAssociationFkLeafColumn,
       prefillAssociationFkMainColumn,
       prefillAssociationSelectedRows

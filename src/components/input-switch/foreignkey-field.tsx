@@ -25,10 +25,8 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
-  callOnChangeAfterSelection,
-  clearForeignKeyData,
-  createForeignKeyReference,
-  validateForeignkeyValue
+  callOnChangeAfterSelection, callUpdateAssocationRows,
+  clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -98,11 +96,19 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
-    callUpdateAssocationRows();
+    const column = props.columnModel.column;
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+      callUpdateAssocationRows(
+        column,
+        getValues(),
+        usedFormNumber,
+        props.foreignKeyCallbacks.updateAssociationSelectedRows
+      );
+    }
 
     clearForeignKeyData(
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue
@@ -172,7 +178,16 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       const selectedRow = selectedRows[0];
       const column = props.columnModel.column;
 
-      callUpdateAssocationRows(selectedRow);
+      // if the recordedit page's table is an association table with a unique key pair, track the selected rows
+      if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+        callUpdateAssocationRows(
+          column,
+          getValues(),
+          usedFormNumber,
+          props.foreignKeyCallbacks.updateAssociationSelectedRows,
+          selectedRow
+        );
+      }
 
       callOnChangeAfterSelection(
         selectedRow,
@@ -184,27 +199,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
         setValue
       );
     }
-  }
-
-  /**
-   * calls function attached to props if it exists, intended to update selected rows
-   * that are used when the association modal is loaded in the case of prefill
-   *
-   * @param rowToAdd
-   */
-  const callUpdateAssocationRows = (rowToAdd?: SelectedRow) => {
-    if (!props.foreignKeyCallbacks?.updateAssociationSelectedRows) return;
-
-    const column = props.columnModel.column;
-
-    const oldValues: any = {};
-    column.foreignKey.colset.columns.forEach((col: any) => {
-      const referencedCol = column.foreignKey.mapping.get(col);
-
-      oldValues[referencedCol.name] = getValues(`c_${usedFormNumber}-${col.RID}`);
-    });
-
-    props.foreignKeyCallbacks.updateAssociationSelectedRows(oldValues, rowToAdd);
   }
 
   const rules: any = {};

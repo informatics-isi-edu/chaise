@@ -8,12 +8,14 @@ import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -24,10 +26,8 @@ import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/cons
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import {
-  callOnChangeAfterSelection,
-  clearForeignKeyData,
-  createForeignKeyReference,
-  validateForeignkeyValue
+  callOnChangeAfterSelection, callUpdateAssocationRows,
+  clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -90,6 +90,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
+  const { prefillAssociationSelectedRows } = useRecordedit();
 
   /**
    * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
@@ -161,6 +162,28 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         setTriggerDropdownChange(false);
       });
   }, [triggerDropdownChange]);
+
+  useEffect(() => {
+    if (!dropdownInitialized || !prefillAssociationSelectedRows) return;
+    setShowSpinner(true);
+
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
+    const stack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+
+    const requestCauses = [LogReloadCauses.UNIQUE_ASSOCIATION_ROWS_CHANGED];
+    const reloadStartTime = ConfigService.ERMrest.getElapsedTime();
+    const logObj = {
+      action: LogService.getActionString(LogActions.RELOAD, stackPath),
+      stack: LogService.addCausesToStack(stack, requestCauses, reloadStartTime)
+    }
+
+    populateDropdownRows(currentDropdownPage, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime).then(() => {
+      setShowSpinner(false);
+    }).catch((exception: any) => {
+      setShowSpinner(false);
+      dispatchError({ error: exception });
+    });
+  }, [prefillAssociationSelectedRows]);
 
   /**
    * populate the dropdown rows after a request is done.
@@ -264,9 +287,20 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
+    const column = props.columnModel.column;
+
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows){
+      callUpdateAssocationRows(
+        column,
+        getValues(),
+        usedFormNumber,
+        props.foreignKeyCallbacks.updateAssociationSelectedRows
+      );
+    }
+
     clearForeignKeyData(
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue
@@ -373,13 +407,38 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     onClearFun(e);
   }
 
+  /**
+   *
+   * @param selectedRow tuple object from ERMrestJS that represents the dropdown row
+   * @param onChange
+   */
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
+
+    const rowToAdd: SelectedRow = {
+      displayname: selectedRow.displayname,
+      uniqueId: selectedRow.uniqueId,
+      data: selectedRow.data
+    }
+
+    const column = props.columnModel.column;
+
+    // if the recordedit page's table is an association table with a unique key pair, track the selected rows
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+      callUpdateAssocationRows(
+        column,
+        getValues(),
+        usedFormNumber,
+        props.foreignKeyCallbacks.updateAssociationSelectedRows,
+        rowToAdd
+      );
+    }
+
     callOnChangeAfterSelection(
       selectedRow,
       onChange,
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue

@@ -302,7 +302,7 @@ const FormRow = ({
     if (prefillObject?.hasUniqueAssociation && column.isForeignKey && prefillAssociationFkLeafColumn.name === colName) {
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
         prefillObject,
-        column.reference,
+        column.reference.contextualize.compactSelectForeignKey,
         prefillAssociationFkLeafColumn,
         prefillAssociationFkMainColumn,
         prefillAssociationSelectedRows

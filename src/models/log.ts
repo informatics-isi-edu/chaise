@@ -255,4 +255,5 @@ export enum LogReloadCauses {
   RELATED_INLINE_UPDATE= 'related-inline-update', // a row in one of the related (inline) tables has been edited
   SORT= 'sort', // sort changed
   SEARCH_BOX= 'search-box', // search box value changed
+  UNIQUE_ASSOCIATION_ROWS_CHANGED= 'association-selected-rows', // selected rows for unique association have changed
 }
