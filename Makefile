@@ -57,7 +57,8 @@ E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submis
 E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.config.ts
 E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.config.ts
 # Record tests
-E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
+E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.config.ts
+E2EDrecordProt=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.config.ts
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.config.ts
 E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.ts
@@ -91,7 +92,7 @@ DefaultConfigParallel=test/e2e/specs/default-config/playwright.config.ts
 Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
-RECORD_TESTS_PROTRACTOR=$(E2EDrecord)
+RECORD_TESTS_PROTRACTOR=$(E2EDrecordProt)
 RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
@@ -102,7 +103,7 @@ ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
-RECORD_TESTS=$(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
+RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDSET_TESTS=$(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
 RECORDEDIT_TESTS=$(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)

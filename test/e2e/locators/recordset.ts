@@ -180,6 +180,10 @@ export default class RecordsetLocators {
     return container.locator('.view-action-button');
   }
 
+  static getDeleteActionButtons(container: Page | Locator): Locator {
+    return container.locator('.delete-action-button');
+  }
+
   static getCheckboxInputs(container: Page | Locator): Locator {
     return container.locator('.recordset-table').locator('.chaise-checkbox input');
   }
