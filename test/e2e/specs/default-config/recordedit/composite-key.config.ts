@@ -3,6 +3,6 @@ import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configurat
 export default getConfig({
   testName: 'default-config/recordedit/composite-key',
   configFileName: 'recordedit/composite-key.dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
+  mainSpecName: 'default-config',
   testMatch: [ 'composite-key.spec.ts' ]
 });

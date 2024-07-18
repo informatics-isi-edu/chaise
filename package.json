@@ -27,7 +27,7 @@
     "ui"
   ],
   "devDependencies": {
-    "@isrd-isi-edu/ermrest-data-utils": "0.0.5",
+    "@isrd-isi-edu/ermrest-data-utils": "^0.0.6",
     "@playwright/test": "latest",
     "@typescript-eslint/eslint-plugin": "~7.1.0",
     "@typescript-eslint/parser": "~7.1.0",
@@ -43,7 +43,7 @@
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
     "patch-package": "^8.0.0",
-    "prettier": "^2.8.4",
+    "prettier": "^3.2.5",
     "protractor": "5.4.4",
     "set-cookie-parser": "x",
     "ts-node": "^10.9.1",

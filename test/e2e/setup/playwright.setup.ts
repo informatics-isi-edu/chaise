@@ -68,13 +68,19 @@ export default async function globalSetup(config: FullConfig) {
 
   // create the catalog
   try {
-    await createCatalog(testConfiguration, projectNames, options.manualTestConfig);
+    await createCatalog(testConfiguration, projectNames, options.mainSpecName, options.manualTestConfig);
   } catch (exp) {
     throw exp;
   }
 
   // take care of chaise-config
-  copyChaiseConfig(options.chaiseConfigFilePath);
+  let chaiseConfigFilePath = options.chaiseConfigFilePath;
+  // use the default
+  if (typeof chaiseConfigFilePath !== 'string') {
+    chaiseConfigFilePath = `test/e2e/specs/${options.mainSpecName}/chaise-config.js`;
+  }
+
+  copyChaiseConfig(chaiseConfigFilePath);
 
   registerCallbacks(testConfiguration);
 }
@@ -119,7 +125,7 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
 /**
  * create the catalog and data
  */
-async function createCatalog(testConfiguration: any, projectNames: string[], isManual?: boolean) {
+async function createCatalog(testConfiguration: any, projectNames: string[], mainSpecName: string, isManual?: boolean) {
 
   return new Promise(async (resolve, reject) => {
     testConfiguration.setup.url = process.env.ERMREST_URL;
@@ -174,7 +180,9 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
 
     for (const p of projectNames) {
       try {
-        const res = await setupCatalog({ catalog, schemas });
+        // add alias to the catalog based on the config and project name
+        const alias = `${mainSpecName}-${p}`;
+        const res = await setupCatalog({ catalog: { ...catalog, alias }, schemas });
         console.log(`catalog with id ${res.catalogId} created for project ${p}`);
         setCatalogID(p, res.catalogId);
 

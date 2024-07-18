@@ -30,7 +30,9 @@ const loginSettings : ConfigServiceSettings = {
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: false,
   overrideDownloadClickBehavior: false,
-  overrideExternalLinkBehavior: false
+  overrideExternalLinkBehavior: false,
+  // the url for this app doesn't follow other chaise apps:
+  skipParsingURLForCatalogID: true,
 };
 
 export type loginForm = {

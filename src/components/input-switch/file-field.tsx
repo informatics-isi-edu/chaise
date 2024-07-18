@@ -3,6 +3,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -29,12 +30,12 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   const { addAlert } = useAlert();
   const fileInputRef = useRef(null);
 
-  const [fileObject, setFileObject] = useState<FileObject | null>(null);
-
   const fileElementId = 'fileInput' + Math.round(Math.random() * 100000);
   const fileExtensionFilter = props.columnModel.column.filenameExtFilter;
   // needs to be a comma separated list, i.e. ".jpg", ".png", ...
   const fileExtensions = fileExtensionFilter.join(',');
+
+  const ellipsisRef = useRef(null);
 
   const handleChange = (field: any, e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target;
@@ -68,8 +69,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       tempFileObject.url = tempFileObject.filename = tempFileObject.file.name;
       tempFileObject.filesize = tempFileObject.file.size;
 
-      setFileObject(tempFileObject);
-
       field.onChange(tempFileObject);
       field.onBlur();
     }
@@ -82,16 +81,6 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     return v?.url && v.url !== '';
   };
 
-  const onClear = (e: MouseEvent) => {
-    const tempFileObject: FileObject = {
-      url: '',
-      filename: '',
-      filesize: 0
-    }
-
-    setFileObject(tempFileObject);
-  }
-
   const openFilePicker = () => {
     const fileInputElement = fileInputRef.current;
     if (!fileInputElement) return;
@@ -101,8 +90,17 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     (fileInputElement as HTMLInputElement).click();
   }
 
-  const fileTooltip = (fileObj: FileObject) => {
-    return (fileObj.filesize ? '- ' + fileObj.filename + '\n- ' + humanFileSize(fileObj.filesize) : fileObj.filename);
+  const renderFileTooltip = (fieldValue: any) => {
+    return () => {
+      if (fieldValue && isStringAndNotEmpty(fieldValue.filename)) {
+        if (fieldValue.filesize) {
+          return `- ${fieldValue.filename} \n- size: ${humanFileSize(fieldValue.filesize)}`;
+        } else {
+          return fieldValue.filename;
+        }
+      }
+      return null;
+    }
   }
 
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
@@ -110,26 +108,17 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       <div
         className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
         {... (!props.disableInput && { onClick: openFilePicker })}
+        ref={ellipsisRef}
       >
         {isStringAndNotEmpty(fieldValue?.filename) ?
           <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-          <span className='chaise-input-placeholder'>{props.placeholder}</span>
+          <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a file'}</span>
         }
         <ClearInputBtn
           btnClassName={`${props.clearClasses} input-switch-clear`}
           clickCallback={clearInput} show={showClear && !props.disableInput}
         />
       </div>
-    )
-  }
-
-  const renderInputWithTooltip = (fieldValue: any, showClear: any, clearInput: any) => {
-    if (!fileObject || !fileObject.filename) return renderInput(fieldValue, showClear, clearInput);
-
-    return (
-      <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip(fileObject)}>
-        {renderInput(fieldValue, showClear , clearInput)}
-      </ChaiseTooltip>
     )
   }
 
@@ -161,21 +150,26 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   }
 
   return (
-    <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
+    <InputField {...props} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
         <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
-          <div className='chaise-input-group'>
-            {renderInputWithTooltip(field.value, showClear, clearInput)}
-            {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
-              <div className='chaise-input-group-append' tabIndex={0}>
-                <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
-                  <span className='fa-solid fa-folder-open'></span>
-                  <span className='button-text'>Select file</span>
-                </label>
-              </div>
-            </ChaiseTooltip>}
-          </div>
+          <EllipsisWrapper
+            elementRef={ellipsisRef}
+            tooltip={renderFileTooltip(field.value)}
+          >
+            <div className='chaise-input-group'>
+              {renderInput(field.value, showClear, clearInput)}
+              {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
+                <div className='chaise-input-group-append' tabIndex={0}>
+                  <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
+                    <span className='fa-solid fa-folder-open'></span>
+                    <span className='button-text'>Select file</span>
+                  </label>
+                </div>
+              </ChaiseTooltip>}
+            </div>
+          </EllipsisWrapper>
           {renderImagePreview(field.value)}
           <input
             id={fileElementId}

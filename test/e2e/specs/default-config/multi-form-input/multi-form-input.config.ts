@@ -8,5 +8,5 @@ export default getConfig({
     'multi-form-input-edit.spec.ts'
   ],
   configFileName: 'recordedit/multi-form-input.dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
+  mainSpecName: 'default-config',
 });

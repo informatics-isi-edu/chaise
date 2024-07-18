@@ -49,7 +49,16 @@ export interface ConfigServiceSettings {
   overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
-  openIframeLinksInTab?: boolean
+  openIframeLinksInTab?: boolean,
+  /**
+   * this can be used to make sure we're not parsing the url to find the catalog id.
+   * for example in static sites we cannot assume the hash fragment has the catalog id,
+   * so we should skip parsing it.
+   *
+   * TODO we might want to come up with a better name. other suggestions were `forceDefaultCatalog`,
+   * and `hasChaiseURLFragment`.
+   */
+  skipParsingURLForCatalogID?: boolean
 }
 
 export interface ContextHeaderParams {
@@ -140,7 +149,7 @@ export class ConfigService {
     // if it already is not populated
     const service = ConfigService.ERMrestLocation;
 
-    const catalogId = getCatalogId();
+    const catalogId = getCatalogId(settings.skipParsingURLForCatalogID);
 
     ConfigService._catalogID = catalogId;
 
