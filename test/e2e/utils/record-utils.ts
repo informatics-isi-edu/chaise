@@ -524,6 +524,13 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
     await test.step('the opened form should have the proper prefilled values.', async () => {
       if (!newPage) return;
 
+      // close association modal that loads and continue with test
+      const modal = ModalLocators.getRecordeditAssociationPopup(newPage);
+      await expect.soft(modal).toBeVisible();
+
+      await ModalLocators.getCloseBtn(modal).click();
+      await expect.soft(modal).not.toBeAttached();
+
       for await (const colName of Object.keys(params.prefilledValues)) {
         const expectedCol = params.prefilledValues[colName];
 

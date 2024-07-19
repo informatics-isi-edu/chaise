@@ -28,6 +28,10 @@ export default class ModalLocators {
     return page.locator('.foreignkey-popup');
   }
 
+  static getRecordeditAssociationPopup(page: Page): Locator {
+    return page.locator('.association-popup');
+  }
+
   static getErrorModal(page: Page): Locator {
     return page.locator('.modal-error');
   }
