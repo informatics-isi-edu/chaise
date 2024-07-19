@@ -32,12 +32,12 @@ const testParams = {
     secondAttemptValues: {
       creator: 'John Smith II',
       file_content: 'actually the content should be this one.',
-      notes: 'some notes'
+      notes: '["note 1","note 2"]'
     },
     submission: {
       tableDisplayname: 'main',
       resultColumnNames: ['id', 'creator', 'notes'],
-      resultRowValues: [['1', 'John Smith II', 'some notes']]
+      resultRowValues: [['1', 'John Smith II', 'note 1, note 2']]
     }
   },
   edit: {
@@ -46,7 +46,7 @@ const testParams = {
     existingValues: {
       creator: 'John Smith II',
       file_content: 'actually the content should be this one.',
-      notes: 'some notes'
+      notes: '["note 1","note 2"]'
     },
     newValues: {
       creator: 'Kylan Gentry',
