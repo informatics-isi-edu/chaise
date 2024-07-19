@@ -191,6 +191,18 @@ const IframeFieldModal = ({
                 filesize: colData.size
               };
 
+            }
+            else if (col.type?.isArray) {
+              try {
+                // the iframe will send the array value in a string, so we have to turn it into a proper array
+                const arrayValue = JSON.parse(colData);
+                if (Array.isArray(arrayValue)) {
+                  // mimic the same structure that we have in array fields (the value is stored inside the .val prop)
+                  values[`c_${formNumber}-${col.RID}`] = arrayValue.map((v: any) => ({val: v}));
+                }
+              } catch (exp) {
+                values[`c_${formNumber}-${col.RID}`] = [];
+              }
             } else {
               values[`c_${formNumber}-${col.RID}`] = colData;
             }
