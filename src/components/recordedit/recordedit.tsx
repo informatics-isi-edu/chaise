@@ -315,7 +315,7 @@ const RecordeditInner = ({
     if (!initialized) return;
 
     // used to trigger recordset select view
-    if (prefillObject?.hasUniqueAssociation) {
+    if (prefillObject) {
       let domainRef: any,
         fkColumnToLeaf: any,
         fkColumnToMain: any;
@@ -336,88 +336,90 @@ const RecordeditInner = ({
         }
       });
 
-      if (!domainRef) return;
-      setAssociationIsUnique(prefillObject.hasUniqueAssociation);
+      // trigger the association modal when we know the leaf column for the association is visible in create mode
+      if (domainRef) {
+        setAssociationIsUnique(prefillObject.hasUniqueAssociation);
 
-      const andFilters: any[] = [];
-      // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-      fkColumnToLeaf.foreignKey.key.colset.columns.forEach((col: any) => {
-        andFilters.push({
-          source: col.name,
-          hidden: true,
-          not_null: true
+        const andFilters: any[] = [];
+        // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+        fkColumnToLeaf.foreignKey.key.colset.columns.forEach((col: any) => {
+          andFilters.push({
+            source: col.name,
+            hidden: true,
+            not_null: true
+          });
         });
-      });
 
-      // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
-      let customFacets: any = null;
-      if (
-        domainRef.pseudoColumn &&
-        domainRef.pseudoColumn.filterProps &&
-        domainRef.pseudoColumn.filterProps.leafFilterString
-      ) {
-        // NOTE should we display the filters or not?
-        customFacets = {
-          ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
-          removable: false,
+        // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
+        let customFacets: any = null;
+        if (
+          domainRef.pseudoColumn &&
+          domainRef.pseudoColumn.filterProps &&
+          domainRef.pseudoColumn.filterProps.leafFilterString
+        ) {
+          // NOTE should we display the filters or not?
+          customFacets = {
+            ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
+            removable: false,
+          };
+        }
+
+        const modalReference = domainRef.addFacets(andFilters, customFacets)
+          .contextualize.compactSelectAssociationLink;
+
+        const recordsetConfig: RecordsetConfig = {
+          viewable: false,
+          editable: false,
+          deletable: false,
+          sortable: true,
+          selectMode: RecordsetSelectMode.MULTI_SELECT,
+          showFaceting: true,
+          disableFaceting: false,
+          displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
         };
-      }
 
-      const modalReference = domainRef.addFacets(andFilters, customFacets)
-        .contextualize.compactSelectAssociationLink;
-
-      const recordsetConfig: RecordsetConfig = {
-        viewable: false,
-        editable: false,
-        deletable: false,
-        sortable: true,
-        selectMode: RecordsetSelectMode.MULTI_SELECT,
-        showFaceting: true,
-        disableFaceting: false,
-        displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
-      };
-
-      const stackElement = LogService.getStackNode(
-        LogStackTypes.RELATED,
-        domainRef.table,
-        { source: domainRef.compressedDataSource, entity: true, picker: 1 }
-      );
-
-      const logInfo = {
-        logObject: null,
-        logStack: [stackElement],
-        // logStack: getRecordLogStack(stackElement),
-        logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
-      };
-
-      let getDisabledTuples;
-      if (prefillObject.hasUniqueAssociation) {
-        /**
-         * The existing rows in this p&b association must be disabled
-         * so users doesn't resubmit them.
-         */
-        getDisabledTuples = disabledTuplesPromise(
-          prefillObject,
-          domainRef.contextualize.compactSelectAssociationLink,
-          fkColumnToLeaf,
-          fkColumnToMain,
-          []
+        const stackElement = LogService.getStackNode(
+          LogStackTypes.RELATED,
+          domainRef.table,
+          { source: domainRef.compressedDataSource, entity: true, picker: 1 }
         );
+
+        const logInfo = {
+          logObject: null,
+          logStack: [stackElement],
+          // logStack: getRecordLogStack(stackElement),
+          logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
+        };
+
+        let getDisabledTuples;
+        if (prefillObject.hasUniqueAssociation) {
+          /**
+           * The existing rows in this p&b association must be disabled
+           * so users doesn't resubmit them.
+           */
+          getDisabledTuples = disabledTuplesPromise(
+            prefillObject,
+            domainRef.contextualize.compactSelectAssociationLink,
+            fkColumnToLeaf,
+            fkColumnToMain,
+            []
+          );
+        }
+
+        // set recordset select view then set selected rows on "submit"
+        setAssociationRecordsetProps({
+          initialReference: modalReference,
+          initialPageLimit: modalReference.display.defaultPageSize
+            ? modalReference.display.defaultPageSize
+            : RECORDSET_DEFAULT_PAGE_SIZE,
+          config: recordsetConfig,
+          logInfo: logInfo,
+          parentReference: reference,
+          getDisabledTuples
+        });
+
+        setShowAssociationModal(true);
       }
-
-      // set recordset select view then set selected rows on "submit"
-      setAssociationRecordsetProps({
-        initialReference: modalReference,
-        initialPageLimit: modalReference.display.defaultPageSize
-          ? modalReference.display.defaultPageSize
-          : RECORDSET_DEFAULT_PAGE_SIZE,
-        config: recordsetConfig,
-        logInfo: logInfo,
-        parentReference: reference,
-        getDisabledTuples
-      });
-
-      setShowAssociationModal(true);
     }
 
     const initialValues = getInitialFormValues(forms, columnModels);

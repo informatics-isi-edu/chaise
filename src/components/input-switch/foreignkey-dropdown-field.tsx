@@ -163,8 +163,14 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       });
   }, [triggerDropdownChange]);
 
+  // if there is a unique association using prefill and  this column is the same as the one used in the unique association for the leaf
+  // table of the association, update the rows in the dropdown if the selected rows change
   useEffect(() => {
-    if (!dropdownInitialized || !prefillAssociationSelectedRows) return;
+    if (
+      !props.foreignKeyCallbacks?.updateAssociationSelectedRows ||
+      !dropdownInitialized || !prefillAssociationSelectedRows
+    ) return;
+
     setShowSpinner(true);
 
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);

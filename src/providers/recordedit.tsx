@@ -106,7 +106,7 @@ export const RecordeditContext = createContext<{
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
-  /*  */
+  /* the prefill object from cookie storage based on prefill query param */
   prefillObject: PrefillObject | null,
   /* the column to the leaf table for the association table if we have a prefill object */
   prefillAssociationFkLeafColumn: any,
