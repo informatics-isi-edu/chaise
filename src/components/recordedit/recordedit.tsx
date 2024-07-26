@@ -119,7 +119,7 @@ const RecordeditInner = ({
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
-  // the next 5 props are used when there is a prefill object for starting recordedit with more than one form to associate on creation
+  // the next 5 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
   const [modalDomainRef, setModalDomainRef] = useState<any>(null);
   const [associationIsUnique, setAssociationIsUnique] = useState<boolean>(false);
   const [showAssociationModal, setShowAssociationModal] = useState<boolean>(false);
@@ -350,6 +350,7 @@ const RecordeditInner = ({
           });
         });
 
+        // TODO: think about this more if it's required in this context
         // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
         let customFacets: any = null;
         if (
@@ -577,6 +578,7 @@ const RecordeditInner = ({
     // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
     const getDisabledTuples = disabledTuplesPromise(
       prefillObject,
+      // TODO: this doesn't have addFacets on it!
       modalDomainRef.contextualize.compactSelectAssociationLink,
       prefillAssociationFkLeafColumn,
       prefillAssociationFkMainColumn,

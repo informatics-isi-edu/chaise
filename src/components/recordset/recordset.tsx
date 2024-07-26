@@ -299,15 +299,15 @@ const RecordsetInner = ({
             })
           };
 
-          const config: any = {
+          const requestConfig: any = {
             skipHTTP401Handling: true,
             headers: {}
           };
 
-          config.headers[windowRef.ERMrest.contextHeaderName] = logObj;
+          requestConfig.headers[windowRef.ERMrest.contextHeaderName] = logObj;
           // attributegroup/CFDE:saved_query/RID;last_execution_status
           const updateSavedQueryUrl = windowRef.location.origin + savedQueryConfig.ermrestAGPath + '/RID;' + lastExecutedColumnName;
-          ConfigService.http.put(updateSavedQueryUrl, rows, config).then(() => {
+          ConfigService.http.put(updateSavedQueryUrl, rows, requestConfig).then(() => {
             // do nothing
           }).catch((error: any) => {
             $log.warn('saved query last executed time could not be updated');

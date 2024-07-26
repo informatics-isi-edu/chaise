@@ -121,6 +121,19 @@ const TableRow = ({
    *   - we're waiting for the delete request
    */
   const rowDisabled = disabled || waitingForDelete;
+  let disabledTooltip = 'This row is selected in another input in the form';
+  if (rowDisabled) {
+    switch (tuple.disabledType) {
+      case 'associated':
+        disabledTooltip = 'This row is already associated';
+        break
+      case 'selected':
+        if (selected) disabledTooltip = 'This row is the current selection for this input';
+        break;
+      default:
+        break;
+    }
+  }
 
   // TODO: logging
   const initializeOverflows = () => {
@@ -179,7 +192,7 @@ const TableRow = ({
     // attach an onload function that updates how many have loaded
     const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
       `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
-      )).filter(img => !img.complete);
+    )).filter(img => !img.complete);
     if (imgTags.length > numImages.current) numImages.current = imgTags.length
 
     const onImageLoad = () => {
@@ -408,25 +421,36 @@ const TableRow = ({
     }
   }
 
+  const renderSingleSelectActionButton = () => {
+    if ((tuple.disabledType === 'selected' || tuple.disabledType === 'associated') && !selected) return;
+
+    const button = () => (<button
+      className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
+      type='button'
+      disabled={rowDisabled}
+      onClick={() => onSelectChange(tuple)}
+    >
+      <span className='chaise-btn-icon fa-solid fa-circle'></span>
+    </button>)
+
+    return (<>
+      {!rowDisabled ?
+        <ChaiseTooltip
+          placement='bottom-start'
+          tooltip='Select'
+        >
+          {button()}
+        </ChaiseTooltip>
+        : button()
+      }
+    </>)
+  }
+
   const renderActionButtons = () => {
 
     switch (config.selectMode) {
       case RecordsetSelectMode.SINGLE_SELECT:
-        return (
-          <ChaiseTooltip
-            placement='bottom-start'
-            tooltip='Select'
-          >
-            <button
-              className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
-              type='button' 
-              disabled={rowDisabled}
-              onClick={() => onSelectChange(tuple)}
-            >
-              <span className='chaise-btn-icon fa-solid fa-circle'></span>
-            </button>
-          </ChaiseTooltip>
-        )
+        return renderSingleSelectActionButton();
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
@@ -557,22 +581,30 @@ const TableRow = ({
     });
   }
 
+  const renderTableRow = () => {
+    return (<tr
+      className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
+      ref={rowContainer}
+      style={{ 'position': 'relative' }}
+    >
+      {showActionButtons && <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
+        <div className='action-btns-inner-container'>
+          {renderActionButtons()}
+        </div>
+      </td>}
+      {renderCells()}
+    </tr>);
+  }
+
   return (
     <>
-      <tr
-        className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
-        ref={rowContainer}
-        style={{ 'position': 'relative' }}
-      >
-        {showActionButtons &&
-          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
-            <div className='action-btns-inner-container'>
-              {renderActionButtons()}
-            </div>
-          </td>
-        }
-        {renderCells()}
-      </tr>
+      {config.selectMode === RecordsetSelectMode.SINGLE_SELECT && rowDisabled ?
+        // only add tooltip if single select and disabled
+        <ChaiseTooltip tooltip={disabledTooltip} placement='bottom-start' className='reposition-tr-tooltip'>
+          {renderTableRow()}
+        </ChaiseTooltip>
+        : renderTableRow()
+      }
       {showDeleteConfirmationModal &&
         <DeleteConfirmationModal
           show={!!showDeleteConfirmationModal}

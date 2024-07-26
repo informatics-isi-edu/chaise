@@ -803,6 +803,7 @@ export default function RecordeditProvider({
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
 
+    // NOTE: comment why this check is the way it is
     if (prefillObject?.hasUniqueAssociation) {
       let tempSelectedRows = [...prefillAssociationSelectedRows];
       // TODO: this is ignoring composite foreign keys

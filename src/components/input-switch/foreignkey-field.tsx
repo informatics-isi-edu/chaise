@@ -9,6 +9,7 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 // hooks
 import { useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
 import {
@@ -81,9 +82,10 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
 
   const { setValue, getValues } = useFormContext();
+  const { prefillAssociationSelectedRows } = useRecordedit();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
-
+  const [inputSelectedRow, setInputSelectedRow] = useState<SelectedRow | null>(null);
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
   const ellipsisRef = useRef(null);
@@ -100,6 +102,9 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    */
   const onClear = () => {
     const column = props.columnModel.column;
+
+    setInputSelectedRow(null);
+
     if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
       callUpdateAssocationRows(
         column,
@@ -155,7 +160,21 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       getValues
     );
 
+    let currentSelectedRow = inputSelectedRow;
+    // there is a value in the input but no selected row because of prefill showing an association picker on recordedit page load
+    if (getValues(props.name) && !currentSelectedRow) {
+      console.log(getValues(props.name));
+      console.log(prefillAssociationSelectedRows)
+      console.log('need to set a selected row')
+
+      // find row in prefillAssociationSelectedRows
+      currentSelectedRow = prefillAssociationSelectedRows.filter((row: SelectedRow) => {
+        return row.displayname.value === getValues(props.name);
+      })[0];
+    }
+
     setRecordsetModalProps({
+      initialSelectedRows: currentSelectedRow ? [currentSelectedRow] : undefined,
       parentReference: props.parentReference,
       parentTuple: props.parentTuple,
       initialReference: ref.contextualize.compactSelectForeignKey,
@@ -180,6 +199,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       const selectedRow = selectedRows[0];
       const column = props.columnModel.column;
+
+      setInputSelectedRow(selectedRow);
 
       // if the recordedit page's table is an association table with a unique key pair, track the selected rows
       if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
@@ -239,7 +260,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               <Spinner animation='border' size='sm' />
             </div>
           }
-          <EllipsisWrapper 
+          <EllipsisWrapper
             elementRef={ellipsisRef}
             tooltip={existingValuePresentation(field)}
           >

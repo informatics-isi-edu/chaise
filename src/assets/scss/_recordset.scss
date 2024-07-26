@@ -189,4 +189,14 @@
       top: calc(50% - variables.$main-spinner-height);
     }
   }
+
+  // !important needs to be used here since bootstrap attaches styles directly to the component which override stylesheet styles
+  .tooltip.reposition-tr-tooltip {
+    left: 22px !important;
+
+    .tooltip-arrow {
+      left: 5px !important;
+      transform: unset !important;
+    }
+  }
 }

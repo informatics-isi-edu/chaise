@@ -192,7 +192,8 @@ const RecordsetTable = ({
    */
   const onSelectChange = (tuple: any) => {
     setSelectedRows((currRows: SelectedRow[]) => {
-      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      // since single select can have a row selected when the modal loads (foreign key input), we want to make sure the set is empty before adding to it
+      const res: SelectedRow[] = (Array.isArray(currRows) && config.selectMode !== RecordsetSelectMode.SINGLE_SELECT) ? [...currRows] : [];
       // see if the tuple is list of selected rows or not
       const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
       // if it's currently selected, then we should deselect (and vice versa)

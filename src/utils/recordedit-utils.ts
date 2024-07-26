@@ -948,7 +948,11 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
             const index = page.tuples.findIndex((tuple: any) => {
               return tuple.uniqueId === newTuple.uniqueId;
             });
-            if (index > -1) disabledRows.push(page.tuples[index]);
+
+            if (index > -1) {
+              page.tuples[index].disabledType = 'associated';
+              disabledRows.push(page.tuples[index]);
+            }
           });
 
           // iterate through the current row selections in recordedit forms
@@ -956,8 +960,12 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
             const index = page.tuples.findIndex((tuple: any) => {
               return tuple.uniqueId === row.uniqueId;
             });
-            if (index > -1) disabledRows.push(page.tuples[index]);
-          })
+
+            if (index > -1) {
+              page.tuples[index].disabledType = 'selected';
+              disabledRows.push(page.tuples[index]);
+            }
+          });
 
           resolve({ disabledRows: disabledRows, page: page });
         })
