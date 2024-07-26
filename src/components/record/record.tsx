@@ -200,6 +200,7 @@ const RecordInner = ({
       if (ConfigService.appSettings.hideNavbar) url += `?hideNavbar=${ConfigService.appSettings.hideNavbar}`;
       windowRef.history.replaceState({}, '', url);
     }).catch((error: any) => {
+      console.log('main_data_load_failure');
       dispatchError({ error });
     });
   }, []);

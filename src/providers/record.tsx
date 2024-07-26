@@ -876,6 +876,8 @@ export default function RecordProvider({
           return;
         }
 
+        console.log('full_page_load_failure');
+
         const errorIndexes: any = {};
         activeListModel.objects.forEach(function (obj: any) {
           if (obj.column || obj.inline) {

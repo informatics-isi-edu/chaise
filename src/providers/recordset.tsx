@@ -809,6 +809,13 @@ export default function RecordsetProvider({
           return defer.resolve({ success: false, page: null });
         }
 
+        if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
+          console.log('main_data_load_failure');
+        }
+        else if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+          console.log('full_page_load_failure');
+        }
+
         setIsInitialized(true);
 
         // globally sets when the app state is ready to interact with
@@ -1059,6 +1066,8 @@ export default function RecordsetProvider({
       if (flowControl.current.queue.counter !== current) {
         return defer.resolve(false), defer.promise;
       }
+
+      console.log('full_page_load_failure');
 
       let errorIndexes: any = {};
       activeListModel.objects.forEach((obj: any) => {

@@ -310,6 +310,8 @@ const Faceting = ({
           setFacetModelByIndex(i, { facetHasTimeoutError: false });
           updatePage();
         }).catch(function (err: any) {
+          console.log('full_page_load_failure');
+
           // show alert if 400 Query Timeout Error
           if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
             setFacetModelByIndex(i, { facetHasTimeoutError: true });
@@ -335,6 +337,8 @@ const Faceting = ({
             afterFacetUpdate(i, res, flowControl);
             updatePage();
           }).catch(function (err: any) {
+            console.log('full_page_load_failure');
+
             // show alert if 400 Query Timeout Error
             if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
               setFacetModelByIndex(i, { facetHasTimeoutError: true });
