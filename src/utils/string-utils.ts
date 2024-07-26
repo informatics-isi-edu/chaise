@@ -29,3 +29,11 @@ export function makeSafeIdAttr(string: string) {
 export function hasTrailingPeriod(str: string) {
   return str[str.length-1] === '.';
 }
+
+
+export function printLoadTestingError(title: string, exception: any) {
+  let res = title ? title + '\n' : '';
+  res += (exception.status ? exception.status : 'Terminal Error') + '\n';
+  res += exception.message + '\n';
+  return res;
+}

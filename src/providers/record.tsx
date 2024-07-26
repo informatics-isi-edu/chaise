@@ -29,6 +29,7 @@ import { isNonEmptyObject, isObjectAndKeyDefined, isObjectAndNotNull } from '@is
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { attachGoogleDatasetJsonLd } from '@isrd-isi-edu/chaise/src/utils/google-dataset';
 import { canCreateRelated, generateRelatedRecordModel, getRelatedPageLimit } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { printLoadTestingError } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 export const RecordContext = createContext<{
   /**
@@ -876,7 +877,7 @@ export default function RecordProvider({
           return;
         }
 
-        console.log('full_page_load_failure');
+        console.log(`full_page_load_failure: ${printLoadTestingError('aggregate', err)}`);
 
         const errorIndexes: any = {};
         activeListModel.objects.forEach(function (obj: any) {

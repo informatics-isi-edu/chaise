@@ -31,6 +31,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { printLoadTestingError } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 /**
  * types related to the update function
@@ -810,10 +811,10 @@ export default function RecordsetProvider({
         }
 
         if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
-          console.log('main_data_load_failure');
+          console.log(`main_data_load_failure: ${printLoadTestingError('',err)}`);
         }
         else if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
-          console.log('full_page_load_failure');
+          console.log(`full_page_load_failure: ${printLoadTestingError('related table',err)}`);
         }
 
         setIsInitialized(true);
@@ -1067,7 +1068,7 @@ export default function RecordsetProvider({
         return defer.resolve(false), defer.promise;
       }
 
-      console.log('full_page_load_failure');
+      console.log(`full_page_load_failure: ${printLoadTestingError('aggregate',err)}`);
 
       let errorIndexes: any = {};
       activeListModel.objects.forEach((obj: any) => {

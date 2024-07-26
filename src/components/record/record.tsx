@@ -42,7 +42,7 @@ import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/const
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { canShowInlineRelated, canShowRelated, determineScrollElement } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { makeSafeIdAttr, printLoadTestingError } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -200,7 +200,7 @@ const RecordInner = ({
       if (ConfigService.appSettings.hideNavbar) url += `?hideNavbar=${ConfigService.appSettings.hideNavbar}`;
       windowRef.history.replaceState({}, '', url);
     }).catch((error: any) => {
-      console.log('main_data_load_failure');
+      console.log(`main_data_load_failure: ${printLoadTestingError('',error)}`);
       dispatchError({ error });
     });
   }, []);

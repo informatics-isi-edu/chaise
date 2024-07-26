@@ -22,6 +22,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
+import { printLoadTestingError } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type FacetingProps = {
   /**
@@ -310,7 +311,7 @@ const Faceting = ({
           setFacetModelByIndex(i, { facetHasTimeoutError: false });
           updatePage();
         }).catch(function (err: any) {
-          console.log('full_page_load_failure');
+          console.log(`full_page_load_failure: ${printLoadTestingError('facet', err)}`);
 
           // show alert if 400 Query Timeout Error
           if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
@@ -337,7 +338,7 @@ const Faceting = ({
             afterFacetUpdate(i, res, flowControl);
             updatePage();
           }).catch(function (err: any) {
-            console.log('full_page_load_failure');
+            console.log(`full_page_load_failure: ${printLoadTestingError('facet', err)}`);
 
             // show alert if 400 Query Timeout Error
             if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
