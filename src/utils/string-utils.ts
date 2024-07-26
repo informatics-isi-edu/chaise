@@ -33,7 +33,13 @@ export function hasTrailingPeriod(str: string) {
 
 export function printLoadTestingError(title: string, exception: any) {
   let res = title ? title + '\n' : '';
+  if (exception.code) res += exception.code;
   res += (exception.status ? exception.status : 'Terminal Error') + '\n';
-  res += exception.message + '\n';
+  if (exception.code === 500) {
+    res += exception.subMessage + '\n';
+  } else {
+    res += exception.message + '\n';
+  }
+
   return res;
 }

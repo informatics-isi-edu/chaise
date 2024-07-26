@@ -34,6 +34,7 @@ import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { printLoadTestingError } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type AppWrapperProps = {
   /**
@@ -124,6 +125,8 @@ const AppWrapperInner = ({
     }).then(() => {
       setConfigDone(true);
     }).catch((err: any) => {
+      console.log(`navbar_load_failure: ${printLoadTestingError('',err)}`)
+
       dispatchError({ error: err });
     });
 
