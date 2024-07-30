@@ -1,12 +1,14 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import fs from 'fs';
 
+// Locators
 import PageLocators from '@isrd-isi-edu/chaise/test/e2e/locators/page';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 
-import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+// utils
+import { APP_NAMES, DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 export async function getClipboardContent(page: Page): Promise<string> {
   return await page.evaluate('navigator.clipboard.readText()');
@@ -135,3 +137,14 @@ export async function testButtonState(button: Locator, useSoftExpect: boolean, i
     await expectFn(button).toHaveText(label);
   }
 }
+
+export async function deleteDownloadedFiles(fileNames: string[]) {
+  fileNames.forEach((name: string) => {
+      const filename = `${process.env.PWD}/test/e2e/${name}`;
+      if (fs.existsSync(filename)) {
+          // delete if there is any existing file with same name
+          fs.unlinkSync(filename);
+          console.log(`file: ${filename} has been removed`);
+      }
+  });
+};

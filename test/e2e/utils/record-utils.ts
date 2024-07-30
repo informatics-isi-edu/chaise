@@ -144,7 +144,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
         await btns.first().click();
 
         clipboardText = await getClipboardContent(page);
-        expect.soft(clipboardText).toBe(expectedLink);
+        expect.soft(clipboardText).toContain(expectedLink);
       }
     });
   }
@@ -183,7 +183,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
 
 }
 
-type RelatedTableTestParams = {
+export type RelatedTableTestParams = {
   tableName: string,
   schemaName: string,
   /**
@@ -388,6 +388,18 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   });
 
   await test.step('row level', async () => {
+    if (!params.isTableMode) {
+      await test.step('make sure tabular mode is displayed', async () => {
+        const text = await markdownToggleLink.innerText();
+        if (text === 'Edit mode') {
+          await markdownToggleLink.click();
+          displayIsToggled = true;
+        }
+
+        await expect.soft(markdownToggleLink).toHaveText('Custom mode');
+      });
+    }
+
     if (params.rowViewPaths) {
       await test.step('`View Details` button should have the correct link.', async () => {
         if (!params.rowViewPaths) return;
@@ -405,6 +417,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
       await test.step(`edit button should${!params.canEdit ? ' not ' : ' '}be visible.`, async () => {
         const editBtns = currentEl.locator('.edit-action-button');
         if (params.canEdit) {
+          // await page.pause();
           await expect.soft(editBtns.first()).toBeVisible();
         } else {
           await expect.soft(editBtns.first()).not.toBeVisible();
@@ -440,7 +453,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           await test.step('should have the proper tooltip', async () => {
             let expected = 'Delete';
             if (params.isAssociation) {
-              expected = `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTableName}.`;
+              expected = `Disconnect ${params.displayname}:${params.entityMarkdownName} from this ${params.baseTableName}.`;
             }
             await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
           });

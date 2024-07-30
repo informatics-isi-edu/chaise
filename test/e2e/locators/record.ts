@@ -101,6 +101,18 @@ export default class RecordLocators {
     return container.locator(`#row-${columnName} .entity-value span`);
   }
 
+  static getInlineRelatedTableInlineComment(container: Locator | Page, displayname: string) {
+    return RecordLocators.getEntityRelatedTable(container, displayname).locator('.inline-tooltip');
+  }
+
+  static getLinkChild(el: Locator) {
+    return el.locator('a');
+  };
+
+  static getValueMarkdownContainer(el: Locator) {
+    return el.locator('.markdown-container:not(.chaise-comment)');
+  };
+
   // --------------------- related table selectors ----------------- //
 
   static getRelatedTableContainer(container: Locator | Page, displayname: string, isInline?: boolean): Locator {
@@ -111,6 +123,11 @@ export default class RecordLocators {
   static getRelatedTableAccordion(container: Locator | Page, displayname: string): Locator {
     displayname = makeSafeIdAttr(displayname);
     return container.locator(`#rt-heading-${displayname}`);
+  }
+
+  static getRelatedTable(container: Locator | Page, displayname: string): Locator {
+    displayname = makeSafeIdAttr(displayname);
+    return container.locator(`#rt-${displayname}`);
   }
 
   static getRelatedSectionSpinner(page: Page): Locator {
