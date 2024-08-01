@@ -56,6 +56,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-function-type': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
+    '@typescript-eslint/no-require-imports': 'warn',
 
     // ------------------ testing ------------------
     '@typescript-eslint/no-floating-promises': 'warn'
