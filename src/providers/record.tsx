@@ -993,7 +993,7 @@ export default function RecordProvider({
         else if (index in doneInlines && !!val.relatedModel) {
           // if the page data is already fetched, we can just popuplate the tableMarkdownContent value.
           // otherwise we should just wait for the related/inline table data to get back to popuplate the tableMarkdownContent
-          let mdProps: { tableMarkdownContentInitialized: boolean, tableMarkdownContent: string | null } | {} = {};
+          let mdProps: { tableMarkdownContentInitialized: boolean, tableMarkdownContent: string | null } | object = {};
           if (val.relatedModel.recordsetState.page && !val.relatedModel.recordsetState.isLoading) {
             mdProps = {
               tableMarkdownContentInitialized: true,

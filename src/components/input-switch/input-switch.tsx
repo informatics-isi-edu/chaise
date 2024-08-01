@@ -145,7 +145,7 @@ export type InputSwitchProps = {
    *  Check allowed rules here - https://react-hook-form.com/docs/useform/register#options
    */
   additionalControllerRules?: {
-    [key: string]: (string | number | boolean | RegExp | Function | Object) | RuleWithMessage
+    [key: string]: (string | number | boolean | RegExp | Function | object) | RuleWithMessage
   }
 };
 

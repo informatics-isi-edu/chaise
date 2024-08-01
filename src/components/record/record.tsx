@@ -125,7 +125,7 @@ const RecordInner = ({
    */
   const [disablePanel, setDisablePanel] = useState(() => {
     return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
-      col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
+      return col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
     }));
   });
 
@@ -587,7 +587,7 @@ const RecordInner = ({
     const mainContainerTop = mainContainer.current.getBoundingClientRect().top;
 
     // return if related table header is at the top of main container or below the top (it's already visible)
-    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next 
+    // NOTE: related table header can't be below the bottom of main container since the user clicked prev/next
     //    for the related table we are looking at, meaning prev/next is above the bottom of main container and
     //    therefore the related table header is either visible or above the top of main container top
     if (scrollElTop >= mainContainerTop) return;
