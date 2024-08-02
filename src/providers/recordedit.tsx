@@ -9,7 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import {
   appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
-  RecordeditModalOptions, UploadProgressProps
+  RecordeditModalOptions, UpdateAssociationRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
@@ -118,7 +118,7 @@ export const RecordeditContext = createContext<{
   prefillAssociationSelectedRows: SelectedRow[],
   setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
   /* function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique */
-  updateAssociationSelectedRows: (oldValues: any, newRow?: SelectedRow) => void,
+  updateAssociationSelectedRows: UpdateAssociationRowsCallback,
   /**
    * log client actions
    * Notes:
@@ -297,6 +297,13 @@ export default function RecordeditProvider({
     setupStarted.current = true;
 
     const prefillObj = getPrefillObject(queryParams);
+
+    // add properties to the prefillObject that is stored here in the provider for use in other components
+    if (prefillObj) {
+      // TODO: isAssociation and associationIsUnique
+      // prefillObj.isAssociation = reference.table.isAssociation || false;
+      prefillObj.hasUniqueAssociation = reference.table.isAssociation || false;
+    }
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
@@ -422,7 +429,28 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
-        if (prefillObj) setPrefillObject(prefillObj);
+        if (prefillObj) {
+          setPrefillObject(prefillObj);
+
+          // TODO: if reference.table is an association
+          // if (prefillObject.isAssociation) {
+          reference.columns.forEach((column: any) => {
+            // column should be a foreignkey pseudo column
+            if (!column.isForeignKey) return;
+
+            reference.table.foreignKeys.all().forEach((fk: any) => {
+              // column and foreign key `.name` property is a hash value
+              if (column.name === fk.name) {
+                if (prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+                  setPrefillAssociationFkMainColumn(column);
+                } else {
+                  setPrefillAssociationFkLeafColumn(column);
+                }
+              }
+            });
+          });
+          // }
+        }
 
         setInitialized(true);
       } else if (session) {
@@ -803,25 +831,13 @@ export default function RecordeditProvider({
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
 
-    // NOTE: comment why this check is the way it is
+    // prefillAssocationSelectedRows is only used when in create mode, with a prefill object, and there is a unique association
     if (prefillObject?.hasUniqueAssociation) {
-      let tempSelectedRows = [...prefillAssociationSelectedRows];
-      // TODO: this is ignoring composite foreign keys
-      // NOTE: indexes is the value AT the given index in forms[] to remove
-      indexes.forEach((idx: number) => {
-        // get values from RHF to then find the rows in prefillAssociationSelectedRows to remove
-        prefillAssociationFkLeafColumn.foreignKey.colset.columns.forEach((fkCol: any) => {
-          // RHF indexing starts at 1
-          const RHFindex = `c_${forms[idx]}-${fkCol.RID}`;
-          const valueToCompare = formValues[RHFindex];
+      const tempSelectedRows = [...prefillAssociationSelectedRows];
 
-          const keyCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(fkCol)
-
-          tempSelectedRows = tempSelectedRows.filter((row: SelectedRow) => {
-            return row.data[keyCol.name] !== valueToCompare;
-          });
-        });
-
+      indexes.forEach((index: number) => {
+        // use splice to remove the element from the array and shift all array values after this element forward
+        tempSelectedRows.splice(index, 1);
       });
 
       setPrefillAssociationSelectedRows(tempSelectedRows);
@@ -840,24 +856,23 @@ export default function RecordeditProvider({
    * when a single foreignkey input field value is changed or removed, removes old row from association selected rows
    * and adds the new one if a new value was selected. Used when there is a prefill object and the association is unique
    *
-   * @param oldValues old values for finding which row to remove
-   * @param newRow the new row to keep track of
+   * @param formNumber the form number from forms array to remove
+   * @param newRow the new row to keep track of, if not defined removes the previous row
    */
-  const updateAssociationSelectedRows = (oldValues: any, newRow?: SelectedRow) => {
-    let tempSelectedRows = [...prefillAssociationSelectedRows];
-    tempSelectedRows = tempSelectedRows.filter((row: SelectedRow) => {
-      // oldValues is keyed by the column name we are matching against
-      const oldKeys: string[] = Object.keys(oldValues);
-      let matchedVals = 0;
-      for (let i=0; i < oldKeys.length; i++) {
-        const key = oldKeys[i];
-        if (row.data[key] === oldValues[key]) matchedVals += 1;
-      }
+  const updateAssociationSelectedRows = (formNumber: number, newRow?: SelectedRow) => {
+    const tempSelectedRows = [...prefillAssociationSelectedRows];
 
-      return matchedVals !== oldKeys.length;
-    });
+    // find the index in forms for the form number
+    const indexToChange = forms.indexOf(formNumber);
 
-    if (newRow) tempSelectedRows.push(newRow);
+    if (newRow) {
+      // change the value at 'formNumber'
+      tempSelectedRows[indexToChange] = newRow
+    } else {
+      // remove value at form number without shifting other array values
+      // leaves an `empty` or `undefined` value at `indexToChange` in array
+      delete tempSelectedRows[indexToChange];
+    }
 
     setPrefillAssociationSelectedRows(tempSelectedRows);
   }

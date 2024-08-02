@@ -88,6 +88,7 @@ export type RecordeditModalOptions = {
   onClose: () => void;
 }
 
+export type UpdateAssociationRowsCallback = (formNumber: number, newRow?: SelectedRow) => void;
 export type RecordeditForeignkeyCallbacks = {
   /**
    * if defined, called before loading the foreign key picker or association modal
@@ -103,7 +104,7 @@ export type RecordeditForeignkeyCallbacks = {
    * This will call a function in recordedit provider to update the selected rows for the
    * association popup if we have a prefillObject and the association is unique
    */
-  updateAssociationSelectedRows?: (oldValues: any, newRow?: SelectedRow) => void,
+  updateAssociationSelectedRows?: UpdateAssociationRowsCallback,
   /**
    * if defined, will be used for validating the foreign key value.
    *
@@ -194,10 +195,6 @@ export interface PrefillObject {
    */
   fkColumnNames: string[];
   /**
-   * the foreignkey columns that point to the leaf table
-   */
-  toFkColumnNames: string[],
-  /**
    * map of column names as keys to column RIDs as values
    */
   columnNameToRID: { [key: string]: string };
@@ -212,7 +209,7 @@ export interface PrefillObject {
   /**
    * boolean to trigger add association popup when loading recordedit before showing the forms
    */
-  hasUniqueAssociation: boolean;
+  hasUniqueAssociation?: boolean;
 }
 
 export interface LastChunkMap {

@@ -190,12 +190,13 @@
     }
   }
 
+  // used for foreignkey-dropdown-field
   // !important needs to be used here since bootstrap attaches styles directly to the component which override stylesheet styles
-  .tooltip.reposition-tr-tooltip {
-    left: 22px !important;
+  .tooltip.reposition-li-tooltip {
+    left: 10px !important;
 
     .tooltip-arrow {
-      left: 5px !important;
+      left: 40px !important;
       transform: unset !important;
     }
   }

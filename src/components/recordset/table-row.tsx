@@ -22,11 +22,12 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { disabledRowTooltip } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -120,19 +121,13 @@ const TableRow = ({
    *   - the parent says that it should be disabled
    *   - we're waiting for the delete request
    */
-  const rowDisabled = disabled || waitingForDelete;
-  let disabledTooltip = 'This row is selected in another input in the form';
+  const rowDisabled = (disabled && !selected) || waitingForDelete;
+  const singleSelectIcon = `fa-solid ${selected ? 'fa-check' : 'fa-circle'}`;
+  let singleSelectIconTooltip = `Select${selected ? 'ed' : ''}`;
+
   if (rowDisabled) {
-    switch (tuple.disabledType) {
-      case 'associated':
-        disabledTooltip = 'This row is already associated';
-        break
-      case 'selected':
-        if (selected) disabledTooltip = 'This row is the current selection for this input';
-        break;
-      default:
-        break;
-    }
+    // disabled will be a small grey button without an icon
+    singleSelectIconTooltip = disabledRowTooltip(tuple.disabledType);
   }
 
   // TODO: logging
@@ -421,36 +416,22 @@ const TableRow = ({
     }
   }
 
-  const renderSingleSelectActionButton = () => {
-    if ((tuple.disabledType === 'selected' || tuple.disabledType === 'associated') && !selected) return;
-
-    const button = () => (<button
-      className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
-      type='button'
-      disabled={rowDisabled}
-      onClick={() => onSelectChange(tuple)}
-    >
-      <span className='chaise-btn-icon fa-solid fa-circle'></span>
-    </button>)
-
-    return (<>
-      {!rowDisabled ?
-        <ChaiseTooltip
-          placement='bottom-start'
-          tooltip='Select'
-        >
-          {button()}
-        </ChaiseTooltip>
-        : button()
-      }
-    </>)
-  }
-
   const renderActionButtons = () => {
-
     switch (config.selectMode) {
       case RecordsetSelectMode.SINGLE_SELECT:
-        return renderSingleSelectActionButton();
+        return (<ChaiseTooltip
+          placement='bottom-start'
+          tooltip={singleSelectIconTooltip}
+        >
+          <button
+            className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
+            type='button'
+            disabled={rowDisabled}
+            onClick={() => onSelectChange(tuple)}
+          >
+            {!rowDisabled && <span className={`chaise-btn-icon ${singleSelectIcon}`}></span>}
+          </button>
+        </ChaiseTooltip>);
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
@@ -581,30 +562,20 @@ const TableRow = ({
     });
   }
 
-  const renderTableRow = () => {
-    return (<tr
-      className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
-      ref={rowContainer}
-      style={{ 'position': 'relative' }}
-    >
-      {showActionButtons && <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
-        <div className='action-btns-inner-container'>
-          {renderActionButtons()}
-        </div>
-      </td>}
-      {renderCells()}
-    </tr>);
-  }
-
   return (
     <>
-      {config.selectMode === RecordsetSelectMode.SINGLE_SELECT && rowDisabled ?
-        // only add tooltip if single select and disabled
-        <ChaiseTooltip tooltip={disabledTooltip} placement='bottom-start' className='reposition-tr-tooltip'>
-          {renderTableRow()}
-        </ChaiseTooltip>
-        : renderTableRow()
-      }
+      <tr
+        className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
+        ref={rowContainer}
+        style={{ 'position': 'relative' }}
+      >
+        {showActionButtons && <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
+          <div className='action-btns-inner-container'>
+            {renderActionButtons()}
+          </div>
+        </td>}
+        {renderCells()}
+      </tr>
       {showDeleteConfirmationModal &&
         <DeleteConfirmationModal
           show={!!showDeleteConfirmationModal}

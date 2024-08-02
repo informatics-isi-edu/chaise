@@ -1,10 +1,11 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import Spinner from 'react-bootstrap/Spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -23,12 +24,12 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import {
-  callOnChangeAfterSelection, callUpdateAssocationRows,
-  clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
+  callOnChangeAfterSelection, clearForeignKeyData, createForeignKeyReference,
+  disabledRowTooltip, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ForeignkeyDropdownFieldProps = InputFieldProps & {
@@ -183,7 +184,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       stack: LogService.addCausesToStack(stack, requestCauses, reloadStartTime)
     }
 
-    populateDropdownRows(currentDropdownPage, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime).then(() => {
+    populateDropdownRows(currentDropdownPage, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime).then(() => {
       setShowSpinner(false);
     }).catch((exception: any) => {
       setShowSpinner(false);
@@ -195,7 +196,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    * populate the dropdown rows after a request is done.
    * this function will take care of calling the getDisabledTuples if it's defined and setting the tuples as disabled
    */
-  const populateDropdownRows = (page: any, pageLimit: number, logStack: any,
+  const populateDropdownRows = (page: any, currentRow: SelectedRow | null, pageLimit: number, logStack: any,
     logStackPath: string, requestCauses?: any, reloadStartTime?: any): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       type PType = { page: any, disabledRows?: any };
@@ -215,7 +216,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         }
 
         setDropdownRows(page.tuples.map((tuple: any) => {
-          return { isDisabled: (tuple.uniqueId in disabledTuplesUniqueIDs), tuple };
+          // only disable if it's in the list AND it's not the current selection
+          const isDisabled = tuple.uniqueId in disabledTuplesUniqueIDs && tuple.uniqueId !== currentRow?.uniqueId
+          return { isDisabled, tuple };
         }));
 
         resolve(true);
@@ -270,15 +273,19 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       // we don't know which column value is used for the displayname so it's better to check react-hook-form state
       const displayedValue = getValues()[props.name];
 
+      let currentRow = null;
       // check if we have a value set for the foreign key input
       if (displayedValue) {
         // set the checked row if it's present in the page of rows
         page.tuples.forEach((tuple: any) => {
-          if (tuple.displayname.value === displayedValue) setCheckedRow(tuple);
+          if (tuple.displayname.value === displayedValue) {
+            setCheckedRow(tuple);
+            currentRow = tuple;
+          }
         });
       }
 
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath);
+      return populateDropdownRows(page, currentRow, pageLimit, logObj.stack, stackPath);
     }).then(() => {
 
       setShowSpinner(false);
@@ -295,13 +302,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const onClear = () => {
     const column = props.columnModel.column;
 
-    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows){
-      callUpdateAssocationRows(
-        column,
-        getValues(),
-        usedFormNumber,
-        props.foreignKeyCallbacks.updateAssociationSelectedRows
-      );
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
     }
 
     clearForeignKeyData(
@@ -346,7 +348,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+      return populateDropdownRows(page, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
     }).then(() => {
       setShowSpinner(false);
     }).catch((exception: any) => {
@@ -431,13 +433,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     // if the recordedit page's table is an association table with a unique key pair, track the selected rows
     if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-      callUpdateAssocationRows(
-        column,
-        getValues(),
-        usedFormNumber,
-        props.foreignKeyCallbacks.updateAssociationSelectedRows,
-        rowToAdd
-      );
+      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber, rowToAdd);
     }
 
     callOnChangeAfterSelection(
@@ -478,7 +474,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     dropdownReference.read(newPageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
 
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+      return populateDropdownRows(page, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
     }).then(() => {
 
       setShowSpinner(false);
@@ -488,8 +484,26 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     })
   }
 
+
   const renderDropdownOptions = (onChange: any) => {
     if (!dropdownInitialized) return;
+
+    const renderOptionRow = (row: any) => (
+      <Dropdown.Item
+        as='li'
+        onClick={(e) => onRowSelected(row.tuple, onChange)}
+        disabled={row.isDisabled}
+      >
+        {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
+        <label>
+          <DisplayValue
+            className='dropdown-select-value'
+            value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
+          />
+        </label>
+
+      </Dropdown.Item>
+    )
 
     if (dropdownRows.length === 0) {
       // return a special row that doesn't use Dropdown.Item so it won't be selectable
@@ -507,24 +521,22 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         </li>
       )
     }
-    return dropdownRows.map((row: DropdownRow) => {
-      return (
-        <Dropdown.Item
-          key={`fk-val-${row.tuple.uniqueId}`}
-          as='li'
-          onClick={(e) => onRowSelected(row.tuple, onChange)}
-          disabled={row.isDisabled}
-        >
-          {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
-          <label>
-            <DisplayValue
-              className='dropdown-select-value'
-              value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
-            />
-          </label>
-        </Dropdown.Item>
-      )
-    })
+
+    return dropdownRows.map((row: DropdownRow) => (
+      <div key={`fk-val-${row.tuple.uniqueId}`}>
+        {row.isDisabled ?
+          // only add tooltip if single select and disabled
+          <ChaiseTooltip
+            tooltip={disabledRowTooltip(row.tuple.disabledType)}
+            placement='bottom-start'
+            className='reposition-li-tooltip'
+          >
+            <div>{renderOptionRow(row)}</div>
+          </ChaiseTooltip>
+          : renderOptionRow(row)
+        }
+      </div>
+    ))
   }
 
   const rules: any = {};

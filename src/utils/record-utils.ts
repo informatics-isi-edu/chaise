@@ -318,8 +318,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
 
   let origTable;
   if (ref.derivedAssociationReference) {
-    // add association relies on the object that this returns for
-    // prefilling the data.
+    // add association relies on the object that this returns for prefilling the data.
     origTable = ref.derivedAssociationReference.table;
   } else {
     // we should contextualize to make sure the same table is shown in create mode
@@ -327,12 +326,10 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
   }
 
   const prefilledFks: string[] = [];
-  const otherFks: string[] = [];
   const keys: { [key: string]: any } = {};
   const columnNameToRID: { [key: string]: string } = {}
   origTable.foreignKeys.all().forEach((fk: any) => {
     if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) {
-      otherFks.push(fk.name);
       return;
     }
     prefilledFks.push(fk.name);
@@ -349,11 +346,8 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
     rowname: mainTuple.displayname,
     origUrl: mainTuple.reference.uri,
     fkColumnNames: prefilledFks,
-    toFkColumnNames: otherFks,
     columnNameToRID: columnNameToRID,
-    keys: keys,
-    // temporary function added in ermrestJS, maybe this should have a different name
-    hasUniqueAssociation: origTable.isAssociation
+    keys: keys
   };
 }
 

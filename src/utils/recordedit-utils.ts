@@ -8,8 +8,8 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, PrefillObject, RecordeditColumnModel, RecordeditForeignkeyCallbacks,
-  MULTI_FORM_INPUT_FORM_VALUE, TimestampOptions
+  appModes, MULTI_FORM_INPUT_FORM_VALUE, PrefillObject, RecordeditColumnModel,
+  RecordeditForeignkeyCallbacks, TimestampOptions, UpdateAssociationRowsCallback
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
@@ -19,12 +19,13 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isNonEmptyObject, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
@@ -734,26 +735,23 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
 
   // make sure all the keys are in the object
   if (!(
-    ('keys' in cookie) && ('columnNameToRID' in cookie) &&
-    ('fkColumnNames' in cookie) && ('toFkColumnNames' in cookie) &&
+    ('keys' in cookie) && ('columnNameToRID' in cookie) && ('fkColumnNames' in cookie) &&
     ('origUrl' in cookie) && ('rowname' in cookie)
   )) {
     return null;
   }
 
   // validate the values
-  if (!Array.isArray(cookie.fkColumnNames) || !Array.isArray(cookie.toFkColumnNames) || typeof cookie.origUrl !== 'string') {
+  if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
     return null;
   }
 
   return {
     keys: cookie.keys,
     fkColumnNames: cookie.fkColumnNames,
-    toFkColumnNames: cookie.toFkColumnNames,
     columnNameToRID: cookie.columnNameToRID,
     origUrl: cookie.origUrl,
-    rowname: cookie.rowname,
-    hasUniqueAssociation: cookie.hasUniqueAssociation
+    rowname: cookie.rowname
   }
 }
 
@@ -778,7 +776,7 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
   ));
 }
 
-/* The following 3 functions are for foreignkey fields */
+/* The following 6 functions are for foreignkey and foreignkey-dropdown fields */
 export function createForeignKeyReference(
   column: any,
   parentReference: any,
@@ -887,6 +885,17 @@ export function validateForeignkeyValue(
   }
 }
 
+export function disabledRowTooltip(disabledType: string): string {
+  let disabledTooltip = '';
+  if (disabledType === 'associated') {
+    disabledTooltip = MESSAGE_MAP.tooltip.otherRow;
+  } else if (disabledType === 'selected') {
+    disabledTooltip = MESSAGE_MAP.tooltip.otherInput;
+  }
+
+  return disabledTooltip;
+}
+
 /**
  * Used to fetch the disabled tuples for a recordset modal picker used to associate rows of data
  *
@@ -957,6 +966,9 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
 
           // iterate through the current row selections in recordedit forms
           rowsUsedInForm.forEach((row: SelectedRow) => {
+            // if an input is empty, there won't be a row defined
+            if (!row) return;
+
             const index = page.tuples.findIndex((tuple: any) => {
               return tuple.uniqueId === row.uniqueId;
             });
@@ -974,27 +986,4 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
         });
     });
   };
-}
-
-/**
-   * calls function attached to props if it exists, intended to update selected rows
-   * that are used when the association modal is loaded in the case of prefill
-   *
-   * @param rowToAdd
-   */
-export function callUpdateAssocationRows(
-  column: any,
-  values: any,
-  formNumber: number,
-  updateAssociationSelectedRows: (oldValues: any, row?: SelectedRow) => void,
-  rowToAdd?: SelectedRow
-) {
-  const oldValues: any = {};
-  column.foreignKey.colset.columns.forEach((col: any) => {
-    const referencedCol = column.foreignKey.mapping.get(col);
-
-    oldValues[referencedCol.name] = values[`c_${formNumber}-${col.RID}`];
-  });
-
-  updateAssociationSelectedRows(oldValues, rowToAdd);
 }

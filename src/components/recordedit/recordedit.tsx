@@ -110,8 +110,8 @@ const RecordeditInner = ({
   const { addAlert } = useAlert();
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions, prefillObject,
-    prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn,
-    prefillAssociationSelectedRows, setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
+    prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows,
+    setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
     addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
     showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
@@ -119,9 +119,7 @@ const RecordeditInner = ({
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
-  // the next 5 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
-  const [modalDomainRef, setModalDomainRef] = useState<any>(null);
-  const [associationIsUnique, setAssociationIsUnique] = useState<boolean>(false);
+  // the next 3 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
   const [showAssociationModal, setShowAssociationModal] = useState<boolean>(false);
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
   // when initializing the page, the selections in the modal that appears first should fill the first form
@@ -316,33 +314,13 @@ const RecordeditInner = ({
 
     // used to trigger recordset select view
     if (prefillObject) {
-      let domainRef: any,
-        fkColumnToLeaf: any,
-        fkColumnToMain: any;
-
-      reference.columns.forEach((column: any) => {
-        // column is a foreignkey pseudo column
-        if (!column.isForeignKey) return;
-        if (prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
-          setPrefillAssociationFkMainColumn(column);
-          fkColumnToMain = column;
-        }
-
-        if (prefillObject.toFkColumnNames.indexOf(column.name) !== -1) {
-          setPrefillAssociationFkLeafColumn(column);
-          fkColumnToLeaf = column;
-          setModalDomainRef(column.reference);
-          domainRef = column.reference;
-        }
-      });
+      const domainRef: any = prefillAssociationFkLeafColumn.reference;
 
       // trigger the association modal when we know the leaf column for the association is visible in create mode
       if (domainRef) {
-        setAssociationIsUnique(prefillObject.hasUniqueAssociation);
-
         const andFilters: any[] = [];
         // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-        fkColumnToLeaf.foreignKey.key.colset.columns.forEach((col: any) => {
+        prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
           andFilters.push({
             source: col.name,
             hidden: true,
@@ -395,14 +373,14 @@ const RecordeditInner = ({
         let getDisabledTuples;
         if (prefillObject.hasUniqueAssociation) {
           /**
-           * The existing rows in this p&b association must be disabled
+           * The existing rows in this association must be disabled
            * so users doesn't resubmit them.
            */
           getDisabledTuples = disabledTuplesPromise(
             prefillObject,
             domainRef.contextualize.compactSelectAssociationLink,
-            fkColumnToLeaf,
-            fkColumnToMain,
+            prefillAssociationFkLeafColumn,
+            prefillAssociationFkMainColumn,
             []
           );
         }
@@ -578,8 +556,7 @@ const RecordeditInner = ({
     // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
     const getDisabledTuples = disabledTuplesPromise(
       prefillObject,
-      // TODO: this doesn't have addFacets on it!
-      modalDomainRef.contextualize.compactSelectAssociationLink,
+      prefillAssociationFkLeafColumn.reference.contextualize.compactSelectAssociationLink,
       prefillAssociationFkLeafColumn,
       prefillAssociationFkMainColumn,
       prefillAssociationSelectedRows
@@ -622,8 +599,19 @@ const RecordeditInner = ({
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
 
-    if (associationIsUnique) {
-      const newRows = [...modalSelectedRows, ...prefillAssociationSelectedRows]
+    if (prefillObject?.hasUniqueAssociation) {
+      /**
+       * copy modalSelectedRows 2nd to preserve indexes in prefillAssociationSelectedRows
+       *
+       * this function does 2 different things:
+       *  - fills the first form and adds new forms
+       *  - OR only adds new forms
+       *
+       * in both cases, the selected rows are added to the forms in the same order that
+       * the rows were selected in the modal. As we are adding new forms, we copy the
+       * values from the modalSelectedRows in the same index order
+       **/
+      const newRows = [...prefillAssociationSelectedRows, ...modalSelectedRows]
       setPrefillAssociationSelectedRows(newRows);
     }
 

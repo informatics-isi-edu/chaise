@@ -27,8 +27,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
-  callOnChangeAfterSelection, callUpdateAssocationRows,
-  clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
+  callOnChangeAfterSelection, clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -106,12 +105,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     setInputSelectedRow(null);
 
     if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-      callUpdateAssocationRows(
-        column,
-        getValues(),
-        usedFormNumber,
-        props.foreignKeyCallbacks.updateAssociationSelectedRows
-      );
+      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
     }
 
     clearForeignKeyData(
@@ -163,13 +157,11 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     let currentSelectedRow = inputSelectedRow;
     // there is a value in the input but no selected row because of prefill showing an association picker on recordedit page load
     if (getValues(props.name) && !currentSelectedRow) {
-      console.log(getValues(props.name));
-      console.log(prefillAssociationSelectedRows)
-      console.log('need to set a selected row')
 
       // find row in prefillAssociationSelectedRows
       currentSelectedRow = prefillAssociationSelectedRows.filter((row: SelectedRow) => {
-        return row.displayname.value === getValues(props.name);
+        // if an input is empty, there won't be a row defined in `prefillAssociationSelectedRows`
+        return row && row.displayname.value === getValues(props.name);
       })[0];
     }
 
@@ -204,13 +196,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       // if the recordedit page's table is an association table with a unique key pair, track the selected rows
       if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-        callUpdateAssocationRows(
-          column,
-          getValues(),
-          usedFormNumber,
-          props.foreignKeyCallbacks.updateAssociationSelectedRows,
-          selectedRow
-        );
+        props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber, selectedRow);
       }
 
       callOnChangeAfterSelection(
