@@ -126,7 +126,7 @@ const RecordsetModal = ({
    * This will also allow us to set the state of submit button
    */
   const [submittedRows, setSubmittedRows] = useState<SelectedRow[]>(() => (
-    Array.isArray(recordsetProps.initialSelectedRows) ? recordsetProps.initialSelectedRows : []
+    (Array.isArray(recordsetProps.initialSelectedRows) && selectMode !== RecordsetSelectMode.SINGLE_SELECT) ? recordsetProps.initialSelectedRows : []
   ));
 
   /**
@@ -250,6 +250,16 @@ const RecordsetModal = ({
         </>
       )
       break;
+    case RecordsetDisplayMode.RE_ASSOCIATION:
+      submitText = 'Continue';
+      submitTooltip = (
+        <>
+          <span>Submit the selected records to fill in </span>
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>
+          <span> forms</span>.
+        </>
+      )
+      break;
   }
 
   const renderTitle = () => {
@@ -305,6 +315,17 @@ const RecordsetModal = ({
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
+      case RecordsetDisplayMode.RE_ASSOCIATION:
+        return (
+          <div>
+            <span>Select a set of </span>
+            <Title displayname={displayname} />
+            <span>
+              <span> for </span>
+              <Title reference={recordsetProps.parentReference} />
+            </span>
+          </div>
+        )
       case RecordsetDisplayMode.FACET_POPUP:
         return (
           <div>

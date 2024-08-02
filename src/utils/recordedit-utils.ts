@@ -6,12 +6,12 @@
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  appModes, PrefillObject, RecordeditColumnModel, RecordeditForeignkeyCallbacks,
-  MULTI_FORM_INPUT_FORM_VALUE, TimestampOptions
-
-} from '@isrd-isi-edu/chaise/src/models/recordedit'
+  appModes, MULTI_FORM_INPUT_FORM_VALUE, PrefillObject, RecordeditColumnModel,
+  RecordeditForeignkeyCallbacks, TimestampOptions, UpdateAssociationRowsCallback
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -19,19 +19,20 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isNonEmptyObject, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any, isHidden?: boolean, queryParams?: any): RecordeditColumnModel {
+export function columnToColumnModel(column: any, isHidden?: boolean, prefillObject?: PrefillObject | null): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
   const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
@@ -54,22 +55,21 @@ export function columnToColumnModel(column: any, isHidden?: boolean, queryParams
   }
 
 
-  const prefillObj = getPrefillObject(queryParams ? queryParams : {});
   let isPrefilled = false, hasDomainFilter = false;
   if (column.isForeignKey) hasDomainFilter = column.hasDomainFilter;
 
-  if (prefillObj) {
+  if (prefillObject) {
     if (column.isForeignKey) {
       if (
         // whether the fk is already marked as prefilled
-        prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||
+        prefillObject.fkColumnNames.indexOf(column.name) !== -1 ||
         // or all the columns have the prefilled value, and therefore it should be marked as prefilled.
-        allForeignKeyColumnsPrefilled(column, prefillObj)
+        allForeignKeyColumnsPrefilled(column, prefillObject)
       ) {
         isPrefilled = true;
       }
 
-    } else if (column.name in prefillObj.keys) {
+    } else if (column.name in prefillObject.keys) {
       isPrefilled = true;
     }
   }
@@ -243,7 +243,7 @@ export function copyOrClearValue(
 export function populateCreateInitialValues(
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  queryParams?: any,
+  prefillObject?: PrefillObject | null,
   prefillRowData?: any[]
 ) {
   const values: any = {};
@@ -251,13 +251,7 @@ export function populateCreateInitialValues(
   // only 1 row in the case of create
   if (prefillRowData) initialValues = prefillRowData[0];
 
-  let shouldWaitForForeignKeyData = false;
-
-  // get the prefilled values
-  const prefillObj = getPrefillObject(queryParams);
-  if (prefillObj) {
-    shouldWaitForForeignKeyData = true;
-  }
+  let shouldWaitForForeignKeyData = prefillObject ? true : false;
 
   // the data associated with the foreignkeys
   const foreignKeyData: any = {};
@@ -280,13 +274,13 @@ export function populateCreateInitialValues(
       }
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (column.isForeignKey && prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+      if (column.isForeignKey && prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
         continue;
       }
 
       // if the column is prefilled, get the prefilled value instead of default
-      if (prefillObj && column.name in prefillObj.keys) {
-        defaultValue = prefillObj.keys[column.name];
+      if (prefillObject && column.name in prefillObject.keys) {
+        defaultValue = prefillObject.keys[column.name];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
@@ -339,7 +333,7 @@ export function populateCreateInitialValues(
 
           } else if (column.isForeignKey) {
             // if all the columns of the foreignkey are prefilled, use that instead of default
-            const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
+            const allPrefilled = prefillObject && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObject);
 
             // if all the columns of the foreignkey are initialized, use that instead of default
             const allInitialized = isNonEmptyObject(initialValues) && column.foreignKey.colset.columns.every((col: any) => {
@@ -347,7 +341,7 @@ export function populateCreateInitialValues(
             });
 
             if (allPrefilled || allInitialized) {
-              const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefillObj.keys : initialValues);
+              const defaultDisplay = column.getDefaultDisplay((allPrefilled && prefillObject) ? prefillObject.keys : initialValues);
 
               // display the initial value
               initialModelValue = defaultDisplay.rowname.value;
@@ -741,8 +735,7 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
 
   // make sure all the keys are in the object
   if (!(
-    ('keys' in cookie) && ('columnNameToRID' in cookie) && 
-    ('fkColumnNames' in cookie) && 
+    ('keys' in cookie) && ('columnNameToRID' in cookie) && ('fkColumnNames' in cookie) &&
     ('origUrl' in cookie) && ('rowname' in cookie)
   )) {
     return null;
@@ -783,7 +776,7 @@ export function allForeignKeyColumnsPrefilled(column: any, prefillObj: PrefillOb
   ));
 }
 
-/* The following 3 functions are for foreignkey fields */
+/* The following 6 functions are for foreignkey and foreignkey-dropdown fields */
 export function createForeignKeyReference(
   column: any,
   parentReference: any,
@@ -890,4 +883,107 @@ export function validateForeignkeyValue(
 
     return foreignKeyCallbacks.onChange(column, data);
   }
+}
+
+export function disabledRowTooltip(disabledType: string): string {
+  let disabledTooltip = '';
+  if (disabledType === 'associated') {
+    disabledTooltip = MESSAGE_MAP.tooltip.otherRow;
+  } else if (disabledType === 'selected') {
+    disabledTooltip = MESSAGE_MAP.tooltip.otherInput;
+  }
+
+  return disabledTooltip;
+}
+
+/**
+ * Used to fetch the disabled tuples for a recordset modal picker used to associate rows of data
+ *
+ * @param prefillObject the prefill object in cookie storage fetched using queryParams
+ * @param domainRef the reference used in the modal picker that we want to disable rows for
+ * @param fkToLeaf the foreign key column from the association table that points to the leaf table
+ * @param fkToMain the foreign key column from the association table that points to the main table
+ * @param rowsUsedInForm
+ * @returns a function that returns a promise
+ */
+export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
+  /**
+   * The existing rows in this p&b association must be disabled
+   * so users doesn't resubmit them.
+   */
+  return (
+    page: any,
+    pageLimit: number,
+    logStack: any,
+    logStackPath: string,
+    requestCauses?: any,
+    reloadStartTime?: any
+  ): Promise<{ page: any, disabledRows?: any }> => {
+    return new Promise((resolve, reject) => {
+      const disabledRows: any = [];
+
+      const disabledRowsFilters: any[] = [];
+      Object.keys(prefillObject.keys).forEach((key: string) => {
+        disabledRowsFilters.push({
+          source: [
+            { 'inbound': fkToLeaf.foreignKey.constraint_names[0] },
+            { 'outbound': fkToMain.foreignKey.constraint_names[0] },
+            fkToMain.foreignKey.mapping._to[0].name
+          ],
+          choices: [prefillObject.keys[key]]
+        });
+      });
+
+      let action = LogActions.LOAD,
+        newStack = logStack;
+      if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+        action = LogActions.RELOAD;
+        newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
+      }
+
+      // using the service instead of the record one since this is called from the modal
+      const logObj = {
+        action: LogService.getActionString(action, logStackPath),
+        stack: newStack,
+      };
+
+      // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+      domainRef
+        .addFacets(disabledRowsFilters)
+        .setSamePaging(page)
+        .read(pageLimit, logObj, false, true)
+        .then((newPage: any) => {
+          newPage.tuples.forEach((newTuple: any) => {
+            const index = page.tuples.findIndex((tuple: any) => {
+              return tuple.uniqueId === newTuple.uniqueId;
+            });
+
+            if (index > -1) {
+              page.tuples[index].disabledType = 'associated';
+              disabledRows.push(page.tuples[index]);
+            }
+          });
+
+          // iterate through the current row selections in recordedit forms
+          rowsUsedInForm.forEach((row: SelectedRow) => {
+            // if an input is empty, there won't be a row defined
+            if (!row) return;
+
+            const index = page.tuples.findIndex((tuple: any) => {
+              return tuple.uniqueId === row.uniqueId;
+            });
+
+            if (index > -1) {
+              page.tuples[index].disabledType = 'selected';
+              disabledRows.push(page.tuples[index]);
+            }
+          });
+
+          resolve({ disabledRows: disabledRows, page: page });
+        })
+        .catch((err: any) => {
+          reject(err);
+        });
+    });
+  };
 }

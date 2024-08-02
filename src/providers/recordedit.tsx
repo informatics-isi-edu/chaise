@@ -8,11 +8,12 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import {
   appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
-  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
+  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
+  RecordeditModalOptions, UpdateAssociationRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -30,8 +31,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
-  allForeignKeyColumnsPrefilled,
-  columnToColumnModel, getPrefillObject,
+  allForeignKeyColumnsPrefilled, columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -49,6 +49,8 @@ export const RecordeditContext = createContext<{
   appMode: string,
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
+  queryParams: any,
+  prefillRowData?: any[],
   /* the main entity reference */
   reference: any,
   /* the tuples correspondeing to the displayed form */
@@ -73,7 +75,7 @@ export const RecordeditContext = createContext<{
   /* callback to add form(s) to the forms array */
   addForm: (count: number) => number[],
   /* callback to remove from(s) from the forms array */
-  removeForm: (indexes: number[], skipLogging?: boolean) => void,
+  removeForm: (indexes: number[], formValues: any, skipLogging?: boolean) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
@@ -104,6 +106,19 @@ export const RecordeditContext = createContext<{
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
+  /* the prefill object from cookie storage based on prefill query param */
+  prefillObject: PrefillObject | null,
+  /* the column to the leaf table for the association table if we have a prefill object */
+  prefillAssociationFkLeafColumn: any,
+  setPrefillAssociationFkLeafColumn: (val: any) => void,
+  /* the column tot he main table for the association table if we have a prefill object */
+  prefillAssociationFkMainColumn: any,
+  setPrefillAssociationFkMainColumn: (val: any) => void,
+  /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
+  prefillAssociationSelectedRows: SelectedRow[],
+  setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
+  /* function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique */
+  updateAssociationSelectedRows: UpdateAssociationRowsCallback,
   /**
    * log client actions
    * Notes:
@@ -256,6 +271,11 @@ export default function RecordeditProvider({
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
 
+  const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
+  const [prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn] = useState<any>(null);
+  const [prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn] = useState<any>(null);
+  const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
+
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
    * foreignkey-field.tsx for domain-filter support.
@@ -276,10 +296,18 @@ export default function RecordeditProvider({
     if (!reference || setupStarted.current) return;
     setupStarted.current = true;
 
+    const prefillObj = getPrefillObject(queryParams);
+
+    // add properties to the prefillObject that is stored here in the provider for use in other components
+    if (prefillObj) {
+      // TODO: isAssociation and associationIsUnique
+      // prefillObj.isAssociation = reference.table.isAssociation || false;
+      prefillObj.hasUniqueAssociation = reference.table.isAssociation || false;
+    }
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
-      const cm = columnToColumnModel(column, isHidden, queryParams);
+      const cm = columnToColumnModel(column, isHidden, prefillObj);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -399,6 +427,29 @@ export default function RecordeditProvider({
       if (reference.canCreate) {
         if (config.displayMode === RecordeditDisplayMode.FULLSCREEN) {
           updateHeadTitle('Create new ' + reference.displayname.value);
+        }
+
+        if (prefillObj) {
+          setPrefillObject(prefillObj);
+
+          // TODO: if reference.table is an association
+          // if (prefillObject.isAssociation) {
+          reference.columns.forEach((column: any) => {
+            // column should be a foreignkey pseudo column
+            if (!column.isForeignKey) return;
+
+            reference.table.foreignKeys.all().forEach((fk: any) => {
+              // column and foreign key `.name` property is a hash value
+              if (column.name === fk.name) {
+                if (prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+                  setPrefillAssociationFkMainColumn(column);
+                } else {
+                  setPrefillAssociationFkLeafColumn(column);
+                }
+              }
+            });
+          });
+          // }
         }
 
         setInitialized(true);
@@ -769,9 +820,27 @@ export default function RecordeditProvider({
     return newFormValues;
   };
 
-  const removeForm = (indexes: number[], skipLogging?: boolean) => {
+  /**
+   *
+   * @param indexes array of indexes to remove from forms array (and tuples array)
+   * @param formValues formValuesused for cleaning up
+   * @param skipLogging boolean to skip logging the remove action
+   */
+  const removeForm = (indexes: number[], formValues: any, skipLogging?: boolean) => {
     if (!skipLogging) {
       logRecordeditClientAction(LogActions.FORM_REMOVE);
+    }
+
+    // prefillAssocationSelectedRows is only used when in create mode, with a prefill object, and there is a unique association
+    if (prefillObject?.hasUniqueAssociation) {
+      const tempSelectedRows = [...prefillAssociationSelectedRows];
+
+      indexes.forEach((index: number) => {
+        // use splice to remove the element from the array and shift all array values after this element forward
+        tempSelectedRows.splice(index, 1);
+      });
+
+      setPrefillAssociationSelectedRows(tempSelectedRows);
     }
 
     // remove the forms based on the given indexes
@@ -783,18 +852,40 @@ export default function RecordeditProvider({
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
   }
 
+  /**
+   * when a single foreignkey input field value is changed or removed, removes old row from association selected rows
+   * and adds the new one if a new value was selected. Used when there is a prefill object and the association is unique
+   *
+   * @param formNumber the form number from forms array to remove
+   * @param newRow the new row to keep track of, if not defined removes the previous row
+   */
+  const updateAssociationSelectedRows = (formNumber: number, newRow?: SelectedRow) => {
+    const tempSelectedRows = [...prefillAssociationSelectedRows];
+
+    // find the index in forms for the form number
+    const indexToChange = forms.indexOf(formNumber);
+
+    if (newRow) {
+      // change the value at 'formNumber'
+      tempSelectedRows[indexToChange] = newRow
+    } else {
+      // remove value at form number without shifting other array values
+      // leaves an `empty` or `undefined` value at `indexToChange` in array
+      delete tempSelectedRows[indexToChange];
+    }
+
+    setPrefillAssociationSelectedRows(tempSelectedRows);
+  }
+
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
+      initialModel = populateCreateInitialValues(columnModels, forms, prefillObject, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
-
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
-
-
       // using page.tuples here instead of forms
       initialModel = populateEditInitialValues(reference, columnModels, forms, tuplesRef.current, appMode);
 
@@ -823,14 +914,12 @@ export default function RecordeditProvider({
       return;
     }
 
-    const prefillObj = getPrefillObject(queryParams);
-
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+      if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
         return;
       }
 
@@ -838,8 +927,8 @@ export default function RecordeditProvider({
       const defaultValue = initialValues[`c_1-${column.RID}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
-      if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
-        const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+      if (prefillObject && allForeignKeyColumnsPrefilled(column, prefillObject)) {
+        const defaultDisplay = column.getDefaultDisplay(prefillObject.keys);
 
         // if the data is missing, ermrestjs will return null
         // although the previous allPrefilled should already guard against this.
@@ -961,17 +1050,17 @@ export default function RecordeditProvider({
   }
 
   /**
- * In case of prefill and default we only have a reference to the foreignkey,
- * we should do extra reads to get the actual data.
- *
- * NOTE for default we don't want to send the raw data to the ermrestjs request,
- * that's why after fetching the data we're only changing the displayed rowname
- * and the foreignKeyData, not the raw values sent to ermrestjs.
- * @param formValue which form it is
- * @param colRIDs the columns RIDs that will use this data
- * @param fkRef the foreignkey reference that should be used for fetching data
- * @param logObject
- */
+   * In case of prefill and default we only have a reference to the foreignkey,
+   * we should do extra reads to get the actual data.
+   *
+   * NOTE for default we don't want to send the raw data to the ermrestjs request,
+   * that's why after fetching the data we're only changing the displayed rowname
+   * and the foreignKeyData, not the raw values sent to ermrestjs.
+   * @param formValue which form it is
+   * @param colRIDs the columns RIDs that will use this data
+   * @param fkRef the foreignkey reference that should be used for fetching data
+   * @param logObject
+   */
   function fetchForeignKeyData(colRIDs: string[], fkRef: any, logObject: any, setValue: any) {
     // NOTE since this is create mode and we're disabling the addForm,
     // we can assume this is the first form
@@ -1069,6 +1158,8 @@ export default function RecordeditProvider({
       foreignKeyData,
       initialized,
       modalOptions,
+      queryParams,
+      prefillRowData,
       reference,
       tuples,
       waitingForForeignKeyData,
@@ -1094,6 +1185,16 @@ export default function RecordeditProvider({
       lastContiguousChunkRef,
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
+      // prefill association modal
+      prefillObject,
+      prefillAssociationFkLeafColumn,
+      setPrefillAssociationFkLeafColumn,
+      prefillAssociationFkMainColumn,
+      setPrefillAssociationFkMainColumn,
+      prefillAssociationSelectedRows,
+      setPrefillAssociationSelectedRows,
+      updateAssociationSelectedRows,
+
       // log related:
       logRecordeditClientAction,
       getRecordeditLogAction,
@@ -1102,7 +1203,8 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
-    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
+    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
+    prefillObject, prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows
   ]);
 
   return (

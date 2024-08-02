@@ -186,6 +186,7 @@ export enum LogStackPaths {
   FACET= 'facet',
   RELATED= 'related',
   RELATED_INLINE= 'related-inline',
+  ADD_ASSOCIATION= 'related-association-add',
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
@@ -254,4 +255,5 @@ export enum LogReloadCauses {
   RELATED_INLINE_UPDATE= 'related-inline-update', // a row in one of the related (inline) tables has been edited
   SORT= 'sort', // sort changed
   SEARCH_BOX= 'search-box', // search box value changed
+  UNIQUE_ASSOCIATION_ROWS_CHANGED= 'association-selected-rows', // selected rows for unique association have changed
 }

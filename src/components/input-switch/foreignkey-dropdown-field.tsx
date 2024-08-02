@@ -1,19 +1,22 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import Spinner from 'react-bootstrap/Spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -21,14 +24,12 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import {
-  callOnChangeAfterSelection,
-  clearForeignKeyData,
-  createForeignKeyReference,
-  validateForeignkeyValue
+  callOnChangeAfterSelection, clearForeignKeyData, createForeignKeyReference,
+  disabledRowTooltip, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ForeignkeyDropdownFieldProps = InputFieldProps & {
@@ -90,6 +91,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
+  const { prefillAssociationSelectedRows } = useRecordedit();
 
   /**
    * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
@@ -162,11 +164,39 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       });
   }, [triggerDropdownChange]);
 
+  // if there is a unique association using prefill and  this column is the same as the one used in the unique association for the leaf
+  // table of the association, update the rows in the dropdown if the selected rows change
+  useEffect(() => {
+    if (
+      !props.foreignKeyCallbacks?.updateAssociationSelectedRows ||
+      !dropdownInitialized || !prefillAssociationSelectedRows
+    ) return;
+
+    setShowSpinner(true);
+
+    const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
+    const stack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
+
+    const requestCauses = [LogReloadCauses.UNIQUE_ASSOCIATION_ROWS_CHANGED];
+    const reloadStartTime = ConfigService.ERMrest.getElapsedTime();
+    const logObj = {
+      action: LogService.getActionString(LogActions.RELOAD, stackPath),
+      stack: LogService.addCausesToStack(stack, requestCauses, reloadStartTime)
+    }
+
+    populateDropdownRows(currentDropdownPage, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime).then(() => {
+      setShowSpinner(false);
+    }).catch((exception: any) => {
+      setShowSpinner(false);
+      dispatchError({ error: exception });
+    });
+  }, [prefillAssociationSelectedRows]);
+
   /**
    * populate the dropdown rows after a request is done.
    * this function will take care of calling the getDisabledTuples if it's defined and setting the tuples as disabled
    */
-  const populateDropdownRows = (page: any, pageLimit: number, logStack: any,
+  const populateDropdownRows = (page: any, currentRow: SelectedRow | null, pageLimit: number, logStack: any,
     logStackPath: string, requestCauses?: any, reloadStartTime?: any): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       type PType = { page: any, disabledRows?: any };
@@ -186,7 +216,9 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         }
 
         setDropdownRows(page.tuples.map((tuple: any) => {
-          return { isDisabled: (tuple.uniqueId in disabledTuplesUniqueIDs), tuple };
+          // only disable if it's in the list AND it's not the current selection
+          const isDisabled = tuple.uniqueId in disabledTuplesUniqueIDs && tuple.uniqueId !== currentRow?.uniqueId
+          return { isDisabled, tuple };
         }));
 
         resolve(true);
@@ -241,15 +273,19 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       // we don't know which column value is used for the displayname so it's better to check react-hook-form state
       const displayedValue = getValues()[props.name];
 
+      let currentRow = null;
       // check if we have a value set for the foreign key input
       if (displayedValue) {
         // set the checked row if it's present in the page of rows
         page.tuples.forEach((tuple: any) => {
-          if (tuple.displayname.value === displayedValue) setCheckedRow(tuple);
+          if (tuple.displayname.value === displayedValue) {
+            setCheckedRow(tuple);
+            currentRow = tuple;
+          }
         });
       }
 
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath);
+      return populateDropdownRows(page, currentRow, pageLimit, logObj.stack, stackPath);
     }).then(() => {
 
       setShowSpinner(false);
@@ -264,9 +300,15 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
+    const column = props.columnModel.column;
+
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
+    }
+
     clearForeignKeyData(
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue
@@ -306,7 +348,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     searchRef.read(pageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+      return populateDropdownRows(page, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
     }).then(() => {
       setShowSpinner(false);
     }).catch((exception: any) => {
@@ -373,13 +415,32 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     onClearFun(e);
   }
 
+  /**
+   *
+   * @param selectedRow tuple object from ERMrestJS that represents the dropdown row
+   * @param onChange
+   */
   const onRowSelected = (selectedRow: any, onChange: any) => {
     setCheckedRow(selectedRow);
+
+    const rowToAdd: SelectedRow = {
+      displayname: selectedRow.displayname,
+      uniqueId: selectedRow.uniqueId,
+      data: selectedRow.data
+    }
+
+    const column = props.columnModel.column;
+
+    // if the recordedit page's table is an association table with a unique key pair, track the selected rows
+    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
+      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber, rowToAdd);
+    }
+
     callOnChangeAfterSelection(
       selectedRow,
       onChange,
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue
@@ -413,7 +474,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     dropdownReference.read(newPageLimit, logObj).then((page: any) => {
       setCurrentDropdownPage(page);
 
-      return populateDropdownRows(page, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
+      return populateDropdownRows(page, checkedRow, pageLimit, logObj.stack, stackPath, requestCauses, reloadStartTime);
     }).then(() => {
 
       setShowSpinner(false);
@@ -423,8 +484,26 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     })
   }
 
+
   const renderDropdownOptions = (onChange: any) => {
     if (!dropdownInitialized) return;
+
+    const renderOptionRow = (row: any) => (
+      <Dropdown.Item
+        as='li'
+        onClick={(e) => onRowSelected(row.tuple, onChange)}
+        disabled={row.isDisabled}
+      >
+        {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
+        <label>
+          <DisplayValue
+            className='dropdown-select-value'
+            value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
+          />
+        </label>
+
+      </Dropdown.Item>
+    )
 
     if (dropdownRows.length === 0) {
       // return a special row that doesn't use Dropdown.Item so it won't be selectable
@@ -442,24 +521,22 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
         </li>
       )
     }
-    return dropdownRows.map((row: DropdownRow) => {
-      return (
-        <Dropdown.Item
-          key={`fk-val-${row.tuple.uniqueId}`}
-          as='li'
-          onClick={(e) => onRowSelected(row.tuple, onChange)}
-          disabled={row.isDisabled}
-        >
-          {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
-          <label>
-            <DisplayValue
-              className='dropdown-select-value'
-              value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
-            />
-          </label>
-        </Dropdown.Item>
-      )
-    })
+
+    return dropdownRows.map((row: DropdownRow) => (
+      <div key={`fk-val-${row.tuple.uniqueId}`}>
+        {row.isDisabled ?
+          // only add tooltip if single select and disabled
+          <ChaiseTooltip
+            tooltip={disabledRowTooltip(row.tuple.disabledType)}
+            placement='bottom-start'
+            className='reposition-li-tooltip'
+          >
+            <div>{renderOptionRow(row)}</div>
+          </ChaiseTooltip>
+          : renderOptionRow(row)
+        }
+      </div>
+    ))
   }
 
   const rules: any = {};

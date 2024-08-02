@@ -1,5 +1,5 @@
 import {
-  RecordsetProviderGetDisabledTuples
+  RecordsetProviderGetDisabledTuples, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 export enum appModes {
@@ -88,8 +88,23 @@ export type RecordeditModalOptions = {
   onClose: () => void;
 }
 
+export type UpdateAssociationRowsCallback = (formNumber: number, newRow?: SelectedRow) => void;
 export type RecordeditForeignkeyCallbacks = {
+  /**
+   * if defined, called before loading the foreign key picker or association modal
+   *
+   * This will disable the rows in the modal popup that are already associated with the main
+   * record we are associating more rows with. This will only occur when there is a prefillObject
+   * and the association is unique
+   */
   getDisabledTuples?: RecordsetProviderGetDisabledTuples,
+  /**
+   * if defined, will be called after closing the modal selector
+   *
+   * This will call a function in recordedit provider to update the selected rows for the
+   * association popup if we have a prefillObject and the association is unique
+   */
+  updateAssociationSelectedRows?: UpdateAssociationRowsCallback,
   /**
    * if defined, will be used for validating the foreign key value.
    *
@@ -191,6 +206,10 @@ export interface PrefillObject {
    * the rowname of the fk
    */
   rowname: any;
+  /**
+   * boolean to trigger add association popup when loading recordedit before showing the forms
+   */
+  hasUniqueAssociation?: boolean;
 }
 
 export interface LastChunkMap {
