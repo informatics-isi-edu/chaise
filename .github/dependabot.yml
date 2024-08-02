@@ -8,10 +8,25 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "@playwright/test"
+    # https://github.com/dependabot/dependabot-core/issues/1778#issuecomment-1988140219
+    target-branch: master
+    assignees:
+      - "jrchudy"
+      - "RFSH"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
       interval: "monthly"
+    open-pull-requests-limit: 10
     ignore:
       - dependency-name: "moment*"
       - dependency-name: "protractor"
+      - dependency-name: "@typescript-eslint/*"
+      - dependency-name: "eslint-*"
+      - dependency-name: "eslint"
     groups:
       babel:
         patterns:
@@ -21,11 +36,6 @@ updates:
         patterns:
           - "react-bootstrap"
           - "bootstrap"
-      eslint:
-        patterns:
-          - "@typescript-eslint/*"
-          - "eslint-*"
-          - "eslint"
       react:
         patterns:
           - "@types/react"
