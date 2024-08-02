@@ -36,6 +36,7 @@ const testParams: any = {
       name: 'int_col',
       type: 'numeric',
       notNullNumRows: 20,
+      nullNumRows: 10,
       listElems: 1,
       invalid: '1.1',
       initialMin: '3',
@@ -114,6 +115,7 @@ const testParams: any = {
       type: 'timestamp',
       listElems: 0,
       notNullNumRows: 20,
+      nullNumRows: 10,
       // invalid removed since mask protects against bad input values, clear date input to test validator
       // invalid: {...}
       initialMin: {
@@ -344,7 +346,7 @@ test.describe('Testing individual facet types', () => {
               await openFacetAndTestFilterOptions(page, facet, index, facetParams.options, 1);
 
               await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
-              
+
               if (!facetParams.isBoolean) {
                 // make sure search placeholder is correct
                 let placeholder = 'Search';
@@ -360,11 +362,11 @@ test.describe('Testing individual facet types', () => {
 
             await test.step('select a value to filter on and update the search criteria', async () => {
               await testSelectFacetOptionThenClear(
-                page, 
-                index, 
-                facetParams.option, 
-                facetParams.filter, 
-                facetParams.numRows, 
+                page,
+                index,
+                facetParams.option,
+                facetParams.filter,
+                facetParams.numRows,
                 testParams.defaults.pageSize
               );
 
@@ -380,9 +382,9 @@ test.describe('Testing individual facet types', () => {
             const rangeInputs = RecordsetLocators.getFacetRangeInputs(facet);
             await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-              await openFacet(page, facet, index, facetParams.listElems + 1, 1);
-              
-              // wait for facet to open              
+              await openFacet(page, facet, index, facetParams.listElems + 2, 1);
+
+              // wait for facet to open
               await expect.soft(rangeInputs.submit).toBeVisible();
               await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
 
@@ -413,9 +415,9 @@ test.describe('Testing individual facet types', () => {
               await testRangeInputSubmitThenClear(
                 page,
                 facet,
-                rangeInputs.submit, 
-                facetParams.range.filter, 
-                facetParams.range.numRows, 
+                rangeInputs.submit,
+                facetParams.range.filter,
+                facetParams.range.numRows,
                 testParams.defaults.pageSize
               );
               await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
@@ -428,11 +430,24 @@ test.describe('Testing individual facet types', () => {
             if (facetParams.notNullNumRows) {
               await test.step('should be able to filter not-null values.', async () => {
                 await testSelectFacetOption(page, facet, 0, facetParams.notNullNumRows, 1);
-                
+
                 // make sure submit is disabled
                 await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
 
                 await testClearAllFilters(page, testParams.defaults.pageSize, facet, 0);
+                await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+                // clear inputs
+                await clearRangeInput(rangeInputs.minInput);
+                await clearRangeInput(rangeInputs.maxInput);
+              });
+            }
+
+            if (facetParams.nullNumRows) {
+              await test.step('should be able to filter null values.', async () => {
+                await testSelectFacetOption(page, facet, 1, facetParams.nullNumRows, 1);
+
+                await testClearAllFilters(page, testParams.defaults.pageSize, facet, 1);
                 await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
 
                 // clear inputs
@@ -448,14 +463,14 @@ test.describe('Testing individual facet types', () => {
               // let validation message disappear
               await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
               await testRangeInputSubmitThenClear(
-                page, 
-                facet, 
-                rangeInputs.submit, 
-                facetParams.justMin.filter, 
-                facetParams.justMin.numRows, 
+                page,
+                facet,
+                rangeInputs.submit,
+                facetParams.justMin.filter,
+                facetParams.justMin.numRows,
                 testParams.defaults.pageSize
               );
-              
+
               await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
 
               await clearRangeInput(rangeInputs.minInput);
@@ -469,14 +484,14 @@ test.describe('Testing individual facet types', () => {
               // let validation message disappear
               await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
               await testRangeInputSubmitThenClear(
-                page, 
-                facet, 
-                rangeInputs.submit, 
-                facetParams.justMax.filter, 
-                facetParams.justMax.numRows, 
+                page,
+                facet,
+                rangeInputs.submit,
+                facetParams.justMax.filter,
+                facetParams.justMax.numRows,
                 testParams.defaults.pageSize
               );
-              
+
               await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
 
               // close the facet
@@ -491,8 +506,8 @@ test.describe('Testing individual facet types', () => {
             const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(facet);
             await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
               await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets);
-              await openFacet(page, facet, index, facetParams.listElems + 1, 1);
-              
+              await openFacet(page, facet, index, facetParams.listElems + 2, 1);
+
               // wait for facet to open
               await expect.soft(rangeInputs.submit).toBeVisible();
               await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
@@ -548,6 +563,21 @@ test.describe('Testing individual facet types', () => {
                 await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
 
                 await testClearAllFilters(page, testParams.defaults.pageSize, facet, 0);
+                await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+                // clear the inputs
+                await clearRangeInput(rangeInputs.minDateInput);
+                await clearRangeInput(rangeInputs.maxDateInput);
+                await clearRangeInput(rangeInputs.minTimeInput);
+                await clearRangeInput(rangeInputs.maxTimeInput);
+              });
+            }
+
+            if (facetParams.nullNumRows) {
+              await test.step('should be able to filter not-null values.', async () => {
+                await testSelectFacetOption(page, facet, 1, facetParams.nullNumRows, 1);
+
+                await testClearAllFilters(page, testParams.defaults.pageSize, facet, 1);
                 await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
 
                 // clear the inputs
@@ -620,22 +650,22 @@ test.describe('Testing individual facet types', () => {
 
             await test.step('selecting the not-null option, should only show the applicable rows.', async () => {
               await testSelectFacetOptionThenClear(
-                page, 
-                index, 
-                0, 
-                facetParams.notNullFilter, 
-                facetParams.notNullNumRows, 
+                page,
+                index,
+                0,
+                facetParams.notNullFilter,
+                facetParams.notNullNumRows,
                 testParams.defaults.pageSize
               );
             });
 
             await test.step('selecting the null option, should only show the applicable rows.', async () => {
               await testSelectFacetOptionThenClear(
-                page, 
-                index, 
-                1, 
-                facetParams.nullFilter, 
-                facetParams.nullNumRows, 
+                page,
+                index,
+                1,
+                facetParams.nullFilter,
+                facetParams.nullNumRows,
                 testParams.defaults.pageSize
               );
 

@@ -21,7 +21,10 @@
     const fetchExistingData = (existingValue) => {
       const fileURL = existingValue[FIELD_NAMES.FILE];
       const creator = existingValue[FIELD_NAMES.CREATOR];
-      const notes = existingValue[FIELD_NAMES.NOTES];
+      let notes = existingValue[FIELD_NAMES.NOTES];
+      if (Array.isArray(notes)) {
+        notes = JSON.stringify(notes);
+      }
 
       fetch(fileURL).then(response => {
         if (response.ok) {
@@ -138,7 +141,7 @@
     <br/>
     <label for="file-content">File content:</label><br/><textarea id="file-content" name="file-content" rows="4" cols="50"></textarea>
     <br/>
-    <label for="notes">Notes:</label><br/><input type="text" id="notes" name="notes">
+    <label for="notes">Notes (array of text):</label><br/><input type="text" id="notes" name="notes">
     <br/>
     <button id='iframe-submit-btn' type="button" onclick="submitData()">submit</button>
   </div>

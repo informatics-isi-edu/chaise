@@ -707,7 +707,7 @@ export default function RecordeditProvider({
   }
 
   // NOTE: most likely not needed
-  const onSubmitInvalid = (errors: Object, e?: any) => {
+  const onSubmitInvalid = (errors: object, e?: any) => {
     $log.debug('errors in the form:');
     $log.debug(errors);
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
