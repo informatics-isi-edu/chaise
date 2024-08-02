@@ -57,6 +57,8 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
     '@typescript-eslint/no-require-imports': 'warn',
+    // TODO we should remove the following deprecated rule when we go to version 8:
+    '@typescript-eslint/ban-types': 'warn',
 
     // ------------------ testing ------------------
     '@typescript-eslint/no-floating-promises': 'warn'
