@@ -27,11 +27,16 @@ updates:
       - dependency-name: "@typescript-eslint/*"
       - dependency-name: "eslint-*"
       - dependency-name: "eslint"
+      - dependency-name: "prettier"
+      - dependency-name: "patch-package"
+      - dependency-name: "uglify-js"
     groups:
       babel:
         patterns:
           - "@babel/*"
           - "babel-loader"
+          - "css-loader"
+          - "sass-loader"
       bootstrap:
         patterns:
           - "react-bootstrap"
