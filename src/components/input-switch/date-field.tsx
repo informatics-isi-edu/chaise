@@ -70,7 +70,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
                * converting a strored "Date" object to string (what user sees)
                * and vice versa.
                */
-              format={(date) => windowRef.moment(date).format(dataFormats.date)}
+              format={(date: any) => windowRef.moment(date).format(dataFormats.date)}
               parse={(str) => windowRef.moment(str, dataFormats.date)}
               autofix={false}
               /**

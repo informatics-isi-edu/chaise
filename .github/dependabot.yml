@@ -22,17 +22,22 @@ updates:
       interval: "monthly"
     open-pull-requests-limit: 10
     ignore:
+      - dependency-name: "@playwright/test"
       - dependency-name: "moment*"
       - dependency-name: "protractor"
       - dependency-name: "@typescript-eslint/*"
       - dependency-name: "eslint-*"
       - dependency-name: "eslint"
-      - dependency-name: "@playwright/test"
+      - dependency-name: "prettier"
+      - dependency-name: "patch-package"
+      - dependency-name: "uglify-js"
     groups:
       babel:
         patterns:
           - "@babel/*"
           - "babel-loader"
+          - "css-loader"
+          - "sass-loader"
       bootstrap:
         patterns:
           - "react-bootstrap"
