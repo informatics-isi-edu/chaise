@@ -312,12 +312,14 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
-    // used to trigger recordset select view
+    // used to trigger recordset select view when adding association records
     if (prefillObject) {
-      const domainRef: any = prefillAssociationFkLeafColumn.reference;
+      // trigger the association modal when there is an assoication and
+      // we know the leaf column for the association is visible in create mode
+      if (prefillAssociationFkLeafColumn?.reference) {
+        // check if leaf column is defined and set the reference to use if it is
+        const domainRef: any = prefillAssociationFkLeafColumn?.reference;
 
-      // trigger the association modal when we know the leaf column for the association is visible in create mode
-      if (domainRef) {
         const andFilters: any[] = [];
         // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
         prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
