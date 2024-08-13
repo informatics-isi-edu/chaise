@@ -85,7 +85,7 @@ const ChaiseTooltip = ({
            * adding the tooltip as key will make sure we're remounting when tooltip changes.
            * we have to remount so the tooltip position is updated properly
            */
-          {...(dynamicTooltipString && typeof tooltip === 'string' && { key: tooltip })}
+          key={dynamicTooltipString && typeof tooltip === 'string' ? tooltip : undefined}
         >
           {tooltip}
         </Tooltip>

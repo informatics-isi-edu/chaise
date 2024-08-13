@@ -4,4 +4,5 @@ export default getConfig({
   testName: 'delete-prohibited/navbar',
   configFileName: 'navbar/catalog-chaise-config.dev.json',
   mainSpecName: 'delete-prohibited',
+  addDefaultCatalogToChaiseConfig: true
 });
