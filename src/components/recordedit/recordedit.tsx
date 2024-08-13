@@ -277,7 +277,7 @@ const RecordeditInner = ({
           }
         });
 
-        removeForm(removedForms, methods.getValues(), true);
+        removeForm(removedForms, true);
       };
       /**
        * will be called when all records were deleted
@@ -312,95 +312,96 @@ const RecordeditInner = ({
   useEffect(() => {
     if (!initialized) return;
 
-    // used to trigger recordset select view when adding association records
-    if (prefillObject) {
-      // trigger the association modal when there is an assoication and
-      // we know the leaf column for the association is visible in create mode
-      if (prefillAssociationFkLeafColumn?.reference) {
-        // check if leaf column is defined and set the reference to use if it is
-        const domainRef: any = prefillAssociationFkLeafColumn?.reference;
+    /**
+     * used to trigger recordset select view when adding association records
+     *
+     * trigger the association modal when there is an assoication and
+     * we know the leaf column for the association is visible in create mode
+     **/
+    if (prefillObject && prefillAssociationFkLeafColumn?.reference) {
+      // check if leaf column is defined and set the reference to use if it is
+      const domainRef: any = prefillAssociationFkLeafColumn.reference;
 
-        const andFilters: any[] = [];
-        // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-        prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
-          andFilters.push({
-            source: col.name,
-            hidden: true,
-            not_null: true
-          });
+      const andFilters: any[] = [];
+      // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+      prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
+        andFilters.push({
+          source: col.name,
+          hidden: true,
+          not_null: true
         });
+      });
 
-        // TODO: think about this more if it's required in this context
-        // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
-        let customFacets: any = null;
-        if (
-          domainRef.pseudoColumn &&
-          domainRef.pseudoColumn.filterProps &&
-          domainRef.pseudoColumn.filterProps.leafFilterString
-        ) {
-          // NOTE should we display the filters or not?
-          customFacets = {
-            ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
-            removable: false,
-          };
-        }
-
-        const modalReference = domainRef.addFacets(andFilters, customFacets)
-          .contextualize.compactSelectAssociationLink;
-
-        const recordsetConfig: RecordsetConfig = {
-          viewable: false,
-          editable: false,
-          deletable: false,
-          sortable: true,
-          selectMode: RecordsetSelectMode.MULTI_SELECT,
-          showFaceting: true,
-          disableFaceting: false,
-          displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
+      // TODO: think about this more if it's required in this context
+      // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
+      let customFacets: any = null;
+      if (
+        domainRef.pseudoColumn &&
+        domainRef.pseudoColumn.filterProps &&
+        domainRef.pseudoColumn.filterProps.leafFilterString
+      ) {
+        // NOTE should we display the filters or not?
+        customFacets = {
+          ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
+          removable: false,
         };
-
-        const stackElement = LogService.getStackNode(
-          LogStackTypes.RELATED,
-          domainRef.table,
-          { source: domainRef.compressedDataSource, entity: true, picker: 1 }
-        );
-
-        const logInfo = {
-          logObject: null,
-          logStack: [stackElement],
-          // logStack: getRecordLogStack(stackElement),
-          logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
-        };
-
-        let getDisabledTuples;
-        if (prefillObject.hasUniqueAssociation) {
-          /**
-           * The existing rows in this association must be disabled
-           * so users doesn't resubmit them.
-           */
-          getDisabledTuples = disabledTuplesPromise(
-            prefillObject,
-            domainRef.contextualize.compactSelectAssociationLink,
-            prefillAssociationFkLeafColumn,
-            prefillAssociationFkMainColumn,
-            []
-          );
-        }
-
-        // set recordset select view then set selected rows on "submit"
-        setAssociationRecordsetProps({
-          initialReference: modalReference,
-          initialPageLimit: modalReference.display.defaultPageSize
-            ? modalReference.display.defaultPageSize
-            : RECORDSET_DEFAULT_PAGE_SIZE,
-          config: recordsetConfig,
-          logInfo: logInfo,
-          parentReference: reference,
-          getDisabledTuples
-        });
-
-        setShowAssociationModal(true);
       }
+
+      const modalReference = domainRef.addFacets(andFilters, customFacets)
+        .contextualize.compactSelectAssociationLink;
+
+      const recordsetConfig: RecordsetConfig = {
+        viewable: false,
+        editable: false,
+        deletable: false,
+        sortable: true,
+        selectMode: RecordsetSelectMode.MULTI_SELECT,
+        showFaceting: true,
+        disableFaceting: false,
+        displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
+      };
+
+      const stackElement = LogService.getStackNode(
+        LogStackTypes.RELATED,
+        domainRef.table,
+        { source: domainRef.compressedDataSource, entity: true, picker: 1 }
+      );
+
+      const logInfo = {
+        logObject: null,
+        logStack: [stackElement],
+        // logStack: getRecordLogStack(stackElement),
+        logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
+      };
+
+      let getDisabledTuples;
+      if (prefillObject.hasUniqueAssociation) {
+        /**
+         * The existing rows in this association must be disabled
+         * so users doesn't resubmit them.
+         */
+        getDisabledTuples = disabledTuplesPromise(
+          prefillObject,
+          domainRef.contextualize.compactSelectAssociationLink,
+          prefillAssociationFkLeafColumn,
+          prefillAssociationFkMainColumn,
+          []
+        );
+      }
+
+      // set recordset select view then set selected rows on "submit"
+      setAssociationRecordsetProps({
+        initialReference: modalReference,
+        initialPageLimit: modalReference.display.defaultPageSize
+          ? modalReference.display.defaultPageSize
+          : RECORDSET_DEFAULT_PAGE_SIZE,
+        config: recordsetConfig,
+        logInfo: logInfo,
+        parentReference: reference,
+        getDisabledTuples
+      });
+
+      setShowAssociationModal(true);
     }
 
     const initialValues = getInitialFormValues(forms, columnModels);

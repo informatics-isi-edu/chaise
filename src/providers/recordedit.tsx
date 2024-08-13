@@ -75,7 +75,7 @@ export const RecordeditContext = createContext<{
   /* callback to add form(s) to the forms array */
   addForm: (count: number) => number[],
   /* callback to remove from(s) from the forms array */
-  removeForm: (indexes: number[], formValues: any, skipLogging?: boolean) => void,
+  removeForm: (indexes: number[], skipLogging?: boolean) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
@@ -110,10 +110,8 @@ export const RecordeditContext = createContext<{
   prefillObject: PrefillObject | null,
   /* the column to the leaf table for the association table if we have a prefill object */
   prefillAssociationFkLeafColumn: any,
-  setPrefillAssociationFkLeafColumn: (val: any) => void,
   /* the column tot he main table for the association table if we have a prefill object */
   prefillAssociationFkMainColumn: any,
-  setPrefillAssociationFkMainColumn: (val: any) => void,
   /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
   prefillAssociationSelectedRows: SelectedRow[],
   setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
@@ -823,10 +821,9 @@ export default function RecordeditProvider({
   /**
    *
    * @param indexes array of indexes to remove from forms array (and tuples array)
-   * @param formValues formValuesused for cleaning up
    * @param skipLogging boolean to skip logging the remove action
    */
-  const removeForm = (indexes: number[], formValues: any, skipLogging?: boolean) => {
+  const removeForm = (indexes: number[], skipLogging?: boolean) => {
     if (!skipLogging) {
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
@@ -1188,9 +1185,7 @@ export default function RecordeditProvider({
       // prefill association modal
       prefillObject,
       prefillAssociationFkLeafColumn,
-      setPrefillAssociationFkLeafColumn,
       prefillAssociationFkMainColumn,
-      setPrefillAssociationFkMainColumn,
       prefillAssociationSelectedRows,
       setPrefillAssociationSelectedRows,
       updateAssociationSelectedRows,
