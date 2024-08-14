@@ -324,6 +324,7 @@ const RecordeditInner = ({
 
       const andFilters: any[] = [];
       // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+      // NOTE: this is similar to the function `openAddPureBinaryModal` in `related-table-actions`
       prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
         andFilters.push({
           source: col.name,

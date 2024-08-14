@@ -29,7 +29,7 @@ const FormContainer = ({
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
 
-  const { getValues, handleSubmit } = useFormContext();
+  const { handleSubmit } = useFormContext();
 
   const formContainer = useRef<any>(null);
 
