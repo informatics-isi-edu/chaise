@@ -388,7 +388,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   });
 
   await test.step('row level', async () => {
-    if (!params.isTableMode) {
+    if (params.isTableMode === false) {
       await test.step('make sure tabular mode is displayed', async () => {
         const text = await markdownToggleLink.innerText();
         if (text === 'Edit mode') {

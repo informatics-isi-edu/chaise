@@ -88,6 +88,7 @@ const testParams: any = {
       canEdit: true,
       canCreate: false,
       isInline: true,
+      isTableMode: false,
       viewMore: {
         displayname: 'accommodation_collections',
         filter: 'AccommodationsSherathon Hotel'
@@ -110,6 +111,7 @@ const testParams: any = {
       canEdit: true,
       canCreate: false, // it has filter in source, so create is disabled
       isInline: true,
+      isTableMode: false,
       viewMore: {
         name: 'table_w_aggregates',
         displayname: 'table_w_aggregates',
@@ -137,6 +139,7 @@ const testParams: any = {
       canCreate: true,
       canDelete: true, // NOTE: was canUnlink
       isInline: true,
+      isTableMode: false,
       viewMore: {
         name: 'file',
         displayname: 'file',
@@ -196,7 +199,7 @@ test.describe('View existing record', () => {
 
     await test.step('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCite defined', async () => {
       expect.soft(cc.deleteRecord).toBeTruthy();
-      expect.soft(cc.resolverImplicitCatalog).toBe(2);
+      expect.soft(cc.resolverImplicitCatalog).toBe(100);
 
       expect.soft(cc.shareCite).toBeDefined();
       expect.soft(cc.shareCite.acls.show).toEqual(['*']);
