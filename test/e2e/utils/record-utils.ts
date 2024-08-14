@@ -417,7 +417,6 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
       await test.step(`edit button should${!params.canEdit ? ' not ' : ' '}be visible.`, async () => {
         const editBtns = currentEl.locator('.edit-action-button');
         if (params.canEdit) {
-          // await page.pause();
           await expect.soft(editBtns.first()).toBeVisible();
         } else {
           await expect.soft(editBtns.first()).not.toBeVisible();
