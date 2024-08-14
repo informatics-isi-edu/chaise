@@ -6,8 +6,8 @@ export default getConfig({
   mainSpecName: 'all-features-confirmation',
   testMatch: [
     'presentation.spec.ts',
-    // 'create-btn.spec.ts',
-    // 'delete-btn.spec.ts',
-    // 'edit-btn.spec.ts'
+    'create-btn.spec.ts',
+    'delete-btn.spec.ts',
+    'edit-btn.spec.ts'
   ]
 });

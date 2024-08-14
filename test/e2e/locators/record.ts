@@ -68,6 +68,10 @@ export default class RecordLocators {
     return container.locator('.columns-container li.toc-heading');
   }
 
+  static getSidePanelItemById(container: Locator | Page, idx: number): Locator {
+    return container.locator(`#recordSidePan-heading-${idx}`);
+  }
+
 
   // ----------------- main section selectors ------------------------ //
 
@@ -133,6 +137,10 @@ export default class RecordLocators {
   static getRelatedSectionSpinner(page: Page): Locator {
     return page.locator('.related-section-spinner');
   }
+
+  static getRelatedTables(page: Page): Locator {
+    return page.locator('.chaise-accordion:not(.forced-hidden)');
+  };
 
   static getDisplayedRelatedTableTitles(page: Page): Locator {
     return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')
