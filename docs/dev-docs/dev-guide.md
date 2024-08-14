@@ -16,6 +16,7 @@ This is a guide for people who develop Chaise.
 - [Building and installation](#building-and-installation)
   * [Make targets](#make-targets)
   * [NPM](#npm)
+  * [Dependabot](#dependabot)
 - [Structure of an App](#structure-of-an-app)
 - [Using Chaise through npm](#using-chaise-through-npm)
 - [Error handling](#error-handling)
@@ -431,6 +432,39 @@ This section will go over how we think the NPM modules should be managed.
     - If you used `npm install` double-check the changes to `package-lock.json`.
   3. Push the changes to the main branch.
   4. After pushing the changes, `npm-publish.yml` GitHub workflow will detect the version change and properly publish the new version to npm.
+
+### Dependabot
+
+We're using [dependabot](https://github.com/dependabot) to keep our dependencies up to date. Apart from automated security updates, it will use the [`dependabot.yml`](https://github.com/informatics-isi-edu/chaise/blob/master/.github/dependabot.yml) to figure out which dependencies should be checked for update.
+
+While our goal is to keep all dependencies updated, we don't want the process of updating to hinder our development. We also want to avoid introducing new bugs with the new versions. So, before going through the review process, look at the release notes. If you didn't notice any change worth pushing, consider closing and ignoring that version change. Dependable will eventually create new PRs for newer versions that might be worth merging.
+
+While reviewing a PR that Dependabot opened:
+
+1. Ensure that the GitHub Actions build was successful and had no issues.
+
+3. Grab the branch locally and ensure you can build it using all the Node.js versions that we support:
+  
+    ```
+    nvm use 18.18
+    make dist
+    ```
+    This should not throw any errors and should finish properly.
+
+5. Build and deploy the branch locally with the main Node.js version we support and use on our servers (currently 20.12.2):
+  
+    ```
+    nvm use 20.12.2
+    make deps-test
+    make dist-wo-deps
+    make deploy
+    ```
+
+6. Run the test cases and manually take a look at the pages if necessary.
+
+7. Depending on the automated or manual test, you might have to make more changes to the code. Push them to the same branch so they can be merged together.
+
+
 
 ## Structure of an App
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
