@@ -27,7 +27,7 @@
     "ui"
   ],
   "devDependencies": {
-    "@isrd-isi-edu/ermrest-data-utils": "^0.0.6",
+    "@isrd-isi-edu/ermrest-data-utils": "^0.0.7",
     "@playwright/test": "latest",
     "@typescript-eslint/eslint-plugin": "~7.18.0",
     "@typescript-eslint/parser": "~7.18.0",
