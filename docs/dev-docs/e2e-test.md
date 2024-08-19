@@ -198,6 +198,14 @@ To debug Playwright tests,
   npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug --max-failures=1
   ```
 
+### Github Actions debugging
+
+There's a chance a test case will fail in github actions only and not locally. This makes it very difficult to reproduce/test without a browser to show what is happening. In github actions, if you download the playwright report, there will be images with the HTML report of the pages when they did fail.
+
+This isn't "perfect" since it captures the state of the browser when the test "ends" not when the test fails. We often have tests written with `test.step` and `expect.soft` which will run tests in sequence and usually not cause later tests to fail just because an earlier one did. More info about screencaps with `test.step` and `expect.soft` in [this github issue](https://github.com/microsoft/playwright/issues/14854).
+
+If there is a suspicion that a test is failing only in github actions, to get an accurate screencap, comment out the rest of the `test.step`s that are after the failing step so that the state during the "failing" test.step will be properly captured.
+
 ## Writing test
 
 Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.

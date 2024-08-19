@@ -1,12 +1,11 @@
 import { test, expect, TestInfo } from '@playwright/test';
-import { execSync } from 'child_process';
 import { resolve } from 'path';
 
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { copyFileToChaiseDir, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { setInputValue, testRecordeditColumnNames, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 const testParams = {
@@ -33,12 +32,12 @@ const testParams = {
     secondAttemptValues: {
       creator: 'John Smith II',
       file_content: 'actually the content should be this one.',
-      notes: 'some notes'
+      notes: '["note 1","note 2"]'
     },
     submission: {
       tableDisplayname: 'main',
       resultColumnNames: ['id', 'creator', 'notes'],
-      resultRowValues: [['1', 'John Smith II', 'some notes']]
+      resultRowValues: [['1', 'John Smith II', 'note 1, note 2']]
     }
   },
   edit: {
@@ -47,7 +46,7 @@ const testParams = {
     existingValues: {
       creator: 'John Smith II',
       file_content: 'actually the content should be this one.',
-      notes: 'some notes'
+      notes: '["note 1","note 2"]'
     },
     newValues: {
       creator: 'Kylan Gentry',
@@ -230,24 +229,7 @@ const getRecordeditURL = (baseURL: string | undefined, testInfo: TestInfo, filte
  */
 const copyIframeToLocation = () => {
   const iframeLocation = resolve(__dirname, './../../../utils/input-iframe-test.html');
-
-  const remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
-  let cmd;
-  if (typeof remoteChaiseDirPath === 'string') {
-    cmd = `scp ${iframeLocation} ${remoteChaiseDirPath}/input-iframe-test.html`;
-  } else {
-    cmd = `sudo cp ${iframeLocation} /var/www/html/chaise/input-iframe-test.html`;
-  }
-
-  try {
-    execSync(cmd);
-    console.log('copied the iframe into proper location');
-  } catch (exp) {
-    console.log(exp);
-    console.log('Unable to copy the iframe into proper location');
-    process.exit(1);
-  }
+  copyFileToChaiseDir(iframeLocation, 'input-iframe-test.html');
 }
 
 const setIframeInputValues = async (iframeElementProps: any, values: any) => {

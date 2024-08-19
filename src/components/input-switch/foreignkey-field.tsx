@@ -1,24 +1,24 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Spinner from 'react-bootstrap/Spinner';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
 import {
-  appModes, MULTI_FORM_INPUT_FORM_VALUE, RecordeditColumnModel, RecordeditForeignkeyCallbacks
+  appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -87,6 +87,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
+
+  const ellipsisRef = useRef(null);
 
   /**
    * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
@@ -187,6 +189,26 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     rules.validate = validateForeignkeyValue(props.name, props.columnModel.column, props.foreignKeyData, props.foreignKeyCallbacks);
   }
 
+  // TODO - Multiple fields use a similar function and few other components in a similar way. Refactor to consolidate and create reusable helper(s) to eliminate code redundancy.
+  /**
+   * returns the value to be rendered for the provided field
+   */
+  const existingValuePresentation = (field: any): JSX.Element => {
+
+    if (isStringAndNotEmpty(field?.value)) {
+      return <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} />
+    }
+
+    return (
+      <span
+        className='chaise-input-placeholder popup-select-value'
+        contentEditable={false}
+      >
+        {props.placeholder ? props.placeholder : 'Select a value'}
+      </span>
+    )
+  }
+
   return (
     <InputField {...props} onClear={onClear} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
@@ -197,37 +219,35 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               <Spinner animation='border' size='sm' />
             </div>
           }
-          <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
-            <div
-              id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
-              className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
-            >
-              {isStringAndNotEmpty(field?.value) ?
-                <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
-                <span
-                  className='chaise-input-placeholder popup-select-value'
-                  contentEditable={false}
-                >
-                  {props.placeholder ? props.placeholder : 'Select a value'}
-                </span>
-              }
-              <ClearInputBtn
-                btnClassName={`${props.clearClasses} input-switch-clear`}
-                clickCallback={clearInput} show={!props.disableInput && showClear}
-              />
-            </div>
-            {!props.disableInput && <div className='chaise-input-group-append'>
-              <button
-                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
-                className='chaise-btn chaise-btn-primary modal-popup-btn'
-                role='button'
-                type='button'
+          <EllipsisWrapper 
+            elementRef={ellipsisRef}
+            tooltip={existingValuePresentation(field)}
+          >
+            <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
+              <div
+                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
+                className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+                ref={ellipsisRef}
               >
-                <span className='chaise-btn-icon fa-solid fa-chevron-down' />
-              </button>
-            </div>}
-          </div>
-          <input className={props.inputClasses} {...field} type='hidden' />
+                {existingValuePresentation(field)}
+                <ClearInputBtn
+                  btnClassName={`${props.clearClasses} input-switch-clear`}
+                  clickCallback={clearInput} show={!props.disableInput && showClear}
+                />
+              </div>
+              {!props.disableInput && <div className='chaise-input-group-append'>
+                <button
+                  id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
+                  className='chaise-btn chaise-btn-primary modal-popup-btn'
+                  role='button'
+                  type='button'
+                >
+                  <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+                </button>
+              </div>}
+            </div>
+          </EllipsisWrapper>
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
           {
             recordsetModalProps &&
             <RecordsetModal

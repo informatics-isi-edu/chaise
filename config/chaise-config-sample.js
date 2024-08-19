@@ -2,6 +2,8 @@
 
 var chaiseConfig = {
     name: "Sample",
+    defaultCatalog: "1",
+    resolverImplicitCatalog: "1",
     allowErrorDismissal: true,
     confirmDelete: true,
     headTitle: 'Chaise',

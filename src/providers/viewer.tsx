@@ -1148,14 +1148,14 @@ export default function ViewerProvider({
         submissionRows[0][annotConfig.reference_image_column_name] = imageIDRef.current;
 
         // add the default z index value
-        if (defaultZIndex.current !== null) {
+        if (defaultZIndex.current !== null && defaultZIndex.current !== undefined) {
           submissionRows[0][annotConfig.z_index_column_name] = defaultZIndex.current;
         }
 
         // add the file
         // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
         let fileName = `${imageIDRef.current}_${submissionRows[0][annotConfig.annotated_term_column_name]}`;
-        if (defaultZIndex.current != null) {
+        if (defaultZIndex.current !== null && defaultZIndex.current !== undefined) {
           fileName += `_z${defaultZIndex.current}.svg`;
         }
         const file = new File([formState.svgAnnotationData[0].svg], fileName, { type: 'image/svg+xml' });

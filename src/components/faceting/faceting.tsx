@@ -249,11 +249,11 @@ const Faceting = ({
 
     /**
      * Get Facet Order from LocalStorage
-     */ 
+     */
      const facetOrder = LocalStorage.getStorage(facetListKey) || undefined;
 
     // If facet order is not stored in localStorage, display items in default order
-    if (!facetOrder) {      
+    if (!facetOrder) {
       setOrderedFacets(reference.facetColumns.map((item: any, index: number) => [item, index]))
       return;
     }
@@ -262,7 +262,7 @@ const Faceting = ({
      * If facet order is present in localStorage, rearrange the items according to the stored order
      */
     const facetsInOrder = reorderFacets(reference.facetColumns, facetOrder)
-    
+
     /**
      * Update isOpen state for facets based on stored state
      */
@@ -287,7 +287,7 @@ const Faceting = ({
   }, [])
 
   useEffect(()=>{
-    
+
     if(!orderedFacets || !orderedFacets.length) return;
 
     /**
@@ -670,7 +670,7 @@ const Faceting = ({
    * Handle drag and drop events for draggable facets
    */
   const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(orderedFacets);    
+    const items = Array.from(orderedFacets);
 
     if (!result.destination) {
       const [reorderedItem] = items.splice(result.source.index, 1);
@@ -756,7 +756,6 @@ const Faceting = ({
                               <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
                                 <FacetHeader
                                   displayname={fc.displayname}
-                                  showTooltipIcon={fc.comment ? true : false}
                                   comment={fc.comment}
                                   isLoading={facetModels[index].isLoading}
                                   facetHasTimeoutError={facetModels[index].facetHasTimeoutError}

@@ -19,6 +19,7 @@
 .multi-form-input {
   .add-button {
     padding-right: 6px;
+    min-width: 31px;
   }
   .array-input-field-container {
     ul {
@@ -118,15 +119,8 @@
       display: flex;
       align-items: center;
       position: relative;
-      &.add-padding-bottom {
-        padding-bottom: 30px !important;
-      }
       .move-icon * {
         transform: translateX(-2px) !important;
-      }
-      .chaise-btn-group {
-        position: absolute;
-        bottom: 0px;
       }
     }
   }

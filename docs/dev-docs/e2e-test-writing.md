@@ -60,6 +60,11 @@ This section summarizes the best practices for writing test cases in Chaise.
           });
         });
         ```
+    - If your file has multiple independent `test`s that can run in parallel, you can ask playwright to run them in parallel by adding the following:
+        ```ts
+        test.describe.configure({ mode: 'parallel' });
+        ```
+      - Don't use this configuration if you have a `beforeAll` or `afterAll` that you want to run only once. Because in this case each worker will run their own `beforeAll` and `afterAll` instead of running it once (https://github.com/microsoft/playwright/issues/28201).
     - If your tests must run in order and on the same browser, use the `test.step` method.
       - Don't forget to include `await` before each `test.step`.
       - Playwright will not run the remaining steps if any of the steps fail. To get around this, you should use `expect.soft`.
@@ -225,9 +230,18 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   // https://playwright.dev/docs/api/class-locator#locator-fill
   await locator.fill('new value');
 
-  // clear the value of input or textaraea
+  // clear the value of input or textaraea (PREFERRED)
   // https://playwright.dev/docs/api/class-locator#locator-clear
   await locator.clear();
+
+  // will accomplish the same thing as `clear()`
+  await locator.fill('');
+  ```
+
+- When filling a value in an input, we want to ensure it is filled afterwards:
+  ```ts
+  await locator.fill(value);
+  await expect.soft(locator).toHaveValue(value);
   ```
 
 - Mouse actions:
@@ -235,6 +249,12 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   ```ts
   await locator.click();
   await locator.hover();
+  ```
+
+- Checkbox specific:
+  ```ts
+  // https://playwright.dev/docs/input#checkboxes-and-radio-buttons
+  await locator.check();
   ```
 
 ### Managing page

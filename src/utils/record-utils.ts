@@ -1,16 +1,17 @@
 // models
-import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { CLASS_NAMES, RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 /**
@@ -322,13 +323,17 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
    */
   origUrl: string,
   /**
-   * the foreignkey columns that should be prefileld
+   * the foreignkey columns that should be prefilled
    */
   fkColumnNames: string[],
   /**
-   * raw values of the foreign key columns
+   * raw values of the foreign key columns keyed by column name
    */
-  keys: { [key: string]: any }
+  keys: { [key: string]: any },
+  /**
+   * map of column names as keys to column RIDs as values
+   */
+  columnNameToRID: { [key: string]: string }
 } {
 
   let origTable;
@@ -343,13 +348,16 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
 
   const prefilledFks: string[] = [];
   const keys: { [key: string]: any } = {};
+  const columnNameToRID: { [key: string]: string } = {}
   origTable.foreignKeys.all().forEach((fk: any) => {
     if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) return;
     prefilledFks.push(fk.name);
+    columnNameToRID[fk.name] = fk.RID
 
     // add foreign key column data
     fk.mapping._from.forEach((fromColumn: any, i: number) => {
       keys[fromColumn.name] = mainTuple.data[fk.mapping._to[i].name];
+      columnNameToRID[fromColumn.name] = fromColumn.RID;
     })
   });
 
@@ -357,6 +365,36 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
     rowname: mainTuple.displayname,
     origUrl: mainTuple.reference.uri,
     fkColumnNames: prefilledFks,
+    columnNameToRID: columnNameToRID,
     keys: keys
   };
+}
+
+/**
+ * Takes the displayname for a related table (both inline and related), and tries to find it on the record page.
+ *   used for table of contents click event and scrrolling on click of previous/next
+ * 
+ * @param displayname the displayname of the column to scroll to
+ * @returns Element | false - returns the related table element to scroll to
+ *      - false if no element with displayname is found
+ */
+export function determineScrollElement(displayname: string): Element | false {
+  // id encode query param
+  const htmlId = makeSafeIdAttr(displayname);
+  // "entity-" is used for record entity section
+  // we have to make sure the row is visible on the page
+  let el = document.querySelector(`tr:not(.${CLASS_NAMES.HIDDEN}) #entity-${htmlId}`);
+
+  if (el) {
+    // if in entity section, grab parent
+    el = el.parentElement;
+  } else {
+    // "rt-heading-" is used for related table section
+    // we have to make sure the section is visible on the page
+    el = document.querySelector(`#rt-heading-${htmlId}:not(.${CLASS_NAMES.HIDDEN})`);
+  }
+
+  if (!el) return false;
+
+  return el;
 }

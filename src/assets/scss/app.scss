@@ -110,7 +110,7 @@ html {
   .h4-class small {
     font-weight: 400;
     line-height: 1;
-    color: #777;
+    color: map-get(variables.$color-map, 'header-small');
     font-size: 65%;
   }
 
@@ -145,8 +145,8 @@ html {
   code {
     padding: 2px 4px;
     font-size: 90%;
-    color: #c7254e;
-    background-color: #f9f2f4;
+    color: map-get(variables.$color-map, 'code-block');
+    background-color: map-get(variables.$color-map, 'code-block-background');
     border-radius: 4px;
   }
   // make sure the pre style is consistent with old bootstrap styles
@@ -156,11 +156,11 @@ html {
     margin: 0 0 10px;
     font-size: 13px;
     line-height: 1.42857143;
-    color: #333;
+    color: map-get(variables.$color-map, 'black');
     word-break: break-all;
     word-wrap: break-word;
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
+    background-color: map-get(variables.$color-map, 'code-block-background-alt');
+    border: 1px solid map-get(variables.$color-map, 'border');
     border-radius: 4px;
   }
 
@@ -208,9 +208,9 @@ html {
     // the icon is directly next to the text.
     content: "\00A6";
   }
-  .chaise-icon-for-tooltip.align-center-icon {
-    line-height: 20px;
-    vertical-align: middle;
+  .chaise-icon-for-tooltip.chaise-accordion-header-icon-for-tooltip {
+    // this used to make the icon centered, but we want the icon to be text-top like any other places
+    // we're just adding more space between this icon and other content on the header
     margin: 4px;
   }
 
@@ -255,8 +255,8 @@ html {
   }
   .tooltip code,
   .tooltip-inner code {
-    background: rgba(110, 118, 129);
-    color: #fff;
+    background: map-get(variables.$color-map, 'code-block-background-in-tooltip');
+    color: map-get(variables.$color-map, 'white');
     padding: 0.5px;
   }
 
@@ -288,7 +288,7 @@ html {
   }
 
   .disabled-form .btn.btn-inverted[disabled]:hover {
-    background-color: white !important;
+    background-color: map-get(variables.$color-map, 'white') !important;
     border-color: map-get(variables.$color-map, 'border') !important;
   }
 
@@ -328,10 +328,10 @@ html {
     position: fixed;
     z-index: map-get(variables.$z-index-map, 'spinner');
     bottom: 0;
-    background: #d9edf7;
+    background: map-get(variables.$color-map, 'spinner-background');
     margin: 5px;
     padding: 5px 20px;
-    border: solid #446c73 1.5px;
+    border: solid map-get(variables.$color-map, 'spinner-border') 1.5px;
     .spinner-message {
       display: inline-block;
       margin-left: 5px;
@@ -411,7 +411,7 @@ html {
 
   // record and recordedit column headers
   .entity-key {
-    color: #333333;
+    color: map-get(variables.$color-map, 'black');
     font-weight: normal;
     font-size: 1rem;
     word-wrap: break-word;
@@ -420,7 +420,7 @@ html {
   // record and recordedit column values
   .entity-value {
     font-size: 1rem;
-    color: #333;
+    color: map-get(variables.$color-map, 'black');
   }
 
   // show more/show less ellipsis
@@ -460,11 +460,11 @@ html {
 
     .footer-content {
       height: 30px;
-      background-color: #ededed;
+      background-color: map-get(variables.$color-map, 'footer-background');
       padding-right: 5px;
       padding-left: 5px;
       padding-top: 5px;
-      color: #595757;
+      color: map-get(variables.$color-map, 'footer');
       font-size: 11px;
 
       li {
@@ -483,7 +483,7 @@ html {
         padding-left: 0;
         padding-right: 0;
         color: map-get(variables.$color-map, 'black');
-        background-color: #f5f5f5;
+        background-color: map-get(variables.$color-map, 'code-block-background-alt');
       }
     }
   }
@@ -767,8 +767,8 @@ html {
       // we have to change the the checkmark to the label otherwise firefox won't show it.
       &:checked + label:after {
         position: absolute;
-        top: 1px;
-        left: 1px;
+        top: 2px;
+        left: 2px;
         font-family: "Font Awesome 6 Free";
         font-weight: 900;
         content: "\f00c"; // fa-solid fa-check
@@ -793,7 +793,7 @@ html {
     font-size: 18px;
 
     &.fa-solid.fa-star {
-      color: goldenrod;
+      color: map-get(variables.$color-map, 'favorite');
     }
 
     &.hover-show {
@@ -877,7 +877,7 @@ html {
         display: inline-block;
         cursor: pointer;
         padding-right: 3px;
-        color: black;
+        color: map-get(variables.$color-map, 'black');
         font-size: 1.3em;
         vertical-align: middle;
       }
@@ -1153,6 +1153,34 @@ html {
     --bs-table-striped-color: var(--bs-body-color);
     --bs-table-active-color: var(--bs-body-color);
     --bs-table-hover-color: var(--bs-body-color);
+  }
+
+  /****** classes referenced by webapps ******/
+
+  /** horizontal alignment **/
+  .chaise-content-left {
+    text-align: start;
+  }
+
+  .chaise-content-center {
+    text-align: center;
+  }
+
+  .chaise-content-right {
+    text-align: end;
+  }
+
+  /** vertical alignment **/
+  .chaise-content-top {
+    align-items: start;
+  }
+
+  .chaise-content-middle {
+    align-items: center;
+  }
+
+  .chaise-content-bottom {
+    align-items: end;
   }
 }
 

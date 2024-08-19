@@ -2,10 +2,11 @@ import { FullConfig } from '@playwright/test';
 import axios from 'axios';
 import { execSync } from 'child_process';
 import fs from 'fs';
+import path from 'path';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.model';
-import { removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { ENTITIES_PATH, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { getCatalogID, removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { ENTITIES_PATH, PW_PROJECT_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { setCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 /**
@@ -68,13 +69,19 @@ export default async function globalSetup(config: FullConfig) {
 
   // create the catalog
   try {
-    await createCatalog(testConfiguration, projectNames, options.manualTestConfig);
+    await createCatalog(testConfiguration, projectNames, options.mainSpecName, options.manualTestConfig);
   } catch (exp) {
     throw exp;
   }
 
   // take care of chaise-config
-  copyChaiseConfig(options.chaiseConfigFilePath);
+  let chaiseConfigFilePath = options.chaiseConfigFilePath;
+  // use the default
+  if (typeof chaiseConfigFilePath !== 'string') {
+    chaiseConfigFilePath = `test/e2e/specs/${options.mainSpecName}/chaise-config.js`;
+  }
+
+  copyChaiseConfig(chaiseConfigFilePath, options.addDefaultCatalogToChaiseConfig);
 
   registerCallbacks(testConfiguration);
 }
@@ -119,7 +126,7 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
 /**
  * create the catalog and data
  */
-async function createCatalog(testConfiguration: any, projectNames: string[], isManual?: boolean) {
+async function createCatalog(testConfiguration: any, projectNames: string[], mainSpecName: string, isManual?: boolean) {
 
   return new Promise(async (resolve, reject) => {
     testConfiguration.setup.url = process.env.ERMREST_URL;
@@ -174,7 +181,7 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
 
     for (const p of projectNames) {
       try {
-        const res = await setupCatalog({ catalog, schemas });
+        const res = await setupCatalog({ catalog: { ...catalog }, schemas });
         console.log(`catalog with id ${res.catalogId} created for project ${p}`);
         setCatalogID(p, res.catalogId);
 
@@ -284,7 +291,7 @@ async function getSessionByUserPass(username: string, password: string, authCook
 /**
  * copy the chaise config into desired location
  */
-function copyChaiseConfig(chaiseConfigFilePath?: string) {
+function copyChaiseConfig(chaiseConfigFilePath?: string, addDefaultCatalogToChaiseConfig?: boolean) {
   let chaiseFilePath = 'chaise-config-sample.js';
   if (typeof chaiseConfigFilePath === 'string') {
     try {
@@ -293,6 +300,23 @@ function copyChaiseConfig(chaiseConfigFilePath?: string) {
     } catch (e) {
       console.log(`Config file ${chaiseConfigFilePath} doesn't exists`);
     }
+  }
+
+  if (addDefaultCatalogToChaiseConfig) {
+    // grab the catalog id
+    const catId = getCatalogID(PW_PROJECT_NAMES.CHROME);
+    if (catId === null) {
+      throw new Error('unable to find catalog id for chrome project while adding defaultCatalog');
+    }
+
+    // grab the content of chaise-config file and add the defaultCatalog to it
+    let content = fs.readFileSync(chaiseFilePath, 'utf8');
+    content += `\nchaiseConfig.defaultCatalog = '${catId}'`;
+
+    // write the new content into the temporary location
+    execSync(`mkdir -p ${UPLOAD_FOLDER}`);
+    chaiseFilePath = path.resolve(UPLOAD_FOLDER, 'chaise-config.js');
+    fs.writeFileSync(chaiseFilePath, content);
   }
 
   const remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;

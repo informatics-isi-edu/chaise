@@ -54,7 +54,13 @@
         {
           "name": "notes",
           "nullok": true,
-          "type": {"typename": "text"}
+          "type": {
+            "is_array": true,
+            "typename": "text[]",
+            "base_type": {
+                "typename": "text"
+            }
+          }
         }
       ],
       "annotations": {

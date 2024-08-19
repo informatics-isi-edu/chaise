@@ -76,7 +76,7 @@ var recordEditPage = function() {
 
     /* input selectors */
     this.getInputRemoveButton = function (name, index) {
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.remove-input-btn'));
     }
 
@@ -91,8 +91,8 @@ var recordEditPage = function() {
 
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('input[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     this.getInputById = function (index, displayName) {
@@ -100,28 +100,30 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + displayName + "-input"));
     };
 
+    // NOTE: duplicate of getInputForAColumn, not removing this and refactoring tests since protractor tests will be deprecated soon
     this.getTextAreaForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('textarea[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         const inputObj = {};
-        inputObj.date = element(by.css('input[name="' + inputName + '"]'));
+        // NOTE: duplicate of getInputForAColumn, not changing this since protractor tests will be deprecated soon
+        inputObj.date = element(by.className(inputName));
         inputObj.todayBtn = element(by.css(`.input-switch-container-${inputName} .date-today-btn`));
         return inputObj;
     };
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         var inputObj = {};
         const container =  element(by.className(`input-switch-container-${inputName}`));
-        inputObj.date = element(by.css('input[name="' + inputName + '-date"]'));
-        inputObj.time = element(by.css('input[name="' + inputName + '-time"]'));
+        inputObj.date = element(by.className(`${inputName}-date`));
+        inputObj.time = element(by.className(`${inputName}-time`));
         inputObj.nowBtn = container.element(by.css('.date-time-now-btn'));
         inputObj.clearBtn = container.element(by.css('.date-time-clear-btn'));
         return inputObj;
@@ -129,26 +131,26 @@ var recordEditPage = function() {
 
     this.getInputControlForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
     }
 
     this.getTextFileInputForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
     }
 
     /* Color input selectors */
     this.getColorInputForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
     }
 
     this.getColorInputBackground = function (name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         var script = "var color = document.querySelector('.input-switch-container-" + inputName + " .chaise-color-picker-preview').style.backgroundColor;";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
@@ -157,7 +159,7 @@ var recordEditPage = function() {
 
     this.getColorInputBtn = function (name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.css('.input-switch-container-' + inputName + ' button'));
     }
 
@@ -206,7 +208,7 @@ var recordEditPage = function() {
     /* dropdown selectors */
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
+        const inputName = 'c_' + index + '-' + name;
         return element(by.css('.input-switch-container-' + inputName + ' .dropdown-toggle'));
     }
 
@@ -319,7 +321,7 @@ var recordEditPage = function() {
      */
     this.getFormInputCell = (name, index, isArray) => {
       index = index || 1;
-      const inputName = index + '-' + name;
+      const inputName = 'c_' + index + '-' + name;
 
       if(isArray){
         return element(by.className('array-input-field-container ' + inputName)).element(by.xpath('..'));
@@ -329,12 +331,13 @@ var recordEditPage = function() {
 
     this.getInputSwitchContainer = (name, index) => {
       index = index || 1;
-      const inputName = index + '-' + name;
+      const inputName = 'c_' + index + '-' + name;
       return element(by.className('input-switch-container-' + inputName))
     }
+    // TODO: This is BAD, no column name should be hardcoded
     this.getInputSwitchContainerFK = (index) => {
         index = index || 1;
-        const inputName = index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
+        const inputName = 'c_' + index + '-' + 'lIHKX0WnQgN1kJOKR0fK5A';
         return element(by.className('input-switch-container-' + inputName))
       }
 
@@ -405,17 +408,17 @@ var recordEditPage = function() {
     /* error message selectors */
     this.getErrorMessageForAColumn = (name, index) => {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error.text-danger'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-error'));
     }
 
     this.getInputErrorMessage = function(el, type) {
-        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error'));
     };
 
     this.getJSONInputErrorMessage = function(el) {
         // similar input structure as array detailed below
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getArrayInputErrorMessage = function(el) {
@@ -424,13 +427,13 @@ var recordEditPage = function() {
          *  <div class='input-switch-container-{index}-{name}'>
          *    <div class='input-switch-array'>
          *      <div class='chaise-input-control'>
-         *        <textarea name='{index}-{name}' />
+         *        <textarea class='c_{index}-{name}' />
          *      </div>
          *    </div>
          *    <span class='input-switch-error'>...</span>]
          *  </div>
          */
-        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error'));
     };
 
     this.getDeleteRowButton = function(index) {
@@ -526,7 +529,7 @@ var recordEditPage = function() {
      */
     this.getArrayFieldContainer = function(colName, formNumber, baseType){
       formNumber = formNumber || 1;
-      const fieldName = `${formNumber}-${colName}`;
+      const fieldName = `c_${formNumber}-${colName}`;
 
       const elem = element(by.css(`.array-input-field-container-${fieldName}`));
 
@@ -1023,7 +1026,7 @@ var recordsetPage = function() {
     };
 
     /**
-     * TODO in playwright version, use rdsetLocators.getRows(rsModal)
+     * TODO in playwright version, use recordsetLocators.getRows(rsModal)
      */
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .chaise-table-row'));
@@ -1034,7 +1037,7 @@ var recordsetPage = function() {
     };
 
     this.waitForInverseModalSpinner = function () {
-        var locator = element(by.css(".modal-body .recordest-main-spinner"));
+        var locator = element(by.css(".modal-body .recordset-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
     };
 
@@ -1098,8 +1101,8 @@ var recordsetPage = function() {
     // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
-        const inputName = index + '-' + name;
-        return element(by.css('input[name="' + inputName + '"]'));
+        const inputName = 'c_' + index + '-' + name;
+        return element(by.className(inputName));
     };
 
     // NOTE: used for making changes in recordedit app. Could be rewritten to use recordEditPage function instead
@@ -1464,7 +1467,7 @@ var errorModal = function () {
     }
 
     this.getOKButton = function () {
-        return element(by.css('.modal-error .error-ok-button'));
+        return element(by.css('.modal-error .ok-button'));
     }
 
     this.getCloseButton = function () {

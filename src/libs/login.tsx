@@ -6,13 +6,15 @@ import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 
 // services
 import { ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const loginLibSettings : ConfigServiceSettings = {
-  appName: APP_NAMES.LOGIN
+  appName: APP_NAMES.LOGIN,
+  skipParsingURLForCatalogID: true
 };
 
 /**
@@ -28,4 +30,7 @@ waitForElementToLoad(LOGIN_SELECTOR).then(() => {
       <ChaiseLogin />
     </AppWrapper>
   );
+}).catch((error) => {
+  $log.error('<login> element is either missing or never loaded.')
+  $log.error(error);
 });

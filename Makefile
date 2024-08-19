@@ -51,24 +51,25 @@ E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.
 # not part of the make recordedit command anymore
 E2EDIrecordMultiFormInput=test/e2e/specs/default-config/multi-form-input/multi-form-input.config.ts
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
-E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
-E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.conf.js
+E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.config.ts
+E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.config.ts
 E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
-E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.conf.js
+E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.config.ts
 E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.config.ts
 # Record tests
-E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
+E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.config.ts
+E2EDrecordProt=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf.js
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.config.ts
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.config.ts
 E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.ts
-E2EDrecordLinks=test/e2e/specs/default-config/record/links.conf.js
+E2EDrecordLinks=test/e2e/specs/default-config/record/links.config.ts
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
-E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
-E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
-E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.conf.ts
+E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.config.ts
+E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
+E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
 
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/playwright.config.ts
@@ -78,10 +79,9 @@ E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
-E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
+E2Eerrors=test/e2e/specs/all-features-confirmation/errors/errors.config.ts
 ## Parallel test scripts (protractor)
 AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
-DeleteProhibitedParallel_PROTRACTOR=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel_PROTRACTOR=test/e2e/specs/default-config/protractor.conf.js
 ## Parallel test scripts
 AllFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
@@ -92,26 +92,24 @@ DefaultConfigParallel=test/e2e/specs/default-config/playwright.config.ts
 Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
-RECORD_TESTS_PROTRACTOR=$(E2EDrecord) $(E2EDrecordLinks)
-RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable) $(E2ErecordEditForeignKeyDropdown)
-RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
-ERRORS_TESTS_PROTRACTOR=$(E2Eerrors)
+RECORD_TESTS_PROTRACTOR=$(E2EDrecordProt)
+RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
+RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
+RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
-DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR=$(DeleteProhibitedParallel_PROTRACTOR)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
-PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR) $(DeleteProhibitedParallel_PROTRACTOR)
-ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR) $(ERRORS_TESTS_PROTRACTOR)
+PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR)
+ALL_TESTS_PROTRACTOR=$(RECORD_TESTS_PROTRACTOR) $(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR)
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
-RECORD_TESTS=$(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
-RECORDSET_TESTS=$(E2ErecordsetSavedQuery)
-RECORDADD_TESTS=$(E2EDIrecordMultiFormInput)
-RECORDEDIT_TESTS=$(E2ErecordEditInputIframe)
+RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
+RECORDSET_TESTS=$(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
+RECORDEDIT_TESTS=$(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
-ERRORS_TESTS=
+ERRORS_TESTS=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(AllFeaturesConfirmationParallel)
@@ -183,6 +181,14 @@ testrecordset: test-RECORDSET_TESTS
 .PHONY: testrecordset-protractor
 testrecordset-protractor: test_protractor-RECORDSET_TESTS_PROTRACTOR
 
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testfooter
+testfooter: test-FOOTER_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testerrors
+testerrors: test-ERRORS_TESTS
+
 #### Parallel make commands - these commands will run tests in parallel
 #Rule to run all parallel test configurations
 .PHONY: testparallel
@@ -206,27 +212,12 @@ testallfeaturesconfirmation-protractor: test_protractor-ALL_FEATURES_CONFIRMATIO
 .PHONY: testdeleteprohibited
 testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
 
-.PHONY: testdeleteprohibited-protractor
-testdeleteprohibited-protractor: test_protractor-DELETE_PROHIBITED_PARALLEL_TESTS_PROTRACTOR
-
-
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testdefaultconfig
 testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
 .PHONY: testdefaultconfig-protractor
 testdefaultconfig-protractor: test_protractor-DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testfooter
-testfooter: test-FOOTER_TESTS
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testerrors
-testerrors: test-ERRORS_TESTS
-
-.PHONY: testerrors-protractor
-testerrors-protractor: test_protractor-ERRORS_TESTS_PROTRACTOR
 
 # Rule to setup schema and data for manual tests
 .PHONY: testmanually
@@ -510,6 +501,10 @@ lint: $(SOURCE)
 .PHONY: lint-w-warn
 lint-w-warn: $(SOURCE)
 	@npx eslint src --ext .ts,.tsx
+
+.PHONY: lint-tests
+lint-tests:
+	npx eslint test/e2e --ext .ts,.tsx --quiet
 
 # Rule to create the package.
 .PHONY: dist-wo-deps

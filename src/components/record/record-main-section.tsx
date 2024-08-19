@@ -27,7 +27,6 @@ import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
  * Returns Main Section of the record page.
  */
 const RecordMainSection = (): JSX.Element => {
-
   const { errors } = useError();
   const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections } = useRecord();
 
@@ -124,7 +123,7 @@ const RecordMainSection = (): JSX.Element => {
                   }
                   <RelatedTable
                     relatedModel={cm.relatedModel}
-                    tableContainerID={`rt-${idSafeDisplayname}`}
+                    displaynameForID={cm.column.displayname.value}
                   />
                 </div>
               </span>

@@ -25,7 +25,7 @@ const testParams = {
 
 test.describe('View recordset page and form a query,', () => {
 
-  test.beforeAll(async ({}, testInfo) => {
+  test.beforeAll('update the catalog annotation', async ({}, testInfo) => {
     const catalogId = getCatalogID(testInfo.project.name);
 
     await updateCatalogAnnotation(catalogId, {
@@ -61,7 +61,7 @@ test.describe('View recordset page and form a query,', () => {
 
   test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => {
 
-    await test.step('should load recordset page', async() => {
+    await test.step('should load recordset page', async () => {
       const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}`;
 
       await page.goto(`${baseURL}${PAGE_URL}`);
@@ -124,7 +124,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
 
       const textAreaVal = 'main with:\n  - int_col (1 choice): int_col ( 11 to 22);';
-      await expect.soft(RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
+      await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
 
@@ -180,7 +180,7 @@ test.describe('View recordset page and form a query,', () => {
       await queryNameInput.clear();
       await queryNameInput.fill('Second saved query');
 
-      const descriptionInput = RecordeditLocators.getTextAreaForAColumn(createSavedQueryModal, 'description', 1);
+      const descriptionInput = RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'description', 1);
       await descriptionInput.clear();
       await descriptionInput.fill('Second query description');
 

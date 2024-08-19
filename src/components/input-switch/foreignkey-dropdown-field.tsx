@@ -124,7 +124,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const [checkedRow, setCheckedRow] = useState<any>(null); // ERMrest.Tuple
 
   const [dropdownInitialized, setDropdownInitialized] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<String | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string | null>(null);
   const [pageLimit, setPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
   const [pagingPageLimit, setPagingPageLimit] = useState<number>(RECORDSET_DEFAULT_PAGE_SIZE);
 
@@ -509,7 +509,10 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
                 </button>
               </div>}
             </Dropdown.Toggle>
-            {!props.disableInput && dropdownReference && <Dropdown.Menu className='responsive-dropdown-menu' ref={dropdownMenuRef}>
+            {/* when there are very few columns in recordedit, foreign key dropdowns were opening
+              up causing them to open "behind" the top container and making some options unclickable
+              https://github.com/informatics-isi-edu/chaise/pull/2455 */}
+            {!props.disableInput && dropdownReference && <Dropdown.Menu flip={false} className='responsive-dropdown-menu' ref={dropdownMenuRef}>
               <li className='search-row'>
                 <SearchInput
                   initialSearchTerm=''
@@ -530,7 +533,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
               </div>
             </Dropdown.Menu>}
           </Dropdown>
-          <input className={props.inputClasses} {...field} type='hidden' />
+          <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
         </div>
       )}
     </InputField>

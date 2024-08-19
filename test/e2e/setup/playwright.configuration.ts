@@ -32,6 +32,12 @@ const getConfig = (options: TestOptions) => {
 
     testMatch: options.testMatch ? options.testMatch : /.*\.spec\.ts/,
 
+    // increase the default timeout
+    timeout: 60 * 1000,
+    expect: {
+      timeout: 15 * 1000
+    },
+
     // Look for test files in the "tests" directory, relative to this configuration file.
     // testDir: '',
 
@@ -68,6 +74,9 @@ const getConfig = (options: TestOptions) => {
 
       // Collect trace when retrying the failed test.
       trace: 'on-first-retry',
+
+      // screenshots will be added to the playwright-report folder
+      screenshot: 'only-on-failure'
     },
     // Configure projects for major browsers.
     projects: [

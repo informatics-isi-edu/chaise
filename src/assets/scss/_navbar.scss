@@ -266,7 +266,6 @@ nav.navbar {
 
       // Adding min-width and box-shadow so that submenus are differentiable
       min-width: 250px;
-      background: transparent;
     }
 
     .dropdown-menu>a,
@@ -276,7 +275,6 @@ nav.navbar {
       &:focus,
       &:hover {
         color: map-get(variables.$color-map, 'white');
-        background: transparent;
       }
     }
 

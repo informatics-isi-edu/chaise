@@ -128,27 +128,23 @@ export default class RecordeditLocators {
     */
   static getFormInputCell(container: Locator | Page, name: string, formNumber: number, isArray?: boolean): Locator {
     formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
     if (isArray) {
-      return container.locator(`.array-input-field-container-${formNumber}-${name}`).locator('xpath=..');
+      return container.locator(`.array-input-field-container-${inputName}`).locator('xpath=..');
     }
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('xpath=..')
+    return container.locator(`.input-switch-container-${inputName}`).locator('xpath=..')
   }
 
   static getInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`input[name="${formNumber}-${name}"]`);
-  }
-
-  static getTextAreaForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
-    formNumber = formNumber || 1;
-    return container.locator(`textarea[name="${formNumber}-${name}"]`);
+    return container.locator(`.c_${formNumber}-${name}`);
   }
 
   static getDateInputsForAColumn(container: Locator | Page, name: string, formNumber: number): { date: Locator, todayBtn: Locator } {
     formNumber = formNumber || 1;
-    const inputName = `${formNumber}-${name}`;
+    const inputName = `c_${formNumber}-${name}`;
     return {
-      date: container.locator(`input[name="${inputName}"]`),
+      date: container.locator(`.${inputName}`),
       todayBtn: container.locator(`.input-switch-container-${inputName} .date-today-btn`)
     }
   }
@@ -157,11 +153,11 @@ export default class RecordeditLocators {
     date: Locator, time: Locator, nowBtn: Locator, clearBtn: Locator
   } {
     formNumber = formNumber || 1;
-    const inputName = `${formNumber}-${name}`;
+    const inputName = `c_${formNumber}-${name}`;
     const wrapper = container.locator(`.input-switch-container-${inputName}`);
     return {
-      date: wrapper.locator(`input[name="${inputName}-date"]`),
-      time: wrapper.locator(`input[name="${inputName}-time"]`),
+      date: wrapper.locator(`.${inputName}-date`),
+      time: wrapper.locator(`.${inputName}-time`),
       nowBtn: wrapper.locator('.date-time-now-btn'),
       clearBtn: wrapper.locator('.date-time-clear-btn')
     };
@@ -169,12 +165,14 @@ export default class RecordeditLocators {
 
   static getInputControlForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-control');
   }
 
   static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.input-switch-error.text-danger');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error');
   }
 
   static getColumnPermissionOverlay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
@@ -192,24 +190,28 @@ export default class RecordeditLocators {
   // -------------- file input selectors --------------- //
   static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-control > span');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-control > span');
   }
 
   static getFileInputButtonForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('.chaise-input-group-append');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-group-append');
   }
 
   // -------------- color input selectors -------------- //
   static getColorInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name}`).locator('input');
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('input');
   }
 
   static async getColorInputBackground(page: Page, name: string, formNumber: number): Promise<string> {
     formNumber = formNumber || 1;
     return await page.evaluate(async () => {
-      const el = document.querySelector(`.input-switch-container-${formNumber}-${name} .chaise-color-picker-preview`) as HTMLElement;
+      const inputName = `c_${formNumber}-${name}`;
+      const el = document.querySelector(`.input-switch-container-${inputName} .chaise-color-picker-preview`) as HTMLElement;
       const ctx = document.createElement('canvas').getContext('2d');
       if (!ctx || !el) return '';
       ctx.fillStyle = el.style.backgroundColor;
@@ -219,7 +221,8 @@ export default class RecordeditLocators {
 
   static getColorInputBtn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
-    return container.locator(`.input-switch-container-${formNumber}-${name} button`);
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName} button`);
   }
 
   static getColorInputPopup(container: Locator | Page): Locator {
@@ -253,6 +256,10 @@ export default class RecordeditLocators {
     return RecordeditLocators.getForeignKeyInputDisplay(container, columnDisplayName, formNumber).locator('.remove-input-btn');
   }
 
+  static getModalPopupButtons(container: Page | Locator): Locator {
+    return container.locator('.modal-popup-btn');
+  }
+
 
   // ----------------- multi form input selectors ------------------- //
 
@@ -284,7 +291,9 @@ export default class RecordeditLocators {
 
   // ------------------ dropdown selectors  --------------------- //
   static getDropdownElementByName = (container: Locator | Page, name: string, formNumber: number) => {
-    return container.locator(`.input-switch-container-${formNumber}-${name} .dropdown-toggle`);
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName} .dropdown-toggle`);
   }
 
   // --------------- foreign key dropdown selectors ------------- //
@@ -325,7 +334,8 @@ export default class RecordeditLocators {
    */
   static getIframeFieldProps(container: Locator | Page, name: string, formNumber?: number) {
     formNumber = formNumber || 1;
-    const inputSwitchContainer = container.locator(`.input-switch-container-${formNumber}-${name}`);
+    const inputName = `c_${formNumber}-${name}`;
+    const inputSwitchContainer = container.locator(`.input-switch-container-${inputName}`);
     return {
       container: inputSwitchContainer.locator('.input-switch-iframe'),
       popupButton: inputSwitchContainer.locator('.chaise-input-group-append button'),
@@ -350,7 +360,8 @@ export default class RecordeditLocators {
   // ------------- array selectors ----------------- //
   static getArrayFieldContainer(container: Locator | Page, name: string, formNumber: number) {
     formNumber = formNumber || 1;
-    return container.locator(`.array-input-field-container-${formNumber}-${name}`);
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.array-input-field-container-${inputName}`);
   }
 
   /**
@@ -358,8 +369,8 @@ export default class RecordeditLocators {
    */
   static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number, baseType: string) {
     formNumber = formNumber || 1;
-    const fieldName = `${formNumber}-${name}`;
-    const elem = container.locator(`.array-input-field-container-${fieldName}`);
+    const inputName = `c_${formNumber}-${name}`;
+    const elem = container.locator(`.array-input-field-container-${inputName}`);
     return {
       container: elem,
       addItemContainer: elem.locator('.add-element-container'),

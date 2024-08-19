@@ -46,7 +46,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <IMaskInput
               // ------------ input props ----------- //
-              className={`${props.inputClasses} input-switch ${showClear ? 'date-input-show-clear' : ''}`}
+              className={`${props.inputClasses} input-switch ${props.inputClassName} ${showClear ? 'date-input-show-clear' : ''}`}
               disabled={props.disableInput}
               placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.date}
               /**
@@ -70,7 +70,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
                * converting a strored "Date" object to string (what user sees)
                * and vice versa.
                */
-              format={(date) => windowRef.moment(date).format(dataFormats.date)}
+              format={(date: any) => windowRef.moment(date).format(dataFormats.date)}
               parse={(str) => windowRef.moment(str, dataFormats.date)}
               autofix={false}
               /**

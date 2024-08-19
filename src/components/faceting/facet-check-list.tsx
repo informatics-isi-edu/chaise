@@ -3,6 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_check-list.scss';
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -59,7 +60,6 @@ const FacetCheckListRowLabel = ({
   // in these cases we want the tooltip to always show up.
   const alwaysShowTooltip = row.isNotNull || row.displayname.value === null || row.displayname.value === '';
 
-  const [showTooltip, setShowTooltip] = useState(false);
   const labelContainer = useRef<HTMLLabelElement>(null);
 
   /**
@@ -76,32 +76,19 @@ const FacetCheckListRowLabel = ({
   }
 
   return (
-    <ChaiseTooltip
+    <EllipsisWrapper
       placement='right'
-      tooltip={<DisplayValue value={tooltip} />}
-      onToggle={(nextshow: boolean) => {
-        if (!labelContainer.current) return;
-
-        const el = labelContainer.current as HTMLElement;
-        const overflow = el.scrollWidth > el.offsetWidth;
-
-        /**
-         * tooltip should be displayed if it's toggled on, and,
-         *   - we always want to show tooltip
-         *   - or the content overflows and is showing ellipsis
-         */
-        setShowTooltip(nextshow && (overflow || alwaysShowTooltip));
-      }}
-      show={showTooltip}
+      tooltip={alwaysShowTooltip ? () => <DisplayValue value={tooltip} /> : <DisplayValue value={tooltip} />}
+      elementRef={labelContainer}
     >
-       <label
+      <label
         // we have specific tooltip for these modes
         className={alwaysShowTooltip ? 'chaise-icon-for-tooltip' : ''}
         ref={labelContainer}
       >
         <DisplayValue value={row.displayname} specialNullEmpty={true} />
       </label>
-    </ChaiseTooltip>
+    </EllipsisWrapper>
   );
 };
 
@@ -147,7 +134,7 @@ const FacetCheckList = ({
       return (
         // mimic the same structure to make sure the height and ellipsis works the same
         <li key={'empty'} className='chaise-checkbox ellipsis-text no-left-padding'>
-          <FacetCheckListRowLabel row={{displayname: {value: 'No results found', isHTML: false}}} />
+          <FacetCheckListRowLabel row={{ displayname: { value: 'No results found', isHTML: false } }} />
         </li>
       )
     }
