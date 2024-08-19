@@ -497,6 +497,10 @@ lint: $(SOURCE)
 lint-w-warn: $(SOURCE)
 	@npx eslint src --ext .ts,.tsx
 
+.PHONY: lint-tests
+lint-tests:
+	npx eslint test/e2e --ext .ts,.tsx --quiet
+
 # Rule to create the package.
 .PHONY: dist-wo-deps
 dist-wo-deps: print-variables run-webpack $(SASS) $(MIN) $(HTML) gitversion

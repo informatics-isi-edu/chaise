@@ -99,7 +99,7 @@ export const RecordeditContext = createContext<{
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
   /* for updating the last contiguous chunk tracking info */
-  setLastContiguousChunk: (arg0: any) => void, 
+  setLastContiguousChunk: (arg0: any) => void,
   /* useRef react hook to current value */
   lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
@@ -230,7 +230,7 @@ export default function RecordeditProvider({
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
   /*
    * Object for keeping track of each file and their existing upload jobs so we can resume on interruption
-   * 
+   *
    * For example, we have the following 3 scenarios:
    *   1. contiguous offset: 1; chunks in flight with index 2, 3; chunk completed with index 4 (after chunk at index 4 is acknowledged w/ 204)
    *     - [0, 1, empty, empty, 4]
@@ -238,7 +238,7 @@ export default function RecordeditProvider({
    *     - [0, 1, empty, 3, 4]
    *   3. contiguous offset: 4; (after chunk at index 2 is acknowledged w/ 204)
    *     - [0, 1, 2, 3, 4]
-   * 
+   *
    * Object structure is as follows where index is the index of the last contiguous chunk that was uploaded.
    * {
    *   `${file.md5_base64}_${column_name}_${record_index}`: {
@@ -656,7 +656,7 @@ export default function RecordeditProvider({
   }
 
   // NOTE: most likely not needed
-  const onSubmitInvalid = (errors: Object, e?: any) => {
+  const onSubmitInvalid = (errors: object, e?: any) => {
     $log.debug('errors in the form:');
     $log.debug(errors);
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
@@ -1090,7 +1090,7 @@ export default function RecordeditProvider({
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
-      setLastContiguousChunk, 
+      setLastContiguousChunk,
       lastContiguousChunkRef,
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
@@ -1101,7 +1101,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
+    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
   ]);
 

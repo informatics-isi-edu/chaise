@@ -94,7 +94,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     return () => {
       if (fieldValue && isStringAndNotEmpty(fieldValue.filename)) {
         if (fieldValue.filesize) {
-          return `- ${fieldValue.filename} \n- size: ${humanFileSize(fieldValue.filesize)}`;
+          return `- ${fieldValue.filename}\n- ${humanFileSize(fieldValue.filesize)}`;
         } else {
           return fieldValue.filename;
         }

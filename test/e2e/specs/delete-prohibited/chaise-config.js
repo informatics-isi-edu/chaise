@@ -2,7 +2,6 @@
 
 var chaiseConfig = {
     name: "Delete Prohibited",
-    defaultCatalog: 'delete-prohibited-chrome',
     editRecord: true,
     deleteRecord: false,
     showFaceting: true,

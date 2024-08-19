@@ -23,6 +23,14 @@ export type TestOptions = {
    */
   chaiseConfigFilePath?: string,
 
+  /**
+   * if set to to true, we will inject the "defaultCatalog" property
+   * into the chaise-config.js file.
+   *
+   * the id of the catalog created for the chrome project will be used for this.
+   */
+  addDefaultCatalogToChaiseConfig?: boolean,
+
   manualTestConfig?: boolean,
 
   /**
