@@ -135,3 +135,22 @@ export async function testButtonState(button: Locator, useSoftExpect: boolean, i
     await expectFn(button).toHaveText(label);
   }
 }
+
+/**
+ *
+ * https://github.com/microsoft/playwright/issues/20254#issuecomment-1771669110
+ * @param page
+ * @param draggable
+ * @param droppable
+ */
+export async function dragAndDrop(page: Page, draggable: Locator, droppable: Locator) {
+  const box = (await droppable.boundingBox())!;
+  await draggable.hover();
+  await page.pause();
+
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+    steps: 5,
+  });
+  await page.mouse.up();
+}

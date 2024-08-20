@@ -1,6 +1,7 @@
 import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 /**
  * Returns an object that can be used for showing the null filter
@@ -78,11 +79,15 @@ export const getStoredFacetOrders = (reference: any): { facetIndex: number, isOp
   // make sure the saved order are still part of the visible facets
   facetOrder.forEach((fo) => {
     // ignore the invalid or missing ones.
-    if (!(fo.name in nameMap)) return;
+    if (!isObjectAndKeyDefined(fo, 'name') || !(fo.name in nameMap)) return;
 
-    res.push({ facetIndex: nameMap[fo.name], isOpen: fo.open });
+    const order: { facetIndex: number, isOpen?: boolean } = { facetIndex: nameMap[fo.name] };
+    if (typeof fo.open === 'boolean') {
+      order.isOpen = fo.open;
+    }
+    res.push(order);
 
-    // remove it so we know which facets were not in the stored order
+    // remove it so we know which facets were not in the stored order (it will also make sure duplicates are ignored)
     delete nameMap[fo.name];
   });
 

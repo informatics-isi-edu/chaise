@@ -260,6 +260,10 @@ export default class RecordsetLocators {
     return container.locator('.panel-open .facet-header-text');
   }
 
+  static getFacetMoveIcon(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.facet-item-container .facet-move-icon-${idx}`);
+  }
+
   static getFacetById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-${idx}`);
   }

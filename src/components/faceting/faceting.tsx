@@ -743,7 +743,7 @@ const Faceting = ({
                             {...provided.draggableProps}
                           >
                             <ChaiseTooltip placement='right' tooltip='Drag the facet and drop it in the desired order.'>
-                              <div className='move-icon' {...provided.dragHandleProps}>
+                              <div className={`move-icon facet-move-icon-${facetIndex}`} {...provided.dragHandleProps}>
                                 <i className='fa-solid fa-grip-vertical'></i>
                               </div>
                             </ChaiseTooltip>
