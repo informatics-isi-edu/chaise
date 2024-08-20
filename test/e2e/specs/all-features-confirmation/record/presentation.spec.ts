@@ -12,8 +12,11 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { deleteDownloadedFiles, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import {
+  clickAndVerifyDownload, deleteDownloadedFiles,
+  getPageURLOrigin, testTooltip
+} from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { testRecordMainSectionValues, testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 
 const testParams: any = {
   schema_name: 'product-record',
@@ -182,35 +185,19 @@ test.describe('View existing record', () => {
 
   test(`For table ${testParams.table_name}`, async ({ page, baseURL }, testInfo) => {
     const catalogID = getCatalogID(testInfo.project.name);
-    let cc: any;
 
     await test.step('should load record page', async () => {
       const PAGE_URL = `/record/#${catalogID}/${testParams.schema_name}:${testParams.table_name}/${testParams.key}`;
 
       await page.goto(`${baseURL}${PAGE_URL}`);
       await RecordLocators.waitForRecordPageReady(page);
-
-      cc = await page.evaluate(() => {
-        // cast to 'any' typed variable so we can avoid typescript errors
-        const windowRef: any = window;
-        return windowRef.chaiseConfig;
-      });
-    });
-
-    await test.step('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCite defined', async () => {
-      expect.soft(cc.deleteRecord).toBeTruthy();
-      expect.soft(cc.resolverImplicitCatalog).toBe(100);
-
-      expect.soft(cc.shareCite).toBeDefined();
-      expect.soft(cc.shareCite.acls.show).toEqual(['*']);
-      expect.soft(cc.shareCite.acls.enable).toEqual(['*']);
     });
 
     await test.step('presentation of the record page', async () => {
       const keyValues = [{ column: 'id', value: '2002' }];
       const ridValue = getEntityRow(testInfo, testParams.schema_name, testParams.table_name, keyValues).RID;
 
-      const origin = await page.evaluate(() => window.origin);
+      const origin = await getPageURLOrigin(page);
 
       // update testParams now that we have testInfo
       testParams.file_names = [
@@ -226,40 +213,51 @@ test.describe('View existing record', () => {
       testParams.columns = [
         { title: 'Id', value: '2002', type: 'serial4' },
         { title: 'Name of Accommodation', value: 'Sherathon Hotel, accommodation_inbound3 one| accommodation_inbound3 three| accommodation_inbound3 five', type: 'text' },
-        { title: 'Website', value: '<p><a href="http://www.starwoodhotels.com/sheraton/index.html" class="external-link-icon">Link to Website</a></p>\n', type: 'text', comment: 'A valid url of the accommodation', match: 'html' },
         {
-          title: 'Category', value: 'Hotel', type: 'text', comment: 'can support markdown',
-          presentation: {
-            type: 'url',
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:category/`,
-            table_name: 'category',
-            key_value: [{ column: 'id', value: '10003' }]
+          title: 'Website', type: 'text', comment: 'A valid url of the accommodation', match: 'html',
+          value: {
+            url: 'http://www.starwoodhotels.com/sheraton/index.html',
+            caption: 'Link to Website'
           }
         },
-        { title: 'booking', value: '<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: 'inline' },
+        {
+          title: 'Category', type: 'text', comment: 'can support markdown',
+          value: {
+            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:category/RID=${getEntityRow(testInfo, testParams.schema_name, 'category', [{ column: 'id', value: '10003' }]).RID}`,
+            caption: 'Hotel'
+          }
+        },
+        {
+          title: 'booking', type: 'inline',
+          value: {
+            customValues: ['2', '350.0000', '2016-04-18 00:00:00', '4', '200.0000', ' 2016-05-31 00:00:00'].join(' ')
+          }
+        },
         { title: 'User Rating', value: '4.3000', type: 'float4', markdown_title: '<strong>User Rating</strong>' },
         { title: 'Summary', value: 'Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.', type: 'longtext' },
-        { title: 'Description', type: 'markdown', match: 'html', value: '<p><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>\n' },
+        { title: 'Description', type: 'markdown', match: 'html', value: 'CARING. SHARING. DARING.\nRadisson® is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding Yes I Can! SM service, comfort and style where you need us.\nTHE RADISSON® WAY Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to Yes I Can! SM hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.\n' },
         { title: 'Number of Rooms', value: '23', type: 'int2' },
         {
-          title: 'Cover Image', value: '3005', type: 'int2',
-          presentation: {
-            type: 'url',
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/`,
-            table_name: 'file',
-            key_value: [{ column: 'id', value: '3005' }]
+          title: 'Cover Image', type: 'int2',
+          value: {
+            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
+            caption: '3005'
           }
         },
         { title: 'Thumbnail', value: null, type: 'int4' },
         { title: 'Operational Since', value: '2008-12-09 00:00:00', type: 'timestamptz' },
         { title: 'Is Luxurious', value: 'true', type: 'boolean' },
-        { title: 'accommodation_collections', value: '<p>Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel</p>', comment: 'collections', type: 'inline' },
         {
-          title: 'table_w_aggregates', value: '3', comment: 'has aggregates',
-          presentation: {
-            type: 'inline',
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:table_w_aggregates/`,
-            table_name: 'table_w_aggregates', key_value: [{ column: 'id', value: '3' }]
+          title: 'accommodation_collections', value: {
+            customValues: 'Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel'
+          }, comment: 'collections', type: 'inline'
+        },
+        {
+          title: 'table_w_aggregates', comment: 'has aggregates',
+          value: {
+            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:table_w_aggregates/RID=${getEntityRow(testInfo, testParams.schema_name, 'table_w_aggregates', [{ column: 'id', value: '3' }]).RID}`,
+            caption: '3',
+            inlineRT: true
           }
         },
         { title: '# thumbnail collection', comment: 'Count of thumbnail collection', value: '1', markdown_title: '# thumbnail collection' },
@@ -267,27 +265,28 @@ test.describe('View existing record', () => {
         { title: 'agg column with waitfor entityset and all-outbound', comment: 'Minimum of title', value: 'Sherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five', markdown_title: 'agg column with waitfor entityset and all-outbound' },
         { title: 'Max Name of accommodation_collection', comment: 'maximum of title', value: 'Sherathon Hotel', markdown_title: 'Max Name of accommodation_collection' },
         { title: 'json_col', value: null },
-        { title: 'json_col_with_markdown', value: '<p>Status is: “delivered”</p>\n', match: 'html' },
+        { title: 'json_col_with_markdown', value: 'Status is: “delivered”', match: 'html' },
         {
-          title: 'accommodation_image_assoc', comment: 'Accommodation Image', value: '3005',
-          presentation: {
-            type: 'inline',
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/`,
-            table_name: 'file',
-            key_value: [{ column: 'id', value: '3005' }]
+          title: 'accommodation_image_assoc', comment: 'Accommodation Image',
+          value: {
+            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
+            caption: '3005',
+            inlineRT: true
           }
         },
-        { title: 'table_w_invalid_row_markdown_pattern' },
+        { title: 'table_w_invalid_row_markdown_pattern', 'value': true }, // set value to true for testing columnNames but skip testing value (since it's a recordset table)
         { title: 'virtual column wait_for all-outbound', 'value': 'virtual value of 2002 with title Sherathon Hotel', markdown_title: 'virtual column wait_for all-outbound' },
         { title: 'virtual column wait_for agg', 'value': 'virtual Sherathon Hotel', markdown_title: 'virtual column wait_for agg' },
         { title: 'virtual column wait_for entity set', 'value': 'Sherathon Hotel', markdown_title: 'virtual column wait_for entity set' },
-        { title: 'color_rgb_hex_column', value: '<p><span class="chaise-color-preview" style="background-color:#323456"> </span> #323456</p>\n', match: 'html' }
+        { title: 'color_rgb_hex_column', value: '  #323456', match: 'html' }
       ];
 
       if (!process.env.CI) {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded before
-          await deleteDownloadedFiles(testParams.file_names);
+          await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+            return `${process.env.PWD}/test/e2e/.download/${name}`
+          }));
         });
       }
 
@@ -313,9 +312,10 @@ test.describe('View existing record', () => {
       });
 
       await test.step('should have the correct head title using the heuristics for record app', async () => {
+        const ccHeadTitle = 'show me on the navbar!';
         // <table-name>: <row-name> | chaiseConfig.headTitle
         // NOTE: subTitle and title are badly named
-        expect.soft(await page.title()).toContain(`${testParams.subTitle}: ${testParams.title} | ${cc.headTitle}`);
+        expect.soft(await page.title()).toContain(`${testParams.subTitle}: ${testParams.title} | ${ccHeadTitle}`);
       });
 
       await test.step(`should show ${notNullColumns.length} columns only`, async () => {
@@ -349,79 +349,56 @@ test.describe('View existing record', () => {
         await exportButton.click();
       });
 
-      if (!process.env.CI) {
-        await test.step('should have "This record (CSV)" as a download option and download the file.', async () => {
-          await ExportLocators.getExportDropdown(page).click();
 
-          const csvOption = ExportLocators.getExportOption(page, 'This record (CSV)');
-          await expect.soft(csvOption).toHaveText('This record (CSV)');
+      await test.step('should have "This record (CSV)" as a download option and download the file.', async () => {
+        await ExportLocators.getExportDropdown(page).click();
 
-          const fileLocation = `${process.env.PWD}/test/e2e/${testParams.file_names[0]}`;
-          const downloadPromise = page.waitForEvent('download');
+        const csvOption = ExportLocators.getExportOption(page, 'This record (CSV)');
+        await expect.soft(csvOption).toHaveText('This record (CSV)');
 
-          await csvOption.click();
-          const download = await downloadPromise;
-          await download.saveAs(fileLocation);
+        await clickAndVerifyDownload(csvOption, testParams.file_names[0]);
+      });
 
-          expect.soft(fs.existsSync(fileLocation)).toBeTruthy();
-        });
+      await test.step('should have "BDBag" as a download option and download the file.', async () => {
+        await ExportLocators.getExportDropdown(page).click();
 
-        await test.step('should have "BDBag" as a download option and download the file.', async () => {
-          await ExportLocators.getExportDropdown(page).click();
+        const bagOption = ExportLocators.getExportOption(page, 'BDBag');
+        await expect.soft(bagOption).toHaveText('BDBag');
 
-          const bagOption = ExportLocators.getExportOption(page, 'BDBag');
-          await expect.soft(bagOption).toHaveText('BDBag');
-
-          const fileLocation = `${process.env.PWD}/test/e2e/${testParams.file_names[1]}`;
-          const downloadPromise = page.waitForEvent('download');
-
-          await bagOption.click();
-
+        await clickAndVerifyDownload(bagOption, testParams.file_names[1], async () => {
           const modal = ModalLocators.getExportModal(page)
           await expect.soft(modal).toBeVisible();
           await expect.soft(modal).not.toBeAttached();
-
-          const download = await downloadPromise;
-          await download.saveAs(fileLocation);
-
-          expect.soft(fs.existsSync(fileLocation)).toBeTruthy();
         });
+      });
 
-        await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
-          // let exportSubmenuOptions, configOption;
-          await ExportLocators.getExportDropdown(page).click();
+      await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
+        // let exportSubmenuOptions, configOption;
+        await ExportLocators.getExportDropdown(page).click();
 
-          const configOption = ExportLocators.getExportOption(page, 'configurations');
-          await expect.soft(configOption).toHaveText('Configurations');
+        const configOption = ExportLocators.getExportOption(page, 'configurations');
+        await expect.soft(configOption).toHaveText('Configurations');
 
-          await configOption.click();
+        await configOption.click();
 
-          await expect.soft(ExportLocators.getExportSubmenuOptions(page)).toHaveCount(1);
+        await expect.soft(ExportLocators.getExportSubmenuOptions(page)).toHaveCount(1);
 
-          const bdBagSubmenu = ExportLocators.getExportSubmenuOption(page, 'BDBag');
-          await expect.soft(bdBagSubmenu).toBeVisible();
+        const bdBagSubmenu = ExportLocators.getExportSubmenuOption(page, 'BDBag');
+        await expect.soft(bdBagSubmenu).toBeVisible();
 
-          const fileLocation = `${process.env.PWD}/test/e2e/${testParams.file_names[2]}`;
-          const downloadPromise = page.waitForEvent('download');
+        await clickAndVerifyDownload(bdBagSubmenu, testParams.file_names[3]); // use the last filename since it is the suggested filename
 
-          await bdBagSubmenu.click();
+        /**
+         * hover over to make the dropdown menu tooltip OverlayTrigger trigger so it will hide when another tooltip is shown in a later test
 
-          const download = await downloadPromise;
-          await download.saveAs(fileLocation);
+         *
+         * NOTE: this is only an issue when `NODE_ENV="development"` since we are adding "focus" event for tooltips
+         *   this has no harm if the tooltip is not showing (node environment is production)
+         *   see /src/components/tooltip.tsx for more info
+         */
+        await ExportLocators.getExportDropdown(page).hover();
+      });
 
-          expect.soft(fs.existsSync(fileLocation)).toBeTruthy();
-
-          /**
-           * hover over to make the dropdown menu tooltip OverlayTrigger trigger so it will hide when another tooltip is shown in a later test
-
-           *
-           * NOTE: this is only an issue when `NODE_ENV="development"` since we are adding "focus" event for tooltips
-           *   this has no harm if the tooltip is not showing (node environment is production)
-           *   see /src/components/tooltip.tsx for more info
-           */
-          await ExportLocators.getExportDropdown(page).hover();
-        });
-      }
 
       await test.step('should render columns which are specified to be visible and in order', async () => {
         const pageColumns = RecordLocators.getAllColumnNames(page);
@@ -466,34 +443,10 @@ test.describe('View existing record', () => {
         await expect.soft(RecordLocators.getAllColumnValues(page)).toHaveCount(notNullColumns.length);
 
         const columns = testParams.columns.filter((c: any) => (c.hasOwnProperty('value') && c.value));
-        for (const column of columns) {
-          const columnTitle = column.markdown_title ? column.markdown_title : column.title;
+        const colNames = columns.map((col: any) => col.title);
+        const colValues = columns.map((col: any) => col.value)
 
-          let columnEl;
-          if (column.type === 'inline') {
-            columnEl = RecordLocators.getRelatedMarkdownContainer(page, columnTitle, true);
-            expect(await columnEl.innerHTML()).toContain(column.value);
-          } else if (column.match === 'html') {
-            columnEl = RecordLocators.getEntityRelatedTable(page, columnTitle);
-
-            const html = await RecordLocators.getValueMarkdownContainer(columnEl).innerHTML();
-            expect(html).toContain(column.value);
-          } else {
-            columnEl = RecordLocators.getEntityRelatedTable(page, columnTitle);
-            if (column.presentation) {
-              if (column.presentation.type === 'inline') columnEl = RecordLocators.getRelatedMarkdownContainer(page, columnTitle, true);
-
-              const aTag = RecordLocators.getLinkChild(columnEl);
-              const dataRow = getEntityRow(testInfo, testParams.schema_name, column.presentation.table_name, column.presentation.key_value);
-              const columnUrl = `${column.presentation.url}RID=${dataRow.RID}`;
-
-              expect.soft(await aTag.getAttribute('href')).toContain(columnUrl);
-              await expect.soft(aTag).toHaveText(column.value);
-            } else {
-              await expect.soft(columnEl).toHaveText(column.value);
-            }
-          }
-        }
+        await testRecordMainSectionValues(page, colNames, colValues);
       });
 
       await test.step('should show related table names and their tables', async () => {
@@ -662,13 +615,15 @@ test.describe('View existing record', () => {
       if (!process.env.CI) {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded during tests
-          await deleteDownloadedFiles(testParams.file_names);
+          await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+            return `${process.env.PWD}/test/e2e/.download/${name}`
+          }));
         });
       }
     });
   });
 
-  test('For a record with all of it\'s related tables as empty', async ({ page, baseURL }, testInfo) => {
+  test('For a record with all of its related tables as empty', async ({ page, baseURL }, testInfo) => {
     const params = testParams.no_related_data;
 
     await test.step('should load record page', async () => {

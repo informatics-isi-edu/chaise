@@ -7,7 +7,14 @@ import RecordsetLocators, {
   TimestampRangeInputLocators
 } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-export type RecordsetColValue = { url: string, caption: string } | string;
+export type CustomParams = {
+  url?: string,
+  caption?: string,
+  customValues?: string
+  inlineRT?: boolean
+};
+
+export type RecordsetColValue = CustomParams | string;
 export type RecordsetRowValue = RecordsetColValue[]
 
 
@@ -31,7 +38,7 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
 
       if (typeof expectedCell === 'string') {
         await expectFn(cell).toHaveText(expectedCell);
-      } else {
+      } else if (expectedCell.url && expectedCell.caption) {
         const link = cell.locator('a');
         expectFn(await link.getAttribute('href')).toContain(expectedCell.url);
         await expectFn(link).toHaveText(expectedCell.caption);

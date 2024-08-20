@@ -138,13 +138,12 @@ export async function testButtonState(button: Locator, useSoftExpect: boolean, i
   }
 }
 
-export async function deleteDownloadedFiles(fileNames: string[]) {
-  fileNames.forEach((name: string) => {
-      const filename = `${process.env.PWD}/test/e2e/${name}`;
-      if (fs.existsSync(filename)) {
+export async function deleteDownloadedFiles(filePaths: string[]) {
+  filePaths.forEach((path: string) => {
+      if (fs.existsSync(path)) {
           // delete if there is any existing file with same name
-          fs.unlinkSync(filename);
-          console.log(`file: ${filename} has been removed`);
+          fs.unlinkSync(path);
+          console.log(`file: ${path} has been removed`);
       }
   });
 };
