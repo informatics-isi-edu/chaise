@@ -1,5 +1,6 @@
 import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
 /**
  * Returns an object that can be used for showing the null filter
@@ -46,30 +47,66 @@ export function getInitialFacetPanelOpen(config: RecordsetConfig, initialReferen
   return res;
 }
 
+export const getFacetOrderStorageKey = (reference: any): string => {
+  return `facet-order-${reference.table.schema.catalog.id}_${reference.table.schema.name}_${reference.table.name}`;
+}
+
 /**
- * Change render order for facets based on 'newOrder'
- * @param defaultFacetColumns default order ex. 'reference.facetColumns'
- * @param newOrder order in which the facets should be rendered 
- * @returns facet columns in newOrder
+ * Return the order of facets that should be used initially.
+ * @param reference the reference that represents the main recordset page
  */
-export const reorderFacets = (defaultFacetColumns:any[], newOrder:{name:string, open: boolean}[]) => {
-  // Create a map to store the indices of elements in array `newOrder`
-  const indexMap = new Map();
-  for (let i = 0; i < newOrder.length; i++) {
-      indexMap.set(newOrder[i].name, i);
+export const getStoredFacetOrders = (reference: any): { facetIndex: number, isOpen?: boolean }[] | null => {
+  const facetColumns = reference.facetColumns;
+  const facetListKey = getFacetOrderStorageKey(reference);
+  const facetOrder = LocalStorage.getStorage(facetListKey) as {
+    name: string,
+    open: boolean
+  }[] || undefined;
+
+  if (!facetOrder || !Array.isArray(facetOrder) || facetOrder.length === 0) {
+    return null;
   }
 
-  const facetsInNewOrder = defaultFacetColumns.map((item: any, index: number) => [item, index])
+  const res: { facetIndex: number, isOpen?: boolean }[] = [];
 
-  // Sort array `defaultFacetColumns` based on the indices in array `newOrder`
-  facetsInNewOrder.sort((a, b) => {
-      const indexA = indexMap.get(a[0].sourceObjectWrapper.name);
-      const indexB = indexMap.get(b[0].sourceObjectWrapper.name);
-      // If either element is not found in `newOrder`, move it to the end
-      if (indexA === undefined) return 1;
-      if (indexB === undefined) return -1;
-      return indexA - indexB;
+  // store the mapping between name and facetIndex
+  const nameMap: { [facetName: string]: number } = {};
+  facetColumns.forEach((fc: any, facetIndex: number) => {
+    nameMap[fc.sourceObjectWrapper.name] = facetIndex;
   });
 
-  return facetsInNewOrder;
+  // make sure the saved order are still part of the visible facets
+  facetOrder.forEach((fo) => {
+    // ignore the invalid or missing ones.
+    if (!(fo.name in nameMap)) return;
+
+    res.push({ facetIndex: nameMap[fo.name], isOpen: fo.open });
+
+    // remove it so we know which facets were not in the stored order
+    delete nameMap[fo.name];
+  });
+
+  // add the rest of visible facets that were not part of the stored order
+  facetColumns.forEach((fc: any, facetIndex: number) => {
+    const facetName = fc.sourceObjectWrapper.name;
+    if (!(facetName in nameMap)) return;
+
+    res.push({ facetIndex: facetIndex });
+  });
+
+  return res;
+}
+
+/**
+ * Return an object where the key is the facet index and the value is its stored isOpen.
+ *
+ * @param reference the reference that represents the main recordset page
+ */
+export const getStoredFacetOpenStatus = (reference: any): { [facetIndex: string]: (boolean | undefined) } => {
+  const storedOrder = getStoredFacetOrders(reference);
+  if (!storedOrder) return {};
+
+  const booleanRes: { [facetIndex: string]: (boolean | undefined) } = {};
+  storedOrder.forEach((r) => { booleanRes[r.facetIndex] = r.isOpen; });
+  return booleanRes;
 }

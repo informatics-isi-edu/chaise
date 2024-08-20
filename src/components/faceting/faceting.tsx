@@ -6,6 +6,7 @@ import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/face
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-presence';
 import FacetHeader from '@isrd-isi-edu/chaise/src/components/faceting/facet-header';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-range-picker';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -27,7 +28,7 @@ import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
-import { reorderFacets } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { getFacetOrderStorageKey, getStoredFacetOpenStatus, getStoredFacetOrders } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
 
@@ -77,21 +78,38 @@ const Faceting = ({
   const [allFacetsRegistered, setAllFacetsRegistered] = useState(false);
 
   /**
-   * Store facets in custom order
+   * Store the displayed order of facets.
+   *
+   * - This is an array of numbers, each number encoding the index of the corresponding facet in facetModels
+   * or reference.facetColumns arrays.
+   * - This will allow us to reorder the facets while keeping the internal facet index the way it was.
    */
-  const [orderedFacets, setOrderedFacets] = useState<any[]>([]);
+  const [facetOrders, setFacetOrders, facetOrdersRef] = useStateRef<number[]>(() => {
+    const initalOrder = getStoredFacetOrders(reference);
+    if (initalOrder) {
+      return initalOrder.map((o) => o.facetIndex);
+    }
+    return reference.facetColumns.map((fc: any, index: number) => index);
+  });
 
   const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
     const res: FacetModel[] = [];
+
+    const storedOpenStatus = getStoredFacetOpenStatus(reference);
     let firstOpen = -1;
     reference.facetColumns.forEach((fc: any, index: number) => {
-      if (fc.isOpen) {
+
+      // get the open status (similar to useEffect generating facetRequestModels)
+      const storedOrder = storedOpenStatus[`${index}`];
+      const isOpen = fc.isOpen || storedOrder;
+
+      if (isOpen) {
         firstOpen = (firstOpen === -1 || firstOpen > index) ? index : firstOpen;
       }
       res.push({
         initialized: false,
-        isOpen: fc.isOpen,
-        isLoading: fc.isOpen,
+        isOpen: isOpen,
+        isLoading: isOpen,
         noConstraints: false,
         facetHasTimeoutError: false,
         // TODO
@@ -147,6 +165,7 @@ const Faceting = ({
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
 
+    const storedOpenStatus = getStoredFacetOpenStatus(reference);
     let atLeastOneOpen = false;
     reference.facetColumns.forEach((facetColumn: any, index: number) => {
       const table = facetColumn.column.table;
@@ -156,15 +175,19 @@ const Faceting = ({
         { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode }
       );
 
-      if (facetColumn.isOpen) {
+      // get the open status (similar to default value of facetModels)
+      const storedOrder = storedOpenStatus[`${index}`];
+      const isOpen = facetColumn.isOpen || storedOrder;
+
+      if (isOpen) {
         atLeastOneOpen = true;
         facetsToPreProcess.current.push(index);
       }
 
       facetRequestModels.current.push({
         // some facets require extra step to process preselected filters
-        preProcessed: !facetColumn.isOpen,
-        processed: !facetColumn.isOpen,
+        preProcessed: !isOpen,
+        processed: !isOpen,
         // TODO why??
         // appliedFilters: [],
         registered: false,
@@ -203,15 +226,29 @@ const Faceting = ({
    */
   useLayoutEffect(() => {
     if (!displayFacets) return;
-    let firstOpen = 0;
+    let firstOpen: number | null = null;
+    const storedOpenStatus = getStoredFacetOpenStatus(reference);
     reference.facetColumns.some((fc: any, index: number) => {
-      if (fc.isOpen) {
-        firstOpen = index;
+      // get the open status (similar to default value of facetModels)
+      const storedOrder = storedOpenStatus[`${index}`];
+      const isOpen = fc.isOpen || storedOrder;
+
+      if (isOpen) {
+        /**
+         * the displayed order of facets might be different from facetColumns order,
+         * so we cannot assume the first index that we see is the one that should be opened,
+         * and instead have to do Math.min
+         */
+        if (firstOpen === null) {
+          firstOpen = index
+        } else {
+          firstOpen = Math.min(index, firstOpen);
+        }
       }
-      return fc.isOpen;
+      return isOpen;
     });
     setTimeout(() => {
-      scrollToFacet(firstOpen, true);
+      scrollToFacet(firstOpen === null ? 0 : firstOpen, true);
     }, 200);
   }, [displayFacets])
 
@@ -234,67 +271,19 @@ const Faceting = ({
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
-
-  /**
-   * Allows us to Uniquely identify and access facet order for a given table
-   */
-  const facetListKey = `facet-order-${reference.table.schema.catalog.id}_${reference.table.schema.name}_${reference.table.name}`;
-  /**
-   * Fetch custom facet order from localStorage and update the orderedFacets state
-   */
   useEffect(() => {
-
-    // Disable dev warnings for facets for this component
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
-
-    /**
-     * Get Facet Order from LocalStorage
-     */
-     const facetOrder = LocalStorage.getStorage(facetListKey) || undefined;
-
-    // If facet order is not stored in localStorage, display items in default order
-    if (!facetOrder) {
-      setOrderedFacets(reference.facetColumns.map((item: any, index: number) => [item, index]))
-      return;
-    }
-
-    /**
-     * If facet order is present in localStorage, rearrange the items according to the stored order
-     */
-    const facetsInOrder = reorderFacets(reference.facetColumns, facetOrder)
-
-    /**
-     * Update isOpen state for facets based on stored state
-     */
-    if(facetModels && facetModels.length){
-      let copyOfFacetModels = Array.from(facetModels);
-
-      for(let i=0; i < facetsInOrder.length;i++){
-        let facetIndex = facetsInOrder[i][1];
-
-        copyOfFacetModels[facetIndex].isOpen = facetOrder[i].open
-      }
-
-      setFacetModels(copyOfFacetModels)
-    }
-
-    setOrderedFacets(facetsInOrder)
-
-    return () =>{
-      // Enable Dev warnings when the component unmounts
-      (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
-    }
-  }, [])
-
-  useEffect(()=>{
-
-    if(!orderedFacets || !orderedFacets.length) return;
-
+    if (!facetOrders || !facetOrders.length) return;
     /**
      * store isOpen state for facets to localStorage
      */
-    LocalStorage.setStorage(facetListKey, orderedFacets.map(i => ({name : i[0].sourceObjectWrapper.name, open:facetModels[i[1]].isOpen})))
-  },[facetModels])
+    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
+      return {
+        name: reference.facetColumns[i].sourceObjectWrapper.name,
+        open: facetModelsRef.current[i].isOpen
+      };
+    }));
+
+  }, [facetModels, facetOrders])
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -303,7 +292,8 @@ const Faceting = ({
     const modifiedAttrs: { [index: number]: { [key: string]: boolean } } = {};
 
     // see which facets need to be updated
-    facetRequestModels.current.forEach(function (frm: any, index: number) {
+    facetOrdersRef.current.forEach((index: number) => {
+      const frm = facetRequestModels.current[index];
       const facetModel = facetModels[index];
 
       if (flowControl.current.lastActiveFacet === index) {
@@ -382,7 +372,8 @@ const Faceting = ({
       })(index, flowControl.current.queue.counter);
     }
     else {
-      facetRequestModels.current.forEach(function (frm, index) {
+      facetOrdersRef.current.forEach((index: number) => {
+        const frm = facetRequestModels.current[index];
         if (!frm.preProcessed || frm.processed || !flowControl.current.haveFreeSlot()) {
           return;
         }
@@ -549,7 +540,10 @@ const Faceting = ({
       reason = LogReloadCauses.CLEAR_ALL;
 
       // remove all the checkboxes in the UI
-      facetRequestModels.current.forEach((frm) => { frm.removeAppliedFilters() });
+      facetOrdersRef.current.forEach((index: number) => {
+        const frm = facetRequestModels.current[index];
+        frm.removeAppliedFilters();
+      });
     }
 
     // whether we should log the action for the whole page or not
@@ -638,7 +632,7 @@ const Faceting = ({
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     if (!sidePanelContainer.current) return;
 
-    const el = sidePanelContainer.current.querySelectorAll('.facet-panel')[index] as HTMLElement;
+    const el = sidePanelContainer.current.querySelector(`.facet-panel.fc-${index}`) as HTMLElement;
     if (!el) return;
 
     if (!dontLog) {
@@ -670,23 +664,25 @@ const Faceting = ({
    * Handle drag and drop events for draggable facets
    */
   const handleOnDragEnd = (result: DropResult) => {
-    const items = Array.from(orderedFacets);
+    const items = Array.from(facetOrders);
 
-    if (!result.destination) {
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(orderedFacets.length - 1, 0, reorderedItem);
-    } else {
+    if (result.destination) {
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, reorderedItem);
+    } else {
+      // uncomment the following if we want to allow users to remove facets
+      // const [reorderedItem] = items.splice(result.source.index, 1);
+      // items.splice(facetOrders.length - 1, 0, reorderedItem);
+      return;
     }
 
-    // Save facet order to localStorage
-    LocalStorage.setStorage(facetListKey, items.map(i => ({name : i[0].sourceObjectWrapper.name, open:facetModels[i[1]].isOpen})))
-    setOrderedFacets(items);
+
+    setFacetOrders(items);
   }
   //-------------------  render logic:   --------------------//
 
-  const renderFacet = (fc: any, index: number) => {
+  const renderFacet = (index: number) => {
+    const fc = reference.facetColumns[index];
     const fm = facetModels[index];
     switch (fc.preferredMode) {
       case 'ranges':
@@ -737,8 +733,8 @@ const Faceting = ({
                   ref={provided.innerRef}
                   key={'facet-list'}
                 >
-                  {orderedFacets.map(([fc, index]: [any, number], idx) => {
-                    return <Draggable key={index} draggableId={`facet-${index}`} index={idx}>
+                  {facetOrders.map((facetIndex: number, draggableIndex: number) => {
+                    return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
                       {
                         (provided: DraggableProvided) => {
                           return <div
@@ -746,24 +742,26 @@ const Faceting = ({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                           >
-                            <div className='move-icon' {...provided.dragHandleProps}>
-                              <i className='fa-solid fa-grip-vertical'></i>
-                            </div>
+                            <ChaiseTooltip placement='right' tooltip='Drag the facet and drop it in the desired order.'>
+                              <div className='move-icon' {...provided.dragHandleProps}>
+                                <i className='fa-solid fa-grip-vertical'></i>
+                              </div>
+                            </ChaiseTooltip>
                             <Accordion.Item
-                              eventKey={index + ''} key={index}
-                              className={`facet-panel fc-${index}${facetModels[index].isOpen ? ' panel-open' : ''}`}
+                              eventKey={facetIndex + ''} key={facetIndex}
+                              className={`facet-panel fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
                             >
-                              <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
+                              <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
                                 <FacetHeader
-                                  displayname={fc.displayname}
-                                  comment={fc.comment}
-                                  isLoading={facetModels[index].isLoading}
-                                  facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
-                                  noConstraints={facetModels[index].noConstraints}
+                                  displayname={reference.facetColumns[facetIndex].displayname}
+                                  comment={reference.facetColumns[facetIndex].comment}
+                                  isLoading={facetModels[facetIndex].isLoading}
+                                  facetHasTimeoutError={facetModels[facetIndex].facetHasTimeoutError}
+                                  noConstraints={facetModels[facetIndex].noConstraints}
                                 />
                               </Accordion.Header>
                               <Accordion.Body>
-                                {renderFacet(fc, index)}
+                                {renderFacet(facetIndex)}
                               </Accordion.Body>
                             </Accordion.Item>
                           </div>
