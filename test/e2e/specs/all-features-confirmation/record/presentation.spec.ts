@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
-import { expect, Locator, test } from '@playwright/test';
-import fs from 'fs';
+import { expect, test } from '@playwright/test';
 import moment from 'moment';
 
 // locators
@@ -10,12 +9,9 @@ import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import {
-  clickAndVerifyDownload, deleteDownloadedFiles,
-  getPageURLOrigin, testTooltip
-} from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { deleteDownloadedFiles, getPageURLOrigin, testExportDropdown, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { testRecordMainSectionValues, testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 
 const testParams: any = {
@@ -33,7 +29,7 @@ const testParams: any = {
   tables_order: ['accommodation_image', 'media'],
   file_names: [
     'Accommodations.csv',
-    // updated in test() with 2 more rows
+    // updated in test() with 1 more rows
     'BDBag.json'
   ],
   related_table_name_with_page_size_annotation: 'accommodation_image',
@@ -209,7 +205,6 @@ test.describe('View existing record', () => {
       testParams.file_names = [
         'Accommodations.csv',
         `accommodation_${ridValue}.zip`,
-        `accommodation_${ridValue}.bib`,
         'BDBag.json'
       ];
 
@@ -293,7 +288,7 @@ test.describe('View existing record', () => {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded before
           await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
-            return `${process.env.PWD}/test/e2e/.download/${name}`
+            return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
       }
@@ -348,68 +343,7 @@ test.describe('View existing record', () => {
 
       await testShareCiteModal(page, testInfo, testParams.sharePopupParams);
 
-      await test.step('should have 3 options in the export dropdown menu.', async () => {
-        const exportButton = ExportLocators.getExportDropdown(page);
-
-        await exportButton.click();
-        await expect.soft(ExportLocators.getExportOptions(page)).toHaveCount(3);
-        // close the dropdown
-        await exportButton.click();
-      });
-
-
-      await test.step('should have "This record (CSV)" as a download option and download the file.', async () => {
-        await ExportLocators.getExportDropdown(page).click();
-
-        const csvOption = ExportLocators.getExportOption(page, 'This record (CSV)');
-        await expect.soft(csvOption).toHaveText('This record (CSV)');
-
-        await clickAndVerifyDownload(csvOption, testParams.file_names[0]);
-      });
-
-      await test.step('should have "BDBag" as a download option and download the file.', async () => {
-        test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
-
-        await ExportLocators.getExportDropdown(page).click();
-
-        const bagOption = ExportLocators.getExportOption(page, 'BDBag');
-        await expect.soft(bagOption).toHaveText('BDBag');
-
-        await clickAndVerifyDownload(bagOption, testParams.file_names[1], async () => {
-          const modal = ModalLocators.getExportModal(page)
-          await expect.soft(modal).toBeVisible();
-          await expect.soft(modal).not.toBeAttached();
-        });
-      });
-
-      await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
-        test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
-
-        await ExportLocators.getExportDropdown(page).click();
-
-        const configOption = ExportLocators.getExportOption(page, 'configurations');
-        await expect.soft(configOption).toHaveText('Configurations');
-
-        await configOption.click();
-
-        await expect.soft(ExportLocators.getExportSubmenuOptions(page)).toHaveCount(1);
-
-        const bdBagSubmenu = ExportLocators.getExportSubmenuOption(page, 'BDBag');
-        await expect.soft(bdBagSubmenu).toBeVisible();
-
-        await clickAndVerifyDownload(bdBagSubmenu, testParams.file_names[3]); // use the last filename since it is the suggested filename
-
-        /**
-         * hover over to make the dropdown menu tooltip OverlayTrigger trigger so it will hide when another tooltip is shown in a later test
-
-         *
-         * NOTE: this is only an issue when `NODE_ENV="development"` since we are adding "focus" event for tooltips
-         *   this has no harm if the tooltip is not showing (node environment is production)
-         *   see /src/components/tooltip.tsx for more info
-         */
-        await ExportLocators.getExportDropdown(page).hover();
-      });
-
+      await testExportDropdown(page, testParams.file_names);
 
       await test.step('should render columns which are specified to be visible and in order', async () => {
         const pageColumns = RecordLocators.getAllColumnNames(page);
@@ -626,7 +560,7 @@ test.describe('View existing record', () => {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded during tests
           await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
-            return `${process.env.PWD}/test/e2e/.download/${name}`
+            return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
       }

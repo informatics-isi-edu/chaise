@@ -187,7 +187,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
 
 }
 
-export type RelatedTableTestParams = {
+type RelatedTableTestParams = {
   tableName: string,
   schemaName: string,
   /**

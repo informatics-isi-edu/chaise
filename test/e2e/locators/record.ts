@@ -109,10 +109,6 @@ export default class RecordLocators {
     return RecordLocators.getEntityRelatedTable(container, displayname).locator('.inline-tooltip');
   }
 
-  static getLinkChild(el: Locator) {
-    return el.locator('a');
-  };
-
   static getValueMarkdownContainer(el: Locator) {
     return el.locator('.markdown-container:not(.chaise-comment)');
   };
