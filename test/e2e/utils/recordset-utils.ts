@@ -6,15 +6,28 @@ import RecordsetLocators, {
   DefaultRangeInputLocators,
   TimestampRangeInputLocators
 } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
+import { Either } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
-export type CustomParams = {
-  url?: string,
-  caption?: string,
-  customValues?: string
-  inlineRT?: boolean
+type RecordsetColStringValue = {
+  value: string,
+  /**
+   * this will allow us to specify which element we should get the value from.
+   * @param value the cell that the value is displayed in
+   */
+  valueLocator?: (value: Locator) => Locator
+}
+
+type RecordsetColURLValue = {
+  url: string,
+  caption: string,
+  /**
+   * this will allow us to specify which element we should get the value from.
+   * @param value the cell that the value is displayed in
+   */
+  valueLocator?: (value: Locator) => Locator
 };
 
-export type RecordsetColValue = CustomParams | string;
+export type RecordsetColValue = Either<RecordsetColStringValue, RecordsetColURLValue> | string;
 export type RecordsetRowValue = RecordsetColValue[]
 
 
@@ -33,11 +46,15 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
     for (let innerIndex = 0; innerIndex < expectedRow.length; innerIndex++) {
       const expectedCell = expectedRow[innerIndex];
 
-      const cell = cells.nth(innerIndex);
+      let cell = cells.nth(innerIndex);
       await expectFn(cell).toBeVisible();
 
-      if (typeof expectedCell === 'string') {
-        await expectFn(cell).toHaveText(expectedCell);
+      if (typeof expectedCell === 'object' && expectedCell.valueLocator) {
+        cell = expectedCell.valueLocator(cell);
+      }
+
+      if (typeof expectedCell === 'string' || expectedCell.value) {
+        await expectFn(cell).toHaveText(typeof expectedCell === 'string' ? expectedCell : expectedCell.value);
       } else if (expectedCell.url && expectedCell.caption) {
         const link = cell.locator('a');
         expectFn(await link.getAttribute('href')).toContain(expectedCell.url);

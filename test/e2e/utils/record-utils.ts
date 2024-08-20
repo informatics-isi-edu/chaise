@@ -29,15 +29,16 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   let index = 0;
   for (const expectedValue of expectedColumnValues) {
     let value = allValues.nth(index);
-    if (typeof expectedValue === 'string') {
-      await expect.soft(value).toHaveText(expectedValue);
+    if (typeof expectedValue === 'object' && expectedValue.valueLocator) {
+      value = expectedValue.valueLocator(value);
+    }
+
+    if (typeof expectedValue === 'string' || expectedValue.value) {
+      await expect.soft(value).toHaveText(typeof expectedValue === 'string' ? expectedValue : expectedValue.value);
     } else if (expectedValue.url && expectedValue.caption) {
-      if (expectedValue.inlineRT) value = value.locator('.related-markdown-content');
       const link = value.locator('a');
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
-    } else if (expectedValue.customValues) {
-      await expect(value.locator('.related-markdown-content')).toHaveText(expectedValue.customValues);
     }
     index++;
   }

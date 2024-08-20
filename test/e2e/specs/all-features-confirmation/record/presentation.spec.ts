@@ -199,6 +199,12 @@ test.describe('View existing record', () => {
 
       const origin = await getPageURLOrigin(page);
 
+      /**
+       * this is used for testing the values of related tables.
+       * The actual value that we want to test is the inner element of the cell.
+       */
+      const findRelatedMarkdownValue = (value: Locator) => value.locator('.related-markdown-content');
+
       // update testParams now that we have testInfo
       testParams.file_names = [
         'Accommodations.csv',
@@ -230,7 +236,8 @@ test.describe('View existing record', () => {
         {
           title: 'booking', type: 'inline',
           value: {
-            customValues: ['2', '350.0000', '2016-04-18 00:00:00', '4', '200.0000', ' 2016-05-31 00:00:00'].join(' ')
+            value: ['2', '350.0000', '2016-04-18 00:00:00', '4', '200.0000', ' 2016-05-31 00:00:00'].join(' '),
+            valueLocator: findRelatedMarkdownValue
           }
         },
         { title: 'User Rating', value: '4.3000', type: 'float4', markdown_title: '<strong>User Rating</strong>' },
@@ -249,7 +256,8 @@ test.describe('View existing record', () => {
         { title: 'Is Luxurious', value: 'true', type: 'boolean' },
         {
           title: 'accommodation_collections', value: {
-            customValues: 'Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel'
+            value: 'Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel',
+            valueLocator: findRelatedMarkdownValue
           }, comment: 'collections', type: 'inline'
         },
         {
@@ -257,7 +265,7 @@ test.describe('View existing record', () => {
           value: {
             url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:table_w_aggregates/RID=${getEntityRow(testInfo, testParams.schema_name, 'table_w_aggregates', [{ column: 'id', value: '3' }]).RID}`,
             caption: '3',
-            inlineRT: true
+            valueLocator: findRelatedMarkdownValue
           }
         },
         { title: '# thumbnail collection', comment: 'Count of thumbnail collection', value: '1', markdown_title: '# thumbnail collection' },
@@ -271,7 +279,7 @@ test.describe('View existing record', () => {
           value: {
             url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
             caption: '3005',
-            inlineRT: true
+            valueLocator: findRelatedMarkdownValue
           }
         },
         { title: 'table_w_invalid_row_markdown_pattern', 'value': true }, // set value to true for testing columnNames but skip testing value (since it's a recordset table)
@@ -441,7 +449,6 @@ test.describe('View existing record', () => {
         }
       });
 
-      // TODO playwright: modify testRecordMainSectionValues and use it here instead
       await test.step('should validate the values of each column', async () => {
         await expect.soft(RecordLocators.getAllColumnValues(page)).toHaveCount(notNullColumns.length);
 
