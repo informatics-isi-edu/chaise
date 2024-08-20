@@ -360,6 +360,8 @@ test.describe('View existing record', () => {
       });
 
       await test.step('should have "BDBag" as a download option and download the file.', async () => {
+        test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
+
         await ExportLocators.getExportDropdown(page).click();
 
         const bagOption = ExportLocators.getExportOption(page, 'BDBag');
@@ -373,7 +375,8 @@ test.describe('View existing record', () => {
       });
 
       await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
-        // let exportSubmenuOptions, configOption;
+        test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
+
         await ExportLocators.getExportDropdown(page).click();
 
         const configOption = ExportLocators.getExportOption(page, 'configurations');
