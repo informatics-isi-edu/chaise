@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { expect, test } from '@playwright/test';
+import { expect, Locator, test } from '@playwright/test';
 import moment from 'moment';
 
 // locators
