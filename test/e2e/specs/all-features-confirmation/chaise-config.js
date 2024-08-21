@@ -10,7 +10,9 @@ var chaiseConfig = {
     // TODO: make sure this is working properly in spec
     maxRecordsetRowHeight: false, // triggers (ignores) some logic in ellipsis.js. Tests view buttons having proper links
     allowErrorDismissal : true,
-    resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id
+    // in parallel config mode, this config is used second with catalog Id 2
+    // We want to ensure this value is NOT the same as the catalog used when testing
+    resolverImplicitCatalog: 100,
     systemcolumnsdisplaycompact: ['RCB', 'RMT'], //testing case-insensitive properties
     SystemColumnsDisplayDetailed: true, //testing case-insensitive properties
     systemColumnsDisplayENTRY: ['RCB', 'RMB', 'RMT'], //testing case-insensitive properties
