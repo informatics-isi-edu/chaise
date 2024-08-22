@@ -50,3 +50,7 @@ export interface ICustomWindow extends Window {
 declare let window: ICustomWindow;
 
 export const windowRef = window;
+
+export function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+}

@@ -29,11 +29,3 @@ export function makeSafeIdAttr(string: string) {
 export function hasTrailingPeriod(str: string) {
   return str[str.length-1] === '.';
 }
-
-/**
- * returns true if the browser is safari
- * @param userAgentString - navigator.userAgent
- */
-export function isUserAgentSafari(userAgentString: string): boolean {
-  return /^((?!chrome|android).)*safari/i.test(userAgentString);
-}

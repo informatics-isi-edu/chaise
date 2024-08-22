@@ -32,11 +32,10 @@ import {
 import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { OSDViewerDeploymentPath, chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { manuallyTriggerFormSubmit } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { isUserAgentSafari } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
 type DeleteAnnotationConfirmProps = {
@@ -490,7 +489,7 @@ export default function ViewerProvider({
        * there are some annotations, or user can create or edit annotations.
        */
       const hasOrCanHaveAnnot = (res.annotationTuples.length > 0 || res.canUpdateAnnotation || res.canCreateAnnotation);
-      if (isUserAgentSafari(windowRef.navigator.userAgent) && hasOrCanHaveAnnot) {
+      if (isSafari() && hasOrCanHaveAnnot) {
         const errorMessage = [
           'You are using a browser that has limited support for this application.',
           '<br/><br/>',

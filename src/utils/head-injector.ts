@@ -4,9 +4,9 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utils
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { isUserAgentSafari, makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
 * Will return a promise that is resolved when the setup is done
@@ -80,7 +80,7 @@ function addBodyClasses() {
   let browserClass;
   if (navigator.userAgent.indexOf('Firefox') !== -1) {
     browserClass = BODY_CLASS_NAMES.firefox;
-  } else if (isUserAgentSafari(windowRef.navigator.userAgent)) {
+  } else if (isSafari()) {
     browserClass = BODY_CLASS_NAMES.safari;
   }
 

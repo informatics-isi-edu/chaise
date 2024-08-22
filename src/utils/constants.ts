@@ -217,7 +217,7 @@ export const HELP_PAGES = {
   }
 }
 
-// NOTE: should this be added to head-injector as a browser class?
+// NOTE: this should be added to windowRef similar to "isSafari" if this check is needed elsewhere
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
