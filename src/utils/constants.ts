@@ -149,6 +149,7 @@ export const BODY_CLASS_NAMES = {
   self: 'chaise-body',
   mac: 'chaise-mac',
   firefox: 'chaise-firefox',
+  safari: 'chaise-safari',
   iframe: 'chaise-iframe'
 };
 
@@ -216,6 +217,7 @@ export const HELP_PAGES = {
   }
 }
 
+// NOTE: should this be added to head-injector as a browser class?
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
