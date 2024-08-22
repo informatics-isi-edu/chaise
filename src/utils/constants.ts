@@ -149,6 +149,7 @@ export const BODY_CLASS_NAMES = {
   self: 'chaise-body',
   mac: 'chaise-mac',
   firefox: 'chaise-firefox',
+  safari: 'chaise-safari',
   iframe: 'chaise-iframe'
 };
 
@@ -216,6 +217,7 @@ export const HELP_PAGES = {
   }
 }
 
+// NOTE: this should be added to windowRef similar to "isSafari" if this check is needed elsewhere
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
