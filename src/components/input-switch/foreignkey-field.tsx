@@ -82,7 +82,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const { setValue, getValues } = useFormContext();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
-  const [inputSelectedRow, setInputSelectedRow] = useState<SelectedRow | null>(null);
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
   const ellipsisRef = useRef(null);
@@ -99,8 +98,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    */
   const onClear = () => {
     const column = props.columnModel.column;
-
-    setInputSelectedRow(null);
 
     if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
       props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
@@ -152,10 +149,9 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       getValues
     );
 
-    let currentSelectedRow = inputSelectedRow;
+    let currentSelectedRow;
     // there is a value in the input but no selected row yet because of prefill showing an association picker on recordedit page load
-    if (getValues(props.name) && !currentSelectedRow && props.foreignKeyCallbacks?.prefillAssociationSelectedRows) {
-
+    if (getValues(props.name) && props.foreignKeyCallbacks?.prefillAssociationSelectedRows) {
       // find row in prefillAssociationSelectedRows
       currentSelectedRow = props.foreignKeyCallbacks.prefillAssociationSelectedRows.filter((row: SelectedRow) => {
         // if an input is empty, there won't be a row defined in `prefillAssociationSelectedRows`
@@ -189,8 +185,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       const selectedRow = selectedRows[0];
       const column = props.columnModel.column;
-
-      setInputSelectedRow(selectedRow);
 
       // if the recordedit page's table is an association table with a unique key pair, track the selected rows
       if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
