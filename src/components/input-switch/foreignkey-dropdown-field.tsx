@@ -11,11 +11,10 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { DisabledRow, DisabledRowType, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { appModes, RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // services
@@ -91,7 +90,6 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
   const { setValue, getValues } = useFormContext();
   const { dispatchError } = useError();
-  const { prefillAssociationSelectedRows } = useRecordedit();
 
   /**
    * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
@@ -121,7 +119,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const [dropdownReference, setDropdownReference] = useState<any>(null);
   const [currentDropdownPage, setCurrentDropdownPage] = useState<any>(null);
 
-  type DropdownRow = { tuple: any, isDisabled: boolean };
+  type DropdownRow = { tuple: any, isDisabled: boolean, disabledType?: DisabledRowType };
   const [dropdownRows, setDropdownRows] = useState<DropdownRow[]>([]); // array of page.tuples
   const [checkedRow, setCheckedRow] = useState<any>(null); // ERMrest.Tuple
 
@@ -169,7 +167,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   useEffect(() => {
     if (
       !props.foreignKeyCallbacks?.updateAssociationSelectedRows ||
-      !dropdownInitialized || !prefillAssociationSelectedRows
+      !dropdownInitialized || !props.foreignKeyCallbacks.prefillAssociationSelectedRows
     ) return;
 
     setShowSpinner(true);
@@ -190,7 +188,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       setShowSpinner(false);
       dispatchError({ error: exception });
     });
-  }, [prefillAssociationSelectedRows]);
+  }, [props.foreignKeyCallbacks?.prefillAssociationSelectedRows]);
 
   /**
    * populate the dropdown rows after a request is done.
@@ -199,7 +197,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const populateDropdownRows = (page: any, currentRow: SelectedRow | null, pageLimit: number, logStack: any,
     logStackPath: string, requestCauses?: any, reloadStartTime?: any): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-      type PType = { page: any, disabledRows?: any };
+      type PType = { page: any, disabledRows?: DisabledRow[] };
       let p;
       if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.getDisabledTuples) {
         p = props.foreignKeyCallbacks.getDisabledTuples(page, pageLimit, logStack, logStackPath, requestCauses, reloadStartTime);
@@ -208,17 +206,20 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       }
 
       p.then((result: PType) => {
-        const disabledTuplesUniqueIDs: any = {};
+        const disabledTuplesUniqueIDs: any = {}; // { uniqueId: { disabledType: DisabledRowType } }
         if (Array.isArray(result.disabledRows)) {
-          result.disabledRows.forEach((t: any) => {
-            disabledTuplesUniqueIDs[t.uniqueId] = 1;
+          result.disabledRows.forEach((t: DisabledRow) => {
+            disabledTuplesUniqueIDs[t.tuple.uniqueId] = { disabledType: t.disabledType };
           })
         }
 
         setDropdownRows(page.tuples.map((tuple: any) => {
           // only disable if it's in the list AND it's not the current selection
           const isDisabled = tuple.uniqueId in disabledTuplesUniqueIDs && tuple.uniqueId !== currentRow?.uniqueId
-          return { isDisabled, tuple };
+          const row: DropdownRow = { tuple, isDisabled }
+          if (isDisabled) row.disabledType = disabledTuplesUniqueIDs[tuple.uniqueId].disabledType;
+
+          return row;
         }));
 
         resolve(true);
@@ -524,10 +525,10 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
     return dropdownRows.map((row: DropdownRow) => (
       <div key={`fk-val-${row.tuple.uniqueId}`}>
-        {row.isDisabled ?
+        {row.disabledType ?
           // only add tooltip if single select and disabled
           <ChaiseTooltip
-            tooltip={disabledRowTooltip(row.tuple.disabledType)}
+            tooltip={disabledRowTooltip(row.disabledType)}
             placement='bottom-start'
             className='reposition-li-tooltip'
           >

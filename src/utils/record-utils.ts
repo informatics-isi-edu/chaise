@@ -329,9 +329,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject 
   const keys: { [key: string]: any } = {};
   const columnNameToRID: { [key: string]: string } = {}
   origTable.foreignKeys.all().forEach((fk: any) => {
-    if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) {
-      return;
-    }
+    if (!canRelatedForeignKeyBePrefilled(fk, ref.origFKR)) return;
     prefilledFks.push(fk.name);
     columnNameToRID[fk.name] = fk.RID
 

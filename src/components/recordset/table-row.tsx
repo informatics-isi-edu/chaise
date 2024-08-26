@@ -13,7 +13,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { DisabledRowType, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogParentActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -40,7 +40,8 @@ type TableRowProps = {
   showActionButtons: boolean,
   selected: boolean,
   onSelectChange: (tuple: any) => void,
-  disabled: boolean
+  disabled: boolean,
+  disabledType?: DisabledRowType
 }
 
 type ReadMoreStateProps = {
@@ -57,7 +58,8 @@ const TableRow = ({
   showActionButtons,
   selected,
   onSelectChange,
-  disabled
+  disabled,
+  disabledType
 }: TableRowProps): JSX.Element => {
 
   /**
@@ -125,9 +127,9 @@ const TableRow = ({
   const singleSelectIcon = `fa-solid ${selected ? 'fa-check' : 'fa-circle'}`;
   let singleSelectIconTooltip = `Select${selected ? 'ed' : ''}`;
 
-  if (rowDisabled) {
+  if (rowDisabled && disabledType) {
     // disabled will be a small grey button without an icon
-    singleSelectIconTooltip = disabledRowTooltip(tuple.disabledType);
+    singleSelectIconTooltip = disabledRowTooltip(disabledType);
   }
 
   // TODO: logging

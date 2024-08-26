@@ -106,6 +106,10 @@ export type RecordeditForeignkeyCallbacks = {
    */
   updateAssociationSelectedRows?: UpdateAssociationRowsCallback,
   /**
+   * if defined, will be used in foreign key & foreign key dropdown fields
+   */
+  prefillAssociationSelectedRows?: SelectedRow[],
+  /**
    * if defined, will be used for validating the foreign key value.
    *
    * return `true` if the value is valid. otherwise return a string that will be showed as an error.

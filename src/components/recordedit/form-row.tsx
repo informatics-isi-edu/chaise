@@ -333,6 +333,7 @@ const FormRow = ({
       );
 
       tempForeignKeyCallbacks.updateAssociationSelectedRows = updateAssociationSelectedRows;
+      tempForeignKeyCallbacks.prefillAssociationSelectedRows = prefillAssociationSelectedRows;
     }
 
     return (

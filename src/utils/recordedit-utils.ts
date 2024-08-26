@@ -11,7 +11,7 @@ import {
   appModes, MULTI_FORM_INPUT_FORM_VALUE, PrefillObject, RecordeditColumnModel,
   RecordeditForeignkeyCallbacks, TimestampOptions, UpdateAssociationRowsCallback
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { DisabledRow, DisabledRowType, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -885,11 +885,11 @@ export function validateForeignkeyValue(
   }
 }
 
-export function disabledRowTooltip(disabledType: string): string {
+export function disabledRowTooltip(disabledType: DisabledRowType): string {
   let disabledTooltip = '';
-  if (disabledType === 'associated') {
+  if (disabledType === DisabledRowType.ASSOCIATED) {
     disabledTooltip = MESSAGE_MAP.tooltip.otherRow;
-  } else if (disabledType === 'selected') {
+  } else if (disabledType === DisabledRowType.SELECTED) {
     disabledTooltip = MESSAGE_MAP.tooltip.otherInput;
   }
 
@@ -916,9 +916,9 @@ export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[]
     logStackPath: string,
     requestCauses?: any,
     reloadStartTime?: any
-  ): Promise<{ page: any, disabledRows?: any }> => {
+  ): Promise<{ page: any, disabledRows?: DisabledRow[] }> => {
     return new Promise((resolve, reject) => {
-      const disabledRows: any = [];
+      const disabledRows: DisabledRow[] = [];
 
       let action = LogActions.LOAD,
         newStack = logStack;
@@ -945,8 +945,10 @@ export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[]
             });
 
             if (index > -1) {
-              page.tuples[index].disabledType = 'associated';
-              disabledRows.push(page.tuples[index]);
+              disabledRows.push({
+                disabledType: DisabledRowType.ASSOCIATED,
+                tuple: page.tuples[index]
+              });
             }
           });
 
@@ -960,8 +962,10 @@ export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[]
             });
 
             if (index > -1) {
-              page.tuples[index].disabledType = 'selected';
-              disabledRows.push(page.tuples[index]);
+              disabledRows.push({
+                disabledType: DisabledRowType.SELECTED,
+                tuple: page.tuples[index]
+              });
             }
           });
 

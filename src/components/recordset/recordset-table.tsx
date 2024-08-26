@@ -14,7 +14,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 // models
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, SortColumn } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  DisabledRow, DisabledRowType, RecordsetConfig,
+  RecordsetDisplayMode, RecordsetSelectMode,
+  SelectedRow, SortColumn
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -59,25 +63,62 @@ const RecordsetTable = ({
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
+  type RowConfig = {
+    isSelected: boolean;
+    isDisabled: boolean;
+    disabledType: DisabledRowType | undefined;
+  }
   /**
    * capture the state of selected and disabled of rows in here so
    * we don't have to populate this multiple times
    */
-  let isRowSelected = Array(page ? page.length : 0).fill(false);
-  if (page && page.length && Array.isArray(selectedRows) && selectedRows.length > 0) {
-    isRowSelected = page.tuples.map((tuple: any) => (
-      // ermrestjs always returns a string for uniqueId, but internally we don't
-      // eslint-disable-next-line eqeqeq
-      selectedRows.some((obj) => obj.uniqueId == tuple.uniqueId)
-    ));
-  }
-  let isRowDisabled = Array(page ? page.length : 0).fill(false);
-  if (page && page.length && Array.isArray(disabledRows) && disabledRows.length > 0) {
-    isRowDisabled = page.tuples.map((tuple: any) => (
-      // ermrestjs always returns a string for uniqueId, but internally we don't
-      // eslint-disable-next-line eqeqeq
-      disabledRows.some((obj) => obj.uniqueId == tuple.uniqueId)
-    ));
+  let rowDetails: RowConfig[] = Array(page ? page.length : 0).fill({
+    isSelected: false,
+    isDisabled: false,
+    disabledType: undefined
+  });
+
+  const hasSelectedRows = Array.isArray(selectedRows) && selectedRows.length > 0,
+    hasDisabledRows = Array.isArray(disabledRows) && disabledRows.length > 0;
+
+  if (page && page.length && (hasSelectedRows || hasDisabledRows)) {
+    const tempRowDetails: RowConfig[] = []
+    for (let i = 0; i < page.tuples.length; i++) {
+      const tuple = page.tuples[i];
+      const rowConfig: RowConfig = {
+        isSelected: false,
+        isDisabled: false,
+        disabledType: undefined
+      };
+    // page.tuples.forEach((tuple: any, index: number) => {
+      if (hasSelectedRows) {
+        const row = selectedRows.find((obj: SelectedRow) => {
+          // ermrestjs always returns a string for uniqueId, but internally we don't
+          // eslint-disable-next-line eqeqeq
+          return obj.uniqueId == tuple.uniqueId
+        });
+
+        if (row) rowConfig.isSelected = true;
+      }
+
+      if (hasDisabledRows) {
+        const row = disabledRows.find((obj: DisabledRow) => {
+          // ermrestjs always returns a string for uniqueId, but internally we don't
+          // eslint-disable-next-line eqeqeq
+          return obj.tuple.uniqueId == tuple.uniqueId
+        });
+
+        if (row) {
+          rowConfig.isDisabled = true;
+          rowConfig.disabledType = row.disabledType;
+        }
+      }
+
+      tempRowDetails[i] = rowConfig;
+    // });
+    }
+
+    rowDetails = tempRowDetails;
   }
 
   /**
@@ -156,8 +197,8 @@ const RecordsetTable = ({
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       if (!page) return res;
       page.tuples.forEach((tuple: any, index: number) => {
-        if (isRowDisabled[index]) return;
-        if (!isRowSelected[index]) {
+        if (rowDetails[index].isDisabled) return;
+        if (!rowDetails[index].isSelected) {
           res.push({
             displayname: tuple.displayname,
             uniqueId: tuple.uniqueId,
@@ -394,9 +435,10 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
-          selected={isRowSelected[index]}
+          selected={rowDetails[index].isSelected}
           onSelectChange={onSelectChange}
-          disabled={isRowDisabled[index]}
+          disabled={rowDetails[index].isDisabled}
+          disabledType={rowDetails[index].disabledType}
         />)
     })
   }

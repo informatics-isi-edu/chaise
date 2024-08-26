@@ -16,11 +16,9 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  RecordsetConfig,
-  RecordsetDisplayMode,
-  RecordsetProps,
-  RecordsetSelectMode,
-  SelectedRow,
+  DisabledRow, RecordsetConfig,
+  RecordsetDisplayMode, RecordsetProps,
+  RecordsetSelectMode, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -353,9 +351,9 @@ const RelatedTableActions = ({
       logStackPath: string,
       requestCauses?: any,
       reloadStartTime?: any
-    ): Promise<{ page: any, disabledRows?: any }> => {
+    ): Promise<{ page: any, disabledRows?: DisabledRow[] }> => {
       return new Promise((resolve, reject) => {
-        const disabledRows: any = [];
+        const disabledRows: DisabledRow[] = [];
 
         let action = LogActions.LOAD,
           newStack = logStack;
@@ -375,9 +373,9 @@ const RelatedTableActions = ({
           .then(function (newPage: any) {
             newPage.tuples.forEach(function (newTuple: any) {
               const index = page.tuples.findIndex(function (tuple: any) {
-                return tuple.uniqueId == newTuple.uniqueId;
+                return tuple.uniqueId === newTuple.uniqueId;
               });
-              if (index > -1) disabledRows.push(page.tuples[index]);
+              if (index > -1) disabledRows.push({tuple: page.tuples[index] });
             });
 
             resolve({ disabledRows: disabledRows, page: page });

@@ -7,7 +7,7 @@ import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 export type RecordsetProviderGetDisabledTuples = (
   page: any, pageLimit: number, logStack: any,
   logStackPath: string, requestCauses?: any, reloadStartTime?: any
-) => Promise<{ page: any, disabledRows?: any }>;
+) => Promise<{ page: any, disabledRows?: DisabledRow[] }>;
 
 export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean
 
@@ -159,6 +159,16 @@ export type SelectedRow = {
   tupleReference?: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
+}
+
+export enum DisabledRowType {
+  ASSOCIATED= 'associated',
+  SELECTED= 'selected'
+}
+
+export type DisabledRow = {
+  disabledType?: DisabledRowType;
+  tuple: any;
 }
 
 export type RecordsetProviderAddUpdateCauses = (

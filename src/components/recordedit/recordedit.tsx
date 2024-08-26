@@ -491,7 +491,7 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        if (reference.prefill.isUnqiue && cm.column.name === reference.prefill.leafColumn.name) return;
+        if (reference.prefill.isUnique && cm.column.name === reference.prefill.leafColumn.name) return;
 
         copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
       });

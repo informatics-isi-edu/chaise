@@ -9,7 +9,6 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 // hooks
 import { useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
 import {
@@ -81,7 +80,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const usedFormNumber = typeof props.formNumber === 'number' ? props.formNumber : 1;
 
   const { setValue, getValues } = useFormContext();
-  const { prefillAssociationSelectedRows } = useRecordedit();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   const [inputSelectedRow, setInputSelectedRow] = useState<SelectedRow | null>(null);
@@ -155,11 +153,11 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     );
 
     let currentSelectedRow = inputSelectedRow;
-    // there is a value in the input but no selected row because of prefill showing an association picker on recordedit page load
-    if (getValues(props.name) && !currentSelectedRow) {
+    // there is a value in the input but no selected row yet because of prefill showing an association picker on recordedit page load
+    if (getValues(props.name) && !currentSelectedRow && props.foreignKeyCallbacks?.prefillAssociationSelectedRows) {
 
       // find row in prefillAssociationSelectedRows
-      currentSelectedRow = prefillAssociationSelectedRows.filter((row: SelectedRow) => {
+      currentSelectedRow = props.foreignKeyCallbacks.prefillAssociationSelectedRows.filter((row: SelectedRow) => {
         // if an input is empty, there won't be a row defined in `prefillAssociationSelectedRows`
         return row && row.displayname.value === getValues(props.name);
       })[0];

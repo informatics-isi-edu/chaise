@@ -21,37 +21,18 @@
     display: table-row-group;
     vertical-align: middle;
 
-    // > tr > td.disabled-cell {
-    //   background-color: map-get(variables.$color-map, 'table-disabled-background');
-    // }
-
     /* table hover */
     > tr:hover {
       background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-
-      /* match color from row highlight for disabled cells */
-      // > td.disabled-cell {
-      //   background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-      // }
 
       .hover-show {
         visibility: visible;
       }
     }
 
-    /* odd disabled cells need to be darker */
-    // > tr:nth-child(odd) > td.disabled-cell {
-    //   background-color: map-get(variables.$color-map, 'table-striped-disabled-background');
-    // }
-
     /* odd row hover for striped table */
     > tr:nth-child(odd):hover {
       background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-
-      /* odd disabled cells need to match odd row hover for striped table above */
-      // > td.disabled-cell {
-      //   background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-      // }
     }
   }
 
@@ -208,7 +189,7 @@
         font-size: 1.6rem;
         // added here instead of to the button as padding-top to only affect these buttons/icons
         margin-top: 1px;
-        background-color: white !important;
+        background-color: map-get(variables.$color-map, 'white') !important;
         border-radius: inherit;
       }
     }

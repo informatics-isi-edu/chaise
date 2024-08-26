@@ -9,6 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import {
+  DisabledRow,
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
@@ -126,7 +127,7 @@ export const RecordsetContext = createContext<{
   /**
    * The rows that should be disabled
    */
-  disabledRows: any,
+  disabledRows: DisabledRow[],
   /**
    * The rows that are selected
    */
@@ -326,7 +327,7 @@ export default function RecordsetProvider({
 
   const [totalRowCount, setTotalRowCount] = useState<number | null>(null);
 
-  const [disabledRows, setDisabledRows] = useState<any>([]);
+  const [disabledRows, setDisabledRows] = useState<DisabledRow[]>([]);
 
   /**
    * The selected rows
@@ -751,7 +752,7 @@ export default function RecordsetProvider({
         } else {
           return { page: result.page };
         }
-      }).then((result: { page: any, disabledRows?: any }) => {
+      }).then((result: { page: any, disabledRows?: DisabledRow[] }) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;
