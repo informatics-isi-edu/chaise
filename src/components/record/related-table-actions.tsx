@@ -510,6 +510,16 @@ const RelatedTableActions = ({
       setShowPureBinarySpinner(true);
 
       validateSessionBeforeMutation(() => {
+        const deleteResponse = () => {
+          leafReference
+            .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
+            .then(()=>{
+              setUnlinkPureBinaryModalProps(null);
+              updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
+            })
+            .catch(deleteError)
+            .finally(()=>setShowPureBinarySpinner(false));
+        };
 
         const deleteError = (err: any) => {
           setShowPureBinarySpinner(false);
@@ -520,19 +530,36 @@ const RelatedTableActions = ({
           dispatchError({ error: err, isDismissible: true });
         };
 
+        if (!CONFIRM_DELETE) {
+          return deleteResponse();
+        }
+
         logRecordClientAction(LogActions.UNLINK_INTEND);
 
-        leafReference
-            .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
-            .then(()=>{
-              setUnlinkPureBinaryModalProps(null);
-              updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
-            })
-            .catch(deleteError)
-            .finally(()=>setShowPureBinarySpinner(false));
+        const multiple = selectedRows.length > 1 ? 's' : '';
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to unlink {selectedRows.length} record{multiple}?
+          </>
+        );
 
+        setShowDeleteConfirmationModal({
+          buttonLabel: 'Unlink',
+          title: 'Confirm Unlink',
+          onConfirm: () => {
+            setShowDeleteConfirmationModal(null);
+            return deleteResponse();
+          },
+          onCancel: () => {
+            setShowDeleteConfirmationModal(null);
+            setShowPureBinarySpinner(false);
+            logRecordClientAction(LogActions.UNLINK_CANCEL);
+          },
+          message: confirmMessage,
+        });
       });
     };
+
     setUnlinkPureBinarySubmitCB(() => submitCB);
 
     setUnlinkPureBinaryModalProps({
