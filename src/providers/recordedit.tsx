@@ -108,10 +108,6 @@ export const RecordeditContext = createContext<{
   MAX_ROWS_TO_ADD: number,
   /* the prefill object from cookie storage based on prefill query param */
   prefillObject: PrefillObject | null,
-  /* the column to the leaf table for the association table if we have a prefill object */
-  prefillAssociationFkLeafColumn: any,
-  /* the column tot he main table for the association table if we have a prefill object */
-  prefillAssociationFkMainColumn: any,
   /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
   prefillAssociationSelectedRows: SelectedRow[],
   setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
@@ -270,8 +266,6 @@ export default function RecordeditProvider({
   const [forms, setForms] = useState<number[]>([1]);
 
   const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
-  const [prefillAssociationFkLeafColumn, setPrefillAssociationFkLeafColumn] = useState<any>(null);
-  const [prefillAssociationFkMainColumn, setPrefillAssociationFkMainColumn] = useState<any>(null);
   const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
 
   /**
@@ -295,13 +289,6 @@ export default function RecordeditProvider({
     setupStarted.current = true;
 
     const prefillObj = getPrefillObject(queryParams);
-
-    // add properties to the prefillObject that is stored here in the provider for use in other components
-    if (prefillObj) {
-      // TODO: isAssociation and associationIsUnique
-      // prefillObj.isAssociation = reference.table.isAssociation || false;
-      prefillObj.hasUniqueAssociation = reference.table.isAssociation || false;
-    }
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
@@ -428,26 +415,9 @@ export default function RecordeditProvider({
         }
 
         if (prefillObj) {
+          // initialize `ERMrest.Prefill` object on reference
+          reference.computePrefill(prefillObj);
           setPrefillObject(prefillObj);
-
-          // TODO: if reference.table is an association
-          // if (prefillObject.isAssociation) {
-          reference.columns.forEach((column: any) => {
-            // column should be a foreignkey pseudo column
-            if (!column.isForeignKey) return;
-
-            reference.table.foreignKeys.all().forEach((fk: any) => {
-              // column and foreign key `.name` property is a hash value
-              if (column.name === fk.name) {
-                if (prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
-                  setPrefillAssociationFkMainColumn(column);
-                } else {
-                  setPrefillAssociationFkLeafColumn(column);
-                }
-              }
-            });
-          });
-          // }
         }
 
         setInitialized(true);
@@ -829,7 +799,7 @@ export default function RecordeditProvider({
     }
 
     // prefillAssocationSelectedRows is only used when in create mode, with a prefill object, and there is a unique association
-    if (prefillObject?.hasUniqueAssociation) {
+    if (reference.prefill.isUnqiue) {
       const tempSelectedRows = [...prefillAssociationSelectedRows];
 
       indexes.forEach((index: number) => {
@@ -1184,8 +1154,6 @@ export default function RecordeditProvider({
 
       // prefill association modal
       prefillObject,
-      prefillAssociationFkLeafColumn,
-      prefillAssociationFkMainColumn,
       prefillAssociationSelectedRows,
       setPrefillAssociationSelectedRows,
       updateAssociationSelectedRows,
@@ -1199,7 +1167,7 @@ export default function RecordeditProvider({
     // main entity:
     columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
-    prefillObject, prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows
+    prefillObject, prefillAssociationSelectedRows
   ]);
 
   return (

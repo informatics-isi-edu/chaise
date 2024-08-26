@@ -899,14 +899,12 @@ export function disabledRowTooltip(disabledType: string): string {
 /**
  * Used to fetch the disabled tuples for a recordset modal picker used to associate rows of data
  *
- * @param prefillObject the prefill object in cookie storage fetched using queryParams
  * @param domainRef the reference used in the modal picker that we want to disable rows for
- * @param fkToLeaf the foreign key column from the association table that points to the leaf table
- * @param fkToMain the foreign key column from the association table that points to the main table
+ * @param disabledRowsFilters
  * @param rowsUsedInForm
  * @returns a function that returns a promise
  */
-export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: any, fkToLeaf: any, fkToMain: any, rowsUsedInForm: SelectedRow[]) {
+export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[], rowsUsedInForm: SelectedRow[]) {
   /**
    * The existing rows in this p&b association must be disabled
    * so users doesn't resubmit them.
@@ -921,18 +919,6 @@ export function disabledTuplesPromise(prefillObject: PrefillObject, domainRef: a
   ): Promise<{ page: any, disabledRows?: any }> => {
     return new Promise((resolve, reject) => {
       const disabledRows: any = [];
-
-      const disabledRowsFilters: any[] = [];
-      Object.keys(prefillObject.keys).forEach((key: string) => {
-        disabledRowsFilters.push({
-          source: [
-            { 'inbound': fkToLeaf.foreignKey.constraint_names[0] },
-            { 'outbound': fkToMain.foreignKey.constraint_names[0] },
-            fkToMain.foreignKey.mapping._to[0].name
-          ],
-          choices: [prefillObject.keys[key]]
-        });
-      });
 
       let action = LogActions.LOAD,
         newStack = logStack;

@@ -109,11 +109,11 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, prefillObject,
-    prefillAssociationFkLeafColumn, prefillAssociationFkMainColumn, prefillAssociationSelectedRows,
-    setPrefillAssociationSelectedRows, prefillRowData, reference, tuples, waitingForForeignKeyData,
-    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
-    showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
+    appMode, columnModels, config, foreignKeyData, initialized, modalOptions,
+    prefillObject, prefillAssociationSelectedRows, setPrefillAssociationSelectedRows,
+    prefillRowData, reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
+    getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
+    showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
@@ -318,20 +318,11 @@ const RecordeditInner = ({
      * trigger the association modal when there is an assoication and
      * we know the leaf column for the association is visible in create mode
      **/
-    if (prefillObject && prefillAssociationFkLeafColumn?.reference) {
+    if (reference.prefill?.isAssociation) {
       // check if leaf column is defined and set the reference to use if it is
-      const domainRef: any = prefillAssociationFkLeafColumn.reference;
+      const domainRef: any = reference.prefill.leafColumn?.reference;
 
-      const andFilters: any[] = [];
-      // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-      // NOTE: this is similar to the function `openAddPureBinaryModal` in `related-table-actions`
-      prefillAssociationFkLeafColumn.foreignKey.key.colset.columns.forEach((col: any) => {
-        andFilters.push({
-          source: col.name,
-          hidden: true,
-          not_null: true
-        });
-      });
+      const andFilters: any[] = reference.prefill.andFiltersForLeaf();
 
       // TODO: think about this more if it's required in this context
       // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
@@ -376,16 +367,14 @@ const RecordeditInner = ({
       };
 
       let getDisabledTuples;
-      if (prefillObject.hasUniqueAssociation) {
+      if (reference.prefill.isUnique) {
         /**
          * The existing rows in this association must be disabled
          * so users doesn't resubmit them.
          */
         getDisabledTuples = disabledTuplesPromise(
-          prefillObject,
           domainRef.contextualize.compactSelectAssociationLink,
-          prefillAssociationFkLeafColumn,
-          prefillAssociationFkMainColumn,
+          reference.prefill.disabledRowsFilter(),
           []
         );
       }
@@ -502,7 +491,7 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) return;
+        if (reference.prefill.isUnqiue && cm.column.name === reference.prefill.leafColumn.name) return;
 
         copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
       });
@@ -528,7 +517,7 @@ const RecordeditInner = ({
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
-      if (prefillObject?.hasUniqueAssociation && col.name === prefillAssociationFkLeafColumn.name) return;
+      if (reference.prefill.isUnqiue && col.name === reference.prefill.leafColumn.name) return;
 
       // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
       foreignKeyData.current[`c_${formNumber}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
@@ -556,15 +545,16 @@ const RecordeditInner = ({
   const showPrefillAssociationModal = () => {
     if (!associationRecordsetProps || !prefillObject) return;
 
-    // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
-    // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
-    const getDisabledTuples = disabledTuplesPromise(
-      prefillObject,
-      prefillAssociationFkLeafColumn.reference.contextualize.compactSelectAssociationLink,
-      prefillAssociationFkLeafColumn,
-      prefillAssociationFkMainColumn,
-      prefillAssociationSelectedRows
-    );
+    let getDisabledTuples;
+    if (reference.prefill.isUnique) {
+      // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
+      // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
+      getDisabledTuples = disabledTuplesPromise(
+        reference.prefill.leafColumn.reference.contextualize.compactSelectAssociationLink,
+        reference.prefill.disabledRowsFilter(),
+        prefillAssociationSelectedRows
+      );
+    }
 
     setAssociationRecordsetProps({
       initialReference: associationRecordsetProps.initialReference,
@@ -573,7 +563,7 @@ const RecordeditInner = ({
       logInfo: associationRecordsetProps.logInfo,
       parentReference: associationRecordsetProps.parentReference,
       getDisabledTuples
-    })
+    });
 
     setShowAssociationModal(true);
   }
@@ -603,7 +593,7 @@ const RecordeditInner = ({
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
 
-    if (prefillObject?.hasUniqueAssociation) {
+    if (reference.prefill.isUnique) {
       /**
        * copy modalSelectedRows 2nd to preserve indexes in prefillAssociationSelectedRows
        *
@@ -668,20 +658,20 @@ const RecordeditInner = ({
     // iterate selectedRows to fill in the fkey information
     modalSelectedRows.forEach((row: SelectedRow, index: number) => {
       if (foreignKeyData && foreignKeyData.current) {
-        foreignKeyData.current[`c_${startFormNumber + index}-${prefillAssociationFkLeafColumn.RID}`] = row.data;
+        foreignKeyData.current[`c_${startFormNumber + index}-${reference.prefill.leafColumn.RID}`] = row.data;
       }
 
       // find the raw value of the fk columns that correspond to the selected row
       // since we've already added a not-null hidden filter, the values will be not-null.
-      prefillAssociationFkLeafColumn.foreignKey.colset.columns.forEach((col: any) => {
-        const referencedCol = prefillAssociationFkLeafColumn.foreignKey.mapping.get(col);
+      reference.prefill.leafColumn.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = reference.prefill.leafColumn.foreignKey.mapping.get(col);
 
         // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
         initialValues[`c_${startFormNumber + index}-${col.RID}`] = row.data[referencedCol.name];
       });
 
       // update "display" value
-      initialValues[`c_${startFormNumber + index}-${prefillAssociationFkLeafColumn.RID}`] = row.displayname.value;
+      initialValues[`c_${startFormNumber + index}-${reference.prefill.leafColumn.RID}`] = row.displayname.value;
     });
 
     // required to set values in all new forms in the RHF model
@@ -871,7 +861,7 @@ const RecordeditInner = ({
           recordsetProps={associationRecordsetProps}
           onSubmit={submitAssociationCB}
           onClose={closeAssociationCB}
-          displayname={prefillAssociationFkLeafColumn.displayname}
+          displayname={reference.prefill.leafColumn.displayname}
         />
       }
     </>);
@@ -1041,7 +1031,7 @@ const RecordeditInner = ({
                       {associationRecordsetProps &&
                         // only show association modal button if we started with an association picker
                         <ChaiseTooltip
-                          tooltip={`Select more ${prefillAssociationFkLeafColumn.displayname.value} for new forms`}
+                          tooltip={`Select more ${reference.prefill.leafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
                         >
                           <button

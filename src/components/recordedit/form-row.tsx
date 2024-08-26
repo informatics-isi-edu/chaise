@@ -64,9 +64,6 @@ const FormRow = ({
     columnPermissionErrors,
     foreignKeyData,
     waitingForForeignKeyData,
-    prefillObject,
-    prefillAssociationFkLeafColumn,
-    prefillAssociationFkMainColumn,
     prefillAssociationSelectedRows,
     updateAssociationSelectedRows,
     getRecordeditLogStack,
@@ -328,12 +325,10 @@ const FormRow = ({
      *  - the column is a foreignkey
      *  - and the column is the one used for associating to the leaf table of the association
      */
-    if (prefillObject?.hasUniqueAssociation && column.isForeignKey && prefillAssociationFkLeafColumn.name === colName) {
+    if (reference.prefill.isUnique && column.isForeignKey && reference.prefill.leafColumn.name === colName) {
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
-        prefillObject,
         column.reference.contextualize.compactSelectForeignKey,
-        prefillAssociationFkLeafColumn,
-        prefillAssociationFkMainColumn,
+        reference.prefill.disabledRowsFilter(),
         prefillAssociationSelectedRows
       );
 

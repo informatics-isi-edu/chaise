@@ -206,10 +206,6 @@ export interface PrefillObject {
    * the rowname of the fk
    */
   rowname: any;
-  /**
-   * boolean to trigger add association popup when loading recordedit before showing the forms
-   */
-  hasUniqueAssociation?: boolean;
 }
 
 export interface LastChunkMap {

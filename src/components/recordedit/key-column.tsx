@@ -29,8 +29,7 @@ const KeyColumn = ({
 
   const {
     appMode, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction,
-    prefillObject, prefillAssociationFkLeafColumn
+    config, forms, logRecordeditClientAction, reference
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -76,7 +75,7 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    if (prefillObject?.hasUniqueAssociation && cm.column.name === prefillAssociationFkLeafColumn.name) {
+    if (reference.prefill.isUnique && cm.column.name === reference.prefill.leafColumn.name) {
       return false
     }
 
