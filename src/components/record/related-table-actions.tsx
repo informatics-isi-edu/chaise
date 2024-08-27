@@ -510,28 +510,26 @@ const RelatedTableActions = ({
       setShowPureBinarySpinner(true);
 
       validateSessionBeforeMutation(() => {
-        const deleteResponse = () => {
+        const deleteTuples = () => {
           leafReference
             .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
             .then(()=>{
+              setShowPureBinarySpinner(false);
               setUnlinkPureBinaryModalProps(null);
               updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
             })
-            .catch(deleteError)
-            .finally(()=>setShowPureBinarySpinner(false));
-        };
-
-        const deleteError = (err: any) => {
-          setShowPureBinarySpinner(false);
-          // errors that land here would be execution of code errors
-          // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
-          //   as part of the deleteErrors object in the success cb
-          // NOTE: if one of the identifying values is empty or null, an error is thrown here
-          dispatchError({ error: err, isDismissible: true });
+            .catch((err: Error)=>{
+              setShowPureBinarySpinner(false);
+            // errors that land here would be execution of code errors
+            // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+            //   as part of the deleteErrors object in the success cb
+            // NOTE: if one of the identifying values is empty or null, an error is thrown here
+              dispatchError({ error: err, isDismissible: true });
+            })
         };
 
         if (!CONFIRM_DELETE) {
-          return deleteResponse();
+          return deleteTuples();
         }
 
         logRecordClientAction(LogActions.UNLINK_INTEND);
@@ -548,7 +546,7 @@ const RelatedTableActions = ({
           title: 'Confirm Unlink',
           onConfirm: () => {
             setShowDeleteConfirmationModal(null);
-            return deleteResponse();
+            return deleteTuples();
           },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
