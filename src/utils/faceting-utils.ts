@@ -54,64 +54,101 @@ export const getFacetOrderStorageKey = (reference: any): string => {
 
 /**
  * Return the order of facets that should be used initially.
+ *
+ * This function consults both the annotation and the stored order.
+ *
  * @param reference the reference that represents the main recordset page
  */
-export const getStoredFacetOrders = (reference: any): { facetIndex: number, isOpen?: boolean }[] | null => {
+export const getInitialFacetOrder = (reference: any): { facetIndex: number, isOpen: boolean }[] => {
+  const res: { facetIndex: number, isOpen: boolean }[] = [];
   const facetColumns = reference.facetColumns;
   const facetListKey = getFacetOrderStorageKey(reference);
   const facetOrder = LocalStorage.getStorage(facetListKey) as {
     name: string,
     open: boolean
   }[] || undefined;
+  let atLeastOneIsOpen = false;
 
+  // no valid stored value was found in storage, so return the annotaion value.
   if (!facetOrder || !Array.isArray(facetOrder) || facetOrder.length === 0) {
-    return null;
+    return facetColumns.map((fc: any, index: number) => {
+      return { facetIndex: index, isOpen: fc.isOpen };
+    });
   }
 
-  const res: { facetIndex: number, isOpen?: boolean }[] = [];
-
   // store the mapping between name and facetIndex
-  const nameMap: { [facetName: string]: number } = {};
+  const annotOrder: { [facetName: string]: { facetIndex: number, isOpen: boolean, hasFilters: boolean } } = {};
   facetColumns.forEach((fc: any, facetIndex: number) => {
-    nameMap[fc.sourceObjectWrapper.name] = facetIndex;
+    annotOrder[fc.sourceObjectWrapper.name] = {
+      facetIndex,
+      isOpen: fc.isOpen,
+      // if the facet has filters, we have to open it.
+      hasFilters: fc.filters.length > 0
+    };
   });
 
   // make sure the saved order are still part of the visible facets
   facetOrder.forEach((fo) => {
     // ignore the invalid or missing ones.
-    if (!isObjectAndKeyDefined(fo, 'name') || !(fo.name in nameMap)) return;
+    if (!isObjectAndKeyDefined(fo, 'name') || !(fo.name in annotOrder)) return;
 
-    const order: { facetIndex: number, isOpen?: boolean } = { facetIndex: nameMap[fo.name] };
+    const currOrder = annotOrder[fo.name];
+    let isOpen = currOrder.isOpen;
     if (typeof fo.open === 'boolean') {
-      order.isOpen = fo.open;
+      isOpen = fo.open;
     }
-    res.push(order);
+    // if the facet has filters, we have to open it so we can show the initial state properly
+    if (currOrder.hasFilters) {
+      isOpen = true;
+    }
+    res.push({ facetIndex: currOrder.facetIndex, isOpen });
+
+    if (isOpen) {
+      atLeastOneIsOpen = true;
+    }
 
     // remove it so we know which facets were not in the stored order (it will also make sure duplicates are ignored)
-    delete nameMap[fo.name];
+    delete annotOrder[fo.name];
   });
 
   // add the rest of visible facets that were not part of the stored order
   facetColumns.forEach((fc: any, facetIndex: number) => {
     const facetName = fc.sourceObjectWrapper.name;
-    if (!(facetName in nameMap)) return;
-
-    res.push({ facetIndex: facetIndex });
+    if (!(facetName in annotOrder)) return;
+    const isOpen = annotOrder[facetName].isOpen;
+    if (isOpen) {
+      atLeastOneIsOpen = true;
+    }
+    res.push({ facetIndex: facetIndex, isOpen });
   });
+
+  // all the facets are closed, open the first one
+  if (!atLeastOneIsOpen && res.length > 0) {
+    res[0].isOpen = true;
+  }
 
   return res;
 }
 
 /**
- * Return an object where the key is the facet index and the value is its stored isOpen.
+ * Return the order of facets (and their open status) that should be used initially.
+ *
+ * Notes:
+ *   - The returned object has two props:
+ *     - order: the same response that you get from getInitialFacetOrder
+ *     - openStatus: an object where the key is the facet index and the returned value is whether the facet
+ *       should be open or not.
+ *   - This function consults both the annotation and the stored order.
  *
  * @param reference the reference that represents the main recordset page
  */
-export const getStoredFacetOpenStatus = (reference: any): { [facetIndex: string]: (boolean | undefined) } => {
-  const storedOrder = getStoredFacetOrders(reference);
-  if (!storedOrder) return {};
+export const getInitialFacetOpenStatus = (reference: any): {
+  order: { facetIndex: number, isOpen: boolean }[],
+  openStatus: { [facetIndex: string]: boolean }
+} => {
+  const storedOrder = getInitialFacetOrder(reference);
 
-  const booleanRes: { [facetIndex: string]: (boolean | undefined) } = {};
+  const booleanRes: { [facetIndex: string]: boolean } = {};
   storedOrder.forEach((r) => { booleanRes[r.facetIndex] = r.isOpen; });
-  return booleanRes;
+  return { order: storedOrder, openStatus: booleanRes };
 }

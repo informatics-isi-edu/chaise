@@ -48,6 +48,9 @@ export default class RecordsetLocators {
     return container.locator('.table-column-spinner').waitFor({ state: 'hidden', timeout });
   }
 
+  static async waitForFacets(container: Page | Locator, timeout?: number): Promise<void> {
+    return container.locator('.facet-spinner').waitFor({ state: 'hidden', timeout });
+  }
 
   static getPageTitleElement(container: Page | Locator): Locator {
     return container.locator('#page-title');

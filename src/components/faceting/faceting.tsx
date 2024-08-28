@@ -28,7 +28,7 @@ import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
-import { getFacetOrderStorageKey, getStoredFacetOpenStatus, getStoredFacetOrders } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
 
@@ -85,27 +85,16 @@ const Faceting = ({
    * - This will allow us to reorder the facets while keeping the internal facet index the way it was.
    */
   const [facetOrders, setFacetOrders, facetOrdersRef] = useStateRef<number[]>(() => {
-    const initalOrder = getStoredFacetOrders(reference);
-    if (initalOrder) {
-      return initalOrder.map((o) => o.facetIndex);
-    }
-    return reference.facetColumns.map((fc: any, index: number) => index);
+    return getInitialFacetOrder(reference).map((o) => o.facetIndex);
   });
 
   const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
     const res: FacetModel[] = [];
-
-    const storedOpenStatus = getStoredFacetOpenStatus(reference);
-    let firstOpen = -1;
+    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
     reference.facetColumns.forEach((fc: any, index: number) => {
+      // the initial open status is based on annotation and also the local storage
+      const isOpen = initialOpenStatus[`${index}`];
 
-      // get the open status (similar to useEffect generating facetRequestModels)
-      const storedOrder = storedOpenStatus[`${index}`];
-      const isOpen = fc.isOpen || storedOrder;
-
-      if (isOpen) {
-        firstOpen = (firstOpen === -1 || firstOpen > index) ? index : firstOpen;
-      }
       res.push({
         initialized: false,
         isOpen: isOpen,
@@ -118,14 +107,9 @@ const Faceting = ({
         parentLogStackPath: recordsetLogStackPath
       });
     });
-    // all the facets are closed, open the first one
-    if (firstOpen === -1 && res.length > 0) {
-      firstOpen = 0;
-      res[0].isOpen = true;
-      res[0].isLoading = true;
-    }
     return res;
   });
+
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
     setFacetModels((prevFacetModels: FacetModel[]) => {
       return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
@@ -165,8 +149,7 @@ const Faceting = ({
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
 
-    const storedOpenStatus = getStoredFacetOpenStatus(reference);
-    let atLeastOneOpen = false;
+    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
     reference.facetColumns.forEach((facetColumn: any, index: number) => {
       const table = facetColumn.column.table;
       const facetLogStackNode = LogService.getStackNode(
@@ -175,12 +158,10 @@ const Faceting = ({
         { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode }
       );
 
-      // get the open status (similar to default value of facetModels)
-      const storedOrder = storedOpenStatus[`${index}`];
-      const isOpen = facetColumn.isOpen || storedOrder;
+      // the initial open status is based on annotation and also the local storage
+      const isOpen = initialOpenStatus[`${index}`];
 
       if (isOpen) {
-        atLeastOneOpen = true;
         facetsToPreProcess.current.push(index);
       }
 
@@ -213,11 +194,6 @@ const Faceting = ({
       return;
     }
 
-    // all the facets are closed, the fist one should be processed.
-    if (!atLeastOneOpen) {
-      facetRequestModels.current[0].processed = false;
-    }
-
     setDisplayFacets(true);
   }, []);
 
@@ -227,11 +203,10 @@ const Faceting = ({
   useLayoutEffect(() => {
     if (!displayFacets) return;
     let firstOpen: number | null = null;
-    const storedOpenStatus = getStoredFacetOpenStatus(reference);
+    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
     reference.facetColumns.some((fc: any, index: number) => {
-      // get the open status (similar to default value of facetModels)
-      const storedOrder = storedOpenStatus[`${index}`];
-      const isOpen = fc.isOpen || storedOrder;
+      // the initial open status is based on annotation and also the local storage
+      const isOpen = initialOpenStatus[`${index}`];
 
       if (isOpen) {
         /**
@@ -240,7 +215,7 @@ const Faceting = ({
          * and instead have to do Math.min
          */
         if (firstOpen === null) {
-          firstOpen = index
+          firstOpen = index;
         } else {
           firstOpen = Math.min(index, firstOpen);
         }
@@ -271,6 +246,9 @@ const Faceting = ({
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
+  /**
+   * store the facet order in the local stroage if any changes happened to the facets
+   */
   useEffect(() => {
     if (!facetOrders || !facetOrders.length) return;
     /**
@@ -742,7 +720,7 @@ const Faceting = ({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                           >
-                            <ChaiseTooltip placement='right' tooltip='Drag the facet and drop it in the desired order.'>
+                            <ChaiseTooltip placement='right' tooltip='Drag and drop this filter to the desired position.'>
                               <div className={`move-icon facet-move-icon-${facetIndex}`} {...provided.dragHandleProps}>
                                 <i className='fa-solid fa-grip-vertical'></i>
                               </div>
