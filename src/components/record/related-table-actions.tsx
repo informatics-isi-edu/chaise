@@ -513,10 +513,33 @@ const RelatedTableActions = ({
         const deleteTuples = () => {
           leafReference
             .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
-            .then(()=>{
+            .then((response: any)=>{
               setShowPureBinarySpinner(false);
+              if(response.failedTupleData.length>0){
+                response.clickOkToDismiss = true;
+
+                // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+                //       - some errors could have been because of row level security
+                dispatchError({
+                  error: response,
+                  isDismissible: true,
+                  closeBtnCallback: () => {
+                    // ask recordset to update the modal
+                    if (!!containerRef.current) {
+                      // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
+                      fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, containerRef.current, {
+                        cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
+                        pageStates: { updateResult: true, updateCount: true, updateFacets: true },
+                        response: response,
+                      });
+                    }
+                  },
+                });
+              }
+              else{
               setUnlinkPureBinaryModalProps(null);
               updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
+              }
             })
             .catch((err: Error)=>{
               setShowPureBinarySpinner(false);
