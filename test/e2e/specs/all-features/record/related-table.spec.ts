@@ -527,7 +527,7 @@ test.describe('Related tables', () => {
         rowViewPaths: [
           [{ column: 'id', value: '1' }], [{ column: 'id', value: '3' }]
         ],
-        count: 1, // by load time it's one but when we add another related for the other table this should be updated too.
+        count: 2, // by load time it's one but when we add another related for the other table this should be updated too.
         canEdit: true,
         canCreate: false,
         canDelete: true
