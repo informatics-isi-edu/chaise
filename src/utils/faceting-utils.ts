@@ -71,9 +71,16 @@ export const getInitialFacetOrder = (reference: any): { facetIndex: number, isOp
 
   // no valid stored value was found in storage, so return the annotaion value.
   if (!facetOrder || !Array.isArray(facetOrder) || facetOrder.length === 0) {
-    return facetColumns.map((fc: any, index: number) => {
-      return { facetIndex: index, isOpen: fc.isOpen };
+    facetColumns.forEach((fc: any, index: number) => {
+      if (fc.isOpen) atLeastOneIsOpen = true;
+      res.push({ facetIndex: index, isOpen: fc.isOpen });
     });
+
+    // all the facets are closed, open the first one
+    if (!atLeastOneIsOpen && res.length > 0) {
+      res[0].isOpen = true;
+    }
+    return res;
   }
 
   // store the mapping between name and facetIndex
