@@ -12,6 +12,7 @@ E2E tests are automation tests that simulate a user interacting with the app and
 - [File structure](#file-structure)
 - [Debugging](#debugging)
 - [Writing test](#writing-test)
+- [Screenshot testing](#screenshot-testing)
 
 ## Tools used
 - [**Playwright**](https://playwright.dev/): The E2e test framework that we're using.
@@ -209,3 +210,49 @@ If there is a suspicion that a test is failing only in github actions, to get an
 ## Writing test
 
 Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
+
+
+## Screenshot testing
+
+As originally mentioned in [this issue](https://github.com/informatics-isi-edu/chaise/issues/2368) we might want to explore doing screenshot testing. The following is how this could be done in Playwright:
+
+```ts
+import { test, expect } from '@playwright/test';
+
+// locators
+import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
+
+test.describe('visual testing atlas', () => {
+  test('Collection recordset page', async ({ page }) => {
+    await page.goto('https://atlas-d2k.org/chaise/recordset/#2/Common:Collection@sort(RMT::desc::,RID)');
+
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+    await RecordsetLocators.waitForAggregates(page);
+
+    // on  load we're focusing on the first opened one and therefore will have a different border
+    await page.waitForTimeout(3000);
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+  })
+
+  test('Collection record page', async ({ page }) => {
+    await page.goto('https://atlas-d2k.org/chaise/record/#2/Common:Collection/RID=17-E76T');
+
+    await RecordLocators.waitForRecordPageReady(page);
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+
+    await page.evaluate(() => {
+      return document.querySelector('.related-section-container.chaise-accordions')!.scrollIntoView();
+    });
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+  })
+
+});
+```
+
+- `fullPage` config allows us to screenshot the whole page. But because of how we're defining the scrollable section, it still won't be able to capture the page fully. That's why I'm scrolling to the related section and taking a different screenshot in the record page example.
+- While I'm using atlas-d2k in my example, this should be part of the test framework in our final solution. We must discuss whether we want to initiate this manually or have it as part of our automated testing. Regardless, it should use test data and not an existing production.
+- In our discussion, we discussed using this method as part of the review process for the UI features. So, for example, we could run a similar script on the master to get the initial screenshots and then rerun it on the feature branch to compare.

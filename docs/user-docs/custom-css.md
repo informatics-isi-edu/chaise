@@ -179,48 +179,74 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 
 3. Increase the width of a column in tabular displays:
 
-```css
-.s_schema.t_table .c_column {
-  min-width: 200px;
-}
-```
-NOTE: The `min-width` property will almost always be honored. If content is shorter than the `min-width`, there will be whitespace after the content. If the content is longer than the `min-width`, the width will be at minimum the value set for `min-width` and get wider to accomodate the content. This may be affected by having many columns with each having a `min-width` property set.
+    ```css
+    .s_schema.t_table .c_column {
+      min-width: 200px;
+    }
+    ```
+    - The `min-width` property will almost always be honored. If content is shorter than the `min-width`, there will be whitespace after the content. If the content is longer than the `min-width`, the width will be at minimum the value set for `min-width` and get wider to accomodate the content. This may be affected by having many columns with each having a `min-width` property set.
 
-NOTE: The `max-width` property will also almost always be honored. If the content is shorter than the `max-width` value, then it will shrink down to fit the content. If the content itself has to show on one line and is longer than the `max-width` value, the `max-width` will be ignored.
+    - The `max-width` property will also almost always be honored. If the content is shorter than the `max-width` value, then it will shrink down to fit the content. If the content itself has to show on one line and is longer than the `max-width` value, the `max-width` will be ignored.
 
 4. Change the color of the Related Table section header to chaise blue from #747474
 
-```css
-#record .chaise-accordions .accordion-button {
-  background: #4674A7;
-}
-```
-NOTE: Depending on the color that the header is changed to, the text color and buttons might need to be modified as well.
+    ```css
+    #record .chaise-accordions .accordion-button {
+      background: #4674A7;
+    }
+    ```
+    - Depending on the color that the header is changed to, the text color and buttons might need to be modified as well.
 
- - Change the color of 1 sepcific Related Table header:
- ```css
- #record .chaise-accordions #rt-heading-header_name .accordion-button {
-   background: #4674A7;
- }
- ```
- NOTE: This uses an `id` selector (`#`) that relies on the `id` attribute of the `.chaise-accordion` element. The id is always in the form of `rt-heading-` + the related table heading text (which includes special characters). For example, since `Authors *` in PDB has a superscript `*` for the related table heading in the `Entry` table, the `id` is being set to `rt-heading-Authors-sup-sup-`.
+5. Change the color of 1 sepcific Related Table header:
+    ```css
+    #record .chaise-accordions #rt-heading-header_name .accordion-button {
+      background: #4674A7;
+    }
+    ```
+    - This uses an `id` selector (`#`) that relies on the `id` attribute of the `.chaise-accordion` element. The id is always in the form of `rt-heading-` + the related table heading text (which includes special characters). For example, since `Authors *` in PDB has a superscript `*` for the related table heading in the `Entry` table, the `id` is being set to `rt-heading-Authors-sup-sup-`.
 
- - To change the text color to black from default (white):
- ```css
- #record .chaise-accordions .accordion-button {
-   color: black;
- }
- ```
+     - To change the text color to black from default (white):
+        ```css
+        #record .chaise-accordions .accordion-button {
+          color: black;
+        }
+        ```
 
- - To change the buttons (by default, the styles are for chaise-btn-secondary):
- ```css
- #record .chaise-accordions .chaise-accordion-header-buttons .related-table-actions .chaise-btn {
-   color: black;
-   background-color: #ffffff;
-   border: 1px solid #4674a7;
- }
- ```
- NOTE: `color` refers to text color. `background-color` refers to the background. `border` is the "width", "style", and "color".
+    - To change the buttons (by default, the styles are for chaise-btn-secondary):
+        ```css
+        #record .chaise-accordions .chaise-accordion-header-buttons .related-table-actions .chaise-btn {
+          color: black;
+          background-color: #ffffff;
+          border: 1px solid #4674a7;
+        }
+        ```
+
+      `color` refers to text color. `background-color` refers to the background. `border` is the "width", "style", and "color".
+
+
+6. In recordset tables, we've intentionally ensured the column names in the table header stay in one line. While this helps with alignment and consistency, it's not desirable in some cases. For example, if the column name is longer than the maximum length of the column values, the whole table's column will be wide, and we will waste a lot of space. To force a column header to be displayed in multiple rows, you can apply the following styles:
+
+    ```css
+    /* make sure the header appears in the first line */
+    .s_schema.t_table th {
+        vertical-align: top;
+    }
+    /* move the sort icon to be aligned with the first line */
+    .s_schema.t_table th .table-heading-icons {
+        top: 8px;
+    }
+
+    .s_scema.t_table th.c_column_w_long_name {
+        /* ensure breaking of the content in multiple lines*/
+        white-space: inherit !important;
+        /* ensure two lines (both rules needed): */
+        min-width: 90px;
+        width: 90px;
+    }
+    ```
+    As you can see, we have to manually set the width to ensure the name is broken in the specific character we see fit. While this works in this particular scenario, we might want to develop a more general solution that doesn't require handcrafting. We could potentially implement this as a built-in feature that data-modelers can turn on.
+
+
 
 
 ### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen))

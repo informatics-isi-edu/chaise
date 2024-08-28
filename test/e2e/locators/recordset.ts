@@ -173,6 +173,10 @@ export default class RecordsetLocators {
     return container.locator(`.c_${rawColumnName} .not-sorted-icon`);
   };
 
+  static getNoResultsRow(container: Page | Locator): Locator {
+    return container.locator('#no-results-row');
+  };
+
 
   // -------------------- row-level selectors ------------------------ //
 

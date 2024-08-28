@@ -512,7 +512,7 @@ test.describe('Related tables', () => {
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'association_table_markdown',
         tableName: 'association_table_markdown',
-        entityMarkdownName: '1:Television',
+        entityMarkdownName: ' 1:Television', // space added in markdown name since this is only tested in tooltips and some other tooltips don't have the space
         associationLeafTableName: 'related_table',
         baseTableName: 'Accommodations',
         isAssociation: true,

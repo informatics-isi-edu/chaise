@@ -6,7 +6,7 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clickAndVerifyDownload, clickNewTabLink, getPageURLOrigin } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickAndVerifyDownload, clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'links-table'
@@ -91,32 +91,10 @@ test.describe('show/hide empty section button state', () => {
 
 
 test('export button', async ({ page, baseURL }, testInfo) => {
-  test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
-
   await goToPage(page, baseURL, testInfo, testParams.table_name);
 
-  await test.step('first option must be `This record (CSV)` and user should be able to download the file.', async () => {
-    await ExportLocators.getExportDropdown(page).click();
-    const option = ExportLocators.getExportOption(page, 'This record (CSV)');
-    await expect.soft(option).toHaveText('This record (CSV)');
-
-    await clickAndVerifyDownload(option, 'links-table.csv');
-  });
-
-  await test.step('second option must be default `BDBag` and user should be able to download the file.', async () => {
-    await ExportLocators.getExportDropdown(page).click();
-    const option = ExportLocators.getExportOption(page, 'BDBag');
-    await expect.soft(option).toHaveText('BDBag');
-
-    const filename = `links-table_${getEntityRow(testInfo, 'links', 'links-table', [{ column: 'id', value: '1' }]).RID}.zip`;
-
-    await clickAndVerifyDownload(option, filename, async () => {
-      const exportModal = ModalLocators.getExportModal(page);
-      await expect.soft(exportModal).toBeVisible();
-      await expect.soft(exportModal).not.toBeAttached();
-    });
-  });
-
+  const ridValue = getEntityRow(testInfo, 'links', 'links-table', [{ column: 'id', value: '1' }]).RID;
+  await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`]);
 });
 
 test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
