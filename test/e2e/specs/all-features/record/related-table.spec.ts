@@ -403,7 +403,6 @@ test.describe('Related tables', () => {
 
         // click on submit
         await ModalLocators.getSubmitButton(rsModal).click();
-        await page.pause();
 
         // confirm the unlink
         const confirmModal = ModalLocators.getConfirmDeleteModal(page);
