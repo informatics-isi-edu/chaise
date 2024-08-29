@@ -246,8 +246,10 @@ export async function dragAndDropWithScroll(page: Page, draggable: Locator, drop
 
   await page.mouse.down();
   await droppable.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
     steps: 5,
   });
   await page.mouse.up();
+  await page.waitForTimeout(100);
 }
