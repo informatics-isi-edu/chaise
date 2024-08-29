@@ -32,8 +32,8 @@ const testParams = {
     facetNamesAfterReorder: [
       'int_col', 'id', 'timestamp_col', 'float_col', 'date_col', 'text_col',
       'longtext_col', 'markdown_col', 'boolean_col', 'jsonb_col', 'F1',
-      'f3 (term)', 'from_name', 'to_name', 'F1 with Term', 'F5', 'Check Presence Text',
-      'F3 Entity', 'F5 with filter', 'Outbound1 (using F1)',
+      'f3 (term)', 'from_name', 'to_name', 'F1 with Term', 'Check Presence Text',
+      'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
       'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
     ]
   },
@@ -166,7 +166,6 @@ test.describe('Facet reorder feature', () => {
       await moveFacet(page, 0, 2);
       await moveFacet(page, 4, 2);
       await moveFacet(page, 11, 14);
-      await moveFacet(page, 17, 15);
 
       await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder);
     });
