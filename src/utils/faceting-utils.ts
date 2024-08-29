@@ -48,6 +48,14 @@ export function getInitialFacetPanelOpen(config: RecordsetConfig, initialReferen
   return res;
 }
 
+/**
+ * returns the key that should be used for local storage name.
+ *
+ * Notes:
+ *  - we want to make sure the same list is used for all recordset instances of the same table (recordset app, facet popup, etc).
+ * @param reference
+ * @returns
+ */
 export const getFacetOrderStorageKey = (reference: any): string => {
   return `facet-order-${reference.table.schema.catalog.id}_${reference.table.schema.name}_${reference.table.name}`;
 }

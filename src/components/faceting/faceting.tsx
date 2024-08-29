@@ -659,6 +659,43 @@ const Faceting = ({
   }
   //-------------------  render logic:   --------------------//
 
+  const renderFacetList = () => {
+    return facetOrders.map((facetIndex: number, draggableIndex: number) => {
+      return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
+        {(draggableArgs: DraggableProvided) => (
+          <div
+            className='facet-item-container'
+            ref={draggableArgs.innerRef}
+            {...draggableArgs.draggableProps}
+          >
+            <ChaiseTooltip placement='right' tooltip='Drag and drop this filter to the desired position.'>
+              <div className={`move-icon facet-move-icon-${facetIndex}`} {...draggableArgs.dragHandleProps}>
+                <i className='fa-solid fa-grip-vertical'></i>
+              </div>
+            </ChaiseTooltip>
+            <Accordion.Item
+              eventKey={facetIndex + ''} key={facetIndex}
+              className={`facet-panel fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
+            >
+              <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
+                <FacetHeader
+                  displayname={reference.facetColumns[facetIndex].displayname}
+                  comment={reference.facetColumns[facetIndex].comment}
+                  isLoading={facetModels[facetIndex].isLoading}
+                  facetHasTimeoutError={facetModels[facetIndex].facetHasTimeoutError}
+                  noConstraints={facetModels[facetIndex].noConstraints}
+                />
+              </Accordion.Header>
+              <Accordion.Body>
+                {renderFacet(facetIndex)}
+              </Accordion.Body>
+            </Accordion.Item>
+          </div>
+        )}
+      </Draggable>
+    })
+  }
+
   const renderFacet = (index: number) => {
     const fc = reference.facetColumns[index];
     const fm = facetModels[index];
@@ -703,54 +740,17 @@ const Faceting = ({
       <div className='faceting-columns-container'>
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <ChaiseDroppable droppableId={'facet-droppable'}>
-            {
-              (provided: DroppableProvided) => (
-                <Accordion
-                  className='panel-group' activeKey={activeKeys} alwaysOpen
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  key={'facet-list'}
-                >
-                  {facetOrders.map((facetIndex: number, draggableIndex: number) => {
-                    return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
-                      {
-                        (provided: DraggableProvided) => {
-                          return <div
-                            className='facet-item-container'
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                          >
-                            <ChaiseTooltip placement='right' tooltip='Drag and drop this filter to the desired position.'>
-                              <div className={`move-icon facet-move-icon-${facetIndex}`} {...provided.dragHandleProps}>
-                                <i className='fa-solid fa-grip-vertical'></i>
-                              </div>
-                            </ChaiseTooltip>
-                            <Accordion.Item
-                              eventKey={facetIndex + ''} key={facetIndex}
-                              className={`facet-panel fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
-                            >
-                              <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
-                                <FacetHeader
-                                  displayname={reference.facetColumns[facetIndex].displayname}
-                                  comment={reference.facetColumns[facetIndex].comment}
-                                  isLoading={facetModels[facetIndex].isLoading}
-                                  facetHasTimeoutError={facetModels[facetIndex].facetHasTimeoutError}
-                                  noConstraints={facetModels[facetIndex].noConstraints}
-                                />
-                              </Accordion.Header>
-                              <Accordion.Body>
-                                {renderFacet(facetIndex)}
-                              </Accordion.Body>
-                            </Accordion.Item>
-                          </div>
-                        }
-                      }
-                    </Draggable>
-                  })}
-                  {provided.placeholder}
-                </Accordion>
-              )
-            }
+            {(droppableArgs: DroppableProvided) => (
+              <Accordion
+                className='panel-group' activeKey={activeKeys} alwaysOpen
+                {...droppableArgs.droppableProps}
+                ref={droppableArgs.innerRef}
+                key={'facet-list'}
+              >
+                {renderFacetList()}
+                {droppableArgs.placeholder}
+              </Accordion>
+            )}
           </ChaiseDroppable>
         </DragDropContext>
       </div>
