@@ -178,7 +178,6 @@ export default class RecordsetLocators {
   }
 
   static getColumnCells(container: Page | Locator, index: number): Locator {
-    // nth-child indexing starts with 1
     return container.locator(`.chaise-table-row td:nth-child(${index+1})`)
   }
 

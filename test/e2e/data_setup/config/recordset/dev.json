@@ -2,7 +2,6 @@
     "setup": {
         "schemaConfigurations": [
             "recordset/config.json",
-            "recordset/product-recordset-sort.config.json",
             "recordset/system-columns-heuristic.config.json",
             "recordset/active-list.config.json"
         ],
