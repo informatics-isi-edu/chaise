@@ -20,6 +20,18 @@ export async function getPageURLOrigin(page: Page): Promise<string> {
   return await page.evaluate(() => { return document.location.origin });
 }
 
+export async function getWindowName(page: Page): Promise<string> {
+  return await page.evaluate(() => { return window.name });
+}
+
+export async function getPageId(page: Page): Promise<string> {
+  return await page.evaluate(() => {
+    // cast to 'any' typed variable so we can avoid typescript errors
+    const windowRef: any = window;
+    return windowRef.dcctx.contextHeaderParams.pid
+  });
+}
+
 /**
  * click on the given link and return the opened page instance.
  *
@@ -156,7 +168,9 @@ export async function deleteDownloadedFiles(filePaths: string[]) {
  *
  * @param fileNames string names for files to verify have downloaded
  */
-export async function testExportDropdown(page: Page, fileNames: string[]) {
+export async function testExportDropdown(page: Page, fileNames: string[], app: APP_NAMES) {
+  const csvText = (app === APP_NAMES.RECORDSET ? 'Search results (CSV)' : 'This record (CSV)')
+
   await test.step(`should have ${fileNames.length} options in the export dropdown menu.`, async () => {
     const exportButton = ExportLocators.getExportDropdown(page);
 
@@ -166,11 +180,11 @@ export async function testExportDropdown(page: Page, fileNames: string[]) {
     await exportButton.click();
   });
 
-  await test.step('should have "This record (CSV)" as a download option and download the file.', async () => {
+  await test.step(`should have "${csvText}" as a download option and download the file.`, async () => {
     await ExportLocators.getExportDropdown(page).click();
 
-    const csvOption = ExportLocators.getExportOption(page, 'This record (CSV)');
-    await expect.soft(csvOption).toHaveText('This record (CSV)');
+    const csvOption = ExportLocators.getExportOption(page, csvText);
+    await expect.soft(csvOption).toHaveText(csvText);
 
     await clickAndVerifyDownload(csvOption, fileNames[0]);
   });
@@ -190,7 +204,7 @@ export async function testExportDropdown(page: Page, fileNames: string[]) {
     });
   });
 
-  // NOTE: this is very specific to the test done in record/presentation.spec.ts
+  // NOTE: this is specific to the tests done in record/presentation.spec.ts and recordset/presentation.spec.ts
   if (fileNames.length > 2) {
     await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
       test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
@@ -207,7 +221,7 @@ export async function testExportDropdown(page: Page, fileNames: string[]) {
       const bdBagSubmenu = ExportLocators.getExportSubmenuOption(page, 'BDBag');
       await expect.soft(bdBagSubmenu).toBeVisible();
 
-      await clickAndVerifyDownload(bdBagSubmenu, fileNames[2]); // use the last filename since it is the suggested filename
+      await clickAndVerifyDownload(bdBagSubmenu, fileNames[2]);
 
       /**
        * hover over to make the dropdown menu tooltip OverlayTrigger trigger so it will hide when another tooltip is shown in a later test

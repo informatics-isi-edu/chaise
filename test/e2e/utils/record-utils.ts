@@ -12,7 +12,10 @@ import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
   manuallyTriggerFocus, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { RecordsetColValue, RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import {
+  RecordsetColValue, RecordsetRowValue,
+  testRecordsetTableRowValues, testTotalCount
+} from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
 /**
@@ -616,7 +619,7 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
@@ -705,7 +708,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();

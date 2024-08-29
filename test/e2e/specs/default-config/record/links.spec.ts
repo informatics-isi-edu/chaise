@@ -1,12 +1,15 @@
 import { test, expect, TestInfo, Page } from '@playwright/test';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
-import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
+
+// locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
-import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
+import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
+// utils
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clickAndVerifyDownload, clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'links-table'
@@ -94,7 +97,7 @@ test('export button', async ({ page, baseURL }, testInfo) => {
   await goToPage(page, baseURL, testInfo, testParams.table_name);
 
   const ridValue = getEntityRow(testInfo, 'links', 'links-table', [{ column: 'id', value: '1' }]).RID;
-  await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`]);
+  await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`], APP_NAMES.RECORD);
 });
 
 test('hide_column_header support', async ({ page, baseURL }, testInfo) => {

@@ -343,7 +343,7 @@ test.describe('View existing record', () => {
 
       await testShareCiteModal(page, testInfo, testParams.sharePopupParams);
 
-      await testExportDropdown(page, testParams.file_names);
+      await testExportDropdown(page, testParams.file_names, APP_NAMES.RECORD);
 
       await test.step('should render columns which are specified to be visible and in order', async () => {
         const pageColumns = RecordLocators.getAllColumnNames(page);

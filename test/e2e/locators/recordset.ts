@@ -43,14 +43,20 @@ export default class RecordsetLocators {
     await container.locator('.recordset-main-spinner').waitFor({ state: 'detached', timeout });
   }
 
-
-  static async waitForAggregates(container: Page | Locator, timeout?: number): Promise<void> {
-    return container.locator('.table-column-spinner').waitFor({ state: 'hidden', timeout });
+  static getAggregateSpinners(container: Page | Locator): Locator {
+    return container.locator('.table-column-spinner');
   }
 
+  static async waitForAggregates(container: Page | Locator, timeout?: number): Promise<void> {
+    return this.getAggregateSpinners(container).waitFor({ state: 'hidden', timeout });
+  }
 
   static getPageTitleElement(container: Page | Locator): Locator {
     return container.locator('#page-title');
+  }
+
+  static getPermalinkButton(container: Page | Locator): Locator {
+    return container.locator('#permalink');
   }
 
   // ---------------- facet chiclet selectors ---------------- //
@@ -105,8 +111,8 @@ export default class RecordsetLocators {
   // --------------- table-level selectors ------------------- //
 
   /**
- * @param container pass `page` if on recordset app and the container's locator if on popups or other apps.
- */
+   * @param container pass `page` if on recordset app and the container's locator if on popups or other apps.
+   */
   static getTotalCount(container: Page | Locator): Locator {
     return container.locator('.chaise-table-header-total-count');
   }
@@ -157,11 +163,20 @@ export default class RecordsetLocators {
 
   static getColumnNames(container: Page | Locator): Locator {
     return container.locator('.table-column-displayname > span');
-};
+  };
 
   static getFirstColumn(container: Page | Locator): Locator {
     return container.locator('.chaise-table-row td:nth-child(2)');
   }
+
+  static getColumnCells(container: Page | Locator, index: number): Locator {
+    // nth-child indexing starts with 1
+    return container.locator(`.chaise-table-row td:nth-child(${index+1})`)
+  }
+
+  static getColumnsWithTooltipIcon(container: Page | Locator): Locator {
+    return container.locator('.table-column-displayname.chaise-icon-for-tooltip');
+  };
 
   // Currently only in modals but could be part of recordset in different contexts/views
   static getSelectAllBtn(container: Page | Locator): Locator {
@@ -173,6 +188,16 @@ export default class RecordsetLocators {
     return container.locator(`.c_${rawColumnName} .not-sorted-icon`);
   };
 
+  static getColumnSortAscButton(container: Page | Locator, rawColumnName: string): Locator {
+    // the "desc-sorted-icon" shows on the button that changes the sort to "asc"
+    return container.locator(`.c_${rawColumnName} .desc-sorted-icon`);
+  };
+
+  static getColumnSortDescButton(container: Page | Locator, rawColumnName: string): Locator {
+    // the "asc-sorted-icon" shows on the button that changes the sort to "desc"
+    return container.locator(`.c_${rawColumnName} .asc-sorted-icon`);
+  };
+
   static getNoResultsRow(container: Page | Locator): Locator {
     return container.locator('#no-results-row');
   };
@@ -182,6 +207,10 @@ export default class RecordsetLocators {
 
   static getViewActionButtons(container: Page | Locator): Locator {
     return container.locator('.view-action-button');
+  }
+
+  static getEditActionButtons(container: Page | Locator): Locator {
+    return container.locator('.edit-action-button');
   }
 
   static getDeleteActionButtons(container: Page | Locator): Locator {
