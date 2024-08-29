@@ -6,5 +6,6 @@ export default getConfig({
   mainSpecName: 'all-features-confirmation',
   testMatch: [
     'presentation.spec.ts'
-  ]
+  ],
+  addDefaultCatalogToChaiseConfig: true
 });

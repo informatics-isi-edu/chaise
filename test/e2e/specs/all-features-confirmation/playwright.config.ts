@@ -4,4 +4,5 @@ export default getConfig({
   testName: 'all-features-confirmation',
   configFileName: 'parallel-configs/all-features-confirmation.dev.json',
   mainSpecName: 'all-features-confirmation',
+  addDefaultCatalogToChaiseConfig: true
 });

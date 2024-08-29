@@ -387,6 +387,8 @@ test.describe('View recordset', () => {
       });
 
       await test.step('should show correct table rows', async () => {
+        // mapping the data object values to an array for this test case
+        // NOTE: each object in data is only used for this test. the defined test params could be changed to be an array of rowValues instead
         const testValues = params.data.map((tableRowData) => {
           const rowValues = Object.values(tableRowData);
 
@@ -735,16 +737,26 @@ test.describe('View recordset', () => {
     });
   });
 
-  if (!process.env.CI) {
-    test('For chaise config properties when no catalog or schema:table is specified', async ({ page, baseURL }, testInfo) => {
-      await test.step('should use the default schema:table defined in chaise config if no schema:table is present in the uri.', async () => {
-        await page.goto(`${baseURL}/recordset/#1`);
-        await RecordsetLocators.waitForRecordsetPageReady(page);
+  test('For chaise config properties when no catalog or schema:table is specified', async ({ page, baseURL }, testInfo) => {
+    const params = testParams.accommodation_tuple;
+    const catalogSchemaTable = `#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`;
 
-        await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText('Dataset');
-      });
+    await test.step('should use the default catalog and schema:table defined in chaise config if no catalog or schema:table is present in the uri', async () => {
+      await page.goto(`${baseURL}/recordset`);
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+
+      expect.soft(page.url()).toContain(catalogSchemaTable);
+      await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText('Accommodations');
     });
-  }
+
+    await test.step('should use the default schema:table defined in chaise config if no schema:table is present in the uri.', async () => {
+      await page.goto(`${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}`);
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+
+      expect.soft(page.url()).toContain(catalogSchemaTable);
+      await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText('Accommodations');
+    });
+  });
 
   test('For chaise config properties with system columns heuristic properties', async ({ page, baseURL }, testInfo) => {
     const params = testParams.system_columns;

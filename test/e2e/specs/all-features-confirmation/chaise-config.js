@@ -21,8 +21,8 @@ var chaiseConfig = {
     hideRecordeditLeaveAlert: true,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTable: {
-        "schema": "isa",
-        "table": "dataset"
+        "schema": "product-recordset",
+        "table": "accommodation"
     },
     templating: {
       engine: 'handlebars'

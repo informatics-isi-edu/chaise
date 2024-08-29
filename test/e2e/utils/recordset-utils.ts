@@ -30,7 +30,12 @@ type RecordsetColURLValue = {
 export type RecordsetColValue = Either<RecordsetColStringValue, RecordsetColURLValue> | string;
 export type RecordsetRowValue = RecordsetColValue[]
 
-
+/**
+ *
+ * @param container Page or recordset container (if recordset is showing in a modal or we are testing a related section)
+ * @param expectedRowValues array of `RecordsetRowValue` types for testing each cell
+ * @param isSoft if this test should run in sequence with other tests and not force the tests to end if it fails
+ */
 export async function testRecordsetTableRowValues(container: Page | Locator, expectedRowValues: RecordsetRowValue[], isSoft?: boolean) {
   const expectFn = isSoft ? expect.soft : expect;
 
@@ -161,6 +166,17 @@ export async function testColumnSort(modal: Locator, rawColumnName: string, expe
   await expect.soft(columnValues).toHaveText(expectedColumnValues);
 }
 
+/**
+ * test the displayed state of recordset table after first sorting then paging (without changing the sort criteria)
+ *
+ * @param button the ascending/descending button to verify is displayed
+ * @param rawColumnName raw column name for the column we are sorting by
+ * @param numRows number of rows displayed on this recordset page
+ * @param totalNumRecords total number of rows
+ * @param viewedPage string used in total count test (NOTE: assumes the data fits on 2 pages only)
+ * @param sortModifier string used in total count test depending on sort order
+ * @param rsContainer optional parameter to define if we are testing a recordset table with other recordset tables on the page
+ */
 export async function testRecordsetDisplayWSortAfterPaging(
   page: Page,
   button: Locator,
@@ -342,6 +358,12 @@ export async function testTimestampRangePickerInputsAfterZoom(
   await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }
 
+/**
+ * tests filling in the search box, submitting the search, then the number of rows displayed in the recordset table
+ *
+ * @param searchPhrase string to type into the search box
+ * @param count number of rows shown (and total)
+ */
 export async function testMainSearch(page: Page, searchPhrase: string, count: number) {
   const searchBox = RecordsetLocators.getMainSearchInput(page),
     searchSubmitButton = RecordsetLocators.getSearchSubmitButton(page),
