@@ -529,6 +529,8 @@ test.describe('View recordset', () => {
       }
     });
 
+    // This "step" of tests relies on a row being deleted at the end of the above `test.step`
+    //   because of this, the "sorting and paging" tests have to be run in sequence after the "presentation" tests
     await test.step('sorting and paging features', async () => {
       await test.step('should load recordset page', async () => {
         await page.goto(`${baseURL}${PAGE_URL}?limit=3`);
