@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 export type DefaultRangeInputLocators = {
   minInput: Locator;
@@ -43,16 +43,16 @@ export default class RecordsetLocators {
     await container.locator('.recordset-main-spinner').waitFor({ state: 'detached', timeout });
   }
 
-  static getAggregateSpinners(container: Page | Locator): Locator {
-    return container.locator('.table-column-spinner');
-  }
-
-  static async waitForAggregates(container: Page | Locator, timeout?: number): Promise<void> {
-    return this.getAggregateSpinners(container).waitFor({ state: 'hidden', timeout });
+  static async waitForRecordsetAggregates(container: Page | Locator) {
+    await expect.soft(container.locator('.table-column-spinner')).toHaveCount(0);
   }
 
   static getPageTitleElement(container: Page | Locator): Locator {
     return container.locator('#page-title');
+  }
+
+  static getPageTitleTooltip(container: Page | Locator): Locator {
+    return this.getPageTitleElement(container).locator('.chaise-icon-for-tooltip');
   }
 
   static getPermalinkButton(container: Page | Locator): Locator {
@@ -115,6 +115,14 @@ export default class RecordsetLocators {
    */
   static getTotalCount(container: Page | Locator): Locator {
     return container.locator('.chaise-table-header-total-count');
+  }
+
+  static getDisplayText(container: Page | Locator): Locator {
+    return this.getTotalCount(container).locator('.displaying-text');
+  }
+
+  static getTotalText(container: Page | Locator): Locator {
+    return this.getTotalCount(container).locator('.total-count-text');
   }
 
   static getNextButton(container: Page | Locator): Locator {

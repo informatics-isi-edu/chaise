@@ -30,6 +30,12 @@ type RecordsetColURLValue = {
 export type RecordsetColValue = Either<RecordsetColStringValue, RecordsetColURLValue> | string;
 export type RecordsetRowValue = RecordsetColValue[]
 
+export type TotalCountParts = {
+  displayingText: string,
+  dropdownButtonText: string,
+  totalText: string
+}
+
 /**
  *
  * @param container Page or recordset container (if recordset is showing in a modal or we are testing a related section)
@@ -369,15 +375,25 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
     searchSubmitButton = RecordsetLocators.getSearchSubmitButton(page),
     clearSearchButton = RecordsetLocators.getSearchClearButton(page);
 
-  let totalCountTextAfterSearch = `Displaying all${count}of ${count} matching results`;
-  if (count === 0) totalCountTextAfterSearch = `Displaying ${count} matching results`;
+  // `Displaying all${count}of ${count} matching results`;
+  const totalCountTextObjAfterSearch = {
+    displayingText: 'Displaying all',
+    dropdownButtonText: `${count}`,
+    totalText: `of ${count} matching results`
+  }
+
+  if (count === 0) {
+    // `Displaying ${count} matching results`
+    totalCountTextObjAfterSearch.displayingText = 'Displaying ';
+    totalCountTextObjAfterSearch.totalText = `${count} matching results`;
+  }
 
   await searchBox.fill(searchPhrase);
   await searchSubmitButton.click();
   await RecordsetLocators.waitForRecordsetPageReady(page);
 
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(count);
-  await testTotalCount(page, totalCountTextAfterSearch, true, count !== 0);
+  await testTotalCount(page, totalCountTextObjAfterSearch, count !== 0);
   if (count === 0) await expect.soft(RecordsetLocators.getNoResultsRow(page)).toHaveText('No Results Found');
 
   // clearing the search resets the page for the next test case
@@ -386,7 +402,12 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
 
   // NOTE: factor out "totalCount" if this function is reused
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(4);
-  await testTotalCount(page, 'Displaying all4of 4 matching results', true, true);
+  const totalCountTextObj = {
+    displayingText: 'Displaying all',
+    dropdownButtonText: '4',
+    totalText: 'of 4 matching results'
+  }
+  await testTotalCount(page, totalCountTextObj, true);
 }
 
 /**
@@ -394,30 +415,26 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
  *   the dropdown options text becomes part of getTotalCount().text
  *   e.g. `Displaying all${count} 10 25 50 100 200of ${count} matching results`
  *
- * @param totalCountText the text we are trying to test for
- * @param wasDropdownOpened if the page limit dropdown was opened before testing this
+ * @param totalCountText the text we are testing for
  * @param someRows if wasDropdownOpened is true, this variable should be defined when testing there are no rows
  */
-export async function testTotalCount(container: Page | Locator, totalCountText: string, wasDropdownOpened?: boolean, someRows?: boolean) {
-  const totalCount = RecordsetLocators.getTotalCount(container);
-
-  if (!wasDropdownOpened) {
-    await expect.soft(totalCount).toHaveText(totalCountText);
+export async function testTotalCount(
+  container: Page | Locator,
+  totalCountText: string | TotalCountParts,
+  someRows?: boolean)
+{
+  if (typeof totalCountText === 'string') {
+    await expect.soft(RecordsetLocators.getTotalCount(container)).toHaveText(totalCountText);
   } else {
     /**
      * there are 3 elements with text in them that make up the full total count string:
      *   '.displaying-text', '.dropdown.page-size-dropdown', and '.total-count-text'
      *
-     * Fetch each value individually and piece them together for the test.
-     *
-     * NOTE: this is not ideal but this might be better than the alternative which is passing
-     *   3 separate strings into this function and use expect.soft().toHaveText() for each element
+     * Fetch each value and test them separately
      */
-    const displayingText = await totalCount.locator('.displaying-text').textContent();
-    const dropdownButtonText = someRows ? await totalCount.locator('.page-size-dropdown').textContent() : '';
-    const totalText = await totalCount.locator('.total-count-text').textContent();
-
-    expect.soft(`${displayingText}${dropdownButtonText}${totalText}`).toEqual(totalCountText);
+    await expect.soft(RecordsetLocators.getDisplayText(container)).toHaveText(totalCountText.displayingText);
+    if (someRows) await expect.soft(RecordsetLocators.getPageLimitDropdown(container)).toHaveText(totalCountText.dropdownButtonText);
+    await expect.soft(RecordsetLocators.getTotalText(container)).toHaveText(totalCountText.totalText);
   }
 }
 

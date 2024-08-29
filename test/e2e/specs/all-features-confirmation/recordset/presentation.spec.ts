@@ -149,7 +149,11 @@ const testParams = {
         max_image_id: '',
         color_rgb_hex_column: '#523456'
       }
-    ],
+    ]
+  },
+  sorted_data_params: {
+    schema_name: 'product-recordset-sort',
+    table_name: 'accommodation',
     sortedData: [
       {
         columnName: 'Name of Accommodation',
@@ -192,7 +196,7 @@ const testParams = {
       },
       {
         columnName: 'Category',
-        rawColumnName: 'F8V7Ebs7zt7towDneZvefw',
+        rawColumnName: 'G7MCXC3VFcnilN5VWaYIpQ',
         columnPosition: 12,
         page1: {
           asc: ['Hotel', 'Hotel', 'Hotel'],
@@ -205,7 +209,7 @@ const testParams = {
       },
       {
         columnName: 'Type of Facilities',
-        rawColumnName: 'hZ7Jzy0aC3Q3KQqz4DIXTw',
+        rawColumnName: '5quCXEVdc3FV2L4xS7Bx6A',
         columnPosition: 13,
         page1: {
           asc: ['Basic', 'Luxury', 'Upscale'],
@@ -286,7 +290,6 @@ const testParams = {
 test.describe('View recordset', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  // NOTE: should this NOT run in CI still?
   test('For recordset with columns with waitfor', async ({ page, baseURL }, testInfo) => {
     const params = testParams.active_list;
     const data = params.data;
@@ -296,10 +299,7 @@ test.describe('View recordset', () => {
     await test.step('should load recordset page', async () => {
       await page.goto(`${baseURL}${PAGE_URL}@sort(${params.sortby})`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
-
-      // "wait for" table column aggregate spinners to all be hidden by waiting until the count retruned in 0
-      // NOTE: using `waitForAggregates` fails because there are "multiple spinners on the page"
-      await expect.soft(RecordsetLocators.getAggregateSpinners(page)).toHaveCount(0);
+      await RecordsetLocators.waitForRecordsetAggregates(page);
     });
 
     await test.step('should not show the total count if hide_row_count is true.', async () => {
@@ -313,11 +313,11 @@ test.describe('View recordset', () => {
     await test.step('going to a recordset page with no results, the loader for columns should hide.', async () => {
       await page.goto(`${baseURL}${PAGE_URL}/main_id=03`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
-      await RecordsetLocators.waitForAggregates(page);
+      await RecordsetLocators.waitForRecordsetAggregates(page);
     })
   });
 
-  test(`For table ${testParams.accommodation_tuple.table_name}`, async ({ page, baseURL }, testInfo) => {
+  test(`For table ${testParams.accommodation_tuple.table_name} presentation`, async ({ page, baseURL }, testInfo) => {
     const params = testParams.accommodation_tuple;
     const catalogID = getCatalogID(testInfo.project.name);
     const PAGE_URL = `/recordset/#${catalogID}/${params.schema_name}:${params.table_name}`
@@ -325,310 +325,324 @@ test.describe('View recordset', () => {
     await test.step('should load recordset page', async () => {
       await page.goto(`${baseURL}${PAGE_URL}/${params.key}@sort(${params.sortby})`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
-
-      // NOTE: same comment from above about multiple spinners on the page
-      await expect.soft(RecordsetLocators.getAggregateSpinners(page)).toHaveCount(0);
+      await RecordsetLocators.waitForRecordsetAggregates(page);
     });
 
-    await test.step('presentation of the recordset page', async () => {
-      if (!process.env.CI) {
-        await test.step('delete files', async () => {
-          // delete files that may have been downloaded before
-          await deleteDownloadedFiles(params.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
+    if (!process.env.CI) {
+      await test.step('delete files that may have been downloaded before', async () => {
+        await deleteDownloadedFiles(params.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
+    }
+
+    await test.step(`should have ${params.title} as title`, async () => {
+      await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText(params.title);
+    });
+
+    await test.step('should have the correct tooltip.', async () => {
+      await testTooltip(RecordsetLocators.getPageTitleTooltip(page), params.comment, APP_NAMES.RECORDSET);
+    });
+
+    await test.step('should have the correct head title using the heuristics for recordset app', async () => {
+      const ccHeadTitle = 'show me on the navbar!';
+      // <table-name> | chaiseConfig.headTitle
+      expect.soft(await page.title()).toContain(`${params.title} | ${ccHeadTitle}`);
+    });
+
+    await test.step('should display the permalink button & a tooltip on hovering over it', async () => {
+      const permalink = RecordsetLocators.getPermalinkButton(page);
+      await expect.soft(permalink).toBeVisible();
+
+      await testTooltip(permalink, testParams.tooltip.permalink, APP_NAMES.RECORDSET);
+    });
+
+    await test.step('should autofocus on search box', async () => {
+      const searchBox = RecordsetLocators.getMainSearchInput(page);
+      await expect.soft(searchBox).toBeVisible();
+
+      const activeElementClass = await page.evaluate('document.activeElement.className');
+      // main-search-input is hard-coded in `getMainSearchInput`, no need to have the "expected value" come from the element on the page
+      expect.soft(activeElementClass).toEqual('main-search-input');
+    });
+
+    // The annotated page size will be "added" to the page limit dropdown ONLY if it is the selected option
+    // Only need to test it is shown in the dropdown since that also implies it is selected
+    await test.step('should use annotated page size', async () => {
+      const expectedOptionText = '15';
+
+      const pageLimitDropdown = RecordsetLocators.getPageLimitDropdown(page);
+      await pageLimitDropdown.click();
+
+      const pageLimitOption = RecordsetLocators.getPageLimitSelector(page, expectedOptionText);
+      await expect.soft(pageLimitOption).toBeVisible();
+      await expect.soft(pageLimitOption).toHaveText(expectedOptionText);
+
+      // close the page limit dropdown
+      await pageLimitDropdown.click();
+    });
+
+    await test.step('should show correct table rows', async () => {
+      // mapping the data object values to an array for this test case
+      // NOTE: each object in data is only used for this test. the defined test params could be changed to be an array of rowValues instead
+      const testValues = params.data.map((tableRowData) => {
+        const rowValues = Object.values(tableRowData);
+
+        // removes the first entry in the array and adjusts the indexes of everything else
+        // NOTE: we don't want to test the "id" column
+        rowValues.shift();
+        return rowValues;
+      });
+
+      await testRecordsetTableRowValues(page, testValues, true);
+    });
+
+    await test.step(`should have ${params.columns.length} columns`, async () => {
+      const columnTitles = params.columns.map((col) => col.title);
+      await expect.soft(RecordsetLocators.getColumnNames(page)).toHaveText(columnTitles);
+    });
+
+    await test.step('should display the Export dropdown button with proper tooltip.', async () => {
+      const exportDropdown = ExportLocators.getExportDropdown(page);
+      await expect.soft(exportDropdown).toBeVisible();
+
+      await testTooltip(exportDropdown, testParams.tooltip.exportDropdown, APP_NAMES.RECORDSET);
+    });
+
+    await testExportDropdown(page, params.file_names, APP_NAMES.RECORDSET);
+
+    await test.step('should show information icon after column name in column headers which have a comment and inspect the comment value', async () => {
+      const columnsWComments = params.columns.filter((c) => typeof c.comment === 'string');
+
+      const columnsEls = RecordsetLocators.getColumnsWithTooltipIcon(page);
+      await expect.soft(columnsEls).toHaveCount(columnsWComments.length);
+
+      const testColumnTooltip = async (idx: number) => {
+
+        // if we reached the end of the list, then finish the test case
+        if (idx === columnsWComments.length) return;
+
+        const comment = columnsWComments[idx].comment;
+
+        await testTooltip(columnsEls.nth(idx), comment, APP_NAMES.RECORDSET, true)
+        await testColumnTooltip(idx + 1);
       }
 
-      await test.step(`should have ${params.title} as title`, async () => {
-        await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText(params.title);
-      });
-
-      await test.step('should have the correct tooltip.', async () => {
-        await testTooltip(RecordsetLocators.getPageTitleElement(page).locator('.chaise-icon-for-tooltip'), params.comment, APP_NAMES.RECORDSET);
-      });
-
-      await test.step('should have the correct head title using the heuristics for recordset app', async () => {
-        const ccHeadTitle = 'show me on the navbar!';
-        // <table-name> | chaiseConfig.headTitle
-        expect.soft(await page.title()).toContain(`${params.title} | ${ccHeadTitle}`);
-      });
-
-      await test.step('should display the permalink button & a tooltip on hovering over it', async () => {
-        const permalink = RecordsetLocators.getPermalinkButton(page);
-        await expect.soft(permalink).toBeVisible();
-
-        await testTooltip(permalink, testParams.tooltip.permalink, APP_NAMES.RECORDSET);
-      });
-
-      await test.step('should autofocus on search box', async () => {
-        const searchBox = RecordsetLocators.getMainSearchInput(page);
-        await expect.soft(searchBox).toBeVisible();
-
-        const activeElementClass = await page.evaluate('document.activeElement.className');
-        // main-search-input is hard-coded in `getMainSearchInput`, no need to have the "expected value" come from the element on the page
-        expect.soft(activeElementClass).toEqual('main-search-input');
-      });
-
-      // The annotated page size will be "added" to the page limit dropdown ONLY if it is the selected option
-      // Only need to test it is shown in the dropdown since that also implies it is selected
-      await test.step('should use annotated page size', async () => {
-        const expectedOptionText = '15';
-
-        const pageLimitDropdown = RecordsetLocators.getPageLimitDropdown(page);
-        await pageLimitDropdown.click();
-
-        const pageLimitOption = RecordsetLocators.getPageLimitSelector(page, expectedOptionText);
-        await expect.soft(pageLimitOption).toBeVisible();
-        await expect.soft(pageLimitOption).toHaveText(expectedOptionText);
-
-        // close the page limit dropdown
-        await pageLimitDropdown.click();
-      });
-
-      await test.step('should show correct table rows', async () => {
-        // mapping the data object values to an array for this test case
-        // NOTE: each object in data is only used for this test. the defined test params could be changed to be an array of rowValues instead
-        const testValues = params.data.map((tableRowData) => {
-          const rowValues = Object.values(tableRowData);
-
-          // removes the first entry in the array and adjusts the indexes of everything else
-          // NOTE: we don't want to test the "id" column
-          rowValues.shift();
-          return rowValues;
-        });
-
-        await testRecordsetTableRowValues(page, testValues, true);
-      });
-
-      await test.step(`should have ${params.columns.length} columns`, async () => {
-        const columnTitles = params.columns.map((col) => col.title);
-        await expect.soft(RecordsetLocators.getColumnNames(page)).toHaveText(columnTitles);
-      });
-
-      await test.step('should display the Export dropdown button with proper tooltip.', async () => {
-        const exportDropdown = ExportLocators.getExportDropdown(page);
-        await expect.soft(exportDropdown).toBeVisible();
-
-        await testTooltip(exportDropdown, testParams.tooltip.exportDropdown, APP_NAMES.RECORDSET);
-      });
-
-      await testExportDropdown(page, params.file_names, APP_NAMES.RECORDSET);
-
-      await test.step('should show information icon after column name in column headers which have a comment and inspect the comment value', async () => {
-        const columnsWComments = params.columns.filter((c) => typeof c.comment === 'string');
-
-        const columnsEls = RecordsetLocators.getColumnsWithTooltipIcon(page);
-        await expect.soft(columnsEls).toHaveCount(columnsWComments.length);
-
-        const testColumnTooltip = async (idx: number) => {
-
-          // if we reached the end of the list, then finish the test case
-          if (idx === columnsWComments.length) return;
-
-          const comment = columnsWComments[idx].comment;
-
-          await testTooltip(columnsEls.nth(idx), comment, APP_NAMES.RECORDSET, true)
-          await testColumnTooltip(idx + 1);
-        }
-
-        // go one by one over the columns w comments and test their tooltip
-        await testColumnTooltip(0);
-      });
-
-      await test.step('have correct tooltip for action column', async () => {
-        await testTooltip(RecordsetLocators.getActionsHeader(page), testParams.tooltip.actionCol, APP_NAMES.RECORDSET, true);
-      });
-
-      await test.step('apply different searches', async () => {
-        // apply simple search words
-        await testMainSearch(page, 'Super 8 North Hollywood Motel', 1);
-
-        // apply conjunctive search words
-        await testMainSearch(page, '"Super 8" motel "North Hollywood"', 1);
-
-        // apply non-matching search words
-        await testMainSearch(page, 'asdfghjkl', 0);
-      });
-
-      await test.step('JSON Column value should be searchable', async () => {
-        const searchBox = RecordsetLocators.getMainSearchInput(page),
-          searchSubmitButton = RecordsetLocators.getSearchSubmitButton(page);
-
-        // search for a row that is not the first one after sorting
-        await searchBox.fill('9876.3543');
-        await searchSubmitButton.click();
-        await RecordsetLocators.waitForRecordsetPageReady(page);
-
-        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
-        // clear search in next it case
-      });
-
-      await test.step('check the link of the view details after searching', async () => {
-        const keyValues = [{ column: 'id', value: params.data[3].id }];
-        const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
-
-        const filter = params.shortest_key_filter + dataRow.RID;
-        const viewUrl = `/record/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}`;
-
-        const firstRowActionButton = RecordsetLocators.getRows(page).nth(0).locator('.view-action-button');
-        expect.soft(await firstRowActionButton.getAttribute('href')).toContain(viewUrl);
-
-        // clear search
-        await RecordsetLocators.getSearchClearButton(page).click();
-      });
-
-      // view link here should be different from the `it` case above
-      await test.step('action columns should show view button that redirects to the record page', async () => {
-        const keyValues = [{ column: 'id', value: params.data[0].id }];
-        const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
-
-        const filter = params.shortest_key_filter + dataRow.RID;
-        const newPageUrl = `**/record/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}**`;
-
-        await expect.soft(RecordsetLocators.getViewActionButtons(page)).toHaveCount(4);
-
-        await RecordsetLocators.getRowViewButton(page, 0).click();
-        await page.waitForURL(newPageUrl);
-        await page.goBack();
-      });
-
-      await test.step('action columns should show edit button that redirects to the recordedit page', async () => {
-        const keyValues = [{ column: 'id', value: params.data[0].id }];
-        const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
-
-        const filter = params.shortest_key_filter + dataRow.RID;
-        const newPageUrl = `**/recordedit/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}**`;
-
-        await expect.soft(RecordsetLocators.getEditActionButtons(page)).toHaveCount(4);
-
-        const newPage = await clickNewTabLink(RecordsetLocators.getRowEditButton(page, 0));
-        await newPage.waitForURL(newPageUrl);
-        await newPage.close();
-      });
-
-      await test.step('action columns should show delete button that deletes record', async () => {
-        await expect.soft(RecordsetLocators.getDeleteActionButtons(page)).toHaveCount(4);
-
-        await RecordsetLocators.getRowDeleteButton(page, 3).click();
-
-        const modal = ModalLocators.getConfirmDeleteModal(page);
-        await ModalLocators.getOkButton(modal).click();
-
-        await RecordsetLocators.waitForRecordsetPageReady(page);
-        await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3)
-      });
-
-      if (!process.env.CI) {
-        await test.step('delete files', async () => {
-          // delete files that may have been downloaded before
-          await deleteDownloadedFiles(params.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
-      }
+      // go one by one over the columns w comments and test their tooltip
+      await testColumnTooltip(0);
     });
 
-    // This "step" of tests relies on a row being deleted at the end of the above `test.step`
-    //   because of this, the "sorting and paging" tests have to be run in sequence after the "presentation" tests
-    await test.step('sorting and paging features', async () => {
-      await test.step('should load recordset page', async () => {
-        await page.goto(`${baseURL}${PAGE_URL}?limit=3`);
-        await RecordsetLocators.waitForRecordsetPageReady(page);
+    await test.step('have correct tooltip for action column', async () => {
+      await testTooltip(RecordsetLocators.getActionsHeader(page), testParams.tooltip.actionCol, APP_NAMES.RECORDSET, true);
+    });
 
-        await expect.soft(RecordsetLocators.getRows(page).nth(2)).toBeVisible();
+    await test.step('apply different searches', async () => {
+      // apply simple search words
+      await testMainSearch(page, 'Super 8 North Hollywood Motel', 1);
+
+      // apply conjunctive search words
+      await testMainSearch(page, '"Super 8" motel "North Hollywood"', 1);
+
+      // apply non-matching search words
+      await testMainSearch(page, 'asdfghjkl', 0);
+    });
+
+    await test.step('JSON Column value should be searchable and check the link of the view details', async () => {
+      const searchBox = RecordsetLocators.getMainSearchInput(page),
+        searchSubmitButton = RecordsetLocators.getSearchSubmitButton(page);
+
+      // search for a row that is not the first one after sorting
+      await searchBox.fill('9876.3543');
+      await searchSubmitButton.click();
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
+
+      const keyValues = [{ column: 'id', value: params.data[3].id }];
+      const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
+
+      const filter = params.shortest_key_filter + dataRow.RID;
+      const viewUrl = `/record/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}`;
+
+      expect.soft(await RecordsetLocators.getRowViewButton(page, 0).getAttribute('href')).toContain(viewUrl);
+
+      // clear search
+      await RecordsetLocators.getSearchClearButton(page).click();
+    });
+
+    // view link here should be different from the `it` case above
+    await test.step('action columns should show view button that redirects to the record page', async () => {
+      const keyValues = [{ column: 'id', value: params.data[0].id }];
+      const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
+
+      const filter = params.shortest_key_filter + dataRow.RID;
+      const newPageUrl = `**/record/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}**`;
+
+      await expect.soft(RecordsetLocators.getViewActionButtons(page)).toHaveCount(4);
+
+      await RecordsetLocators.getRowViewButton(page, 0).click();
+      await page.waitForURL(newPageUrl);
+      await page.goBack();
+    });
+
+    await test.step('action columns should show edit button that redirects to the recordedit page', async () => {
+      const keyValues = [{ column: 'id', value: params.data[0].id }];
+      const dataRow = getEntityRow(testInfo, params.schema_name, params.table_name, keyValues);
+
+      const filter = params.shortest_key_filter + dataRow.RID;
+      const newPageUrl = `**/recordedit/#${catalogID}/${params.schema_name}:${params.table_name}/${filter}**`;
+
+      await expect.soft(RecordsetLocators.getEditActionButtons(page)).toHaveCount(4);
+
+      const newPage = await clickNewTabLink(RecordsetLocators.getRowEditButton(page, 0));
+      await newPage.waitForURL(newPageUrl);
+      await newPage.close();
+    });
+
+    await test.step('action columns should show delete button that deletes record', async () => {
+      await expect.soft(RecordsetLocators.getDeleteActionButtons(page)).toHaveCount(4);
+      // delete the 4th row (Hilton Hotel)
+      await RecordsetLocators.getRowDeleteButton(page, 3).click();
+
+      const modal = ModalLocators.getConfirmDeleteModal(page);
+      await ModalLocators.getOkButton(modal).click();
+
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3)
+    });
+
+    if (!process.env.CI) {
+      await test.step('delete files downloaded during the tests', async () => {
+        await deleteDownloadedFiles(params.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
+    }
+  });
+
+  // This "step" of tests relies on a row being deleted from the original data
+  //   because of this, the "sorting and paging" tests have to delete that row first
+  //   before testing the sorting and paging (without changing the expected data from before)
+  test('sorting and paging features', async ({ page, baseURL }, testInfo) => {
+    const params = testParams.sorted_data_params;
+    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`
+
+    await test.step('should load recordset page without limit to delete a row', async () => {
+      await page.goto(`${baseURL}${PAGE_URL}`);
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+    });
+
+    await test.step('delete row ', async () => {
+      await expect.soft(RecordsetLocators.getDeleteActionButtons(page)).toHaveCount(6);
+
+      // delete the 5th row (Hilton Hotel)
+      // different from the delete above because there is no "key"/"filter" appended to the url
+      await RecordsetLocators.getRowDeleteButton(page, 4).click();
+
+      const modal = ModalLocators.getConfirmDeleteModal(page);
+      await ModalLocators.getOkButton(modal).click();
+
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(5);
+    });
+
+    await test.step('reload recordset page with a limit', async () => {
+      await page.goto(`${baseURL}${PAGE_URL}?limit=3`);
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+
+      await expect.soft(RecordsetLocators.getRows(page).nth(2)).toBeVisible();
+    });
+
+    for (const [index, dataParams] of params.sortedData.entries()) {
+      const recordsOnPage1 = dataParams.page1.asc.length,
+        recordsOnPage2 = dataParams.page2.asc.length,
+        totalRecords = recordsOnPage1 + recordsOnPage2;
+
+      await test.step(`should sort ${dataParams.columnName} column in ascending order.`, async () => {
+        // if (dataParams.columnName === 'Category') await page.pause();
+        // Check the presence of initial sort button
+        await expect.soft(RecordsetLocators.getColumnSortButton(page, dataParams.rawColumnName)).toBeVisible();
+
+        // Click on sort button
+        await RecordsetLocators.getColumnSortButton(page, dataParams.rawColumnName).click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage1,
+          totalRecords,
+          'first'
+        );
+        await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page1.asc);
+
+        // Go to the next page
+        await RecordsetLocators.getNextButton(page).click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage2,
+          totalRecords,
+          'last'
+        );
+        await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page2.asc);
+
+        // Go to the previous page
+        await RecordsetLocators.getPreviousButton(page).click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage1,
+          totalRecords,
+          'first'
+        );
       });
 
-      for (const [index, dataParams] of params.sortedData.entries()) {
-        const recordsOnPage1 = dataParams.page1.asc.length,
-          recordsOnPage2 = dataParams.page2.asc.length,
-          totalRecords = recordsOnPage1 + recordsOnPage2;
+      await test.step(`should sort ${dataParams.columnName} column in descending order.`, async () => {
+        const sortDescBtn = RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName);
+        // Check the presence of descending sort button
+        await expect.soft(sortDescBtn).toBeVisible();
 
-        await test.step(`should sort ${dataParams.columnName} column in ascending order.`, async () => {
-          // Check the presence of initial sort button
-          await expect.soft(RecordsetLocators.getColumnSortButton(page, dataParams.rawColumnName)).toBeVisible();
+        // Click on sort button to sort in descending order
+        await sortDescBtn.click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage1,
+          totalRecords,
+          'first',
+          '::desc::'
+        );
+        await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page1.desc);
 
-          // Click on sort button
-          await RecordsetLocators.getColumnSortButton(page, dataParams.rawColumnName).click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage1,
-            totalRecords,
-            'first'
-          );
-          await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page1.asc);
+        // Go to the next page
+        await RecordsetLocators.getNextButton(page).click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage2,
+          totalRecords,
+          'last',
+          '::desc::'
+        );
+        await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page2.desc);
 
-          // Go to the next page
-          await RecordsetLocators.getNextButton(page).click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage2,
-            totalRecords,
-            'last'
-          );
-          await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page2.asc);
-
-          // Go to the previous page
-          await RecordsetLocators.getPreviousButton(page).click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage1,
-            totalRecords,
-            'first'
-          );
-        });
-
-        await test.step(`should sort ${dataParams.columnName} column in descending order.`, async () => {
-          const sortDescBtn = RecordsetLocators.getColumnSortDescButton(page, dataParams.rawColumnName);
-          // Check the presence of descending sort button
-          await expect.soft(sortDescBtn).toBeVisible();
-
-          // Click on sort button to sort in descending order
-          await sortDescBtn.click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage1,
-            totalRecords,
-            'first',
-            '::desc::'
-          );
-          await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page1.desc);
-
-          // Go to the next page
-          await RecordsetLocators.getNextButton(page).click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage2,
-            totalRecords,
-            'last',
-            '::desc::'
-          );
-          await expect.soft(RecordsetLocators.getColumnCells(page, dataParams.columnPosition)).toHaveText(dataParams.page2.desc);
-
-          // Go to the previous page
-          await RecordsetLocators.getPreviousButton(page).click();
-          await testRecordsetDisplayWSortAfterPaging(
-            page,
-            RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
-            dataParams.rawColumnName,
-            recordsOnPage1,
-            totalRecords,
-            'first',
-            '::desc::'
-          );
-        });
-      };
-    });
+        // Go to the previous page
+        await RecordsetLocators.getPreviousButton(page).click();
+        await testRecordsetDisplayWSortAfterPaging(
+          page,
+          RecordsetLocators.getColumnSortAscButton(page, dataParams.rawColumnName),
+          dataParams.rawColumnName,
+          recordsOnPage1,
+          totalRecords,
+          'first',
+          '::desc::'
+        );
+      });
+    };
   });
 
   test(`For table ${testParams.file_tuple.table_name}`, async ({ page, baseURL }, testInfo) => {

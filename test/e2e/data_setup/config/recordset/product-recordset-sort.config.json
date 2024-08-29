@@ -1,0 +1,15 @@
+{
+  "catalog": {},
+  "schema": {
+      "name": "product-recordset-sort",
+      "createNew": true,
+      "path": "test/e2e/data_setup/schema/recordset/product-recordset-sort.json"
+  },
+  "tables": {
+      "createNew": true
+  },
+  "entities": {
+      "createNew": true,
+      "path": "test/e2e/data_setup/data/product"
+  }
+}
