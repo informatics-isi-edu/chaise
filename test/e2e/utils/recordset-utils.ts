@@ -30,7 +30,18 @@ type RecordsetColURLValue = {
 export type RecordsetColValue = Either<RecordsetColStringValue, RecordsetColURLValue> | string;
 export type RecordsetRowValue = RecordsetColValue[]
 
+export type TotalCountParts = {
+  displayingText: string,
+  dropdownButtonText: string,
+  totalText: string
+}
 
+/**
+ *
+ * @param container Page or recordset container (if recordset is showing in a modal or we are testing a related section)
+ * @param expectedRowValues array of `RecordsetRowValue` types for testing each cell
+ * @param isSoft if this test should run in sequence with other tests and not force the tests to end if it fails
+ */
 export async function testRecordsetTableRowValues(container: Page | Locator, expectedRowValues: RecordsetRowValue[], isSoft?: boolean) {
   const expectFn = isSoft ? expect.soft : expect;
 
@@ -159,6 +170,41 @@ export async function testColumnSort(modal: Locator, rawColumnName: string, expe
   const columnValues = RecordsetLocators.getFirstColumn(modal);
   await expect.soft(columnValues).toHaveCount(expectedColumnValues.length);
   await expect.soft(columnValues).toHaveText(expectedColumnValues);
+}
+
+/**
+ * test the displayed state of recordset table after first sorting then paging (without changing the sort criteria)
+ *
+ * @param button the ascending/descending button to verify is displayed
+ * @param rawColumnName raw column name for the column we are sorting by
+ * @param numRows number of rows displayed on this recordset page
+ * @param totalNumRecords total number of rows
+ * @param viewedPage string used in total count test (NOTE: assumes the data fits on 2 pages only)
+ * @param sortModifier string used in total count test depending on sort order
+ * @param rsContainer optional parameter to define if we are testing a recordset table with other recordset tables on the page
+ */
+export async function testRecordsetDisplayWSortAfterPaging(
+  page: Page,
+  button: Locator,
+  rawColumnName: string,
+  numRows: number,
+  totalNumRecords: number,
+  viewedPage: 'first' | 'last',
+  sortModifier?: '::desc::' | '::asc::' | '',
+  rsContainer?: Locator,
+) {
+  const container: Page | Locator = rsContainer || page;
+  if (!sortModifier) sortModifier = '';
+
+  await RecordsetLocators.waitForRecordsetPageReady(container);
+  await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRows);
+  await testTotalCount(container, `Displaying ${viewedPage}${numRows}of ${totalNumRecords} records`);
+
+  // Check the presence of asc/desc sort button
+  await expect.soft(button).toBeVisible();
+
+  // Check if the url has @sort by column name
+  expect.soft(page.url()).toContain(`@sort(${rawColumnName}${sortModifier},RID)`);
 }
 
 /**
@@ -318,7 +364,81 @@ export async function testTimestampRangePickerInputsAfterZoom(
   await testInputValue(false, rangeInputs.maxTimeInput, max.time);
 }
 
-/** Reusable Test Steps **/
+/**
+ * tests filling in the search box, submitting the search, then the number of rows displayed in the recordset table
+ *
+ * @param searchPhrase string to type into the search box
+ * @param count number of rows shown (and total)
+ */
+export async function testMainSearch(page: Page, searchPhrase: string, count: number) {
+  const searchBox = RecordsetLocators.getMainSearchInput(page),
+    searchSubmitButton = RecordsetLocators.getSearchSubmitButton(page),
+    clearSearchButton = RecordsetLocators.getSearchClearButton(page);
+
+  // `Displaying all${count}of ${count} matching results`;
+  const totalCountTextObjAfterSearch = {
+    displayingText: 'Displaying all',
+    dropdownButtonText: `${count}`,
+    totalText: `of ${count} matching results`
+  }
+
+  if (count === 0) {
+    // `Displaying ${count} matching results`
+    totalCountTextObjAfterSearch.displayingText = 'Displaying ';
+    totalCountTextObjAfterSearch.totalText = `${count} matching results`;
+  }
+
+  await searchBox.fill(searchPhrase);
+  await searchSubmitButton.click();
+  await RecordsetLocators.waitForRecordsetPageReady(page);
+
+  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(count);
+  await testTotalCount(page, totalCountTextObjAfterSearch, count !== 0);
+  if (count === 0) await expect.soft(RecordsetLocators.getNoResultsRow(page)).toHaveText('No Results Found');
+
+  // clearing the search resets the page for the next test case
+  await clearSearchButton.click();
+  await RecordsetLocators.waitForRecordsetPageReady(page);
+
+  // NOTE: factor out "totalCount" if this function is reused
+  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(4);
+  const totalCountTextObj = {
+    displayingText: 'Displaying all',
+    dropdownButtonText: '4',
+    totalText: 'of 4 matching results'
+  }
+  await testTotalCount(page, totalCountTextObj, true);
+}
+
+/**
+ * tests the total count displayed text. If the page limit dropdown was opened,
+ *   the dropdown options text becomes part of getTotalCount().text
+ *   e.g. `Displaying all${count} 10 25 50 100 200of ${count} matching results`
+ *
+ * @param totalCountText the text we are testing for
+ * @param someRows if wasDropdownOpened is true, this variable should be defined when testing there are no rows
+ */
+export async function testTotalCount(
+  container: Page | Locator,
+  totalCountText: string | TotalCountParts,
+  someRows?: boolean)
+{
+  if (typeof totalCountText === 'string') {
+    await expect.soft(RecordsetLocators.getTotalCount(container)).toHaveText(totalCountText);
+  } else {
+    /**
+     * there are 3 elements with text in them that make up the full total count string:
+     *   '.displaying-text', '.dropdown.page-size-dropdown', and '.total-count-text'
+     *
+     * Fetch each value and test them separately
+     */
+    await expect.soft(RecordsetLocators.getDisplayText(container)).toHaveText(totalCountText.displayingText);
+    if (someRows) await expect.soft(RecordsetLocators.getPageLimitDropdown(container)).toHaveText(totalCountText.dropdownButtonText);
+    await expect.soft(RecordsetLocators.getTotalText(container)).toHaveText(totalCountText.totalText);
+  }
+}
+
+/****** Reusable Test Steps ******/
 
 /**
  * this is done in multiple places for facet specs. it will reset the state of the facets.

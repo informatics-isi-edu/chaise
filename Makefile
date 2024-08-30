@@ -63,7 +63,7 @@ E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.confi
 E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.ts
 E2EDrecordLinks=test/e2e/specs/default-config/record/links.config.ts
 # Recordset tests
-E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
+E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.config.ts
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/facet.config.ts
@@ -91,7 +91,7 @@ DefaultConfigParallel=test/e2e/specs/default-config/playwright.config.ts
 Manualrecordset=test/manual/specs/recordset.conf.js
 
 # protractor tests
-RECORDSET_TESTS_PROTRACTOR=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
+RECORDSET_TESTS_PROTRACTOR=$(E2ErecordsetAdd) $(E2EDrecordsetEdit)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
@@ -102,7 +102,7 @@ ALL_TESTS_PROTRACTOR=$(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR)
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
-RECORDSET_TESTS=$(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
 RECORDEDIT_TESTS=$(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
