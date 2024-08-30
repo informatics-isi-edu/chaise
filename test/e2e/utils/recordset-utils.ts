@@ -321,29 +321,21 @@ export async function testTimestampRangePickerInputsAfterZoom(
 /** Reusable Test Steps **/
 
 /**
- * this is done in multiple places for facet specs. it will reset the state of the page.
+ * this is done in multiple places for facet specs. it will reset the state of the facets.
  * @param page the page object
  * @param url the url of the page
  * @param totalNumFacets how many facets there are
  * @param openedFacets facets that are opened and should be closed
  * @param pageSizeAfterClear the page size after clear is clicked
  */
-export async function openRecordsetAndResetFacetState(
-  page: Page, url: string, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number
-) {
-  const clearAll = RecordsetLocators.getClearAllFilters(page);
+export async function resetFacetState(page: Page, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number) {
   const closedFacets = RecordsetLocators.getClosedFacets(page);
-
-  await test.step('should load recordset page', async () => {
-    await page.goto(url);
-    await RecordsetLocators.waitForRecordsetPageReady(page);
-
-    // without this the test might fail
-    // wait for the default facets to open first
-    await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
-  });
+  const clearAll = RecordsetLocators.getClearAllFilters(page);
 
   await test.step('clear all filters', async () => {
+    // wait for the default facets to open first
+    await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
+
     await clearAll.click();
     await expect.soft(clearAll).not.toBeVisible();
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
@@ -356,6 +348,25 @@ export async function openRecordsetAndResetFacetState(
       await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
     }
   });
+}
+
+/**
+ * same as resetFacetState but opens the recordset page first.
+ * @param page the page object
+ * @param url the url of the page
+ * @param totalNumFacets how many facets there are
+ * @param openedFacets facets that are opened and should be closed
+ * @param pageSizeAfterClear the page size after clear is clicked
+ */
+export async function openRecordsetAndResetFacetState(
+  page: Page, url: string, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number
+) {
+  await test.step('should load recordset page', async () => {
+    await page.goto(url);
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+  });
+
+  await resetFacetState(page, totalNumFacets, openedFacets, pageSizeAfterClear);
 }
 
 /**
@@ -389,4 +400,478 @@ export async function testFacetOptionsAndModalRows(page: Page, facetIdx: number,
     await ModalLocators.getCloseBtn(modal).click();
     await expect.soft(modal).not.toBeAttached();
   });
+}
+
+type TestIndividualFacetParamsGeneral = {
+  /**
+   * the index of facet in the reference.facetColumns list
+   */
+  index: number,
+  /**
+   * the name of the facet
+   */
+  name: string,
+  /**
+   * number of rows on the page after selecting the not-null option
+   */
+  notNullNumRows?: number,
+  /**
+   * number of rows on the page after selecting the null option
+   */
+  nullNumRows?: number,
+};
+
+type TestIndividualFacetParamsCheckPresence = TestIndividualFacetParamsGeneral & {
+  type: 'check_presence',
+  /**
+   * the filter that will be displayed once the not-null option is selected
+   */
+  notNullFilter: string,
+  /**
+   * the filter that will be displayed once the null option is selected
+   */
+  nullFilter: string
+}
+
+type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
+  type: 'choice',
+  isBoolean?: boolean,
+  isEntityMode?: boolean,
+  searchPlaceholder?: string,
+  /**
+   * initially displayed option
+   */
+  options: string[],
+  /**
+   * the option that should be selected
+   */
+  option: number,
+  /**
+   * the filter that will be displayed once the option is selected
+   */
+  filter: string,
+  /**
+   * number of rows on the page after selecting the option
+   */
+  numRows: number,
+}
+
+type TestIndividualFacetParamsRange = TestIndividualFacetParamsGeneral & {
+  type: 'numeric' | 'date' | 'timestamp',
+
+  /**
+   * number of already existing options.
+   */
+  listElems: number,
+  /**
+   * initial value in the min input
+   */
+  initialMin: string | { date: string, time: string },
+  /**
+   * initial value in the max input
+   */
+  initialMax: string | { date: string, time: string },
+  /**
+   * an invalid value to test the error handling.
+   */
+  invalid?: string,
+  /**
+   * The error that will be displayed if the input is invalid
+   */
+  error: string,
+
+  range: {
+    min: string | { date: string, time: string },
+    max: string | { date: string, time: string },
+    /**
+     * the filter that will be displayed after submitting this range
+     */
+    filter: string,
+    /**
+     * number of rows that will be displayed after submitting this range.
+     */
+    numRows: number
+  },
+
+  justMin: {
+    min: string | { date: string, time: string },
+    filter: string,
+    numRows: number
+  },
+
+  justMax: {
+    max: string | { date: string, time: string },
+    filter: string,
+    numRows: number
+  },
+
+}
+
+export type TestIndividualFacetParams = Either<
+  TestIndividualFacetParamsChoice,
+  Either<TestIndividualFacetParamsCheckPresence, TestIndividualFacetParamsRange>
+>;
+
+/**
+ * This function can be used for testing an individual facet. This opens the facet, test its features, and then will close it.
+ */
+export async function testIndividualFacet(page: Page, pageSize: number, totalNumFacets: number, facetParams: TestIndividualFacetParams) {
+  switch (facetParams.type) {
+    case 'choice':
+      await test.step('for choice facet,', async () => {
+        const facet = RecordsetLocators.getFacetById(page, facetParams.index);
+        await test.step('open the facet and check the available options.', async () => {
+          await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
+          // open facet
+          await openFacetAndTestFilterOptions(page, facet, facetParams.index, facetParams.options, 1);
+
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
+
+          if (!facetParams.isBoolean) {
+            // make sure search placeholder is correct
+            let placeholder = 'Search';
+            if (facetParams.searchPlaceholder) {
+              placeholder += ' ' + facetParams.searchPlaceholder;
+            } else if (facetParams.isEntityMode) {
+              placeholder += ' all columns';
+            }
+
+            await expect.soft(RecordsetLocators.getFacetSearchPlaceholderById(facet)).toHaveText(placeholder);
+          }
+        });
+
+        await test.step('select a value to filter on and update the search criteria', async () => {
+          await testSelectFacetOptionThenClear(
+            page,
+            facetParams.index,
+            facetParams.option,
+            facetParams.filter,
+            facetParams.numRows,
+            pageSize
+          );
+
+          // close the facet
+          await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+        });
+      });
+      break;
+    case 'numeric':
+    case 'date':
+      await test.step('for range facet', async () => {
+        const facet = RecordsetLocators.getFacetById(page, facetParams.index);
+        const rangeInputs = RecordsetLocators.getFacetRangeInputs(facet);
+        await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
+          await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
+          // +2 is for null and not-null.
+          await openFacet(page, facet, facetParams.index, (facetParams.listElems ? facetParams.listElems : 0) + 2, 1);
+
+          // wait for facet to open
+          await expect.soft(rangeInputs.submit).toBeVisible();
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
+
+          // wait for intial values to be set
+          await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+          // first clear the min and max
+          await clearRangeInput(rangeInputs.minInput);
+          await clearRangeInput(rangeInputs.maxInput);
+
+          // now send an invalid value for min
+          if (facetParams.invalid) await fillRangeInput(rangeInputs.minInput, facetParams.invalid);
+
+          const validationError = RecordsetLocators.getRangeInputValidationError(facet);
+          await expect.soft(validationError).toBeVisible();
+          if (facetParams.error) await expect.soft(validationError).toHaveText(facetParams.error);
+
+          // remove the invalid value so we can continue with the tests
+          await clearRangeInput(rangeInputs.minInput);
+
+          // test min and max being set
+          // define test params values
+          if (typeof facetParams.range.min === 'string' && typeof facetParams.range.max === 'string') {
+            await fillRangeInput(rangeInputs.minInput, facetParams.range.min);
+            await fillRangeInput(rangeInputs.maxInput, facetParams.range.max);
+
+            // let validation message disappear
+            await expect.soft(validationError).not.toBeVisible();
+            await testRangeInputSubmitThenClear(
+              page,
+              facet,
+              rangeInputs.submit,
+              facetParams.range.filter,
+              facetParams.range.numRows,
+              pageSize
+            );
+            await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+            // clear inputs
+            await clearRangeInput(rangeInputs.minInput);
+            await clearRangeInput(rangeInputs.maxInput);
+          }
+        });
+
+        if (typeof facetParams.notNullNumRows === 'number') {
+          await test.step('should be able to filter not-null values.', async () => {
+            await testSelectFacetOption(page, facet, 0, facetParams.notNullNumRows!, 1);
+
+            // make sure submit is disabled
+            await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
+
+            await testClearAllFilters(page, pageSize, facet, 0);
+            await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+            // clear inputs
+            await clearRangeInput(rangeInputs.minInput);
+            await clearRangeInput(rangeInputs.maxInput);
+          });
+        }
+
+        if (typeof facetParams.nullNumRows === 'number') {
+          await test.step('should be able to filter null values.', async () => {
+            await testSelectFacetOption(page, facet, 1, facetParams.nullNumRows!, 1);
+
+            await testClearAllFilters(page, pageSize, facet, 1);
+            await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+            // clear inputs
+            await clearRangeInput(rangeInputs.minInput);
+            await clearRangeInput(rangeInputs.maxInput);
+          });
+        }
+
+        await test.step('should filter on just a min value and update the search criteria.', async () => {
+          if (!facetParams.justMin || typeof facetParams.justMin.min !== 'string') return;
+
+          // test just min being set
+          await fillRangeInput(rangeInputs.minInput, facetParams.justMin.min);
+
+          // let validation message disappear
+          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await testRangeInputSubmitThenClear(
+            page,
+            facet,
+            rangeInputs.submit,
+            facetParams.justMin.filter,
+            facetParams.justMin.numRows,
+            pageSize
+          );
+
+          await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+          await clearRangeInput(rangeInputs.minInput);
+          await clearRangeInput(rangeInputs.maxInput);
+        });
+
+        await test.step('should filter on just a max value and update the search criteria.', async () => {
+          if (!facetParams.justMax || typeof facetParams.justMax.max !== 'string') return;
+
+          // test just max being set
+          await fillRangeInput(rangeInputs.maxInput, facetParams.justMax.max);
+
+          // let validation message disappear
+          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await testRangeInputSubmitThenClear(
+            page,
+            facet,
+            rangeInputs.submit,
+            facetParams.justMax.filter,
+            facetParams.justMax.numRows,
+            pageSize
+          );
+
+          await testDefaultRangePickerInitialValues(rangeInputs, facetParams);
+
+          // close the facet
+          await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+        });
+      });
+
+      break;
+    case 'timestamp':
+      await test.step('for timetamp range facet', async () => {
+        const facet = RecordsetLocators.getFacetById(page, facetParams.index);
+        const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(facet);
+        await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
+          await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
+          await openFacet(page, facet, facetParams.index, facetParams.listElems + 2, 1);
+
+          // wait for facet to open
+          await expect.soft(rangeInputs.submit).toBeVisible();
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
+
+          // wait for intial values to be set
+          await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+          // test validator by clearing the date input
+          await clearRangeInput(rangeInputs.minDateInput);
+
+          const validationError = RecordsetLocators.getRangeInputValidationError(facet);
+          await expect.soft(validationError).toBeVisible();
+          await expect.soft(validationError).toHaveText(facetParams.error);
+
+          // clear the inputs first so we can then change their values
+          await clearRangeInput(rangeInputs.maxDateInput);
+          await clearRangeInput(rangeInputs.minTimeInput);
+          await clearRangeInput(rangeInputs.maxTimeInput);
+
+          // test min and max being set
+          if (typeof facetParams.range.min === 'object' && typeof facetParams.range.max === 'object') {
+            // define test params values
+            await fillRangeInput(rangeInputs.minDateInput, facetParams.range.min.date);
+            await fillRangeInput(rangeInputs.maxDateInput, facetParams.range.max.date);
+
+            await fillRangeInput(rangeInputs.minTimeInput, facetParams.range.min.time);
+            await fillRangeInput(rangeInputs.maxTimeInput, facetParams.range.max.time);
+
+            // let validation message disappear
+            await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+            await testRangeInputSubmitThenClear(
+              page,
+              facet,
+              rangeInputs.submit,
+              facetParams.range.filter,
+              facetParams.range.numRows,
+              pageSize
+            );
+
+            await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+          }
+
+          // clear the inputs
+          await clearRangeInput(rangeInputs.minDateInput);
+          await clearRangeInput(rangeInputs.maxDateInput);
+          await clearRangeInput(rangeInputs.minTimeInput);
+          await clearRangeInput(rangeInputs.maxTimeInput);
+        });
+
+        if (typeof facetParams.notNullNumRows === 'number') {
+          await test.step('should be able to filter not-null values.', async () => {
+            await testSelectFacetOption(page, facet, 0, facetParams.notNullNumRows!, 1);
+
+            // make sure submit is disabled
+            await expect.soft(rangeInputs.submit).toHaveAttribute('disabled');
+
+            await testClearAllFilters(page, pageSize, facet, 0);
+            await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+            // clear the inputs
+            await clearRangeInput(rangeInputs.minDateInput);
+            await clearRangeInput(rangeInputs.maxDateInput);
+            await clearRangeInput(rangeInputs.minTimeInput);
+            await clearRangeInput(rangeInputs.maxTimeInput);
+          });
+        }
+
+        if (typeof facetParams.nullNumRows === 'number') {
+          await test.step('should be able to filter not-null values.', async () => {
+            await testSelectFacetOption(page, facet, 1, facetParams.nullNumRows!, 1);
+
+            await testClearAllFilters(page, pageSize, facet, 1);
+            await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+            // clear the inputs
+            await clearRangeInput(rangeInputs.minDateInput);
+            await clearRangeInput(rangeInputs.maxDateInput);
+            await clearRangeInput(rangeInputs.minTimeInput);
+            await clearRangeInput(rangeInputs.maxTimeInput);
+          });
+        }
+
+        await test.step('should filter on just a min value and update the search criteria.', async () => {
+          if (!facetParams.justMin || typeof facetParams.justMin.min !== 'object') return;
+
+          // test just min being set
+          await fillRangeInput(rangeInputs.minDateInput, facetParams.justMin.min.date);
+          await fillRangeInput(rangeInputs.minTimeInput, facetParams.justMin.min.time);
+
+          // let validation message disappear
+          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await testRangeInputSubmitThenClear(
+            page,
+            facet,
+            rangeInputs.submit,
+            facetParams.justMin.filter,
+            facetParams.justMin.numRows,
+            pageSize
+          );
+
+          await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+          // clear the inputs
+          await clearRangeInput(rangeInputs.minDateInput);
+          await clearRangeInput(rangeInputs.maxDateInput);
+          await clearRangeInput(rangeInputs.minTimeInput);
+          await clearRangeInput(rangeInputs.maxTimeInput);
+        });
+
+        await test.step('should filter on just a max value and update the search criteria.', async () => {
+          if (!facetParams.justMax || typeof facetParams.justMax.max !== 'object') return;
+
+          // test just max being set
+          await fillRangeInput(rangeInputs.maxDateInput, facetParams.justMax.max.date);
+          await fillRangeInput(rangeInputs.maxTimeInput, facetParams.justMax.max.time);
+
+          // let validation message disappear
+          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await testRangeInputSubmitThenClear(
+            page,
+            facet,
+            rangeInputs.submit,
+            facetParams.justMax.filter,
+            facetParams.justMax.numRows,
+            pageSize
+          );
+
+          await testTimestampRangePickerInitialValues(rangeInputs, facetParams);
+
+          // close the facet
+          await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+        });
+      });
+
+      break;
+    case 'check_presence':
+      await test.step('for check_presence facet', async () => {
+        const facet = RecordsetLocators.getFacetById(page, facetParams.index);
+        await test.step('should open the facet and the two options should be available.', async () => {
+          await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
+
+          await openFacetAndTestFilterOptions(page, facet, facetParams.index, ['All records with value', 'No value'], 1);
+
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
+        });
+
+        await test.step('selecting the not-null option, should only show the applicable rows.', async () => {
+          if (facetParams.notNullNumRows === undefined) return;
+
+          await testSelectFacetOptionThenClear(
+            page,
+            facetParams.index,
+            0,
+            facetParams.notNullFilter,
+            facetParams.notNullNumRows,
+            pageSize
+          );
+        });
+
+        await test.step('selecting the null option, should only show the applicable rows.', async () => {
+          if (facetParams.nullNumRows === undefined) return;
+
+          await testSelectFacetOptionThenClear(
+            page,
+            facetParams.index,
+            1,
+            facetParams.nullFilter,
+            facetParams.nullNumRows,
+            pageSize
+          );
+
+          await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+        });
+      });
+
+      break;
+    default:
+      break;
+  }
 }

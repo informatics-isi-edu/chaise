@@ -167,7 +167,7 @@ export enum APP_NAMES {
   RECORDEDIT = 'recordedit',
   RECORDSET = 'recordset',
   VIEWER = 'viewer'
-};
+}
 
 export const CLASS_NAMES = {
   CONTENT_LOADED: '-chaise-post-load',

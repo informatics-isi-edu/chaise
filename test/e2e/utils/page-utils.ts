@@ -221,3 +221,35 @@ export async function testExportDropdown(page: Page, fileNames: string[]) {
     });
   }
 }
+
+/**
+ * Click on an element and move to a given destionation.
+ *
+ * Issues:
+ * - While this function works and is deterministic, it might not do exactly what you would expect. For example if you
+ *   use this for testing ChaiseDroppable component, depending on the size of the elements the dragged element might not
+ *   end up in the droppable position. This is because while an element is being dragged, the position of other elements
+ *   also changes. So the original position of "droppable" (where we want the element to go) might not correspond with
+ *   the actual order of elements. For example assume we have Item1, Item2, and Item3 in a ChaiseDroppable, and we want to
+ *   move Item1 to the position of Item3. Depending on the size of items, calling this function might either change the order
+ *   to Item2, Item1, Item3 or Item2, Item3, Item1.
+ * - This function cannot properly handle scrolling and dragging.
+ *
+ * https://github.com/microsoft/playwright/issues/20254#issuecomment-1771669110
+ * @param page
+ * @param draggable
+ * @param droppable
+ */
+export async function dragAndDropWithScroll(page: Page, draggable: Locator, droppable: Locator) {
+  const box = (await droppable.boundingBox())!;
+  await draggable.hover();
+
+  await page.mouse.down();
+  await droppable.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+    steps: 5,
+  });
+  await page.mouse.up();
+  await page.waitForTimeout(100);
+}
