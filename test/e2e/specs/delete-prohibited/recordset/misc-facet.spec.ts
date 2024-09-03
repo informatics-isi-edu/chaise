@@ -11,10 +11,11 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { 
+import {
   openFacet, openFacetAndTestFilterOptions, testColumnSort,
   testClearAllFilters, testFacetOptionsAndModalRows, testModalClose,
-  testSelectFacetOption, testShowMoreClick, testSubmitModalSelection
+  testSelectFacetOption, testShowMoreClick,
+  testSubmitModalSelection, testTotalCount
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 const testParams = {
@@ -291,16 +292,16 @@ test.describe('Other facet features', () => {
     await test.step('should open the facet, select a value to filter on.', async () => {
       // wait for facet to open
       await openFacet(
-        page, 
-        facet, 
+        page,
+        facet,
         testParams.filter_secondary_key.facetIdx,
         testParams.filter_secondary_key.totalNumOptions,
         4 // 3 facets open on page load
       );
 
       await testSelectFacetOption(
-        page, 
-        facet, 
+        page,
+        facet,
         testParams.filter_secondary_key.option,
         testParams.filter_secondary_key.numRows,
         1
@@ -309,7 +310,7 @@ test.describe('Other facet features', () => {
 
     await test.step('the selected value should be selected in the modal.', async () => {
       await testShowMoreClick(facet, modal, 12, 1);
-      
+
       await expect.soft(RecordsetLocators.getCheckboxInputs(modal).nth(testParams.filter_secondary_key.selectedModalOption)).toBeChecked();
     });
 
@@ -462,7 +463,7 @@ test.describe('Other facet features', () => {
     await test.step('null should be provided as an option and user should be able to select it.', async () => {
       const params = testParams.null_filter.panel;
       const facet = RecordsetLocators.getFacetById(page, params.facetIdx);
-      
+
       await openFacet(page, facet, params.facetIdx, params.totalNumOptions, 4);
 
       await testSelectFacetOption(page, facet, params.option, params.numRows, 1);
@@ -644,7 +645,7 @@ test.describe('Other facet features', () => {
 
       // facet is already open so we don't have to click to open
       await testShowMoreClick(facet, modal, params.numModalOptions, 0);
-      await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
+      await testTotalCount(modal, params.displayingText);
 
       await testModalClose(modal);
     });
@@ -658,7 +659,7 @@ test.describe('Other facet features', () => {
       await openFacet(page, facet, params.facetIdx, 11, 4);
 
       await testShowMoreClick(facet, modal, params.numModalOptions, 0);
-      await expect.soft(RecordsetLocators.getTotalCount(modal)).toHaveText(params.displayingText);
+      await testTotalCount(modal, params.displayingText);
 
       await testModalClose(modal);
     });
@@ -693,7 +694,7 @@ test.describe('Other facet features', () => {
       /**
        * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
        *   value for the rows that are hidden because of the height logic
-       * 
+       *
        * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
        */
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.options);
@@ -715,7 +716,7 @@ test.describe('Other facet features', () => {
       /**
        * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
        *   value for the rows that are hidden because of the height logic
-       * 
+       *
        * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
        */
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.optionsWOFilter);
@@ -873,7 +874,7 @@ test.describe('Other facet features', () => {
 
         // make sure side bar is shown
         await expect.soft(RecordsetLocators.getSidePanel(modal)).toBeVisible();
-        // make sure 'hide' filter panel button is shown 
+        // make sure 'hide' filter panel button is shown
         await expect.soft(RecordsetLocators.getHideFilterPanelBtn(modal)).toBeVisible();
       });
 
@@ -930,7 +931,7 @@ test.describe('Other facet features', () => {
 
         // make sure side bar is shown
         await expect.soft(RecordsetLocators.getSidePanel(modal)).toBeVisible();
-        // make sure 'hide' filter panel button is shown 
+        // make sure 'hide' filter panel button is shown
         await expect.soft(RecordsetLocators.getHideFilterPanelBtn(modal)).toBeVisible();
       });
 
@@ -971,7 +972,7 @@ test.describe('Other facet features', () => {
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
 
       await openFacetAndTestFilterOptions(page, facet, params.facet, params.options, 2);
-      
+
       await testSelectFacetOption(page, facet, params.option, params.numRowsWFacet, 2);
     });
 
@@ -981,11 +982,11 @@ test.describe('Other facet features', () => {
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRowsWOCustomFacet);
       // wait for list to be fully visible
       await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
-        
+
       /**
        * NOTE: this was getFacetOptionsText in protractor because for some reason the .getText started returning empty
        *   value for the rows that are hidden because of the height logic
-       * 
+       *
        * This doesn't seem to be an issue anymore but leaving this comment in case this fails randomly later
        */
       await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(params.optionsWOCustomFacet);

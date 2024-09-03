@@ -10,7 +10,7 @@ import {
   testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
@@ -359,7 +359,7 @@ test.describe('Related tables', () => {
         await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
         const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-        await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+        await testTotalCount(rsModal, expectedText);
 
         // select 'Television' (not deletable)
         await RecordsetLocators.getRowCheckboxInput(rsModal, 0).click();
@@ -497,7 +497,7 @@ test.describe('Related tables', () => {
       await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText('Link accommodation_image to Accommodations: Super 8 North Hollywood Motel');
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
 
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText('Displaying first2records');
+      await testTotalCount(rsModal, 'Displaying first2records');
 
       await ModalLocators.getCloseBtn(rsModal).click();
       await expect.soft(rsModal).not.toBeAttached();
@@ -512,7 +512,7 @@ test.describe('Related tables', () => {
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'association_table_markdown',
         tableName: 'association_table_markdown',
-        entityMarkdownName: '1:Television',
+        entityMarkdownName: ' 1:Television', // space added in markdown name since this is only tested in tooltips and some other tooltips don't have the space
         associationLeafTableName: 'related_table',
         baseTableName: 'Accommodations',
         isAssociation: true,

@@ -799,7 +799,7 @@ var recordPage = function() {
       var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
       // the link is not a child of the table, rather one of the accordion group
       return el.element(by.css(".bulk-edit-link"));
-  };
+    };
 
     this.getAddRecordLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
