@@ -24,8 +24,6 @@ import {
   SelectedRow,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
-// providers
-
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
@@ -513,9 +511,9 @@ const RelatedTableActions = ({
         const deleteTuples = () => {
           leafReference
             .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
-            .then((response: any)=>{
+            .then((response: any) => {
               setShowPureBinarySpinner(false);
-              if(response.failedTupleData.length>0){
+              if (response.failedTupleData.length > 0) {
                 response.clickOkToDismiss = true;
 
                 // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
@@ -536,17 +534,17 @@ const RelatedTableActions = ({
                   },
                 });
               }
-              else{
-              setUnlinkPureBinaryModalProps(null);
-              updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
+              else {
+                setUnlinkPureBinaryModalProps(null);
+                updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
               }
             })
-            .catch((err: Error)=>{
+            .catch((err: Error) => {
               setShowPureBinarySpinner(false);
-            // errors that land here would be execution of code errors
-            // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
-            //   as part of the deleteErrors object in the success cb
-            // NOTE: if one of the identifying values is empty or null, an error is thrown here
+              // errors that land here would be execution of code errors
+              // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+              //   as part of the deleteErrors object in the success cb
+              // NOTE: if one of the identifying values is empty or null, an error is thrown here
               dispatchError({ error: err, isDismissible: true });
             })
         };
@@ -606,7 +604,7 @@ const RelatedTableActions = ({
 
   let pureAndBinaryTitleComment;
   if (usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP) {
-    pureAndBinaryTitleComment= usedRef.comment;
+    pureAndBinaryTitleComment = usedRef.comment;
   }
 
   const mainTable = (

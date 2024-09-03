@@ -1,7 +1,13 @@
+import { expect, Page, test } from '@playwright/test';
+import moment from 'moment';
+
+//locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
+
+//utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
@@ -9,8 +15,6 @@ import {
   testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
   testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { expect, Page, test } from '@playwright/test';
-import moment from 'moment';
 import { testRecordsetTableRowValues } from '../../../utils/recordset-utils';
 
 const testParams = {
