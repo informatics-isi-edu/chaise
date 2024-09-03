@@ -319,16 +319,18 @@ const FormRow = ({
     const safeClassNameId = `${formNumber}-${makeSafeIdAttr(column.displayname.value)}`;
 
     const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
+    const prefill = reference.prefillForCreateAssociation;
     /**
-     * add foreginkey callbacks to generated input if:
+     * add foreignkey callbacks to generated input if:
+     *  - there is a prefillForCreateAssociation defined
      *  - there is a pair of columns that create a unique assocation that use the prefill behavior
      *  - the column is a foreignkey
      *  - and the column is the one used for associating to the leaf table of the association
      */
-    if (reference.prefill.isUnique && column.isForeignKey && reference.prefill.leafColumn.name === colName) {
+    if (prefill?.isUnique && column.isForeignKey && prefill.leafColumn.name === colName) {
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
         column.reference.contextualize.compactSelectForeignKey,
-        reference.prefill.disabledRowsFilter(),
+        prefill.disabledRowsFilter(),
         prefillAssociationSelectedRows
       );
 

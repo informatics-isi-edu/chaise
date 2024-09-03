@@ -75,7 +75,8 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    if (reference.prefill.isUnique && cm.column.name === reference.prefill.leafColumn.name) {
+    const prefill = reference.prefillForCreateAssociation
+    if (prefill?.isUnique && cm.column.name === prefill.leafColumn.name) {
       return false
     }
 

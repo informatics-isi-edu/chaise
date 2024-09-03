@@ -288,6 +288,7 @@ export default function RecordeditProvider({
     if (!reference || setupStarted.current) return;
     setupStarted.current = true;
 
+    // should only be available in create mode
     const prefillObj = getPrefillObject(queryParams);
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
@@ -415,8 +416,8 @@ export default function RecordeditProvider({
         }
 
         if (prefillObj) {
-          // initialize `ERMrest.Prefill` object on reference
-          reference.computePrefill(prefillObj);
+          // initialize `ERMrest.PrefillForCreateAssociation` object on reference
+          reference.computePrefillForCreateAssociation(prefillObj);
           setPrefillObject(prefillObj);
         }
 
@@ -798,8 +799,8 @@ export default function RecordeditProvider({
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
 
-    // prefillAssocationSelectedRows is only used when in create mode, with a prefill object, and there is a unique association
-    if (reference.prefill.isUnqiue) {
+    // prefillAssocationSelectedRows is only used when there is a prefill object and there is a unique association
+    if (reference.prefillForCreateAssociation?.isUnique) {
       const tempSelectedRows = [...prefillAssociationSelectedRows];
 
       indexes.forEach((index: number) => {
@@ -827,6 +828,8 @@ export default function RecordeditProvider({
    * @param newRow the new row to keep track of, if not defined removes the previous row
    */
   const updateAssociationSelectedRows = (formNumber: number, newRow?: SelectedRow) => {
+    if (!reference.prefillForCreateAssociation) return;
+
     const tempSelectedRows = [...prefillAssociationSelectedRows];
 
     // find the index in forms for the form number
