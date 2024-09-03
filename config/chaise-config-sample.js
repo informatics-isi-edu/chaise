@@ -51,14 +51,14 @@ var chaiseConfig = {
             //     // This "Search" menu item has 2 nested dropdowns.
             //     // Use the "name" key to label a menu item.
             //     // Use the "children" key to specify dropdowns; you can nest as many dropdowns as you need.
-            //     name: "Search",
+            //     nameMarkdownPattern: "Search",
             //     children: [
             //         {
-            //             name: "Search 1",
+            //             nameMarkdownPattern: "Search 1",
             //             children: [
             //                 {
-            //                     name: "Search 1.1",
-            //                     url: "/chaise/recordset/#1/YOUR_SCHEMA:YOUR_TABLE"
+            //                     nameMarkdownPattern: "Search 1.1",
+            //                     urlPattern: "/chaise/recordset/#1/YOUR_SCHEMA:YOUR_TABLE"
             //                 }
             //             ]
             //         }
@@ -68,8 +68,8 @@ var chaiseConfig = {
             //     // This "Create" menu item doesn't have any dropdowns.
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
-            //     name: "Create",
-            //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
+            //     nameMarkdownPattern: "Create",
+            //     urlPattern: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
             //     // Define globus groups or users that can see and and be able to click the link or navigate the submenu
             //     // If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default
             //     // An empty array (`[]`) will hide the link or disable it for everyone
@@ -80,13 +80,13 @@ var chaiseConfig = {
             // },
             // {
             //     // URLs support templating primarily for catalog substition
-            //     name: "Create",
-            //     url: "/chaise/recordedit/#{{$catalog.snapshot}}/YOUR_SCHEMA:YOUR_TABLE"
+            //     nameMarkdownPattern: "Create",
+            //     urlPattern: "/chaise/recordedit/#{{$catalog.snapshot}}/YOUR_SCHEMA:YOUR_TABLE"
             // },
             // {
             //     // set header to true to create an unclickable bold menu option with class `chaise-dropdown-header`
-            //     name: "A header",
-            //     header: true
+            //     nameMarkdownPattern: "A header",
+            //     type: "header"
             // }
         ]
     },

@@ -5,8 +5,10 @@ import RecordsetLocators, { TimestampDateTime } from '@isrd-isi-edu/chaise/test/
 
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { 
-  testRangePickerInputsAfterZoom, testTimestampRangePickerInputsAfterZoom 
+import {
+  testRangePickerInputsAfterZoom,
+  testTimestampRangePickerInputsAfterZoom,
+  testTotalCount
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 const testParams = {
@@ -94,7 +96,7 @@ test.describe('Testing features for range picker facet types with histograms', (
 
       if (facetParams.name === 'timestamp_col') {
         const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(facet);
-        
+
         await test.step('should have a histogram displayed with min/max inputs filled in.', async () => {
           // wait for facet to open
           await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
@@ -104,8 +106,8 @@ test.describe('Testing features for range picker facet types with histograms', (
           await expect.soft(RecordsetLocators.getFacetHistogram(facet)).toBeVisible();
 
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.initialMin as TimestampDateTime, 
+            rangeInputs,
+            facetParams.initialMin as TimestampDateTime,
             facetParams.initialMax as TimestampDateTime
           );
         });
@@ -117,8 +119,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.zoom1.min as TimestampDateTime, 
+            rangeInputs,
+            facetParams.zoom1.min as TimestampDateTime,
             facetParams.zoom1.max as TimestampDateTime
           );
 
@@ -130,8 +132,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.zoom2.min as TimestampDateTime, 
+            rangeInputs,
+            facetParams.zoom2.min as TimestampDateTime,
             facetParams.zoom2.max as TimestampDateTime
           );
 
@@ -141,7 +143,7 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           // wait for facet filters to load
           await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(1);
-          await expect.soft(RecordsetLocators.getTotalCount(page)).toHaveText(facetParams.allRecords);
+          await testTotalCount(page, facetParams.allRecords);
         });
 
         await test.step('zoom in once more, unzoom once, then reset the histogram.', async () => {
@@ -150,8 +152,8 @@ test.describe('Testing features for range picker facet types with histograms', (
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
 
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.zoom3.min as TimestampDateTime, 
+            rangeInputs,
+            facetParams.zoom3.min as TimestampDateTime,
             facetParams.zoom3.max as TimestampDateTime
           );
 
@@ -160,8 +162,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.zoom2.min as TimestampDateTime, 
+            rangeInputs,
+            facetParams.zoom2.min as TimestampDateTime,
             facetParams.zoom2.max as TimestampDateTime
           );
 
@@ -170,8 +172,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.initialMin as TimestampDateTime, 
+            rangeInputs,
+            facetParams.initialMin as TimestampDateTime,
             facetParams.initialMax as TimestampDateTime
           );
         });
@@ -181,8 +183,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.zoom1.min as TimestampDateTime, 
+            rangeInputs,
+            facetParams.zoom1.min as TimestampDateTime,
             facetParams.zoom1.max as TimestampDateTime
           );
 
@@ -192,8 +194,8 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testTimestampRangePickerInputsAfterZoom(
-            rangeInputs, 
-            facetParams.initialMin as TimestampDateTime, 
+            rangeInputs,
+            facetParams.initialMin as TimestampDateTime,
             facetParams.initialMax as TimestampDateTime
           );
       });
@@ -229,9 +231,9 @@ test.describe('Testing features for range picker facet types with histograms', (
           await expect.soft(histogramButtons.unzoomDisabled).toHaveCount(0);
 
           await testRangePickerInputsAfterZoom(
-            rangeInputs, 
-            isFloat, 
-            facetParams.zoom1.min as string, 
+            rangeInputs,
+            isFloat,
+            facetParams.zoom1.min as string,
             facetParams.zoom1.max as string
           );
         });
@@ -253,7 +255,7 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           // wait for facet filters to load
           await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(1);
-          await expect.soft(RecordsetLocators.getTotalCount(page)).toHaveText(facetParams.allRecords);
+          await testTotalCount(page, facetParams.allRecords);
         });
 
         await test.step('zoom in once more, unzoom once, then reset the histogram.', async () => {
@@ -270,7 +272,7 @@ test.describe('Testing features for range picker facet types with histograms', (
           if (facetParams.name === 'int_col') {
             await expect.soft(histogramButtons.zoomDisabled).toHaveCount(1);
           }
-          
+
           // unzoom
           await histogramButtons.unzoom.click();
 
@@ -299,12 +301,12 @@ test.describe('Testing features for range picker facet types with histograms', (
 
           await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
           await testRangePickerInputsAfterZoom(
-            rangeInputs, 
-            isFloat, 
-            facetParams.zoom1.min as string, 
+            rangeInputs,
+            isFloat,
+            facetParams.zoom1.min as string,
             facetParams.zoom1.max as string
           );
-           
+
           const clearAll = RecordsetLocators.getClearAllFilters(page);
           await clearAll.click();
           await expect.soft(clearAll).not.toBeVisible();

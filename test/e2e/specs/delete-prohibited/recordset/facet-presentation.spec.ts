@@ -102,6 +102,9 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
   });
 
   if (!process.env.CI) {
+    // NOTE: the page would load and every check would succeed until this check where only 1 filter would be shown
+    //   - noticed the id filter would show but the int_col facet would not have a selection or a filter shown
+    //   - can't understand why this is happening in github actions. this can't be reproduced locally
     await test.step('should have 2 filters selected', async () => {
       await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(testParams.defaults.numFilters);
     });

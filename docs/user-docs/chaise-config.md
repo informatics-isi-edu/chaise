@@ -206,13 +206,12 @@ If a property appears in the same configuration twice, the property defined late
        newTab: <true|false>,
        children: [
          {
-           name: <display name>,
-           markdownName: <pattern>
-           url: <pattern>,
+           nameMarkdownPattern: <pattern>,
+           urlPattern: <pattern>,
+           type: <menu|url|header>,
            children: [ <menuOption>, ... ],
            acls: { show: [], enable:[] },
-           newTab: <true|false>,
-           header: <true|false>
+           newTab: <true|false>
          },
          <menuOption>,
          ...
@@ -224,13 +223,20 @@ If a property appears in the same configuration twice, the property defined late
      - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Define this property here in `navbarMenu` to have all children and children of children inherit the same link functionality. If undefined at root, `newTab` is treated as `true`.
      - `children`: Array - used to specify dropdowns, you can nest as many dropdowns as you need.
    - `menuOption` attributes
-     - `name`: String - label of the menu item
-     - `markdownName`: String - use this to override the `name` property and add markdown styling to the label of the menu item. Can be used to attach a class for CSS styles to be applied to, read more in the [markdown document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md).
-     - `url`: String - this menu item's url. URLs can be absolute or relative to the document root. URLs support templating primarily for catalog substition.
+     - `type`: String - set the type of the menu option to change how it is displayed. Types include: `menu`, `url`, `header`. More info for each type can be found below.
+     - `nameMarkdownPattern`: String _required_ - label of the menu item. Will be computed by performing [Pattern Expansion](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/annotation.md#pattern-expansion) on the pattern to obtain a markdown-formatted text value which will be rendered using a markdown renderer.
+       - `name` (DEPRECATED): use `nameMarkdownPattern` instead
+       - `markdownName` (DEPRECATED): use `nameMarkdownPattern` instead
+     - `urlPattern`: String - this menu item's url. URLs can be absolute or relative to the document root. URLs support templating primarily for catalog substition.
+       - `url` (DEPRECATED): use `urlPattern` instead
      - `children`: Array - used to specify dropdowns, you can nest as many dropdowns as you need.
      - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. Follows the same rules for defaults defined above.
      - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Each child menu item checks for a `newTab` property on itself, if nothing is set, the child inherits from it's parent.
-     - `header`: Boolean _optional_ - set to true to create an un-clickable bold menu option with class `chaise-dropdown-header`
+    - `header` (DEPRECATED): use `type = header` instead
+   - Values allowed for `type` attribute
+     - `menu`: display the menu item with a sub menu. Valid if children Array is defined and length is greater than 0.
+     - `url`: display the menu item as a url link. Valid if `urlPattern` evaluates into a non `null` value
+     - `header`: display the menu item as an unclickable header with bold text
    - Sample syntax:
      ```
      navbarMenu: {

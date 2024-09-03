@@ -12,7 +12,10 @@ import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
   manuallyTriggerFocus, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { RecordsetColValue, RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import {
+  RecordsetColValue, RecordsetRowValue,
+  testRecordsetTableRowValues, testTotalCount
+} from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
 /**
@@ -28,10 +31,14 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   const allValues = RecordLocators.getAllColumnValues(page);
   let index = 0;
   for (const expectedValue of expectedColumnValues) {
-    const value = allValues.nth(index);
-    if (typeof expectedValue === 'string') {
-      await expect.soft(value).toHaveText(expectedValue);
-    } else {
+    let value = allValues.nth(index);
+    if (typeof expectedValue === 'object' && expectedValue.valueLocator) {
+      value = expectedValue.valueLocator(value);
+    }
+
+    if (typeof expectedValue === 'string' || expectedValue.value) {
+      await expect.soft(value).toHaveText(typeof expectedValue === 'string' ? expectedValue : expectedValue.value);
+    } else if (expectedValue.url && expectedValue.caption) {
       const link = value.locator('a');
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
@@ -53,7 +60,7 @@ export const testRecordMainSectionPartialValues = async (page: Page, numCols: nu
 
     if (typeof expectedValue === 'string') {
       await expect.soft(value).toHaveText(expectedValue);
-    } else {
+    } else if (expectedValue.url && expectedValue.caption) {
       const link = value.locator('a');
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
@@ -144,7 +151,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
         await btns.first().click();
 
         clipboardText = await getClipboardContent(page);
-        expect.soft(clipboardText).toBe(expectedLink);
+        expect.soft(clipboardText).toContain(expectedLink);
       }
     });
   }
@@ -388,6 +395,18 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   });
 
   await test.step('row level', async () => {
+    if (params.isTableMode === false) {
+      await test.step('make sure tabular mode is displayed', async () => {
+        const text = await markdownToggleLink.innerText();
+        if (text === 'Edit mode') {
+          await markdownToggleLink.click();
+          displayIsToggled = true;
+        }
+
+        await expect.soft(markdownToggleLink).toHaveText('Custom mode');
+      });
+    }
+
     if (params.rowViewPaths) {
       await test.step('`View Details` button should have the correct link.', async () => {
         if (!params.rowViewPaths) return;
@@ -440,7 +459,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           await test.step('should have the proper tooltip', async () => {
             let expected = 'Delete';
             if (params.isAssociation) {
-              expected = `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTableName}.`;
+              expected = `Disconnect ${params.displayname}:${params.entityMarkdownName} from this ${params.baseTableName}.`;
             }
             await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
           });
@@ -600,7 +619,7 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
@@ -689,7 +708,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();

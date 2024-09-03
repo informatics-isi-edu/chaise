@@ -5,7 +5,7 @@ export default getConfig({
   configFileName: 'record/dev.json',
   mainSpecName: 'all-features-confirmation',
   testMatch: [
-    // 'presentation.spec.ts',
+    'presentation.spec.ts',
     'create-btn.spec.ts',
     'delete-btn.spec.ts',
     'edit-btn.spec.ts'
