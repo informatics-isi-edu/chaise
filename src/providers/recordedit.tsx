@@ -415,11 +415,9 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
-        if (prefillObj) {
-          // initialize `ERMrest.PrefillForCreateAssociation` object on reference
-          reference.computePrefillForCreateAssociation(prefillObj);
-          setPrefillObject(prefillObj);
-        }
+        // initialize `ERMrest.PrefillForCreateAssociation` object on reference even if we don't have a prefillObj
+        reference.computePrefillForCreateAssociation(prefillObj);
+        if (prefillObj) setPrefillObject(prefillObj);
 
         setInitialized(true);
       } else if (session) {
