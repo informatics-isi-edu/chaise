@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import RecordeditLocators, { RecordeditArrayBaseType, RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, setInputValue, testFormValuesForAColumn, testSubmission
@@ -456,7 +456,7 @@ const testParams = {
       },
       {
         type: RecordeditInputType.ARRAY,
-        arrayBaseType: RecordeditArrayBaseType.TEXT,
+        arrayBaseType: RecordeditInputType.TEXT,
         column_name: 'array_text',
         column_displayname: 'array_text',
         apply_to_all: {

@@ -39,19 +39,6 @@ export enum RecordeditInputType {
   TEXT = 'text'
 }
 
-export enum RecordeditArrayBaseType {
-  TIMESTAMP = 'timestamp',
-  DATE = 'date',
-  INT_2 = 'integer2',
-  INT_4 = 'integer4',
-  INT_8 = 'integer8',
-  NUMBER = 'number',
-  BOOLEAN = 'boolean',
-  MARKDOWN = 'markdown',
-  LONGTEXT = 'longtext',
-  TEXT = 'text'
-}
-
 export default class RecordeditLocators {
 
   static async waitForRecordeditPageReady(container: Locator | Page, timeout?: number) {
@@ -192,6 +179,12 @@ export default class RecordeditLocators {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
     return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-control');
+  }
+
+  static getInputRemoveButton(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.remove-input-btn');
   }
 
   static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
@@ -383,6 +376,7 @@ export default class RecordeditLocators {
   }
 
   // ------------- array selectors ----------------- //
+
   static getArrayFieldContainer(container: Locator | Page, name: string, formNumber: number) {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
@@ -392,17 +386,38 @@ export default class RecordeditLocators {
   /**
    * TODO this only supports array of texts for now and should be changed later for other types.
    */
-  static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number, baseType: string) {
+  static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number) {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
     const elem = container.locator(`.array-input-field-container-${inputName}`);
     return {
       container: elem,
       addItemContainer: elem.locator('.add-element-container'),
-      addItemInput: elem.locator('.add-element-container input'),
       addItemButton: elem.locator('.add-button'),
       removeItemButtons: elem.locator('.array-remove-button'),
-      inputs: elem.locator('li input')
     };
+  }
+
+  static getArrayInputName(name: string, index: number) {
+    const append = index === -1 ? 'new-item' : `${index}-val`;
+    return `${name}-${append}`;
+  }
+
+
+  // ------------- markdown selectors ----------------- //
+  static getMarkdownElements(container: Locator | Page, name: string, formNumber: number) {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    const elem = container.locator(`.input-switch-container-${inputName}`);
+
+    return {
+      container: elem,
+      getButton: (title: string) => elem.locator(`button[title="${title}"]`),
+      helpButton: elem.locator('button[title="Help"]'),
+      previewButton: elem.locator('button[title="Preview"]'),
+      fullScreenButton: elem.locator('button[title="Fullscreen Preview"]'),
+      previewContent: elem.locator('.md-preview .markdown-container')
+    }
+
   }
 }

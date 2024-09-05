@@ -66,7 +66,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-    if (!dateVal && !timeVal && !props.requiredInput) {
+    if (!dateVal && !timeVal) {
       if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
       trigger(props.name);
@@ -89,18 +89,14 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
       }
     }
 
-    // if only time is missing, use 00:00:00 for it
+    // if time is missing, use 00:00:00 for it
     let timeValTemp = '';
-    if (!timeVal && !props.requiredInput) {
+    if (!timeVal) {
       timeValTemp = '00:00:00';
+      setValue(`${props.name}-time`, timeValTemp);
     }
     // otherwise validate the time value
     else {
-      if (!timeVal) {
-        setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: 'Please enter a valid time' });
-        setValue(props.name, 'invalid-value');
-        return;
-      }
       const err = VALIDATE_VALUE_BY_TYPE['time'](timeVal);
       if (typeof err === 'string') {
         setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: err });

@@ -1,5 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
-import RecordeditLocators, { RecordeditArrayBaseType, RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import { test, expect } from '@playwright/test';
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
@@ -70,18 +70,18 @@ const testParams: {
           { name: 'opened_on', displayname: 'Operational Since', type: RecordeditInputType.TIMESTAMP, isRequired: true },
           { name: 'date_col', displayname: 'date_col', type: RecordeditInputType.DATE },
           { name: 'luxurious', displayname: 'Is Luxurious', type: RecordeditInputType.BOOLEAN, isRequired: true },
-          { name: 'text_array', displayname: 'text_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.TEXT },
-          { name: 'boolean_array', displayname: 'boolean_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.BOOLEAN },
-          { name: 'int4_array', displayname: 'int4_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.INT_4 },
-          { name: 'float4_array', displayname: 'float4_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.NUMBER },
-          { name: 'date_array', displayname: 'date_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.DATE },
+          { name: 'text_array', displayname: 'text_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.TEXT },
+          { name: 'boolean_array', displayname: 'boolean_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.BOOLEAN },
+          { name: 'int4_array', displayname: 'int4_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.INT_4 },
+          { name: 'float4_array', displayname: 'float4_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.NUMBER },
+          { name: 'date_array', displayname: 'date_array', type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.DATE },
           {
             name: 'timestamp_array', displayname: 'timestamp_array',
-            type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.TIMESTAMP
+            type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.TIMESTAMP
           },
           {
             name: 'timestamptz_array', displayname: 'timestamptz_array',
-            type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditArrayBaseType.TIMESTAMP
+            type: RecordeditInputType.ARRAY, arrayBaseType: RecordeditInputType.TIMESTAMP
           },
           { name: 'color_rgb_hex_column', displayname: 'color_rgb_hex_column', type: RecordeditInputType.COLOR, isRequired: true },
         ],
@@ -91,11 +91,10 @@ const testParams: {
             'rating': '1', 'summary': 'This is the summary of this column 1.', 'description': '## Description 1',
             'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             'no_of_rooms': '1', 'opened_on': { date_value: '2017-01-01', time_value: '01:01:01' }, 'date_col': '2017-01-01', 'luxurious': 'false',
-            // TODO
-            // 'text_array': ['v1', 'v2'], 'boolean_array': ['true'],
-            // 'int4_array': ['1', '2'], 'float4_array': ['1', '2.2'],
-            // 'date_array': ['2001-01-01', '2002-02-02'], 'timestamp_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
-            // 'timestamptz_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
+            'text_array': ['v1', 'v2'], 'boolean_array': ['true'],
+            'int4_array': ['1', '2'], 'float4_array': ['1', '2.2'],
+            'date_array': ['2001-01-01', '2002-02-02'], 'timestamp_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
+            'timestamptz_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
             'color_rgb_hex_column': '#123456'
           },
           {
@@ -103,11 +102,9 @@ const testParams: {
             'rating': '2', 'summary': 'This is the summary of this column 2.', 'description': '## Description 2',
             'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             'no_of_rooms': '2', 'opened_on': { date_value: '2017-02-02', time_value: '02:02:02' }, 'date_col': '2017-02-02', 'luxurious': 'true',
-            // TODO
-            // 'text_array': ['v2', 'v3'], 'boolean_array': ['false'],
-            //  'int4_array': ['1', '2'], 'float4_array': ['2', '3.3'],
-            // 'date_array': ['2002-02-02'], 'timestamp_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
-            // 'timestamptz_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
+            'text_array': ['v2', 'v3'], 'boolean_array': ['false'], 'int4_array': ['1', '2'], 'float4_array': ['2', '3.3'],
+            'date_array': ['2002-02-02'], 'timestamp_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
+            'timestamptz_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
             'color_rgb_hex_column': '#654321'
           }
         ]
@@ -126,8 +123,7 @@ const testParams: {
             '1.0000', 'This is the summary of this column 1.', 'Description 1',
             JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             '1', '2017-01-01 01:01:01', '2017-01-01', 'false',
-            '', '', '', '', '', '', '', // TODO
-            // 'v1, v2', 'true', '1, 2', '1.0000, 2.2000', '2001-01-01, 2002-02-02', '2001-01-01 01:01:01', '2001-01-01 01:01:01',
+            'v1, v2', 'true', '1, 2', '1.0000, 2.2000', '2001-01-01, 2002-02-02', '2001-01-01 01:01:01', '2001-01-01 01:01:01',
             '#123456'
           ],
           [
@@ -136,14 +132,12 @@ const testParams: {
             '2.0000', 'This is the summary of this column 2.', 'Description 2',
             JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             '2', '2017-02-02 02:02:02', '2017-02-02', 'true',
-            '', '', '', '', '', '', '', // TODO
-            // 'v2, v3', 'false', '1, 2', '2.0000, 3.3000', '2002-02-02', '2002-02-02 02:02:02', '2002-02-02 02:02:02',
+            'v2, v3', 'false', '1, 2', '2.0000, 3.3000', '2002-02-02', '2002-02-02 02:02:02', '2002-02-02 02:02:02',
             '#654321'
           ]
         ]
       }
     },
-    // TODO
     {
       num_files: 2, // only two forms will be submitted
       presentation: {
@@ -271,17 +265,28 @@ test.describe('Recordedit create', () => {
     const presentation = params.presentation;
 
     test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
+      const numForms = presentation.inputs.length;
+
       await test.step('open recordedit page', async () => {
         const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
         await page.goto(url);
       });
+
+      if (numForms > 1) {
+        await test.step('clone more forms', async () => {
+          let cnt = 1;
+          while (cnt < numForms) {
+            await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
+            await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(++cnt);
+          }
+        });
+      }
 
       // test everything related to the form
       await testFormPresentationAndValidation(page, baseURL, testInfo, presentation, false);
 
       // this test clones the form and then remove the extra one. just to make sure nothing is affected by this.
       await test.step('remove form', async () => {
-        const numForms = presentation.inputs.length;
         // for the tests with file, we want to remove the actual form instead of adding a new one.
         const addExtraForm = params.num_files === 0;
 
@@ -316,10 +321,6 @@ test.describe('Recordedit create', () => {
       });
     });
   }
-
-  // TODO When url has a prefill query string param set
-
-
 
   test.afterAll(async () => {
     await deleteFiles(testFiles);

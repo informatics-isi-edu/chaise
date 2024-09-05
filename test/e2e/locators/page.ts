@@ -17,4 +17,8 @@ export default class PageLocators {
   static getFooterLink(page: Page): Locator {
     return PageLocators.getFooterContainer(page).locator('a');
   }
+
+  static getHelpPageMainTable(page: Page): Locator {
+    return page.locator('#mainTable')
+  }
 }
