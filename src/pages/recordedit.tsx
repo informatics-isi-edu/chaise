@@ -22,12 +22,13 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { addAppContainerClasses } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const recordeditSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORDEDIT,
@@ -85,16 +86,22 @@ const RecordeditApp = (): JSX.Element => {
       }
 
 
+      let prefillObj = null;
       let logAppMode = LogAppModes.EDIT;
       if (appMode === appModes.COPY) {
         logAppMode = LogAppModes.CREATE_COPY;
       } else if (appMode === appModes.CREATE) {
         if (res.queryParams.invalidate && res.queryParams.prefill) {
           logAppMode = LogAppModes.CREATE_PRESELECT;
+
+          prefillObj = getPrefillObject(res.queryParams);
         } else {
           logAppMode = LogAppModes.CREATE;
         }
       }
+
+      // initialize `ERMrest.PrefillForCreateAssociation` object on reference even if we don't have a prefillObj
+      reference.computePrefillForCreateAssociation(prefillObj);
 
       const logStack = [
         LogService.getStackNode(

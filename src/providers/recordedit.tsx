@@ -415,8 +415,6 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
-        // initialize `ERMrest.PrefillForCreateAssociation` object on reference even if we don't have a prefillObj
-        reference.computePrefillForCreateAssociation(prefillObj);
         if (prefillObj) setPrefillObject(prefillObj);
 
         setInitialized(true);
