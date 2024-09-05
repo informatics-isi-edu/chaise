@@ -1,14 +1,16 @@
 import { execSync } from 'child_process';
 import { resolve } from 'path';
-import { expect, Locator, Page } from '@playwright/test';
+import test, { expect, Locator, Page, TestInfo } from '@playwright/test';
 
-import { UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import { APP_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import RecordeditLocators, { RecordeditArrayBaseType, RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 export type RecordeditExpectedColumn = {
   name: string,
@@ -42,7 +44,8 @@ export type RecordeditFile = {
   size: number | string,
   path: string,
   skipCreation?: boolean,
-  skipDeletion?: boolean
+  skipDeletion?: boolean,
+  tooltip?: string
 }
 
 /**
@@ -90,6 +93,11 @@ export const selectFile = async (file: RecordeditFile, fileInputBtn: Locator, fi
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles(resolve(UPLOAD_FOLDER, file.path));
   await expect.soft(fileTextInput).toHaveText(file.name);
+
+  // TODO why is this not working?
+  // if (file.tooltip) {
+  //   await testTooltip(fileTextInput, file.tooltip, APP_NAMES.RECORDEDIT, true);
+  // }
 }
 
 
@@ -114,14 +122,13 @@ type SetInputValueProps = string | RecordeditFile | {
   time_value: string
 } | {
   modal_num_rows: number,
-  modal_option_index: number
+  modal_option_index: number,
+  rowName?: string
 };
 
 /**
  *
  * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', 'array' , or any other string
- *
- * NOTE: 'array' only supports array of texts for now.
  *
  * expected valueProps:
  * {
@@ -143,7 +150,7 @@ type SetInputValueProps = string | RecordeditFile | {
  */
 export const setInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
-  valueProps: SetInputValueProps | SetInputValueProps[]
+  valueProps: SetInputValueProps | SetInputValueProps[], arrayBaseType?: RecordeditArrayBaseType
 ) => {
   switch (inputType) {
     case RecordeditInputType.BOOLEAN:
@@ -152,6 +159,19 @@ export const setInputValue = async (
       const dropdown = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
       await selectDropdownValue(dropdown, valueProps);
       await expect.soft(RecordeditLocators.getDropdownText(dropdown)).toHaveText(valueProps);
+      break;
+
+    case RecordeditInputType.COLOR:
+      if (typeof valueProps !== 'string') return;
+      const colorInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+      await colorInput.clear();
+      await colorInput.fill(valueProps);
+      // the input won't validate until we press enter or change focus
+      await RecordeditLocators.getRequiredInfoEl(page).focus();
+      // make sure the displayed value is correct
+      await expect.soft(colorInput).toHaveValue(valueProps);
+      // make sure the background color is correct
+      expect.soft(await RecordeditLocators.getColorInputBackground(page, name, formNumber)).toEqual(valueProps);
       break;
 
     case RecordeditInputType.FK_POPUP:
@@ -165,6 +185,12 @@ export const setInputValue = async (
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(valueProps.modal_num_rows);
       await RecordsetLocators.getRowSelectButton(rsModal, valueProps.modal_option_index).click();
       await expect.soft(rsModal).not.toBeAttached();
+
+      if (valueProps.rowName) {
+        await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber)).toHaveText(valueProps.rowName);
+      }
+
+
       break;
 
     case RecordeditInputType.FK_DROPDOWN:
@@ -201,7 +227,7 @@ export const setInputValue = async (
       break;
 
     case RecordeditInputType.ARRAY:
-      if (!Array.isArray(valueProps)) return;
+      if (!Array.isArray(valueProps) || arrayBaseType === undefined) return;
       const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
 
       // remove the existing value if there are any
@@ -210,10 +236,29 @@ export const setInputValue = async (
       }
 
       // add the values one by one.
+      // TODO finalize this
       for (const val of valueProps) {
-        if (typeof val !== 'string') continue;
-        await elems.addItemInput.fill(val);
-        await elems.addItemButton.click();
+        switch (arrayBaseType) {
+          case RecordeditArrayBaseType.TIMESTAMP:
+            if (typeof val !== 'object' || !(('time_value' in val) && ('date_value' in val))) {
+              return;
+            }
+            const inputs = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
+            await inputs.clearBtn.click();
+            await inputs.date.clear();
+            await inputs.date.fill(val.date_value);
+            await inputs.time.clear();
+            await inputs.time.fill(val.time_value);
+
+            break;
+          case RecordeditArrayBaseType.BOOLEAN:
+            break;
+          default:
+            if (typeof val !== 'string') continue;
+            await elems.addItemInput.fill(val);
+            await elems.addItemButton.click();
+            break;
+        }
       }
       break;
 
@@ -229,6 +274,105 @@ export const setInputValue = async (
 };
 
 /**
+ * test the value diplayed for a input on the recordedit form
+ */
+export const testInputValue = async (
+  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
+  disabled: boolean, valueProps?: SetInputValueProps | SetInputValueProps[], arrayBaseType?: RecordeditArrayBaseType
+) => {
+  let input;
+  const inputControl = RecordeditLocators.getInputControlForAColumn(page, name, formNumber);
+  switch (inputType) {
+    case RecordeditInputType.BOOLEAN:
+      input = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
+      await expect.soft(input).toBeVisible();
+      if (disabled) {
+        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+      }
+
+      if (typeof valueProps !== 'string') return;
+      await expect.soft(input).toHaveText(valueProps);
+      break;
+
+    case RecordeditInputType.COLOR:
+      input = RecordeditLocators.getColorInputForAColumn(page, name, formNumber);
+      await expect.soft(input).toBeVisible();
+
+      if (typeof valueProps !== 'string') return;
+      // make sure the displayed value is correct
+      await expect.soft(input).toHaveValue(valueProps);
+      // make sure the background color is correct
+      expect.soft(await RecordeditLocators.getColorInputBackground(page, name, formNumber)).toEqual(valueProps);
+      break;
+
+    case RecordeditInputType.FK_POPUP:
+      input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
+      await expect.soft(input).toBeVisible();
+      if (disabled) {
+        await expect.soft(input).toHaveClass(/input-disabled/);
+      }
+
+      if (typeof valueProps !== 'string') return;
+      await expect.soft(input).toHaveText(valueProps);
+      break;
+
+    case RecordeditInputType.TIMESTAMP:
+      input = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
+      await expect.soft(input.date).toBeVisible();
+      await expect.soft(input.time).toBeVisible();
+      if (disabled) {
+        await expect.soft(input.date).toBeDisabled();
+        await expect.soft(input.time).toBeDisabled();
+      }
+
+      if (typeof valueProps !== 'object' || !('date_value' in valueProps) || !('time_value' in valueProps)) return;
+      await expect.soft(input.date).toHaveValue(valueProps.date_value);
+      await expect.soft(input.time).toHaveValue(valueProps.time_value);
+      break;
+
+    case RecordeditInputType.FILE:
+      input = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
+      await expect.soft(input).toBeVisible();
+      if (disabled) {
+        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+      }
+
+      if (typeof valueProps !== 'string') return;
+      await expect.soft(input).toHaveText(valueProps);
+      break;
+
+    case RecordeditInputType.ARRAY:
+      // TODO support more types
+      if (!Array.isArray(valueProps)) return;
+      const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
+
+      let index = 0;
+      for (const val of valueProps) {
+        if (typeof val !== 'string') continue;
+        input = elems.inputs.nth(index);
+        if (disabled) {
+          await expect.soft(input).toBeDisabled();
+        }
+        await expect.soft(input).toHaveValue(val);
+        index++;
+      }
+
+      break;
+
+    default:
+      input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+      await expect.soft(input).toBeVisible();
+      if (disabled) {
+        await expect.soft(input).toBeDisabled();
+      }
+
+      if (typeof valueProps !== 'string') return;
+      await expect.soft(input).toHaveValue(valueProps);
+      break;
+  }
+}
+
+/**
  * test the values displayed on the forms for a column
  *
  * expectedValues expected type will be different depending on the input type. for all the types expect the following
@@ -238,99 +382,26 @@ export const setInputValue = async (
  *
  * NOTE: 'array' only supports array of texts for now.
  *
- * @param {string} name the column name
- * @param {string}}displayname the column displayname
- * @param {string} displayType the display type (boolean, fk, timestamp, upload, "any other string")
- * @param {boolean} allDisabled whether we should test that all the inputs are disabled or not
- * @param {any[]} expectedValues the expected values
+ * @param name the column name
+ * @param displayname the column displayname
+ * @param displayType the display type (boolean, fk, timestamp, upload, "any other string")
+ * @param allDisabled whether we should test that all the inputs are disabled or not
+ * @param expectedValues the expected values
  * @returns
  */
 export const testFormValuesForAColumn = async (
   page: Page, name: string, displayname: string, inputType: RecordeditInputType, allDisabled: boolean,
-  expectedValues: (SetInputValueProps |SetInputValueProps[])[]
+  expectedValues: (SetInputValueProps | SetInputValueProps[])[]
 ) => {
-
-  let formNumber = 1, input;
-  const inputControl = RecordeditLocators.getInputControlForAColumn(page, name, formNumber);
+  let formNumber = 1;
   for (const value of expectedValues) {
-    switch (inputType) {
-      case RecordeditInputType.BOOLEAN:
-        if (typeof value !== 'string') return;
-
-        input = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
-        if (allDisabled) {
-          await expect.soft(inputControl).toHaveClass(/input-disabled/);
-        }
-        await expect.soft(input).toHaveText(value);
-        break;
-
-      case RecordeditInputType.FK_POPUP:
-        if (typeof value !== 'string') return;
-
-        input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
-        if (allDisabled) {
-          await expect.soft(input).toHaveClass(/input-disabled/);
-        }
-        await expect.soft(input).toHaveText(value);
-        break;
-
-      case RecordeditInputType.TIMESTAMP:
-        if (typeof value !== 'object' || !('date_value' in value) || !('time_value' in value)) return;
-        input = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
-        if (allDisabled) {
-          await expect.soft(input.date).toBeDisabled();
-          await expect.soft(input.time).toBeDisabled();
-        }
-        await expect.soft(input.date).toHaveValue(value.date_value);
-        await expect.soft(input.time).toHaveValue(value.time_value);
-        break;
-
-      case RecordeditInputType.FILE:
-        if (typeof value !== 'string') return;
-
-        input = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
-        if (allDisabled) {
-          await expect.soft(inputControl).toHaveClass(/input-disabled/);
-        }
-        await expect.soft(input).toHaveText(value);
-        break;
-
-      case RecordeditInputType.ARRAY:
-        if (!Array.isArray(value)) return;
-        const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber, 'text');
-
-        let index = 0;
-        for (const val of value) {
-          if (typeof val !== 'string') continue;
-          input = elems.inputs.nth(index);
-          if (allDisabled) {
-            await expect.soft(input).toBeDisabled();
-          }
-          await expect.soft(input).toHaveValue(val);
-          index++;
-        }
-
-        break;
-
-      default:
-        if (typeof value !== 'string') return;
-
-        input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
-        if (allDisabled) {
-          await expect.soft(input).toBeDisabled();
-        }
-        await expect.soft(input).toHaveValue(value);
-        break;
-    }
-
+    await testInputValue(page, formNumber, name, displayname, inputType, allDisabled, value);
     formNumber++;
   }
-
-
 };
 
 
-type TestSubmissionParams = {
+export type TestSubmissionParams = {
   tableDisplayname: string,
   resultColumnNames: string[],
   /**
@@ -361,3 +432,193 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
     await testRecordsetTableRowValues(resultset, params.resultRowValues, true);
   }
 }
+
+
+export type TestFormPresentationAndValidation = {
+  description: string,
+  schemaName: string,
+  tableName: string,
+  tableDisplayname: string,
+  tableComment?: string,
+  /**
+   * applicaple only to single edit mode
+   */
+  rowName?: string,
+
+  columns: {
+    name: string,
+    displayname: string,
+    type: RecordeditInputType,
+
+
+    arrayBaseType?: RecordeditArrayBaseType,
+    isRequired?: boolean,
+    comment?: string,
+    inlineComment?: string,
+
+    disabled?: boolean,
+
+    skipValidation?: boolean,
+  }[],
+
+  inputs: {
+    [colName: string]: SetInputValueProps | SetInputValueProps[]
+  }[],
+
+  values?: {
+    [colName: string]: SetInputValueProps | SetInputValueProps[]
+  }[]
+}
+
+/**
+ * can be used to test the recordedit page. Currenly only works for single-edit, single-create, or multi-create.
+ */
+export const testFormPresentationAndValidation = async (
+  page: Page, baseURL: string | undefined, testInfo: TestInfo, params: TestFormPresentationAndValidation, isEditMode?: boolean
+) => {
+
+  const _getColumnValue = (recordIndex: number, colName: string) => {
+    if (Array.isArray(params.values) && params.values.length > recordIndex && typeof params.values[recordIndex][colName] !== 'undefined') {
+      return params.values[recordIndex][colName];
+    }
+    return undefined;
+  };
+
+  const _getColumnInput = (recordIndex: number, colName: string) => {
+    if (Array.isArray(params.inputs) && params.inputs.length > recordIndex && typeof params.inputs[recordIndex][colName] !== 'undefined') {
+      return params.inputs[recordIndex][colName];
+    }
+    return undefined;
+  }
+
+  await test.step('should have the correct page title.', async () => {
+    await RecordeditLocators.waitForRecordeditPageReady(page);
+
+    let pageTitle;
+    if (isEditMode) {
+      pageTitle = `Edit ${params.tableDisplayname}: ${params.rowName}`;
+    } else {
+      pageTitle = `Create 1 ${params.tableDisplayname} record`;
+    }
+
+    await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(pageTitle);
+
+    const linkEl = RecordeditLocators.getPageTitleLink(page);
+    const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
+
+    expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
+    if (params.tableComment) {
+      await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true);
+    }
+  });
+
+  await test.step('should have the corret head title.', async () => {
+    let pageTitle;
+    if (isEditMode) {
+      pageTitle = `Edit ${params.tableDisplayname}: ${params.rowName}`;
+    } else {
+      pageTitle = `Create new ${params.tableDisplayname}`;
+    }
+    expect.soft(await page.title()).toContain(pageTitle + ' | ');
+  });
+
+  await test.step('should show the proper buttons.', async () => {
+    if (isEditMode) {
+      await expect.soft(RecordeditLocators.getRecordeditResetButton(page)).toBeVisible();
+    } else {
+      await expect.soft(RecordeditLocators.getCloneFormInputSubmitButton(page)).toBeVisible();
+    }
+    const submitBtn = RecordeditLocators.getSubmitRecordButton(page);
+    await expect.soft(submitBtn).toBeVisible();
+    await expect.soft(submitBtn).toHaveText('Save');
+  });
+
+  await test.step('should show the columns in the expected order and mark the required ones.', async () => {
+    const columns = RecordeditLocators.getAllColumnNames(page);
+    await expect.soft(columns).toHaveCount(params.columns.length);
+
+    for await (const [index, expectedCol] of params.columns.entries()) {
+      const col = columns.nth(index);
+      await expect.soft(col).toHaveText(expectedCol.displayname);
+      const requiredIcon = RecordeditLocators.getColumnRequiredIcon(col);
+      const errorMessage = `missmatch required status, index=${index}, name=${expectedCol.name}`;
+      if (expectedCol.isRequired) {
+        await expect.soft(requiredIcon, errorMessage).toBeVisible();
+      } else {
+        await expect.soft(requiredIcon, errorMessage).not.toBeVisible();
+      }
+    }
+  });
+
+  await test.step('should properly show the column tooltips and inline tooltips.', async () => {
+    const expectedColsWTooltip: number[] = [];
+    const expectedInlineComments: string[] = [];
+    params.columns.forEach((c, i) => {
+      if (c.comment) {
+        expectedColsWTooltip.push(i);
+      }
+      else if (c.inlineComment) {
+        expectedInlineComments.push(c.inlineComment);
+      }
+    });
+
+    // inline comments
+    const inlineComments = RecordeditLocators.getColumnInlineComments(page);
+    await expect.soft(inlineComments).toHaveCount(expectedInlineComments.length);
+    await expect.soft(inlineComments).toHaveText(expectedInlineComments);
+
+    // tooltips
+    const colsWithTooltip = RecordeditLocators.getColumnNamesWithTooltip(page);
+    await expect.soft(colsWithTooltip).toHaveCount(expectedColsWTooltip.length);
+    for (const i of expectedColsWTooltip) {
+      await testTooltip(RecordeditLocators.getColumnNameByColumnIndex(page, i), params.columns[i].comment!, APP_NAMES.RECORDEDIT, true);
+    }
+  });
+
+  for await (const recordIndex of Array.from(Array(params.inputs.length).keys())) {
+
+    if (recordIndex > 0) {
+      await test.step('should be able to clone new record', async () => {
+        await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(recordIndex + 1);
+      });
+    }
+
+    for await (const col of params.columns) {
+      await test.step(`record index=${recordIndex}, column ${col.name}, `, async () => {
+
+        // check the input and value
+        await test.step('show the input with the correct value', async () => {
+          await testInputValue(page, recordIndex + 1, col.name, col.displayname, col.type, !!col.disabled, _getColumnValue(recordIndex, col.name));
+        });
+
+        if (col.disabled) return;
+
+        // TODO
+        // test the validators and extra features if needed
+        // if (!col.skipValidation) {
+        // switch (col.type) {
+        //   case RecordeditInputType.ARRAY:
+        //     // TODO
+        //     break;
+
+        //   default:
+        //     break;
+        // }
+        // }
+
+        // set the value
+        const newVal = _getColumnInput(recordIndex, col.name);
+        if (newVal === undefined) return;
+
+        await test.step('set the new value', async () => {
+          await setInputValue(page, recordIndex + 1, col.name, col.displayname, col.type, newVal, col.arrayBaseType);
+        });
+
+      });
+    }
+
+  }
+}
+
+

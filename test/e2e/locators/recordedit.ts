@@ -39,6 +39,19 @@ export enum RecordeditInputType {
   TEXT = 'text'
 }
 
+export enum RecordeditArrayBaseType {
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  INT_2 = 'integer2',
+  INT_4 = 'integer4',
+  INT_8 = 'integer8',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
+  MARKDOWN = 'markdown',
+  LONGTEXT = 'longtext',
+  TEXT = 'text'
+}
+
 export default class RecordeditLocators {
 
   static async waitForRecordeditPageReady(container: Locator | Page, timeout?: number) {
@@ -97,6 +110,18 @@ export default class RecordeditLocators {
 
   static getAllColumnNames(container: Locator | Page): Locator {
     return container.locator('.entity-key-column > .entity-key > span.column-displayname > span');
+  }
+
+  static getColumnNamesWithTooltip(container: Locator | Page): Locator {
+    return container.locator('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip > span');
+  }
+
+  static getColumnNameByColumnIndex(container: Locator | Page, index: number): Locator {
+    return container.locator(`.entity-key-column > .entity-key.entity-key-${index} > span.column-displayname > span`);
+  }
+
+  static getColumnInlineComments(container: Locator | Page): Locator {
+    return container.locator('.inline-comment-row');
   }
 
   static getColumnRequiredIcon(colNameElement: Locator): Locator {
@@ -209,14 +234,14 @@ export default class RecordeditLocators {
 
   static async getColorInputBackground(page: Page, name: string, formNumber: number): Promise<string> {
     formNumber = formNumber || 1;
-    return await page.evaluate(async () => {
-      const inputName = `c_${formNumber}-${name}`;
+    const inputName = `c_${formNumber}-${name}`;
+    return await page.evaluate(async ({ inputName }) => {
       const el = document.querySelector(`.input-switch-container-${inputName} .chaise-color-picker-preview`) as HTMLElement;
       const ctx = document.createElement('canvas').getContext('2d');
       if (!ctx || !el) return '';
       ctx.fillStyle = el.style.backgroundColor;
       return ctx.fillStyle;
-    })
+    }, { inputName });
   }
 
   static getColorInputBtn(container: Locator | Page, name: string, formNumber: number): Locator {
