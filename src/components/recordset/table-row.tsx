@@ -124,7 +124,6 @@ const TableRow = ({
    *   - we're waiting for the delete request
    */
   const rowDisabled = (disabled && !selected) || waitingForDelete;
-  const singleSelectIcon = `fa-solid ${selected ? 'fa-check' : 'fa-circle'}`;
   let singleSelectIconTooltip = `Select${selected ? 'ed' : ''}`;
 
   if (rowDisabled && disabledType) {
@@ -426,12 +425,12 @@ const TableRow = ({
           tooltip={singleSelectIconTooltip}
         >
           <button
-            className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
+            className={'select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn'}
             type='button'
             disabled={rowDisabled}
             onClick={() => onSelectChange(tuple)}
           >
-            {!rowDisabled && <span className={`chaise-btn-icon ${singleSelectIcon}`}></span>}
+            {selected && <span className={'chaise-btn-icon fa-solid fa-circle'}></span>}
           </button>
         </ChaiseTooltip>);
       case RecordsetSelectMode.MULTI_SELECT:

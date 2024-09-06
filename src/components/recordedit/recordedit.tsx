@@ -448,7 +448,10 @@ const RecordeditInner = ({
     // refactor so provider manages the forms
     const numberForms = forms.length;
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
-      const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
+      // calculate the number of forms the user can still add
+      const numberFormsAllowed = MAX_ROWS_TO_ADD - numberForms
+      let alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
+      if (numberFormsAllowed === 0) alertMessage = `Cannot add ${numberFormsToAdd} records. Maximum number of forms already added.`;
       addAlert(alertMessage, ChaiseAlertType.ERROR);
       setShowCloneSpinner(false);
       return true;
@@ -1012,6 +1015,7 @@ const RecordeditInner = ({
                           className='chaise-input-control chaise-input-control-sm add-rows-input'
                           placeholder='1'
                           min='1'
+                          max='200'
                         />
                         <span className='chaise-input-group-append'>
                           <ChaiseTooltip

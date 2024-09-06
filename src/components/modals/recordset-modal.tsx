@@ -20,6 +20,7 @@ import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displa
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 export type RecordestModalProps = {
@@ -156,11 +157,18 @@ const RecordsetModal = ({
       // against it.
       if (submittedRows.length === 0) return;
       submit();
-    }
-    else {
+    } else {
       let cannotSubmit = false;
       if (onSelectedRowsChanged) {
         cannotSubmit = onSelectedRowsChanged(submittedRows) === false;
+      }
+
+      // TODO: if submittedRows + numberRecordeditForms > RECORDEDIT_MAX_ROWS
+      if (submittedRows.length > 5) {
+        cannotSubmit = true;
+        // TODO: show alert
+      } else {
+        // TODO: if there is an alert shown, hide it
       }
 
       /**

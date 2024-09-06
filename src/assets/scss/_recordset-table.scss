@@ -177,6 +177,10 @@
     .chaise-btn.select-action-button {
       border-radius: 12px;
 
+      &.chaise-btn-secondary {
+        border-width: 2px;
+      }
+
       &[disabled] {
         min-width: 12px;
         width: 12px;
