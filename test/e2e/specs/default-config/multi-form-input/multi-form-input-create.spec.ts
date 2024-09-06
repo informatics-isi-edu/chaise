@@ -673,7 +673,7 @@ test.describe('multi form input in create mode', () => {
       const colDisplayname = params.column_displayname;
       const toggleBtn = RecordeditLocators.getMultiFormToggleButton(page, colDisplayname);
       const applybtn = RecordeditLocators.getMultiFormApplyBtn(page);
-      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page)
+      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page);
 
       await test.step(`${params.type}`, async () => {
 

@@ -8,7 +8,6 @@ import {
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import moment from 'moment';
 
-
 const currentTimestampTimeStr = moment().format('x');
 
 const testFiles = [
@@ -32,6 +31,19 @@ const testFiles = [
   },
 ];
 
+// we're testing this table multiple times
+const fileTableDefaultPresentationProps = {
+  schemaName: 'product-add',
+  tableName: 'file',
+  tableDisplayname: 'file',
+  tableComment: 'asset/object',
+  columns: [
+    { name: 'fileid', displayname: 'fileid', type: RecordeditInputType.INT_4, skipValidation: true },
+    { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
+    { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
+  ]
+}
+
 const testParams: {
   tables: {
     num_files: number,
@@ -43,7 +55,7 @@ const testParams: {
     {
       num_files: 0,
       presentation: {
-        description: 'general case',
+        description: 'multi create',
         schemaName: 'product-add',
         tableName: 'accommodation',
         tableDisplayname: 'Accommodations',
@@ -93,8 +105,8 @@ const testParams: {
             'no_of_rooms': '1', 'opened_on': { date_value: '2017-01-01', time_value: '01:01:01' }, 'date_col': '2017-01-01', 'luxurious': 'false',
             'text_array': ['v1', 'v2'], 'boolean_array': ['true'],
             'int4_array': ['1', '2'], 'float4_array': ['1', '2.2'],
-            'date_array': ['2001-01-01', '2002-02-02'], 'timestamp_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
-            'timestamptz_array': [{date_value: '2001-01-01', time_value: '01:01:01'}],
+            'date_array': ['2001-01-01', '2002-02-02'], 'timestamp_array': [{ date_value: '2001-01-01', time_value: '01:01:01' }],
+            'timestamptz_array': [{ date_value: '2001-01-01', time_value: '01:01:01' }],
             'color_rgb_hex_column': '#123456'
           },
           {
@@ -103,8 +115,8 @@ const testParams: {
             'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             'no_of_rooms': '2', 'opened_on': { date_value: '2017-02-02', time_value: '02:02:02' }, 'date_col': '2017-02-02', 'luxurious': 'true',
             'text_array': ['v2', 'v3'], 'boolean_array': ['false'], 'int4_array': ['1', '2'], 'float4_array': ['2', '3.3'],
-            'date_array': ['2002-02-02'], 'timestamp_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
-            'timestamptz_array': [{date_value: '2002-02-02', time_value: '02:02:02'}],
+            'date_array': ['2002-02-02'], 'timestamp_array': [{ date_value: '2002-02-02', time_value: '02:02:02' }],
+            'timestamptz_array': [{ date_value: '2002-02-02', time_value: '02:02:02' }],
             'color_rgb_hex_column': '#654321'
           }
         ]
@@ -141,16 +153,8 @@ const testParams: {
     {
       num_files: 2, // only two forms will be submitted
       presentation: {
-        description: 'uploading new files',
-        schemaName: 'product-add',
-        tableName: 'file',
-        tableDisplayname: 'file',
-        tableComment: 'asset/object',
-        columns: [
-          { name: 'fileid', displayname: 'fileid', type: RecordeditInputType.INT_4, skipValidation: true },
-          { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
-          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
-        ],
+        ...fileTableDefaultPresentationProps,
+        description: 'multi create with new files',
         inputs: [
           { 'fileid': '1', 'uri': testFiles[0], 'timestamp_txt': currentTimestampTimeStr },
           { 'fileid': '2', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr },
@@ -179,7 +183,7 @@ const testParams: {
     {
       num_files: 2, // only two forms will be submitted
       presentation: {
-        description: 'uploader when one file exists in hatrac and the other one is new',
+        description: 'multi create when one file previously uploaded to hatrac',
         schemaName: 'product-add',
         tableName: 'file',
         tableDisplayname: 'file',
@@ -217,7 +221,7 @@ const testParams: {
     {
       num_files: 2, // only two forms will be submitted
       presentation: {
-        description: 'uploader when all the files already exist in hatrac',
+        description: 'multi create when both files previously uploaded to hatrac',
         schemaName: 'product-add',
         tableName: 'file',
         tableDisplayname: 'file',
@@ -257,6 +261,8 @@ const testParams: {
 
 
 test.describe('Recordedit create', () => {
+  // the file create tests must run sequentially, that's why we're not forcing parallel testing here.
+
   test.beforeAll(async () => {
     await createFiles(testFiles);
   });

@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - 'master'
-      - 'recordedit-add-pw'
   pull_request:
     branches:
       - 'master'
@@ -168,12 +167,6 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run all features confirmation test spec (protractor)
-        id: test-protractor-all-features-confirmation
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeaturesconfirmation-protractor
       - name: Run default config test spec  (protractor)
         id: test-protractor-default-config
         continue-on-error: true
@@ -191,9 +184,6 @@ jobs:
         run: exit 1
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
-      - name: Check on all features confirmation test spec (protractor)
-        if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
         run: exit 1
       - name: Check on default config test spec (protractor)
         if: always() && steps.test-protractor-default-config.outcome != 'success'

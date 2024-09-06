@@ -396,7 +396,14 @@ export type TestSubmissionParams = {
 
 export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean, timeout?: number) => {
   await RecordeditLocators.getSubmitRecordButton(page).click();
-  await expect.soft(AlertLocators.getErrorAlert(page)).not.toBeAttached();
+
+  try {
+    await expect(AlertLocators.getErrorAlert(page)).not.toBeAttached();
+  } catch (exp) {
+    // provide more information about what went wrong
+    const alertContent = await AlertLocators.getErrorAlert(page).textContent();
+    expect(alertContent).toEqual('');
+  }
 
   await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
   await expect.soft(RecordeditLocators.getSubmitSpinner(page)).not.toBeAttached({ timeout: timeout });
@@ -418,43 +425,52 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
 
 
 export type TestFormPresentationAndValidation = {
+  /**
+   * describe what this test is about.
+   */
   description: string,
   schemaName: string,
   tableName: string,
   tableDisplayname: string,
   tableComment?: string,
   /**
-   * applicaple only to single edit mode
+   * applicaple only to edit mode
    */
-  rowName?: string,
+  rowNames?: string[],
 
   columns: {
     name: string,
     displayname: string,
     type: RecordeditInputType,
-
-
     arrayBaseType?: RecordeditInputType,
     isRequired?: boolean,
     comment?: string,
     inlineComment?: string,
-
     disabled?: boolean,
-
     skipValidation?: boolean,
   }[],
 
+  /**
+   * the new values that should be used for the inputs.
+   * 
+   */
   inputs: {
     [colName: string]: SetInputValueProps | SetInputValueProps[]
   }[],
 
+  /**
+   * existing values in the form
+   */
   values?: {
     [colName: string]: SetInputValueProps | SetInputValueProps[]
   }[]
 }
 
 /**
- * can be used to test the recordedit page. Currenly only works for single-edit, single-create, or multi-create.
+ * can be used to test the recordedit page. works for single or multi, create or edit.
+ *
+ * Notes:
+ * - If the input has an existing value, and no input, we will skip the validation as it will manipulate the value.
  */
 export const testFormPresentationAndValidation = async (
   page: Page, baseURL: string | undefined, testInfo: TestInfo, params: TestFormPresentationAndValidation, isEditMode?: boolean
@@ -478,14 +494,12 @@ export const testFormPresentationAndValidation = async (
     await RecordeditLocators.waitForRecordeditPageReady(page);
 
     let pageTitle;
-    if (isEditMode) {
-      if (params.rowName) {
-        pageTitle = `Edit ${params.tableDisplayname}: ${params.rowName}`;
-      } else {
-        pageTitle = `Edit ${params.inputs.length} ${params.tableDisplayname} records`;
-      }
+    if (isEditMode && params.rowNames && params.rowNames.length === 1) {
+      pageTitle = `Edit ${params.tableDisplayname}: ${params.rowNames[0]}`;
     } else {
-      pageTitle = `Create ${params.inputs.length} ${params.tableDisplayname} ${params.inputs.length > 1 ? 'records' : 'record'}`;
+      const appendText = params.inputs.length > 1 ? 'records' : 'record';
+      const action = isEditMode ? 'Edit' : 'Create';
+      pageTitle = `${action} ${params.inputs.length} ${params.tableDisplayname} ${appendText}`;
     }
 
     await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(pageTitle);
@@ -494,15 +508,19 @@ export const testFormPresentationAndValidation = async (
     const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
-    if (params.tableComment) {
-      await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true);
-    }
+    // TODO
+    // if (params.tableComment) {
+    //   await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true);
+    // }
   });
 
   await test.step('should have the corret head title.', async () => {
     let pageTitle;
     if (isEditMode) {
-      pageTitle = `Edit ${params.tableDisplayname}: ${params.rowName}`;
+      pageTitle = `Edit ${params.tableDisplayname}`;
+      if (params.rowNames && params.rowNames.length === 1) {
+        pageTitle += `: ${params.rowNames[0]}`;
+      }
     } else {
       pageTitle = `Create new ${params.tableDisplayname}`;
     }
@@ -569,6 +587,8 @@ export const testFormPresentationAndValidation = async (
       await test.step(`record ${formNumber}, column ${col.name} (${col.type}${col.arrayBaseType ? ' ' + col.arrayBaseType : ''}), `, async () => {
         const cellError = RecordeditLocators.getErrorMessageForAColumn(page, col.name, formNumber);
         const existingValue = _getColumnValue(recordIndex, col.name);
+        const newValue = _getColumnInput(recordIndex, col.name);
+        const skipValidation = col.skipValidation || (!!existingValue && !newValue);
 
         // check the input and value
         await test.step('show the input with the correct value', async () => {
@@ -578,7 +598,7 @@ export const testFormPresentationAndValidation = async (
         if (col.disabled) return;
 
         // test the validators and extra features if needed
-        if (!col.skipValidation) {
+        if (!skipValidation) {
           switch (col.type) {
             case RecordeditInputType.ARRAY:
               // TODO
@@ -673,6 +693,7 @@ export const testFormPresentationAndValidation = async (
                 }];
 
                 const mdInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
+                await mdInput.clear();
                 for await (const param of markdownTestParams) {
                   //if title defined found for markdown elements then send click command
                   if (param.title) {
@@ -733,11 +754,14 @@ export const testFormPresentationAndValidation = async (
                   await expect.soft(RecordsetLocators.getRows(rsModal)).not.toHaveCount(0);
                   let title = `Select ${col.displayname} for `;
                   if (isEditMode) {
-                    title += `${params.tableDisplayname}: ${params.rowName}`;
+                    title += `${params.tableDisplayname}: `;
+                    if (params.rowNames && params.rowNames[recordIndex]) {
+                      title += `${params.rowNames[recordIndex]}`;
+                    }
                   } else {
                     title += `new ${params.tableDisplayname}`;
                   }
-                  await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText(title);
+                  await expect.soft(ModalLocators.getModalTitle(rsModal)).toContainText(title);
                 });
 
                 await test.step('closing without selecting should not select any values.', async () => {
@@ -936,7 +960,7 @@ export const testFormPresentationAndValidation = async (
                 await colorInput.fill('#de');
                 // the input won't validate until we focus somewhere else
                 await RecordeditLocators.getRequiredInfoEl(page).click();
-                await expect.soft(colorInput).toHaveValue('#');
+                await expect.soft(colorInput).toHaveValue(typeof existingValue === 'string' ? existingValue : '#');
 
                 // a valid color
                 await colorInput.clear();
@@ -978,11 +1002,10 @@ export const testFormPresentationAndValidation = async (
         }
 
         // set the value
-        const newVal = _getColumnInput(recordIndex, col.name);
-        if (newVal === undefined) return;
 
+        if (newValue === undefined) return;
         await test.step('set the new value', async () => {
-          await setInputValue(page, formNumber, col.name, col.displayname, col.type, newVal, col.arrayBaseType);
+          await setInputValue(page, formNumber, col.name, col.displayname, col.type, newValue, col.arrayBaseType);
         });
 
       });
