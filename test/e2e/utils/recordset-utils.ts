@@ -2,10 +2,13 @@ import { expect, Locator, Page, test } from '@playwright/test'
 
 // locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators, {
   DefaultRangeInputLocators,
   TimestampRangeInputLocators
 } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
+
+// utils
 import { Either } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type RecordsetColStringValue = {
@@ -994,4 +997,23 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
     default:
       break;
   }
+}
+
+/**
+ * test navigating to recordset and clicking the bulk edit link to ensure the same number of rows are shown in both apps
+ *
+ * @param url recordset url to navigate to for this test
+ * @param count the count of recordset rows and recordedit forms
+ */
+export async function testBulkEditLink(page: Page, url: string, count: number) {
+  await test.step('should load recordset page', async () => {
+    await page.goto(`${url}`);
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+  });
+
+  await test.step(`clicking edit will show ${count} forms.`, async () => {
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(count);
+    await RecordsetLocators.getBulkEditLink(page).click();
+    await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(count);
+  });
 }
