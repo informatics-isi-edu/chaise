@@ -1014,6 +1014,8 @@ export async function testBulkEditLink(page: Page, url: string, count: number) {
   await test.step(`clicking edit will show ${count} forms.`, async () => {
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(count);
     await RecordsetLocators.getBulkEditLink(page).click();
+
+    await RecordeditLocators.waitForRecordeditPageReady(page);
     await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(count);
   });
 }
