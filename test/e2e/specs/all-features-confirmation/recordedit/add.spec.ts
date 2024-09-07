@@ -261,7 +261,10 @@ const testParams: {
 
 
 test.describe('Recordedit create', () => {
-  // the file create tests must run sequentially, that's why we're not forcing parallel testing here.
+  /**
+   * we have to make sure we're running test cases sequentially since upload test cases are testing that users
+   * can upload the same file to the same location. That's why we're not running tests here in parallel
+   */
 
   test.beforeAll(async () => {
     await createFiles(testFiles);
@@ -276,6 +279,7 @@ test.describe('Recordedit create', () => {
       await test.step('open recordedit page', async () => {
         const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
         await page.goto(url);
+        await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 
       if (numForms > 1) {
@@ -318,7 +322,7 @@ test.describe('Recordedit create', () => {
         });
       });
 
-      await test.step('user should be able to submit and save data.', async () => {
+      await test.step('submit and save the data', async () => {
         let timeout: number | undefined;
         if (params.num_files > 0) {
           timeout = params.num_files * 30 * 1000;

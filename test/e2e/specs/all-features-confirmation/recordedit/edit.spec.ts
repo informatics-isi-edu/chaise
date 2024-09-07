@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { test } from '@playwright/test';
-import { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import { expect, test } from '@playwright/test';
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
@@ -159,7 +159,7 @@ const testParams: {
             'summary': 'Radisson Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.',
             'description': '** CARING. SHARING. DARING.**\nRadisson^®^ is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding `Yes I Can!` ^SM^ service, comfort and style where you need us.\n\n**THE RADISSON^®^ WAY** Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to `Yes I Can!` ^SM^ hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.',
             'no_of_rooms': '46', 'opened_on': { date_value: '2002-01-22', time_value: '00:00:00' },
-            'date_col': '2008-12-09', 'luxurious': 'true', 'json_col': JSON.stringify({'name':'testing_json'}, undefined, 2),
+            'date_col': '2008-12-09', 'luxurious': 'true', 'json_col': JSON.stringify({ 'name': 'testing_json' }, undefined, 2),
             'text_array': ['val1'], 'boolean_array': ['false', 'false'], 'int4_array': ['1', '2', '3', '4', '5'], 'float4_array': ['-5.2'],
             'date_array': '', 'timestamp_array': '',
             'timestamptz_array': '', 'color_rgb_hex_column': '#223456'
@@ -170,7 +170,7 @@ const testParams: {
             'summary': 'Fair Hotel. Close to Universal Studios. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.',
             'description': '** CARING. SHARING. DARING.**\nRadisson^®^ is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding `Yes I Can!` ^SM^ service, comfort and style where you need us.\n\n**THE RADISSON^®^ WAY** Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to `Yes I Can!` ^SM^ hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.',
             'no_of_rooms': '35', 'opened_on': { date_value: '2013-06-11', time_value: '00:00:00' },
-            'date_col': '2008-12-09', 'luxurious': 'false', 'json_col': JSON.stringify({'age': 25, 'name': 'Testing'}, undefined, 2),
+            'date_col': '2008-12-09', 'luxurious': 'false', 'json_col': JSON.stringify({ 'age': 25, 'name': 'Testing' }, undefined, 2),
             'text_array': ['val2'], 'boolean_array': ['false'], 'int4_array': ['1'], 'float4_array': ['1.1', '2.2'],
             'date_array': '', 'timestamp_array': '',
             'timestamptz_array': [{ date_value: '2022-02-02', time_value: '02:02:02' }, { date_value: '2024-04-04', time_value: '04:04:04' }],
@@ -306,7 +306,7 @@ test.describe('Recordedit edit', () => {
       // test everything related to the form
       await testFormPresentationAndValidation(page, baseURL, testInfo, presentation, true);
 
-      await test.step('user should be able to submit and save data.', async () => {
+      await test.step('submit and save the data', async () => {
         let timeout: number | undefined;
         if (params.num_files > 0) {
           timeout = params.num_files * 30 * 1000;
@@ -324,4 +324,47 @@ test.describe('Recordedit edit', () => {
       }
     });
   }
+
+  test('remove form button', async ({ page, baseURL }, testInfo) => {
+    await test.step('open recordedit page', async () => {
+      const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/product-edit:booking`;
+      await page.goto(url + '/id=any(1,2,3,4,5,6,7,8,9,10,11,12)@sort(id)');
+    });
+
+    await test.step('remove several forms and edit some of the data"', async () => {
+      const formsToBeRemoved = [8, 6, 3, 2, 0];
+      const originalNumRows = 12;
+
+      await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows);
+
+      for await (const [index, formIndex] of formsToBeRemoved.entries()) {
+        await RecordeditLocators.getDeleteRowButton(page, formIndex).click();
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - (index+1));
+      }
+
+      await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - formsToBeRemoved.length);
+
+      // the first form (formNumber=1) is not visible anymore
+      const inp = RecordeditLocators.getInputForAColumn(page, 'price', 2);
+      await inp.clear();
+      await inp.fill('2500');
+    });
+
+    await test.step('submit and save data.', async () => {
+      await testSubmission(page, {
+        tableDisplayname: 'booking',
+        resultColumnNames: ['id', 'accommodation_id', 'price', 'booking_date'],
+        resultRowValues: [
+          ['2', '2002', '2,500.0000', '2016-04-18 00:00:00'],
+          ['5', '2003', '240.0000', '2016-01-25 00:00:00'],
+          ['6', '2003', '320.0000', '2016-02-09 00:00:00'],
+          ['8', '2004', '125.0000', '2016-03-12 00:00:00'],
+          ['10', '2004', '110.0000', '2016-05-19 01:00:00'],
+          ['11', '2004', '120.0000', '2015-11-10 00:00:00'],
+          ['12', '2004', '180.0000', '2016-09-04 01:00:00'],
+        ]
+      }, true);
+    });
+
+  });
 });

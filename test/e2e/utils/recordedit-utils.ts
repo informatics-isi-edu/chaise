@@ -244,12 +244,11 @@ export const setInputValue = async (
       for (const val of valueProps) {
         const addItemName = RecordeditLocators.getArrayInputName(name, -1);
         const addOrDiscardMessage = 'Click \'Add\' to include the value or clear the entry to discard.';
-        const addItemError = RecordeditLocators.getErrorMessageForAColumn(page, addItemName, formNumber);
+        const addItemError = RecordeditLocators.getErrorMessageForAColumn(page, addItemName, formNumber, true);
 
         await setInputValue(page, formNumber, addItemName, displayname, arrayBaseType, val);
-        // TODO timestamp has a bug where the error doesn't show up.
-        // await expect.soft(addItemError).toBeVisible();
-        // await expect.soft(addItemError).toHaveText(addOrDiscardMessage);
+        await expect.soft(addItemError).toBeVisible();
+        await expect.soft(addItemError).toHaveText(addOrDiscardMessage);
         await elems.addItemButton.click();
       }
       break;
@@ -423,6 +422,416 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
   }
 }
 
+/**
+ * run the validation tests and make sure extra features for the input work
+ *
+ * used by testFormPresentationAndValidation. I extracted this into a function so we can recursively call it for arrays.
+ * @private
+ */
+const _testInputValidationAndExtraFeatures = async (
+  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType, arrayBaseType?: RecordeditInputType,
+  existingValue?: SetInputValueProps | SetInputValueProps[], fkPopupTitle?: string
+) => {
+  const cellError = RecordeditLocators.getErrorMessageForAColumn(page, name, formNumber);
+
+  switch (inputType) {
+    case RecordeditInputType.ARRAY:
+      const itemName = RecordeditLocators.getArrayInputName(name, -1);
+      if (arrayBaseType) {
+        await _testInputValidationAndExtraFeatures(page, formNumber, itemName, displayname, arrayBaseType);
+      }
+      break;
+
+    case RecordeditInputType.JSON:
+    case RecordeditInputType.JSONB:
+      const jsonInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+
+      await test.step('should allow any valid JSON values.', async () => {
+        const validJSONValues = [
+          { stringVal: '{}', description: 'empty object' },
+          { stringVal: '{\"name\":\"tester\"}', description: 'object' },
+          { stringVal: '6534.9987', description: 'number' },
+          { stringVal: 'null', description: 'null' },
+          { stringVal: '\"          \"', description: 'string of spaces' }
+        ];
+
+        for await (const val of validJSONValues) {
+          await jsonInput.clear();
+          await jsonInput.fill(val.stringVal);
+          await expect.soft(jsonInput, val.description).toHaveValue(val.stringVal);
+          await expect.soft(cellError, val.description).not.toBeAttached();
+          await jsonInput.clear();
+        }
+      });
+
+      await test.step('should not allow invalid JSON values', async () => {
+        const invalidJSONValues = [
+          { stringVal: '{', description: 'only {' },
+          { stringVal: '{name\":\"tester\"}', description: 'missing double qoute' },
+          { stringVal: '          ', description: 'empty' }
+        ];
+
+        for await (const val of invalidJSONValues) {
+          await jsonInput.clear();
+          await jsonInput.fill(val.stringVal);
+          await expect.soft(jsonInput, val.description).toHaveValue(val.stringVal);
+          await expect.soft(cellError, val.description).toBeVisible();
+          await expect.soft(cellError, val.description).toHaveText('Please enter a valid JSON value.');
+          await jsonInput.clear();
+        }
+      });
+      break;
+
+    case RecordeditInputType.MARKDOWN:
+      const markdownProps = RecordeditLocators.getMarkdownElements(page, name, formNumber);
+
+      await test.step('should render markdown with inline preview and full preview button.', async () => {
+        const markdownTestParams = [{
+          input: 'RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh',
+          html: '<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n',
+          title: 'Heading'
+        }, {
+          input: 'E15.5 embryonic kidneys for sections\n' +
+            '- E18.5 embryonic kidneys for cDNA synthesis\n' +
+            '- Sterile PBS\n' +
+            '- QIAShredder columns (Qiagen, cat no. 79654)\n' +
+            '- DEPC-Treated Water',
+          html: '<ul>\n' +
+            '<li>E15.5 embryonic kidneys for sections</li>\n' +
+            '<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n' +
+            '<li>Sterile PBS</li>\n' +
+            '<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n' +
+            '<li>DEPC-Treated Water</li>\n' +
+            '</ul>\n',
+          title: 'Unordered List'
+        }, {
+          // eslint-disable-next-line max-len
+          input: 'This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru',
+          // eslint-disable-next-line max-len
+          html: '<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n',
+          title: 'Bold'
+        }, {
+          // eslint-disable-next-line max-len
+          input: 'This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.',
+          // eslint-disable-next-line max-len
+          html: '<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n',
+          title: 'Italic'
+        }, {
+          input: '~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~',
+          html: '<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n',
+          title: ''
+        }, {
+          input: 'X^2^+Y^2^+Z^2^=0',
+          html: '<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n',
+          title: ''
+        }, {
+          input: '[[RID]]',
+          html: '<p><a href="/id/RID">RID</a></p>\n',
+          title: ''
+        }];
+
+        const mdInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+        await mdInput.clear();
+        for await (const param of markdownTestParams) {
+          //if title defined found for markdown elements then send click command
+          if (param.title) {
+            const mdOption = markdownProps.getButton(param.title);
+            await expect.soft(mdOption).toBeVisible();
+            await mdOption.click();
+          }
+
+          // .fill will replace the content but we want to append to the content, so using .pressSequentially instead
+          await mdInput.pressSequentially(param.input);
+
+          // inline preview
+          await markdownProps.previewButton.click();
+          await expect.soft(markdownProps.previewContent).toBeVisible();
+          expect.soft(await markdownProps.previewContent.innerHTML()).toEqual(param.html);
+          await markdownProps.previewButton.click();
+          await expect.soft(markdownProps.previewContent).not.toBeAttached();
+
+          // modal preview
+          const modal = ModalLocators.getMarkdownPreviewModal(page);
+          await markdownProps.fullScreenButton.click();
+          await expect.soft(modal).toBeVisible();
+          const modalContent = ModalLocators.getMarkdownPreviewContent(modal);
+          await expect.soft(modalContent).toBeVisible();
+          expect.soft(await modalContent.innerHTML()).toEqual(param.html);
+
+          await ModalLocators.getCloseBtn(modal).click();
+          await expect.soft(modal).not.toBeAttached();
+
+          await mdInput.clear();
+        }
+      });
+
+      await test.step('help button should open the help page', async () => {
+        const newPage = await clickNewTabLink(markdownProps.helpButton);
+        await newPage.waitForURL('**/help/?page=chaise%2Fmarkdown-help');
+        await expect.soft(PageLocators.getHelpPageMainTable(newPage)).toBeVisible();
+        await newPage.close();
+      });
+      break;
+
+    case RecordeditInputType.FK_POPUP:
+      const displayedValue = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
+
+      if (typeof existingValue === 'string') {
+        await test.step('clicking the "x" should remove the value in the foreign key field.', async () => {
+          await expect.soft(displayedValue).toHaveText(existingValue);
+          await RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber).click();
+          await expect.soft(displayedValue).toHaveText('Select a value');
+        });
+      }
+
+      await test.step('popup selector', async () => {
+        const rsModal = ModalLocators.getForeignKeyPopup(page);
+        await test.step('should have the proper title.', async () => {
+          await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
+          await expect.soft(rsModal).toBeVisible();
+          await expect.soft(RecordsetLocators.getRows(rsModal)).not.toHaveCount(0);
+          if (fkPopupTitle) {
+            await expect.soft(ModalLocators.getModalTitle(rsModal)).toContainText(fkPopupTitle);
+          }
+        });
+
+        await test.step('closing without selecting should not select any values.', async () => {
+          await ModalLocators.getCloseBtn(rsModal).click();
+          await expect.soft(rsModal).not.toBeAttached();
+          await expect.soft(displayedValue).toHaveText('Select a value');
+        });
+      });
+      break;
+
+    case RecordeditInputType.DATE:
+      const dateInputProps = RecordeditLocators.getDateInputsForAColumn(page, name, formNumber);
+      const dateRemoveBtn = RecordeditLocators.getInputRemoveButton(page, name, formNumber);
+
+      await test.step('should complain about invalid date values.', async () => {
+        // testing partial input
+        await dateInputProps.date.clear();
+        await dateInputProps.date.fill('1234-1');
+        await expect.soft(cellError).toHaveText('Please enter a valid date value in YYYY-MM-DD format.');
+
+        // clear the input and see if the error disapears
+        // (.clear() wasn't working consistently)
+        await dateRemoveBtn.click();
+        await expect.soft(cellError).not.toBeAttached();
+      });
+
+      await test.step('"Today" button should enter the current date into the input', async () => {
+        await dateInputProps.todayBtn.click();
+        await expect.soft(dateInputProps.date).toHaveValue(moment().format('YYYY-MM-DD'));
+      });
+
+      await test.step('"clear" button should clear the date.', async () => {
+        await expect.soft(dateRemoveBtn).toBeVisible();
+        await dateRemoveBtn.click();
+        await expect.soft(dateInputProps.date).toHaveValue('');
+        await expect.soft(dateRemoveBtn).not.toBeAttached();
+      });
+
+      break;
+
+    case RecordeditInputType.TIMESTAMP:
+      const timestampProps = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
+      const timeErrorMessage = 'Please enter a valid time value in 24-hr HH:MM:SS format.';
+      const dateErrorMessage = 'Please enter a valid date value in YYYY-MM-DD format.';
+
+      await test.step('should complain about invalid values and allow valid ones.', async () => {
+        await timestampProps.date.clear();
+        await timestampProps.time.clear();
+
+        // the test cases below are only checking time, so we should first add a proper date.
+        await timestampProps.date.fill('2016-01-01');
+
+        // If user enters an invalid time an error msg should appear
+        await timestampProps.time.fill('24:12:00');
+        await expect.soft(cellError).toHaveText(timeErrorMessage);
+
+        // If user enters a valid time, then error msg should disappear
+        await timestampProps.time.fill('12:00:00');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // users can enter 1 digit in any place
+        await timestampProps.time.clear();
+        await timestampProps.time.fill('2:2:2');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // users can enter just the hours
+        await timestampProps.time.clear();
+        await timestampProps.time.fill('08');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // users can enter just the hours and minutes
+        await timestampProps.time.clear();
+        await timestampProps.time.fill('2:10');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // users can enter 0 for the time
+        await timestampProps.time.clear();
+        await timestampProps.time.fill('00:00:00');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // Invalid date + good time = error
+        // If user enters a valid time but no date, an error msg should appear
+        await timestampProps.date.clear();
+        await timestampProps.time.clear();
+        await timestampProps.time.fill('12:00:00');
+        await expect.soft(cellError).toHaveText(dateErrorMessage);
+
+        // Good date + good time = no error
+        // Now, if user enters a valid date, then no error message should appear
+        await timestampProps.date.fill('2016-01-01');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // Good date + clear time = no error
+        await timestampProps.time.clear();
+        await expect.soft(cellError).not.toBeAttached();
+
+      });
+
+      await test.step('"Now" button should enter the current date and time', async () => {
+        const nowObject = moment();
+        const nowDate = nowObject.format('YYYY-MM-DD');
+        await timestampProps.nowBtn.click();
+        await expect.soft(timestampProps.date).toHaveValue(nowDate);
+
+        await expect.soft(timestampProps.time).not.toHaveValue('');
+        const UITime = await timestampProps.time.getAttribute('value') as string;
+        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
+        expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
+      });
+
+      await test.step('"clear" button should clear both time and date.', async () => {
+        await timestampProps.clearBtn.click();
+        await expect.soft(timestampProps.date).toHaveValue('');
+        await expect.soft(timestampProps.time).toHaveValue('');
+      });
+
+      break;
+
+    case RecordeditInputType.INT_2:
+    case RecordeditInputType.INT_4:
+    case RecordeditInputType.INT_8:
+      const intInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+
+      await test.step('should complain about invalid values and allow valid ones.', async () => {
+        // a non-number value
+        await intInput.clear();
+        await intInput.fill('1j2yu');
+        await expect.soft(cellError).toHaveText('Please enter a valid integer value.');
+
+        await intInput.clear();
+        await expect.soft(cellError).not.toBeAttached();
+
+        // float number
+        await intInput.fill('12.1');
+        await expect.soft(cellError).toHaveText('Please enter a valid integer value.');
+
+        await intInput.clear();
+        await expect.soft(cellError).not.toBeAttached();
+
+        // min and max values
+        let invalidMaxNo = '2343243243242414423243242353253253253252352', invalidMinNo = '-2343243243242414423243242353253253253252352';
+        if (inputType === RecordeditInputType.INT_2) {
+          invalidMaxNo = '8375832757832', invalidMinNo = '-237587565';
+        } else if (inputType === RecordeditInputType.INT_4) {
+          invalidMaxNo = '3827374576453', invalidMinNo = '-326745374576375';
+        }
+
+        await intInput.clear();
+        await intInput.fill(invalidMaxNo);
+        await expect.soft(cellError).toContainText('This field requires a value less than');
+
+        await intInput.clear();
+        await expect.soft(cellError).not.toBeAttached();
+
+        await intInput.fill(invalidMinNo);
+        await expect.soft(cellError).toContainText('This field requires a value greater than');
+
+        await intInput.clear();
+        await intInput.fill('12')
+        await expect.soft(cellError).not.toBeAttached();
+
+        await intInput.clear();
+      });
+      break;
+
+    case RecordeditInputType.NUMBER:
+      const numInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+
+      await test.step('should complain about invalid values and allow valid ones.', async () => {
+        // a non-number value
+        await numInput.clear();
+        await numInput.fill('1j2yu');
+        await expect.soft(cellError).toHaveText('Please enter a valid decimal value.');
+
+        // float number
+        await numInput.clear();
+        await numInput.fill('12.1');
+        await expect.soft(cellError).not.toBeAttached();
+
+        // int number
+        await numInput.clear();
+        await numInput.fill('12')
+        await expect.soft(cellError).not.toBeAttached();
+
+        await numInput.clear();
+        await expect.soft(cellError).not.toBeAttached();
+      });
+      break;
+
+    case RecordeditInputType.COLOR:
+      const colorInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
+
+      await test.step('should now allow invalid values and allow valid ones.', async () => {
+        // an incomplete value
+        await colorInput.clear();
+        await colorInput.fill('#de');
+        // the input won't validate until we focus somewhere else
+        await RecordeditLocators.getRequiredInfoEl(page).click();
+        await expect.soft(colorInput).toHaveValue(typeof existingValue === 'string' ? existingValue : '#');
+
+        // a valid color
+        await colorInput.clear();
+        await colorInput.fill('#abcabc');
+        await expect.soft(colorInput).toHaveValue('#abcabc');
+        await expect.soft(cellError).not.toBeAttached();
+      });
+
+      await test.step('color picker popup', async () => {
+        // focus somewhere else to make sure the popup is still not open
+        await RecordeditLocators.getRequiredInfoEl(page).click();
+        // open the popup
+        await RecordeditLocators.getColorInputBtn(page, name, formNumber).click();
+
+        const colorPopup = RecordeditLocators.getColorInputPopup(page);
+        await expect.soft(colorPopup).toBeVisible();
+
+        // make sure clear btn is offered regardless of null/not-null (just like any other  input)
+        const colorClearBtn = RecordeditLocators.getColorInputPopupClearBtn(page);
+        await expect.soft(colorClearBtn).toBeVisible();
+
+        const colorPopupInput = RecordeditLocators.getColorInputPopupInput(page);
+        await expect.soft(colorPopupInput).toBeVisible();
+
+        // make sure users can use the color popup input
+        const colorVal = '#555555';
+        await colorPopupInput.clear();
+        await colorPopupInput.fill(colorVal);
+        await RecordeditLocators.getColorInputPopupSelectBtn(page).click();
+        await expect.soft(colorPopup).not.toBeAttached();
+
+        await expect.soft(colorInput).toHaveValue(colorVal);
+        expect.soft(await RecordeditLocators.getColorInputBackground(page, name, formNumber)).toEqual(colorVal);
+
+      });
+
+      break;
+  }
+}
+
 
 export type TestFormPresentationAndValidation = {
   /**
@@ -452,7 +861,7 @@ export type TestFormPresentationAndValidation = {
 
   /**
    * the new values that should be used for the inputs.
-   * 
+   *
    */
   inputs: {
     [colName: string]: SetInputValueProps | SetInputValueProps[]
@@ -508,7 +917,7 @@ export const testFormPresentationAndValidation = async (
     const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
-    // TODO
+
     // if (params.tableComment) {
     //   await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true);
     // }
@@ -585,7 +994,6 @@ export const testFormPresentationAndValidation = async (
 
     for await (const col of params.columns) {
       await test.step(`record ${formNumber}, column ${col.name} (${col.type}${col.arrayBaseType ? ' ' + col.arrayBaseType : ''}), `, async () => {
-        const cellError = RecordeditLocators.getErrorMessageForAColumn(page, col.name, formNumber);
         const existingValue = _getColumnValue(recordIndex, col.name);
         const newValue = _getColumnInput(recordIndex, col.name);
         const skipValidation = col.skipValidation || (!!existingValue && !newValue);
@@ -599,410 +1007,24 @@ export const testFormPresentationAndValidation = async (
 
         // test the validators and extra features if needed
         if (!skipValidation) {
-          switch (col.type) {
-            case RecordeditInputType.ARRAY:
-              // TODO
-              break;
-
-            case RecordeditInputType.JSON:
-            case RecordeditInputType.JSONB:
-              const jsonInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
-
-              await test.step('should allow any valid JSON values.', async () => {
-                const validJSONValues = [
-                  { stringVal: '{}', description: 'empty object' },
-                  { stringVal: '{\"name\":\"tester\"}', description: 'object' },
-                  { stringVal: '6534.9987', description: 'number' },
-                  { stringVal: 'null', description: 'null' },
-                  { stringVal: '\"          \"', description: 'string of spaces' }
-                ];
-
-                for await (const val of validJSONValues) {
-                  await jsonInput.clear();
-                  await jsonInput.fill(val.stringVal);
-                  await expect.soft(jsonInput, val.description).toHaveValue(val.stringVal);
-                  await expect.soft(cellError, val.description).not.toBeAttached();
-                  await jsonInput.clear();
-                }
-              });
-
-              await test.step('should not allow invalid JSON values', async () => {
-                const invalidJSONValues = [
-                  { stringVal: '{', description: 'only {' },
-                  { stringVal: '{name\":\"tester\"}', description: 'missing double qoute' },
-                  { stringVal: '          ', description: 'empty' }
-                ];
-
-                for await (const val of invalidJSONValues) {
-                  await jsonInput.clear();
-                  await jsonInput.fill(val.stringVal);
-                  await expect.soft(jsonInput, val.description).toHaveValue(val.stringVal);
-                  await expect.soft(cellError, val.description).toBeVisible();
-                  await expect.soft(cellError, val.description).toHaveText('Please enter a valid JSON value.');
-                  await jsonInput.clear();
-                }
-              });
-              break;
-
-            case RecordeditInputType.MARKDOWN:
-              const markdownProps = RecordeditLocators.getMarkdownElements(page, col.name, formNumber);
-
-              await test.step('should render markdown with inline preview and full preview button.', async () => {
-                const markdownTestParams = [{
-                  input: 'RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh',
-                  html: '<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n',
-                  title: 'Heading'
-                }, {
-                  input: 'E15.5 embryonic kidneys for sections\n' +
-                    '- E18.5 embryonic kidneys for cDNA synthesis\n' +
-                    '- Sterile PBS\n' +
-                    '- QIAShredder columns (Qiagen, cat no. 79654)\n' +
-                    '- DEPC-Treated Water',
-                  html: '<ul>\n' +
-                    '<li>E15.5 embryonic kidneys for sections</li>\n' +
-                    '<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n' +
-                    '<li>Sterile PBS</li>\n' +
-                    '<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n' +
-                    '<li>DEPC-Treated Water</li>\n' +
-                    '</ul>\n',
-                  title: 'Unordered List'
-                }, {
-                  // eslint-disable-next-line max-len
-                  input: 'This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru',
-                  // eslint-disable-next-line max-len
-                  html: '<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n',
-                  title: 'Bold'
-                }, {
-                  // eslint-disable-next-line max-len
-                  input: 'This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.',
-                  // eslint-disable-next-line max-len
-                  html: '<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n',
-                  title: 'Italic'
-                }, {
-                  input: '~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~',
-                  html: '<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n',
-                  title: ''
-                }, {
-                  input: 'X^2^+Y^2^+Z^2^=0',
-                  html: '<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n',
-                  title: ''
-                }, {
-                  input: '[[RID]]',
-                  html: '<p><a href="/id/RID">RID</a></p>\n',
-                  title: ''
-                }];
-
-                const mdInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
-                await mdInput.clear();
-                for await (const param of markdownTestParams) {
-                  //if title defined found for markdown elements then send click command
-                  if (param.title) {
-                    const mdOption = markdownProps.getButton(param.title);
-                    await expect.soft(mdOption).toBeVisible();
-                    await mdOption.click();
-                  }
-
-                  // .fill will replace the content but we want to append to the content, so using .pressSequentially instead
-                  await mdInput.pressSequentially(param.input);
-
-                  // inline preview
-                  await markdownProps.previewButton.click();
-                  await expect.soft(markdownProps.previewContent).toBeVisible();
-                  expect.soft(await markdownProps.previewContent.innerHTML()).toEqual(param.html);
-                  await markdownProps.previewButton.click();
-                  await expect.soft(markdownProps.previewContent).not.toBeAttached();
-
-                  // modal preview
-                  const modal = ModalLocators.getMarkdownPreviewModal(page);
-                  await markdownProps.fullScreenButton.click();
-                  await expect.soft(modal).toBeVisible();
-                  const modalContent = ModalLocators.getMarkdownPreviewContent(modal);
-                  await expect.soft(modalContent).toBeVisible();
-                  expect.soft(await modalContent.innerHTML()).toEqual(param.html);
-
-                  await ModalLocators.getCloseBtn(modal).click();
-                  await expect.soft(modal).not.toBeAttached();
-
-                  await mdInput.clear();
-                }
-              });
-
-              await test.step('help button should open the help page', async () => {
-                const newPage = await clickNewTabLink(markdownProps.helpButton);
-                await newPage.waitForURL('**/help/?page=chaise%2Fmarkdown-help');
-                await expect.soft(PageLocators.getHelpPageMainTable(newPage)).toBeVisible();
-                await newPage.close();
-              });
-              break;
-
-            case RecordeditInputType.FK_POPUP:
-              const displayedValue = RecordeditLocators.getForeignKeyInputDisplay(page, col.displayname, formNumber);
-
-              if (typeof existingValue === 'string') {
-                await test.step('clicking the "x" should remove the value in the foreign key field.', async () => {
-                  await expect.soft(displayedValue).toHaveText(existingValue);
-                  await RecordeditLocators.getForeignKeyInputClear(page, col.displayname, formNumber).click();
-                  await expect.soft(displayedValue).toHaveText('Select a value');
-                });
+          let fkPopupTitle;
+          if (col.type === RecordeditInputType.FK_POPUP) {
+            fkPopupTitle = `Select ${col.displayname} for `;
+            if (isEditMode) {
+              fkPopupTitle += `${params.tableDisplayname}: `;
+              if (params.rowNames && params.rowNames[recordIndex]) {
+                fkPopupTitle += `${params.rowNames[recordIndex]}`;
               }
-
-              await test.step('popup selector', async () => {
-                const rsModal = ModalLocators.getForeignKeyPopup(page);
-                await test.step('should have the proper title.', async () => {
-                  await RecordeditLocators.getForeignKeyInputButton(page, col.displayname, formNumber).click();
-                  await expect.soft(rsModal).toBeVisible();
-                  await expect.soft(RecordsetLocators.getRows(rsModal)).not.toHaveCount(0);
-                  let title = `Select ${col.displayname} for `;
-                  if (isEditMode) {
-                    title += `${params.tableDisplayname}: `;
-                    if (params.rowNames && params.rowNames[recordIndex]) {
-                      title += `${params.rowNames[recordIndex]}`;
-                    }
-                  } else {
-                    title += `new ${params.tableDisplayname}`;
-                  }
-                  await expect.soft(ModalLocators.getModalTitle(rsModal)).toContainText(title);
-                });
-
-                await test.step('closing without selecting should not select any values.', async () => {
-                  await ModalLocators.getCloseBtn(rsModal).click();
-                  await expect.soft(rsModal).not.toBeAttached();
-                  await expect.soft(displayedValue).toHaveText('Select a value');
-                });
-              });
-              break;
-
-            case RecordeditInputType.DATE:
-              const dateInputProps = RecordeditLocators.getDateInputsForAColumn(page, col.name, formNumber);
-              const dateRemoveBtn = RecordeditLocators.getInputRemoveButton(page, col.name, formNumber);
-
-              await test.step('should complain about invalid date values.', async () => {
-                // testing partial input
-                await dateInputProps.date.clear();
-                await dateInputProps.date.fill('1234-1');
-                await expect.soft(cellError).toHaveText('Please enter a valid date value in YYYY-MM-DD format.');
-
-                // clear the input and see if the error disapears
-                // (.clear() wasn't working consistently)
-                await dateRemoveBtn.click();
-                await expect.soft(cellError).not.toBeAttached();
-              });
-
-              await test.step('"Today" button should enter the current date into the input', async () => {
-                await dateInputProps.todayBtn.click();
-                await expect.soft(dateInputProps.date).toHaveValue(moment().format('YYYY-MM-DD'));
-              });
-
-              await test.step('"clear" button should clear the date.', async () => {
-                await expect.soft(dateRemoveBtn).toBeVisible();
-                await dateRemoveBtn.click();
-                await expect.soft(dateInputProps.date).toHaveValue('');
-                await expect.soft(dateRemoveBtn).not.toBeAttached();
-              });
-
-              break;
-
-            case RecordeditInputType.TIMESTAMP:
-              const timestampProps = RecordeditLocators.getTimestampInputsForAColumn(page, col.name, formNumber);
-              const timeErrorMessage = 'Please enter a valid time value in 24-hr HH:MM:SS format.';
-              const dateErrorMessage = 'Please enter a valid date value in YYYY-MM-DD format.';
-
-              await test.step('should complain about invalid values and allow valid ones.', async () => {
-                await timestampProps.date.clear();
-                await timestampProps.time.clear();
-
-                // the test cases below are only checking time, so we should first add a proper date.
-                await timestampProps.date.fill('2016-01-01');
-
-                // If user enters an invalid time an error msg should appear
-                await timestampProps.time.fill('24:12:00');
-                await expect.soft(cellError).toHaveText(timeErrorMessage);
-
-                // If user enters a valid time, then error msg should disappear
-                await timestampProps.time.fill('12:00:00');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // users can enter 1 digit in any place
-                await timestampProps.time.clear();
-                await timestampProps.time.fill('2:2:2');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // users can enter just the hours
-                await timestampProps.time.clear();
-                await timestampProps.time.fill('08');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // users can enter just the hours and minutes
-                await timestampProps.time.clear();
-                await timestampProps.time.fill('2:10');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // users can enter 0 for the time
-                await timestampProps.time.clear();
-                await timestampProps.time.fill('00:00:00');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // Invalid date + good time = error
-                // If user enters a valid time but no date, an error msg should appear
-                await timestampProps.date.clear();
-                await timestampProps.time.clear();
-                await timestampProps.time.fill('12:00:00');
-                await expect.soft(cellError).toHaveText(dateErrorMessage);
-
-                // Good date + good time = no error
-                // Now, if user enters a valid date, then no error message should appear
-                await timestampProps.date.fill('2016-01-01');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // Good date + clear time = no error
-                await timestampProps.time.clear();
-                await expect.soft(cellError).not.toBeAttached();
-
-              });
-
-              await test.step('"clear" button should clear both time and date.', async () => {
-                await timestampProps.clearBtn.click();
-                await expect.soft(timestampProps.date).toHaveValue('');
-                await expect.soft(timestampProps.time).toHaveValue('');
-              });
-
-              await test.step('"Now" button should enter the current date and time', async () => {
-                const nowObject = moment();
-                const nowDate = nowObject.format('YYYY-MM-DD');
-                await timestampProps.nowBtn.click();
-                await expect.soft(timestampProps.date).toHaveValue(nowDate);
-
-                await expect.soft(timestampProps.time).not.toHaveValue('');
-                const UITime = await timestampProps.time.getAttribute('value') as string;
-                const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
-                expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
-              });
-
-              break;
-
-            case RecordeditInputType.INT_2:
-            case RecordeditInputType.INT_4:
-            case RecordeditInputType.INT_8:
-              const intInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
-
-              await test.step('should complain about invalid values and allow valid ones.', async () => {
-                // a non-number value
-                await intInput.clear();
-                await intInput.fill('1j2yu');
-                await expect.soft(cellError).toHaveText('Please enter a valid integer value.');
-
-                await intInput.clear();
-                await expect.soft(cellError).not.toBeAttached();
-
-                // float number
-                await intInput.fill('12.1');
-                await expect.soft(cellError).toHaveText('Please enter a valid integer value.');
-
-                await intInput.clear();
-                await expect.soft(cellError).not.toBeAttached();
-
-                // min and max values
-                let invalidMaxNo = '2343243243242414423243242353253253253252352', invalidMinNo = '-2343243243242414423243242353253253253252352';
-                if (col.type === RecordeditInputType.INT_2) {
-                  invalidMaxNo = '8375832757832', invalidMinNo = '-237587565';
-                } else if (col.type === RecordeditInputType.INT_4) {
-                  invalidMaxNo = '3827374576453', invalidMinNo = '-326745374576375';
-                }
-
-                await intInput.clear();
-                await intInput.fill(invalidMaxNo);
-                await expect.soft(cellError).toContainText('This field requires a value less than');
-
-                await intInput.clear();
-                await expect.soft(cellError).not.toBeAttached();
-
-                await intInput.fill(invalidMinNo);
-                await expect.soft(cellError).toContainText('This field requires a value greater than');
-
-                await intInput.clear();
-                await intInput.fill('12')
-                await expect.soft(cellError).not.toBeAttached();
-
-                await intInput.clear();
-              });
-              break;
-
-            case RecordeditInputType.NUMBER:
-              const numInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
-
-              await test.step('should complain about invalid values and allow valid ones.', async () => {
-                // a non-number value
-                await numInput.clear();
-                await numInput.fill('1j2yu');
-                await expect.soft(cellError).toHaveText('Please enter a valid decimal value.');
-
-                // float number
-                await numInput.clear();
-                await numInput.fill('12.1');
-                await expect.soft(cellError).not.toBeAttached();
-
-                // int number
-                await numInput.clear();
-                await numInput.fill('12')
-                await expect.soft(cellError).not.toBeAttached();
-
-                await numInput.clear();
-                await expect.soft(cellError).not.toBeAttached();
-              });
-              break;
-
-            case RecordeditInputType.COLOR:
-              const colorInput = RecordeditLocators.getInputForAColumn(page, col.name, formNumber);
-
-              await test.step('should now allow invalid values and allow valid ones.', async () => {
-                // an incomplete value
-                await colorInput.clear();
-                await colorInput.fill('#de');
-                // the input won't validate until we focus somewhere else
-                await RecordeditLocators.getRequiredInfoEl(page).click();
-                await expect.soft(colorInput).toHaveValue(typeof existingValue === 'string' ? existingValue : '#');
-
-                // a valid color
-                await colorInput.clear();
-                await colorInput.fill('#abcabc');
-                await expect.soft(colorInput).toHaveValue('#abcabc');
-                await expect.soft(cellError).not.toBeAttached();
-              });
-
-              await test.step('color picker popup', async () => {
-                // focus somewhere else to make sure the popup is still not open
-                await RecordeditLocators.getRequiredInfoEl(page).click();
-                // open the popup
-                await RecordeditLocators.getColorInputBtn(page, col.name, formNumber).click();
-
-                const colorPopup = RecordeditLocators.getColorInputPopup(page);
-                await expect.soft(colorPopup).toBeVisible();
-
-                // make sure clear btn is offered regardless of null/not-null (just like any other  input)
-                const colorClearBtn = RecordeditLocators.getColorInputPopupClearBtn(page);
-                await expect.soft(colorClearBtn).toBeVisible();
-
-                const colorPopupInput = RecordeditLocators.getColorInputPopupInput(page);
-                await expect.soft(colorPopupInput).toBeVisible();
-
-                // make sure users can use the color popup input
-                const colorVal = '#555555';
-                await colorPopupInput.clear();
-                await colorPopupInput.fill(colorVal);
-                await RecordeditLocators.getColorInputPopupSelectBtn(page).click();
-                await expect.soft(colorPopup).not.toBeAttached();
-
-                await expect.soft(colorInput).toHaveValue(colorVal);
-                expect.soft(await RecordeditLocators.getColorInputBackground(page, col.name, formNumber)).toEqual(colorVal);
-
-              });
-
-              break;
+            } else {
+              fkPopupTitle += `new ${params.tableDisplayname}`;
+            }
           }
+          await _testInputValidationAndExtraFeatures(
+            page, formNumber, col.name, col.displayname, col.type, col.arrayBaseType, existingValue, fkPopupTitle
+          );
         }
 
         // set the value
-
         if (newValue === undefined) return;
         await test.step('set the new value', async () => {
           await setInputValue(page, formNumber, col.name, col.displayname, col.type, newValue, col.arrayBaseType);

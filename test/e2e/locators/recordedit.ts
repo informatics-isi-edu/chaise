@@ -187,10 +187,19 @@ export default class RecordeditLocators {
     return container.locator(`.input-switch-container-${inputName}`).locator('.remove-input-btn');
   }
 
-  static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
+  /**
+   * return the error message that is displayed for an input
+   * @param container the container that the input is part of
+   * @param name name of the input
+   * @param formNumber the form number value
+   * @param isWarning whether this is for the warning messages or not (.e.g. the add or remove warning of arrays)
+   * @returns
+   */
+  static getErrorMessageForAColumn(container: Locator | Page, name: string, formNumber: number, isWarning?: boolean): Locator {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
-    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error');
+    const erroClass = isWarning ? 'input-switch-error-warning' : 'input-switch-error-danger';
+    return container.locator(`.input-switch-container-${inputName}`).locator('.input-switch-error.' + erroClass);
   }
 
   static getColumnPermissionOverlay(container: Locator | Page, columnDisplayName: string, formNumber: number): Locator {
@@ -384,7 +393,10 @@ export default class RecordeditLocators {
   }
 
   /**
-   * TODO this only supports array of texts for now and should be changed later for other types.
+   * Returns the elemens that are needed for testing arrays.
+   *
+   * if you would like to test each individual input, use the `getArrayInputName` function to find its appropriate
+   * name and then use the other functions that are used for inptus (e.g. `getInputForAColumn`).
    */
   static getArrayFieldElements(container: Locator | Page, name: string, formNumber: number) {
     formNumber = formNumber || 1;
@@ -398,6 +410,13 @@ export default class RecordeditLocators {
     };
   }
 
+  /**
+   * Returns the input name that chaise uses for the n-th input for an array column.
+   *
+   * @param name the name of the column
+   * @param index the index of the value (use -1 if it's for the "new-item" one)
+   * @returns
+   */
   static getArrayInputName(name: string, index: number) {
     const append = index === -1 ? 'new-item' : `${index}-val`;
     return `${name}-${append}`;
