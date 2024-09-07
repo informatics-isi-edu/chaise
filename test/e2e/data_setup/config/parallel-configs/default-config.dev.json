@@ -9,7 +9,6 @@
             "recordedit/domain-filter.config.json",
             "recordedit/foreign-key-dropdown.config.json",
             "recordedit/multi-column-types.config.json",
-            "recordedit/edit-multi.config.json",
             "recordedit/submission-disabled.config.json",
 
             "recordset/add.config.json",
