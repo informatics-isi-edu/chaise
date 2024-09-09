@@ -126,30 +126,60 @@ type SetInputValueProps = string | RecordeditFile | {
   date_value: string,
   time_value: string
 } | {
+  /**
+   * how many rows are visible in the initial fk picker.
+   */
   modal_num_rows: number,
+  /**
+   * the index of the option that we should choose
+   */
   modal_option_index: number,
+  /**
+   * the rowname of the selected option
+   */
   rowName?: string
 };
 
 /**
+ * clear the value of an input by clicking on the "x" button.
  *
- * expected types: 'timestamp', 'boolean', 'fk', 'fk-dropdown', 'array' , or any other string
+ * Notes:
+ *  - this function assumes the input already has a value and doesn't double check.
+*   - in most cases it will click on the "x" for the input.
+ */
+export const clearInputValue = async (
+  page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
+) => {
+  switch (inputType) {
+    case RecordeditInputType.FK_POPUP:
+      const fkBtn = RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber);
+      await fkBtn.click();
+      break;
+    case RecordeditInputType.TIMESTAMP:
+      const timestampBtns = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
+      // we have to remove the date first, otherwise time will keep showing 00:00:00
+      await timestampBtns.dateRemoveBtn.click();
+      await timestampBtns.timeRemoveBtn.click();
+      break;
+    case RecordeditInputType.ARRAY:
+      const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber);
+      while (await elems.removeItemButtons.count() > 0) {
+        await elems.removeItemButtons.nth(0).click();
+      }
+      break;
+    default:
+      const btn = RecordeditLocators.getInputRemoveButton(page, name, formNumber);
+      await btn.click();
+      break;
+  }
+}
+
+/**
+ * chagne the input value.
  *
- * expected valueProps:
- * {
- *
- * // general:
- *  value,
- *
- * // time stamp props:
- *  date_value,
- *  time_value,
- *
- * // fk props:
- *  modal_num_rows,
- *  modal_option_index,
- *
- * }
+ * Notes:
+ *  - If the given value is invalid, this test will not proceed.
+ *  - If you want to clear an input, we recommend calling `clearInputValue` instead.
  *
  * @returns
  */
@@ -194,7 +224,6 @@ export const setInputValue = async (
       if (valueProps.rowName) {
         await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber)).toHaveText(valueProps.rowName);
       }
-
 
       break;
 

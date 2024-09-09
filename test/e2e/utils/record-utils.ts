@@ -19,8 +19,11 @@ import {
 
 
 /**
- * TODO this function is currently only used for recordedit result test, but
- * we should also use this for the 'should validate the values of each column' test in record-helpers.js
+ * make sure the main section of record page is showing the proper values.
+ *
+ * While `expectedColumnNames` must include all the column names, `expectedColumnValues` can be just a subset of columns. but it must
+ * be in the same order. so for example if you don't want to include the default system columns that are displayed at the end of the
+ * column list, you can omit those values.
  */
 export const testRecordMainSectionValues = async (page: Page, expectedColumnNames: string[], expectedColumnValues: RecordsetRowValue) => {
   await RecordLocators.waitForRecordPageReady(page);

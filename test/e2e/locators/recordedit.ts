@@ -162,7 +162,7 @@ export default class RecordeditLocators {
   }
 
   static getTimestampInputsForAColumn(container: Locator | Page, name: string, formNumber: number): {
-    date: Locator, time: Locator, nowBtn: Locator, clearBtn: Locator
+    date: Locator, time: Locator, nowBtn: Locator, clearBtn: Locator, dateRemoveBtn: Locator, timeRemoveBtn: Locator
   } {
     formNumber = formNumber || 1;
     const inputName = `c_${formNumber}-${name}`;
@@ -171,7 +171,9 @@ export default class RecordeditLocators {
       date: wrapper.locator(`.${inputName}-date`),
       time: wrapper.locator(`.${inputName}-time`),
       nowBtn: wrapper.locator('.date-time-now-btn'),
-      clearBtn: wrapper.locator('.date-time-clear-btn')
+      clearBtn: wrapper.locator('.date-time-clear-btn'),
+      dateRemoveBtn: wrapper.locator('.input-switch-date .input-switch-clear'),
+      timeRemoveBtn: wrapper.locator('.input-switch-time .input-switch-clear')
     };
   }
 

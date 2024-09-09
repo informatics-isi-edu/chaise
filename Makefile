@@ -45,7 +45,7 @@ MODULES=node_modules
 ## Sequential test scripts
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.config.ts
-E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
+E2EDrecordEditNullValues=test/e2e/specs/default-config/recordedit/null-values.config.ts
 E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.config.ts
 # not part of the make recordedit command anymore
@@ -91,7 +91,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 # protractor tests
 RECORDSET_TESTS_PROTRACTOR=$(E2ErecordsetAdd) $(E2EDrecordsetEdit)
 RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
-RECORDEDIT_TESTS_PROTRACTOR=$(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
+RECORDEDIT_TESTS_PROTRACTOR=$(E2EDrecordEditSubmissionDisabled)
 DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
 ALL_TESTS_PROTRACTOR=$(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR)
@@ -101,7 +101,7 @@ NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
-RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)

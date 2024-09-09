@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "null-values",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordedit/null-values.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/null-values"
+    }
+}
