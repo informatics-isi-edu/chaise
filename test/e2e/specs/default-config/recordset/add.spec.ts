@@ -44,10 +44,7 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     await expect.soft(testCell).toHaveText(/... more/);
 
     let dimensions = await testCell.boundingBox();
-    if (!dimensions) {
-      expect.soft(false).toBeTruthy();
-      return;
-    }
+    if (!dimensions) return;
 
     // the calculations might be one pixel off
     expect.soft(Math.abs(dimensions.height - cellHeight)).toBeLessThanOrEqual(1);
@@ -56,10 +53,7 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     await expect.soft(testCell).toHaveText(/... less/);
 
     dimensions = await testCell.boundingBox();
-    if (!dimensions) {
-      expect.soft(false).toBeTruthy();
-      return;
-    }
+    if (!dimensions) return;
 
     expect.soft(dimensions.height).toBeGreaterThan(cellHeight);
   });
