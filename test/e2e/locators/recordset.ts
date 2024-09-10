@@ -59,6 +59,10 @@ export default class RecordsetLocators {
     return this.getPageTitleElement(container).locator('.chaise-icon-for-tooltip');
   }
 
+  static getPageTitleInlineComment(container: Page | Locator): Locator {
+    return this.getPageTitleElement(container).locator('.inline-tooltip');
+  };
+
   static getPermalinkButton(container: Page | Locator): Locator {
     return container.locator('#permalink');
   }
@@ -267,6 +271,10 @@ export default class RecordsetLocators {
 
   static getRowSelectButton(container: Page | Locator, rowIndex: number): Locator {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.select-action-button');
+  }
+
+  static getReadMore(container: Page | Locator): Locator {
+    return container.locator('.readmore');
   }
 
 

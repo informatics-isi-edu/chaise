@@ -1,15 +1,15 @@
 {
     "catalog": {},
     "schema": {
-        "name": "multi-edit",
+        "name": "null-values",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/recordedit/multi-edit.json"
+        "path": "test/e2e/data_setup/schema/recordedit/null-values.json"
     },
     "tables": {
         "createNew": true
     },
     "entities": {
         "createNew": true,
-        "path": "test/e2e/data_setup/data/multi-edit"
+        "path": "test/e2e/data_setup/data/null-values"
     }
 }
