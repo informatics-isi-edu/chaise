@@ -160,14 +160,14 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           >
             <div className='chaise-input-group'>
               {renderInput(field.value, showClear, clearInput)}
-              {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
+              {!props.disableInput &&
                 <div className='chaise-input-group-append' tabIndex={0}>
                   <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
                     <span className='fa-solid fa-folder-open'></span>
                     <span className='button-text'>Select file</span>
                   </label>
                 </div>
-              </ChaiseTooltip>}
+              }
             </div>
           </EllipsisWrapper>
           {renderImagePreview(field.value)}

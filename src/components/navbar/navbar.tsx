@@ -67,7 +67,7 @@ const ChaiseNavbar = (): JSX.Element => {
   const isVersioned = (): boolean => (!!catalogId.split('@')[1]);
 
   useEffect(() => {
-    const root = { ...cc.navbarMenu } || {};
+    const root = typeof cc.navbarMenu === 'object' ? { ...cc.navbarMenu } : {};
 
     // if in iframe and we want to force links to open in new tab,
     const forceNewTab = settings.openLinksInTab === true;
@@ -195,7 +195,7 @@ const ChaiseNavbar = (): JSX.Element => {
     /**
      * Update the state to reflect most recently opened dropdown
      */
-     setOpenedDropDownIndex(isOpen ? index :  undefined);
+    setOpenedDropDownIndex(isOpen ? index : undefined);
 
     onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
   }
