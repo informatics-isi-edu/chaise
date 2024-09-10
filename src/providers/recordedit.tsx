@@ -796,7 +796,7 @@ export default function RecordeditProvider({
     }
 
     // prefillAssocationSelectedRows is only used when there is a prefill object and there is a unique association
-    if (reference.prefillForCreateAssociation?.isUnique) {
+    if (reference.bulkCreateForeignKeyObject?.isUnique) {
       const tempSelectedRows = [...prefillAssociationSelectedRows];
 
       indexes.forEach((index: number) => {
@@ -824,7 +824,7 @@ export default function RecordeditProvider({
    * @param newRow the new row to keep track of, if not defined removes the previous row
    */
   const updateAssociationSelectedRows = (formNumber: number, newRow?: SelectedRow) => {
-    if (!reference.prefillForCreateAssociation) return;
+    if (!reference.bulkCreateForeignKeyObject) return;
 
     const tempSelectedRows = [...prefillAssociationSelectedRows];
 

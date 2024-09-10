@@ -318,8 +318,8 @@ const RecordeditInner = ({
      * trigger the association modal when there is an assoication and
      * we know the leaf column for the association is visible in create mode
      **/
-    if (reference.prefillForCreateAssociation) {
-      const prefill = reference.prefillForCreateAssociation;
+    if (reference.bulkCreateForeignKeyObject) {
+      const prefill = reference.bulkCreateForeignKeyObject;
       const domainRef: any = prefill.leafColumn.reference;
       const andFilters: any[] = prefill.andFiltersForLeaf();
 
@@ -493,7 +493,7 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        const prefill = reference.prefillForCreateAssociation;
+        const prefill = reference.bulkCreateForeignKeyObject;
         // don't copy the value for the leaf column for an assoication that is unique
         if (prefill?.isUnique && cm.column.name === prefill.leafColumn.name) return;
 
@@ -521,7 +521,7 @@ const RecordeditInner = ({
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const prefill = reference.prefillForCreateAssociation;
+      const prefill = reference.bulkCreateForeignKeyObject;
         // don't copy the value for the leaf column for an assoication that is unique
       if (prefill?.isUnique && col.name === prefill.leafColumn.name) return;
 
@@ -549,9 +549,9 @@ const RecordeditInner = ({
 
   // show the prefill association modal if we have a prefill object and association recordset props
   const showPrefillAssociationModal = () => {
-    const prefill = reference.prefillForCreateAssociation;
-    // check for prefillForCreateAssociation being defined since a malformed prefillObject should be ignored
-    //   and the `prefillForCreateAssociation` constructor will handle those malformed cases
+    const prefill = reference.bulkCreateForeignKeyObject;
+    // check for bulkCreateForeignKeyObject being defined since a malformed prefillObject should be ignored
+    //   and the `bulkCreateForeignKeyObject` constructor will handle those malformed cases
     if (!associationRecordsetProps || !prefill) return;
 
     let getDisabledTuples;
@@ -594,7 +594,7 @@ const RecordeditInner = ({
    * fill in the first form. After that, the selections will copy the last form's values or use default
    * values based on what is set in the annotation (pending annotation implementation)
    *
-   * NOTE: This should only be called if reference.prefillForCreateAssociation is defined
+   * NOTE: This should only be called if reference.bulkCreateForeignKeyObject is defined
    *
    * @param modalSelectedRows the selected rows from the association modal
    */
@@ -604,7 +604,7 @@ const RecordeditInner = ({
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
 
-    const prefill = reference.prefillForCreateAssociation
+    const prefill = reference.bulkCreateForeignKeyObject
     if (prefill.isUnique) {
       /**
        * copy modalSelectedRows 2nd to preserve indexes in prefillAssociationSelectedRows
@@ -873,7 +873,7 @@ const RecordeditInner = ({
           recordsetProps={associationRecordsetProps}
           onSubmit={submitAssociationCB}
           onClose={closeAssociationCB}
-          displayname={reference.prefillForCreateAssociation.leafColumn.displayname}
+          displayname={reference.bulkCreateForeignKeyObject.leafColumn.displayname}
         />
       }
     </>);
@@ -1043,9 +1043,9 @@ const RecordeditInner = ({
                       </div>
                       {associationRecordsetProps &&
                         // only show association modal button if we started with an association picker
-                        // associationRecordsetProps only get set if there is a `reference.prefillForCreateAssociation` defined when the recordedit app loads
+                        // associationRecordsetProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
                         <ChaiseTooltip
-                          tooltip={`Select more ${reference.prefillForCreateAssociation.leafColumn.displayname.value} for new forms`}
+                          tooltip={`Select more ${reference.bulkCreateForeignKeyObject.leafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
                         >
                           <button

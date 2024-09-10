@@ -193,7 +193,7 @@ const SavedQueryDropdown = ({
     const columnModels: any[] = [];
     const rows: any[] = [];
     const tempSavedQueryReference = savedQueryReference.contextualize.entryCreate;
-    tempSavedQueryReference.computePrefillForCreateAssociation(null);
+    tempSavedQueryReference.computeBulkCreateForeignKeyObject(null);
 
     // set columns list
     tempSavedQueryReference.columns.forEach((col: any) => {

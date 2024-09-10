@@ -100,8 +100,8 @@ const RecordeditApp = (): JSX.Element => {
         }
       }
 
-      // initialize `ERMrest.PrefillForCreateAssociation` object on reference even if we don't have a prefillObj
-      reference.computePrefillForCreateAssociation(prefillObj);
+      // initialize `ERMrest.BulkCreateForeignKeyObject` object on reference even if we don't have a prefillObj
+      reference.computeBulkCreateForeignKeyObject(prefillObj);
 
       const logStack = [
         LogService.getStackNode(

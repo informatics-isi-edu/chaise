@@ -319,10 +319,10 @@ const FormRow = ({
     const safeClassNameId = `${formNumber}-${makeSafeIdAttr(column.displayname.value)}`;
 
     const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
-    const prefill = reference.prefillForCreateAssociation;
+    const prefill = reference.bulkCreateForeignKeyObject;
     /**
      * add foreignkey callbacks to generated input if:
-     *  - there is a prefillForCreateAssociation defined
+     *  - there is a bulkCreateForeignKeyObject defined
      *  - there is a pair of columns that create a unique assocation that use the prefill behavior
      *  - the column is a foreignkey
      *  - and the column is the one used for associating to the leaf table of the association
