@@ -23,6 +23,7 @@ const testParams = {
 test('Recordset add record', async ({ page, baseURL }, testInfo) => {
   const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
 
+  let firstRow, testCell: any, dimensions;
   await test.step('should load recordset page', async () => {
     await page.goto(`${baseURL}${PAGE_URL}`);
     await RecordsetLocators.waitForRecordsetPageReady(page);
@@ -34,28 +35,42 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     await expect.soft(RecordsetLocators.getPageTitleInlineComment(page)).toHaveText('Recordset inline comment');
   });
 
-  await test.step('verify the text is truncated properly based on the default config, then not truncated after clicking "more"', async () => {
-    // default config: maxRecordsetRowHeight = 160
-    // 160 for max height, 10 for padding
-    const cellHeight = 170;
-
-    const firstRow = RecordsetLocators.getRows(page).nth(0);
-    const testCell = RecordsetLocators.getRowCells(firstRow).nth(4);
+  await test.step('verify the text is truncated and "... more" is showing', async () => {
+    firstRow = RecordsetLocators.getRows(page).nth(0);
+    testCell = RecordsetLocators.getRowCells(firstRow).nth(4);
     await expect.soft(testCell).toHaveText(/... more/);
+  });
 
-    let dimensions = await testCell.boundingBox();
-    if (!dimensions) return;
+  // default config: maxRecordsetRowHeight = 160
+  // 160 for max height, 10 for padding
+  const cellHeight = 170;
+  await test.step('the cell with text has the expected height when truncated', async () => {
+    dimensions = await testCell.boundingBox();
+    expect.soft(dimensions).toBeDefined();
 
-    // the calculations might be one pixel off
-    expect.soft(Math.abs(dimensions.height - cellHeight)).toBeLessThanOrEqual(1);
+    if (dimensions) {
+      // the calculations might be one pixel off
+      expect.soft(Math.abs(dimensions.height - cellHeight)).toBeLessThanOrEqual(1);
+    }
+  });
 
+  await test.step('click "... more" and verify "... less" shows up', async () => {
     await RecordsetLocators.getReadMore(testCell).click();
     await expect.soft(testCell).toHaveText(/... less/);
+  });
 
+  await test.step('the cell with text is expanded with a new height', async () => {
     dimensions = await testCell.boundingBox();
-    if (!dimensions) return;
+    expect.soft(dimensions).toBeDefined();
 
-    expect.soft(dimensions.height).toBeGreaterThan(cellHeight);
+    if (dimensions) {
+      expect.soft(dimensions.height).toBeGreaterThan(cellHeight);
+    };
+  });
+
+  await test.step('click on "... less" and verify the content is truncated again', async() => {
+    await RecordsetLocators.getReadMore(testCell).click();
+    await expect.soft(testCell).toHaveText(/... more/);
   });
 
   await test.step('verify view details link, search for a term, then verify view details link has changed', async () => {
