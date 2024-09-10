@@ -258,6 +258,12 @@ export const setInputValue = async (
       const fileInputBtn = RecordeditLocators.getFileInputButtonForAColumn(page, name, formNumber);
       const fileTextInput = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
       await selectFile(valueProps, fileInputBtn, fileTextInput);
+
+      if (valueProps.tooltip) {
+        // when we select a file, the file button remains in focus, so we have to hover on some other element first
+        await RecordeditLocators.getRequiredInfoEl(page).hover();
+        await testTooltip(fileInputBtn, valueProps.tooltip, APP_NAMES.RECORDEDIT, true);
+      }
       break;
 
     case RecordeditInputType.ARRAY:
@@ -940,16 +946,21 @@ export const testFormPresentationAndValidation = async (
       pageTitle = `${action} ${params.inputs.length} ${params.tableDisplayname} ${appendText}`;
     }
 
-    await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(pageTitle);
+    const titleEl = RecordeditLocators.getPageTitle(page);
+    await expect.soft(titleEl).toHaveText(pageTitle);
 
     const linkEl = RecordeditLocators.getPageTitleLink(page);
     const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
 
-    // if (params.tableComment) {
-    //   await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true);
-    // }
+    if (params.tableComment) {
+      /**
+       * the default "hover element" that this function will use for recordedit is the "required info" which is directly below the title.
+       * when the title tooltip is displayed, the tooltip is blocking the "required info", that's why in here we're passing our own hover element.
+       */
+      await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true, titleEl);
+    }
   });
 
   await test.step('should have the corret head title.', async () => {
