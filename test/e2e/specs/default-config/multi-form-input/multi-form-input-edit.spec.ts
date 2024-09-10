@@ -82,6 +82,15 @@ test.describe('Regarding multi form input button', () => {
       await RecordeditLocators.getMultiFormApplyBtn(page).click();
     });
 
+    // we used to have bug where the clear all wasn't working as expected for fkeys. so we're specifically testing it here
+    await test.step('user should be able to clear all foreign key values.', async () => {
+      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page);
+      await RecordeditLocators.getMultiFormToggleButton(page, 'fk_col').click();
+      await RecordeditLocators.getMultiFormInputCheckbox(page).click();
+      await expect.soft(clearBtn).not.toBeDisabled();
+      await clearBtn.click();
+    });
+
     await test.step('user should be able to submit and save data.', async () => {
       /**
        * increse the timeout because of upload modal

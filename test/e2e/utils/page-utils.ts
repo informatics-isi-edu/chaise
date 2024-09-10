@@ -81,11 +81,17 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
 /**
  * hover over an element and make sure it shows the expected tooltip
  *
- * To make sure the hover goes away after this test, we're hovering over an element.
- * This element is chosen based on app.
+ * Notes:
+ *  - To make sure the tooltip goes away after this test, we're hovering over a different element after testing the tooltip.
+ *
+ * @param locator the element with the tooltip
+ * @param expectedTooltip the expected value that is used in a `toHaveText`. so if a string is passed, we expect a full match.
+ * @param appName the name of the app. Used for figuring out the default "hover element".
+ * @param hoverEl the element that we should hover over so the tooltip disapears. if undefined, we will pick a default element based on the app.
  */
-export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean) {
+export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean, hoverEl?: Locator) {
   await locator.hover();
+  await locator.page().pause();
 
   const el = PageLocators.getTooltipContainer(locator.page());
 
@@ -95,23 +101,23 @@ export async function testTooltip(locator: Locator, expectedTooltip: string | Re
   await expectFn(el).toHaveText(expectedTooltip);
 
   // hover over an element that we know doesn't have tooltip to remove the tooltip
-  let hoverEl;
-  switch (appName) {
-    case APP_NAMES.RECORD:
-      hoverEl = RecordLocators.getEntityTitleElement(locator.page());
-      break;
-    case APP_NAMES.RECORDSET:
-      hoverEl = RecordsetLocators.getTotalCount(locator.page());
-      break;
-    case APP_NAMES.RECORDEDIT:
-      hoverEl = RecordeditLocators.getRequiredInfoEl(locator.page());
-      break;
-    default:
-      // TODO what about other apps
-      hoverEl = locator.page().locator('.app-container');
-      break;
+  if (!hoverEl) {
+    switch (appName) {
+      case APP_NAMES.RECORD:
+        hoverEl = RecordLocators.getEntityTitleElement(locator.page());
+        break;
+      case APP_NAMES.RECORDSET:
+        hoverEl = RecordsetLocators.getTotalCount(locator.page());
+        break;
+      case APP_NAMES.RECORDEDIT:
+        hoverEl = RecordeditLocators.getRequiredInfoEl(locator.page());
+        break;
+      default:
+        // TODO what about other apps
+        hoverEl = locator.page().locator('.app-container');
+        break;
+    }
   }
-
   await hoverEl.hover();
   await expectFn(el).not.toBeAttached();
 
