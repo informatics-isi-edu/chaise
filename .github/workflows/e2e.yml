@@ -1,19 +1,14 @@
 
 name: Chaise end-to-end tests
 
-on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'master'
-
-concurrency: chaise_env
+on: [push]
 
 jobs:
   install-and-test:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: ["18.18", "20.0.0"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -22,12 +17,16 @@ jobs:
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
-    timeout-minutes: 150
+    timeout-minutes: 60
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
         with:
           path: chaise
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Setup the system
         run: |
           echo "node version:"
