@@ -98,11 +98,6 @@ export const selectFile = async (file: RecordeditFile, fileInputBtn: Locator, fi
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles(resolve(UPLOAD_FOLDER, file.path));
   await expect.soft(fileTextInput).toHaveText(file.name);
-
-  // TODO why is this not working?
-  // if (file.tooltip) {
-  //   await testTooltip(fileTextInput, file.tooltip, APP_NAMES.RECORDEDIT, true);
-  // }
 }
 
 
@@ -332,6 +327,7 @@ export const testInputValue = async (
       break;
 
     case RecordeditInputType.FK_POPUP:
+    case RecordeditInputType.FK_DROPDOWN:
       input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {

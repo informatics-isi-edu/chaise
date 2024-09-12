@@ -34,7 +34,6 @@ test.describe('Navbar with chaise-config annotation', () => {
 
   test('should hide the navbar bar if the hideNavbar query parameter is set to true', async ({ page, baseURL }, testInfo) => {
     const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
-    await page.pause();
     await page.goto(`${baseURL}${PAGE_URL}?hideNavbar=true`);
     await RecordsetLocators.waitForRecordsetPageReady(page);
     await expect.soft(NavbarLocators.getContainer(page)).not.toBeAttached();

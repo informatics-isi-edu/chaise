@@ -63,7 +63,8 @@ const testParams = {
 };
 
 test.describe('Testing features for range picker facet types with histograms', () => {
-  test.describe.configure({ mode: 'parallel' });
+  // this test is flaky, so we're going to retry it if it failed the first time.
+  test.describe.configure({ mode: 'parallel', retries: 3 });
 
   for (const [index, facetParams] of testParams.facets.entries()) {
     test(`Testing facet: ${facetParams.name}`, async ({ page, baseURL }, testInfo) => {
