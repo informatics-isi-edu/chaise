@@ -164,7 +164,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.node-version }}
           path: chaise/playwright-report/
           retention-days: 30
       - name: Diagnosis after failure
