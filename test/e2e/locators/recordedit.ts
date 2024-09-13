@@ -216,6 +216,15 @@ export default class RecordeditLocators {
     return container.locator(`.column-permission-warning-${formNumber}-${columnDisplayName}`)
   }
 
+  /**
+   * only applicaple to inputs that have a "fake" placehodler: boolean, file, foriegnkey, and iframe.
+   */
+  static getInputPlaceholderMessage(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-placeholder');
+  }
+
   // -------------- file input selectors --------------- //
   static getTextFileInputForAColumn(container: Locator | Page, name: string, formNumber: number): Locator {
     formNumber = formNumber || 1;
