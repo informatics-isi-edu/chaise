@@ -170,7 +170,6 @@ test.describe('Immutable and Generated columns', () => {
               case RecordeditInputType.FK_POPUP:
               case RecordeditInputType.BOOLEAN:
                 await expect.soft(RecordeditLocators.getInputPlaceholderMessage(page, col.name, 1)).toHaveText('Automatically generated');
-                // TODO
                 break;
               default:
                 await testAutomaticallyGenerated(RecordeditLocators.getInputForAColumn(page, col.name, 1), col.displayname);
@@ -190,7 +189,6 @@ test.describe('Immutable and Generated columns', () => {
     await test.step('open recordedit page', async () => {
       await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schemaTable}/id=2`);
       await RecordeditLocators.waitForRecordeditPageReady(page);
-      await page.pause();
     });
 
     await test.step('display immutable inputs properly with their values.', async () => {
