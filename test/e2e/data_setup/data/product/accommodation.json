@@ -34,6 +34,13 @@
   "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
   "luxurious": true,
+  "text_array": ["val1"],
+  "boolean_array": [false, false],
+  "int4_array": [1, 2, 3, 4, 5],
+  "float4_array": [-5.2],
+  "date_array": null,
+  "timestamp_array": null,
+  "timestamptz_array": null,
   "color_rgb_hex_column": "#223456"
  },
  {
@@ -75,6 +82,13 @@
   "luxurious": false,
   "nullable_assoc_key2": "value",
   "fk_col_outbound1": "o1_2",
+  "text_array": ["val2"],
+  "boolean_array": [false, false, true],
+  "int4_array": [1, 2, 3],
+  "float4_array": [1.1, -5],
+  "date_array": null,
+  "timestamp_array": null,
+  "timestamptz_array": ["2022-02-02T02:02:02-08:00", "2024-04-04T04:04:04-08:00"],
   "color_rgb_hex_column": "#423456"
 },
 {
@@ -117,4 +131,5 @@
  "timestamp_array": ["2003-03-03T03:03:03"],
  "timestamptz_array": ["2002-02-02T02:02:02-08:00"],
  "color_rgb_hex_column": "#623456"
-}]
+}
+]

@@ -456,6 +456,7 @@ const testParams = {
       },
       {
         type: RecordeditInputType.ARRAY,
+        arrayBaseType: RecordeditInputType.TEXT,
         column_name: 'array_text',
         column_displayname: 'array_text',
         apply_to_all: {
@@ -672,7 +673,7 @@ test.describe('multi form input in create mode', () => {
       const colDisplayname = params.column_displayname;
       const toggleBtn = RecordeditLocators.getMultiFormToggleButton(page, colDisplayname);
       const applybtn = RecordeditLocators.getMultiFormApplyBtn(page);
-      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page)
+      const clearBtn = RecordeditLocators.getMultiFormClearBtn(page);
 
       await test.step(`${params.type}`, async () => {
 
@@ -696,7 +697,9 @@ test.describe('multi form input in create mode', () => {
         });
 
         await test.step('when all forms are selected, clicking on apply should apply change to all forms', async () => {
-          await setInputValue(page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_all.value);
+          await setInputValue(
+            page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_all.value, params.arrayBaseType
+          );
           await applybtn.click();
           await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, true, params.apply_to_all.column_values_after);
         });
@@ -707,7 +710,9 @@ test.describe('multi form input in create mode', () => {
             await RecordeditLocators.getFormInputCell(page, params.column_name, f, params.type === RecordeditInputType.ARRAY).click();
           }
 
-          await setInputValue(page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_some.value);
+          await setInputValue(
+            page, MULI_FORM_INPUT_FORM_NUMBER, params.column_name, colDisplayname, params.type, params.apply_to_some.value, params.arrayBaseType
+          );
           await applybtn.click();
           await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, true, params.apply_to_some.column_values_after);
         });
@@ -728,7 +733,9 @@ test.describe('multi form input in create mode', () => {
           await expect.soft(applybtn).not.toBeAttached();
 
           // change one value manually
-          await setInputValue(page, params.manual_test.formNumber, params.column_name, colDisplayname, params.type, params.manual_test.value);
+          await setInputValue(
+            page, params.manual_test.formNumber, params.column_name, colDisplayname, params.type, params.manual_test.value, params.arrayBaseType
+          );
           // make sure the value shows up properly in the form.
           await testFormValuesForAColumn(page, params.column_name, colDisplayname, params.type, false, params.manual_test.column_values_after);
         });

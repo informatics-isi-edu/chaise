@@ -15,8 +15,9 @@
   ],
   "scripts": {
     "build": "make dist",
+    "deploy": "make deploy",
     "pretest": "make deploy",
-    "test": "make test"
+    "test": "make testparallel"
   },
   "repository": {
     "type": "git",
@@ -42,9 +43,7 @@
     "jasmine-spec-reporter": "^2.5.0",
     "moment": "2.29.4",
     "moment-timezone": "0.5.14",
-    "patch-package": "^8.0.0",
     "prettier": "^3.2.5",
-    "protractor": "5.4.4",
     "set-cookie-parser": "x",
     "ts-node": "^10.9.1",
     "webpack-bundle-analyzer": "^4.5.0"

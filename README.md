@@ -1,9 +1,9 @@
 # Chaise (Computer-Human Access Interface with Schema Evolution) [![Build Status](https://github.com/informatics-isi-edu/chaise/workflows/Chaise%20end-to-end%20tests/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
 
 
-A suite of web applications that adapt to the data model for data discovery, analysis, visualization, editing, sharing and collaboration. 
+A suite of web applications that adapt to the data model for data discovery, analysis, visualization, editing, sharing and collaboration.
 
-Chaise is the main front-end component of the [DERIVA asset management Platform](http://isrd.isi.edu/deriva) and utilizes [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs) client library to interact with the DERIVA services including [ERMrest](https://github.com/informatics-isi-edu/ermrest) (a general relational data storage service), [webauthn](https://github.com/informatics-isi-edu/webauthn) (authentication provider framework), [Hatrac](https://github.com/informatics-isi-edu/hatrac) (an object store service), and [deriva-web export](https://github.com/informatics-isi-edu/deriva-web/blob/master/docs/export/api.md) (allows export from an ERMrest catalog). 
+Chaise is the main front-end component of the [DERIVA asset management Platform](http://isrd.isi.edu/deriva) and utilizes [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs) client library to interact with the DERIVA services including [ERMrest](https://github.com/informatics-isi-edu/ermrest) (a general relational data storage service), [webauthn](https://github.com/informatics-isi-edu/webauthn) (authentication provider framework), [Hatrac](https://github.com/informatics-isi-edu/hatrac) (an object store service), and [deriva-web export](https://github.com/informatics-isi-edu/deriva-web/blob/master/docs/export/api.md) (allows export from an ERMrest catalog).
 
 ## Table of Contents
 
@@ -102,7 +102,7 @@ A few representative but non-exhaustive examples of these assumptions include:
 [data model]: https://en.wikipedia.org/wiki/Data_model
 [denormalized]: https://en.wikipedia.org/wiki/Denormalization
 
-Beyond these baseline assumptions about basic usage, Chaise makes almost no assumptions about the structure of the underlying [data model], such as its tables, columns, keys, foreign key relationships, etc. Chaise begins by introspecting the data model by getting the `catalog/N/schema` resource from [ERMrest]. The schema resource includes lightweight semantic annotations about the model in addition to the underlying relational database schema. 
+Beyond these baseline assumptions about basic usage, Chaise makes almost no assumptions about the structure of the underlying [data model], such as its tables, columns, keys, foreign key relationships, etc. Chaise begins by introspecting the data model by getting the `catalog/N/schema` resource from [ERMrest]. The schema resource includes lightweight semantic annotations about the model in addition to the underlying relational database schema.
 
 Chaise uses its rending heuristics to decide, for instance, how to flatten a hierarchical structure into a simplified (or [denormalized]) presentation for searching and viewing. The schema annotations are then used to modify or override its rendering heuristics, for instance, to hide a column of a table or to use a specific display name in the interface that is different than the column name from the table definition of the schema. Chaise then applies user preferences to further override the rendering decisions and annotations, for instance, to present a nested table of data in a transposed layout (i.e., with the columns and rows flipped).
 
@@ -116,7 +116,7 @@ The following are some of the documents and resources that we've prepared for us
   -  [Navbar app integration](docs/user-docs/navbar-app.md): Goes over how the Chaise's Navbar app can be embedded in other web applications.
   -  [Logging](docs/user-docs/logging.md): How Chaise is logging server requests as well as client actions.
   -  [Query parameters](docs/user-docs/query-parameters.md): Query parameters that can be used in different Chaise applications.
-- [Deveoper guides](docs/user-docs): 
+- [Deveoper guides](docs/user-docs):
   - [Chaise developer guide](docs/dev-docs/dev-guide.md): Useful information for developers of Chaise.
   - [End to End Testing](/docs/dev-docs/e2e-test.md): How end to end testing in Chaise works.
 
@@ -129,7 +129,7 @@ When developing new code for Chaise, please make sure you're following these ste
 4. update the e2e tests (if applicable);
 5. make sure the liner doesn't throw any errors (`make lint` should not fail);
 6. make sure you can deploy your code without any issues (`make dist && make deploy` should not fail);
-7. make sure that all tests are passing before submitting the pull request (`make test` should be free of errors);
+7. make sure that all tests are passing before submitting the pull request (`make testparallel` should be free of errors);
 8. make your pull request, assign it to yourself, and ask someone to review your code.
    - Try to provide as much information as you can on your PR. Explain the issues that the PR is fixing, and the changes that you've done in the PR.
    - Provide examples if applicable.
@@ -140,6 +140,7 @@ When developing new code for Chaise, please make sure you're following these ste
 ## Help and Contact
 
 Please direct questions and comments to the [project issue tracker](https://github.com/informatics-isi-edu/chaise/issues).
+
 ## License
 
 Chaise is made available as open source under the Apache License, Version 2.0. Please see the [LICENSE file](LICENSE) for more information.

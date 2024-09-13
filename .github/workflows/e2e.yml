@@ -1,19 +1,14 @@
 
 name: Chaise end-to-end tests
 
-on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'master'
-
-concurrency: chaise_env
+on: [push]
 
 jobs:
   install-and-test:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: ["18.18", "20.0.0"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -22,12 +17,16 @@ jobs:
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
-    timeout-minutes: 150
+    timeout-minutes: 60
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
         with:
           path: chaise
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Setup the system
         run: |
           echo "node version:"
@@ -64,10 +63,6 @@ jobs:
           sudo pip3 uninstall crypto
           sudo pip3 uninstall pycrypto
           sudo pip3 install pycryptodome
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
       - name: Install webauthn
         run: |
           sudo useradd -m -r webauthn
@@ -154,31 +149,6 @@ jobs:
         run: |
           cd chaise
           make testdeleteprohibited
-      - name: Setup and connect to saucelabs
-        timeout-minutes: 2
-        run: |
-          curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
-          tar -xzf saucelabs.tar.gz
-          cd sc-*
-          bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
-      - name: Check sauce connect
-        run: |
-          while [ ! -f /tmp/sc_ready ]; do
-            echo "Waiting for Sauce Connect..."
-            sleep 5;
-          done;
-      - name: Run all features confirmation test spec (protractor)
-        id: test-protractor-all-features-confirmation
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeaturesconfirmation-protractor
-      - name: Run default config test spec  (protractor)
-        id: test-protractor-default-config
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdefaultconfig-protractor
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
@@ -191,16 +161,10 @@ jobs:
       - name: Check on delete prohibited test spec
         if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
-      - name: Check on all features confirmation test spec (protractor)
-        if: always() && steps.test-protractor-all-features-confirmation.outcome != 'success'
-        run: exit 1
-      - name: Check on default config test spec (protractor)
-        if: always() && steps.test-protractor-default-config.outcome != 'success'
-        run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.node-version }}
           path: chaise/playwright-report/
           retention-days: 30
       - name: Diagnosis after failure

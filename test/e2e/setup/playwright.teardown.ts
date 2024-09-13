@@ -4,7 +4,6 @@ import fs from 'fs';
 import { TestOptions } from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.model';
 import { removeAllCatalogs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import axios from 'axios';
 
 async function globalTeardown(config: FullConfig) {
   /**
@@ -26,14 +25,6 @@ async function globalTeardown(config: FullConfig) {
       testConfiguration = require(`../../e2e/data_setup/config/${options.configFileName}`);
     }
   }
-
-  // TODO
-  // if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
-  //   // cleanup the hatrac namespaces
-  //   for (const ns of testConfiguration.hatracNamespaces) {
-  //     const response = await axios(ns, { method: 'DELETE', headers: { Cookie: process.env.AUTH_COOKIE! } });
-  //   }
-  // }
 
   // remove the created catalogs
   if (testConfiguration.cleanup && testConfiguration.setup) {

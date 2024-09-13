@@ -18,7 +18,7 @@ E2E tests are automation tests that simulate a user interacting with the app and
 - [**Playwright**](https://playwright.dev/): The E2e test framework that we're using.
 - **NPM**: to install necessary NodeJS packages
 - **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
-- **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
+- **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Playwright (which will run the tests).
 
 ## Setup
 
@@ -64,11 +64,7 @@ You can get your cookie by querying the database, or using the following simple 
     make deps-test
     ```
 
-    This will install all the npm dependencies that are needed and will also make sure the Selenium's WebDriver that protractor uses is updated.
-
-    - If you just want to update the WebDriver you can do `make update-webdriver`.
-    - If the version of Chrome that is installed on your machine is different from the ChromeDriver that Selenium uses, it will throw an error. So make sure both versions are always updated and compatible.
-
+    This will install all the npm dependencies that are needed and will also make sure the Playwright browsers are installed.
 
 3. Build Chaise without installing the dependencies again:
     ```sh

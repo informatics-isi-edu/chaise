@@ -1,11 +1,11 @@
 {
-    "schema_name": "multi-column-types",
-    "comment": "A schema composed of 3 tables: a main table (table_1) that has nearly all types of columns for testing in RecordEdit app, a 2nd table (table_w_generated_columns) that has generated versions of different column types, and another table (table_2) that supplies a foreign key to table_1.",
+    "schema_name": "null-values",
+    "comment": "",
     "tables": {
         "table_1": {
             "table_name": "table_1",
             "comment": "The main table with different columns that map to a different input controls in RecordEdit",
-            "schema_name": "multi-column-types",
+            "schema_name": "null-values",
             "kind": "table",
             "column_definitions": [
                 {
@@ -362,7 +362,7 @@
                   "type": {"typename": "int"}
                 },
                 {
-                    "comment": "A color_rgb_hex column with an initial value of null",
+                    "comment": "A color_rgb_hex column with an initial value",
                     "name": "color_rgb_hex_col",
                     "default": null,
                     "nullok": true,
@@ -378,7 +378,33 @@
                     "type": {
                         "typename": "color_rgb_hex"
                     }
-                }
+                },
+                {
+                  "comment": "Has initial value",
+                  "name": "array_text_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                      "is_array": true,
+                      "typename": "text[]",
+                      "base_type": {
+                          "typename": "text"
+                      }
+                  }
+              },
+              {
+                  "comment": "Doesn't have any initial values.",
+                  "name": "array_text_null_col",
+                  "default": null,
+                  "nullok": true,
+                  "type": {
+                      "is_array": true,
+                      "typename": "text[]",
+                      "base_type": {
+                          "typename": "text"
+                      }
+                  }
+              }
             ],
             "keys": [
                 {
@@ -392,18 +418,18 @@
             "foreign_keys": [
                 {
                     "comment": "Describes the fk relationship between table_1:fk_null_col and table_2:id",
-                    "names": [["multi-column-types", "table_1_fk_1"]],
+                    "names": [["null-values", "table_1_fk_1"]],
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
-                            "schema_name": "multi-column-types",
+                            "schema_name": "null-values",
                             "column_name": "fk_null_col"
                         }
                     ],
                     "referenced_columns": [
                         {
                             "table_name": "table_2",
-                            "schema_name": "multi-column-types",
+                            "schema_name": "null-values",
                             "column_name": "id"
                         }
                     ],
@@ -411,18 +437,18 @@
                 },
                 {
                     "comment": "Describes the fk relationship between table_1:fk_col and table_2:id",
-                    "names": [["multi-column-types", "table_1_fk_2"]],
+                    "names": [["null-values", "table_1_fk_2"]],
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
-                            "schema_name": "multi-column-types",
+                            "schema_name": "null-values",
                             "column_name": "fk_col"
                         }
                     ],
                     "referenced_columns": [
                         {
                             "table_name": "table_2",
-                            "schema_name": "multi-column-types",
+                            "schema_name": "null-values",
                             "column_name": "id"
                         }
                     ],
@@ -430,262 +456,10 @@
                 }
             ]
         },
-        "table_w_generated_columns": {
-            "table_name": "table_w_generated_columns",
-            "comment": "This is a table of generated columns. The reason these columns are separate from the larger table_1 table is because table_1 was getting too large. ermrestjs would construct /attributegroup/ PUT request urls that uses all of a table's visible columns. When that exceeds 32, postgres complains that the composite key is too large.",
-            "schema_name": "multi-column-types",
-            "kind": "table",
-            "column_definitions": [
-                {
-                    "comment": null,
-                    "name": "id",
-                    "default": null,
-                    "nullok": false,
-                    "type": {
-                        "typename": "int2"
-                    },
-                    "annotations": {}
-                },
-                {
-                    "comment": "An generated int2 column with an initial non-null value",
-                    "name": "int2_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "int2"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated int4 column with an initial non-null value",
-                    "name": "int4_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "int4"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated int8 column with an initial non-null value",
-                    "name": "int8_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "int8"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated float4 column with an initial non-null value",
-                    "name": "float4_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "float4"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated float8 column with an initial non-null value",
-                    "name": "float8_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "float8"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated text column with an initial non-null value",
-                    "name": "text_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "text"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated longtext column with an initial non-null value",
-                    "name": "longtext_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "longtext"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated markdown column with an initial non-null value",
-                    "name": "markdown_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "markdown"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated boolean column with an initial true value",
-                    "name": "bool_true_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "boolean"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated boolean column with an initial false value",
-                    "name": "bool_false_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "boolean"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated timestamp column with an initial non-null value",
-                    "name": "timestamp_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "timestamp"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated timestamptz column with an initial non-null value",
-                    "name": "timestamptz_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "timestamptz"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated date column with an initial non-null value",
-                    "name": "date_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "date"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated json column with an initial non-null value",
-                    "name": "json_col_gen",
-                    "default": 82.89,
-                    "nullok": true,
-                    "type": {
-                        "typename": "json"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": 82.89
-                    }
-                },
-                {
-                    "comment": "A generated foreign key column with an initial non-null value",
-                    "name": "fk_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "int2"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                },
-                {
-                    "comment": "A generated asset column with an initial non-null value",
-                    "name": "asset_col_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "text"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2017:asset": null
-                    }
-                },
-                {
-                    "comment": "A generated color_rgb_hex column with an initial non-null value",
-                    "name": "color_rgb_hex_gen",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "color_rgb_hex"
-                    },
-                    "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
-                    }
-                }
-            ],
-            "keys": [
-                {
-                    "comment": null,
-                    "annotations": {},
-                    "unique_columns": [
-                        "id"
-                    ]
-                }
-            ],
-            "foreign_keys": [
-                {
-                    "comment": "Describes the fk relationship between table_w_generated_columns:fk_col_gen and table_2:id",
-                    "foreign_key_columns": [
-                        {
-                            "table_name": "table_w_generated_columns",
-                            "schema_name": "multi-column-types",
-                            "column_name": "fk_col_gen"
-                        }
-                    ],
-                    "referenced_columns": [
-                        {
-                            "table_name": "table_2",
-                            "schema_name": "multi-column-types",
-                            "column_name": "id"
-                        }
-                    ],
-                    "annotations": {}
-                }
-            ],
-            "annotations": {}
-        },
         "table_2": {
             "table_name": "table_2",
             "comment": "The secondary table that supplies the columns for a fk relationship to the main table (table_1).",
-            "schema_name": "multi-column-types",
+            "schema_name": "null-values",
             "kind": "table",
             "column_definitions": [
                 {
