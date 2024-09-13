@@ -7,7 +7,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import {
-  appModes, PrefillObject, RecordeditColumnModel,
+  appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -56,7 +56,7 @@ export const RecordeditContext = createContext<{
   /**
    * the raw data of outbound foreign keys. used in foreignkey-field to support domain-filter
    * it's a key-value object and follows the same format as the form values.
-   * the key is in the format of `${formNumber}-{colName}` and value is an object.
+   * the key is in the format of `c_${formNumber}-{col.RID}` and value is an object.
    */
   foreignKeyData: any,
   waitingForForeignKeyData: boolean,
@@ -98,6 +98,10 @@ export const RecordeditContext = createContext<{
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
+  /* for updating the last contiguous chunk tracking info */
+  setLastContiguousChunk: (arg0: any) => void,
+  /* useRef react hook to current value */
+  lastContiguousChunkRef: any,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number,
   /**
@@ -224,6 +228,28 @@ export default function RecordeditProvider({
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
+  /*
+   * Object for keeping track of each file and their existing upload jobs so we can resume on interruption
+   *
+   * For example, we have the following 3 scenarios:
+   *   1. contiguous offset: 1; chunks in flight with index 2, 3; chunk completed with index 4 (after chunk at index 4 is acknowledged w/ 204)
+   *     - [0, 1, empty, empty, 4]
+   *   2. contiguous offset: 1; chunks in flight with index 2; chunks completed with index 3, 4 (after chunk at index 3 is acknowledged w/ 204)
+   *     - [0, 1, empty, 3, 4]
+   *   3. contiguous offset: 4; (after chunk at index 2 is acknowledged w/ 204)
+   *     - [0, 1, 2, 3, 4]
+   *
+   * Object structure is as follows where index is the index of the last contiguous chunk that was uploaded.
+   * {
+   *   `${file.md5_base64}_${column_name}_${record_index}`: {
+   *     lastChunkIdx: index
+   *     jobUrl: uploadJob.hash ( in the form of '/hatrac/path/to/file.png;upload/somehash')
+   *     fileSize: size_in_bytes,
+   *     uploadVersion: versioned_url ( in the form of '/hatrac/path/to/file.png:version')
+   *   }
+   * }
+   */
+  const [lastContiguousChunk, setLastContiguousChunk, lastContiguousChunkRef] = useStateRef<LastChunkMap | null>(null);
 
   const [tuples, setTuples, tuplesRef] = useStateRef<any[]>(Array.isArray(initialTuples) ? initialTuples : []);
 
@@ -630,7 +656,7 @@ export default function RecordeditProvider({
   }
 
   // NOTE: most likely not needed
-  const onSubmitInvalid = (errors: Object, e?: any) => {
+  const onSubmitInvalid = (errors: object, e?: any) => {
     $log.debug('errors in the form:');
     $log.debug(errors);
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
@@ -809,7 +835,7 @@ export default function RecordeditProvider({
       }
 
       // TODO assuming this is the first form!
-      const defaultValue = initialValues[`1-${column.name}`];
+      const defaultValue = initialValues[`c_1-${column.RID}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
       if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
@@ -865,7 +891,7 @@ export default function RecordeditProvider({
         action: getRecordeditLogAction(fkReq.logAction, cm.logStackPathChild),
         stack: getRecordeditLogStack(cm.logStackNode)
       };
-      fetchForeignKeyData([cm.column.name], fkReq.reference, logObj, flowControl.current.setValue);
+      fetchForeignKeyData([cm.column.RID], fkReq.reference, logObj, flowControl.current.setValue);
     });
   }
 
@@ -886,13 +912,15 @@ export default function RecordeditProvider({
     const formValue = 1;
 
     // update the displayed value
-    prefillObj.fkColumnNames.forEach(function (cn: string) {
-      setValue(`${formValue}-${cn}`, prefillObj.rowname.value);
+    prefillObj.fkColumnNames.forEach((name: string) => {
+      const colRID = prefillObj.columnNameToRID[name];
+      setValue(`c_${formValue}-${colRID}`, prefillObj.rowname.value);
     });
 
-    // update the raw data that will be sent to ermrsetjs
-    Object.keys(prefillObj.keys).forEach((k: string) => {
-      setValue(`${formValue}-${k}`, prefillObj.keys[k]);
+    // update the raw data that will be sent to ermrestjs
+    Object.keys(prefillObj.keys).forEach((columnName: string) => {
+      const colRID = prefillObj.columnNameToRID[columnName];
+      setValue(`c_${formValue}-${colRID}`, prefillObj.keys[columnName]);
     });
 
     // get the actual foreignkey data
@@ -922,7 +950,11 @@ export default function RecordeditProvider({
         stack: getRecordeditLogStack(stackNode)
       }
 
-      fetchForeignKeyData(prefillObj.fkColumnNames, ref, logObj, setValue);
+      const fkColumnRIDs: string[] = []
+      prefillObj.fkColumnNames.forEach((name: string) => {
+        fkColumnRIDs.push(prefillObj.columnNameToRID[name]);
+      });
+      fetchForeignKeyData(fkColumnRIDs, ref, logObj, setValue);
     }).catch(function (err: any) {
       $log.warn(err);
     });
@@ -936,29 +968,29 @@ export default function RecordeditProvider({
  * that's why after fetching the data we're only changing the displayed rowname
  * and the foreignKeyData, not the raw values sent to ermrestjs.
  * @param formValue which form it is
- * @param colNames the column names that will use this data
+ * @param colRIDs the columns RIDs that will use this data
  * @param fkRef the foreignkey reference that should be used for fetching data
  * @param logObject
  */
-  function fetchForeignKeyData(colNames: string[], fkRef: any, logObject: any, setValue: any) {
+  function fetchForeignKeyData(colRIDs: string[], fkRef: any, logObject: any, setValue: any) {
     // NOTE since this is create mode and we're disabling the addForm,
     // we can assume this is the first form
     const formValue = 1;
 
     // we should get the fk data since it might be used for rowname
     fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
-      colNames.forEach(function (colName) {
+      colRIDs.forEach(function (RID) {
         // we should not set the raw default values since we want ermrest to handle those for us.
         // so we're just setting the displayed rowname to users
         // and also the foreignkeyData used for the domain-filter logic.
 
         // default value is validated
         if (page.tuples.length > 0) {
-          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
+          foreignKeyData.current[`c_${formValue}-${RID}`] = page.tuples[0].data;
+          setValue(`c_${formValue}-${RID}`, page.tuples[0].displayname.value);
         } else {
-          foreignKeyData.current[`${formValue}-${colName}`] = {};
-          setValue(`${formValue}-${colName}`, '');
+          foreignKeyData.current[`c_${formValue}-${RID}`] = {};
+          setValue(`c_${formValue}-${RID}`, '');
         }
       });
     }).catch(function (err: any) {
@@ -1058,6 +1090,8 @@ export default function RecordeditProvider({
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
+      setLastContiguousChunk,
+      lastContiguousChunkRef,
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
       // log related:
@@ -1067,7 +1101,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData, 
+    columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
   ]);
 

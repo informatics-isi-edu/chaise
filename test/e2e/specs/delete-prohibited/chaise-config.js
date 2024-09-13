@@ -20,7 +20,3 @@ var chaiseConfig = {
         markdownPattern: "This is a banner with [link](https://example.com)"
     }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}

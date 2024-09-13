@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "/recordedit/null-values.config.json"
+        ],
+        "schema": "null-values"
+    },
+    "cleanup": true
+}

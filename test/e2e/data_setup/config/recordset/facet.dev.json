@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordset/facet.config.json"
+        ],
+        "schema": "faceting"
+    },
+    "cleanup" : true
+}

@@ -418,11 +418,12 @@ const TableRow = ({
             tooltip='Select'
           >
             <button
-              type='button' disabled={rowDisabled}
               className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
+              type='button' 
+              disabled={rowDisabled}
               onClick={() => onSelectChange(tuple)}
             >
-              <span className='chaise-btn-icon fa-regular fa-square-check'></span>
+              <span className='chaise-btn-icon fa-solid fa-circle'></span>
             </button>
           </ChaiseTooltip>
         )

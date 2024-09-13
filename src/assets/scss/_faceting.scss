@@ -10,6 +10,27 @@
   .panel-group {
     margin-bottom: 20px;
 
+    .facet-item-container {
+      position: relative;
+
+      .move-icon {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        padding: 11px 10px 11px 10px;
+        z-index: 5;
+        width: fit-content;
+
+        &:hover{
+          cursor: grab;
+        }
+
+        i {
+          color: rgb(51, 51, 51, 0.47);
+        }
+      }
+    }
+
     // each facet panel
     .facet-panel {
       border-radius: 0;
@@ -86,7 +107,8 @@
 
         .facet-header-icon {
           position: absolute;
-          right: 5px;
+          // right: 5px;
+          right: 22px;
 
           .facet-spinner {
             color: #828282;

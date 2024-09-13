@@ -1,9 +1,0 @@
-{
-    "setup": {
-        "schemaConfigurations": [
-            "/recordedit/multi-column-types.config.json"
-        ],
-        "schema": "multi-column-types"
-    },
-    "cleanup": true
-}

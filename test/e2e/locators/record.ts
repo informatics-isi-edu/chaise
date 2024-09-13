@@ -68,6 +68,10 @@ export default class RecordLocators {
     return container.locator('.columns-container li.toc-heading');
   }
 
+  static getSidePanelItemById(container: Locator | Page, idx: number): Locator {
+    return container.locator(`#recordSidePan-heading-${idx}`);
+  }
+
 
   // ----------------- main section selectors ------------------------ //
 
@@ -101,6 +105,14 @@ export default class RecordLocators {
     return container.locator(`#row-${columnName} .entity-value span`);
   }
 
+  static getInlineRelatedTableInlineComment(container: Locator | Page, displayname: string) {
+    return RecordLocators.getEntityRelatedTable(container, displayname).locator('.inline-tooltip');
+  }
+
+  static getValueMarkdownContainer(el: Locator) {
+    return el.locator('.markdown-container:not(.chaise-comment)');
+  };
+
   // --------------------- related table selectors ----------------- //
 
   static getRelatedTableContainer(container: Locator | Page, displayname: string, isInline?: boolean): Locator {
@@ -113,9 +125,18 @@ export default class RecordLocators {
     return container.locator(`#rt-heading-${displayname}`);
   }
 
+  static getRelatedTable(container: Locator | Page, displayname: string): Locator {
+    displayname = makeSafeIdAttr(displayname);
+    return container.locator(`#rt-${displayname}`);
+  }
+
   static getRelatedSectionSpinner(page: Page): Locator {
     return page.locator('.related-section-spinner');
   }
+
+  static getRelatedTables(page: Page): Locator {
+    return page.locator('.chaise-accordion:not(.forced-hidden)');
+  };
 
   static getDisplayedRelatedTableTitles(page: Page): Locator {
     return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')

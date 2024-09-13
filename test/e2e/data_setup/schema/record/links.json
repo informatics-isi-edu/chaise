@@ -162,7 +162,7 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "detailed": [
-                        "id", "text", "int", ["links", "fk_assoc_links"]
+                        "id", "text", "int", ["links", "fk_inline_assoc_inline"]
                     ]
                 }
             }

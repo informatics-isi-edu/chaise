@@ -35,9 +35,20 @@ export function isInteger(data: any): boolean {
   return (typeof data === 'number') && (data % 1 === 0);
 }
 
+
 /**
- * Returns true if the input is array and has at least one item, otherwise false.
+ * https://stackoverflow.com/questions/37688318/typescript-interface-possible-to-make-one-or-the-other-properties-required#comment123219068_66605669
  */
-export function isNonEmptyArray(obj: any) : boolean {
-  return Array.isArray(obj) && obj.length !== 0;
-}
+type Only<T, U> = { [P in keyof T]: T[P] } & Omit<{ [P in keyof U]?: never }, keyof T>
+
+/**
+ * use this when you want to create a union of different custom types
+ *
+ * For example:
+ *
+ * type Type1 = { name: string };
+ * type Type2 = { id: string };
+ *
+ * type MainType = Either<Type1, Type2>
+ */
+export type Either<T, U> = Only<T, U> | Only<U, T>;

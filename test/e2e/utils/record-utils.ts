@@ -1,23 +1,29 @@
 import { Locator, Page, TestInfo, expect, test } from '@playwright/test';
 
 // locators
-import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { EntityRowColumnValues, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
   manuallyTriggerFocus, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import {
+  RecordsetColValue, RecordsetRowValue,
+  testRecordsetTableRowValues, testTotalCount
+} from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
 /**
- * TODO this function is currently only used for recordedit result test, but
- * we should also use this for the 'should validate the values of each column' test in record-helpers.js
+ * make sure the main section of record page is showing the proper values.
+ *
+ * While `expectedColumnNames` must include all the column names, `expectedColumnValues` can be just a subset of columns. but it must
+ * be in the same order. so for example if you don't want to include the default system columns that are displayed at the end of the
+ * column list, you can omit those values.
  */
 export const testRecordMainSectionValues = async (page: Page, expectedColumnNames: string[], expectedColumnValues: RecordsetRowValue) => {
   await RecordLocators.waitForRecordPageReady(page);
@@ -25,20 +31,43 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
   await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnNames.length);
   await expect(RecordLocators.getAllColumnNames(page)).toHaveText(expectedColumnNames);
 
-  await expect(RecordLocators.getColumns(page)).toHaveCount(expectedColumnValues.length);
-
   const allValues = RecordLocators.getAllColumnValues(page);
   let index = 0;
   for (const expectedValue of expectedColumnValues) {
-    const value = allValues.nth(index);
-    if (typeof expectedValue === 'string') {
-      await expect.soft(value).toHaveText(expectedValue);
-    } else {
+    let value = allValues.nth(index);
+    if (typeof expectedValue === 'object' && expectedValue.valueLocator) {
+      value = expectedValue.valueLocator(value);
+    }
+
+    if (typeof expectedValue === 'string' || expectedValue.value) {
+      await expect.soft(value).toHaveText(typeof expectedValue === 'string' ? expectedValue : expectedValue.value);
+    } else if (expectedValue.url && expectedValue.caption) {
       const link = value.locator('a');
       expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
       await expect.soft(link).toHaveText(expectedValue.caption);
     }
     index++;
+  }
+}
+
+/**
+ * similar to testRecordMainSectionValues but instead of making sure all values have the expected values, it will
+ * only test the given columns
+ */
+export const testRecordMainSectionPartialValues = async (page: Page, numCols: number, expectedValues: { [colName: string]: RecordsetColValue }) => {
+  await RecordLocators.waitForRecordPageReady(page);
+  await expect(RecordLocators.getColumns(page)).toHaveCount(numCols);
+  for (const colName of Object.keys(expectedValues)) {
+    const value = RecordLocators.getColumnValue(page, colName);
+    const expectedValue = expectedValues[colName];
+
+    if (typeof expectedValue === 'string') {
+      await expect.soft(value).toHaveText(expectedValue);
+    } else if (expectedValue.url && expectedValue.caption) {
+      const link = value.locator('a');
+      expect.soft(await link.getAttribute('href')).toContain(expectedValue.url);
+      await expect.soft(link).toHaveText(expectedValue.caption);
+    }
   }
 }
 
@@ -125,7 +154,7 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
         await btns.first().click();
 
         clipboardText = await getClipboardContent(page);
-        expect.soft(clipboardText).toBe(expectedLink);
+        expect.soft(clipboardText).toContain(expectedLink);
       }
     });
   }
@@ -369,6 +398,18 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   });
 
   await test.step('row level', async () => {
+    if (params.isTableMode === false) {
+      await test.step('make sure tabular mode is displayed', async () => {
+        const text = await markdownToggleLink.innerText();
+        if (text === 'Edit mode') {
+          await markdownToggleLink.click();
+          displayIsToggled = true;
+        }
+
+        await expect.soft(markdownToggleLink).toHaveText('Custom mode');
+      });
+    }
+
     if (params.rowViewPaths) {
       await test.step('`View Details` button should have the correct link.', async () => {
         if (!params.rowViewPaths) return;
@@ -421,7 +462,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           await test.step('should have the proper tooltip', async () => {
             let expected = 'Delete';
             if (params.isAssociation) {
-              expected = `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTableName}.`;
+              expected = `Disconnect ${params.displayname}:${params.entityMarkdownName} from this ${params.baseTableName}.`;
             }
             await testTooltip(deleteBtn, expected, APP_NAMES.RECORD, true);
           });
@@ -581,7 +622,7 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
@@ -670,7 +711,7 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
       const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+      await testTotalCount(rsModal, expectedText);
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
@@ -695,27 +736,27 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await okBtn.click();
       await expect.soft(confirmModal).not.toBeAttached();
 
-      // make sure summary modal shows up
-      const summaryModal = ModalLocators.getErrorModal(page);
-      await expect.soft(summaryModal).toBeVisible();
-      await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
-      await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.postDeleteMessage);
-
-      // close the summary modal
-      await ModalLocators.getCloseBtn(summaryModal).click();
-      await expect.soft(summaryModal).not.toBeAttached();
-
-      // make sure the recordset modal rows update
-      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
-
-      // close the recordset modal
-      await ModalLocators.getCloseBtn(rsModal).click();
-      await expect.soft(rsModal).not.toBeAttached();
-
       // make sure correct values are displayed
       const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);
       await testRecordsetTableRowValues(currentEl, params.rowValuesAfter, true);
     });
 
   });
+}
+
+/**
+ * click on the given button to open the delete-confirm. make sure it looks good, and then confirm.
+ * @param btn the delete btn
+ * @param confirmText the confirm text
+ */
+export const testDeleteConfirm = async (page: Page, btn: Locator, confirmText: string) => {
+  await btn.click();
+
+  const modal = ModalLocators.getConfirmDeleteModal(page);
+  await expect.soft(ModalLocators.getModalTitle(modal)).toHaveText('Confirm Delete');
+
+  await expect.soft(ModalLocators.getModalText(modal)).toHaveText(confirmText);
+
+  await ModalLocators.getOkButton(modal).click();
+  await expect.soft(modal).not.toBeAttached();
 }

@@ -1,8 +1,10 @@
 import { readFileSync } from 'fs';
+import { execSync } from 'child_process';
 import { TestInfo } from '@playwright/test';
+import axios from 'axios';
 
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { ENTITIES_PATH, ERMREST_URL } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
@@ -192,7 +194,7 @@ export const updateCatalogAnnotation = async (catalogId: string, annotation: any
       url: process.env.ERMREST_URL,
       id: catalogId
     };
-    ermrestUtils.createOrModifyCatalog(catalogObj, annotation, null, process.env.AUTH_COOKIE).then(function () {
+    ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, annotation, null).then(function () {
       resolve();
     }).catch((err: any) => {
       console.log('error while trying to update catalog annotation');
@@ -202,3 +204,56 @@ export const updateCatalogAnnotation = async (catalogId: string, annotation: any
   });
 }
 
+export const updateCatalogAlias = async (catalogId: string, alias: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const catalogObj = {
+      url: process.env.ERMREST_URL,
+      id: catalogId
+    };
+    ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, undefined, undefined, alias).then(function () {
+      resolve();
+    }).catch((err: any) => {
+      console.log('error while trying to update catalog annotation');
+      console.log(err);
+      reject(err);
+    });
+  });
+}
+
+export const copyFileToChaiseDir = (fileLocation: string, destinationFilename: string) => {
+  const remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
+  // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
+  let cmd;
+  if (typeof remoteChaiseDirPath === 'string') {
+    cmd = `scp ${fileLocation} ${remoteChaiseDirPath}/${destinationFilename}`;
+  } else {
+    cmd = `sudo cp ${fileLocation} /var/www/html/chaise/${destinationFilename}`;
+  }
+
+  try {
+    execSync(cmd);
+    console.log('copied the file into proper location');
+  } catch (exp) {
+    console.log(exp);
+    console.log('Unable to copy the iframe into proper location');
+    process.exit(1);
+  }
+}
+
+/**
+ * delete the hatrac namespaces that are created during testing
+ * @param namespaces relative paths for the namespaces starting with `/ .e.g. `/hatrac/js/chaise/some_name`
+ */
+export const deleteHatracNamespaces = async (namespaces: string[]) => {
+  const serverLocation = ERMREST_URL?.replace('ermrest', '');
+  // cleanup the hatrac namespaces
+  for await (const ns of namespaces) {
+    try {
+      await axios(serverLocation + ns, { method: 'DELETE', headers: { Cookie: process.env.AUTH_COOKIE! } });
+      console.log(`${ns} hatrac namespace deleted.`);
+    } catch (exp) {
+      console.log(`encountered an error while trying to delete hatrac namespace: ${ns}`);
+      console.error(exp);
+    }
+  }
+}

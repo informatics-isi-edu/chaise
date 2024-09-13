@@ -27,7 +27,6 @@ import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
  * Returns Main Section of the record page.
  */
 const RecordMainSection = (): JSX.Element => {
-
   const { errors } = useError();
   const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections } = useRecord();
 
@@ -37,7 +36,7 @@ const RecordMainSection = (): JSX.Element => {
     } else if (columnModel.requireSecondaryRequest) {
       return (showEmptySections || (!!recordValues[columnModel.index] && !!recordValues[columnModel.index].value));
     } else {
-      return (recordValues[columnModel.index] && recordValues[columnModel.index].value != null);
+      return (recordValues[columnModel.index] && recordValues[columnModel.index].value !== null);
     }
   };
 
@@ -45,11 +44,15 @@ const RecordMainSection = (): JSX.Element => {
    * Show an error warning if the column is aggregate or inline related table and the data failed to load
    */
   const showError = (cm: RecordColumnModel): boolean => {
+    // disable !== checking since cm.relatedModel can be `null` OR `undefined`
+    // eslint-disable-next-line eqeqeq
     return cm.hasTimeoutError || (cm.relatedModel != null && cm.relatedModel.recordsetState.hasTimeoutError);
   };
 
   const showLoader = (cm: RecordColumnModel): boolean => {
     // TODO this is assuming isLoading is also used for the inlines (page.content)
+    // disable !== checking since cm.relatedModel can be `null` OR `undefined`
+    // eslint-disable-next-line eqeqeq
     return cm.isLoading || (cm.relatedModel != null && cm.relatedModel.recordsetState.isLoading);
   };
 
@@ -95,7 +98,7 @@ const RecordMainSection = (): JSX.Element => {
       );
 
       return (
-        <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={rowClassName.join(' ')}>
+        <tr key={`col-${index}`} id={`row-${makeSafeIdAttr(cm.column.name)}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
             {hasTooltip ?
@@ -120,11 +123,11 @@ const RecordMainSection = (): JSX.Element => {
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
                   {cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <div className='inline-tooltip'><DisplayCommentValue comment={cm.column.comment} /></div>
+                    <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable
                     relatedModel={cm.relatedModel}
-                    tableContainerID={`rt-${idSafeDisplayname}`}
+                    displaynameForID={cm.column.displayname.value}
                   />
                 </div>
               </span>

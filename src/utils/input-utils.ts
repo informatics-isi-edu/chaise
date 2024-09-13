@@ -117,7 +117,7 @@ export function getDisabledInputValue(column: any) {
   } else if (column.isForeignKey) {
     return 'Select a value';
   } else if (column.isAsset) {
-    return 'No file Selected';
+    return 'Select a file';
   }
 }
 
@@ -165,7 +165,13 @@ export const ERROR_MESSAGES = {
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
   INVALID_COLOR: 'Please enter a valid color value.',
   INVALID_JSON: 'Please enter a valid JSON value.',
-  INVALID_BOOLEAN: 'Please enter a valid boolean value.'
+  INVALID_BOOLEAN: 'Please enter a valid boolean value.',
+  ARRAY_ADD_OR_DISCARD_VALUE: 'Click \'Add\' to include the value or clear the entry to discard.',
+}
+
+export const CUSTOM_ERROR_TYPES = {
+  ARRAY_ADD_OR_DISCARD_VALUE: 'addOrDiscardValue',
+  INVALID_DATE_TIME: 'invalid-date-time'
 }
 
 export function formatInt(value: string) {
@@ -197,28 +203,28 @@ export function arrayFieldPlaceholder(baseType: string) {
   let placeholder;
   switch (baseType) {
     case 'timestamptz':
-      placeholder = 'example: [ \"2001-01-01T01:01:01-08:00\", \"2002-02-02T02:02:02-08:00\" ]'
+      placeholder = ['2001-01-01T01:01:01-08:00', '2002-02-02T02:02:02-08:00']
     case 'timestamp':
-      placeholder = 'example: [ \"2001-01-01T01:01:01\", \"2002-02-02T02:02:02\" ]'
+      placeholder = ['2001-01-01T01:01:01', '2002-02-02T02:02:02']
       break;
     case 'date':
-      placeholder = 'example: [ \"2001-01-01\", \"2001-02-02\" ]'
+      placeholder = ['2001-01-01', '2001-02-02']
       break;
     case 'numeric':
     case 'float4':
     case 'float8':
-      placeholder = 'example: [ 1, 2.2 ]'
+      placeholder = [1, 2.2]
       break;
     case 'int2':
     case 'int4':
     case 'int8':
-      placeholder = 'example: [ 1, 2 ]'
+      placeholder = [1, 2]
       break;
     case 'boolean':
-      placeholder = 'example: [ true, false ]'
+      placeholder = [true, false]
       break;
     default:
-      placeholder = 'example: [ \"value1\", \"value2\" ]'
+      placeholder = ['value1', 'value2']
       break;
   }
 

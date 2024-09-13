@@ -1,10 +1,12 @@
 import Q from 'q';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+
+// utils
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
 * Will return a promise that is resolved when the setup is done
@@ -74,8 +76,13 @@ async function addCustomCSS() {
 *  - chaise-iframe: if running in an iframe
 */
 function addBodyClasses() {
-  const osClass = (navigator.platform.indexOf('Mac') != -1 ? BODY_CLASS_NAMES.mac : undefined);
-  const browserClass = (navigator.userAgent.indexOf('Firefox') != -1 ? BODY_CLASS_NAMES.firefox : undefined);
+  const osClass = (navigator.platform.indexOf('Mac') !== -1 ? BODY_CLASS_NAMES.mac : undefined);
+  let browserClass;
+  if (navigator.userAgent.indexOf('Firefox') !== -1) {
+    browserClass = BODY_CLASS_NAMES.firefox;
+  } else if (isSafari()) {
+    browserClass = BODY_CLASS_NAMES.safari;
+  }
 
   const bodyElement = document.querySelector(`.${BODY_CLASS_NAMES.self}`);
   if (!bodyElement) return;
@@ -139,7 +146,7 @@ function addCanonicalTag() {
     canonicalTag.setAttribute('rel', 'canonical');
 
     // the hash returned from this function handles the case when '#' is switched with '?'
-    const hash = getURLHashFragment(windowRef.location);
+    const { hash } = getURLHashFragment(windowRef.location);
     const canonicalURL = windowRef.location.origin + windowRef.location.pathname + stripSortAndQueryParams(hash);
     canonicalTag.setAttribute('href', canonicalURL);
     document.getElementsByTagName('head')[0].appendChild(canonicalTag);

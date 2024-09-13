@@ -20,6 +20,14 @@ export default class ModalLocators {
     return page.locator('.search-popup');
   }
 
+  static getScalarPopup(page: Page): Locator {
+    return page.locator('.scalar-show-details-popup');
+  }
+
+  static getForeignKeyPopup(page: Page): Locator {
+    return page.locator('.foreignkey-popup');
+  }
+
   static getErrorModal(page: Page): Locator {
     return page.locator('.modal-error');
   }
@@ -48,6 +56,18 @@ export default class ModalLocators {
     return page.locator('.duplicate-saved-query-modal');
   }
 
+  static getIframeFieldModal(page: Page): Locator {
+    return page.locator('.iframe-field-popup');
+  }
+
+  static getIframeFieldCloseConfirmModal(page: Page): Locator {
+    return page.locator('.confirm-iframe-close-modal');
+  }
+
+  static getMarkdownPreviewModal(page: Page): Locator {
+    return page.locator('.chaise-preview-markdown');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
@@ -66,10 +86,22 @@ export default class ModalLocators {
     return modal.locator('.ok-button');
   }
 
+  static getCancelButton(modal: Locator): Locator {
+    return modal.locator('.cancel-button');
+  }
+
   static getSubmitButton(modal: Locator): Locator {
     return modal.locator('#multi-select-submit-btn');
   }
 
+  // --------- error modal  functions ------------ //
+  static getToggleErrorDetailsButton(modal: Locator): Locator {
+    return modal.locator('.toggle-error-details');
+  }
+
+  static getErrorDetails(modal: Locator): Locator {
+    return modal.locator('.error-details');
+  }
 
   // --------- share cite related functions ------------ //
 
@@ -124,5 +156,15 @@ export default class ModalLocators {
 
   static saveQuerySubmit(modal: Locator): Locator {
     return modal.locator('#modal-submit-record-btn');
+  }
+
+  // --------- iframe-field-modal functions ------------ //
+  static getIframeFieldModalSpinner(modal: Locator): Locator {
+    return modal.locator('.iframe-field-modal-spinner')
+  }
+
+  // --------- markdown-preview modal functions ------------ //
+  static getMarkdownPreviewContent(modal: Locator): Locator {
+    return ModalLocators.getModalText(modal).locator('.markdown-container');
   }
 }

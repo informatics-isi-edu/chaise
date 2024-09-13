@@ -30,7 +30,7 @@
 - Run the "make testmanually" command in Chaise. This will set up a recordset table named Accommodation with long tooltips on the last column (Number of Rooms) and the "Operation Since" column.
 - Manually check the position of the tooltips by hovering over these columns and resizing the window so that these columns are on the window margins.
 - End the test spec by pressing ^D in the terminal
-- The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
+- The test spec is present at "chaise/test/manual/specs/recordset.spec.ts"
 - The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
 
 ## Recordset - auto truncation of cell content
@@ -41,7 +41,7 @@
 - Run the "make testmanually" command in Chaise. This will set up a recordset table named Accommodation with long text in 2 columns, "Summary" and "Description"
 - Maunually check that those 2 columns are truncated and have the "...more" hyperlink. Click that and make sure the column expands to show the full text. Click "...less" and make sure it properly truncates again.
 - End the test spec by pressing ^D in the terminal
-- The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
+- The test spec is present at "chaise/test/manual/specs/recordset.spec.ts"
 - The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
 
 
@@ -140,6 +140,18 @@ In [ErmrestDataUtils](https://github.com/informatics-isi-edu/ErmrestDataUtils), 
       - ssh to `dev.derivacloud.org`
       - `cd /var/www/hatrac/js/chaise/<timestamp_txt-value>/<id-value>/`
       - `ls -al` to list all contents and file sizes
+
+## Test resume file upload
+ - Test that a file upload process can be resumed in recordedit app when the connection to the server is lost (without refreshing the page)
+ - NOTE: I suggest modifying the # of retries in ermrestJS so this can be tested quicker.
+   1. Go to recordedit for the `upload:file` table created using the script above.
+   2. Fill in the for and use a file that is > 25 MB.
+   3. Open the Developer console to the network tab.
+   4. Submit the form.
+   5. Once you see 4 similar request in the console output for uploading chunks, change your network connection from "No throttling" to "Offline".
+     - This will simulate the connection to the server being lost and chaise will return the user to recordedit with an error alert showing.
+   6. Change the network connection back to "No throttling" and click submit again.
+   7. Watching the network tab still, verify that the original 4 chunks are not uploaded again and that the file upload process succeeds.
 
 # Testing Session Timed out (and different user) data mutation events
 The UX currently doesn't update the user when their session state has changed. In some cases a user could log in and navigate to a page that allows create or update, then have their log in status change prior to submitting the data to be mutated. They could have had their session time out (treated as an anonymous user) or changed to a  different user entirely. This pertains to create/update in `recordedit`, pure and binary add in `record`, and anywhere that we show tables with shows thatcan be deleted.

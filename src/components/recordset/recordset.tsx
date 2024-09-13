@@ -15,8 +15,8 @@ import SavedQueryDropdown from '@isrd-isi-edu/chaise/src/components/recordset/sa
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
-import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
+import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import React, { useEffect, useRef, useState } from 'react';
@@ -24,29 +24,29 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // services
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const Recordset = ({
   initialReference,
@@ -805,7 +805,7 @@ const RecordsetInner = ({
       <div className='main-container dynamic-padding' ref={mainContainer}>
         {hasSpinner &&
           <div className='recordset-main-spinner-container sticky-spinner-outer-container'>
-            <ChaiseSpinner className='recordest-main-spinner manual-position-spinner' />
+            <ChaiseSpinner className='recordset-main-spinner manual-position-spinner' />
           </div>
         }
         <div className={`main-body${hasSpinner ? ' with-spinner' : ''}`}>

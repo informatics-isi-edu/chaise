@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
-import { ErrorBoundary, FallbackProps, useErrorHandler } from 'react-error-boundary';
+import { ErrorBoundary, FallbackProps, useErrorBoundary } from 'react-error-boundary';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
@@ -40,7 +40,7 @@ const ErrorComponent = () : JSX.Element => {
 };
 
 const ErrorComponentWithBoundary = () : JSX.Element => {
-  const handleError = useErrorHandler();
+  const { showBoundary }  = useErrorBoundary();
   const [explode, setExplode] = useState(false);
 
   const onClickError = () => {
@@ -48,7 +48,7 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
       throw new Error('Something went wrong in the event handler.');
     } catch (exp) {
       $log.log('wow');
-      handleError(exp);
+      showBoundary(exp);
     }
   };
 

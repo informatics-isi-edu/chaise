@@ -12,12 +12,13 @@ E2E tests are automation tests that simulate a user interacting with the app and
 - [File structure](#file-structure)
 - [Debugging](#debugging)
 - [Writing test](#writing-test)
+- [Screenshot testing](#screenshot-testing)
 
 ## Tools used
 - [**Playwright**](https://playwright.dev/): The E2e test framework that we're using.
 - **NPM**: to install necessary NodeJS packages
 - **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
-- **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
+- **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Playwright (which will run the tests).
 
 ## Setup
 
@@ -63,11 +64,7 @@ You can get your cookie by querying the database, or using the following simple 
     make deps-test
     ```
 
-    This will install all the npm dependencies that are needed and will also make sure the Selenium's WebDriver that protractor uses is updated.
-
-    - If you just want to update the WebDriver you can do `make update-webdriver`.
-    - If the version of Chrome that is installed on your machine is different from the ChromeDriver that Selenium uses, it will throw an error. So make sure both versions are always updated and compatible.
-
+    This will install all the npm dependencies that are needed and will also make sure the Playwright browsers are installed.
 
 3. Build Chaise without installing the dependencies again:
     ```sh
@@ -198,6 +195,60 @@ To debug Playwright tests,
   npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug --max-failures=1
   ```
 
+### Github Actions debugging
+
+There's a chance a test case will fail in github actions only and not locally. This makes it very difficult to reproduce/test without a browser to show what is happening. In github actions, if you download the playwright report, there will be images with the HTML report of the pages when they did fail.
+
+This isn't "perfect" since it captures the state of the browser when the test "ends" not when the test fails. We often have tests written with `test.step` and `expect.soft` which will run tests in sequence and usually not cause later tests to fail just because an earlier one did. More info about screencaps with `test.step` and `expect.soft` in [this github issue](https://github.com/microsoft/playwright/issues/14854).
+
+If there is a suspicion that a test is failing only in github actions, to get an accurate screencap, comment out the rest of the `test.step`s that are after the failing step so that the state during the "failing" test.step will be properly captured.
+
 ## Writing test
 
 Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
+
+
+## Screenshot testing
+
+As originally mentioned in [this issue](https://github.com/informatics-isi-edu/chaise/issues/2368) we might want to explore doing screenshot testing. The following is how this could be done in Playwright:
+
+```ts
+import { test, expect } from '@playwright/test';
+
+// locators
+import RecordLocators from '@isrd-isi-edu/chaise/test/playwright/locators/record';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/recordset';
+
+test.describe('visual testing atlas', () => {
+  test('Collection recordset page', async ({ page }) => {
+    await page.goto('https://atlas-d2k.org/chaise/recordset/#2/Common:Collection@sort(RMT::desc::,RID)');
+
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+    await RecordsetLocators.waitForAggregates(page);
+
+    // on  load we're focusing on the first opened one and therefore will have a different border
+    await page.waitForTimeout(3000);
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+  })
+
+  test('Collection record page', async ({ page }) => {
+    await page.goto('https://atlas-d2k.org/chaise/record/#2/Common:Collection/RID=17-E76T');
+
+    await RecordLocators.waitForRecordPageReady(page);
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+
+    await page.evaluate(() => {
+      return document.querySelector('.related-section-container.chaise-accordions')!.scrollIntoView();
+    });
+
+    await expect(page).toHaveScreenshot({ fullPage: true });
+  })
+
+});
+```
+
+- `fullPage` config allows us to screenshot the whole page. But because of how we're defining the scrollable section, it still won't be able to capture the page fully. That's why I'm scrolling to the related section and taking a different screenshot in the record page example.
+- While I'm using atlas-d2k in my example, this should be part of the test framework in our final solution. We must discuss whether we want to initiate this manually or have it as part of our automated testing. Regardless, it should use test data and not an existing production.
+- In our discussion, we discussed using this method as part of the review process for the UI features. So, for example, we could run a similar script on the master to get the initial screenshots and then rerun it on the feature branch to compare.

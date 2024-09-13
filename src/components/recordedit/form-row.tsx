@@ -168,6 +168,35 @@ const FormRow = ({
     }
   }, [forms, removeClicked]);
 
+  useEffect(() => {
+    /**
+     * This modifies row width when the multi-form-row is enabled for the field
+     * We set the width of the row to match the form width to avoid inputs from rendering beyond the limits of the form.
+     */
+    if (!columnModel.inputType.match(/iframe|file|boolean|popup-select/)) return;
+
+    const formHeader = document.querySelector('.form-header-row') as HTMLElement
+
+    let rowWidth = formHeader.scrollWidth;
+
+    if (container.current) {
+      container.current.style.minWidth = 'none';
+      container.current.style.maxWidth = 'none';
+      container.current.style.width = `${rowWidth}px`;
+    }
+
+    // Ensure the row widths are updated on window resize event
+    window.addEventListener('resize', () => {
+      let rowWidth = formHeader.scrollWidth;
+
+      if (container.current) {
+        container.current.style.minWidth = 'none';
+        container.current.style.maxWidth = 'none';
+        container.current.style.width = `${rowWidth}px`;
+      }
+    })
+  }, [isActiveForm, forms])
+
   // ------------------------ callbacks -----------------------------------//
 
   /**
@@ -187,7 +216,7 @@ const FormRow = ({
    */
   const handleFormClick = (formNumber: number) => {
     // disallow users to click on the disabled inputs (although this is not possible anymore as we're removing these forms on load)
-    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`]) {
+    if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`]) {
       return;
     }
 
@@ -236,7 +265,7 @@ const FormRow = ({
     }
 
     if (typeof formNumber === 'number') {
-      const valName = `${formNumber}-${columnModel.column.name}`;
+      const valName = `c_${formNumber}-${columnModel.column.RID}`;
       if (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false) {
         return true;
       }
@@ -250,7 +279,7 @@ const FormRow = ({
    */
   const getEntityValueClass = (formNumber: number) => {
     const classes = [];
-    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formNumber}-${cm.column.name}`])
+    const cannotBeUpdated = (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formNumber}-${cm.column.RID}`])
     if (!cannotBeUpdated && isActiveForm) {
       classes.push('clickable-form-overlay');
       if (activeForms.includes(formNumber)) {
@@ -263,6 +292,7 @@ const FormRow = ({
 
   const renderInput = (formNumber: number, formIndex?: number) => {
     const colName = columnModel.column.name;
+    const colRID = columnModel.column.RID;
 
     const isDisabled = getIsDisabled(formNumber, formNumber === MULTI_FORM_INPUT_FORM_VALUE);
 
@@ -299,7 +329,8 @@ const FormRow = ({
           displayDateTimeLabels
           disableInput={isDisabled}
           requiredInput={columnModel.isRequired}
-          name={`${formNumber}-${colName}`}
+          name={`c_${formNumber}-${colRID}`}
+          inputClassName={`c_${formNumber}-${makeSafeIdAttr(colName)}`}
           type={columnModel.inputType}
           classes='column-cell-input'
           placeholder={placeholder}

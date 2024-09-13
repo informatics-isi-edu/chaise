@@ -1,20 +1,21 @@
-import { MouseEvent, useState, useRef, useLayoutEffect } from 'react';
+import { MouseEvent, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 // hooks
-import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
-import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { LogActions, LogParentActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   RecordsetConfig,
   RecordsetDisplayMode,
@@ -22,32 +23,26 @@ import {
   RecordsetSelectMode,
   SelectedRow,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
-
-// providers
-import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
-import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import {
+  CUSTOM_EVENTS,
+  RECORDSET_DEFAULT_PAGE_SIZE,
+} from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import {
   allowCustomModeRelated,
   displayCustomModeRelated,
   getPrefillCookieObject,
 } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import {
-  RECORDSET_DEFAULT_PAGE_SIZE,
-  CUSTOM_EVENTS,
-} from '@isrd-isi-edu/chaise/src/utils/constants';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import Q from 'q';
+import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 type RelatedTableActionsProps = {
@@ -420,10 +415,6 @@ const RelatedTableActions = ({
           .create(submissionRows, logObj)
           .then(() => {
             setAddPureBinaryModalProps(null);
-            addAlert(
-              'Your data has been submitted. Showing you the result set...',
-              ChaiseAlertType.SUCCESS
-            );
 
             const details = relatedModel.recordsetProps.config.containerDetails!;
             updateRecordPage(true, undefined, [
@@ -517,45 +508,49 @@ const RelatedTableActions = ({
       setShowPureBinarySpinner(true);
 
       validateSessionBeforeMutation(() => {
-        const deleteResponse = (response: any) => {
-          setShowPureBinarySpinner(false);
+        const deleteTuples = () => {
+          leafReference
+            .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
+            .then((response: any) => {
+              setShowPureBinarySpinner(false);
+              if (response.failedTupleData.length > 0) {
+                response.clickOkToDismiss = true;
 
-          // Show modal popup summarizing total # of deletions succeeded and failed
-          response.clickOkToDismiss = true;
-
-          // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
-          //       - some errors could have been because of row level security
-          dispatchError({
-            error: response,
-            isDismissible: true,
-            closeBtnCallback: () => {
-              // ask recordset to update the modal
-              if (!!containerRef.current) {
-                // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
-                fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, containerRef.current, {
-                  cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
-                  pageStates: { updateResult: true, updateCount: true, updateFacets: true },
-                  response: response,
+                // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+                //       - some errors could have been because of row level security
+                dispatchError({
+                  error: response,
+                  isDismissible: true,
+                  closeBtnCallback: () => {
+                    // ask recordset to update the modal
+                    if (!!containerRef.current) {
+                      // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
+                      fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, containerRef.current, {
+                        cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
+                        pageStates: { updateResult: true, updateCount: true, updateFacets: true },
+                        response: response,
+                      });
+                    }
+                  },
                 });
               }
-            },
-          });
-        };
-
-        const deleteError = (err: any) => {
-          setShowPureBinarySpinner(false);
-          // errors that land here would be execution of code errors
-          // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
-          //   as part of the deleteErrors object in the success cb
-          // NOTE: if one of the identifying values is empty or null, an error is thrown here
-          dispatchError({ error: err, isDismissible: true });
+              else {
+                setUnlinkPureBinaryModalProps(null);
+                updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
+              }
+            })
+            .catch((err: Error) => {
+              setShowPureBinarySpinner(false);
+              // errors that land here would be execution of code errors
+              // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+              //   as part of the deleteErrors object in the success cb
+              // NOTE: if one of the identifying values is empty or null, an error is thrown here
+              dispatchError({ error: err, isDismissible: true });
+            })
         };
 
         if (!CONFIRM_DELETE) {
-          return leafReference
-            .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
-            .then(deleteResponse)
-            .catch(deleteError);
+          return deleteTuples();
         }
 
         logRecordClientAction(LogActions.UNLINK_INTEND);
@@ -572,10 +567,7 @@ const RelatedTableActions = ({
           title: 'Confirm Unlink',
           onConfirm: () => {
             setShowDeleteConfirmationModal(null);
-            return leafReference
-              .deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows)
-              .then(deleteResponse)
-              .catch(deleteError);
+            return deleteTuples();
           },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
@@ -586,6 +578,7 @@ const RelatedTableActions = ({
         });
       });
     };
+
     setUnlinkPureBinarySubmitCB(() => submitCB);
 
     setUnlinkPureBinaryModalProps({
@@ -611,7 +604,7 @@ const RelatedTableActions = ({
 
   let pureAndBinaryTitleComment;
   if (usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP) {
-    pureAndBinaryTitleComment= usedRef.comment;
+    pureAndBinaryTitleComment = usedRef.comment;
   }
 
   const mainTable = (

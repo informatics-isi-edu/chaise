@@ -3,5 +3,6 @@ import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configurat
 export default getConfig({
   testName: 'delete-prohibited',
   configFileName: 'parallel-configs/delete-prohibited.dev.json',
-  chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
+  mainSpecName: 'delete-prohibited',
+  addDefaultCatalogToChaiseConfig: true
 });

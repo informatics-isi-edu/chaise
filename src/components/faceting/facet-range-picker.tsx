@@ -37,7 +37,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getNotNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ResizeSensor } from 'css-element-queries';
 import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -53,14 +53,21 @@ const FacetRangePicker = ({
   getFacetLogAction,
   getFacetLogStack,
 }: FacetRangePickerProps): JSX.Element => {
-  const [ranges, setRanges, rangesRef] = useStateRef<FacetCheckBoxRow[]>(
-    (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) ? [getNotNullFacetCheckBoxRow(false)] : []
-  );
+  const [ranges, setRanges, rangesRef] = useStateRef<FacetCheckBoxRow[]>(() => {
+    const res: FacetCheckBoxRow[] = [];
+    if (!facetColumn.hideNotNullChoice) {
+      res.push(getNotNullFacetCheckBoxRow(facetColumn.hasNotNullFilter));
+    }
+    if (!facetColumn.hideNullChoice) {
+      res.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter));
+    }
+    return res;
+  });
 
   /**
    * We must create references for the state and local variables that
    * are used in the flow-control related functions. This is to ensure the
-   * functions are using thier latest values.
+   * functions are using their latest values.
    */
   const facetColumnRef = useVarRef(facetColumn);
 
@@ -105,7 +112,7 @@ const FacetRangePicker = ({
       yaxis: {
         fixedrange: true,
         zeroline: true
-        // removed tickformat: ',d' since it would cause small data sets to show [0, 1, 1, 2, 2] 
+        // removed tickformat: ',d' since it would cause small data sets to show [0, 1, 1, 2, 2]
         // when the yaxis labels were really [0, 0.5, 1, 1.5, 2] by rounding non whole numbers
       },
       bargap: 0
@@ -198,10 +205,16 @@ const FacetRangePicker = ({
 
     // if we have the not-null filter, other filters are not important and can be ignored
     if (facetColumnRef.current.hasNotNullFilter) {
-      setRanges([getNotNullFacetCheckBoxRow(true)]);
+      setRanges(() => {
+        const res = [getNotNullFacetCheckBoxRow(true)];
+        if (!facetColumn.hideNullChoice) {
+          res.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter));
+        }
+        return res;
+      });
       defer.resolve(true);
     } else {
-      // default handles whether notNull option should be present
+      // default value of ranges already handles whether null and notNull option should be present
       const updatedRows: FacetCheckBoxRow[] = [...rangesRef.current];
 
       for (let i = 0; i < facetColumnRef.current.rangeFilters.length; i++) {
@@ -312,16 +325,24 @@ const FacetRangePicker = ({
         res.reference = facetColumn.removeNotNullFilter();
       }
       $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
-    } else {
-      if (row.metaData) {
-        if (checked) {
-          res = facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
-        } else {
-          res = facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
-        }
-        $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}.
-        min=${row.metaData.min}, max=${row.metaData.max}`);
+    }
+    else if (row.metaData) {
+      if (checked) {
+        res = facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
+      } else {
+        res = facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
       }
+      $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}.
+      min=${row.metaData.min}, max=${row.metaData.max}`);
+    }
+    // this is the null filter
+    else {
+      if (checked) {
+        res.reference = facetColumn.addChoiceFilters([row.uniqueId]);
+      } else {
+        res.reference = facetColumn.removeChoiceFilters([row.uniqueId]);
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) range ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`);
     }
 
     // this function checks the URL length as well and might fails
@@ -660,7 +681,7 @@ const FacetRangePicker = ({
       const minDate = windowRef.moment(min);
       const maxDate = windowRef.moment(max);
       const limitedRange = windowRef.moment.duration((maxDate.diff(minDate))).asDays();
-      
+
       if (limitedRange <= 4) {
         const minDateDisplay = minDate.subtract(2, 'days').format(dataFormats.date);
         const maxDateDisplay = maxDate.add(2, 'days').format(dataFormats.date);
@@ -669,7 +690,7 @@ const FacetRangePicker = ({
     } else if (isColumnOfType('int')) {
       const intMax = max as number;
       const intMin = min as number;
-      if ((intMax-intMin) <= 4) return [intMin-2, intMax+2];
+      if ((intMax - intMin) <= 4) return [intMin - 2, intMax + 2];
     }
 
     return [min, max];
@@ -1001,7 +1022,7 @@ const FacetRangePicker = ({
     <div className='range-picker' ref={rangePickerContainer}>
       {!facetModel.facetHasTimeoutError && renderPickerContainer()}
       <RangeInputs
-        name={`${facetIndex}`}
+        name={`chaise-${facetColumn.column.RID}`}
         inputType={getInputType(facetColumn.column.type)}
         classes='facet-range-input'
         addRange={addFilter}

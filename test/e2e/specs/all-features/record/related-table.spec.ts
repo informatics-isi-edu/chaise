@@ -1,17 +1,22 @@
+import { expect, Page, test } from '@playwright/test';
 import moment from 'moment';
-import { test, expect, Page } from '@playwright/test';
+
+//locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
+
+//utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
   testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
   testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
-import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -359,7 +364,7 @@ test.describe('Related tables', () => {
         await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.totalCount);
 
         const expectedText = `Displaying all${params.totalCount}of ${params.totalCount} records`;
-        await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText(expectedText);
+        await testTotalCount(rsModal, expectedText);
 
         // select 'Television' (not deletable)
         await RecordsetLocators.getRowCheckboxInput(rsModal, 0).click();
@@ -413,23 +418,6 @@ test.describe('Related tables', () => {
         await expect.soft(okBtn).toHaveText('Unlink');
         await okBtn.click();
         await expect.soft(confirmModal).not.toBeAttached();
-
-        // make sure summary modal shows up
-        const summaryModal = ModalLocators.getErrorModal(page);
-        await expect.soft(summaryModal).toBeVisible();
-        await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
-        await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.successPostDeleteMessage);
-
-        // close the summary modal
-        await ModalLocators.getCloseBtn(summaryModal).click();
-        await expect.soft(summaryModal).not.toBeAttached();
-
-        // make sure the recordset modal rows update
-        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
-
-        // close the recordset modal
-        await ModalLocators.getCloseBtn(rsModal).click();
-        await expect.soft(rsModal).not.toBeAttached();
 
         // make sure correct values are displayed
         const currentEl = RecordLocators.getRelatedTableAccordion(page, params.displayname);
@@ -497,7 +485,7 @@ test.describe('Related tables', () => {
       await expect.soft(ModalLocators.getModalTitle(rsModal)).toHaveText('Link accommodation_image to Accommodations: Super 8 North Hollywood Motel');
       await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(2);
 
-      await expect.soft(RecordsetLocators.getTotalCount(rsModal)).toHaveText('Displaying first2records');
+      await testTotalCount(rsModal, 'Displaying first2records');
 
       await ModalLocators.getCloseBtn(rsModal).click();
       await expect.soft(rsModal).not.toBeAttached();
@@ -512,7 +500,7 @@ test.describe('Related tables', () => {
         schemaName: 'product-unordered-related-tables-links',
         displayname: 'association_table_markdown',
         tableName: 'association_table_markdown',
-        entityMarkdownName: '1:Television',
+        entityMarkdownName: ' 1:Television', // space added in markdown name since this is only tested in tooltips and some other tooltips don't have the space
         associationLeafTableName: 'related_table',
         baseTableName: 'Accommodations',
         isAssociation: true,

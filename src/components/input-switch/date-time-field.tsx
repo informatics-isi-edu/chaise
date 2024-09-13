@@ -8,10 +8,9 @@ import { useEffect } from 'react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 // utils
-import { ERROR_MESSAGES, formatDatetime, VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { CUSTOM_ERROR_TYPES, ERROR_MESSAGES, formatDatetime, VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
 
 type DateTimeFieldProps = InputFieldProps & {
   /**
@@ -37,14 +36,27 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   // NOTE: Including these context properties causes this component to redraw every time a change to the form occurs
   //   Can this functionality be done in a different way with react-hook-form to prevent so much rerendering when the component hasn't changed?
-  const { setValue, control, clearErrors, setError, getFieldState } = useFormContext();
+  const { setValue, control, clearErrors, setError, getFieldState, trigger } = useFormContext();
+  const dateTimeVal = useWatch({ name: props.name });
   const dateVal = useWatch({ name: `${props.name}-date` });
   const timeVal = useWatch({ name: `${props.name}-time` });
 
   const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
 
+  // since we're showing a manual error, we're also setting the input as this value so the form is also invalid.
+  const invalidValue = 'invalid-value';
+
   useEffect(() => {
-    /**
+    // Set default values if they exists
+    if (!dateVal && !timeVal && dateTimeVal) {
+      const v = formatDatetime(dateTimeVal, { outputMomentFormat: DATE_TIME_FORMAT })
+
+      setValue(`${props.name}-date`, v?.date);
+      setValue(`${props.name}-time`, v?.time);
+    }
+  }, [])
+
+  useEffect(() => {/**
      * this will make sure we're updating the underlying value after
      * each update to the date and time fields.
      *
@@ -56,44 +68,41 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-    if (!dateVal && !timeVal && !props.requiredInput) {
+    if (!dateVal && !timeVal) {
       if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
+      void trigger(props.name);
       return;
     }
 
     // if date is missing, this is invalid
     if (!dateVal) {
-      setError(props.name, { type: 'custom', message: ERROR_MESSAGES.INVALID_DATE });
-      setValue(props.name, 'invalid-value');
+      setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: ERROR_MESSAGES.INVALID_DATE });
+      setValue(props.name, invalidValue);
       return;
     }
     // otherwise validate the date value
     else {
       const err = VALIDATE_VALUE_BY_TYPE['date'](dateVal);
       if (typeof err === 'string') {
-        setError(props.name, { type: 'custom', message: err });
-        setValue(props.name, 'invalid-value');
+        setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: err });
+        setValue(props.name, invalidValue);
         return;
       }
     }
 
-    // if only time is missing, use 00:00:00 for it
-    let timeValTemp = '';
-    if (!timeVal && !props.requiredInput) {
-      timeValTemp = '00:00:00';
+    // if time is missing, use 00:00:00 for it
+    let usedTimeVal = timeVal;
+    if (!timeVal) {
+      usedTimeVal = '00:00:00';
+      setValue(`${props.name}-time`, usedTimeVal);
     }
     // otherwise validate the time value
     else {
-      if (!timeVal) {
-        setError(props.name, { type: 'custom', message: 'Please enter a valid time' });
-        setValue(props.name, 'invalid-value');
-        return;
-      }
       const err = VALIDATE_VALUE_BY_TYPE['time'](timeVal);
       if (typeof err === 'string') {
-        setError(props.name, { type: 'custom', message: err });
-        setValue(props.name, 'invalid-value');
+        setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: err });
+        setValue(props.name, invalidValue);
         return;
       }
     }
@@ -104,7 +113,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
      * and have to rely on moment to do this for us.
      */
     const date = windowRef.moment(dateVal, dataFormats.date);
-    const time = windowRef.moment(timeValTemp ? timeValTemp : timeVal, dataFormats.time);
+    const time = windowRef.moment(usedTimeVal, dataFormats.time);
     const dateTime = date.set({
       hour: time.get('hour'),
       minute: time.get('minute'),
@@ -113,14 +122,32 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
     // adds the timezone info if needed
     const valueToSet = dateTime.format(DATE_TIME_FORMAT);
-
     if (datetimeFieldState.error) clearErrors(props.name);
     setValue(props.name, valueToSet);
 
-  }, [dateVal, timeVal])
+    // we have to call trigger to trigger all the validators again
+    // (needed for the ARRAY_ADD_OR_DISCARD_VALUE error to show up)
+    void trigger(props.name);
+
+  }, [dateVal, timeVal]);
+
+  /**
+   * we have to make sure to trigger all the validators after we've manually changed the value.
+   *
+   * NOTE:
+   * - This is needed for the ARRAY_ADD_OR_DISCARD_VALUE error or any other custom validators that we have to show up.
+   */
+  useEffect(() => {
+    /**
+     * if we set the value to "invalid value", we also have defined a custom error that we want to show.
+     * so we're excluding that from here to make sure the custom error is not replaced by a generic one.
+     */
+    if (dateTimeVal !== invalidValue) void trigger(props.name);
+  }, [dateTimeVal])
 
   const formInputDate = useController({
     name: `${props.name}-date`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
@@ -133,6 +160,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const formInputTime = useController({
     name: `${props.name}-time`,
+    defaultValue: '',
     control,
     rules: {
       required: props.requiredInput
@@ -170,6 +198,8 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const showTimeClear = () => Boolean(timeFieldValue);
 
+
+
   return (
     <InputField {...props}
       // make sure to mark the whole input as "touched" if any of the inputs are touched
@@ -179,7 +209,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
        * (it's basically just validating the watch above and not the user action)
        */
       controllerRules={{
-        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')]
+        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')],
       }}
     >
       {(field) => (
@@ -195,6 +225,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             displayErrors={false}
             displayExtraDateTimeButtons={false}
             displayDateTimeLabels={props.displayDateTimeLabels}
+            inputClassName={`${props.inputClassName}-date`}
           />
           <div className='chaise-input-group input-switch-time'>
             {props.displayDateTimeLabels && <div className='chaise-input-group-prepend'>
@@ -202,8 +233,13 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             </div>}
             <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
               <input
-                className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
-                type='text' disabled={props.disableInput} {...timeField} onChange={handleTimeChange}
+                className={`${props.timeClasses} input-switch ${props.inputClassName}-time ${
+                  showTimeClear() ? 'time-input-show-clear' : ''
+                }`}
+                type='text'
+                disabled={props.disableInput}
+                {...timeField}
+                onChange={handleTimeChange}
                 placeholder={props.placeholder ? props.placeholder : dataFormats.placeholder.time}
               />
               <ClearInputBtn
@@ -213,15 +249,18 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
               />
             </div>
           </div>
-          {!props.disableInput && props.displayExtraDateTimeButtons && <div className='chaise-btn-group'>
-            <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
-              Now
-            </button>
-            <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
-              Clear
-            </button>
-          </div>}
-          <input {...field} type='hidden' />
+          {/*'translateY' - Prevents overlap of error message and button group in case of arrayField by moving the button group lower*/}
+          {!props.disableInput && props.displayExtraDateTimeButtons &&
+            <div className={`chaise-btn-group ${getFieldState(props.name)?.error ? 'translateY' : ''}`}>
+              <button type='button' className='date-time-now-btn chaise-btn chaise-btn-secondary' onClick={applyNow}>
+                Now
+              </button>
+              <button type='button' className='date-time-clear-btn chaise-btn chaise-btn-secondary' onClick={() => { clearTime(); clearDate(); }}>
+                Clear
+              </button>
+            </div>
+          }
+          <input className={props.inputClassName} {...field} type='hidden' />
         </div>
       )}
     </InputField>

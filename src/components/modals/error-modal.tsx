@@ -277,7 +277,7 @@ const ErrorModal = (): JSX.Element | null => {
         {showOKBtn &&
           <button
             type='button' onClick={() => okCallback()}
-            className='chaise-btn chaise-btn-danger error-ok-button'
+            className='chaise-btn chaise-btn-danger ok-button'
           >
             <span>OK</span>
           </button>

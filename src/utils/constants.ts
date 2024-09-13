@@ -149,6 +149,7 @@ export const BODY_CLASS_NAMES = {
   self: 'chaise-body',
   mac: 'chaise-mac',
   firefox: 'chaise-firefox',
+  safari: 'chaise-safari',
   iframe: 'chaise-iframe'
 };
 
@@ -189,10 +190,11 @@ export const DEFAULT_DISPLAYNAME = {
 };
 
 export const CUSTOM_EVENTS = {
-  ROW_EDIT_INTEND: 'row-edit-intend',
-  ROW_DELETE_SUCCESS: 'row-delete-success',
   ADD_INTEND: 'add-intend',
   FORCE_UPDATE_RECORDSET: 'force-update-recordset-data',
+  RELATED_TABLE_PAGING_SUCCESS: 'related-table-paging-success',
+  ROW_DELETE_SUCCESS: 'row-delete-success',
+  ROW_EDIT_INTEND: 'row-edit-intend',
 };
 
 export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
@@ -215,6 +217,7 @@ export const HELP_PAGES = {
   }
 }
 
+// NOTE: this should be added to windowRef similar to "isSafari" if this check is needed elsewhere
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
