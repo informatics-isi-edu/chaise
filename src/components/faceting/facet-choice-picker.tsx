@@ -446,7 +446,6 @@ const FacetChoicePicker = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: true,
       disableFaceting: !facetColumn.isEntityMode,
       displayMode: RecordsetDisplayMode.FACET_POPUP,
       facetDepthLevel: recordsetFacetDepthLevel + 1

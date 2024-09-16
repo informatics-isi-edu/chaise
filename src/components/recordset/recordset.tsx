@@ -632,7 +632,6 @@ const RecordsetInner = ({
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
   const recordsetUIContextTitles = uiContextTitles ? [...uiContextTitles] : [{ reference: initialReference }];
-  // TODO it should most probably disable
   const recordsetFacetDepthLevel = config.facetDepthLevel !== undefined ? config.facetDepthLevel : 1;
 
   /**
@@ -766,7 +765,7 @@ const RecordsetInner = ({
   }
 
   const renderShowFilterPanelBtn = () => {
-    if (facetPanelOpen || !config.showFaceting || config.disableFaceting || (recordsetFacetDepthLevel > 2)) {
+    if (facetPanelOpen || config.disableFaceting || !reference.display.showFaceting || (recordsetFacetDepthLevel > reference.display.maxFacetDepth)) {
       return;
     }
     return (

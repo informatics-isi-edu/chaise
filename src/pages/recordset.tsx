@@ -107,7 +107,6 @@ const RecordsetApp = (): JSX.Element => {
         deletable: modifyEnabled && deleteEnabled,
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
-        showFaceting: true,
         disableFaceting: false,
         displayMode: RecordsetDisplayMode.FULLSCREEN,
         // TODO

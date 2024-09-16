@@ -79,14 +79,6 @@ export type RecordsetConfig = {
   sortable: boolean,
   selectMode: RecordsetSelectMode,
   /**
-   * whether to show or hide the faceting UI.
-   * if you want to completely disable the feature, set `disableFaceting` instead.
-   * setting this to `true` will just hide the faceting UI while still generating the facets.
-   * this is useful when you don't want to show the facet panel but you want the facet chiclets
-   * to show up properly.
-   */
-  showFaceting: boolean,
-  /**
    * completely disable the faceting feature.
    * if this is set to true, then we won't even show the facet chiclets
    */
@@ -107,10 +99,12 @@ export type RecordsetConfig = {
 
   /**
    * indicates how deep are we in the faceting feature.
-   * - 1 would be when we're showing a recordset page with facet.
-   * - 2 is when you open the facet popup from the page with facetDepthLevel=1
-   * - 3 is when you open the facet popup from the page with disableFaceting=2
+   * - 1 would be when we're showing a recordset page with facet (or a link/unlink popup with facet).
+   * - 2 is when you open the facet popup from the page or component with facetDepthLevel=1
+   * - 3 is when you open the facet popup from the page or component with disableFaceting=2
    * - and so on.
+   *
+   * default: 1
    */
   facetDepthLevel?: number,
 

@@ -320,7 +320,6 @@ const RelatedTableActions = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: true,
       disableFaceting: false,
       displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_ADD,
     };
@@ -478,7 +477,6 @@ const RelatedTableActions = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: true,
       disableFaceting: false,
       displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK,
     };

@@ -19,6 +19,9 @@ var chaiseConfig = {
     disableExternalLinkModal: true,
     logClientActions: false,
     hideRecordeditLeaveAlert: true,
+    facetPanelDisplay: {
+      maxFacetDepth: 0
+    },
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTable: {
         "schema": "product-recordset",

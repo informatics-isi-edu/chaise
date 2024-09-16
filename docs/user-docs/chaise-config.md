@@ -444,15 +444,6 @@ If a property appears in the same configuration twice, the property defined late
      showWriterEmptyRelatedOnLoad: false
      ```
 
- #### showFaceting
- If `true`, shows the faceting panel on the recordset app.
-   - Type: Boolean
-   - Default behavior: the faceting panel will not be available on recordset page
-   - Sample syntax:
-     ```
-     showFaceting: true
-     ```
-
  #### hideTableOfContents
  If true, hides the table of contents panel on the record app.
    - Type: Boolean
@@ -481,24 +472,31 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### facetPanelDisplay
- Use this property to change the visibility of the facet panel on load. Currently the supported properties are `open` and `closed`. Both properties expect an array of
- contexts and subcontexts associated with `compact` displays. `*` may be used but will be treated the same as `compact`. If a context is present in both open and closed, open will take priority. If the current context is not mentioned in either `open` or `closed`, it will try to inherit its value from a parent context. Defining only one array, `open` or `closed`, will assume the other property is equal to `[]`.
+ Use this property to change the settings related to the facet panel.
+
    - Type: Object
-   - Default behavior: The facet panel will be open in the `compact` display and closed in all others.
+   - Default behavior: The facet panel will be displayed for all tables. It will be opened in the `compact` context (recordset app) and closed in all other subcontexts.
    - General syntax:
      ```
      facetPanelDisplay: {
          open: [_context_],
-         closed: [_context_]
+         closed: [_context_],
+         maxFacetDepth: number
      }
      ```
-   - `facetPanelDisplay` attributes:
-     - `open`: An array of contexts that the facet panel should be open for on page load.
+   - Attributes:
+     - `open`: An array of contexts that the facet panel should be open for on page load. Since facet panels are displayed on context and subcontexts associated with `compact`, only these annotations would be appropriate here. `*` may be used but will be treated the same as `compact`. If a context is present in both open and closed, open will take priority. If the current context is not mentioned in either `open` or `closed`, it will try to inherit its value from a parent context. Defining only one array, `open` or `closed`, will assume the other property is equal to `[]`.
      - `closed`: An array of contexts that the facet panel should be closed for on page load.
+     - `maxFacetDepth`: A number indicating how many levels of facets we should allow. The following are the acceptable values:
+       - 0: disable the faceting feature.
+       - 1: The default behavior. Facet panel is displayed on the initial recordset page or recordset popups. But it's not offered on the facet popups.
+       - 2: Facet panel is displayed on the initial recordset page or recordset popups. It's also displayed on the facet popups.
+       - 2+: Not allowed for now, as we think allowing more facets would confuse the users. When we encounter this value, we will use the maximum we support (2).
    - Sample syntax:
      ```
      facetPanelDisplay: {
-         open: ["compact/select/association"]
+         open: ["compact/select/association"],
+         maxFacetDepth: 2
      }
      ```
 

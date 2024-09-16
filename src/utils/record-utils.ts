@@ -164,7 +164,6 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         deletable: true,
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
-        showFaceting: false,
         disableFaceting: true,
         displayMode: isInline ? RecordsetDisplayMode.INLINE : RecordsetDisplayMode.RELATED,
         containerDetails: { isInline, index }
@@ -373,7 +372,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
 /**
  * Takes the displayname for a related table (both inline and related), and tries to find it on the record page.
  *   used for table of contents click event and scrrolling on click of previous/next
- * 
+ *
  * @param displayname the displayname of the column to scroll to
  * @returns Element | false - returns the related table element to scroll to
  *      - false if no element with displayname is found

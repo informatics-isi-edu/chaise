@@ -302,6 +302,12 @@ test.describe('View recordset', () => {
       await testTotalCount(page, `Displaying all${data.length}records`)
     });
 
+    await test.step('should honor the max_facet_depth of table and ignore the chaise-config setting', async () => {
+      await expect.soft(RecordsetLocators.getSidePanel(page)).toBeVisible();
+      await expect.soft(RecordsetLocators.getHideFilterPanelBtn(page)).toBeVisible();
+      await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(16);
+    });
+
     await test.step('should show correct table rows.', async () => {
       await testRecordsetTableRowValues(page, data, true);
     });
@@ -322,6 +328,12 @@ test.describe('View recordset', () => {
       await page.goto(`${baseURL}${PAGE_URL}/${params.key}@sort(${params.sortby})`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
+    });
+
+    await test.step('should not display facets if maxFacetDepth is 0 in the chaise-config', async () => {
+      await expect.soft(RecordsetLocators.getSidePanel(page)).not.toBeVisible();
+      await expect.soft(RecordsetLocators.getShowFilterPanelBtn(page)).not.toBeVisible();
+      await expect.soft(RecordsetLocators.getHideFilterPanelBtn(page)).not.toBeVisible();
     });
 
     await test.step('presentation of the recordset page', async () => {

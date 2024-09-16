@@ -215,7 +215,7 @@ const RecordsetModal = ({
    */
   let modalSize: undefined | 'lg' | 'xl';
   let numCols = recordsetProps.initialReference.columns.length;
-  if (recordsetProps.config.showFaceting) {
+  if (!recordsetProps.config.disableFaceting && recordsetProps.initialReference.display.showFaceting) {
     numCols++;
   }
   if (numCols > 3) {
