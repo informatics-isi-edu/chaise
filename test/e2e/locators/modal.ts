@@ -68,6 +68,10 @@ export default class ModalLocators {
     return page.locator('.confirm-iframe-close-modal');
   }
 
+  static getMarkdownPreviewModal(page: Page): Locator {
+    return page.locator('.chaise-preview-markdown');
+  }
+
   // ------------- common modal functions -------------- //
 
   static getModalTitle(modal: Locator) {
@@ -161,5 +165,10 @@ export default class ModalLocators {
   // --------- iframe-field-modal functions ------------ //
   static getIframeFieldModalSpinner(modal: Locator): Locator {
     return modal.locator('.iframe-field-modal-spinner')
+  }
+
+  // --------- markdown-preview modal functions ------------ //
+  static getMarkdownPreviewContent(modal: Locator): Locator {
+    return ModalLocators.getModalText(modal).locator('.markdown-container');
   }
 }

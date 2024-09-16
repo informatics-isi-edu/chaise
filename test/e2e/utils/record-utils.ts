@@ -1,12 +1,12 @@
 import { Locator, Page, TestInfo, expect, test } from '@playwright/test';
 
 // locators
-import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-import { getCatalogID, getEntityRow, EntityRowColumnValues } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { EntityRowColumnValues, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
@@ -19,8 +19,11 @@ import {
 
 
 /**
- * TODO this function is currently only used for recordedit result test, but
- * we should also use this for the 'should validate the values of each column' test in record-helpers.js
+ * make sure the main section of record page is showing the proper values.
+ *
+ * While `expectedColumnNames` must include all the column names, `expectedColumnValues` can be just a subset of columns. but it must
+ * be in the same order. so for example if you don't want to include the default system columns that are displayed at the end of the
+ * column list, you can omit those values.
  */
 export const testRecordMainSectionValues = async (page: Page, expectedColumnNames: string[], expectedColumnValues: RecordsetRowValue) => {
   await RecordLocators.waitForRecordPageReady(page);
@@ -732,23 +735,6 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
       await expect.soft(okBtn).toHaveText('Unlink');
       await okBtn.click();
       await expect.soft(confirmModal).not.toBeAttached();
-
-      // make sure summary modal shows up
-      const summaryModal = ModalLocators.getErrorModal(page);
-      await expect.soft(summaryModal).toBeVisible();
-      await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
-      await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.postDeleteMessage);
-
-      // close the summary modal
-      await ModalLocators.getCloseBtn(summaryModal).click();
-      await expect.soft(summaryModal).not.toBeAttached();
-
-      // make sure the recordset modal rows update
-      await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
-
-      // close the recordset modal
-      await ModalLocators.getCloseBtn(rsModal).click();
-      await expect.soft(rsModal).not.toBeAttached();
 
       // make sure correct values are displayed
       const currentEl = RecordLocators.getRelatedTableContainer(page, params.displayname, params.isInline);

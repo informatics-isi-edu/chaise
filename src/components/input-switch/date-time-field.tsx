@@ -43,6 +43,8 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   const DATE_TIME_FORMAT = props.hasTimezone ? dataFormats.datetime.return : dataFormats.timestamp;
 
+  // since we're showing a manual error, we're also setting the input as this value so the form is also invalid.
+  const invalidValue = 'invalid-value';
 
   useEffect(() => {
     // Set default values if they exists
@@ -66,17 +68,17 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     const datetimeFieldState = getFieldState(props.name);
 
     // if both are missing, the input is empty
-    if (!dateVal && !timeVal && !props.requiredInput) {
+    if (!dateVal && !timeVal) {
       if (datetimeFieldState.error) clearErrors(props.name);
       setValue(props.name, '');
-      trigger(props.name);
+      void trigger(props.name);
       return;
     }
 
     // if date is missing, this is invalid
     if (!dateVal) {
       setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: ERROR_MESSAGES.INVALID_DATE });
-      setValue(props.name, 'invalid-value');
+      setValue(props.name, invalidValue);
       return;
     }
     // otherwise validate the date value
@@ -84,27 +86,23 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
       const err = VALIDATE_VALUE_BY_TYPE['date'](dateVal);
       if (typeof err === 'string') {
         setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: err });
-        setValue(props.name, 'invalid-value');
+        setValue(props.name, invalidValue);
         return;
       }
     }
 
-    // if only time is missing, use 00:00:00 for it
-    let timeValTemp = '';
-    if (!timeVal && !props.requiredInput) {
-      timeValTemp = '00:00:00';
+    // if time is missing, use 00:00:00 for it
+    let usedTimeVal = timeVal;
+    if (!timeVal) {
+      usedTimeVal = '00:00:00';
+      setValue(`${props.name}-time`, usedTimeVal);
     }
     // otherwise validate the time value
     else {
-      if (!timeVal) {
-        setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: 'Please enter a valid time' });
-        setValue(props.name, 'invalid-value');
-        return;
-      }
       const err = VALIDATE_VALUE_BY_TYPE['time'](timeVal);
       if (typeof err === 'string') {
         setError(props.name, { type: CUSTOM_ERROR_TYPES.INVALID_DATE_TIME, message: err });
-        setValue(props.name, 'invalid-value');
+        setValue(props.name, invalidValue);
         return;
       }
     }
@@ -115,7 +113,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
      * and have to rely on moment to do this for us.
      */
     const date = windowRef.moment(dateVal, dataFormats.date);
-    const time = windowRef.moment(timeValTemp ? timeValTemp : timeVal, dataFormats.time);
+    const time = windowRef.moment(usedTimeVal, dataFormats.time);
     const dateTime = date.set({
       hour: time.get('hour'),
       minute: time.get('minute'),
@@ -129,9 +127,23 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
     // we have to call trigger to trigger all the validators again
     // (needed for the ARRAY_ADD_OR_DISCARD_VALUE error to show up)
-    trigger(props.name);
+    void trigger(props.name);
 
-  }, [dateVal, timeVal])
+  }, [dateVal, timeVal]);
+
+  /**
+   * we have to make sure to trigger all the validators after we've manually changed the value.
+   *
+   * NOTE:
+   * - This is needed for the ARRAY_ADD_OR_DISCARD_VALUE error or any other custom validators that we have to show up.
+   */
+  useEffect(() => {
+    /**
+     * if we set the value to "invalid value", we also have defined a custom error that we want to show.
+     * so we're excluding that from here to make sure the custom error is not replaced by a generic one.
+     */
+    if (dateTimeVal !== invalidValue) void trigger(props.name);
+  }, [dateTimeVal])
 
   const formInputDate = useController({
     name: `${props.name}-date`,

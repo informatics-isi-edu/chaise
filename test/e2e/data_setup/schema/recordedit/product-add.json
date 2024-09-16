@@ -216,7 +216,7 @@
           "default": null,
           "nullok": true,
           "type": {
-            "typename": "int4"
+            "typename": "int2"
           },
           "annotations": {
             "comment" : ["top"],

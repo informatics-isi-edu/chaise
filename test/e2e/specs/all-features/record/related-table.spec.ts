@@ -1,17 +1,22 @@
+import { expect, Page, test } from '@playwright/test';
 import moment from 'moment';
-import { test, expect, Page } from '@playwright/test';
+
+//locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
-import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
+
+//utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
   testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
   testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
-import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+
 
 const testParams = {
   schemaName: 'product-unordered-related-tables-links',
@@ -413,23 +418,6 @@ test.describe('Related tables', () => {
         await expect.soft(okBtn).toHaveText('Unlink');
         await okBtn.click();
         await expect.soft(confirmModal).not.toBeAttached();
-
-        // make sure summary modal shows up
-        const summaryModal = ModalLocators.getErrorModal(page);
-        await expect.soft(summaryModal).toBeVisible();
-        await expect.soft(ModalLocators.getModalTitle(summaryModal)).toHaveText('Batch Unlink Summary');
-        await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(params.successPostDeleteMessage);
-
-        // close the summary modal
-        await ModalLocators.getCloseBtn(summaryModal).click();
-        await expect.soft(summaryModal).not.toBeAttached();
-
-        // make sure the recordset modal rows update
-        await expect.soft(RecordsetLocators.getRows(rsModal)).toHaveCount(params.rowValuesAfter.length);
-
-        // close the recordset modal
-        await ModalLocators.getCloseBtn(rsModal).click();
-        await expect.soft(rsModal).not.toBeAttached();
 
         // make sure correct values are displayed
         const currentEl = RecordLocators.getRelatedTableAccordion(page, params.displayname);

@@ -44,16 +44,14 @@ MODULES=node_modules
 ### test scripts
 ## Sequential test scripts
 # Recordedit tests
-E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
-E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
-E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
-E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
+E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.config.ts
+E2EDrecordEditNullValues=test/e2e/specs/default-config/recordedit/null-values.config.ts
+E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.config.ts
+E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.config.ts
 # not part of the make recordedit command anymore
 E2EDIrecordMultiFormInput=test/e2e/specs/default-config/multi-form-input/multi-form-input.config.ts
-E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.config.ts
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.config.ts
-E2EDrecordEditSubmissionDisabled=test/e2e/specs/default-config/recordedit/submission-disabled.conf.js
 E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.config.ts
 E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.config.ts
 # Record tests
@@ -64,8 +62,8 @@ E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.t
 E2EDrecordLinks=test/e2e/specs/default-config/record/links.config.ts
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.config.ts
-E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
-E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
+E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.config.ts
+E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.config.ts
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
@@ -79,32 +77,20 @@ E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/errors.config.ts
-## Parallel test scripts (protractor)
-AllFeaturesConfirmationParallel_PROTRACTOR=test/e2e/specs/all-features-confirmation/protractor.conf.js
-DefaultConfigParallel_PROTRACTOR=test/e2e/specs/default-config/protractor.conf.js
 ## Parallel test scripts
 AllFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
 AllFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/playwright.config.ts
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/playwright.config.ts
 DefaultConfigParallel=test/e2e/specs/default-config/playwright.config.ts
 # Setup for manual tests
-Manualrecordset=test/manual/specs/recordset.conf.js
-
-# protractor tests
-RECORDSET_TESTS_PROTRACTOR=$(E2ErecordsetAdd) $(E2EDrecordsetEdit)
-RECORDADD_TESTS_PROTRACTOR=$(E2EDIrecordAdd) $(E2EDIrecordMultiFormInput) $(E2EDIrecordImmutable)
-RECORDEDIT_TESTS_PROTRACTOR=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes)
-DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR=$(DefaultConfigParallel_PROTRACTOR)
-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR)
-PARALLEL_TESTS_PROTRACTOR=$(AllFeaturesConfirmationParallel_PROTRACTOR) $(DefaultConfigParallel_PROTRACTOR)
-ALL_TESTS_PROTRACTOR=$(RECORDSET_TESTS_PROTRACTOR) $(RECORDADD_TESTS_PROTRACTOR) $(RECORDEDIT_TESTS_PROTRACTOR)
+Manualrecordset=test/manual/specs/recordset.config.ts
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORDADD_TESTS=$(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
-RECORDEDIT_TESTS=$(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordImmutable) $(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)
@@ -117,35 +103,22 @@ ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) 
 
 ALL_MANUAL_TESTS=$(Manualrecordset)
 
-define make_test_protractor
-	rc=0; \
-	for file in $(1); do \
-		npx protractor $$file || rc=1; \
-	done; \
-	exit $$rc;
-endef
-
+# first argument is the config file location, and second argument will be passed to playwright
 define make_test
 	rc=0; \
 	for file in $(1); do \
-		 npx playwright test --project=chrome --config $$file || rc=1; \
+		 npx playwright test --project=chrome $(2) --config $$file || rc=1; \
 	done; \
 	exit $$rc;
 endef
 
-test_protractor-%:
-	$(call make_test_protractor, $($*), "0")
-
 test-%:
-	$(call make_test, $($*), "0")
+	$(call make_test, $($*))
 
 #### Sequential make commands - these commands will run tests in sequential order
 #Rule to run navbar tests
 .PHONY: testnavbar
 testnavbar: test-NAVBAR_TESTS
-
-.PHONY: testrecord-protractor
-testrecord-protractor: test_protractor-RECORD_TESTS_PROTRACTOR
 
 #Rule to run record tests
 .PHONY: testrecord
@@ -155,15 +128,9 @@ testrecord: test-RECORD_TESTS
 .PHONY: testrecordadd
 testrecordadd: test-RECORDADD_TESTS
 
-.PHONY: testrecordadd-protractor
-testrecordadd-protractor: test_protractor-RECORDADD_TESTS_PROTRACTOR
-
 # Rule to run record edit app tests
 .PHONY: testrecordedit
 testrecordedit: test-RECORDEDIT_TESTS
-
-.PHONY: testrecordedit-protractor
-testrecordedit-protractor: test_protractor-RECORDEDIT_TESTS_PROTRACTOR
 
 # Rule to run permission tests
 .PHONY: testpermissions
@@ -172,9 +139,6 @@ testpermissions:test-PERMISSIONS_TESTS
 #Rule to run recordset app tests
 .PHONY: testrecordset
 testrecordset: test-RECORDSET_TESTS
-
-.PHONY: testrecordset-protractor
-testrecordset-protractor: test_protractor-RECORDSET_TESTS_PROTRACTOR
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
@@ -189,9 +153,6 @@ testerrors: test-ERRORS_TESTS
 .PHONY: testparallel
 testparallel: test-PARALLEL_TESTS
 
-.PHONY: testparallel-protractor
-testparallel-protractor: test_protractor-PARALLEL_TESTS_PROTRACTOR
-
 #Rule to run the All features chaise configuration tests in parallel
 .PHONY: testallfeatures
 testallfeatures: test-ALL_FEATURES_PARALLEL_TESTS
@@ -199,9 +160,6 @@ testallfeatures: test-ALL_FEATURES_PARALLEL_TESTS
 #Rule to run the All features chaise configuration tests in parallel
 .PHONY: testallfeaturesconfirmation
 testallfeaturesconfirmation: test-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS
-
-.PHONY: testallfeaturesconfirmation-protractor
-testallfeaturesconfirmation-protractor: test_protractor-ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS_PROTRACTOR
 
 #Rule to run the delete prohibited chaise configuration tests in parallel
 .PHONY: testdeleteprohibited
@@ -211,19 +169,14 @@ testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
 .PHONY: testdefaultconfig
 testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
-.PHONY: testdefaultconfig-protractor
-testdefaultconfig-protractor: test_protractor-DEFAULT_CONFIG_PARALLEL_TESTS_PROTRACTOR
-
 # Rule to setup schema and data for manual tests
 .PHONY: testmanually
-testmanually: test_protractor-ALL_MANUAL_TESTS
+testmanually:
+	$(call make_test, $(ALL_MANUAL_TESTS), --debug)
 
 # Rule to run tests
 .PHONY: test
 test: test-ALL_TESTS
-
-.PHONY: test-protractor
-test-protractor: test_protractor-ALL_TESTS_PROTRACTOR
 
 # ============================================================= #
 #						BULDING THE PACKAGE						#
@@ -438,14 +391,6 @@ endef
 # build version will change everytime it's called
 $(BUILD_VERSION):
 
-# make sure the latest webdriver is installed
-# - we fixed the version since this is the latest version that works with
-#   the protractor version that we're using.
-# - we're only using chrome, so we're ignoring gecko installation.
-.PHONY: update-webdriver
-update-webdriver:
-	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0 --gecko false
-
 # install packages (honors NOD_ENV)
 # using clean-install instead of install to ensure usage of pacakge-lock.json
 .PHONY: npm-install-modules
@@ -453,19 +398,15 @@ npm-install-modules:
 	@npm clean-install
 
 # install packages needed for production and development (including testing)
-# also run patch-package to patch all the issues in dependencies (currently only webdriver-manager.)
-# if we decided to patch other prod dependencies, we should move `patch-package` command to the `postinstall` of package.json.
 # --include=dev makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
-	@npx patch-package
 	@npx playwright install --with-deps
 
-# for test cases we have to make sure we're installing dev dependencies and
-# webdriver is always updated to the latest version
+# for test cases we have to make sure we're installing dev dependencies and playwright is installed
 .PHONY: deps-test
-deps-test: npm-install-all-modules update-webdriver
+deps-test: npm-install-all-modules
 
 # install all the dependencies
 .PHONY: deps
@@ -584,8 +525,7 @@ usage:
 	@echo "  distclean                      the same as clean, and also removes npm dependencies"
 	@echo "  deps                           local install of node dependencies"
 	@echo "  updeps                         local update  of node dependencies"
-	@echo "  update-webdriver               update the protractor's webdriver"
-	@echo "  deps-test                      local install of dev node dependencies and update protractor's webdriver"
+	@echo "  deps-test                      local install of dev node dependencies and install playwright browsers"
 	@echo "  root-install                   should only be used as root. will use dist with proper user and then deploy, for GNU systems"
 	@echo "  root-install-alt               should only be used as root. will use dist with proper user and then deploy, for FreeBSD and MAC OS X"
 	@echo "  test                           run e2e tests"

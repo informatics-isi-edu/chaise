@@ -1,11 +1,11 @@
 export type TestOptions = {
   /**
-   * the name of the main spec folder.
-   * usages:
-   * - the catalog alias
-   * - finding the folder (for default chaise-config.js)
+   * the name of the main spec folder. used for locating the chaise-config.js file. If missing, we won't try to find and
+   * copy the chaise-config.js file into the remote location.
+   *
+   * Note: it should be defined for all the tests under "specs". It's optional so we can use this for manual testing too.
    */
-  mainSpecName: string,
+  mainSpecName?: string,
   /**
    * the name of the spec (will be used for the report file)
    */
