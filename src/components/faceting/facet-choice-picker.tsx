@@ -5,7 +5,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
-import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
+import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';

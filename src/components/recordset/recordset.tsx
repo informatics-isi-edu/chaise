@@ -908,7 +908,7 @@ const RecordsetInner = ({
                 </div>
               </div>
             }
-            {renderSelectedFilterChiclets()}
+            {facetsRegistered && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>
