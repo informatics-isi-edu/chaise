@@ -1,4 +1,4 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, Locator, Page, test } from '@playwright/test';
 import moment from 'moment';
 
 //locators
@@ -10,12 +10,13 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 //utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, manuallyTriggerFocus, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
-  testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
-  testRelatedTablePresentation, testShareCiteModal
+  testAddAssociationTable, testAddRelatedTable, testAddRelatedWithForeignKeyMultiPicker,
+  testBatchUnlinkAssociationTable, testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { clearInputValue, testInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { testModalClose, testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
 
 const testParams = {
@@ -42,7 +43,9 @@ const testParams = {
     'inbound related with filter on related table', // related entity with filter on related table
     'association with filter on main table',
     'association with filter on related table', // association with filter on related table
-    'path of length 3 with filters' // path of length 3 with filters
+    'path of length 3 with filters', // path of length 3 with filters
+    'association_table_w_static_column', // "almost" pure and binary multi create foreig key with fk input modals
+    'association_table_w_static_column_dropdown' // "almost" pure and binary multi create foreig key with fk input dropdowns
   ],
   tocHeaders: [
     'Summary', 'booking (6)', 'schedule (2)', 'media (1)', 'association_table (1)',
@@ -54,7 +57,9 @@ const testParams = {
     'inbound related with filter on related table (1)',
     'association with filter on main table (1)',
     'association with filter on related table (1)',
-    'path of length 3 with filters (1)'
+    'path of length 3 with filters (1)',
+    'association_table_w_static_column (1)',
+    'association_table_w_static_column_dropdown (1)'
   ],
   scrollToDisplayname: 'table_w_aggregates'
 };
@@ -831,6 +836,36 @@ test.describe('Related tables', () => {
     });
   });
 
+  /**
+   * The following 2 tests are for testing the prefill functionality when the inbound foreign key is part of a table that is "almost" pure and binary
+   *
+   * This means there are 2 foreign keys that are part of the same key (making the pair unique) and there are other columns that are not foreign keys
+   */
+  test.describe('for a table that is almost pure and binary and the foreign keys are a unique key', async () => {
+    const params = {
+      table_name: 'association_table_w_static_column',
+      prefill_col: 'main_fk_col',
+      leaf_col: 'leaf_fk_col',
+      leaf_fk_name: 'leaf_fk_col',
+      prefill_value: 'Super 8 North Hollywood Motel',
+      column_names: ['static1', 'main_fk_col', 'leaf_fk_col'],
+      resultset_values: [['', '2004', '10'], ['', '2004', '7']],
+      related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']]
+    }
+
+    test('with fk inputs as modals', async ({ page }) => {
+
+
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_POPUP);
+    });
+
+    test('with fk inputs as dropdowns', async ({ page }) => {
+      params.table_name = 'association_table_w_static_column_dropdown';
+      params.leaf_fk_name = 'U0KYeFQJ-lwuLEaGb2RNRg';
+
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
+    });
+  });
 });
 
 test.describe('Scroll to query parameter', () => {

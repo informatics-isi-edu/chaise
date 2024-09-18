@@ -146,6 +146,7 @@ export const clearInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
 ) => {
   switch (inputType) {
+    case RecordeditInputType.FK_DROPDOWN:
     case RecordeditInputType.FK_POPUP:
       const fkBtn = RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber);
       await fkBtn.click();

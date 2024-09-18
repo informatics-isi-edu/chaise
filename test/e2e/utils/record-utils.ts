@@ -6,14 +6,16 @@ import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
+// utils
 import { EntityRowColumnValues, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
   manuallyTriggerFocus, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clearInputValue, testInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import {
-  RecordsetColValue, RecordsetRowValue,
+  RecordsetColValue, RecordsetRowValue, testModalClose,
   testRecordsetTableRowValues, testTotalCount
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 
@@ -759,4 +761,250 @@ export const testDeleteConfirm = async (page: Page, btn: Locator, confirmText: s
 
   await ModalLocators.getOkButton(modal).click();
   await expect.soft(modal).not.toBeAttached();
+}
+
+type AddRecordsForeignKeyMultiParams = {
+  table_name: string,
+  prefill_col: string,
+  leaf_col: string,
+  leaf_fk_name: string,
+  prefill_value: string,
+  column_names: string[],
+  resultset_values: RecordsetRowValue[],
+  related_table_values: RecordsetRowValue[]
+}
+
+/**
+ * Function to test foreign key multi picker when there is a prefill query param from record app in recordedit
+ * can test both modal and dropdown foreign key input types
+ *
+ * @param params params for the test
+ * @param inputType RecordeditInputType for popup or dropdown
+ */
+export const testAddRelatedWithForeignKeyMultiPicker = async (
+  page: Page,
+  params: AddRecordsForeignKeyMultiParams,
+  inputType: RecordeditInputType.FK_DROPDOWN | RecordeditInputType.FK_POPUP
+) => {
+  let newPage: Page, modal: Locator, fkInputModal: Locator, fkInputDropdown: Locator, dropdownMenu: Locator;
+
+  const isModal = inputType === RecordeditInputType.FK_POPUP;
+
+  await test.step('should open recordedit with a modal picker showing', async () => {
+    const addBtn = RecordLocators.getRelatedTableAddButton(page, params.table_name);
+
+    newPage = await clickNewTabLink(addBtn);
+    await RecordeditLocators.waitForRecordeditPageReady(newPage);
+
+    modal = ModalLocators.getRecordeditBulkFKPopup(newPage);
+    await expect.soft(modal).toBeAttached();
+  });
+
+  await test.step('modal should have 1 row selected and disabled', async () => {
+    const rows = RecordsetLocators.getRows(modal);
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(1);
+
+    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(1);
+    await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
+  });
+
+  await test.step('select 2 rows and submit the selection', async () => {
+    await RecordsetLocators.getRowCheckboxInput(modal, 3).click();
+    await RecordsetLocators.getRowCheckboxInput(modal, 4).click();
+
+    await ModalLocators.getSubmitButton(modal).click();
+    await expect.soft(modal).not.toBeAttached();
+
+    await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(2);
+  });
+
+  await test.step('2 forms should have expected values filled in for prefill and modal selections', async () => {
+    await testInputValue(newPage, 1, params.prefill_col, params.prefill_col, inputType, false, params.prefill_value);
+    await testInputValue(newPage, 2, params.prefill_col, params.prefill_col, inputType, false, params.prefill_value);
+
+    await testInputValue(newPage, 1, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 4');
+    await testInputValue(newPage, 2, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 5');
+  });
+
+  await test.step('clicking a foreign key input should show a modal/dropdown with 2 rows disabled', async () => {
+    let rows;
+    if (isModal) {
+      fkInputModal = ModalLocators.getForeignKeyPopup(newPage);
+      await RecordeditLocators.getForeignKeyInputButton(newPage, params.leaf_fk_name, 1).click();
+
+      await expect.soft(fkInputModal).toBeAttached();
+      await expect.soft(RecordsetLocators.getDisabledRows(fkInputModal)).toHaveCount(2);
+
+      rows = RecordsetLocators.getRows(fkInputModal);
+    } else {
+      fkInputDropdown = RecordeditLocators.getDropdownElementByName(newPage, params.leaf_fk_name, 1);
+      dropdownMenu = RecordeditLocators.getDropdownMenuByName(newPage, params.leaf_fk_name, 1);
+      await fkInputDropdown.click();
+
+      await expect.soft(dropdownMenu).toBeVisible();
+      await expect.soft(RecordeditLocators.getDropdownDisabledOptions(newPage)).toHaveCount(2);
+
+      rows = RecordeditLocators.getFKDropdownOptions(newPage);
+    }
+
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
+    await expect.soft(rows.nth(4)).toHaveClass(/disabled/);
+  });
+
+  await test.step('test tooltips for disabled rows and already selected row', async () => {
+    let associatedSelector, otherInputSelector, app;
+    if (isModal) {
+      associatedSelector = RecordsetLocators.getRowSelectButton(fkInputModal, 1);
+      otherInputSelector = RecordsetLocators.getRowSelectButton(fkInputModal, 4)
+      app = APP_NAMES.RECORDSET;
+
+      // test row tooltip for row that is already selected for this input
+      await testTooltip(RecordsetLocators.getRowSelectButton(fkInputModal, 3), 'Selected', app, true);
+    } else {
+      associatedSelector = RecordeditLocators.getDropdownRow(newPage, 1);
+      otherInputSelector = RecordeditLocators.getDropdownRow(newPage, 4);
+      app = APP_NAMES.RECORDEDIT;
+
+      // no tooltip on selected row in fk dropdown
+    }
+
+    // test row tooltip that is associated when catalog created
+    await testTooltip(associatedSelector, 'This row is already associated', app, true);
+
+    // test row tooltip for row that is selected for another input
+    await testTooltip(otherInputSelector, 'This row is selected in another input in the form', app, true);
+  });
+
+  await test.step('selecting a row should update the input we selected a value for', async () => {
+    if (isModal) {
+      await RecordsetLocators.getRowSelectButton(fkInputModal, 9).click();
+      await expect.soft(fkInputModal).not.toBeAttached();
+    } else {
+      await RecordeditLocators.getDropdownRow(newPage, 9).click();
+      await expect.soft(dropdownMenu).not.toBeVisible();
+    }
+
+    await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(newPage, params.leaf_col, 1)).not.toHaveText('Leaf 4');
+    await testInputValue(newPage, 1, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 10');
+
+    // make sure other input didn't change
+    await testInputValue(newPage, 2, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 5');
+  });
+
+  await test.step('clicking "add more" should have 3 rows disabled', async () => {
+    await RecordeditLocators.getAddMoreButton(newPage).click();
+    // The same modal when the page loaded should show again
+    await expect.soft(modal).toBeAttached();
+
+    const rows = RecordsetLocators.getRows(modal);
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+
+    await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
+    await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/);
+    await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/);
+  });
+
+  await test.step('select 2 more rows and submit the selection', async () => {
+    await RecordsetLocators.getRowCheckboxInput(modal, 0).click();
+    await RecordsetLocators.getRowCheckboxInput(modal, 6).click();
+
+    await ModalLocators.getSubmitButton(modal).click();
+    await expect.soft(modal).not.toBeAttached();
+
+    await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(4);
+  });
+
+  await test.step('2 new forms should have expected values filled in for prefill and new modal selections', async () => {
+    await testInputValue(newPage, 3, params.prefill_col, params.prefill_col, inputType, false, params.prefill_value);
+    await testInputValue(newPage, 4, params.prefill_col, params.prefill_col, inputType, false, params.prefill_value);
+
+    await testInputValue(newPage, 3, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 1');
+    await testInputValue(newPage, 4, params.leaf_col, params.leaf_col, inputType, false, 'Leaf 7');
+  });
+
+  await test.step('clicking a different foreign key input should show a modal with 4 rows disabled', async () => {
+    let rows;
+    if (isModal) {
+      await RecordeditLocators.getForeignKeyInputButton(newPage, params.leaf_fk_name, 3).click();
+
+      await expect.soft(fkInputModal).toBeAttached();
+      await expect.soft(RecordsetLocators.getDisabledRows(fkInputModal)).toHaveCount(4);
+
+      rows = RecordsetLocators.getRows(fkInputModal);
+    } else {
+      fkInputDropdown = RecordeditLocators.getDropdownElementByName(newPage, params.leaf_fk_name, 3);
+      dropdownMenu = RecordeditLocators.getDropdownMenuByName(newPage, params.leaf_fk_name, 3);
+      await fkInputDropdown.click();
+
+      await expect.soft(dropdownMenu).toBeVisible();
+      await expect.soft(RecordeditLocators.getDropdownDisabledOptions(newPage)).toHaveCount(4);
+
+      rows = RecordeditLocators.getFKDropdownOptions(newPage);
+    }
+
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
+    await expect.soft(rows.nth(4)).toHaveClass(/disabled/);
+    await expect.soft(rows.nth(6)).toHaveClass(/disabled/);
+    await expect.soft(rows.nth(9)).toHaveClass(/disabled/);
+
+    if (isModal) {
+      await testModalClose(fkInputModal);
+    } else {
+      await fkInputDropdown.click();
+      await expect.soft(dropdownMenu).not.toBeVisible();
+    }
+  });
+
+  await test.step('clicking x for an input should clear the value and update disabled rows in "add more"', async () => {
+    // clear the value in the 2nd form
+    await clearInputValue(newPage, 2, params.leaf_col, params.leaf_col, inputType);
+    await testInputValue(newPage, 2, params.leaf_col, params.leaf_col, inputType, false, 'Select a value');
+
+    await RecordeditLocators.getAddMoreButton(newPage).click();
+    await expect.soft(modal).toBeAttached();
+
+    const rows = RecordsetLocators.getRows(modal);
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(4);
+    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(4);
+
+    await testModalClose(modal);
+  });
+
+  await test.step('remove the cleared input form and another form, then verify rows disabled in "add more" once more', async () => {
+    // remove in reverse order
+    await RecordeditLocators.getDeleteRowButton(newPage, 2).click();
+    await RecordeditLocators.getDeleteRowButton(newPage, 1).click();
+
+    await RecordeditLocators.getAddMoreButton(newPage).click();
+    await expect.soft(modal).toBeAttached();
+
+    const rows = RecordsetLocators.getRows(modal);
+    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+
+    await testModalClose(modal);
+  });
+
+  await test.step('submit the data and test submission table', async () => {
+    await testSubmission(newPage, {
+      tableDisplayname: params.table_name,
+      resultColumnNames: params.column_names,
+      resultRowValues: params.resultset_values
+    });
+  });
+
+  await test.step('close the tab and record app should update the related table with the new rows', async () => {
+    await newPage.close();
+    await manuallyTriggerFocus(page);
+
+    const prefillTable = RecordLocators.getRelatedTableContainer(page, params.table_name);
+    await testRecordsetTableRowValues(prefillTable, params.related_table_values, true);
+  });
 }

@@ -120,7 +120,7 @@ const RecordeditInner = ({
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
 
   // the next 3 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
-  const [showAssociationModal, setShowAssociationModal] = useState<boolean>(false);
+  const [showBulkForeignKeyModal, setShowBulkForeignKeyModal] = useState<boolean>(false);
   const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
   // when initializing the page, the selections in the modal that appears first should fill the first form
   const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
@@ -390,7 +390,7 @@ const RecordeditInner = ({
         getDisabledTuples
       });
 
-      setShowAssociationModal(true);
+      setShowBulkForeignKeyModal(true);
     }
 
     const initialValues = getInitialFormValues(forms, columnModels);
@@ -574,7 +574,7 @@ const RecordeditInner = ({
       getDisabledTuples
     });
 
-    setShowAssociationModal(true);
+    setShowBulkForeignKeyModal(true);
   }
 
   // user closes the modal without making any selections
@@ -582,7 +582,7 @@ const RecordeditInner = ({
     // if the page was loaded with a modal showing and it is dismissed, update app state variable and do nothing else
     if (selectionsFillFirstForm) setSelectionsFillFirstForm(false);
 
-    setShowAssociationModal(false);
+    setShowBulkForeignKeyModal(false);
   }
 
   /**
@@ -599,7 +599,7 @@ const RecordeditInner = ({
    * @param modalSelectedRows the selected rows from the association modal
    */
   const submitAssociationCB = (modalSelectedRows: SelectedRow[]) => {
-    setShowAssociationModal(false);
+    setShowBulkForeignKeyModal(false);
 
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
@@ -867,9 +867,9 @@ const RecordeditInner = ({
           onCancel={uploadProgressModalProps.onCancel}
         />
       }
-      {showAssociationModal && associationRecordsetProps &&
+      {showBulkForeignKeyModal && associationRecordsetProps &&
         <RecordsetModal
-          modalClassName='association-popup'
+          modalClassName='bulk-foreign-key-popup'
           recordsetProps={associationRecordsetProps}
           onSubmit={submitAssociationCB}
           onClose={closeAssociationCB}
