@@ -99,8 +99,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const onClear = () => {
     const column = props.columnModel.column;
 
-    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
+    if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber);
     }
 
     clearForeignKeyData(
@@ -151,10 +151,10 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
     let currentSelectedRow;
     // there is a value in the input but no selected row yet because of prefill showing an association picker on recordedit page load
-    if (getValues(props.name) && props.foreignKeyCallbacks?.prefillAssociationSelectedRows) {
-      // find row in prefillAssociationSelectedRows
-      currentSelectedRow = props.foreignKeyCallbacks.prefillAssociationSelectedRows.filter((row: SelectedRow) => {
-        // if an input is empty, there won't be a row defined in `prefillAssociationSelectedRows`
+    if (getValues(props.name) && props.foreignKeyCallbacks?.bulkForeignKeySelectedRows) {
+      // find row in bulkForeignKeySelectedRows
+      currentSelectedRow = props.foreignKeyCallbacks.bulkForeignKeySelectedRows.filter((row: SelectedRow) => {
+        // if an input is empty, there won't be a row defined in `bulkForeignKeySelectedRows`
         return row && row.displayname.value === getValues(props.name);
       })[0];
     }
@@ -187,8 +187,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       const column = props.columnModel.column;
 
       // if the recordedit page's table is an association table with a unique key pair, track the selected rows
-      if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-        props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber, selectedRow);
+      if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+        props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber, selectedRow);
       }
 
       callOnChangeAfterSelection(

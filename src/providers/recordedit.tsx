@@ -9,7 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import {
   appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
-  RecordeditModalOptions, UpdateAssociationRowsCallback, UploadProgressProps
+  RecordeditModalOptions, UpdateBulkForeignKeyRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
@@ -109,10 +109,10 @@ export const RecordeditContext = createContext<{
   /* the prefill object from cookie storage based on prefill query param */
   prefillObject: PrefillObject | null,
   /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
-  prefillAssociationSelectedRows: SelectedRow[],
-  setPrefillAssociationSelectedRows: (val: SelectedRow[]) => void,
+  bulkForeignKeySelectedRows: SelectedRow[],
+  setbulkForeignKeySelectedRows: (val: SelectedRow[]) => void,
   /* function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique */
-  updateAssociationSelectedRows: UpdateAssociationRowsCallback,
+  updateBulkForeignKeySelectedRows: UpdateBulkForeignKeyRowsCallback,
   /**
    * log client actions
    * Notes:
@@ -266,7 +266,7 @@ export default function RecordeditProvider({
   const [forms, setForms] = useState<number[]>([1]);
 
   const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
-  const [prefillAssociationSelectedRows, setPrefillAssociationSelectedRows] = useState<SelectedRow[]>([]);
+  const [bulkForeignKeySelectedRows, setbulkForeignKeySelectedRows] = useState<SelectedRow[]>([]);
 
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
@@ -795,16 +795,16 @@ export default function RecordeditProvider({
       logRecordeditClientAction(LogActions.FORM_REMOVE);
     }
 
-    // prefillAssocationSelectedRows is only used when there is a prefill object and there is a unique association
+    // bulkForeignKeySelectedRows is only used when there is a prefill object and there is a unique association
     if (reference.bulkCreateForeignKeyObject?.isUnique) {
-      const tempSelectedRows = [...prefillAssociationSelectedRows];
+      const tempSelectedRows = [...bulkForeignKeySelectedRows];
 
       indexes.forEach((index: number) => {
         // use splice to remove the element from the array and shift all array values after this element forward
         tempSelectedRows.splice(index, 1);
       });
 
-      setPrefillAssociationSelectedRows(tempSelectedRows);
+      setbulkForeignKeySelectedRows(tempSelectedRows);
     }
 
     // remove the forms based on the given indexes
@@ -823,10 +823,10 @@ export default function RecordeditProvider({
    * @param formNumber the form number from forms array to remove
    * @param newRow the new row to keep track of, if not defined removes the previous row
    */
-  const updateAssociationSelectedRows = (formNumber: number, newRow?: SelectedRow) => {
+  const updateBulkForeignKeySelectedRows = (formNumber: number, newRow?: SelectedRow) => {
     if (!reference.bulkCreateForeignKeyObject) return;
 
-    const tempSelectedRows = [...prefillAssociationSelectedRows];
+    const tempSelectedRows = [...bulkForeignKeySelectedRows];
 
     // find the index in forms for the form number
     const indexToChange = forms.indexOf(formNumber);
@@ -840,7 +840,7 @@ export default function RecordeditProvider({
       delete tempSelectedRows[indexToChange];
     }
 
-    setPrefillAssociationSelectedRows(tempSelectedRows);
+    setbulkForeignKeySelectedRows(tempSelectedRows);
   }
 
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
@@ -1153,9 +1153,9 @@ export default function RecordeditProvider({
 
       // prefill association modal
       prefillObject,
-      prefillAssociationSelectedRows,
-      setPrefillAssociationSelectedRows,
-      updateAssociationSelectedRows,
+      bulkForeignKeySelectedRows,
+      setbulkForeignKeySelectedRows,
+      updateBulkForeignKeySelectedRows,
 
       // log related:
       logRecordeditClientAction,
@@ -1166,7 +1166,7 @@ export default function RecordeditProvider({
     // main entity:
     columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
     forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
-    prefillObject, prefillAssociationSelectedRows
+    prefillObject, bulkForeignKeySelectedRows
   ]);
 
   return (

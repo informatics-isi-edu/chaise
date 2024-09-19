@@ -166,8 +166,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   // table of the association, update the rows in the dropdown if the selected rows change
   useEffect(() => {
     if (
-      !props.foreignKeyCallbacks?.updateAssociationSelectedRows ||
-      !dropdownInitialized || !props.foreignKeyCallbacks.prefillAssociationSelectedRows
+      !props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows ||
+      !dropdownInitialized || !props.foreignKeyCallbacks.bulkForeignKeySelectedRows
     ) return;
 
     setShowSpinner(true);
@@ -175,7 +175,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     const currStackNode = LogService.getStackNode(LogStackTypes.FOREIGN_KEY, dropdownReference.table);
     const stack = LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { dropdown: 1 })
 
-    const requestCauses = [LogReloadCauses.UNIQUE_ASSOCIATION_ROWS_CHANGED];
+    const requestCauses = [LogReloadCauses.BULK_FK_ROWS_CHANGED];
     const reloadStartTime = ConfigService.ERMrest.getElapsedTime();
     const logObj = {
       action: LogService.getActionString(LogActions.RELOAD, stackPath),
@@ -188,7 +188,7 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
       setShowSpinner(false);
       dispatchError({ error: exception });
     });
-  }, [props.foreignKeyCallbacks?.prefillAssociationSelectedRows]);
+  }, [props.foreignKeyCallbacks?.bulkForeignKeySelectedRows]);
 
   /**
    * populate the dropdown rows after a request is done.
@@ -303,8 +303,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   const onClear = () => {
     const column = props.columnModel.column;
 
-    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber);
+    if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber);
     }
 
     clearForeignKeyData(
@@ -433,8 +433,8 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
     const column = props.columnModel.column;
 
     // if the recordedit page's table is an association table with a unique key pair, track the selected rows
-    if (props.foreignKeyCallbacks?.updateAssociationSelectedRows) {
-      props.foreignKeyCallbacks.updateAssociationSelectedRows(usedFormNumber, rowToAdd);
+    if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber, rowToAdd);
     }
 
     callOnChangeAfterSelection(

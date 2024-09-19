@@ -186,7 +186,7 @@ export enum LogStackPaths {
   FACET= 'facet',
   RELATED= 'related',
   RELATED_INLINE= 'related-inline',
-  ADD_ASSOCIATION= 'related-association-add',
+  ADD_BULK_FOREIGN_KEY= 'related-bulk-add',
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
@@ -226,6 +226,7 @@ export enum LogParentActions {
 
 // why we had to reload a request
 export enum LogReloadCauses {
+  BULK_FK_ROWS_CHANGED= 'bulk-foreignkey-selected-rows', // selected rows for bulk foreign key picker have changed
   CLEAR_ALL= 'clear-all', // clear all button
   CLEAR_CFACET= 'clear-cfacet',
   CLEAR_CUSTOM_FILTER= 'clear-custom-filter',
@@ -254,6 +255,5 @@ export enum LogReloadCauses {
   RELATED_INLINE_DELETE= 'related-inline-delete', // a row in one of the related (inline) tables has been deleted
   RELATED_INLINE_UPDATE= 'related-inline-update', // a row in one of the related (inline) tables has been edited
   SORT= 'sort', // sort changed
-  SEARCH_BOX= 'search-box', // search box value changed
-  UNIQUE_ASSOCIATION_ROWS_CHANGED= 'association-selected-rows', // selected rows for unique association have changed
+  SEARCH_BOX= 'search-box' // search box value changed
 }

@@ -88,7 +88,7 @@ export type RecordeditModalOptions = {
   onClose: () => void;
 }
 
-export type UpdateAssociationRowsCallback = (formNumber: number, newRow?: SelectedRow) => void;
+export type UpdateBulkForeignKeyRowsCallback = (formNumber: number, newRow?: SelectedRow) => void;
 export type RecordeditForeignkeyCallbacks = {
   /**
    * if defined, called before loading the foreign key picker or association modal
@@ -104,11 +104,11 @@ export type RecordeditForeignkeyCallbacks = {
    * This will call a function in recordedit provider to update the selected rows for the
    * association popup if we have a prefillObject and the association is unique
    */
-  updateAssociationSelectedRows?: UpdateAssociationRowsCallback,
+  updateBulkForeignKeySelectedRows?: UpdateBulkForeignKeyRowsCallback,
   /**
    * if defined, will be used in foreign key & foreign key dropdown fields
    */
-  prefillAssociationSelectedRows?: SelectedRow[],
+  bulkForeignKeySelectedRows?: SelectedRow[],
   /**
    * if defined, will be used for validating the foreign key value.
    *

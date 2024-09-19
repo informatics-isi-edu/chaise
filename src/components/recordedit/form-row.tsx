@@ -64,8 +64,8 @@ const FormRow = ({
     columnPermissionErrors,
     foreignKeyData,
     waitingForForeignKeyData,
-    prefillAssociationSelectedRows,
-    updateAssociationSelectedRows,
+    bulkForeignKeySelectedRows,
+    updateBulkForeignKeySelectedRows,
     getRecordeditLogStack,
     getRecordeditLogAction,
     showCloneSpinner,
@@ -331,11 +331,11 @@ const FormRow = ({
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
         column.reference.contextualize.compactSelectForeignKey,
         prefill.disabledRowsFilter(),
-        prefillAssociationSelectedRows
+        bulkForeignKeySelectedRows
       );
 
-      tempForeignKeyCallbacks.updateAssociationSelectedRows = updateAssociationSelectedRows;
-      tempForeignKeyCallbacks.prefillAssociationSelectedRows = prefillAssociationSelectedRows;
+      tempForeignKeyCallbacks.updateBulkForeignKeySelectedRows = updateBulkForeignKeySelectedRows;
+      tempForeignKeyCallbacks.bulkForeignKeySelectedRows = bulkForeignKeySelectedRows;
     }
 
     return (

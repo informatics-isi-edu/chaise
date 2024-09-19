@@ -9,7 +9,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   appModes, MULTI_FORM_INPUT_FORM_VALUE, PrefillObject, RecordeditColumnModel,
-  RecordeditForeignkeyCallbacks, TimestampOptions, UpdateAssociationRowsCallback
+  RecordeditForeignkeyCallbacks, TimestampOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { DisabledRow, DisabledRowType, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 

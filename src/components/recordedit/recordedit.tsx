@@ -110,7 +110,7 @@ const RecordeditInner = ({
   const { addAlert } = useAlert();
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions,
-    prefillObject, prefillAssociationSelectedRows, setPrefillAssociationSelectedRows,
+    prefillObject, bulkForeignKeySelectedRows, setbulkForeignKeySelectedRows,
     prefillRowData, reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
     getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
     showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
@@ -121,7 +121,7 @@ const RecordeditInner = ({
 
   // the next 3 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
   const [showBulkForeignKeyModal, setShowBulkForeignKeyModal] = useState<boolean>(false);
-  const [associationRecordsetProps, setAssociationRecordsetProps] = useState<RecordsetProps | null>(null);
+  const [bulkForeignKeyPickerProps, setBulkForeignKeyPickerProps] = useState<RecordsetProps | null>(null);
   // when initializing the page, the selections in the modal that appears first should fill the first form
   const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
 
@@ -313,15 +313,15 @@ const RecordeditInner = ({
     if (!initialized) return;
 
     /**
-     * used to trigger recordset select view when adding association records
+     * used to trigger recordset select view when selecting multiple foreign key values
      *
-     * trigger the association modal when there is an assoication and
-     * we know the leaf column for the association is visible in create mode
+     * trigger the bulk foreign key modal when there is are 2 foreign keys and
+     * we know the leaf column for the relation is visible in create mode
      **/
     if (reference.bulkCreateForeignKeyObject) {
-      const prefill = reference.bulkCreateForeignKeyObject;
-      const domainRef: any = prefill.leafColumn.reference;
-      const andFilters: any[] = prefill.andFiltersForLeaf();
+      const bulkFKObject = reference.bulkCreateForeignKeyObject;
+      const domainRef: any = bulkFKObject.leafColumn.reference;
+      const andFilters: any[] = bulkFKObject.andFiltersForLeaf();
 
       // TODO: think about this more if it's required in this context
       // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
@@ -366,20 +366,20 @@ const RecordeditInner = ({
       };
 
       let getDisabledTuples;
-      if (prefill.isUnique) {
+      if (bulkFKObject.isUnique) {
         /**
-         * The existing rows in this association must be disabled
+         * The existing rows in this table must be disabled
          * so users doesn't resubmit them.
          */
         getDisabledTuples = disabledTuplesPromise(
           domainRef.contextualize.compactSelectAssociationLink,
-          prefill.disabledRowsFilter(),
+          bulkFKObject.disabledRowsFilter(),
           []
         );
       }
 
       // set recordset select view then set selected rows on "submit"
-      setAssociationRecordsetProps({
+      setBulkForeignKeyPickerProps({
         initialReference: modalReference,
         initialPageLimit: modalReference.display.defaultPageSize
           ? modalReference.display.defaultPageSize
@@ -493,9 +493,9 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        const prefill = reference.bulkCreateForeignKeyObject;
+        const bulkFKObject = reference.bulkCreateForeignKeyObject;
         // don't copy the value for the leaf column for an assoication that is unique
-        if (prefill?.isUnique && cm.column.name === prefill.leafColumn.name) return;
+        if (bulkFKObject?.isUnique && cm.column.name === bulkFKObject.leafColumn.name) return;
 
         copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
       });
@@ -521,9 +521,9 @@ const RecordeditInner = ({
   const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
-      const prefill = reference.bulkCreateForeignKeyObject;
+      const bulkFKObject = reference.bulkCreateForeignKeyObject;
         // don't copy the value for the leaf column for an assoication that is unique
-      if (prefill?.isUnique && col.name === prefill.leafColumn.name) return;
+      if (bulkFKObject?.isUnique && col.name === bulkFKObject.leafColumn.name) return;
 
       // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
       foreignKeyData.current[`c_${formNumber}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
@@ -547,30 +547,30 @@ const RecordeditInner = ({
     return tempFormValues;
   }
 
-  // show the prefill association modal if we have a prefill object and association recordset props
-  const showPrefillAssociationModal = () => {
-    const prefill = reference.bulkCreateForeignKeyObject;
+  // show the prefill bulk foreign key modal if we have a prefill object and bulk foreign key recordset props
+  const openBulkForeignKeyModal = () => {
+    const bulkFKObject = reference.bulkCreateForeignKeyObject;
     // check for bulkCreateForeignKeyObject being defined since a malformed prefillObject should be ignored
     //   and the `bulkCreateForeignKeyObject` constructor will handle those malformed cases
-    if (!associationRecordsetProps || !prefill) return;
+    if (!bulkForeignKeyPickerProps || !bulkFKObject) return;
 
     let getDisabledTuples;
-    if (prefill.isUnique) {
+    if (bulkFKObject.isUnique) {
       // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
       // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
       getDisabledTuples = disabledTuplesPromise(
-        prefill.leafColumn.reference.contextualize.compactSelectAssociationLink,
-        prefill.disabledRowsFilter(),
-        prefillAssociationSelectedRows
+        bulkFKObject.leafColumn.reference.contextualize.compactSelectAssociationLink,
+        bulkFKObject.disabledRowsFilter(),
+        bulkForeignKeySelectedRows
       );
     }
 
-    setAssociationRecordsetProps({
-      initialReference: associationRecordsetProps.initialReference,
-      initialPageLimit: associationRecordsetProps.initialPageLimit,
-      config: associationRecordsetProps.config,
-      logInfo: associationRecordsetProps.logInfo,
-      parentReference: associationRecordsetProps.parentReference,
+    setBulkForeignKeyPickerProps({
+      initialReference: bulkForeignKeyPickerProps.initialReference,
+      initialPageLimit: bulkForeignKeyPickerProps.initialPageLimit,
+      config: bulkForeignKeyPickerProps.config,
+      logInfo: bulkForeignKeyPickerProps.logInfo,
+      parentReference: bulkForeignKeyPickerProps.parentReference,
       getDisabledTuples
     });
 
@@ -589,7 +589,7 @@ const RecordeditInner = ({
   }
 
   // user closes the modal without making any selections
-  const closeAssociationCB = () => {
+  const closeBulkForeignKeyCB = () => {
     // if the page was loaded with a modal showing and it is dismissed, update app state variable and do nothing else
     if (selectionsFillFirstForm) setSelectionsFillFirstForm(false);
 
@@ -597,8 +597,8 @@ const RecordeditInner = ({
   }
 
   /**
-   * user makes selections in the multi select association modal and clicks submit
-   * this function updates the selected rows (if the association is unique) and fills in the new forms based
+   * user makes selections in the multi select foreign key modal and clicks submit
+   * this function updates the selected rows (if the foreign keys are part of a unique key) and fills in the new forms based
    * on the state of the app and the number of selected rows
    *
    * if the first modal is submitted after load of app page, one of the selected values will
@@ -607,18 +607,18 @@ const RecordeditInner = ({
    *
    * NOTE: This should only be called if reference.bulkCreateForeignKeyObject is defined
    *
-   * @param modalSelectedRows the selected rows from the association modal
+   * @param modalSelectedRows the selected rows from the foreign key modal
    */
-  const submitAssociationCB = (modalSelectedRows: SelectedRow[]) => {
+  const submitBulkForeignKeyCB = (modalSelectedRows: SelectedRow[]) => {
     setShowBulkForeignKeyModal(false);
 
     // should not happen since submit button is greyed out
     if (!modalSelectedRows || modalSelectedRows.length === 0) return;
 
-    const prefill = reference.bulkCreateForeignKeyObject
-    if (prefill.isUnique) {
+    const bulkFKObject = reference.bulkCreateForeignKeyObject
+    if (bulkFKObject.isUnique) {
       /**
-       * copy modalSelectedRows 2nd to preserve indexes in prefillAssociationSelectedRows
+       * copy modalSelectedRows 2nd to preserve indexes in bulkForeignKeySelectedRows
        *
        * this function does 2 different things:
        *  - fills the first form and adds new forms
@@ -628,8 +628,8 @@ const RecordeditInner = ({
        * the rows were selected in the modal. As we are adding new forms, we copy the
        * values from the modalSelectedRows in the same index order
        **/
-      const newRows = [...prefillAssociationSelectedRows, ...modalSelectedRows]
-      setPrefillAssociationSelectedRows(newRows);
+      const newRows = [...bulkForeignKeySelectedRows, ...modalSelectedRows]
+      setbulkForeignKeySelectedRows(newRows);
     }
 
     // recordedit has already been initialized so start adding new forms
@@ -681,20 +681,20 @@ const RecordeditInner = ({
     // iterate selectedRows to fill in the fkey information
     modalSelectedRows.forEach((row: SelectedRow, index: number) => {
       if (foreignKeyData && foreignKeyData.current) {
-        foreignKeyData.current[`c_${startFormNumber + index}-${prefill.leafColumn.RID}`] = row.data;
+        foreignKeyData.current[`c_${startFormNumber + index}-${bulkFKObject.leafColumn.RID}`] = row.data;
       }
 
       // find the raw value of the fk columns that correspond to the selected row
       // since we've already added a not-null hidden filter, the values will be not-null.
-      prefill.leafColumn.foreignKey.colset.columns.forEach((col: any) => {
-        const referencedCol = prefill.leafColumn.foreignKey.mapping.get(col);
+      bulkFKObject.leafColumn.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = bulkFKObject.leafColumn.foreignKey.mapping.get(col);
 
         // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
         initialValues[`c_${startFormNumber + index}-${col.RID}`] = row.data[referencedCol.name];
       });
 
       // update "display" value
-      initialValues[`c_${startFormNumber + index}-${prefill.leafColumn.RID}`] = row.displayname.value;
+      initialValues[`c_${startFormNumber + index}-${bulkFKObject.leafColumn.RID}`] = row.displayname.value;
     });
 
     // required to set values in all new forms in the RHF model
@@ -878,13 +878,13 @@ const RecordeditInner = ({
           onCancel={uploadProgressModalProps.onCancel}
         />
       }
-      {showBulkForeignKeyModal && associationRecordsetProps &&
+      {showBulkForeignKeyModal && bulkForeignKeyPickerProps &&
         <RecordsetModal
           modalClassName='bulk-foreign-key-popup'
-          recordsetProps={associationRecordsetProps}
+          recordsetProps={bulkForeignKeyPickerProps}
           onSelectedRowsChanged={onSelectedRowsChanged}
-          onSubmit={submitAssociationCB}
-          onClose={closeAssociationCB}
+          onSubmit={submitBulkForeignKeyCB}
+          onClose={closeBulkForeignKeyCB}
           displayname={reference.bulkCreateForeignKeyObject.leafColumn.displayname}
         />
       }
@@ -1053,9 +1053,9 @@ const RecordeditInner = ({
                           </ChaiseTooltip>
                         </span>
                       </div>
-                      {associationRecordsetProps &&
-                        // only show association modal button if we started with an association picker
-                        // associationRecordsetProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
+                      {bulkForeignKeyPickerProps &&
+                        // only show bulk foreign key modal button if we started with a bulk foreing key picker
+                        // bulkForeignKeyPickerProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
                         <ChaiseTooltip
                           tooltip={`Select more ${reference.bulkCreateForeignKeyObject.leafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
@@ -1063,7 +1063,7 @@ const RecordeditInner = ({
                           <button
                             id='recordedit-add-more'
                             className='chaise-btn chaise-btn-sm chaise-btn-secondary'
-                            onClick={showPrefillAssociationModal}
+                            onClick={openBulkForeignKeyModal}
                             type='button'
                             style={{ marginLeft: '10px' }}
                           >
