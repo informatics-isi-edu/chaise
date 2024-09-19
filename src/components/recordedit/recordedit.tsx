@@ -585,8 +585,7 @@ const RecordeditInner = ({
     // NOTE: forms.length "should" be 1 at this point before subtracting 1
     if (selectionsFillFirstForm) numForms--;
 
-    // return (rows.length + numForms < RECORDEDIT_MAX_ROWS);
-    return (rows.length + numForms < 5);
+    return (rows.length + numForms < RECORDEDIT_MAX_ROWS);
   }
 
   // user closes the modal without making any selections
