@@ -67,7 +67,7 @@ export enum RecordsetDisplayMode {
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
   PURE_BINARY_POPUP_UNLINK = 'popup/purebinary/unlink',
   SAVED_QUERY_POPUP = 'popup/savedquery',
-  RE_ASSOCIATION = 'recordedit/association'
+  FK_BULK = 'popup/foreignkey/bulk'
 }
 
 export type RecordsetConfig = {

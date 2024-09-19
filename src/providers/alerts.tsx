@@ -47,6 +47,8 @@ export const AlertsContext = createContext<{
   removeAlert: RemoveAlertFunction,
   addURLLimitAlert: () => void,
   removeURLLimitAlert: () => void,
+  addTooManyFormsAlert:(message: string) => void,
+  removeTooManyFormsAlert:() => void,
   removeAllAlerts: () => void,
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
@@ -66,8 +68,9 @@ type AlertsProviderProps = {
  */
 export default function AlertsProvider({ children }: AlertsProviderProps): JSX.Element {
   const [alerts, setAlerts] = useState<ChaiseAlert[]>([]);
-  // const [urlLimitAlert, setURLLimitAlert] = useState<ChaiseAlert|null>(null);
+
   const urlLimitAlert = useRef<ChaiseAlert|null>(null);
+  const tooManyFormsAlert = useRef<ChaiseAlert|null>(null);
 
   /**
    * create add an alert
@@ -108,11 +111,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * (we want to ensure only one alert is displayed at the time)
    */
   const addURLLimitAlert = () => {
-    // if (urlLimitAlert) return;
     if (urlLimitAlert.current) return;
-    // setURLLimitAlert(
-      urlLimitAlert.current = addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING, () => urlLimitAlert.current = null)
-    // );
+
+    urlLimitAlert.current = addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING, () => urlLimitAlert.current = null)
   };
 
   /**
@@ -120,9 +121,22 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    */
   const removeURLLimitAlert = () => {
     if (!urlLimitAlert.current) return;
+
     removeAlert(urlLimitAlert.current);
     urlLimitAlert.current = null;
-    // setURLLimitAlert(null);
+  }
+
+  const addTooManyFormsAlert = (message: string) => {
+    if (tooManyFormsAlert.current) return;
+
+    tooManyFormsAlert.current = addAlert(message, ChaiseAlertType.WARNING, () => tooManyFormsAlert.current = null)
+  }
+
+  const removeTooManyFormsAlert = () => {
+    if (!tooManyFormsAlert.current) return;
+
+    removeAlert(tooManyFormsAlert.current);
+    tooManyFormsAlert.current = null;
   }
 
 
@@ -133,7 +147,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
       removeAlert,
       removeAllAlerts,
       addURLLimitAlert,
-      removeURLLimitAlert
+      removeURLLimitAlert,
+      addTooManyFormsAlert,
+      removeTooManyFormsAlert
     }
   }, [alerts]);
 

@@ -20,7 +20,6 @@ import { CommentType, Displayname } from '@isrd-isi-edu/chaise/src/models/displa
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
-import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 export type RecordestModalProps = {
@@ -163,14 +162,6 @@ const RecordsetModal = ({
         cannotSubmit = onSelectedRowsChanged(submittedRows) === false;
       }
 
-      // TODO: if submittedRows + numberRecordeditForms > RECORDEDIT_MAX_ROWS
-      if (submittedRows.length > 5) {
-        cannotSubmit = true;
-        // TODO: show alert
-      } else {
-        // TODO: if there is an alert shown, hide it
-      }
-
       /**
        * Disable the submit button if,
        * - The onSelectedRowsChanged returned false
@@ -258,7 +249,7 @@ const RecordsetModal = ({
         </>
       )
       break;
-    case RecordsetDisplayMode.RE_ASSOCIATION:
+    case RecordsetDisplayMode.FK_BULK:
       submitText = 'Continue';
       submitTooltip = (
         <>
@@ -323,7 +314,7 @@ const RecordsetModal = ({
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
-      case RecordsetDisplayMode.RE_ASSOCIATION:
+      case RecordsetDisplayMode.FK_BULK:
         return (
           <div>
             <span>Select a set of </span>

@@ -6,6 +6,7 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
+import { ChaiseAlert, ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import {
@@ -26,7 +27,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 
 // utils
-import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDEDIT_MAX_ROWS,RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -287,7 +288,10 @@ export default function RecordsetProvider({
   savedQueryConfig,
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
-  const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
+  const {
+    addTooManyFormsAlert, removeTooManyFormsAlert,
+    addURLLimitAlert,  removeURLLimitAlert
+  } = useAlert();
 
   const [reference, setReference, referenceRef] = useStateRef<any>(initialReference);
 
@@ -335,6 +339,7 @@ export default function RecordsetProvider({
   const [selectedRows, setStateSelectedRows] = useState<SelectedRow[]>(() => {
     return Array.isArray(initialSelectedRows) ? initialSelectedRows : [];
   });
+
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
    *
@@ -352,6 +357,19 @@ export default function RecordsetProvider({
             addURLLimitAlert();
           } else {
             removeURLLimitAlert();
+          }
+        } else if (config.displayMode === RecordsetDisplayMode.FK_BULK) {
+          // TODO: how to get numberForms?
+          // const numberFormsAllowed = RECORDEDIT_MAX_ROWS - numberForms
+
+          const numberFormsAllowed = RECORDEDIT_MAX_ROWS - 0;
+          let alertMessage = `Cannot select ${res.length} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
+          if (numberFormsAllowed === 0) alertMessage = `Cannot select ${res.length} records. Maximum number of forms already added.`;
+
+          if (temp === false) {
+            addTooManyFormsAlert(alertMessage)
+          } else {
+            removeTooManyFormsAlert();
           }
         } else {
           return temp === false ? prevRows : res;

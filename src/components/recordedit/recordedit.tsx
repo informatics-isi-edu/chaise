@@ -44,7 +44,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
-import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDEDIT_MAX_ROWS, RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import {
@@ -349,7 +349,7 @@ const RecordeditInner = ({
         selectMode: RecordsetSelectMode.MULTI_SELECT,
         showFaceting: true,
         disableFaceting: false,
-        displayMode: RecordsetDisplayMode.RE_ASSOCIATION,
+        displayMode: RecordsetDisplayMode.FK_BULK,
       };
 
       const stackElement = LogService.getStackNode(
@@ -575,6 +575,18 @@ const RecordeditInner = ({
     });
 
     setShowBulkForeignKeyModal(true);
+  }
+
+  const onSelectedRowsChanged = (rows: SelectedRow[]) => {
+    // return "false" to disable submit button in modal
+    let numForms = forms.length;
+
+    // if we fill the first form, then reduce our calculation by 1
+    // NOTE: forms.length "should" be 1 at this point before subtracting 1
+    if (selectionsFillFirstForm) numForms--;
+
+    // return (rows.length + numForms < RECORDEDIT_MAX_ROWS);
+    return (rows.length + numForms < 5);
   }
 
   // user closes the modal without making any selections
@@ -871,6 +883,7 @@ const RecordeditInner = ({
         <RecordsetModal
           modalClassName='bulk-foreign-key-popup'
           recordsetProps={associationRecordsetProps}
+          onSelectedRowsChanged={onSelectedRowsChanged}
           onSubmit={submitAssociationCB}
           onClose={closeAssociationCB}
           displayname={reference.bulkCreateForeignKeyObject.leafColumn.displayname}
