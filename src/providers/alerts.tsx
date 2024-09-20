@@ -47,7 +47,7 @@ export const AlertsContext = createContext<{
   removeAlert: RemoveAlertFunction,
   addURLLimitAlert: () => void,
   removeURLLimitAlert: () => void,
-  addTooManyFormsAlert:(message: string) => void,
+  addTooManyFormsAlert:(message: string, type: ChaiseAlertType) => void,
   removeTooManyFormsAlert:() => void,
   removeAllAlerts: () => void,
 } |
@@ -126,10 +126,10 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     urlLimitAlert.current = null;
   }
 
-  const addTooManyFormsAlert = (message: string) => {
+  const addTooManyFormsAlert = (message: string, type: ChaiseAlertType) => {
     if (tooManyFormsAlert.current) return;
 
-    tooManyFormsAlert.current = addAlert(message, ChaiseAlertType.WARNING, () => tooManyFormsAlert.current = null)
+    tooManyFormsAlert.current = addAlert(message, type, () => tooManyFormsAlert.current = null)
   }
 
   const removeTooManyFormsAlert = () => {

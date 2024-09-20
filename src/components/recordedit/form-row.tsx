@@ -319,7 +319,7 @@ const FormRow = ({
     const safeClassNameId = `${formNumber}-${makeSafeIdAttr(column.displayname.value)}`;
 
     const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
-    const prefill = reference.bulkCreateForeignKeyObject;
+    const bulkFKObject = reference.bulkCreateForeignKeyObject;
     /**
      * add foreignkey callbacks to generated input if:
      *  - there is a bulkCreateForeignKeyObject defined
@@ -327,10 +327,10 @@ const FormRow = ({
      *  - the column is a foreignkey
      *  - and the column is the one used for associating to the leaf table of the association
      */
-    if (prefill?.isUnique && column.isForeignKey && prefill.leafColumn.name === colName) {
+    if (bulkFKObject?.isUnique && column.isForeignKey && bulkFKObject.leafColumn.name === colName) {
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
         column.reference.contextualize.compactSelectForeignKey,
-        prefill.disabledRowsFilter(),
+        bulkFKObject.disabledRowsFilter(),
         bulkForeignKeySelectedRows
       );
 

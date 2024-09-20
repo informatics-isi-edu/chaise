@@ -367,7 +367,7 @@ export default function RecordsetProvider({
           if (numberFormsAllowed === 0) alertMessage = `Cannot select ${res.length} records. Maximum number of forms already added.`;
 
           if (temp === false) {
-            addTooManyFormsAlert(alertMessage)
+            addTooManyFormsAlert(alertMessage, ChaiseAlertType.WARNING);
           } else {
             removeTooManyFormsAlert();
           }

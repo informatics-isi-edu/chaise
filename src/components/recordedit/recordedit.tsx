@@ -107,7 +107,7 @@ const RecordeditInner = ({
 
   const { validateSessionBeforeMutation } = useAuthn();
   const { errors, dispatchError } = useError();
-  const { addAlert } = useAlert();
+  const { addTooManyFormsAlert } = useAlert();
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions,
     prefillObject, bulkForeignKeySelectedRows, setbulkForeignKeySelectedRows,
@@ -323,7 +323,6 @@ const RecordeditInner = ({
       const domainRef: any = bulkFKObject.leafColumn.reference;
       const andFilters: any[] = bulkFKObject.andFiltersForLeaf();
 
-      // TODO: think about this more if it's required in this context
       // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
       let customFacets: any = null;
       if (
@@ -452,7 +451,7 @@ const RecordeditInner = ({
       const numberFormsAllowed = MAX_ROWS_TO_ADD - numberForms
       let alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
       if (numberFormsAllowed === 0) alertMessage = `Cannot add ${numberFormsToAdd} records. Maximum number of forms already added.`;
-      addAlert(alertMessage, ChaiseAlertType.ERROR);
+      addTooManyFormsAlert(alertMessage, ChaiseAlertType.ERROR);
       setShowCloneSpinner(false);
       return true;
     }
