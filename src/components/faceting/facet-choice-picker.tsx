@@ -608,6 +608,14 @@ const FacetChoicePicker = ({
     i >= maxCheckboxLen && r.selected
   )).length;
 
+  const recordsetModalClassName = [
+    'faceting-show-details-popup',
+    `faceting-show-details-popup-depth-${recordsetFacetDepthLevel}`
+  ];
+  if (!facetColumn.isEntityMode) {
+    recordsetModalClassName.push('scalar-show-details-popup');
+  }
+
   const renderPickerContainer = () => {
     const useShowMore = (hasMore || showFindMore);
 
@@ -707,7 +715,7 @@ const FacetChoicePicker = ({
       {
         recordsetModalProps &&
         <RecordsetModal
-          modalClassName={`faceting-show-details-popup ${!facetColumn.isEntityMode ? 'scalar-show-details-popup' : ''}`}
+          modalClassName={recordsetModalClassName.join(' ')}
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
           onSubmit={modalDataChanged(true)}

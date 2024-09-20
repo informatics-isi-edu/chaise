@@ -4,7 +4,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
+import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
@@ -253,78 +253,90 @@ const RecordsetModal = ({
       break;
   }
 
-  const renderTitle = () => {
-    switch (displayMode) {
-      case RecordsetDisplayMode.FK_POPUP_CREATE:
-        // select <col-displayname> for new <parent-displayname>
-        return (
-          <div>
-            <span>Select </span>
-            <Title displayname={displayname} />
-            {recordsetProps.parentReference &&
-              <span>
-                <span> for new </span>
-                <Title reference={recordsetProps.parentReference} />
-              </span>
-            }
-          </div>
-        );
-      case RecordsetDisplayMode.FK_POPUP_EDIT:
-        // select <col-displayname> for <parent-displayname>:<parent-tuple>
-        return (
-          <div>
-            <span>Select </span>
-            <Title displayname={displayname} />
-            {recordsetProps.parentReference &&
-              <span>
-                <span> for </span>
-                <Title reference={recordsetProps.parentReference} />
-                {recordsetProps.parentTuple &&
-                  <span>: <Title displayname={recordsetProps.parentTuple.displayname}></Title></span>
-                }
-              </span>
-            }
-          </div>
-        );
-      case RecordsetDisplayMode.PURE_BINARY_POPUP_ADD:
-        return (
-          <div>
-            <span>Link </span>
-            <Title displayname={displayname} comment={comment} />
-            <span> to </span>
-            <Title reference={recordsetProps.parentReference} /><span>: </span>
-            <Title displayname={recordsetProps.parentTuple?.displayname} />
-          </div>
-        );
-      case RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK:
-        return (
-          <div>
-            <span>Unlink </span>
-            <Title displayname={displayname} comment={comment} />
-            <span> from </span>
-            <Title reference={recordsetProps.parentReference} /><span>: </span>
-            <Title displayname={recordsetProps.parentTuple?.displayname} />
-          </div>
-        );
-      case RecordsetDisplayMode.FACET_POPUP:
-        return (
-          <div>
-            <span>Select </span>
-            <Title displayname={displayname} comment={comment} />
-          </div>);
-      case RecordsetDisplayMode.SAVED_QUERY_POPUP:
-        return (
-          <div>
-            <span>Saved search criteria for table </span>
-            <Title reference={recordsetProps.parentReference} />
-          </div>
-        );
-      default:
-        return (
-          <div><Title addLink={false} reference={recordsetProps.initialReference} /></div>
-        )
-        break;
-    }
+  let uiContextTitles: TitleProps[] | undefined, // the ui contexts that should be passed to recordset for the next level
+    titleEl: JSX.Element; // the modal title element.
+  switch (displayMode) {
+    case RecordsetDisplayMode.FK_POPUP_CREATE:
+      // select <col-displayname> for new <parent-displayname>
+      uiContextTitles = [{ displayname: displayname }];
+      titleEl = (
+        <div>
+          <span>Select </span>
+          <Title displayname={displayname} />
+          {recordsetProps.parentReference &&
+            <span>
+              <span> for new </span>
+              <Title reference={recordsetProps.parentReference} />
+            </span>
+          }
+        </div>
+      );
+      break;
+    case RecordsetDisplayMode.FK_POPUP_EDIT:
+      // select <col-displayname> for <parent-displayname>:<parent-tuple>
+      uiContextTitles = [{ displayname: displayname }];
+      titleEl = (
+        <div>
+          <span>Select </span>
+          <Title displayname={displayname} />
+          {recordsetProps.parentReference &&
+            <span>
+              <span> for </span>
+              <Title reference={recordsetProps.parentReference} />
+              {recordsetProps.parentTuple &&
+                <span>: <Title displayname={recordsetProps.parentTuple.displayname}></Title></span>
+              }
+            </span>
+          }
+        </div>
+      );
+      break;
+    case RecordsetDisplayMode.PURE_BINARY_POPUP_ADD:
+      uiContextTitles = [{ displayname: displayname }];
+      titleEl = (
+        <div>
+          <span>Link </span>
+          <Title displayname={displayname} comment={comment} />
+          <span> to </span>
+          <Title reference={recordsetProps.parentReference} /><span>: </span>
+          <Title displayname={recordsetProps.parentTuple?.displayname} />
+        </div>
+      );
+      break;
+    case RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK:
+      uiContextTitles = [{ displayname: displayname }];
+      titleEl = (
+        <div>
+          <span>Unlink </span>
+          <Title displayname={displayname} comment={comment} />
+          <span> from </span>
+          <Title reference={recordsetProps.parentReference} /><span>: </span>
+          <Title displayname={recordsetProps.parentTuple?.displayname} />
+        </div>
+      );
+      break;
+    case RecordsetDisplayMode.FACET_POPUP:
+      uiContextTitles = recordsetProps.uiContextTitles;
+      titleEl = (
+        <div>
+          <span>Select </span>
+          <Title displayname={displayname} comment={comment} />
+        </div>);
+      break;
+    case RecordsetDisplayMode.SAVED_QUERY_POPUP:
+      uiContextTitles = [{ reference: recordsetProps.parentReference }];
+      titleEl = (
+        <div>
+          <span>Saved search criteria for table </span>
+          <Title reference={recordsetProps.parentReference} />
+        </div>
+      );
+      break;
+    default:
+      titleEl = (
+        <div><Title addLink={false} reference={recordsetProps.initialReference} /></div>
+      )
+      break;
   }
 
   return (
@@ -342,7 +354,7 @@ const RecordsetModal = ({
           <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
         </div>
       }
-      <Modal.Header ref={modalHeader} className={showUIContextTitles ? 'modal-header-reduced-top-padding': ''}>
+      <Modal.Header ref={modalHeader} className={showUIContextTitles ? 'modal-header-reduced-top-padding' : ''}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
             <div className={`top-left-panel also-resizable ${panelClassName}`}></div>
@@ -390,9 +402,7 @@ const RecordsetModal = ({
                     </button>
                   </ChaiseTooltip>
                 </div>
-                <h2 className='modal-title'>
-                  {renderTitle()}
-                </h2>
+                <h2 className='modal-title'>{titleEl}</h2>
               </div>
             </div>
           </div>
@@ -402,6 +412,7 @@ const RecordsetModal = ({
         {showRecordset &&
           <Recordset
             {...recordsetProps}
+            uiContextTitles={uiContextTitles}
             onSelectedRowsChanged={onSelectedRowsChangedWrapper}
             parentContainer={modalContainerEl}
             parentStickyArea={modalHeaderEl}
