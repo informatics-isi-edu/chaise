@@ -40,6 +40,23 @@ export type TotalCountParts = {
 }
 
 /**
+ * make sure the list of facets is correct.
+ * @param container the element or page the facet panel belongs to
+ * @param facetNames list of facet names
+ * @param openFacetNames the open facet names (optional)
+ */
+export async function testDisplayedFacets (container: Page | Locator, facetNames: string[], openFacetNames?: string[]) {
+  await expect.soft(RecordsetLocators.getAllFacets(container)).toHaveCount(facetNames.length);
+  await expect.soft(RecordsetLocators.getFacetTitles(container)).toHaveText(facetNames);
+
+  if (openFacetNames) {
+    const openedFacets = RecordsetLocators.getOpenFacetTitles(container);
+    await expect.soft(openedFacets).toHaveCount(openFacetNames.length);
+    await expect.soft(openedFacets).toHaveText(openFacetNames);
+  }
+}
+
+/**
  *
  * @param container Page or recordset container (if recordset is showing in a modal or we are testing a related section)
  * @param expectedRowValues array of `RecordsetRowValue` types for testing each cell
@@ -112,15 +129,15 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * @param numRows number of recordset rows after clicking facet option
  * @param numFilters number of recordset filters after clicking facet option
  */
-export async function testSelectFacetOption(page: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
+export async function testSelectFacetOption(container: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
 
   // wait for request to return
-  await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
-  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRows);
-  await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(numFilters);
+  await expect.soft(RecordsetLocators.getClearAllFilters(container)).toBeVisible();
+  await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRows);
+  await expect.soft(RecordsetLocators.getFacetFilters(container)).toHaveCount(numFilters);
 }
 
 /**
@@ -128,11 +145,11 @@ export async function testSelectFacetOption(page: Page | Locator, facet: Locator
  * @param optionIdx facet option index to check is unchecked
  * @param pageSize the recordset page size for comparing with after clear
  */
-export async function testClearAllFilters(page: Page, pageSize: number, facet?: Locator, optionIdx?: number) {
-  const clearAll = RecordsetLocators.getClearAllFilters(page);
+export async function testClearAllFilters(container: Page | Locator, pageSize: number, facet?: Locator, optionIdx?: number) {
+  const clearAll = RecordsetLocators.getClearAllFilters(container);
   await clearAll.click();
   await expect.soft(clearAll).not.toBeVisible();
-  await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSize);
+  await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(pageSize);
 
   if (facet && optionIdx) await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
 }
@@ -235,13 +252,13 @@ export async function testSubmitModalSelection(page: Page, facet: Locator, modal
  * @param pageSize the recordset page size for comparing with after clear
  */
 // eslint-disable-next-line max-len
-export async function testSelectFacetOptionThenClear(page: Page, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number, pageSize: number) {
-  const facet = RecordsetLocators.getFacetById(page, facetIdx);
-  await testSelectFacetOption(page, facet, filterIdx, numRowsAfter, 1);
+export async function testSelectFacetOptionThenClear(container: Page | Locator, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number, pageSize: number) {
+  const facet = RecordsetLocators.getFacetById(container, facetIdx);
+  await testSelectFacetOption(container, facet, filterIdx, numRowsAfter, 1);
 
-  await expect.soft(RecordsetLocators.getFacetFilters(page).nth(0)).toHaveText(filterName);
+  await expect.soft(RecordsetLocators.getFacetFilters(container).nth(0)).toHaveText(filterName);
 
-  await testClearAllFilters(page, pageSize, facet, filterIdx);
+  await testClearAllFilters(container, pageSize, facet, filterIdx);
 };
 
 /**

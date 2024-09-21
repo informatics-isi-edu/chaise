@@ -611,7 +611,7 @@ type AddAssociationTableParams = {
 
 export const testAddAssociationTable = async (page: Page, params: AddAssociationTableParams) => {
   await test.step('link feature', async () => {
-    const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+    const rsModal = ModalLocators.getAddPureBinaryPopup(page);
 
     await test.step('clicking on `Link` button should open up a modal.', async () => {
       const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);

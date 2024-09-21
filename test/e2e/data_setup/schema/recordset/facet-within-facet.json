@@ -1,0 +1,1464 @@
+{
+  "schema_name": "facet-within-facet",
+  "tables": {
+    "main": {
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "main",
+      "comment": "the main table that will be used for testing the facet within facet",
+      "keys": [
+        {
+          "unique_columns": [
+            "id"
+          ]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2021:table-config": {
+          "aggressive_facet_lookup": true
+        },
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_main_inbound2": {
+              "source": [{"inbound": [ "facet-within-facet","main_inbound2_to_main_fk" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "Entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","main_inbound1_to_main_fk" ]},
+                  {"inbound": [ "facet-within-facet","main_inbound1_inbound1_to_main_inbound1_fk" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "Entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","main_inbound1_to_main_fk" ]},
+                  {"inbound": [ "facet-within-facet","main_inbound1_inbound2_to_main_inbound1_fk" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "Entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","main_inbound1_to_main_fk" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","main_inbound1_inbound1_to_main_inbound1_fk" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "Entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_main_inbound2"},
+                  {"inbound": [ "facet-within-facet","main_inbound2_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "Entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_main_inbound2"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"outbound": [ "facet-within-facet","main_inbound2_to_main_inbound2_outbound1_fk" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "Entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","main_inbound3_fk1" ]},
+                  {"inbound": [ "facet-within-facet","main_inbound3_inbound1_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","main_inbound3_fk1" ]},
+                  {"inbound": [ "facet-within-facet","main_inbound3_inbound1_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "recordedit_main": {
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "recordedit_main",
+      "comment": "has an outbound fk to main table. used for testing the fk popup",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","recordedit_main_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "fk_col",
+            "table_name": "recordedit_main",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "entry": [
+            "id",
+            {
+              "markdown_name": "fk_to_main",
+              "source": [{"outbound": [ "facet-within-facet","recordedit_main_fk1" ]}, "RID"]
+            }
+          ]
+        }
+      }
+    },
+    "record_main": {
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "record_main",
+      "comment": "has a p&b association to main table. used for testing the p&b popup",
+      "keys": [{ "unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "detailed": [
+            "id",
+            {
+              "markdown_pattern": "main association",
+              "source": [
+                {"inbound": [ "facet-within-facet","record_main_assoc_fk1" ]},
+                {"outbound": [ "facet-within-facet","record_main_assoc_fk2" ]},
+                "RID"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "record_main_assoc": {
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "record_main_assoc",
+      "comment": "the p&b association between main and record_main",
+      "keys": [{ "unique_columns": ["fk_to_main", "fk_to_record_main"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","record_main_assoc_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "fk_to_record_main",
+            "table_name": "record_main_assoc",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "record_main",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "names": [[ "facet-within-facet","record_main_assoc_fk2" ]],
+          "foreign_key_columns": [{
+            "column_name": "fk_to_main",
+            "table_name": "record_main_assoc",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "fk_to_main",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_to_record_main",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "main_inbound1": {
+      "comment": "has inbound fk to main. ",
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "main_inbound1",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound1_to_main_fk" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound1_to_main_fk_col",
+            "table_name": "main_inbound1",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound1_to_main_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "main_inbound1_inbound1": {
+      "comment": "has inbound fk to main_inbound1",
+      "kind": "table",
+      "table_name": "main_inbound1_inbound1",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound1_inbound1_to_main_inbound1_fk" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound1_inbound1_to_main_inbound1_fk_col",
+            "table_name": "main_inbound1_inbound1",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound1_inbound1_to_main_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2021:table-config": {
+          "aggressive_facet_lookup": true
+        },
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_2nd_layer_hub": {
+              "source": [{"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "facet_col"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "2nd layer entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_inbound1_inbound2": {
+      "comment": "has inbound fk to main_inbound1",
+      "kind": "table",
+      "table_name": "main_inbound1_inbound2",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound1_inbound2_to_main_inbound1_fk" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound1_inbound2_to_main_inbound1_fk_col",
+            "table_name": "main_inbound1_inbound2",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound1_inbound2_to_main_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_2nd_layer_hub": {
+              "source": [{"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "facet_col"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "2nd layer entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_inbound2": {
+      "comment": "has inbound fk to main.",
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "main_inbound2",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound2_to_main_fk" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound2_to_main_fk_col",
+            "table_name": "main_inbound2",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "names": [[ "facet-within-facet","main_inbound2_to_main_inbound2_outbound1_fk" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound2_to_main_inbound2_outbound1_fk_col",
+            "table_name": "main_inbound2",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound2_outbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound2_to_main_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound2_to_main_inbound2_outbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "main_inbound2_inbound1": {
+      "comment": "has inbound fk to main_inbound2",
+      "kind": "table",
+      "table_name": "main_inbound2_inbound1",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound2_inbound1_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound2_inbound1_to_main_inbound2_fk_col",
+            "table_name": "main_inbound2_inbound1",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound2",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound2_inbound1_to_main_inbound2_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_2nd_layer_hub": {
+              "source": [{"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "facet_col"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "2nd layer entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_inbound2_outbound1": {
+      "comment": "has inbound fk to main_inbound2",
+      "kind": "table",
+      "table_name": "main_inbound2_outbound1",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_2nd_layer_hub": {
+              "source": [{"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "facet_col"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "2nd layer entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_inbound3": {
+      "comment": "has inbound fk to main.",
+      "kind": "table",
+      "schema_name": "facet-within-facet",
+      "table_name": "main_inbound3",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound3_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound3_to_main_fk_col",
+            "table_name": "main_inbound3",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound3_to_main_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "main_inbound3_inbound1": {
+      "comment": "has inbound fk to main_inbound3",
+      "kind": "table",
+      "table_name": "main_inbound3_inbound1",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound3_inbound1_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound3_inbound1_to_main_inbound3_fk_col",
+            "table_name": "main_inbound3_inbound1",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound3",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound3_inbound1_to_main_inbound3_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "fkeys": true,
+          "columns": true,
+          "sources": {
+            "path_to_2nd_layer_hub": {
+              "source": [{"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]}, "RID"]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "facet_col"],
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "2nd layer entity path",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path 2",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]},
+                  {
+                    "and": [
+                        {"filter": "RID", "operand_pattern": "::null::"},
+                        {"filter": "RCB", "operand_pattern": "::null::"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with shared prefix and filter",
+                "source": [
+                  {"sourcekey": "path_to_2nd_layer_hub"},
+                  {
+                    "or": [
+                        {"operator": "::null::", "filter": "id"},
+                        {"operator": "::null::", "filter": "RMB"}
+                    ],
+                    "negate": true
+                  },
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]},
+                  "RID"
+                ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer entity path with fast filter",
+                "source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]},
+                  "id"
+                ],
+                "fast_filter_source": [
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]},
+                  {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
+                  "id"
+                ],
+                "open": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_inbound3_inbound1_fast_filter": {
+      "comment": "has inbound fk to main_inbound3",
+      "kind": "table",
+      "table_name": "main_inbound3_inbound1_fast_filter",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","main_inbound3_inbound1_fast_filter_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "main_inbound3_inbound1_fast_filter_to_main_inbound3_fk_col",
+            "table_name": "main_inbound3_inbound1_fast_filter",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound3",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "main_inbound3_inbound1_fast_filter_to_main_inbound3_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub": {
+      "comment": "has inbound to all the entity paths from the layer below. other tables have inbound to it",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "comment": "fk to main_inbound1_inbound1",
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound1_inbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "comment": "fk to main_inbound1_inbound2",
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound1_inbound2" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound1_inbound2",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "comment": "fk to main_inbound2_inbound1",
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_inbound1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound2_inbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "comment": "fk to main_inbound2_outbound1",
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound2_outbound1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound2_outbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        },
+        {
+          "comment": "fk to main_inbound3_inbound1",
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_fk_to_main_inbound3_inbound1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "main_inbound3_inbound1",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound1": {
+      "comment": "has inbound fk to facet_2nd_layer_hub",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound1",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound1_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound1_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound1",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound1_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound2": {
+      "comment": "has inbound fk to facet_2nd_layer_hub",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound2",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound2_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound2_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound2",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound2_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound3": {
+      "comment": "has inbound fk to facet_2nd_layer_hub",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound3",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound3_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound3_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound3",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound3_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound4": {
+      "comment": "has inbound fk to facet_2nd_layer_hub",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound4",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound4_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound4_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound4",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound4_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound5": {
+      "comment": "has inbound fk to facet_2nd_layer_hub",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound5",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound5_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound5_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound5",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound5_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    },
+    "facet_2nd_layer_hub_inbound5_fast_filter": {
+      "comment": "has inbound fk to facet_2nd_layer_hub (it should be the same as inbound5)",
+      "kind": "table",
+      "table_name": "facet_2nd_layer_hub_inbound5_fast_filter",
+      "schema_name": "facet-within-facet",
+      "keys": [{ "unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [[ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]],
+          "foreign_key_columns": [{
+            "column_name": "facet_2nd_layer_hub_inbound5_fast_filter_fk_col",
+            "table_name": "facet_2nd_layer_hub_inbound5_fast_filter",
+            "schema_name": "facet-within-facet"
+          }],
+          "referenced_columns": [{
+            "column_name": "id",
+            "table_name": "facet_2nd_layer_hub",
+            "schema_name": "facet-within-facet"
+          }]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_2nd_layer_hub_inbound5_fast_filter_fk_col",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "facet_col",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          }
+        }
+      ]
+    }
+  }
+}

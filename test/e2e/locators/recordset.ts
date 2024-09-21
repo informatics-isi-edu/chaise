@@ -47,8 +47,8 @@ export default class RecordsetLocators {
     await expect.soft(container.locator('.table-column-spinner')).toHaveCount(0);
   }
 
-  static async waitForFacets(container: Page | Locator, timeout?: number): Promise<void> {
-    return container.locator('.facet-spinner').waitFor({ state: 'hidden', timeout });
+  static async waitForFacets(container: Page | Locator): Promise<void> {
+    await expect.soft(container.locator('.facet-spinner')).toHaveCount(0);
   }
 
   static getPageTitleElement(container: Page | Locator): Locator {

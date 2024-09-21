@@ -15,9 +15,9 @@ var chaiseConfig = {
     disableDefaultExport: true,
     disableExternalLinkModal: true,
     showWriterEmptyRelatedOnLoad: false,
-    showFaceting: true,
     facetPanelDisplay: {
-        open: ["compact/select/association"]
+        open: ["compact/select/association"],
+        maxFacetDepth: 2
     },
     logClientActions: false,
     hideRecordeditLeaveAlert: true,
