@@ -50,13 +50,21 @@ type FacetParamType = {
   index: number,
   name: string,
   /**
+   * description of the config
+   */
+  description: string,
+  /**
    * if defined, we will first select the option defined here.
    */
   otherFacet?: {
     index: number,
     option: number,
-    numRows: number
-  },
+    numRows: number,
+    /**
+     * how many filters are visible after selection (default: 1)
+     */
+    numFacetFilters: number
+  }[],
   popup: {
     uiContext: string,
     title: string,
@@ -66,51 +74,495 @@ type FacetParamType = {
       index: number,
       name: string,
       options: string[],
+      /**
+       * if defined, selection is done proior to opening the popup.
+       */
       select?: {
         option: number,
-        numRows: number
-      },
+        numRows: number,
+        /**
+         * the name that appears above the table summarizing the selected filters
+         */
+        filterName?: string,
+        /**
+         * how many filters are visible after selection, default=1
+         */
+        numFacetFilters?: number
+      }[],
       popup?: {
         uiContext: string,
         title: string,
-        numRows: number
-      }
+        numRows: number,
+        /**
+         * list of selected items
+         */
+        selectedChiclets?: string[]
+      },
+      /**
+       * useful if you want to select something without affecting other facets.
+       */
+      clearAll?: boolean
     }[]
   }
 
 }
 
-const facetNames = [
-  'Entity path', 'Entity path 2', 'Entity path with filter', 'Entity path with shared prefix',
-  'Entity path with shared prefix and filter', 'Entity path with fast filter'
+const popuFacetNames = [
+  '2nd layer entity path', '2nd layer entity path 2', '2nd layer entity path with filter', '2nd layer entity path with shared prefix',
+  '2nd layer entity path with shared prefix and filter', '2nd layer entity path with fast filter'
 ]
 
-const testParams: {
+const getTestParams = (rootUIContext: string): {
   facets: FacetParamType[]
-} = {
-  facets: [
-    {
-      index: 0,
-      name: 'Entity path',
-      popup: {
-        uiContext: 'main:',
-        title: 'Select Entity path',
-        facetNames: facetNames,
-        numRows: 0, // TODO
-        facets: [
-          {
-            index: 0,
-            name: 'Entity path',
-            options: ['All records with value'], // TODO
-            select: {
-              option: 1,// TOOD
-              numRows: 5, // TODO
+} => {
+  return {
+    facets: [
+      {
+        index: 0,
+        name: 'Entity path',
+        description: 'general case without any selection',
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path',
+          facetNames: popuFacetNames,
+          numRows: 10,
+          facets: [
+            {
+              index: 0,
+              name: popuFacetNames[0],
+              options: [
+                'All records with value', 'No value',
+                'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
+                'facet_2nd_layer_hub_inbound1_13', 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path',
+                numRows: 6
+              }
+            },
+            {
+              index: 1,
+              name: popuFacetNames[1],
+              options: [
+                'All records with value', 'No value',
+                'facet_2nd_layer_hub_inbound2_10', 'facet_2nd_layer_hub_inbound2_11', 'facet_2nd_layer_hub_inbound2_12',
+                'facet_2nd_layer_hub_inbound2_13', 'facet_2nd_layer_hub_inbound2_14', 'facet_2nd_layer_hub_inbound2_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path 2',
+                numRows: 6
+              }
+            },
+            {
+              index: 2,
+              name: popuFacetNames[2],
+              options: [
+                'All records with value',
+                'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
+                'facet_2nd_layer_hub_inbound1_13', 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path with filter',
+                numRows: 6
+              }
+            },
+            {
+              index: 3,
+              name: popuFacetNames[3],
+              options: [
+                'All records with value', 'No value',
+                'facet_2nd_layer_hub_inbound3_10', 'facet_2nd_layer_hub_inbound3_11', 'facet_2nd_layer_hub_inbound3_12',
+                'facet_2nd_layer_hub_inbound3_13', 'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path with shared prefix',
+                numRows: 6
+              }
+            },
+            {
+              index: 4,
+              name: popuFacetNames[4],
+              options: [
+                'All records with value',
+                'facet_2nd_layer_hub_inbound4_10', 'facet_2nd_layer_hub_inbound4_11', 'facet_2nd_layer_hub_inbound4_12',
+                'facet_2nd_layer_hub_inbound4_13', 'facet_2nd_layer_hub_inbound4_14', 'facet_2nd_layer_hub_inbound4_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path with shared prefix and filter',
+                numRows: 6
+              }
+            },
+            {
+              index: 5,
+              name: popuFacetNames[5],
+              options: [
+                'All records with value', 'No value',
+                'facet_2nd_layer_hub_inbound5_10', 'facet_2nd_layer_hub_inbound5_11', 'facet_2nd_layer_hub_inbound5_12',
+                'facet_2nd_layer_hub_inbound5_13', 'facet_2nd_layer_hub_inbound5_14', 'facet_2nd_layer_hub_inbound5_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer entity path with fast filter',
+                numRows: 6
+              }
+            },
+          ]
+        }
+      },
+      {
+        index: 1,
+        name: 'Entity path 2',
+        description: 'selection at the root',
+        otherFacet: [{
+          index: 0,
+          option: 1, // null
+          numRows: 18,
+          numFacetFilters: 1
+        }, {
+          index: 0,
+          option: 2,
+          numRows: 19,
+          numFacetFilters: 1
+        }],
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path 2',
+          facetNames: popuFacetNames,
+          numRows: 8,
+          facets: [
+            {
+              index: 0,
+              name: popuFacetNames[0],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound1_13',
+                'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path',
+                numRows: 3
+              }
+            },
+            {
+              index: 1,
+              name: popuFacetNames[1],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound2_13',
+                'facet_2nd_layer_hub_inbound2_14', 'facet_2nd_layer_hub_inbound2_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path 2',
+                numRows: 3
+              }
+            },
+            {
+              index: 2,
+              name: popuFacetNames[2],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound1_13',
+                'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path with filter',
+                numRows: 3
+              }
+            },
+            {
+              index: 3,
+              name: popuFacetNames[3],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound3_13',
+                'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path with shared prefix',
+                numRows: 3
+              }
+            },
+            {
+              index: 4,
+              name: popuFacetNames[4],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound4_13',
+                'facet_2nd_layer_hub_inbound4_14', 'facet_2nd_layer_hub_inbound4_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path with shared prefix and filter',
+                numRows: 3
+              }
+            },
+            {
+              index: 5,
+              name: popuFacetNames[5],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound5_13',
+                'facet_2nd_layer_hub_inbound5_14', 'facet_2nd_layer_hub_inbound5_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer entity path with fast filter',
+                numRows: 3
+              }
+            },
+          ]
+        }
+      },
+      {
+        index: 2,
+        name: 'Entity path with filter',
+        description: 'path with filter, selection on the popup',
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path with filter',
+          facetNames: popuFacetNames,
+          numRows: 10,
+          facets: [
+            {
+              index: 0,
+              name: popuFacetNames[0],
+              options: [
+                'All records with value', 'No value',
+                'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
+                'facet_2nd_layer_hub_inbound1_13', 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              select: [{
+                option: 1, // null
+                numRows: 5,
+              }, {
+                option: 2,
+                numRows: 6,
+                filterName: '2nd layer entity pathNo value , facet_2nd_layer_hub_inbound1_10'
+              }]
+            },
+            {
+              index: 1,
+              name: popuFacetNames[1],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound2_10', 'facet_2nd_layer_hub_inbound2_11']
+            },
+            {
+              index: 2,
+              name: popuFacetNames[2],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11'],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with filter:',
+                title: 'Select 2nd layer entity path with filter',
+                numRows: 2
+              }
+            },
+            {
+              index: 3,
+              name: popuFacetNames[3],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound3_10', 'facet_2nd_layer_hub_inbound3_11']
+            },
+            {
+              index: 4,
+              name: popuFacetNames[4],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound4_10', 'facet_2nd_layer_hub_inbound4_11']
+            },
+            {
+              index: 5,
+              name: popuFacetNames[5],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound5_10', 'facet_2nd_layer_hub_inbound5_11']
             }
-          }
-        ]
+          ]
+        }
+      },
+      {
+        index: 3,
+        name: 'Entity path with shared prefix',
+        description: 'select filters for itself and see it has no effect on the popup. shared prefix filter on popup',
+        otherFacet: [{
+          index: 3,
+          option: 1, // null
+          numRows: 19,
+          numFacetFilters: 1
+        }, {
+          index: 3,
+          option: 2,
+          numRows: 20,
+          numFacetFilters: 1
+        }],
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path with shared prefix',
+          facetNames: popuFacetNames,
+          numRows: 8,
+          facets: [
+            {
+              index: 0,
+              name: popuFacetNames[0],
+              options: [
+                'All records with value', 'No value', 'facet_2nd_layer_hub_inbound1_13',
+                'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with shared prefix:',
+                title: 'Select 2nd layer entity path',
+                numRows: 3
+              }
+            },
+            {
+              index: 1,
+              name: popuFacetNames[1],
+              options: [
+                'All records with value', 'No value','facet_2nd_layer_hub_inbound2_13',
+                'facet_2nd_layer_hub_inbound2_14', 'facet_2nd_layer_hub_inbound2_15'
+              ]
+            },
+            {
+              index: 2,
+              name: popuFacetNames[2],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound1_13',
+                'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
+              ]
+            },
+            {
+              index: 3,
+              name: popuFacetNames[3],
+              options: [
+                'All records with value', 'No value', 'facet_2nd_layer_hub_inbound3_13',
+                'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
+              ],
+              select: [{
+                option: 4,
+                numRows: 1,
+              },{
+                option: 1, // null
+                numRows: 6,
+              }],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with shared prefix:',
+                title: 'Select 2nd layer entity path with shared prefix',
+                numRows: 3,
+                selectedChiclets: ['No value', 'facet_2nd_layer_hub_inbound3_15']
+              }
+            },
+            {
+              index: 4,
+              name: popuFacetNames[4],
+              options: [ 'All records with value', 'facet_2nd_layer_hub_inbound4_15' ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with shared prefix:',
+                title: 'Select 2nd layer entity path with shared prefix and filter',
+                numRows: 1
+              }
+            },
+            {
+              index: 5,
+              name: popuFacetNames[5],
+              options: [ 'All records with value', 'facet_2nd_layer_hub_inbound5_15' ]
+            },
+          ]
+        }
+      },
+      {
+        index: 4,
+        name: 'Entity path with shared prefix and filter',
+        description: 'shared prefix facet interactions',
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path with shared prefix and filter',
+          facetNames: popuFacetNames,
+          numRows: 10,
+          facets: [
+            {
+              index: 3,
+              name: popuFacetNames[3],
+              options: [
+                'All records with value', 'No value', 'facet_2nd_layer_hub_inbound3_06',
+                'facet_2nd_layer_hub_inbound3_07', 'facet_2nd_layer_hub_inbound3_08', 'facet_2nd_layer_hub_inbound3_09',
+                'facet_2nd_layer_hub_inbound3_10', 'facet_2nd_layer_hub_inbound3_11', 'facet_2nd_layer_hub_inbound3_12',
+                'facet_2nd_layer_hub_inbound3_13', 'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
+              ],
+              select: [{
+                option: 3,
+                numRows: 1
+              }, {
+                option: 4,
+                numRows: 2,
+                numFacetFilters: 1
+              }]
+            },
+            {
+              index: 4,
+              name: popuFacetNames[4],
+              options: [
+                'All records with value', 'facet_2nd_layer_hub_inbound4_06', 'facet_2nd_layer_hub_inbound4_07',
+                'facet_2nd_layer_hub_inbound4_08', 'facet_2nd_layer_hub_inbound4_09'
+              ],
+              select: [{
+                option: 1,
+                numRows: 1,
+                numFacetFilters: 2
+              }],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with shared prefix and filter:',
+                title: 'Select 2nd layer entity path with shared prefix and filter',
+                numRows: 4,
+                selectedChiclets: ['facet_2nd_layer_hub_inbound4_06']
+              }
+            }
+          ]
+        }
+      },
+      {
+        index: 5,
+        name: 'Select 2nd layer entity path with fast filter',
+        description: 'fast filter',
+        popup: {
+          uiContext: rootUIContext + ':',
+          title: 'Select Entity path with fast filter',
+          facetNames: popuFacetNames,
+          numRows: 8,
+          facets: [
+            {
+              index: 5,
+              name: popuFacetNames[5],
+              options: [
+                'All records with value', 'No value', 'facet_2nd_layer_hub_inbound5_13',
+                'facet_2nd_layer_hub_inbound5_14', 'facet_2nd_layer_hub_inbound5_15'
+              ],
+              select: [{
+                option: 1,
+                numRows: 5
+              }, {
+                option: 2,
+                numRows: 6
+              }],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with fast filter:',
+                title: 'Select 2nd layer entity path with fast filter',
+                numRows: 3,
+                selectedChiclets: ['No value', 'facet_2nd_layer_hub_inbound5_13']
+              }
+            },
+            // open another one and make sure it works
+            {
+              index: 0,
+              name: popuFacetNames[0],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound1_13'],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with fast filter:',
+                title: 'Select 2nd layer entity path',
+                numRows: 1,
+                selectedChiclets: []
+              }
+            }
+          ]
+        }
       }
-    }
-  ]
+    ]
+  }
 }
 
 /******************** helpers ************************/
@@ -121,11 +573,16 @@ const getChaiseURL = (appName: string, tableName: string, baseURL: string | unde
 
 /**
  * This function must be defined before the test blocks.
+ * @param rootUIContext the ui context of the page (depends on where the recordset instance is)
  * @param initialPageLoad the initial operation to load the recordset instance. it should return the container of recordset instance
  */
-const testFacetWithinFacet = (initialPageLoad: (page: Page, baseURL: string | undefined, testInfo: TestInfo) => Promise<Page | Locator>) => {
+const testFacetWithinFacet = (
+  rootUIContext: string,
+  initialPageLoad: (page: Page, baseURL: string | undefined, testInfo: TestInfo) => Promise<Page | Locator>
+) => {
 
   // make sure facet within facet works for all the different types of entity facets we have (shared prefix, with filter, etc)
+  const testParams = getTestParams(rootUIContext)
   for (const firstLevelProps of testParams.facets) {
     test(`first level: ${firstLevelProps.name}`, async ({ page, baseURL }, testInfo) => {
       let container: Page | Locator;
@@ -134,19 +591,21 @@ const testFacetWithinFacet = (initialPageLoad: (page: Page, baseURL: string | un
         container = await initialPageLoad(page, baseURL, testInfo);
       });
 
-      if (firstLevelProps.otherFacet) {
+      if (Array.isArray(firstLevelProps.otherFacet) && firstLevelProps.otherFacet.length > 0) {
         await test.step('select an option in one of the facets', async () => {
-          const f = RecordsetLocators.getFacetById(container, firstLevelProps.otherFacet!.index);
-          await expect.soft(f).toBeVisible();
-          await testSelectFacetOption(container, f, firstLevelProps.otherFacet!.option, firstLevelProps.otherFacet!.numRows, 1);
+          for await (const item of firstLevelProps.otherFacet!) {
+            const f = RecordsetLocators.getFacetById(container, item.index);
+            await expect.soft(f).toBeVisible();
+            await testSelectFacetOption(container, f, item.option, item.numRows, item.numFacetFilters);
+          }
         });
       }
 
-      await test.step('open the facet popup', async () => {
+      await test.step('facet popup', async () => {
         const firstLevelModal = ModalLocators.getFacetPopup(page, 1);
         const secondLevelModal = ModalLocators.getFacetPopup(page, 2);
 
-        await test.step('title, ui context, and number of rows must be correct', async () => {
+        await test.step('display title, ui context, and number of rows', async () => {
           const f = RecordsetLocators.getFacetById(container, firstLevelProps.index);
           await RecordsetLocators.getShowMore(f).click();
           await expect.soft(firstLevelModal).toBeVisible();
@@ -157,7 +616,7 @@ const testFacetWithinFacet = (initialPageLoad: (page: Page, baseURL: string | un
           await expect.soft(RecordsetLocators.getRows(firstLevelModal)).toHaveCount(firstLevelProps.popup.numRows);
         });
 
-        await test.step('facet panel must be displayed with proper facets', async () => {
+        await test.step('display facet options', async () => {
           const showBtn = RecordsetLocators.getShowFilterPanelBtn(firstLevelModal);
           await expect.soft(showBtn).toBeVisible();
           await showBtn.click();
@@ -169,38 +628,49 @@ const testFacetWithinFacet = (initialPageLoad: (page: Page, baseURL: string | un
           await test.step(`second level: ${secondLevelProps.name}`, async () => {
             const popupFacetEl = RecordsetLocators.getFacetById(firstLevelModal, secondLevelProps.index);
 
-            await test.step('correct options should be displayed', async () => {
+            await test.step('display facet options', async () => {
               // wait for list to be fully visible
               await expect.soft(RecordsetLocators.getList(popupFacetEl)).toBeVisible();
               // wait for facet checkboxes to load
               await expect.soft(RecordsetLocators.getFacetOptions(popupFacetEl)).toHaveText(secondLevelProps.options);
             });
 
-            if (secondLevelProps.select) {
-              await test.step('selecting an option should change the displayed rows', async () => {
-                await testSelectFacetOption(firstLevelModal, popupFacetEl, secondLevelProps.select!.option, secondLevelProps.select!.numRows, 1);
+            if (Array.isArray(secondLevelProps.select) && secondLevelProps.select.length > 0) {
+              await test.step('selecting facet option(s)', async () => {
+                for await (const item of secondLevelProps.select!) {
+                  await testSelectFacetOption(firstLevelModal, popupFacetEl, item.option, item.numRows, item.numFacetFilters);
+                  if (item.filterName) {
+                    await expect.soft(RecordsetLocators.getFacetFilters(firstLevelModal).nth(0)).toHaveText(item.filterName);
+                  }
+                }
               });
             }
 
             if (secondLevelProps.popup) {
-              await test.step('show more must be offered but the opened popup should not have facet panel', async () => {
+              await test.step('facet popup', async () => {
                 const showMore = RecordsetLocators.getShowMore(popupFacetEl);
                 await expect.soft(showMore).toBeVisible();
                 await RecordsetLocators.getShowMore(popupFacetEl).click();
                 await expect.soft(secondLevelModal).toBeVisible();
                 await RecordsetLocators.waitForRecordsetPageReady(secondLevelModal);
 
+                await expect.soft(RecordsetLocators.getShowFilterPanelBtn(secondLevelModal)).not.toBeVisible();
                 await expect.soft(ModalLocators.getModalHeaderContext(secondLevelModal)).toHaveText(secondLevelProps.popup!.uiContext);
                 await expect.soft(ModalLocators.getModalTitle(secondLevelModal)).toHaveText(secondLevelProps.popup!.title);
                 await expect.soft(RecordsetLocators.getRows(secondLevelModal)).toHaveCount(secondLevelProps.popup!.numRows);
 
-                await expect.soft(RecordsetLocators.getShowFilterPanelBtn(secondLevelModal)).not.toBeVisible();
+                const chiclets = secondLevelProps.popup!.selectedChiclets;
+                if (chiclets) {
+                  await expect.soft(RecordsetLocators.getSelectedRowsFilters(secondLevelModal)).toHaveCount(chiclets.length);
+                  await expect.soft(RecordsetLocators.getSelectedRowsFilters(secondLevelModal)).toHaveText(chiclets);
+                }
+
                 await ModalLocators.getCloseBtn(secondLevelModal).click();
                 await expect.soft(secondLevelModal).not.toBeAttached();
               });
             }
 
-            if (secondLevelProps.select) {
+            if (secondLevelProps.clearAll) {
               await test.step('clear all facetes', async () => {
                 await testClearAllFilters(firstLevelModal, firstLevelProps.popup.numRows);
               });
@@ -218,13 +688,12 @@ const testFacetWithinFacet = (initialPageLoad: (page: Page, baseURL: string | un
 
 
 test.describe('facet within facet', () => {
-  // TODO this return has been added so it doesn't affect the CI build. I'll remove it once everything is ready.
-  return;
 
   test.describe.configure({ mode: 'parallel' });
 
   test.describe('recordset page', () => {
     testFacetWithinFacet(
+      'main',
       async (page, baseURL, testInfo) => {
         await page.goto(getChaiseURL('recordset', 'main', baseURL, testInfo));
         await RecordsetLocators.waitForRecordsetPageReady(page);
@@ -233,9 +702,9 @@ test.describe('facet within facet', () => {
     )
   });
 
-  // TODO unskip once the config files are done
-  test.skip('record link popup', () => {
+  test.describe('record link popup', () => {
     testFacetWithinFacet(
+      'main association',
       async (page, baseURL, testInfo) => {
         await page.goto(getChaiseURL('record', 'record_main', baseURL, testInfo) + '/id=record_main_01');
         await RecordLocators.waitForRecordPageReady(page);
@@ -247,15 +716,20 @@ test.describe('facet within facet', () => {
     )
   });
 
-  // TODO unskip once the config files are done
-  test.skip('recoredit fk popup', () => {
+  test.describe('recoredit fk popup', () => {
     testFacetWithinFacet(
+      'fk_to_main',
       async (page, baseURL, testInfo) => {
-        await page.goto(getChaiseURL('recordedit', 'main', baseURL, testInfo));
+        await page.goto(getChaiseURL('recordedit', 'recordedit_main', baseURL, testInfo));
         await RecordeditLocators.waitForRecordeditPageReady(page);
         const modal = ModalLocators.getForeignKeyPopup(page);
         await RecordeditLocators.getForeignKeyInputButton(page, 'fk_to_main', 1).click();
         await expect(modal).toBeVisible();
+
+        await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
+        await RecordsetLocators.getShowFilterPanelBtn(modal).click();
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).toHaveAttribute('class', /open-panel/);
+
         return modal;
       }
     )

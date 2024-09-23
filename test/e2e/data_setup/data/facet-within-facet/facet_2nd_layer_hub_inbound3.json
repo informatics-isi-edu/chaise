@@ -56,5 +56,20 @@
     "id": "facet_2nd_layer_hub_inbound3_12",
     "facet_2nd_layer_hub_inbound3_fk_col": "facet_2nd_layer_hub_05",
     "facet_col": "twelve facet_2nd_layer_hub_inbound3"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound3_13",
+    "facet_2nd_layer_hub_inbound3_fk_col": "facet_2nd_layer_hub_06",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound3_14",
+    "facet_2nd_layer_hub_inbound3_fk_col": "facet_2nd_layer_hub_07",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound3_15",
+    "facet_2nd_layer_hub_inbound3_fk_col": "facet_2nd_layer_hub_08",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
   }
 ]

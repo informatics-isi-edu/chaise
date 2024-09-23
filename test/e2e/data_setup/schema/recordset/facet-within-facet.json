@@ -185,7 +185,7 @@
           "detailed": [
             "id",
             {
-              "markdown_pattern": "main association",
+              "markdown_name": "main association",
               "source": [
                 {"inbound": [ "facet-within-facet","record_main_assoc_fk1" ]},
                 {"outbound": [ "facet-within-facet","record_main_assoc_fk2" ]},

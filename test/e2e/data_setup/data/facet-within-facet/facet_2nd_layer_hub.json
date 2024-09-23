@@ -41,5 +41,37 @@
     "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col": "main_inbound2_inbound1_05",
     "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col": "main_inbound2_outbound1_05",
     "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col": "main_inbound3_inbound1_05"
+  },
+  {
+    "id": "facet_2nd_layer_hub_07",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col": "main_inbound1_inbound1_06",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col": "main_inbound1_inbound2_06",
+    "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col": "main_inbound2_inbound1_06",
+    "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col": "main_inbound2_outbound1_06",
+    "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col": "main_inbound3_inbound1_06"
+  },
+  {
+    "id": "facet_2nd_layer_hub_08",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col": "main_inbound1_inbound1_07",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col": "main_inbound1_inbound2_07",
+    "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col": "main_inbound2_inbound1_07",
+    "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col": "main_inbound2_outbound1_07",
+    "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col": "main_inbound3_inbound1_07"
+  },
+  {
+    "id": "facet_2nd_layer_hub_09",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col": "main_inbound1_inbound1_08",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col": "main_inbound1_inbound2_08",
+    "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col": "main_inbound2_inbound1_08",
+    "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col": "main_inbound2_outbound1_08",
+    "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col": "main_inbound3_inbound1_08"
+  },
+  {
+    "id": "facet_2nd_layer_hub_10",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound1_fk_col": "main_inbound1_inbound1_09",
+    "facet_2nd_layer_hub_to_main_inbound1_inbound2_fk_col": "main_inbound1_inbound2_09",
+    "facet_2nd_layer_hub_to_main_inbound2_inbound1_fk_col": "main_inbound2_inbound1_09",
+    "facet_2nd_layer_hub_to_main_inbound2_outbound1_fk_col": "main_inbound2_outbound1_09",
+    "facet_2nd_layer_hub_to_main_inbound3_inbound1_fk_col": "main_inbound3_inbound1_09"
   }
 ]

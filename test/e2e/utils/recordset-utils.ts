@@ -127,9 +127,9 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
  * Selects a facet option and verifies the row count and number of recordset filters
  * @param optionIdx facet option index to click
  * @param numRows number of recordset rows after clicking facet option
- * @param numFilters number of recordset filters after clicking facet option
+ * @param numFilters number of recordset filters after clicking facet option (default: 1)
  */
-export async function testSelectFacetOption(container: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters: number) {
+export async function testSelectFacetOption(container: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters?: number) {
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
@@ -137,6 +137,10 @@ export async function testSelectFacetOption(container: Page | Locator, facet: Lo
   // wait for request to return
   await expect.soft(RecordsetLocators.getClearAllFilters(container)).toBeVisible();
   await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRows);
+
+  if (typeof numFilters !== 'number') {
+    numFilters = 1;
+  }
   await expect.soft(RecordsetLocators.getFacetFilters(container)).toHaveCount(numFilters);
 }
 
