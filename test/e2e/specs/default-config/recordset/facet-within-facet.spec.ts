@@ -711,6 +711,10 @@ test.describe('facet within facet', () => {
         const modal = ModalLocators.getAddPureBinaryPopup(page);
         await RecordLocators.getRelatedTableAddButton(page, 'main association', true).click();
         await expect(modal).toBeVisible();
+        // open the facet panel
+        await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
+        await RecordsetLocators.getShowFilterPanelBtn(modal).click();
+        await expect.soft(RecordsetLocators.getSidePanel(modal)).toHaveAttribute('class', /open-panel/);
         return modal;
       }
     )
@@ -725,11 +729,10 @@ test.describe('facet within facet', () => {
         const modal = ModalLocators.getForeignKeyPopup(page);
         await RecordeditLocators.getForeignKeyInputButton(page, 'fk_to_main', 1).click();
         await expect(modal).toBeVisible();
-
+        // open the facet panel
         await expect.soft(RecordsetLocators.getShowFilterPanelBtn(modal)).toBeVisible();
         await RecordsetLocators.getShowFilterPanelBtn(modal).click();
         await expect.soft(RecordsetLocators.getSidePanel(modal)).toHaveAttribute('class', /open-panel/);
-
         return modal;
       }
     )

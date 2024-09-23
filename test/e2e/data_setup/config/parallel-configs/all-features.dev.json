@@ -7,7 +7,6 @@
             "record/copy-btn.config.json",
 
             "recordset/saved-query.config.json",
-            "recordset/facet-within-facet.config.json",
 
             "multi-permissions/config.json",
             "navbar/config.json",

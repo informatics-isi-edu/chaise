@@ -1460,5 +1460,12 @@
         }
       ]
     }
+  },
+  "annotations": {
+    "tag:misd.isi.edu,2015:display" : {
+      "max_facet_depth": {
+        "*": 2
+      }
+    }
   }
 }

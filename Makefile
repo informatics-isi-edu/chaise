@@ -66,7 +66,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.config.ts
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.config.ts
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
-E2EDrecordsetFacetWithinFacet=test/e2e/specs/all-features/recordset/facet-within-facet.config.ts
+E2EDrecordsetFacetWithinFacet=test/e2e/specs/default-config/recordset/facet-within-facet.config.ts
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
 
 # misc tests
