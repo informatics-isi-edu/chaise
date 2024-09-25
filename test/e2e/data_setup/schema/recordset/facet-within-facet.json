@@ -325,6 +325,12 @@
           "type": {
             "typename": "text"
           }
+        },
+        {
+          "name": "timestamptz_col",
+          "type": {
+            "typename": "timestamptz"
+          }
         }
       ],
       "annotations": {
@@ -416,6 +422,11 @@
                   "id"
                 ],
                 "open": true
+            },
+              {
+                "markdown_name": "2nd layer timestamptz",
+                "source": "timestamptz_col",
+                "open": true
               }
             ]
           }
@@ -462,6 +473,12 @@
           "nullok": false,
           "type": {
             "typename": "text"
+          }
+        },
+        {
+          "name": "timestamptz_col",
+          "type": {
+            "typename": "timestamptz"
           }
         }
       ],
@@ -550,6 +567,11 @@
                   {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
                   "id"
                 ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer timestamptz",
+                "source": "timestamptz_col",
                 "open": true
               }
             ]
@@ -654,6 +676,12 @@
           "type": {
             "typename": "text"
           }
+        },
+        {
+          "name": "timestamptz_col",
+          "type": {
+            "typename": "timestamptz"
+          }
         }
       ],
       "annotations": {
@@ -742,6 +770,11 @@
                   "id"
                 ],
                 "open": true
+              },
+              {
+                "markdown_name": "2nd layer timestamptz",
+                "source": "timestamptz_col",
+                "open": true
               }
             ]
           }
@@ -767,6 +800,12 @@
           "nullok": false,
           "type": {
             "typename": "text"
+          }
+        },
+        {
+          "name": "timestamptz_col",
+          "type": {
+            "typename": "timestamptz"
           }
         }
       ],
@@ -856,6 +895,11 @@
                   "id"
                 ],
                 "open": true
+              },
+              {
+                "markdown_name": "2nd layer timestamptz",
+                "source": "timestamptz_col",
+                "open": true
               }
             ]
           }
@@ -939,6 +983,12 @@
           "nullok": false,
           "type": {
             "typename": "text"
+          }
+        },
+        {
+          "name": "timestamptz_col",
+          "type": {
+            "typename": "timestamptz"
           }
         }
       ],
@@ -1027,6 +1077,11 @@
                   {"inbound": [ "facet-within-facet","facet_2nd_layer_hub_inbound5_fast_filter_fk1" ]},
                   "id"
                 ],
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer timestamptz",
+                "source": "timestamptz_col",
                 "open": true
               }
             ]

@@ -49,7 +49,9 @@ export type RecordsetProps = {
   onFacetPanelOpenChanged?: (newState: boolean) => void,
 
   /**
-   * The context of the page. used by the facet popups to summarize how many level deep we are.
+   * The context of the page (the breadcrumb titles displayed above the facet popup).
+   *
+   * used by the facet popups to summarize how many level deep we are.
    */
   uiContextTitles?: TitleProps[]
 };

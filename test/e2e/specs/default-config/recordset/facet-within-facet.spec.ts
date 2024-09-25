@@ -5,10 +5,13 @@ import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedi
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
+  clearRangeInput,
+  fillRangeInput,
   testClearAllFilters, testDisplayedFacets, testSelectFacetOption,
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 /**
  * first layer facets:
@@ -89,6 +92,12 @@ type FacetParamType = {
          */
         numFacetFilters?: number
       }[],
+      selectDateTime?: {
+        min?: { date: string, time: string },
+        max?: { date: string, time: string },
+        numRows: number,
+      }[],
+
       popup?: {
         uiContext: string,
         title: string,
@@ -107,9 +116,9 @@ type FacetParamType = {
 
 }
 
-const popuFacetNames = [
+const popupFacetNames = [
   '2nd layer entity path', '2nd layer entity path 2', '2nd layer entity path with filter', '2nd layer entity path with shared prefix',
-  '2nd layer entity path with shared prefix and filter', '2nd layer entity path with fast filter'
+  '2nd layer entity path with shared prefix and filter', '2nd layer entity path with fast filter', '2nd layer timestamptz'
 ]
 
 const getTestParams = (rootUIContext: string): {
@@ -124,12 +133,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 10,
           facets: [
             {
               index: 0,
-              name: popuFacetNames[0],
+              name: popupFacetNames[0],
               options: [
                 'All records with value', 'No value',
                 'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
@@ -143,7 +152,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 1,
-              name: popuFacetNames[1],
+              name: popupFacetNames[1],
               options: [
                 'All records with value', 'No value',
                 'facet_2nd_layer_hub_inbound2_10', 'facet_2nd_layer_hub_inbound2_11', 'facet_2nd_layer_hub_inbound2_12',
@@ -157,7 +166,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 2,
-              name: popuFacetNames[2],
+              name: popupFacetNames[2],
               options: [
                 'All records with value',
                 'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
@@ -171,7 +180,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 3,
-              name: popuFacetNames[3],
+              name: popupFacetNames[3],
               options: [
                 'All records with value', 'No value',
                 'facet_2nd_layer_hub_inbound3_10', 'facet_2nd_layer_hub_inbound3_11', 'facet_2nd_layer_hub_inbound3_12',
@@ -185,7 +194,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 4,
-              name: popuFacetNames[4],
+              name: popupFacetNames[4],
               options: [
                 'All records with value',
                 'facet_2nd_layer_hub_inbound4_10', 'facet_2nd_layer_hub_inbound4_11', 'facet_2nd_layer_hub_inbound4_12',
@@ -199,7 +208,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 5,
-              name: popuFacetNames[5],
+              name: popupFacetNames[5],
               options: [
                 'All records with value', 'No value',
                 'facet_2nd_layer_hub_inbound5_10', 'facet_2nd_layer_hub_inbound5_11', 'facet_2nd_layer_hub_inbound5_12',
@@ -232,12 +241,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path 2',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 8,
           facets: [
             {
               index: 0,
-              name: popuFacetNames[0],
+              name: popupFacetNames[0],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound1_13',
                 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
@@ -250,7 +259,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 1,
-              name: popuFacetNames[1],
+              name: popupFacetNames[1],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound2_13',
                 'facet_2nd_layer_hub_inbound2_14', 'facet_2nd_layer_hub_inbound2_15'
@@ -263,7 +272,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 2,
-              name: popuFacetNames[2],
+              name: popupFacetNames[2],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound1_13',
                 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
@@ -276,7 +285,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 3,
-              name: popuFacetNames[3],
+              name: popupFacetNames[3],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound3_13',
                 'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
@@ -289,7 +298,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 4,
-              name: popuFacetNames[4],
+              name: popupFacetNames[4],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound4_13',
                 'facet_2nd_layer_hub_inbound4_14', 'facet_2nd_layer_hub_inbound4_15'
@@ -302,7 +311,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 5,
-              name: popuFacetNames[5],
+              name: popupFacetNames[5],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound5_13',
                 'facet_2nd_layer_hub_inbound5_14', 'facet_2nd_layer_hub_inbound5_15'
@@ -323,12 +332,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path with filter',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 10,
           facets: [
             {
               index: 0,
-              name: popuFacetNames[0],
+              name: popupFacetNames[0],
               options: [
                 'All records with value', 'No value',
                 'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11', 'facet_2nd_layer_hub_inbound1_12',
@@ -345,12 +354,12 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 1,
-              name: popuFacetNames[1],
+              name: popupFacetNames[1],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound2_10', 'facet_2nd_layer_hub_inbound2_11']
             },
             {
               index: 2,
-              name: popuFacetNames[2],
+              name: popupFacetNames[2],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound1_10', 'facet_2nd_layer_hub_inbound1_11'],
               popup: {
                 uiContext: rootUIContext + 'Entity path with filter:',
@@ -360,18 +369,27 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 3,
-              name: popuFacetNames[3],
+              name: popupFacetNames[3],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound3_10', 'facet_2nd_layer_hub_inbound3_11']
             },
             {
               index: 4,
-              name: popuFacetNames[4],
+              name: popupFacetNames[4],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound4_10', 'facet_2nd_layer_hub_inbound4_11']
             },
             {
               index: 5,
-              name: popuFacetNames[5],
+              name: popupFacetNames[5],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound5_10', 'facet_2nd_layer_hub_inbound5_11']
+            },
+            {
+              index: 6,
+              name: popupFacetNames[6],
+              options: ['All records with value', 'No value'],
+              selectDateTime: [{
+                min: { date: '2006-06-06', time: '00:00:00' },
+                numRows: 3
+              }]
             }
           ]
         }
@@ -394,12 +412,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path with shared prefix',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 8,
           facets: [
             {
               index: 0,
-              name: popuFacetNames[0],
+              name: popupFacetNames[0],
               options: [
                 'All records with value', 'No value', 'facet_2nd_layer_hub_inbound1_13',
                 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
@@ -412,15 +430,15 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 1,
-              name: popuFacetNames[1],
+              name: popupFacetNames[1],
               options: [
-                'All records with value', 'No value','facet_2nd_layer_hub_inbound2_13',
+                'All records with value', 'No value', 'facet_2nd_layer_hub_inbound2_13',
                 'facet_2nd_layer_hub_inbound2_14', 'facet_2nd_layer_hub_inbound2_15'
               ]
             },
             {
               index: 2,
-              name: popuFacetNames[2],
+              name: popupFacetNames[2],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound1_13',
                 'facet_2nd_layer_hub_inbound1_14', 'facet_2nd_layer_hub_inbound1_15'
@@ -428,7 +446,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 3,
-              name: popuFacetNames[3],
+              name: popupFacetNames[3],
               options: [
                 'All records with value', 'No value', 'facet_2nd_layer_hub_inbound3_13',
                 'facet_2nd_layer_hub_inbound3_14', 'facet_2nd_layer_hub_inbound3_15'
@@ -436,7 +454,7 @@ const getTestParams = (rootUIContext: string): {
               select: [{
                 option: 4,
                 numRows: 1,
-              },{
+              }, {
                 option: 1, // null
                 numRows: 6,
               }],
@@ -449,8 +467,8 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 4,
-              name: popuFacetNames[4],
-              options: [ 'All records with value', 'facet_2nd_layer_hub_inbound4_15' ],
+              name: popupFacetNames[4],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound4_15'],
               popup: {
                 uiContext: rootUIContext + 'Entity path with shared prefix:',
                 title: 'Select 2nd layer entity path with shared prefix and filter',
@@ -459,8 +477,8 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 5,
-              name: popuFacetNames[5],
-              options: [ 'All records with value', 'facet_2nd_layer_hub_inbound5_15' ]
+              name: popupFacetNames[5],
+              options: ['All records with value', 'facet_2nd_layer_hub_inbound5_15']
             },
           ]
         }
@@ -472,12 +490,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path with shared prefix and filter',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 10,
           facets: [
             {
               index: 3,
-              name: popuFacetNames[3],
+              name: popupFacetNames[3],
               options: [
                 'All records with value', 'No value', 'facet_2nd_layer_hub_inbound3_06',
                 'facet_2nd_layer_hub_inbound3_07', 'facet_2nd_layer_hub_inbound3_08', 'facet_2nd_layer_hub_inbound3_09',
@@ -495,7 +513,7 @@ const getTestParams = (rootUIContext: string): {
             },
             {
               index: 4,
-              name: popuFacetNames[4],
+              name: popupFacetNames[4],
               options: [
                 'All records with value', 'facet_2nd_layer_hub_inbound4_06', 'facet_2nd_layer_hub_inbound4_07',
                 'facet_2nd_layer_hub_inbound4_08', 'facet_2nd_layer_hub_inbound4_09'
@@ -522,12 +540,12 @@ const getTestParams = (rootUIContext: string): {
         popup: {
           uiContext: rootUIContext + ':',
           title: 'Select Entity path with fast filter',
-          facetNames: popuFacetNames,
+          facetNames: popupFacetNames,
           numRows: 8,
           facets: [
             {
               index: 5,
-              name: popuFacetNames[5],
+              name: popupFacetNames[5],
               options: [
                 'All records with value', 'No value', 'facet_2nd_layer_hub_inbound5_13',
                 'facet_2nd_layer_hub_inbound5_14', 'facet_2nd_layer_hub_inbound5_15'
@@ -549,7 +567,7 @@ const getTestParams = (rootUIContext: string): {
             // open another one and make sure it works
             {
               index: 0,
-              name: popuFacetNames[0],
+              name: popupFacetNames[0],
               options: ['All records with value', 'facet_2nd_layer_hub_inbound1_13'],
               popup: {
                 uiContext: rootUIContext + 'Entity path with fast filter:',
@@ -566,10 +584,6 @@ const getTestParams = (rootUIContext: string): {
 }
 
 /******************** helpers ************************/
-
-const getChaiseURL = (appName: string, tableName: string, baseURL: string | undefined, testInfo: TestInfo) => {
-  return `${baseURL}/${appName}/#${getCatalogID(testInfo.project.name)}/facet-within-facet:${tableName}`;
-};
 
 /**
  * This function must be defined before the test blocks.
@@ -646,6 +660,32 @@ const testFacetWithinFacet = (
               });
             }
 
+            if (Array.isArray(secondLevelProps.selectDateTime) && secondLevelProps.selectDateTime.length > 0) {
+              await test.step('selecting datetime facet(s)', async () => {
+                for await (const item of secondLevelProps.selectDateTime!) {
+                  const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(popupFacetEl);
+                  await clearRangeInput(rangeInputs.minDateInput);
+                  await clearRangeInput(rangeInputs.minTimeInput);
+                  await clearRangeInput(rangeInputs.maxDateInput);
+                  await clearRangeInput(rangeInputs.maxTimeInput);
+
+                  if (item.min) {
+                    await fillRangeInput(rangeInputs.minDateInput, item.min.date);
+                    await fillRangeInput(rangeInputs.minTimeInput, item.min.time);
+                  }
+
+                  if (item.max) {
+                    await fillRangeInput(rangeInputs.minDateInput, item.max.date);
+                    await fillRangeInput(rangeInputs.minTimeInput, item.max.time);
+                  }
+
+                  await rangeInputs.submit.click();
+                  await expect.soft(RecordsetLocators.getRangeInputValidationError(popupFacetEl)).not.toBeVisible();
+                  await expect.soft(RecordsetLocators.getRows(firstLevelModal)).toHaveCount(item.numRows);
+                }
+              });
+            }
+
             if (secondLevelProps.popup) {
               await test.step('facet popup', async () => {
                 const showMore = RecordsetLocators.getShowMore(popupFacetEl);
@@ -688,14 +728,13 @@ const testFacetWithinFacet = (
 
 
 test.describe('facet within facet', () => {
-
   test.describe.configure({ mode: 'parallel' });
 
   test.describe('recordset page', () => {
     testFacetWithinFacet(
       'main',
       async (page, baseURL, testInfo) => {
-        await page.goto(getChaiseURL('recordset', 'main', baseURL, testInfo));
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'facet-within-facet', 'main', testInfo, baseURL));
         await RecordsetLocators.waitForRecordsetPageReady(page);
         return page;
       }
@@ -706,7 +745,7 @@ test.describe('facet within facet', () => {
     testFacetWithinFacet(
       'main association',
       async (page, baseURL, testInfo) => {
-        await page.goto(getChaiseURL('record', 'record_main', baseURL, testInfo) + '/id=record_main_01');
+        await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'facet-within-facet', 'record_main', testInfo, baseURL) + '/id=record_main_01');
         await RecordLocators.waitForRecordPageReady(page);
         const modal = ModalLocators.getAddPureBinaryPopup(page);
         await RecordLocators.getRelatedTableAddButton(page, 'main association', true).click();
@@ -724,7 +763,7 @@ test.describe('facet within facet', () => {
     testFacetWithinFacet(
       'fk_to_main',
       async (page, baseURL, testInfo) => {
-        await page.goto(getChaiseURL('recordedit', 'recordedit_main', baseURL, testInfo));
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'facet-within-facet', 'recordedit_main', testInfo, baseURL));
         await RecordeditLocators.waitForRecordeditPageReady(page);
         const modal = ModalLocators.getForeignKeyPopup(page);
         await RecordeditLocators.getForeignKeyInputButton(page, 'fk_to_main', 1).click();

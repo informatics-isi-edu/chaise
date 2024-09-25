@@ -2,62 +2,74 @@
   {
     "id": "main_inbound1_inbound1_01",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_01",
-    "facet_col": "one main_inbound1_inbound1"
+    "facet_col": "one main_inbound1_inbound1",
+    "timestamptz_col": "2001-01-01T01:01:01-07:00"
   },
   {
     "id": "main_inbound1_inbound1_02",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_01",
-    "facet_col": "two main_inbound1_inbound1"
+    "facet_col": "two main_inbound1_inbound1",
+    "timestamptz_col": "2001-01-01T01:01:01-07:00"
   },
   {
     "id": "main_inbound1_inbound1_03",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_02",
-    "facet_col": "three main_inbound1_inbound1"
+    "facet_col": "three main_inbound1_inbound1",
+    "timestamptz_col": "2002-02-02T02:02:02-07:00"
   },
   {
     "id": "main_inbound1_inbound1_04",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_02",
-    "facet_col": "four main_inbound1_inbound1"
+    "facet_col": "four main_inbound1_inbound1",
+    "timestamptz_col": "2002-02-02T02:02:02-07:00"
   },
   {
     "id": "main_inbound1_inbound1_05",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_03",
-    "facet_col": "five main_inbound1_inbound1"
+    "facet_col": "five main_inbound1_inbound1",
+    "timestamptz_col": "2003-03-03T03:03:03-07:00"
   },
   {
     "id": "main_inbound1_inbound1_06",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_03",
-    "facet_col": "six main_inbound1_inbound1"
+    "facet_col": "six main_inbound1_inbound1",
+    "timestamptz_col": "2003-03-03T03:03:03-07:00"
   },
   {
     "id": "main_inbound1_inbound1_07",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_04",
-    "facet_col": "seven main_inbound1_inbound1"
+    "facet_col": "seven main_inbound1_inbound1",
+    "timestamptz_col": "2004-04-04T04:04:04-07:00"
   },
   {
     "id": "main_inbound1_inbound1_08",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_04",
-    "facet_col": "eight main_inbound1_inbound1"
+    "facet_col": "eight main_inbound1_inbound1",
+    "timestamptz_col": "2004-04-04T04:04:04-07:00"
   },
   {
     "id": "main_inbound1_inbound1_09",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_05",
-    "facet_col": "nine main_inbound1_inbound1"
+    "facet_col": "nine main_inbound1_inbound1",
+    "timestamptz_col": "2005-05-05T05:05:05-07:00"
   },
   {
     "id": "main_inbound1_inbound1_10",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_05",
-    "facet_col": "ten main_inbound1_inbound1"
+    "facet_col": "ten main_inbound1_inbound1",
+    "timestamptz_col": "2006-06-06T06:06:06-07:00"
   },
   {
     "id": "main_inbound1_inbound1_11",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_06",
-    "facet_col": "eleven main_inbound1_inbound1"
+    "facet_col": "eleven main_inbound1_inbound1",
+    "timestamptz_col": "2006-06-06T06:06:06-07:00"
   },
   {
     "id": "main_inbound1_inbound1_12",
     "main_inbound1_inbound1_to_main_inbound1_fk_col": "main_inbound1_07",
-    "facet_col": "twelve main_inbound1_inbound1"
+    "facet_col": "twelve main_inbound1_inbound1",
+    "timestamptz_col": "2007-07-07T07:07:07-07:00"
   }
 
 
