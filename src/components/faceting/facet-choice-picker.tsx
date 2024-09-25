@@ -289,7 +289,7 @@ const FacetChoicePicker = ({
       if (facetColumn.hasNullFilter) appliedLen--;
       if (facetColumn.hasNotNullFilter) appliedLen--;
 
-      // there are more than PAGE_SIZE selected rows, just display them.
+      // there are more than PAGE_SIZE selected rows, just display them and don't fetch from the server.
       if (appliedLen >= FACET_PANEL_DEFAULT_PAGE_SIZE) {
         // there might be more, we're not sure
         processFavorites(updatedRows).then((res: boolean) => {
@@ -301,6 +301,9 @@ const FacetChoicePicker = ({
         }).catch(function (err) {
           reject(err);
         });
+
+        // this is needed to ensure we're skipping the request
+        return;
       }
 
       (function (uri) {

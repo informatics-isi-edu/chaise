@@ -76,7 +76,10 @@ const getConfig = (options: TestOptions) => {
       trace: 'on-first-retry',
 
       // screenshots will be added to the playwright-report folder
-      screenshot: 'only-on-failure'
+      screenshot: 'only-on-failure',
+
+      // set the timezone to Los Angeles
+      timezoneId: 'America/Los_Angeles'
     },
     // Configure projects for major browsers.
     projects: [

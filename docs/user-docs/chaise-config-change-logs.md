@@ -2,10 +2,10 @@ The file contains changes made to chaise-config parameters.
 - Refer to [chaise-config.d](chaise-config.md) for currently supported parameters
 - Refer to [chaise-config-deprecated.md](chaise-config-deprecated.md) for deprecated parameters
 
-#### 09/20/2024 ####
+#### 09/25/2024 ####
 
 ###### PR Link
-  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2544)
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2545)
 
 ###### Removed
   - `showFaceting` has been removed in favor of the new `maxFacetDepth` property of `facetPanelDisplay`.
