@@ -11,6 +11,7 @@ This document contains deprecated chaise-config parameters.
    * [profileURL](#profileURL)
 * [Display Configuration:](#display-configuration)
    * [maxRelatedTablesOpen](#maxrelatedtablesopen)
+   * [showFaceting](#showfaceting)
 * [Share and Cite Configuration:](#share-and-cite-configuration)
    * [shareCiteAcls](#shareciteacls)
 * [Search Application](#search-application)
@@ -70,6 +71,20 @@ This document contains deprecated chaise-config parameters.
    - Sample syntax:
      ```
      maxRelatedTablesOpen: 5
+     ```
+
+#### showFaceting
+
+ If `true`, shows the faceting panel on the recordset app.
+
+> Now faceting panel is displayed by default. If you would like to disable it use the new `maxFacetDepth` property of [`facetPanelDisplay`](chaise-config.md#facetpaneldisplay).
+
+
+   - Type: Boolean
+   - Default behavior: the faceting panel will not be available on recordset page
+   - Sample syntax:
+     ```
+     showFaceting: true
      ```
 
 ### Share and Cite Configuration:

@@ -6,8 +6,9 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 type FilterChicletIdentifier = 'filters' | 'cfacets' | number;
 type FilterChicletProps = {
   /**
-   * The type of chiclet (if number, it's a facet)
-   * the identifier is passed to the onRemove function as well as onFocus
+   * The type of chiclet (if number, it's a facet).
+   *
+   * the identifier is passed to the onRemove and onTitleClick functions
    */
   identifier: FilterChicletIdentifier,
   /**

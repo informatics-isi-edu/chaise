@@ -1,0 +1,75 @@
+[
+  {
+    "id": "facet_2nd_layer_hub_inbound4_01",
+    "facet_col": "one facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_02",
+    "facet_col": "two facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_03",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_01",
+    "facet_col": "three facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_04",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_01",
+    "facet_col": "four facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_05",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_01",
+    "facet_col": "five facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_06",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_02",
+    "facet_col": "six facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_07",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_02",
+    "facet_col": "seven facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_08",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_03",
+    "facet_col": "eight facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_09",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_03",
+    "facet_col": "nine facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_10",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_04",
+    "facet_col": "ten facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_11",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_04",
+    "facet_col": "eleven facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_12",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_05",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound4"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_13",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_06",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_14",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_07",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
+  },
+  {
+    "id": "facet_2nd_layer_hub_inbound4_15",
+    "facet_2nd_layer_hub_inbound4_fk_col": "facet_2nd_layer_hub_08",
+    "facet_col": "twelve facet_2nd_layer_hub_inbound1"
+  }
+]

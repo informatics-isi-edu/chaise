@@ -6,7 +6,8 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
-  openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState
+  openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState,
+  testDisplayedFacets
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { dragAndDropWithScroll } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
@@ -230,18 +231,6 @@ test.describe('Facet reorder feature', () => {
 const getURL = (testInfo: TestInfo, baseURL?: string) => {
   return `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
 }
-
-const testDisplayedFacets = async (page: Page, facetNames: string[], openFacetNames?: string[]) => {
-  await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(facetNames.length);
-  await expect.soft(RecordsetLocators.getFacetTitles(page)).toHaveText(facetNames);
-
-  if (openFacetNames) {
-    const openedFacets = RecordsetLocators.getOpenFacetTitles(page);
-    await expect.soft(openedFacets).toHaveCount(openFacetNames.length);
-    await expect.soft(openedFacets).toHaveText(openFacetNames);
-  }
-}
-
 
 /**
  * This function will move a facet to the original positon of the destination facet.

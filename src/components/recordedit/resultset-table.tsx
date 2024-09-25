@@ -32,7 +32,6 @@ const ResultsetTable = ({
     deletable: false,
     sortable: false,
     selectMode: RecordsetSelectMode.NO_SELECT,
-    showFaceting: false,
     disableFaceting: true,
     displayMode: RecordsetDisplayMode.TABLE
   }

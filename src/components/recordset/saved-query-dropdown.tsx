@@ -521,7 +521,6 @@ const SavedQueryDropdown = ({
         selectMode: RecordsetSelectMode.NO_SELECT,
         // NOTE: when supporting faceting in saved_queries popup
         //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
-        showFaceting: false,
         disableFaceting: true,
         // used popup/savedquery so that we can configure which button to show and change the modal title
         displayMode: RecordsetDisplayMode.SAVED_QUERY_POPUP

@@ -2,11 +2,12 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-choice-picker';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-presence';
 import FacetHeader from '@isrd-isi-edu/chaise/src/components/faceting/facet-header';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-range-picker';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -16,7 +17,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // servies
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -42,7 +43,11 @@ type FacetingProps = {
    * NOTE we have to make sure this function is called after each update of
    *      state variables that they use. Otherwise we will face a staleness issues.
    */
-  registerRecordsetCallbacks: any,
+  registerRecordsetCallbacks: (
+    getAppliedFilters: () => FacetCheckBoxRow[][],
+    removeAppliedFilters: (index?: number | 'filters' | 'cfacets') => void,
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void
+  ) => void,
   /**
    * the recordset's log stack path
    */
@@ -51,13 +56,19 @@ type FacetingProps = {
    * callback that should be called when we're ready to initalize the data
    */
   setReadyToInitialize: () => void,
+
+
+  recordsetFacetDepthLevel: number,
+  recordsetUIContextTitles?: TitleProps[]
 }
 
 const Faceting = ({
   facetPanelOpen,
   registerRecordsetCallbacks,
   recordsetLogStackPath,
-  setReadyToInitialize
+  setReadyToInitialize,
+  recordsetUIContextTitles,
+  recordsetFacetDepthLevel
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -388,8 +399,13 @@ const Faceting = ({
    * Register the facet functions used for flow-control and recordset communication
    * When all the facets have called this function, it will ask flow-control to initialize data
    */
-  const registerFacet = (index: number, processFacet: Function, preprocessFacet: Function,
-    getAppliedFilters: Function, removeAppliedFilters: Function) => {
+  const registerFacet = (
+    index: number,
+    processFacet: (reloadCauses: string[], reloadStartTime: number) => Promise<boolean>,
+    preprocessFacet: () => Promise<boolean>,
+    getAppliedFilters: () => FacetCheckBoxRow[],
+    removeAppliedFilters: () => void
+  ) => {
 
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
@@ -472,7 +488,7 @@ const Faceting = ({
 
   const getFacetLogStack = (index: number, extraInfo?: any): any => {
     return getLogStack(facetRequestModels.current[index].logStackNode, extraInfo);
-  }
+  };
 
   //------------------- callbacks that recordset will call: ----------------//
   /**
@@ -720,6 +736,8 @@ const Faceting = ({
           dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
           facetPanelOpen={facetPanelOpen}
           getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
+          recordsetUIContextTitles={recordsetUIContextTitles}
+          recordsetFacetDepthLevel={recordsetFacetDepthLevel}
         />
     }
   };

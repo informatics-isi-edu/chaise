@@ -66,6 +66,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.config.ts
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.config.ts
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
+E2EDrecordsetFacetWithinFacet=test/e2e/specs/default-config/recordset/facet-within-facet.config.ts
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
 
 # misc tests
@@ -88,7 +89,7 @@ Manualrecordset=test/manual/specs/recordset.config.ts
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2EDrecordsetFacetWithinFacet)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordImmutable) $(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)

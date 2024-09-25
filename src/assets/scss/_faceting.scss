@@ -64,6 +64,8 @@
         border: 0;
         border-radius: 0;
         padding: 10px 5px;
+        // reserve enough space for the spinner and drag icons:
+        padding-right: 40px;
         text-transform: none;
         position: relative;
         // Overriding accordian-button css to align right angle bracket icon to left

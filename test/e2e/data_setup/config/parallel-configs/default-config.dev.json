@@ -11,7 +11,8 @@
             "recordedit/null-values.config.json",
 
             "recordset/add.config.json",
-            "recordset/edit.config.json"
+            "recordset/edit.config.json",
+            "recordset/facet-within-facet.config.json"
         ]
     },
     "cleanup" : true

@@ -16,7 +16,7 @@ import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
+import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import React, { useEffect, useRef, useState } from 'react';
@@ -26,7 +26,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // models
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -63,7 +63,8 @@ const Recordset = ({
   onFacetPanelOpenChanged,
   parentReference,
   parentTuple,
-  savedQueryConfig
+  savedQueryConfig,
+  uiContextTitles
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -88,6 +89,7 @@ const Recordset = ({
           parentContainer={parentContainer}
           parentStickyArea={parentStickyArea}
           onFacetPanelOpenChanged={onFacetPanelOpenChanged}
+          uiContextTitles={uiContextTitles}
         />
       </RecordsetProvider>
     </AlertsProvider>
@@ -105,7 +107,8 @@ type RecordsetInnerProps = {
   },
   parentContainer?: HTMLElement,
   parentStickyArea?: HTMLElement,
-  onFacetPanelOpenChanged?: (newState: boolean) => void
+  onFacetPanelOpenChanged?: (newState: boolean) => void,
+  uiContextTitles?: TitleProps[]
 };
 
 /**
@@ -119,7 +122,8 @@ const RecordsetInner = ({
   logInfo,
   parentContainer,
   parentStickyArea,
-  onFacetPanelOpenChanged
+  onFacetPanelOpenChanged,
+  uiContextTitles
 }: RecordsetInnerProps): JSX.Element => {
 
   const { dispatchError, errors } = useError();
@@ -174,9 +178,9 @@ const RecordsetInner = ({
    * The callbacks from faceting.tsx that we will use here
    */
   const facetCallbacks = useRef<{
-    getAppliedFilters: Function,
-    removeAppliedFilters: Function,
-    focusOnFacet: Function,
+    getAppliedFilters: () => FacetCheckBoxRow[][],
+    removeAppliedFilters: (index?: number | 'filters' | 'cfacets') => void,
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void
   } | null>(null);
 
   const clearSearch = useRef<() => void>(null);
@@ -518,7 +522,11 @@ const RecordsetInner = ({
   /**
    * The callbacks from faceting.tsx that are used in this component
    */
-  const registerCallbacksFromFaceting = (getAppliedFilters: Function, removeAppliedFilters: Function, focusOnFacet: Function) => {
+  const registerCallbacksFromFaceting = (
+    getAppliedFilters: () => FacetCheckBoxRow[][],
+    removeAppliedFilters: () => void,
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void
+  ) => {
     facetCallbacks.current = { getAppliedFilters, removeAppliedFilters, focusOnFacet };
   }
 
@@ -623,6 +631,9 @@ const RecordsetInner = ({
 
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
+  const recordsetUIContextTitles = uiContextTitles ? [...uiContextTitles] : [{ reference: initialReference }];
+  const recordsetFacetDepthLevel = config.facetDepthLevel !== undefined ? config.facetDepthLevel : 1;
+
   /**
    * version info
    */
@@ -726,7 +737,7 @@ const RecordsetInner = ({
               valueTooltip={chicletValueTooltip}
               onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
               // we cannot just pass the callback in the following since it's causing staleness state issue
-              onTitleClick={(identifier) => facetCallbacks.current!.focusOnFacet(identifier)}
+              onTitleClick={(identifier) => typeof identifier === 'number' && facetCallbacks.current!.focusOnFacet(identifier)}
             />
           );
         });
@@ -754,7 +765,7 @@ const RecordsetInner = ({
   }
 
   const renderShowFilterPanelBtn = () => {
-    if (facetPanelOpen || !config.showFaceting || config.disableFaceting) {
+    if (facetPanelOpen || config.disableFaceting || !reference.display.showFaceting || (recordsetFacetDepthLevel > reference.display.maxFacetDepth)) {
       return;
     }
     return (
@@ -779,6 +790,8 @@ const RecordsetInner = ({
             setReadyToInitialize={() => {
               setFacetsRegistered(true);
             }}
+            recordsetUIContextTitles={recordsetUIContextTitles}
+            recordsetFacetDepthLevel={recordsetFacetDepthLevel}
           />
         </div>
       }
