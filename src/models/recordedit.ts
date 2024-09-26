@@ -108,7 +108,7 @@ export type RecordeditForeignkeyCallbacks = {
   /**
    * if defined, will be used in foreign key & foreign key dropdown fields
    */
-  bulkForeignKeySelectedRows?: SelectedRow[],
+  bulkForeignKeySelectedRows?: (SelectedRow | null)[],
   /**
    * if defined, will be used for validating the foreign key value.
    *
@@ -148,6 +148,10 @@ export interface RecordeditColumnModel {
    * (used in viewer app to hide the columns)
    */
   isHidden: boolean;
+  /**
+   * whether to trigger using the unqiue features of bulk foreign key create
+   */
+  isLeafInUniqueBulkForeignKeyCreate: boolean;
 }
 
 export interface TimestampOptions {

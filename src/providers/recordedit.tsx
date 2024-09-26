@@ -45,15 +45,19 @@ type ResultsetProps = {
 }
 
 export const RecordeditContext = createContext<{
-  /* which mode of recordedit we are in */
+  /**
+   * which mode of recordedit we are in
+   */
   appMode: string,
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
-  queryParams: any,
-  prefillRowData?: any[],
-  /* the main entity reference */
+  /**
+   * the main entity reference
+   */
   reference: any,
-  /* the tuples correspondeing to the displayed form */
+  /**
+   * the tuples correspondeing to the displayed form
+   */
   tuples: any,
   /**
    * the raw data of outbound foreign keys. used in foreignkey-field to support domain-filter
@@ -62,27 +66,49 @@ export const RecordeditContext = createContext<{
    */
   foreignKeyData: any,
   waitingForForeignKeyData: boolean,
-  /* the created column models from reference.columns */
+  /**
+   * the created column models from reference.columns
+   */
   columnModels: RecordeditColumnModel[],
-  /* whether a value can be updated or not (key-value pair where key is the same structure as form values ) */
+  /**
+   * whether a value can be updated or not (key-value pair where key is the same structure as form values )
+   */
   canUpdateValues: { [key: string]: boolean };
-  /** precomputed column permission error that should be displayed to the users */
+  /**
+   * precomputed column permission error that should be displayed to the users
+   */
   columnPermissionErrors: { [columnName: string]: string };
-  /* Whether the data for the main entity is fetched and the model is initialized  */
+  /**
+   * Whether the data for the main entity is fetched and the model is initialized
+   */
   initialized: boolean,
-  /* Array of numbers for initalizing form data */
+  /**
+   * Array of numbers for initalizing form data
+   */
   forms: number[],
-  /* callback to add form(s) to the forms array */
+  /**
+   * callback to add form(s) to the forms array
+   */
   addForm: (count: number) => number[],
-  /* callback to remove from(s) from the forms array */
+  /**
+   * callback to remove from(s) from the forms array
+   */
   removeForm: (indexes: number[], skipLogging?: boolean) => void,
-  /* returns the initial values for all forms to display */
+  /**
+   * returns the initial values for all forms to display
+   */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
-  /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
+  /**
+   * initiate the process of handling prefilled and default foreignkeys (in create mode)
+   */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
-  /* callback for react-hook-form to call when forms are valid */
+  /**
+   * callback for react-hook-form to call when forms are valid
+   */
   onSubmitValid: (data: any) => void,
-  /* callback for react-hook-form to call when forms are NOT valid */
+  /**
+   * callback for react-hook-form to call when forms are NOT valid
+   */
   onSubmitInvalid: (errors: any, e?: any) => void,
   /**
    * whether we should show the spinner indicating cloning form data
@@ -100,18 +126,30 @@ export const RecordeditContext = createContext<{
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
-  /* for updating the last contiguous chunk tracking info */
+  /**
+   * for updating the last contiguous chunk tracking info
+   */
   setLastContiguousChunk: (arg0: any) => void,
-  /* useRef react hook to current value */
+  /**
+   * useRef react hook to current value
+   */
   lastContiguousChunkRef: any,
-  /* max rows allowed to add constant */
+  /**
+   * max rows allowed to add constant
+   */
   MAX_ROWS_TO_ADD: number,
-  /* the prefill object from cookie storage based on prefill query param */
+  /**
+   * the prefill object from cookie storage based on prefill query param
+   */
   prefillObject: PrefillObject | null,
-  /* the rows that are already in use in recoredit if we have a prefill object and the association is unique */
-  bulkForeignKeySelectedRows: SelectedRow[],
-  setbulkForeignKeySelectedRows: (val: SelectedRow[]) => void,
-  /* function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique */
+  /**
+   * the rows that are already in use in recoredit if we have a prefill object and the association is unique
+   */
+  bulkForeignKeySelectedRows: (SelectedRow | null)[],
+  setBulkForeignKeySelectedRows: (val: (SelectedRow | null)[]) => void,
+  /**
+   * function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique
+   */
   updateBulkForeignKeySelectedRows: UpdateBulkForeignKeyRowsCallback,
   /**
    * log client actions
@@ -266,7 +304,7 @@ export default function RecordeditProvider({
   const [forms, setForms] = useState<number[]>([1]);
 
   const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
-  const [bulkForeignKeySelectedRows, setbulkForeignKeySelectedRows] = useState<SelectedRow[]>([]);
+  const [bulkForeignKeySelectedRows, setBulkForeignKeySelectedRows] = useState<(SelectedRow | null)[]>([]);
 
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
@@ -293,7 +331,7 @@ export default function RecordeditProvider({
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
-      const cm = columnToColumnModel(column, isHidden, prefillObj);
+      const cm = columnToColumnModel(column, isHidden, prefillObj, reference.bulkCreateForeignKeyObject);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -799,12 +837,21 @@ export default function RecordeditProvider({
     if (reference.bulkCreateForeignKeyObject?.isUnique) {
       const tempSelectedRows = [...bulkForeignKeySelectedRows];
 
+      console.log('before: ');
+      tempSelectedRows.forEach((row, index) => {
+        console.log(`row at index ${index}: `, row?.displayname.value);
+      });
+
       indexes.forEach((index: number) => {
         // use splice to remove the element from the array and shift all array values after this element forward
         tempSelectedRows.splice(index, 1);
       });
 
-      setbulkForeignKeySelectedRows(tempSelectedRows);
+      console.log('after: ');
+      tempSelectedRows.forEach((row, index) => {
+        console.log(`row at index ${index}: `, row?.displayname.value);
+      });
+      setBulkForeignKeySelectedRows(tempSelectedRows);
     }
 
     // remove the forms based on the given indexes
@@ -840,7 +887,7 @@ export default function RecordeditProvider({
       delete tempSelectedRows[indexToChange];
     }
 
-    setbulkForeignKeySelectedRows(tempSelectedRows);
+    setBulkForeignKeySelectedRows(tempSelectedRows);
   }
 
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
@@ -1124,8 +1171,6 @@ export default function RecordeditProvider({
       foreignKeyData,
       initialized,
       modalOptions,
-      queryParams,
-      prefillRowData,
       reference,
       tuples,
       waitingForForeignKeyData,
@@ -1154,7 +1199,7 @@ export default function RecordeditProvider({
       // prefill association modal
       prefillObject,
       bulkForeignKeySelectedRows,
-      setbulkForeignKeySelectedRows,
+      setBulkForeignKeySelectedRows,
       updateBulkForeignKeySelectedRows,
 
       // log related:

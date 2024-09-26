@@ -126,12 +126,22 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     urlLimitAlert.current = null;
   }
 
+  /**
+   * display the too many forms alert
+   * (we want to ensure only one alert is displayed at the time)
+   *
+   * @param message the alert message to show. this can differ depending on how many forms can still be added
+   * @param type the type of alert to show
+   */
   const addTooManyFormsAlert = (message: string, type: ChaiseAlertType) => {
     if (tooManyFormsAlert.current) return;
 
     tooManyFormsAlert.current = addAlert(message, type, () => tooManyFormsAlert.current = null)
   }
 
+  /**
+   * remove too many forms alert
+   */
   const removeTooManyFormsAlert = () => {
     if (!tooManyFormsAlert.current) return;
 

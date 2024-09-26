@@ -358,16 +358,9 @@ export default function RecordsetProvider({
           } else {
             removeURLLimitAlert();
           }
-        } else if (config.displayMode === RecordsetDisplayMode.FK_BULK) {
-          // TODO: how to get numberForms?
-          // const numberFormsAllowed = RECORDEDIT_MAX_ROWS - numberForms
-
-          const numberFormsAllowed = RECORDEDIT_MAX_ROWS - 0;
-          let alertMessage = `Cannot select ${res.length} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
-          if (numberFormsAllowed === 0) alertMessage = `Cannot select ${res.length} records. Maximum number of forms already added.`;
-
-          if (temp === false) {
-            addTooManyFormsAlert(alertMessage, ChaiseAlertType.WARNING);
+        } else if (config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE) {
+          if (typeof temp === 'string') {
+            addTooManyFormsAlert(temp, ChaiseAlertType.WARNING);
           } else {
             removeTooManyFormsAlert();
           }

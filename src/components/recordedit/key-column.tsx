@@ -29,7 +29,7 @@ const KeyColumn = ({
 
   const {
     appMode, columnModels, columnPermissionErrors,
-    config, forms, logRecordeditClientAction, reference
+    config, forms, logRecordeditClientAction
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -75,8 +75,9 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
-    const bulkFKObject = reference.bulkCreateForeignKeyObject
-    if (bulkFKObject?.isUnique && cm.column.name === bulkFKObject.leafColumn.name) {
+    // hide the button if the foreign key values for this column are part of a unique key
+    // and the other part of that key is the prefiiled column that triggered the bulkForeignKey UI
+    if (cm.isLeafInUniqueBulkForeignKeyCreate) {
       return false
     }
 

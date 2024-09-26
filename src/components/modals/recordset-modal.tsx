@@ -49,7 +49,7 @@ export type RecordestModalProps = {
    * and instead is just going to call this function. This is done this way
    * so we can apply the logic to disable the submit button
    */
-  onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean,
+  onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean | string,
   /**
    * The function that will be called on submit
    * Note: the modal won't close on submit and if that's the expected behavior,
@@ -249,7 +249,7 @@ const RecordsetModal = ({
         </>
       )
       break;
-    case RecordsetDisplayMode.FK_BULK:
+    case RecordsetDisplayMode.FK_POPUP_BULK_CREATE:
       submitText = 'Continue';
       submitTooltip = (
         <>
@@ -314,7 +314,7 @@ const RecordsetModal = ({
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
-      case RecordsetDisplayMode.FK_BULK:
+      case RecordsetDisplayMode.FK_POPUP_BULK_CREATE:
         return (
           <div>
             <span>Select a set of </span>

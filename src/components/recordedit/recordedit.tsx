@@ -85,7 +85,7 @@ const Recordedit = ({
       onSubmitSuccess={onSubmitSuccess}
       onSubmitError={onSubmitError}
     >
-      <RecordeditInner parentContainer={parentContainer} />
+      <RecordeditInner parentContainer={parentContainer} prefillRowData={prefillRowData} />
     </RecordeditProvider>
   );
 
@@ -99,10 +99,12 @@ const Recordedit = ({
 
 export type RecordeditInnerProps = {
   parentContainer?: HTMLElement;
+  prefillRowData?: any[];
 }
 
 const RecordeditInner = ({
-  parentContainer
+  parentContainer,
+  prefillRowData
 }: RecordeditInnerProps): JSX.Element => {
 
   const { validateSessionBeforeMutation } = useAuthn();
@@ -110,8 +112,8 @@ const RecordeditInner = ({
   const { addTooManyFormsAlert } = useAlert();
   const {
     appMode, columnModels, config, foreignKeyData, initialized, modalOptions,
-    prefillObject, bulkForeignKeySelectedRows, setbulkForeignKeySelectedRows,
-    prefillRowData, reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
+    prefillObject, bulkForeignKeySelectedRows, setBulkForeignKeySelectedRows,
+    reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
     getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
     showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
@@ -123,7 +125,7 @@ const RecordeditInner = ({
   const [showBulkForeignKeyModal, setShowBulkForeignKeyModal] = useState<boolean>(false);
   const [bulkForeignKeyPickerProps, setBulkForeignKeyPickerProps] = useState<RecordsetProps | null>(null);
   // when initializing the page, the selections in the modal that appears first should fill the first form
-  const [selectionsFillFirstForm, setSelectionsFillFirstForm] = useState<boolean>(true);
+  const [bulkForeignKeySelectionsFillFirstForm, setBulkForeignKeySelectionsFillFirstForm] = useState<boolean>(true);
 
   /**
    * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason
@@ -315,82 +317,12 @@ const RecordeditInner = ({
     /**
      * used to trigger recordset select view when selecting multiple foreign key values
      *
-     * trigger the bulk foreign key modal when there is are 2 foreign keys and
+     * trigger the bulk foreign key modal when there are 2 foreign keys and
      * we know the leaf column for the relation is visible in create mode
-     **/
-    if (reference.bulkCreateForeignKeyObject) {
-      const bulkFKObject = reference.bulkCreateForeignKeyObject;
-      const domainRef: any = bulkFKObject.leafColumn.reference;
-      const andFilters: any[] = bulkFKObject.andFiltersForLeaf();
-
-      // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
-      let customFacets: any = null;
-      if (
-        domainRef.pseudoColumn &&
-        domainRef.pseudoColumn.filterProps &&
-        domainRef.pseudoColumn.filterProps.leafFilterString
-      ) {
-        // NOTE should we display the filters or not?
-        customFacets = {
-          ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString,
-          removable: false,
-        };
-      }
-
-      const modalReference = domainRef.addFacets(andFilters, customFacets)
-        .contextualize.compactSelectAssociationLink;
-
-      const recordsetConfig: RecordsetConfig = {
-        viewable: false,
-        editable: false,
-        deletable: false,
-        sortable: true,
-        selectMode: RecordsetSelectMode.MULTI_SELECT,
-        showFaceting: true,
-        disableFaceting: false,
-        displayMode: RecordsetDisplayMode.FK_BULK,
-      };
-
-      const stackElement = LogService.getStackNode(
-        LogStackTypes.RELATED,
-        domainRef.table,
-        { source: domainRef.compressedDataSource, entity: true, picker: 1 }
-      );
-
-      const logInfo = {
-        logObject: null,
-        logStack: [stackElement],
-        // logStack: getRecordLogStack(stackElement),
-        logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
-      };
-
-      let getDisabledTuples;
-      if (bulkFKObject.isUnique) {
-        /**
-         * The existing rows in this table must be disabled
-         * so users doesn't resubmit them.
-         */
-        getDisabledTuples = disabledTuplesPromise(
-          domainRef.contextualize.compactSelectAssociationLink,
-          bulkFKObject.disabledRowsFilter(),
-          []
-        );
-      }
-
-      // set recordset select view then set selected rows on "submit"
-      setBulkForeignKeyPickerProps({
-        initialReference: modalReference,
-        initialPageLimit: modalReference.display.defaultPageSize
-          ? modalReference.display.defaultPageSize
-          : RECORDSET_DEFAULT_PAGE_SIZE,
-        config: recordsetConfig,
-        logInfo: logInfo,
-        parentReference: reference,
-        getDisabledTuples
-      });
-
-      setShowBulkForeignKeyModal(true);
-    }
+     *
+     * if `bulkCreateForeignKeyObject` is defined on `reference`, we know the above is true
+     */
+    if (reference.bulkCreateForeignKeyObject) openBulkForeignKeyModal();
 
     const initialValues = getInitialFormValues(forms, columnModels);
     methods.reset(initialValues);
@@ -492,9 +424,8 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        const bulkFKObject = reference.bulkCreateForeignKeyObject;
         // don't copy the value for the leaf column for an assoication that is unique
-        if (bulkFKObject?.isUnique && cm.column.name === bulkFKObject.leafColumn.name) return;
+        if (cm.isLeafInUniqueBulkForeignKeyCreate) return;
 
         copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
       });
@@ -521,7 +452,7 @@ const RecordeditInner = ({
     const tempFormValues = { ...formValues };
     reference.activeList.allOutBounds.forEach((col: any) => {
       const bulkFKObject = reference.bulkCreateForeignKeyObject;
-        // don't copy the value for the leaf column for an assoication that is unique
+      // don't copy the value if the column is the leaf column in a unique key for bullk foreign key create
       if (bulkFKObject?.isUnique && col.name === bulkFKObject.leafColumn.name) return;
 
       // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
@@ -551,25 +482,59 @@ const RecordeditInner = ({
     const bulkFKObject = reference.bulkCreateForeignKeyObject;
     // check for bulkCreateForeignKeyObject being defined since a malformed prefillObject should be ignored
     //   and the `bulkCreateForeignKeyObject` constructor will handle those malformed cases
-    if (!bulkForeignKeyPickerProps || !bulkFKObject) return;
+    if (!bulkFKObject) return;
+
+    const domainRef: any = bulkFKObject.leafColumn.reference;
+    const andFilters: any[] = bulkFKObject.andFiltersForLeaf();
+
+    const modalReference = domainRef.addFacets(andFilters).contextualize.compactSelectBulkForeignKey;
+
+    const recordsetConfig: RecordsetConfig = {
+      viewable: false,
+      editable: false,
+      deletable: false,
+      sortable: true,
+      selectMode: RecordsetSelectMode.MULTI_SELECT,
+      showFaceting: true,
+      disableFaceting: false,
+      displayMode: RecordsetDisplayMode.FK_POPUP_BULK_CREATE,
+    };
+
+    const stackElement = LogService.getStackNode(
+      LogStackTypes.FOREIGN_KEY,
+      domainRef.table,
+      { source: domainRef.compressedDataSource, entity: true, picker: 1 }
+    );
+
+    const logInfo = {
+      logStack: [stackElement],
+      logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_BULK_FOREIGN_KEY),
+    };
 
     let getDisabledTuples;
     if (bulkFKObject.isUnique) {
-      // set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
-      // selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
+      /**
+       * The existing rows in this table must be disabled so users doesn't resubmit them.
+       *
+       * set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
+       * selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
+       */
       getDisabledTuples = disabledTuplesPromise(
-        bulkFKObject.leafColumn.reference.contextualize.compactSelectAssociationLink,
+        domainRef.contextualize.compactSelectBulkForeignKey,
         bulkFKObject.disabledRowsFilter(),
         bulkForeignKeySelectedRows
       );
     }
 
+    const pageSize = modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize : RECORDSET_DEFAULT_PAGE_SIZE;
+
+    // set recordset select view then set selected rows on "submit"
     setBulkForeignKeyPickerProps({
-      initialReference: bulkForeignKeyPickerProps.initialReference,
-      initialPageLimit: bulkForeignKeyPickerProps.initialPageLimit,
-      config: bulkForeignKeyPickerProps.config,
-      logInfo: bulkForeignKeyPickerProps.logInfo,
-      parentReference: bulkForeignKeyPickerProps.parentReference,
+      initialReference: modalReference,
+      initialPageLimit: pageSize,
+      config: recordsetConfig,
+      logInfo: logInfo,
+      parentReference: reference,
       getDisabledTuples
     });
 
@@ -582,15 +547,28 @@ const RecordeditInner = ({
 
     // if we fill the first form, then reduce our calculation by 1
     // NOTE: forms.length "should" be 1 at this point before subtracting 1
-    if (selectionsFillFirstForm) numForms--;
+    if (bulkForeignKeySelectionsFillFirstForm) numForms--;
 
-    return (rows.length + numForms < RECORDEDIT_MAX_ROWS);
+    if (rows.length + numForms < RECORDEDIT_MAX_ROWS) {
+      return true;
+    }
+
+    // there are too many forms trying to be added
+    const numberFormsAllowed = RECORDEDIT_MAX_ROWS - numForms;
+    let alertMessage = `Cannot select ${rows.length} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
+    if (numberFormsAllowed === 0) alertMessage = `Cannot select ${rows.length} records. Maximum number of forms already added.`;
+
+    return alertMessage;
   }
 
   // user closes the modal without making any selections
   const closeBulkForeignKeyCB = () => {
     // if the page was loaded with a modal showing and it is dismissed, update app state variable and do nothing else
-    if (selectionsFillFirstForm) setSelectionsFillFirstForm(false);
+    // ensure `bulkForeignKeySelectedRows` is initialized with an empty value
+    if (bulkForeignKeySelectionsFillFirstForm) {
+      setBulkForeignKeySelectionsFillFirstForm(false);
+      setBulkForeignKeySelectedRows([null]);
+    }
 
     setShowBulkForeignKeyModal(false);
   }
@@ -628,7 +606,7 @@ const RecordeditInner = ({
        * values from the modalSelectedRows in the same index order
        **/
       const newRows = [...bulkForeignKeySelectedRows, ...modalSelectedRows]
-      setbulkForeignKeySelectedRows(newRows);
+      setBulkForeignKeySelectedRows(newRows);
     }
 
     // recordedit has already been initialized so start adding new forms
@@ -636,20 +614,14 @@ const RecordeditInner = ({
     let initialValues = tempFormValues,
       startFormNumber: number;
 
-    if (selectionsFillFirstForm) {
+    if (bulkForeignKeySelectionsFillFirstForm) {
       if (modalSelectedRows.length > 1) {
         initialValues = createNewForms(tempFormValues, modalSelectedRows.length - 1).tempFormValues;
       }
 
       startFormNumber = 1;
 
-      setSelectionsFillFirstForm(false);
-      // } else if (annotation.doClone) {
-      // TODO: when configurable through annotation, allow for clone if configured
-      //   const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(tempFormValues, modalSelectedRows.length);
-
-      //   startFormNumber = newFormsObj.lastFormValue + 1;
-      //   initialValues = newFormsObj.tempFormValues;
+      setBulkForeignKeySelectionsFillFirstForm(false);
     } else {
       // use default values to fill new forms
       const newFormValues: number[] = addForm(modalSelectedRows.length);

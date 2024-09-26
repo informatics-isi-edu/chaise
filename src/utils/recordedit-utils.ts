@@ -32,7 +32,12 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any, isHidden?: boolean, prefillObject?: PrefillObject | null): RecordeditColumnModel {
+export function columnToColumnModel(
+  column: any,
+  isHidden?: boolean,
+  prefillObject?: PrefillObject | null,
+  bulkFKObject?: any
+): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
   const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
@@ -58,6 +63,7 @@ export function columnToColumnModel(column: any, isHidden?: boolean, prefillObje
   let isPrefilled = false, hasDomainFilter = false;
   if (column.isForeignKey) hasDomainFilter = column.hasDomainFilter;
 
+  let isLeafInUniqueBulkForeignKeyCreate = false;
   if (prefillObject) {
     if (column.isForeignKey) {
       if (
@@ -67,6 +73,10 @@ export function columnToColumnModel(column: any, isHidden?: boolean, prefillObje
         allForeignKeyColumnsPrefilled(column, prefillObject)
       ) {
         isPrefilled = true;
+      }
+
+      if (bulkFKObject?.isUnique && bulkFKObject.leafColumn.name === column.name) {
+        isLeafInUniqueBulkForeignKeyCreate = true
       }
 
     } else if (column.name in prefillObject.keys) {
@@ -82,7 +92,8 @@ export function columnToColumnModel(column: any, isHidden?: boolean, prefillObje
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
     hasDomainFilter,
-    isHidden: !!isHidden
+    isHidden: !!isHidden,
+    isLeafInUniqueBulkForeignKeyCreate
   };
 }
 
@@ -888,9 +899,9 @@ export function validateForeignkeyValue(
 export function disabledRowTooltip(disabledType: DisabledRowType): string {
   let disabledTooltip = '';
   if (disabledType === DisabledRowType.ASSOCIATED) {
-    disabledTooltip = MESSAGE_MAP.tooltip.otherRow;
+    disabledTooltip = MESSAGE_MAP.tooltip.associatedDisabledRow;
   } else if (disabledType === DisabledRowType.SELECTED) {
-    disabledTooltip = MESSAGE_MAP.tooltip.otherInput;
+    disabledTooltip = MESSAGE_MAP.tooltip.selectedDisabledRow;
   }
 
   return disabledTooltip;
@@ -904,7 +915,7 @@ export function disabledRowTooltip(disabledType: DisabledRowType): string {
  * @param rowsUsedInForm
  * @returns a function that returns a promise
  */
-export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[], rowsUsedInForm: SelectedRow[]) {
+export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[], rowsUsedInForm: (SelectedRow | null)[]) {
   /**
    * The existing rows in this p&b association must be disabled
    * so users doesn't resubmit them.
@@ -953,7 +964,7 @@ export function disabledTuplesPromise(domainRef: any, disabledRowsFilters: any[]
           });
 
           // iterate through the current row selections in recordedit forms
-          rowsUsedInForm.forEach((row: SelectedRow) => {
+          rowsUsedInForm.forEach((row: SelectedRow | null) => {
             // if an input is empty, there won't be a row defined
             if (!row) return;
 

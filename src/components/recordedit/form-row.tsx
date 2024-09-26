@@ -327,9 +327,9 @@ const FormRow = ({
      *  - the column is a foreignkey
      *  - and the column is the one used for associating to the leaf table of the association
      */
-    if (bulkFKObject?.isUnique && column.isForeignKey && bulkFKObject.leafColumn.name === colName) {
+    if (columnModel.isLeafInUniqueBulkForeignKeyCreate) {
       tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
-        column.reference.contextualize.compactSelectForeignKey,
+        column.reference.contextualize.compactSelectBulkForeignKey,
         bulkFKObject.disabledRowsFilter(),
         bulkForeignKeySelectedRows
       );

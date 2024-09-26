@@ -9,7 +9,7 @@ export type RecordsetProviderGetDisabledTuples = (
   logStackPath: string, requestCauses?: any, reloadStartTime?: any
 ) => Promise<{ page: any, disabledRows?: DisabledRow[] }>;
 
-export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean
+export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean | string
 
 
 export type RecordsetProps = {
@@ -62,12 +62,12 @@ export enum RecordsetDisplayMode {
   POPUP = 'popup',
   FACET_POPUP = 'popup/facet',
   FK_POPUP = 'popup/foreignkey',
+  FK_POPUP_BULK_CREATE = 'popup/foreignkey/bulk',
   FK_POPUP_CREATE = 'popup/foreignkey/create',
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
   PURE_BINARY_POPUP_UNLINK = 'popup/purebinary/unlink',
-  SAVED_QUERY_POPUP = 'popup/savedquery',
-  FK_BULK = 'popup/foreignkey/bulk'
+  SAVED_QUERY_POPUP = 'popup/savedquery'
 }
 
 export type RecordsetConfig = {
@@ -162,8 +162,8 @@ export type SelectedRow = {
 }
 
 export enum DisabledRowType {
-  ASSOCIATED= 'associated',
-  SELECTED= 'selected'
+  ASSOCIATED= 'associated', // a row that is already associated
+  SELECTED= 'selected' // a row that is already selected in another recordedit form
 }
 
 export type DisabledRow = {
