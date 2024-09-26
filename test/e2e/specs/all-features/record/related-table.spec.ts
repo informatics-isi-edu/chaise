@@ -864,7 +864,7 @@ test.describe('Related tables', () => {
      * This test ensures the tracking of bulkForeignKeySelectedRows is done right when the first form has no value filled in by the initial modal
      */
     test('closing the initial modal and using "Add more" to add more forms with values', async ({ page }) => {
-      let newPage: Page, modal: Locator;
+      let newPage: Page, bulkFKModal: Locator;
 
       await test.step('should open recordedit with a modal picker showing', async () => {
         const addBtn = RecordLocators.getRelatedTableAddButton(page, params.table_name);
@@ -872,23 +872,23 @@ test.describe('Related tables', () => {
         newPage = await clickNewTabLink(addBtn);
         await RecordeditLocators.waitForRecordeditPageReady(newPage);
 
-        modal = ModalLocators.getRecordeditBulkFKPopup(newPage);
-        await expect.soft(modal).toBeAttached();
+        bulkFKModal = ModalLocators.getRecordeditBulkFKPopup(newPage);
+        await expect.soft(bulkFKModal).toBeAttached();
       });
 
       await test.step('modal should have 3 disabled rows', async () => {
-        const rows = RecordsetLocators.getRows(modal);
+        const rows = RecordsetLocators.getRows(bulkFKModal);
         await expect.soft(rows).toHaveCount(10);
-        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
 
-        await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
         await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
         await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
         await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
       });
 
       await test.step('closing the initial modal should not add any new forms AND not fill the first form', async () => {
-        await testModalClose(modal);
+        await testModalClose(bulkFKModal);
 
         await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(1);
         await testInputValue(newPage, 1, params.prefill_col, params.prefill_col, RecordeditInputType.FK_POPUP, false, params.prefill_value);
@@ -898,24 +898,24 @@ test.describe('Related tables', () => {
       await test.step('clicking "add more" should have 3 rows disabled', async () => {
         await RecordeditLocators.getAddMoreButton(newPage).click();
         // The same modal when the page loaded should show again
-        await expect.soft(modal).toBeAttached();
+        await expect.soft(bulkFKModal).toBeAttached();
 
-        const rows = RecordsetLocators.getRows(modal);
+        const rows = RecordsetLocators.getRows(bulkFKModal);
         await expect.soft(rows).toHaveCount(10);
-        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
 
-        await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
         await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
         await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
         await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
       });
 
       await test.step('select 2 more rows and submit the selection', async () => {
-        await RecordsetLocators.getRowCheckboxInput(modal, 0).click();
-        await RecordsetLocators.getRowCheckboxInput(modal, 4).click();
+        await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 0).click();
+        await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 4).click();
 
-        await ModalLocators.getSubmitButton(modal).click();
-        await expect.soft(modal).not.toBeAttached();
+        await ModalLocators.getSubmitButton(bulkFKModal).click();
+        await expect.soft(bulkFKModal).not.toBeAttached();
 
         await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(3);
       });
@@ -937,13 +937,13 @@ test.describe('Related tables', () => {
 
         await RecordeditLocators.getAddMoreButton(newPage).click();
         // The same modal when the page loaded should show again
-        await expect.soft(modal).toBeAttached();
+        await expect.soft(bulkFKModal).toBeAttached();
 
-        const rows = RecordsetLocators.getRows(modal);
+        const rows = RecordsetLocators.getRows(bulkFKModal);
         await expect.soft(rows).toHaveCount(10);
-        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(4);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(4);
 
-        await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(4);
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(4);
         await expect.soft(rows.nth(0)).not.toHaveClass(/disabled-row/); // Leaf 1 - the row that was just removed
         await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
         await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/); // Leaf 5

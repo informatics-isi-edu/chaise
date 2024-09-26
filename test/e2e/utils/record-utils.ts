@@ -786,7 +786,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
   params: AddRecordsForeignKeyMultiParams,
   inputType: RecordeditInputType.FK_DROPDOWN | RecordeditInputType.FK_POPUP
 ) => {
-  let newPage: Page, modal: Locator, fkInputModal: Locator, fkInputDropdown: Locator, dropdownMenu: Locator;
+  let newPage: Page, bulkFKModal: Locator, fkInputModal: Locator, fkInputDropdown: Locator, dropdownMenu: Locator;
 
   const isModal = inputType === RecordeditInputType.FK_POPUP;
 
@@ -796,25 +796,25 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     newPage = await clickNewTabLink(addBtn);
     await RecordeditLocators.waitForRecordeditPageReady(newPage);
 
-    modal = ModalLocators.getRecordeditBulkFKPopup(newPage);
-    await expect.soft(modal).toBeAttached();
+    bulkFKModal = ModalLocators.getRecordeditBulkFKPopup(newPage);
+    await expect.soft(bulkFKModal).toBeAttached();
   });
 
   await test.step('modal should have 1 row selected and disabled', async () => {
-    const rows = RecordsetLocators.getRows(modal);
+    const rows = RecordsetLocators.getRows(bulkFKModal);
     await expect.soft(rows).toHaveCount(10);
-    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(1);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(1);
 
-    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(1);
+    await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(1);
     await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
   });
 
   await test.step('select 2 rows and submit the selection', async () => {
-    await RecordsetLocators.getRowCheckboxInput(modal, 3).click();
-    await RecordsetLocators.getRowCheckboxInput(modal, 4).click();
+    await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 3).click();
+    await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 4).click();
 
-    await ModalLocators.getSubmitButton(modal).click();
-    await expect.soft(modal).not.toBeAttached();
+    await ModalLocators.getSubmitButton(bulkFKModal).click();
+    await expect.soft(bulkFKModal).not.toBeAttached();
 
     await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(2);
   });
@@ -896,12 +896,12 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
   await test.step('clicking "add more" should have 3 rows disabled', async () => {
     await RecordeditLocators.getAddMoreButton(newPage).click();
     // The same modal when the page loaded should show again
-    await expect.soft(modal).toBeAttached();
+    await expect.soft(bulkFKModal).toBeAttached();
 
-    const rows = RecordsetLocators.getRows(modal);
+    const rows = RecordsetLocators.getRows(bulkFKModal);
     await expect.soft(rows).toHaveCount(10);
-    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
-    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
 
     await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
     await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/);
@@ -909,11 +909,11 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
   });
 
   await test.step('select 2 more rows and submit the selection', async () => {
-    await RecordsetLocators.getRowCheckboxInput(modal, 0).click();
-    await RecordsetLocators.getRowCheckboxInput(modal, 6).click();
+    await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 0).click();
+    await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 6).click();
 
-    await ModalLocators.getSubmitButton(modal).click();
-    await expect.soft(modal).not.toBeAttached();
+    await ModalLocators.getSubmitButton(bulkFKModal).click();
+    await expect.soft(bulkFKModal).not.toBeAttached();
 
     await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(4);
   });
@@ -966,14 +966,14 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await testInputValue(newPage, 2, params.leaf_col, params.leaf_col, inputType, false, 'Select a value');
 
     await RecordeditLocators.getAddMoreButton(newPage).click();
-    await expect.soft(modal).toBeAttached();
+    await expect.soft(bulkFKModal).toBeAttached();
 
-    const rows = RecordsetLocators.getRows(modal);
+    const rows = RecordsetLocators.getRows(bulkFKModal);
     await expect.soft(rows).toHaveCount(10);
-    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(4);
-    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(4);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(4);
+    await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(4);
 
-    await testModalClose(modal);
+    await testModalClose(bulkFKModal);
   });
 
   await test.step('remove the cleared input form and another form, then verify rows disabled in "add more" once more', async () => {
@@ -982,14 +982,14 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await RecordeditLocators.getDeleteRowButton(newPage, 1).click();
 
     await RecordeditLocators.getAddMoreButton(newPage).click();
-    await expect.soft(modal).toBeAttached();
+    await expect.soft(bulkFKModal).toBeAttached();
 
-    const rows = RecordsetLocators.getRows(modal);
+    const rows = RecordsetLocators.getRows(bulkFKModal);
     await expect.soft(rows).toHaveCount(10);
-    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(modal)).toHaveCount(3);
-    await expect.soft(RecordsetLocators.getDisabledRows(modal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
+    await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
 
-    await testModalClose(modal);
+    await testModalClose(bulkFKModal);
   });
 
   await test.step('submit the data and test submission table', async () => {
