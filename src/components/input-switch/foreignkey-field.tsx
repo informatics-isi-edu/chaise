@@ -100,6 +100,8 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const onClear = () => {
     const column = props.columnModel.column;
 
+    setInputSelectedRow(null);
+
     if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
       props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber);
     }

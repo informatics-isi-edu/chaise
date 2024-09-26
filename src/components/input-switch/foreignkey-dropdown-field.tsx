@@ -421,20 +421,14 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
    * @param selectedRow tuple object from ERMrestJS that represents the dropdown row
    * @param onChange
    */
-  const onRowSelected = (selectedRow: any, onChange: any) => {
+  const onRowSelected = (selectedRow: SelectedRow, onChange: any) => {
     setCheckedRow(selectedRow);
-
-    const rowToAdd: SelectedRow = {
-      displayname: selectedRow.displayname,
-      uniqueId: selectedRow.uniqueId,
-      data: selectedRow.data
-    }
 
     const column = props.columnModel.column;
 
     // if the recordedit page's table is an association table with a unique key pair, track the selected rows
     if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
-      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber, rowToAdd);
+      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber, selectedRow);
     }
 
     callOnChangeAfterSelection(
