@@ -123,7 +123,7 @@ const RecordeditInner = ({
 
   // the next 3 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
   const [showBulkForeignKeyModal, setShowBulkForeignKeyModal] = useState<boolean>(false);
-  const [bulkForeignKeyPickerProps, setBulkForeignKeyPickerProps] = useState<RecordsetProps | null>(null);
+  const [bulkForeignKeyRecordsetProps, setBulkForeignKeyRecordsetProps] = useState<RecordsetProps | null>(null);
   // when initializing the page, the selections in the modal that appears first should fill the first form
   const [bulkForeignKeySelectionsFillFirstForm, setBulkForeignKeySelectionsFillFirstForm] = useState<boolean>(true);
 
@@ -529,7 +529,7 @@ const RecordeditInner = ({
     const pageSize = modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize : RECORDSET_DEFAULT_PAGE_SIZE;
 
     // set recordset select view then set selected rows on "submit"
-    setBulkForeignKeyPickerProps({
+    setBulkForeignKeyRecordsetProps({
       initialReference: modalReference,
       initialPageLimit: pageSize,
       config: recordsetConfig,
@@ -849,10 +849,10 @@ const RecordeditInner = ({
           onCancel={uploadProgressModalProps.onCancel}
         />
       }
-      {showBulkForeignKeyModal && bulkForeignKeyPickerProps &&
+      {showBulkForeignKeyModal && bulkForeignKeyRecordsetProps &&
         <RecordsetModal
           modalClassName='bulk-foreign-key-popup'
-          recordsetProps={bulkForeignKeyPickerProps}
+          recordsetProps={bulkForeignKeyRecordsetProps}
           onSelectedRowsChanged={onSelectedRowsChanged}
           onSubmit={submitBulkForeignKeyCB}
           onClose={closeBulkForeignKeyCB}
@@ -1024,9 +1024,9 @@ const RecordeditInner = ({
                           </ChaiseTooltip>
                         </span>
                       </div>
-                      {bulkForeignKeyPickerProps &&
+                      {bulkForeignKeyRecordsetProps &&
                         // only show bulk foreign key modal button if we started with a bulk foreing key picker
-                        // bulkForeignKeyPickerProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
+                        // bulkForeignKeyRecordsetProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
                         <ChaiseTooltip
                           tooltip={`Select more ${reference.bulkCreateForeignKeyObject.leafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
