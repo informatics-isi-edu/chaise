@@ -121,6 +121,12 @@ const Faceting = ({
     return res;
   });
 
+  /**
+   * this boolean indicates whether users made any changes to the facet list or not.
+   * when this is set to true, we should save the changes in the local storage and then change it back to false.
+   */
+  const [facetListModified, setFacetListModified] = useState(false);
+
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
     setFacetModels((prevFacetModels: FacetModel[]) => {
       return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
@@ -262,6 +268,7 @@ const Faceting = ({
    */
   useEffect(() => {
     if (!facetOrders || !facetOrders.length) return;
+    if (!facetListModified) return;
     /**
      * store isOpen state for facets to localStorage
      */
@@ -272,7 +279,10 @@ const Faceting = ({
       };
     }));
 
-  }, [facetModels, facetOrders])
+    // now that the state is saved, just set it to false so we don't update this until the next user action
+    setFacetListModified(false);
+
+  }, [facetListModified, facetModels, facetOrders])
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -616,6 +626,9 @@ const Faceting = ({
         return { ...fm, isOpen };
       });
     });
+
+    // make sure we're saving the new state
+    setFacetListModified(true);
   };
 
   /**
@@ -670,8 +683,8 @@ const Faceting = ({
       return;
     }
 
-
     setFacetOrders(items);
+    setFacetListModified(true)
   }
   //-------------------  render logic:   --------------------//
 
