@@ -89,7 +89,7 @@ test.describe('Navbar', () => {
     });
 
     // TODO why only local?
-    if (!process.env.CI) {
+    // if (!process.env.CI) {
       // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
       await test.step('top level menu with no children should use default "newTab" value and navigate in a new tab', async () => {
         const searchOption = menu.locator('.chaise-nav-item').nth(0);
@@ -118,7 +118,7 @@ test.describe('Navbar', () => {
         await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`);
         await newPage.close();
       });
-    }
+    // }
   });
 
   test('login menu support', async ({ page }) => {

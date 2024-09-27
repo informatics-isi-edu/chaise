@@ -208,11 +208,11 @@ const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?:
     await expect.soft(loginMenuOption).toHaveText('Outbound Profile Link')
   });
 
-  if (!process.env.CI) {
+  // if (!process.env.CI) {
     await test.step('should open a new tab when clicking the link for the login information', async () => {
       const newPage = await clickNewTabLink(loginMenuOption);
 
       await newPage.close();
     });
-  }
+  // }
 }
