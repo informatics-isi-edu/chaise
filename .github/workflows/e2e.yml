@@ -113,7 +113,6 @@ jobs:
           sudo pip3 install .
           sudo useradd --create-home --system ermresolve
           sudo chmod og+rx /home/ermresolve
-          sudo cp ../chaise/wsgi_ermresolve.conf /etc/apache2/conf.d/wsgi_ermresolve.conf
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
