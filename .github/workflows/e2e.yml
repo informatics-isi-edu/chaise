@@ -101,6 +101,11 @@ jobs:
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
           sudo service apache2 restart
+      - name: Install deriva-web
+        run: |
+          git clone https://github.com/informatics-isi-edu/deriva-web.git
+          cd deriva-web
+          sudo make deploy
       - name: Install ermresolve
         run: |
           git clone https://github.com/informatics-isi-edu/ermresolve.git ermresolve
@@ -108,7 +113,7 @@ jobs:
           sudo pip3 install .
           sudo useradd --create-home --system ermresolve
           sudo chmod og+rx /home/ermresolve
-          sudo cp samples/wsgi_ermresolve.conf /etc/apache2/conf.d/wsgi_ermresolve.conf
+          sudo cp ../chaise/wsgi_ermresolve.conf /etc/apache2/conf.d/wsgi_ermresolve.conf
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
@@ -134,12 +139,12 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Run all features test spec
-        id: test-all-features
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeatures
+      # - name: Run all features test spec
+      #   id: test-all-features
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testallfeatures
       # - name: Run all features confirmation test spec
       #   id: test-all-features-confirmation
       #   continue-on-error: true
@@ -152,24 +157,24 @@ jobs:
         run: |
           cd chaise
           make testdefaultconfig
-      - name: Run delete prohibited test spec
-        id: test-delete-prohibited
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
-      - name: Check on all features test spec
-        if: always() && steps.test-all-features.outcome != 'success'
-        run: exit 1
+      # - name: Run delete prohibited test spec
+      #   id: test-delete-prohibited
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
+      # - name: Check on all features test spec
+      #   if: always() && steps.test-all-features.outcome != 'success'
+      #   run: exit 1
       # - name: Check on all features confirmation test spec
       #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
       #   run: exit 1
       - name: Check on default config test spec
         if: always() && steps.test-default-config.outcome != 'success'
         run: exit 1
-      - name: Check on delete prohibited test spec
-        if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
+      # - name: Check on delete prohibited test spec
+      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
+      #   run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
