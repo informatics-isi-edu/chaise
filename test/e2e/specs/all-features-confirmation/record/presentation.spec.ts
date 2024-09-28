@@ -284,14 +284,14 @@ test.describe('View existing record', () => {
         { title: 'color_rgb_hex_column', value: '  #323456', match: 'html' }
       ];
 
-      if (!process.env.CI) {
+      // if (!process.env.CI) {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded before
           await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      }
+      // }
 
       const notNullColumns = testParams.columns.filter((c: any) => {
         return !c.hasOwnProperty('value') || c.value !== null;
@@ -556,14 +556,14 @@ test.describe('View existing record', () => {
         }
       });
 
-      if (!process.env.CI) {
+      // if (!process.env.CI) {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded during tests
           await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      }
+      // }
     });
   });
 
