@@ -146,11 +146,11 @@ jobs:
           cd chaise
           make testallfeatures
       - name: Run all features confirmation test spec
-      #   id: test-all-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeaturesconfirmation
+        id: test-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation
       - name: Run default config test spec
         id: test-default-config
         continue-on-error: true
