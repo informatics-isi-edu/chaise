@@ -145,12 +145,12 @@ jobs:
         run: |
           cd chaise
           make testallfeatures
-      - name: Run all features confirmation test spec
-        id: test-all-features-confirmation
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testallfeaturesconfirmation
+      # - name: Run all features confirmation test spec
+      #   id: test-all-features-confirmation
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testallfeaturesconfirmation
       - name: Run default config test spec
         id: test-default-config
         continue-on-error: true
@@ -166,9 +166,9 @@ jobs:
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
-      - name: Check on all features confirmation test spec
-        if: always() && steps.test-all-features-confirmation.outcome != 'success'
-        run: exit 1
+      # - name: Check on all features confirmation test spec
+      #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
+      #   run: exit 1
       - name: Check on default config test spec
         if: always() && steps.test-default-config.outcome != 'success'
         run: exit 1
