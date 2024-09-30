@@ -338,13 +338,13 @@ test.describe('View recordset', () => {
     });
 
     await test.step('presentation of the recordset page', async () => {
-      // if (!process.env.CI) {
+      if (!process.env.CI) {
         await test.step('delete files that may have been downloaded before', async () => {
           await deleteDownloadedFiles(params.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      // }
+      }
 
       await test.step(`should have ${params.title} as title`, async () => {
         await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText(params.title);
@@ -521,13 +521,13 @@ test.describe('View recordset', () => {
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3)
       });
 
-      // if (!process.env.CI) {
+      if (!process.env.CI) {
         await test.step('delete files downloaded during the tests', async () => {
           await deleteDownloadedFiles(params.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      // }
+      }
 
     });
 

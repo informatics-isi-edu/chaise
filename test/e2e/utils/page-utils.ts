@@ -209,7 +209,7 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
   });
 
   await test.step('should have "BDBag" as a download option and download the file.', async () => {
-    // test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
+    test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
 
     await ExportLocators.getExportDropdown(page).click();
 
@@ -226,7 +226,7 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
   // NOTE: this is specific to the tests done in record/presentation.spec.ts and recordset/presentation.spec.ts
   if (fileNames.length > 2) {
     await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
-      // test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
+      test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
 
       await ExportLocators.getExportDropdown(page).click();
 
