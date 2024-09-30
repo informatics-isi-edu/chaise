@@ -607,8 +607,25 @@ const _testInputValidationAndExtraFeatures = async (
 
     case RecordeditInputType.FK_POPUP:
       const displayedValue = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
+      const rsModal = ModalLocators.getForeignKeyPopup(page);
 
       if (typeof existingValue === 'string') {
+        // before clearing the value, ensure the selected row has the right tooltip in the fk input modal first
+        await test.step('check the tooltip of the selected row in the modal before clearing the value', async () => {
+          await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
+          await expect.soft(rsModal).toBeVisible();
+
+          // In the multi edit spec, we have 2 forms
+          //   in the 1st form, the 1st row is selected
+          //   in the 2nd form, the 3rd row is selected
+          const selectedRowIndex = formNumber === 1 ? 0 : 2;
+          await testTooltip(RecordsetLocators.getRowSelectButton(rsModal, selectedRowIndex), 'Selected', APP_NAMES.RECORDSET, true);
+
+          await ModalLocators.getCloseBtn(rsModal).click();
+          await expect.soft(rsModal).not.toBeAttached();
+        });
+
+        // value should be unchanged from previous test since the modal was closed with no selection made
         await test.step('clicking the "x" should remove the value in the foreign key field.', async () => {
           await expect.soft(displayedValue).toHaveText(existingValue);
           await RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber).click();
@@ -617,7 +634,6 @@ const _testInputValidationAndExtraFeatures = async (
       }
 
       await test.step('popup selector', async () => {
-        const rsModal = ModalLocators.getForeignKeyPopup(page);
         await test.step('should have the proper title.', async () => {
           await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
           await expect.soft(rsModal).toBeVisible();

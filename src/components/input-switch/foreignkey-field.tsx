@@ -81,7 +81,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
   const { setValue, getValues } = useFormContext();
 
-  const [inputSelectedRow, setInputSelectedRow] = useState<SelectedRow | null>(null);
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
@@ -99,8 +98,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    */
   const onClear = () => {
     const column = props.columnModel.column;
-
-    setInputSelectedRow(null);
 
     if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
       props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber);
@@ -152,17 +149,16 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       getValues
     );
 
-    let currentSelectedRow = inputSelectedRow;
-    // there is a value in the input because of prefill showing an association picker on recordedit page load
-    // and the user selected a value in that modal that filled in the first form
-    if (!currentSelectedRow && getValues(props.name) && props.foreignKeyCallbacks?.bulkForeignKeySelectedRows) {
-      // find row in bulkForeignKeySelectedRows
-      currentSelectedRow = props.foreignKeyCallbacks.bulkForeignKeySelectedRows.filter((row: SelectedRow | null) => {
-        // if an input is empty, there won't be a row defined in `bulkForeignKeySelectedRows`
-        return row && row.displayname.value === getValues(props.name);
-      })[0];
-
-      setInputSelectedRow(currentSelectedRow);
+    let currentSelectedRow;
+    const inputFKData = props.foreignKeyData?.current[`c_${usedFormNumber}-${props.columnModel.column.RID}`];
+    if (inputFKData) {
+      currentSelectedRow = {
+        displayname: {
+          value: getValues(props.name),
+          isHTML: false
+        },
+        uniqueId: props.columnModel.column.generateUniqueId(inputFKData)
+      }
     }
 
     setRecordsetModalProps({
@@ -191,8 +187,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
       const selectedRow = selectedRows[0];
       const column = props.columnModel.column;
-
-      setInputSelectedRow(selectedRow);
 
       // if the recordedit page's table is an association table with a unique key pair, track the selected rows
       if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
