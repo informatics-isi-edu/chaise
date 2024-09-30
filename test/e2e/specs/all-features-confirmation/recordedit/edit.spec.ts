@@ -1,14 +1,17 @@
 /* eslint-disable max-len */
 import { expect, test } from '@playwright/test';
+import moment from 'moment';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+
 import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
   TestFormPresentationAndValidation, testSubmission,
   TestSubmissionParams
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import moment from 'moment';
-
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const currentTimestampTimeStr = moment().format('x');
 
@@ -299,7 +302,7 @@ test.describe('Recordedit edit', () => {
       }
 
       await test.step('open recordedit page', async () => {
-        const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
+        const url = generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL);
         await page.goto(url + '/' + params.filter);
       });
 
@@ -327,7 +330,7 @@ test.describe('Recordedit edit', () => {
 
   test('remove form button', async ({ page, baseURL }, testInfo) => {
     await test.step('open recordedit page', async () => {
-      const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/product-edit:booking`;
+      const url = generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-edit', 'booking', testInfo, baseURL);
       await page.goto(url + '/id=any(1,2,3,4,5,6,7,8,9,10,11,12)@sort(id)');
     });
 
@@ -339,7 +342,7 @@ test.describe('Recordedit edit', () => {
 
       for await (const [index, formIndex] of formsToBeRemoved.entries()) {
         await RecordeditLocators.getDeleteRowButton(page, formIndex).click();
-        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - (index+1));
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - (index + 1));
       }
 
       await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - formsToBeRemoved.length);

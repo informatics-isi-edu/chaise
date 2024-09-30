@@ -10,6 +10,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'links-table'
@@ -121,7 +122,7 @@ test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
 /********************** helper functions ************************/
 const goToPage = async (page: Page, baseURL: string | undefined, testInfo: TestInfo, tableName: string, dontWrapAroundStep?: boolean) => {
   const steps = async () => {
-    await page.goto(`${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${tableName}/id=1`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, '', tableName, testInfo, baseURL) + '/id=1');
     await RecordLocators.waitForRecordPageReady(page);
   }
 

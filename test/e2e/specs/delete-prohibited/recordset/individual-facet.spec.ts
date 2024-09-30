@@ -1,10 +1,11 @@
 import { test } from '@playwright/test';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   openRecordsetAndResetFacetState, testIndividualFacet, TestIndividualFacetParams,
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams: {
   schema_name: string,
@@ -327,7 +328,7 @@ test.describe('Testing individual facet types', () => {
     test(`Testing facet: ${facetParams.name},`, async ({ page, baseURL }, testInfo) => {
 
       await openRecordsetAndResetFacetState(page,
-        `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
+        generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL) + testParams.sort,
         testParams.totalNumFacets,
         [0, 1, 11],
         testParams.defaults.pageSize

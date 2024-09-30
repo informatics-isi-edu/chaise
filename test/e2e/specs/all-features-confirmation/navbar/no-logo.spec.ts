@@ -5,14 +5,15 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'product-navbar', 'accommodation', testInfo, baseURL));
   });
 
   test('basic features', async ({ page }) => {

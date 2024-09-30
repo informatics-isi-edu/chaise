@@ -7,7 +7,8 @@ import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
 import { getCatalogID, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { createFiles, deleteFiles, setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import { RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 /**
  * dynamic_acl_main_table rows:
@@ -437,7 +438,7 @@ export const runDynamicACLTests = () => {
 
     test('when trying to create a file without permission, user should be shown an error alert', async ({ page, baseURL }, testInfo) => {
       await test.step('should load the page properly', async () => {
-        await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_file_table/id=1`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'multi-permissions', 'dynamic_acl_file_table', testInfo, baseURL) + '/id=1');
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 
@@ -510,7 +511,7 @@ export const runDynamicACLTests = () => {
 
 /******************** record helpers ************************/
 const getRecordURL = (id: number, baseURL: string | undefined, testInfo: TestInfo) => {
-  return `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_main_table/id=${id}`;
+  return generateChaiseURL(APP_NAMES.RECORD, 'multi-permissions', 'dynamic_acl_main_table', testInfo, baseURL) + '/id=' + id;
 };
 
 const testRecordAppEditAndDeleteButtons = async (
@@ -582,7 +583,7 @@ const testRelatedTableEditAndDeleteButtons = async (
 
 /******************** recordedit helpers ************************/
 const getRecordeditURL = (filter: string, baseURL: string | undefined, testInfo: TestInfo) => {
-  return `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_main_table/${filter}/@sort(id)`;
+  return generateChaiseURL(APP_NAMES.RECORDEDIT, 'multi-permissions', 'dynamic_acl_main_table', testInfo, baseURL) + '/' + filter + '/@sort(id)';
 };
 
 
@@ -592,7 +593,9 @@ const testRecordSetEditAndDeleteButtons = async (
   uriFilter: string, rowCount: number, displayBulkEdit: boolean, expectedEditable: boolean[], expectedDeletable: boolean[]
 ) => {
   await test.step('should load the page properly and show correct number of rows', async () => {
-    await page.goto(`${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/multi-permissions:dynamic_acl_main_table/${uriFilter}@sort(id)`);
+    await page.goto(
+      generateChaiseURL(APP_NAMES.RECORDSET, 'multi-permissions', 'dynamic_acl_main_table', testInfo, baseURL) + '/' + uriFilter + '/@sort(id)'
+    );
     await RecordsetLocators.waitForRecordsetPageReady(page);
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(rowCount);
   });

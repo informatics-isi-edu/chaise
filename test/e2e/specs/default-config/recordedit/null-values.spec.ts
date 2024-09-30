@@ -1,10 +1,14 @@
 /* eslint-disable max-len */
 
-import { expect, test } from '@playwright/test';
-import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clearInputValue, createFiles, deleteFiles, setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { test } from '@playwright/test';
 import moment from 'moment';
+
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { deleteHatracNamespaces } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { clearInputValue, createFiles, deleteFiles, setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const currentTimestampTimeStr = moment().format('x');
 
@@ -24,7 +28,9 @@ const testFiles = [
 ]
 
 const testParams = {
-  url: 'null-values:table_1/id=1',
+  schema_name: 'null-values',
+  table_name: 'table_1',
+  filter: 'id=1',
   columns: [
     { name: 'int2_null_col', displayname: 'int2_null_col', type: RecordeditInputType.INT_2, value: '32767' },
     { name: 'int2_col', displayname: 'int2_col', type: RecordeditInputType.INT_2, value: null },
@@ -103,7 +109,7 @@ test('Null values in recordedit', async ({ page, baseURL }, testInfo) => {
   });
 
   await test.step('open recordedit page', async () => {
-    await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.url}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schema_name, testParams.table_name, testInfo, baseURL) + '/' + testParams.filter);
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 

@@ -5,11 +5,14 @@ import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/te
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
-import { copyFileToChaiseDir, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { copyFileToChaiseDir } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { setInputValue, testRecordeditColumnNames, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
-  schema_table: 'input-iframe:main',
+  schema_name: 'input-iframe',
+  table_name: 'main',
   columns: [
     { name: 'id', title: 'id', nullok: false },
     { name: 'creator', title: 'iframe input', nullok: false },
@@ -221,7 +224,7 @@ test.describe('input-iframe support in recordedit', () => {
 /********************** helper functions ************************/
 
 const getRecordeditURL = (baseURL: string | undefined, testInfo: TestInfo, filter?: string) => {
-  return `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}/${filter ? filter : ''}`;
+  return generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schema_name, testParams.table_name, testInfo, baseURL) + (filter ? `/${filter}` : '');
 }
 
 /**

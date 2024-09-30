@@ -4,9 +4,10 @@ import { readFileSync, writeFileSync, unlinkSync } from 'fs';
 
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
-import { copyFileToChaiseDir, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+
+import { copyFileToChaiseDir } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { clickNewTabLink, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 const NAVBAR_TEST_W_DYNAMIC_DEPS = 'navbar-test-w-dynamic-deps.html';
 const NAVBAR_TEST_W_STATIC_DEPS = 'navbar-test-w-static-deps.html';
@@ -33,14 +34,13 @@ test.describe('Navbar with chaise-config annotation', () => {
   });
 
   test('should hide the navbar bar if the hideNavbar query parameter is set to true', async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`;
-    await page.goto(`${baseURL}${PAGE_URL}?hideNavbar=true`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'catalog-config-navbar', 'config-table', testInfo, baseURL) + '?hideNavbar=true');
     await RecordsetLocators.waitForRecordsetPageReady(page);
     await expect.soft(NavbarLocators.getContainer(page)).not.toBeAttached();
   });
 
   test('on a chaise page', async ({ page, baseURL }, testInfo) => {
-    await testNavbarFunctionalities(page, `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/catalog-config-navbar:config-table`);
+    await testNavbarFunctionalities(page, generateChaiseURL(APP_NAMES.RECORDSET, 'catalog-config-navbar', 'config-table', testInfo, baseURL));
   });
 
   test('on a static page with dynamic navbar-dependencies', async ({ page, baseURL }, testInfo) => {

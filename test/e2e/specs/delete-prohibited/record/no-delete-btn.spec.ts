@@ -3,8 +3,10 @@ import { test, expect } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { getPageURLOrigin } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL, getPageURLOrigin } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 
 test.describe('record page with specific chaise-config properties', () => {
@@ -31,7 +33,7 @@ test.describe('record page with specific chaise-config properties', () => {
   });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const urlPrefix = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/product-record:accommodation`;
+    const urlPrefix = generateChaiseURL(APP_NAMES.RECORD, 'product-record', 'accommodation', testInfo, baseURL);
 
     RIDValue = getEntityRow(testInfo, 'product-record', 'accommodation', [{ column: 'id', value: '4004' }]).RID;
     pageURLWithRID = `${urlPrefix}/RID=${RIDValue}`;

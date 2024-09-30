@@ -3,7 +3,8 @@ import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedi
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const multiColName = 'multi_constrained_col';
 const colWFkeys = 'col_w_fkeys';
@@ -102,7 +103,7 @@ test.describe('domain filter pattern support', () => {
 
 const openRecordediPage = async (page: Page, baseURL: string | undefined, testInfo: TestInfo, filter?: string) => {
   await test.step('should load the page.', async () => {
-    const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/fk-filter-pattern:main-entity-table/${filter ? filter : ''}`;
+    const url = generateChaiseURL(APP_NAMES.RECORDEDIT, 'fk-filter-pattern', 'main-entity-table', testInfo, baseURL) + (filter ? `/${filter}` : '');
     await page.goto(url);
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });

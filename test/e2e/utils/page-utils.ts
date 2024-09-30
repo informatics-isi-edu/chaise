@@ -38,9 +38,11 @@ export async function getPageId(page: Page): Promise<string> {
  *
  * Notes:
  *   - The URL doesn't have any trailing `/`. if you need to append filter or facets, make sure to start with a `/`.
+ *   - if you don't want to specify the schemaName just pass empty string for it.
  */
 export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableName: string, testInfo: TestInfo, baseURL?: string) : string {
-  return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schemaName}:${tableName}`;
+  const schema_table = schemaName.length > 0 ? `${schemaName}:${tableName}` : tableName;
+  return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schema_table}`;
 }
 
 /**
