@@ -118,9 +118,9 @@ jobs:
           echo "first:"
           sudo ls -l /usr/lib/python3.10/
           echo "second:"
-          sudo ls -l /usr/lib/python3.10/site-packages
-          echo "third:"
           sudo ls -l /usr/local/lib/python3.10/dist-packages
+          echo "third"
+          sudo ls -l /var/run/apache2/
           sudo chmod og+rx /home/ermresolve
           sudo service apache2 restart
       - name: Install ermrestjs
