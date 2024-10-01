@@ -540,7 +540,7 @@ const RecordeditInner = ({
     setShowBulkForeignKeyModal(true);
   }
 
-  const onSelectedRowsChanged = (rows: SelectedRow[]) => {
+  const onBulkForeignKeyModalRowsChanged = (rows: SelectedRow[]) => {
     // return "false" to disable submit button in modal
     let numForms = forms.length;
 
@@ -852,7 +852,7 @@ const RecordeditInner = ({
         <RecordsetModal
           modalClassName='bulk-foreign-key-popup'
           recordsetProps={bulkForeignKeyRecordsetProps}
-          onSelectedRowsChanged={onSelectedRowsChanged}
+          onSelectedRowsChanged={onBulkForeignKeyModalRowsChanged}
           onSubmit={submitBulkForeignKeyCB}
           onClose={closeBulkForeignKeyCB}
           displayname={reference.bulkCreateForeignKeyObject.leafColumn.displayname}

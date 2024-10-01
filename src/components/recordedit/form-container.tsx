@@ -77,8 +77,6 @@ const FormContainer = ({
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);
 
-    console.log('index: ', formIndex);
-    console.log('number: ', formNumber);
     removeForm([formIndex]);
   };
 

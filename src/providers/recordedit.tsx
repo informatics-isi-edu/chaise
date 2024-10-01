@@ -837,20 +837,11 @@ export default function RecordeditProvider({
     if (reference.bulkCreateForeignKeyObject?.isUnique) {
       const tempSelectedRows = [...bulkForeignKeySelectedRows];
 
-      console.log('before: ');
-      tempSelectedRows.forEach((row, index) => {
-        console.log(`row at index ${index}: `, row?.displayname.value);
-      });
-
       indexes.forEach((index: number) => {
         // use splice to remove the element from the array and shift all array values after this element forward
         tempSelectedRows.splice(index, 1);
       });
 
-      console.log('after: ');
-      tempSelectedRows.forEach((row, index) => {
-        console.log(`row at index ${index}: `, row?.displayname.value);
-      });
       setBulkForeignKeySelectedRows(tempSelectedRows);
     }
 

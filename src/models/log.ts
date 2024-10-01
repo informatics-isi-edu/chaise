@@ -190,6 +190,7 @@ export enum LogStackPaths {
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
+  FOREIGN_KEY_BULK_POPUP= 'fk-bulk-picker',
   FOREIGN_KEY_DROPDOWN= 'fk-dropdown',
   FACET_POPUP= 'facet-picker',
   SAVED_QUERY_CREATE_POPUP= 'saved-query-entity',
