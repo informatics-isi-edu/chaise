@@ -117,7 +117,7 @@ test.describe('Navbar', () => {
       await newPage.waitForLoadState('domcontentloaded');
       const url = newPage.url();
       console.log(`url is ${url}`);
-      await newPage.waitForURL(`**/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`);
+      await newPage.waitForURL(`**/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`, { waitUntil: 'domcontentloaded' });
       await newPage.close();
     });
   });
