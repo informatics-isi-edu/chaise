@@ -195,7 +195,7 @@ export enum LogStackPaths {
   SAVED_QUERY_CREATE_POPUP= 'saved-query-entity',
   SAVED_QUERY_SELECT_POPUP= 'saved-query-picker',
   // these two have been added to the tables that recordedit is showing
-  // (but not used in logs technically since we're not showing any controls he)
+  // (but not used in logs technically since we're not showing any controls)
   RESULT_SUCCESFUL_SET= 'result-successful-set',
   RESULT_FAILED_SET= 'result-failed-set',
   RESULT_DISABLED_SET= 'result-disabled-set',
