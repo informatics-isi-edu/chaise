@@ -114,10 +114,11 @@ test.describe('Navbar', () => {
 
       // check that clicking opens the link
       const newPage = await clickNewTabLink(datasetOption);
+      /**
+       * this used to use newPage.waitForURL() but for some reason it wasn't working properly on CI, so I rewrote it this way.
+       */
       await newPage.waitForLoadState('domcontentloaded');
-      const url = newPage.url();
-      console.log(`url is ${url}`);
-      await newPage.waitForURL(`**/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`, { waitUntil: 'domcontentloaded' });
+      expect.soft(newPage.url()).toContain(`/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset`)
       await newPage.close();
     });
   });

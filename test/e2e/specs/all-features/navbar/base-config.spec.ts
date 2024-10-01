@@ -65,6 +65,7 @@ test.describe('Navbar', () => {
       expect.soft(html).toContain('<strong>Recordedit</strong>');
     });
 
+    // CI and local options are different due to the navbar acls
     if (!process.env.CI) {
       const editMenu = menu.locator('.chaise-nav-item').nth(3);
       const disabledSubMenuOptions = editMenu.locator('a.disable-link');

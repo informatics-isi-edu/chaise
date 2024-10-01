@@ -20,7 +20,7 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('links on the record page', () => {
   test('The proper permalink should appear in the share popup if resolverImplicitCatalog is undefined', async ({ page, baseURL }, testInfo) => {
-    test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
+    // test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
     await goToPage(page, baseURL, testInfo, testParams.table_name, true);
 
@@ -46,7 +46,7 @@ test.describe('links on the record page', () => {
   });
 
   test('Searching in go to RID input should navigate the user to the resolved record page matching that RID', async ({ page, baseURL }, testInfo) => {
-    test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
+    // test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
     await goToPage(page, baseURL, testInfo, testParams.table_name, true);
 
