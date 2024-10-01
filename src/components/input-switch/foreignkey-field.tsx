@@ -136,7 +136,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.SINGLE_SELECT,
-      showFaceting: true,
       disableFaceting: false,
       displayMode: (props.appMode === appModes.EDIT) ? RecordsetDisplayMode.FK_POPUP_EDIT : RecordsetDisplayMode.FK_POPUP_CREATE,
     };

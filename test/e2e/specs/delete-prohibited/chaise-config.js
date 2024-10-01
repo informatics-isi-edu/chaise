@@ -4,7 +4,9 @@ var chaiseConfig = {
     name: "Delete Prohibited",
     editRecord: true,
     deleteRecord: false,
-    showFaceting: true,
+    facetPanelDisplay: {
+      maxFacetDepth: 1
+    },
     navbarBrandText: 'test123',
     navbarBrandImage: '../images/genetic-data.png',
     maxRecordsetRowHeight: 100,

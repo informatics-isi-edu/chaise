@@ -35,6 +35,11 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     await expect.soft(RecordsetLocators.getPageTitleInlineComment(page)).toHaveText('Recordset inline comment');
   });
 
+  await test.step('the facet panel should be displayed by default if maxFacetDepth is missing from chaise-config', async () => {
+    await expect.soft(RecordsetLocators.getSidePanel(page)).toBeVisible();
+    await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(7);
+  });
+
   await test.step('verify the text is truncated and "... more" is showing', async () => {
     firstRow = RecordsetLocators.getRows(page).nth(0);
     testCell = RecordsetLocators.getRowCells(firstRow).nth(4);

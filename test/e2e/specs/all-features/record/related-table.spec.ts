@@ -850,7 +850,8 @@ test.describe('Related tables', () => {
       prefill_value: 'Super 8 North Hollywood Motel',
       column_names: ['static1', 'main_fk_col', 'leaf_fk_col'],
       resultset_values: [['', '2004', '10'], ['', '2004', '7']],
-      related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']]
+      related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']],
+      bulk_modal_title: 'Select a set of leaf_fk_col for association_table_w_static_column'
     }
 
     test('with fk inputs as modals', async ({ page }) => {
@@ -955,6 +956,7 @@ test.describe('Related tables', () => {
     test('with fk inputs as dropdowns', async ({ page }) => {
       params.table_name = 'association_table_w_static_column_dropdown';
       params.leaf_fk_name = 'U0KYeFQJ-lwuLEaGb2RNRg';
+      params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_static_column_dropdown'
 
       await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
     });

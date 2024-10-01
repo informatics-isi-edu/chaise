@@ -613,7 +613,7 @@ type AddAssociationTableParams = {
 
 export const testAddAssociationTable = async (page: Page, params: AddAssociationTableParams) => {
   await test.step('link feature', async () => {
-    const rsModal = ModalLocators.getRecordsetSearchPopup(page);
+    const rsModal = ModalLocators.getAddPureBinaryPopup(page);
 
     await test.step('clicking on `Link` button should open up a modal.', async () => {
       const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
@@ -771,7 +771,8 @@ type AddRecordsForeignKeyMultiParams = {
   prefill_value: string,
   column_names: string[],
   resultset_values: RecordsetRowValue[],
-  related_table_values: RecordsetRowValue[]
+  related_table_values: RecordsetRowValue[],
+  bulk_modal_title: string
 }
 
 /**
@@ -798,6 +799,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
 
     bulkFKModal = ModalLocators.getRecordeditBulkFKPopup(newPage);
     await expect.soft(bulkFKModal).toBeAttached();
+    await expect.soft(ModalLocators.getModalTitle(bulkFKModal)).toHaveText(params.bulk_modal_title);
   });
 
   await test.step('modal should have 1 row selected and disabled', async () => {

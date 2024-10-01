@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordset/facet-within-facet.config.json"
+      ],
+      "schema": "facet-within-facet"
+  },
+  "cleanup": true
+}

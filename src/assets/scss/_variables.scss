@@ -34,6 +34,13 @@ $chaise-checkbox-height: 20px;
 // currently only used in recordedit. content/input shouldn't be wider than this
 $re-max-allowed-input-width: 1200px;
 
+/**
+ * the value is set this so it would:
+ * - fit the more-filters message
+ * - have enough space for the drag icon and the rest of items on the header.
+ */
+$recordset-facet-panel-min-width: 305px;
+
 // fonts
 $font-size: 14px;
 $h1-font-size: 2.5rem;

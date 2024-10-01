@@ -39,7 +39,7 @@ export function getNotNullFacetCheckBoxRow(selected?: boolean): FacetCheckBoxRow
  * @param initialReference the initial reference object
  */
 export function getInitialFacetPanelOpen(config: RecordsetConfig, initialReference: any): boolean {
-  if (config.disableFaceting || !config.showFaceting) return false;
+  if (config.disableFaceting || !initialReference.display.showFaceting) return false;
 
   let res = initialReference.display.facetPanelOpen;
   if (typeof res !== 'boolean') {

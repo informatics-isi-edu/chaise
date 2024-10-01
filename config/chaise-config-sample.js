@@ -25,7 +25,6 @@ var chaiseConfig = {
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
-    showFaceting: true,
     navbarBanner: [
         {
             markdown_pattern: "This is a development version of Chaise",

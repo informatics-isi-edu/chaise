@@ -495,9 +495,8 @@ const RecordeditInner = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: true,
       disableFaceting: false,
-      displayMode: RecordsetDisplayMode.FK_POPUP_BULK_CREATE,
+      displayMode: RecordsetDisplayMode.FK_POPUP_BULK_CREATE
     };
 
     const stackElement = LogService.getStackNode(

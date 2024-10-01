@@ -165,7 +165,6 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         deletable: true,
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
-        showFaceting: false,
         disableFaceting: true,
         displayMode: isInline ? RecordsetDisplayMode.INLINE : RecordsetDisplayMode.RELATED,
         containerDetails: { isInline, index }
