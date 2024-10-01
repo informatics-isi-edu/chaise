@@ -507,7 +507,7 @@ const RecordeditInner = ({
 
     const logInfo = {
       logStack: [stackElement],
-      logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_BULK_FOREIGN_KEY),
+      logStackPath: LogService.getStackPath(null, LogStackPaths.FOREIGN_KEY_BULK_POPUP),
     };
 
     let getDisabledTuples;
