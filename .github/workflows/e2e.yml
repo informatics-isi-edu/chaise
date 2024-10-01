@@ -114,7 +114,7 @@ jobs:
           sudo useradd --create-home --system ermresolve
           sudo cp ../chaise/test/wsgi_ermresolve.conf /etc/apache2/conf.d/wsgi_ermresolve.conf
           echo "zero:"
-          sudo ls -l etc/apache2/conf.d/
+          sudo ls -l /etc/apache2/conf.d/
           echo "first:"
           sudo ls -l /usr/lib/python3.10/
           echo "second:"
