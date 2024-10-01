@@ -986,7 +986,7 @@ const RecordeditInner = ({
                     </ChaiseTooltip>
                     :
                     <>
-                      <div className='chaise-input-group' style={{ width: 'auto' }}>
+                      <div className='chaise-input-group'>
                         <span className='chaise-input-group-prepend'>
                           <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
                         </span>
@@ -1035,7 +1035,6 @@ const RecordeditInner = ({
                             className='chaise-btn chaise-btn-sm chaise-btn-secondary'
                             onClick={openBulkForeignKeyModal}
                             type='button'
-                            style={{ marginLeft: '10px' }}
                           >
                             <span className='chaise-btn-icon fa-solid fa-plus' />
                             <span>Add more</span>
