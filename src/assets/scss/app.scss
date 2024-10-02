@@ -596,6 +596,10 @@ html {
             padding: 0;
             padding-bottom: 3px;
           }
+
+          .pull-left {
+            display: flex;
+          }
         }
       }
 
@@ -1075,6 +1079,10 @@ html {
       // in other apps .alerts-container is adding the padding-top
       padding-top: 20px;
       padding-bottom: 20px;
+    }
+
+    .help-page-icon {
+      margin: 0 5px;
     }
   }
 

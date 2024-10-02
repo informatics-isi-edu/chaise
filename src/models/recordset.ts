@@ -209,3 +209,13 @@ export type RecordsetProviderUpdateMainEntity = (
 export type RecordsetProviderFetchSecondaryRequests = (
   updatePageCB: Function, hideSpinner?: boolean
 ) => void;
+
+
+export type FacetOrderProps = {
+  isFacetOrderModified: boolean,
+  hasStoredFacetOrder: boolean,
+  isStoredFacetOrderApplied: boolean,
+  storeFacetOrder: () => void,
+  applyDefaultOrder: () => void,
+  applyStoredOrder: () => void
+}

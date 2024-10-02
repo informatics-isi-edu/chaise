@@ -95,6 +95,17 @@
   &.chaise-btn-no-padding {
     padding: 0;
   }
+
+  &.chaise-btn-with-indicator:before {
+    content: '';
+    background-color: map-get(variables.$color-map, 'primary');
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
 }
 
 //TODO
@@ -112,9 +123,4 @@
 .dropdown-item.active,
 .dropdown-item:active {
   background-color: unset;
-}
-
-// override the default behavior of dropdown toggle btn in bootstrap
-.show > button.chaise-btn.btn.dropdown-toggle {
-  @include helpers.chaise-btn-primary();
 }

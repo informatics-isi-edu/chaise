@@ -3,6 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 // Components
 import Accordion from 'react-bootstrap/Accordion';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Dropdown from 'react-bootstrap/Dropdown';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-choice-picker';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-presence';
 import FacetHeader from '@isrd-isi-edu/chaise/src/components/faceting/facet-header';
@@ -29,7 +30,10 @@ import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from 'react-beautiful-dnd';
 import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
-import { getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import {
+  getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder,
+  hasStoredFacetOrder
+} from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
 
@@ -46,7 +50,7 @@ type FacetingProps = {
   registerRecordsetCallbacks: (
     getAppliedFilters: () => FacetCheckBoxRow[][],
     removeAppliedFilters: (index?: number | 'filters' | 'cfacets') => void,
-    focusOnFacet: (index: number, dontUpdate?: boolean) => void
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void,
   ) => void,
   /**
    * the recordset's log stack path
@@ -126,6 +130,12 @@ const Faceting = ({
    * when this is set to true, we should save the changes in the local storage and then change it back to false.
    */
   const [facetListModified, setFacetListModified] = useState(false);
+  /**
+   * whether the current order is based on teh stored facet order or not.
+   */
+  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(() => {
+    return hasStoredFacetOrder(reference);
+  });
 
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
     setFacetModels((prevFacetModels: FacetModel[]) => {
@@ -260,29 +270,12 @@ const Faceting = ({
    */
   useEffect(() => {
     registerFacetCallbacks(updateFacetStates, updateFacets);
-    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
-  /**
-   * store the facet order in the local stroage if any changes happened to the facets
-   */
   useEffect(() => {
-    if (!facetOrders || !facetOrders.length) return;
-    if (!facetListModified) return;
-    /**
-     * store isOpen state for facets to localStorage
-     */
-    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
-      return {
-        name: reference.facetColumns[i].sourceObjectWrapper.name,
-        open: facetModelsRef.current[i].isOpen
-      };
-    }));
-
-    // now that the state is saved, just set it to false so we don't update this until the next user action
-    setFacetListModified(false);
-
-  }, [facetListModified, facetModels, facetOrders])
+    console.log('calling registered in faceting');
+    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
+  }, [facetModels, facetOrders, facetListModified, isStoredFacetOrderApplied]);
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -629,6 +622,7 @@ const Faceting = ({
 
     // make sure we're saving the new state
     setFacetListModified(true);
+    setIsStoredFacetOrderApplied(false);
   };
 
   /**
@@ -684,8 +678,63 @@ const Faceting = ({
     }
 
     setFacetOrders(items);
-    setFacetListModified(true)
+    setFacetListModified(true);
+    setIsStoredFacetOrderApplied(false);
+  };
+
+  const storeFacetOrder = () => {
+    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
+      return {
+        name: reference.facetColumns[i].sourceObjectWrapper.name,
+        open: facetModelsRef.current[i].isOpen
+      };
+    }));
+    setFacetListModified(false);
+    setIsStoredFacetOrderApplied(true);
+  };
+
+  const applyDefaultOrStoredFacetOrder = (useDefault: boolean) => {
+    // change their order
+    setFacetOrders(() => {
+      return getInitialFacetOrder(reference, useDefault).map((o) => o.facetIndex);
+    });
+
+    // open or close facets
+    setFacetModels((prevFacetModels) => {
+      const { openStatus: newOpenStatus } = getInitialFacetOpenStatus(reference, useDefault);
+      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+        const isOpen = newOpenStatus[`${fmIndex}`];
+
+        // if open status has not changed, just return it
+        if (fm.isOpen === isOpen) return fm;
+
+        // if we are closing
+        if (!isOpen) {
+          return { ...fm, isOpen,
+            // hide the spinner:
+            isLoading: false,
+            // if we were waiting for data, make sure to fetch it later
+            initialized: !fm.isLoading
+          }
+        }
+
+        // if we're opening and it's not initialized, initiate the request
+        if (!fm.initialized) {
+          // send a request
+          dispatchFacetUpdate(fmIndex, false);
+          return { ...fm, isOpen, isLoading: true };
+        }
+
+        // otherwise just open it
+        return { ...fm, isOpen };
+      });
+    });
+
+    // set the boolean states
+    setIsStoredFacetOrderApplied(!useDefault);
+    setFacetListModified(false);
   }
+
   //-------------------  render logic:   --------------------//
 
   const renderFacetList = () => {
@@ -755,6 +804,51 @@ const Faceting = ({
     }
   };
 
+  const renderFacetDropdownMenu = () => {
+    const showChangeIndicator = facetListModified;
+    const disableSaveBtn = !facetListModified && isStoredFacetOrderApplied;
+    const disableApplyDefault = !facetListModified && !isStoredFacetOrderApplied;
+    const disableApplyStored = isStoredFacetOrderApplied || !hasStoredFacetOrder(reference);
+
+    return (
+      <Dropdown className='chaise-dropdown chaise-dropdown-no-icon side-panel-heading-menu'>
+        <ChaiseTooltip
+          placement='right' tooltip='Find more about this side panel'
+        >
+          <Dropdown.Toggle className={`chaise-btn chaise-btn-sm chaise-btn-tertiary${showChangeIndicator ? ' chaise-btn-with-indicator' : ''}`}>
+            <span className='fa-solid fa-bars'></span>
+          </Dropdown.Toggle>
+        </ChaiseTooltip>
+        <Dropdown.Menu>
+          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableSaveBtn} onClick={() => storeFacetOrder()}>
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
+              <span>Save facet order</span>
+            </span>
+          </Dropdown.Item>
+          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableApplyDefault} onClick={() => applyDefaultOrStoredFacetOrder(true)}>
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-undo'></span>
+              <span>Reset to default</span>
+            </span>
+          </Dropdown.Item>
+          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableApplyStored} onClick={() => applyDefaultOrStoredFacetOrder(false)}>
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-check'></span>
+              <span>Apply saved state</span>
+            </span>
+          </Dropdown.Item>
+          {/* <Dropdown.Item className='dropdown-item-w-icon' href={getHelpPageURL(HELP_PAGES.FACET_PANEL)} target='_blank'>
+            <span>
+              <span className='dropdown-item-icon chaise-icon chaise-info'></span>
+              <span>Help</span>
+            </span>
+          </Dropdown.Item> */}
+        </Dropdown.Menu>
+      </Dropdown>
+    )
+  }
+
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
@@ -768,6 +862,7 @@ const Faceting = ({
 
   return (
     <div className='side-panel-container' ref={sidePanelContainer}>
+      {renderFacetDropdownMenu()}
       <div className='faceting-columns-container'>
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <ChaiseDroppable droppableId={'facet-droppable'}>
