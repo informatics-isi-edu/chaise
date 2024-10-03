@@ -237,7 +237,7 @@
     cursor: not-allowed;
     // We are adding this to fix the issue in firefox where the form is not clickable if its disabled
     pointer-events: none;
-    
+
     // make sure the input is taking the input-disabled styles and not the default bootstrap/browser ones
     // (using * so it selects input, textarea, or any other HTML element that we might have
     *::placeholder, *:disabled {
@@ -320,7 +320,7 @@
 .chaise-input-group-text-sm {
   height: variables.$btn-height-sm;
   min-height: variables.$btn-height-sm;
-  padding: variables.$btn-padding-y variables.$btn-padding-x;
+  padding: variables.$btn-padding-sm-y variables.$btn-padding-sm-x;
 }
 
 .chaise-input-control-sm {

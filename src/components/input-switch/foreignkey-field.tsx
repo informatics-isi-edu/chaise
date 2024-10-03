@@ -26,10 +26,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
-  callOnChangeAfterSelection,
-  clearForeignKeyData,
-  createForeignKeyReference,
-  validateForeignkeyValue
+  callOnChangeAfterSelection, clearForeignKeyData, createForeignKeyReference, validateForeignkeyValue
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -85,7 +82,6 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
   const { setValue, getValues } = useFormContext();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
-
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
 
   const ellipsisRef = useRef(null);
@@ -101,9 +97,15 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
    * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
+    const column = props.columnModel.column;
+
+    if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+      props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber);
+    }
+
     clearForeignKeyData(
       props.name,
-      props.columnModel.column,
+      column,
       usedFormNumber,
       props.foreignKeyData,
       setValue
@@ -146,7 +148,20 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       getValues
     );
 
+    let currentSelectedRow;
+    const inputFKData = props.foreignKeyData?.current[`c_${usedFormNumber}-${props.columnModel.column.RID}`];
+    if (inputFKData) {
+      currentSelectedRow = {
+        displayname: {
+          value: getValues(props.name),
+          isHTML: false
+        },
+        uniqueId: props.columnModel.column.generateUniqueId(inputFKData)
+      }
+    }
+
     setRecordsetModalProps({
+      initialSelectedRows: currentSelectedRow ? [currentSelectedRow] : undefined,
       parentReference: props.parentReference,
       parentTuple: props.parentTuple,
       initialReference: ref.contextualize.compactSelectForeignKey,
@@ -170,12 +185,18 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       hideRecordsetModal();
 
       const selectedRow = selectedRows[0];
+      const column = props.columnModel.column;
+
+      // if the recordedit page's table is an association table with a unique key pair, track the selected rows
+      if (props.foreignKeyCallbacks?.updateBulkForeignKeySelectedRows) {
+        props.foreignKeyCallbacks.updateBulkForeignKeySelectedRows(usedFormNumber, selectedRow);
+      }
 
       callOnChangeAfterSelection(
         selectedRow,
         onChange,
         props.name,
-        props.columnModel.column,
+        column,
         usedFormNumber,
         props.foreignKeyData,
         setValue

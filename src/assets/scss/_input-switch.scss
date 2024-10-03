@@ -191,6 +191,7 @@
       background: map-get(variables.$color-map, 'disabled-background');
       opacity: 0.55;
     }
+
     .spinner-border-sm {
       top: 8px;
       position: absolute;
@@ -214,19 +215,21 @@
   }
 
   // highlight the recordedit input for visual clarity
-  .dropdown.show {    
+  .dropdown.show {
+
     /**
-    * Select the input groups that are not disabled. react-bootstrap tends to toggle the `show` class for Dropdown toggles with a custom element type. 
+    * Select the input groups that are not disabled. react-bootstrap tends to toggle the `show` class for Dropdown toggles with a custom element type.
     * this check avoid unexpected highlighting of disabled elements.
     */
     >.chaise-input-group:not([aria-disabled="true"]),
-    .dropdown-menu{
+    .dropdown-menu {
       border: 2px solid map-get(variables.$color-map, 'primary');
       border-radius: 6px;
     }
   }
 
-  .responsive-dropdown-menu, .dropdown-menu {
+  .responsive-dropdown-menu,
+  .dropdown-menu {
     // make sure the menu expands the whole row
     width: auto;
     min-width: 100%;
@@ -245,11 +248,11 @@
 
     // remove rounded borders for search input components when in a dropdown
     .search-row .chaise-search-box {
-      .chaise-input-group-prepend > .chaise-input-group-text {
+      .chaise-input-group-prepend>.chaise-input-group-text {
         border-bottom-left-radius: 0;
       }
 
-      .chaise-input-group-append > .chaise-search-btn {
+      .chaise-input-group-append>.chaise-search-btn {
         border-bottom-right-radius: 0;
       }
     }
@@ -263,6 +266,18 @@
 
       .dropdown-item {
         cursor: pointer;
+
+        &.disabled,
+        &:disabled {
+          pointer-events: unset;
+          cursor: unset;
+
+          // bootstrap stylesheets have :hover defined before :disabled so disabled always takes precedence
+          // redefine with the same hover color to override bootstrap order
+          &:hover {
+            background-color: map-get(variables.$color-map, 'recordedit-dropdown-hover');
+          }
+        }
 
         label {
           padding-left: 31px;
@@ -328,7 +343,19 @@
   &.input-switch-error-danger {
     color: map-get(variables.$color-map, 'input-error-message-danger');
   }
+
   &.input-switch-error-warning {
     color: map-get(variables.$color-map, 'input-error-message-warning');
+  }
+}
+
+// used for foreignkey-dropdown-field
+// !important needs to be used here since bootstrap attaches styles directly to the component which override stylesheet styles
+.tooltip.reposition-li-tooltip {
+  left: 10px !important;
+
+  .tooltip-arrow {
+    left: 40px !important;
+    transform: unset !important;
   }
 }

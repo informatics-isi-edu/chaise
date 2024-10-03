@@ -21,37 +21,18 @@
     display: table-row-group;
     vertical-align: middle;
 
-    > tr > td.disabled-cell {
-      background-color: map-get(variables.$color-map, 'table-disabled-background');
-    }
-
     /* table hover */
     > tr:hover {
       background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-
-      /* match color from row highlight for disabled cells */
-      > td.disabled-cell {
-        background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-      }
 
       .hover-show {
         visibility: visible;
       }
     }
 
-    /* odd disabled cells need to be darker */
-    > tr:nth-child(odd) > td.disabled-cell {
-      background-color: map-get(variables.$color-map, 'table-striped-disabled-background');
-    }
-
     /* odd row hover for striped table */
     > tr:nth-child(odd):hover {
       background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-
-      /* odd disabled cells need to match odd row hover for striped table above */
-      > td.disabled-cell {
-        background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-      }
     }
   }
 
@@ -194,7 +175,27 @@
     }
 
     .chaise-btn.select-action-button {
-      border-radius: 10px;
+      border-radius: 12px;
+
+      &.chaise-btn-secondary {
+        border-width: 2px;
+      }
+
+      &[disabled] {
+        min-width: 12px;
+        width: 12px;
+        height: 12px;
+        margin-top: 5px;
+      }
+
+      // change size of single select icon to "fill" the whole button
+      .fa-regular.fa-circle, .fa-circle-check {
+        font-size: 1.6rem;
+        // added here instead of to the button as padding-top to only affect these buttons/icons
+        margin-top: 1px;
+        background-color: map-get(variables.$color-map, 'white') !important;
+        border-radius: inherit;
+      }
     }
 
     // make the button smaller (only visible for primary buttons. for others won't make a difference in UI and that's fine)
