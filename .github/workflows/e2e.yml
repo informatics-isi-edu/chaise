@@ -105,7 +105,6 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
-          git checkout association-display
           sudo make root-install
       - name: Install chaise
         run: |
