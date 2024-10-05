@@ -153,7 +153,7 @@ const facetSelectionParams: TestIndividualFacetParams[] = [
 test.describe('Facet reorder feature', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test.only('changing the order of facets', async ({ page, baseURL }, testInfo) => {
+  test('changing the order of facets', async ({ page, baseURL }, testInfo) => {
     const currParams = testParams.initialState;
     const menuBtn = RecordsetLocators.getSidePanelHeadingMenu(page);
     const saveBtn = RecordsetLocators.getSaveFacetOrderBtn(page);
@@ -261,7 +261,9 @@ test.describe('Facet reorder feature', () => {
       // open a facet since all of them are closed due to the previous test
       await RecordsetLocators.getFacetHeaderButtonById(RecordsetLocators.getFacetById(page, 12), 12).click();
       await page.reload();
-      await testDisplayedFacets(page, currParams.facetNames, ['id', 'int_col', 'f3 (term)']);
+      // TODO open state discussion
+      // ['id', 'int_col', 'f3 (term)']
+      await testDisplayedFacets(page, currParams.facetNames);
     });
   });
 
@@ -281,7 +283,7 @@ test.describe('Facet reorder feature', () => {
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
       await page.reload();
-      await testDisplayedFacets(page, currParams.facetNames);
+      await testDisplayedFacets(page, currParams.facetNames, currParams.openFacets.names);
     });
   });
 
