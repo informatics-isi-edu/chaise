@@ -1,7 +1,13 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
+//react-beatiful-dnd
+import {
+  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
+} from 'react-beautiful-dnd';
+
 // Components
 import Accordion from 'react-bootstrap/Accordion';
+import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-choice-picker';
@@ -25,16 +31,14 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
-//react-beatiful-dnd
-import {
-  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
-} from 'react-beautiful-dnd';
-import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
+// utils
+import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
   getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder,
   hasStoredFacetOrder
 } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
+import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 
 type FacetingProps = {
@@ -805,45 +809,55 @@ const Faceting = ({
   };
 
   const renderFacetDropdownMenu = () => {
-    const showChangeIndicator = facetListModified;
-    const disableSaveBtn = !facetListModified && isStoredFacetOrderApplied;
-    const disableApplyDefault = !facetListModified && !isStoredFacetOrderApplied;
-    const disableApplyStored = isStoredFacetOrderApplied || !hasStoredFacetOrder(reference);
+    const storedIsAvailable = hasStoredFacetOrder(reference);
+    const showChangeIndicator = facetListModified || (storedIsAvailable && !isStoredFacetOrderApplied);
+    const allowSave = showChangeIndicator;
+    const allowApplyDefault = facetListModified || isStoredFacetOrderApplied;
+    const allowApplySaved = storedIsAvailable && showChangeIndicator;
 
     return (
       <Dropdown className='chaise-dropdown chaise-dropdown-no-icon side-panel-heading-menu'>
         <ChaiseTooltip
-          placement='right' tooltip='Find more about this side panel'
+          placement='right' tooltip='Customize the filter order'
         >
           <Dropdown.Toggle className={`chaise-btn chaise-btn-sm chaise-btn-tertiary${showChangeIndicator ? ' chaise-btn-with-indicator' : ''}`}>
             <span className='fa-solid fa-bars'></span>
           </Dropdown.Toggle>
         </ChaiseTooltip>
         <Dropdown.Menu>
-          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableSaveBtn} onClick={() => storeFacetOrder()}>
+          <Dropdown.Item className='dropdown-item-w-icon save-facet-order-btn' disabled={!allowSave} onClick={() => storeFacetOrder()}>
             <span>
               <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
               <span>Save facet order</span>
             </span>
           </Dropdown.Item>
-          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableApplyDefault} onClick={() => applyDefaultOrStoredFacetOrder(true)}>
+          <Dropdown.Item
+            className='dropdown-item-w-icon show-default-facet-order-btn'
+            disabled={!allowApplyDefault} onClick={() => applyDefaultOrStoredFacetOrder(true)}
+          >
             <span>
               <span className='dropdown-item-icon fa-solid fa-undo'></span>
               <span>Reset to default</span>
             </span>
           </Dropdown.Item>
-          <Dropdown.Item className='dropdown-item-w-icon' disabled={disableApplyStored} onClick={() => applyDefaultOrStoredFacetOrder(false)}>
+          <Dropdown.Item
+            className='dropdown-item-w-icon apply-saved-facet-order-btn'
+            disabled={!allowApplySaved} onClick={() => applyDefaultOrStoredFacetOrder(false)}
+          >
             <span>
               <span className='dropdown-item-icon fa-solid fa-check'></span>
               <span>Apply saved state</span>
             </span>
           </Dropdown.Item>
-          {/* <Dropdown.Item className='dropdown-item-w-icon' href={getHelpPageURL(HELP_PAGES.FACET_PANEL)} target='_blank'>
+          <Dropdown.Item
+            className='dropdown-item-w-icon side-panel-heading-menu-help-btn'
+            href={getHelpPageURL(HELP_PAGES.FACET_PANEL)} target='_blank'
+          >
             <span>
               <span className='dropdown-item-icon chaise-icon chaise-info'></span>
               <span>Help</span>
             </span>
-          </Dropdown.Item> */}
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     )

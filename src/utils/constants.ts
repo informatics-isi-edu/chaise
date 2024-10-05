@@ -198,7 +198,22 @@ export const CUSTOM_EVENTS = {
 
 export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
 
-export const HELP_PAGES = {
+export const HELP_PAGES : {
+  [name: string]: {
+    /**
+     * the title of page (what users see)
+     */
+    title: string,
+    /**
+     * what should be used as the query parameter to find the page.
+     */
+    location: string,
+    /**
+     * whether this is a built-in component or a markdown help page.
+     */
+    isComponent: boolean
+  }
+} = {
   MARKDOWN_HELP: {
     title: 'Markdown Help',
     location: 'chaise/markdown-help',
@@ -212,6 +227,11 @@ export const HELP_PAGES = {
   VIEWER_ANNOTATION: {
     title: 'Viewer Annotation',
     location: 'chaise/viewer-annotation',
+    isComponent: false
+  },
+  FACET_PANEL: {
+    title: 'Filter panel',
+    location: 'chaise/facet-panel',
     isComponent: false
   }
 }

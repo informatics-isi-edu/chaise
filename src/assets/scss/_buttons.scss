@@ -96,12 +96,13 @@
     padding: 0;
   }
 
+  // this is currently designed mostly for 
   &.chaise-btn-with-indicator:before {
     content: '';
     background-color: map-get(variables.$color-map, 'primary');
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: -1px;
+    right: -1px;
     width: 8px;
     height: 8px;
     border-radius: 50%;

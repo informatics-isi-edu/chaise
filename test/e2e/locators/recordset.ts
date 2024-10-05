@@ -290,7 +290,27 @@ export default class RecordsetLocators {
 
   static getShowFilterPanelBtn(container: Page | Locator): Locator {
     return container.locator('.show-filter-panel-btn');
-}
+  }
+
+  static getSidePanelHeadingMenu(container: Page | Locator): Locator {
+    return container.locator('.side-panel-heading-menu .dropdown-toggle');
+  }
+
+  static getSaveFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.save-facet-order-btn');
+  }
+
+  static getShowDefaultFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.show-default-facet-order-btn');
+  }
+
+  static getApplySavedFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.apply-saved-facet-order-btn');
+  }
+
+  static getSidePanelHeadingMenuHelpBtn(container: Page | Locator): Locator {
+    return container.locator('.side-panel-heading-menu-help-btn');
+  }
 
   static getAllFacets(container: Page | Locator): Locator {
     return container.locator('.panel-group .facet-panel');
