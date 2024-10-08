@@ -21,6 +21,8 @@ When this was done before for `AngularJS` with `puppeteer`, the pages were hoste
 
 Some direct javascript changes were made to the AngularJS application so that certain functionality wouldn't trigger when the page loaded. Since the standalone page was hosted alongside the working version of chaise so the assets could be reused, the `AngularJS` javascript was running again to "set up the page", but the page was already set up when then html content was downloaded. For instance, the `reference.read` request was bipassed to ignore fetching the data again since it was already present.
 
+The version from angularJS (with javascript changes) can be found in the branch named `angularjs-ssr` in this repo in github.
+
 ## Files and Data
 ### Scripts
 There are a few scripts included in this folder. The `*-SSR-test.js` scripts are the entry points for generating each different page with the first part of the filename being the table name we are downloading HTML content for.
