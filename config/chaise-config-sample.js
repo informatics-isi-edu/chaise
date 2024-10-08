@@ -19,9 +19,6 @@ var chaiseConfig = {
           enable: ["*"] // [] <- disable
         }
     },
-    maxColumns: 6,
-    feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
-    helpURL: '/help/using-the-data-browser/',
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
@@ -109,7 +106,3 @@ var chaiseConfig = {
         engine: 'handlebars'
     }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}
