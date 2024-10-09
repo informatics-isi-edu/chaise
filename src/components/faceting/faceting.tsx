@@ -828,7 +828,7 @@ const Faceting = ({
           <Dropdown.Item className='dropdown-item-w-icon save-facet-order-btn' disabled={!allowSave} onClick={() => storeFacetOrder()}>
             <span>
               <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
-              <span>Save facet order</span>
+              <span>Save filter order</span>
             </span>
           </Dropdown.Item>
           <Dropdown.Item
