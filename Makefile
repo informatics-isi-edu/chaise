@@ -183,134 +183,34 @@ test: test-ALL_TESTS
 #						BULDING THE PACKAGE						#
 # ============================================================= #
 
-# HTML files that need to be created
-HTML=$(DIST)/chaise-dependencies.html
-
-# the minified files that need to be created
-MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
-	$(DIST)/$(SHARED_JS_SOURCE_MIN)
-
+# source code folder
 SOURCE=src
 
+# the build folder
 DIST=dist
 
 # where config files are defined
 CONFIG=config
 
-# Shared utilities
-COMMON=common
-
-# old CSS source
-CSS=styles
-
-# old javascript sources
-JS=scripts
-
- MAKEFILE_VAR=makefile_variables.js
-
 # react bundle location
 REACT_BUNDLES_FOLDERNAME=bundles
 REACT_BUNDLES=$(DIST)/react/$(REACT_BUNDLES_FOLDERNAME)
 
-# -------------------------- shared/common files -------------------------- #
-
-SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
-	$(COMMON)/alerts.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/config.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/export.js \
-	$(COMMON)/faceting.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/footer.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/login.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/recordCreate.js \
-	$(COMMON)/resizable.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/upload.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/validators.js
-
-SHARED_JS_SOURCE_MIN=chaise.min.js
-$(DIST)/$(SHARED_JS_SOURCE_MIN): $(SHARED_JS_SOURCE)
-	$(call bundle_js_files,$(SHARED_JS_SOURCE_MIN),$(SHARED_JS_SOURCE))
-
-ANGULARJS=$(JS)/vendor/angular.js
-
-SHARED_JS_VENDOR_BASE=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(ANGULARJS) \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/plotly-latest.min.js
-
-SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
-	$(JS)/vendor/angular-messages.min.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(COMMON)/vendor/angular-animate.min.js \
-	$(COMMON)/vendor/angular-scroll.min.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
-
-SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
-$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
-	$(call bundle_js_files,$(SHARED_JS_VENDOR_ASSET_MIN),$(SHARED_JS_VENDOR_ASSET))
-
-SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css \
-	$(COMMON)/styles/app.css
-
-SASS=$(COMMON)/styles/app.css
-$(SASS): $(shell find $(COMMON)/styles/scss/)
-	$(info - creating app.css and navbar.css)
-	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
-
-# should eventually be removed
-DEPRECATED_JS_CONFIG=chaise-config.js
+# build version will change everytime it's called.
+$(BUILD_VERSION):
 
 JS_CONFIG=$(CONFIG)/chaise-config.js
 $(JS_CONFIG): $(CONFIG)/chaise-config-sample.js
-	cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
-	touch $(JS_CONFIG)
+	@cp -n $(CONFIG)/chaise-config-sample.js $(JS_CONFIG) || true
+	@touch $(JS_CONFIG)
 
 VIEWER_CONFIG=$(CONFIG)/viewer-config.js
 $(VIEWER_CONFIG): $(CONFIG)/viewer-config-sample.js
-	cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
-	touch $(VIEWER_CONFIG)
+	@cp -n $(CONFIG)/viewer-config-sample.js $(VIEWER_CONFIG) || true
+	@touch $(VIEWER_CONFIG)
 
-$(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
-	$(info - creating makefile_variables.js)
-	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
-	@echo 'chaiseBuildVariables.buildVersion="$(BUILD_VERSION)";' >> $(DIST)/$(MAKEFILE_VAR)
-	@echo 'chaiseBuildVariables.chaiseBasePath="$(CHAISE_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
-	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
-	@echo 'chaiseBuildVariables.OSDViewerBasePath="$(OSD_VIEWER_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
-
-$(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
-	$(info - creating chaise-dependencies.html)
-	@> $(DIST)/chaise-dependencies.html
-	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
-	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(DEPRECATED_JS_CONFIG) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
-
-# list of file and folders that will be sent to the given location
-RSYNC_FILE_LIST=common \
-	dist \
-	help-docs \
-	images \
-	lib \
-	scripts \
-	sitemap \
-	styles \
-	$(JS_CONFIG_SAMPLE) \
-	$(VIEWER_CONFIG_SAMPLE) \
+# list of file and folders outside of src that will be deployed
+RSYNC_FILE_LIST=help-docs \
 	version.txt
 
 # the same list above but also includes the config files
@@ -334,47 +234,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
 
-# -------------------------- utility functions -------------------------- #
-
-# given a list of css files, will create link tag for each one and appends to the first parameter location
-define add_css_link
-	for file in $(SHARED_CSS_SOURCE) $(2); do \
-		runtimepath=$(CHAISE_BASE_PATH)$$file; \
-		version=$(BUILD_VERSION); \
-		echo "<link rel='stylesheet' type='text/css' href='$$runtimepath?v=$$version'>" >> $(1) ; \
-	done
-endef
-
-# given a list of js files, will create script tag for each one and appends to the first parameter location
-define add_js_script
-	for file in $(2); do \
-		runtimepath=$(CHAISE_BASE_PATH)$$file; \
-		version=$(BUILD_VERSION); \
-		echo "<script src='$$runtimepath?v=$$version'></script>" >> $(1) ; \
-	done
-endef
-
-# will create script tag for ermrestjs dep and appends to the parameter location
-define add_ermrestjs_script
-	for file in $(ERMRESTJS_DEPS); do \
-		runtimepath=$(ERMRESTJS_BASE_PATH)$$file ; \
-		version=$(BUILD_VERSION); \
-		echo "<script src='$$runtimepath?v=$$version'></script>" >> $(1) ; \
-	done
-endef
-
-# add meta and assets to the html
-define build_html
-    sed -e '/%INCLUDES%/ {' -e 'r $(1)' -e 'd' -e '}' \
-        $(2).in common/templates/noscript.html > $(2)
-endef
-
-# given a list of js files, create a minified version
-define bundle_js_files
-	$(info - creating $(1))
-	@npx uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
-endef
-
 define add_array_to_file
 	for folder in $(1); do \
 		echo "$$folder" >> $(2); \
@@ -389,8 +248,7 @@ define copy_webpack_external_vendor_files
 	done
 endef
 
-# build version will change everytime it's called
-$(BUILD_VERSION):
+# -------------------------- commands -------------------------- #
 
 # install packages (honors NOD_ENV)
 # using clean-install instead of install to ensure usage of pacakge-lock.json
@@ -420,9 +278,6 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	@rm $(HTML) || true
-	@rm $(COMMON)/styles/app.css || true
-	@rm $(COMMON)/styles/navbar.css || true
 	@rm -rf $(DIST) || true
 	@rm .make-* || true
 
@@ -445,7 +300,7 @@ lint-tests:
 
 # Rule to create the package.
 .PHONY: dist-wo-deps
-dist-wo-deps: print-variables run-webpack $(SASS) $(MIN) $(HTML) gitversion
+dist-wo-deps: print-variables run-webpack gitversion
 
 # Rule to install the dependencies and create the pacakge
 $(DIST): deps dist-wo-deps
@@ -459,8 +314,8 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 
 # deploy chaise to the location
 # this is separated into three seaprate rsyncs:
-#  - send AngularJS files
-#  - send React related files except bundles folder
+#  - send common files/folders
+#  - send React related files except bundles folder (this is separated because we're copying to a different relative path)
 #  - send bundles folder. This is separated to ensure cleaning up the bundles folder
 #    The content of bundles folder are generated based on hash so we have to make sure older files are deleted.
 .PHONY: deploy
@@ -529,6 +384,9 @@ usage:
 	@echo "  deps-test                      local install of dev node dependencies and install playwright browsers"
 	@echo "  root-install                   should only be used as root. will use dist with proper user and then deploy, for GNU systems"
 	@echo "  root-install-alt               should only be used as root. will use dist with proper user and then deploy, for FreeBSD and MAC OS X"
+	@echo "  lint                           run eslint for the source folder"
+	@echo "  lint-w-warn                    run eslint for the source folder and print warnings as well"
+	@echo "  lint-tests                     run eslint for the test folder"
 	@echo "  test                           run e2e tests"
 	@echo "  testrecordadd                  run data entry app add e2e tests"
 	@echo "  testrecordedit                 run data entry app edit e2e tests"
