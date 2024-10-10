@@ -1,8 +1,8 @@
 # Filter panel
 
-In this page we will go over how the filter panel works. The filter panel is displayed on the left side of the data browser pages. This panel allows you to filter results by different categories.
+Filters are the data constraints or restrictions that are applied during search operations. For example, search for "mouse" data, or data submitted by certain "principal investigators".
 
-Please find the topics discussed in the table of contents below:
+The filter panel (displayed on the left under "Refine search") contains a list of filter controls used to set these constraints. This page provides details on how the filter panel works. Please find the topics discussed in the table of contents below:
 
 - [Customizing the order of filters](#customizing-the-order-of-filters)
   - [How to move filters](#how-to-move-filters)
