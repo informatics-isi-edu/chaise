@@ -44,8 +44,9 @@ const testParams = {
     'association with filter on main table',
     'association with filter on related table', // association with filter on related table
     'path of length 3 with filters', // path of length 3 with filters
-    'association_table_w_static_column', // "almost" pure and binary multi create foreig key with fk input modals
-    'association_table_w_static_column_dropdown' // "almost" pure and binary multi create foreig key with fk input dropdowns
+    'association_table_w_static_column', // "almost" pure and binary multi create foreign key with fk input modals
+    'association_table_w_static_column_dropdown', // "almost" pure and binary multi create foreign key with fk input dropdowns
+    'association_table_w_three_fks' // association table with 3 foreign keys and multi create foreign key with annotation
   ],
   tocHeaders: [
     'Summary', 'booking (6)', 'schedule (2)', 'media (1)', 'association_table (1)',
@@ -59,7 +60,8 @@ const testParams = {
     'association with filter on related table (1)',
     'path of length 3 with filters (1)',
     'association_table_w_static_column (1)',
-    'association_table_w_static_column_dropdown (1)'
+    'association_table_w_static_column_dropdown (1)',
+    'association_table_w_three_fks (1)'
   ],
   scrollToDisplayname: 'table_w_aggregates'
 };
@@ -837,9 +839,12 @@ test.describe('Related tables', () => {
   });
 
   /**
-   * The following 2 tests are for testing the prefill functionality when the inbound foreign key is part of a table that is "almost" pure and binary
+   * The following tests are for testing the prefill functionality when the inbound foreign key is part of a table that is "almost" pure and binary
    *
-   * This means there are 2 foreign keys that are part of the same key (making the pair unique) and there are other columns that are not foreign keys
+   * For the first 3 tests, this means there are 2 foreign keys that are part of the same key (making the pair unique) and there are other columns that are not foreign keys
+   *
+   * For the 4th test, there are still 2 foreign keys that are part of the same key but there is another foreign key on this table. This means the heuristics won't trigger
+   *   for the bulk create foreign key functionality requiring an annotation to be defined instead.
    */
   test.describe('for a table that is almost pure and binary and the foreign keys are a unique key', async () => {
     const params = {
@@ -959,6 +964,17 @@ test.describe('Related tables', () => {
       params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_static_column_dropdown'
 
       await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
+    });
+
+    test('with a third foreign key and an annotation on main_fk_col', async ({ page }) => {
+      params.table_name = 'association_table_w_three_fks';
+      params.leaf_fk_name = 'leaf_fk_col';
+      params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_three_fks'
+
+      params.column_names = ['static1', 'main_fk_col', 'leaf_fk_col', 'third_fk_col'];
+      params.resultset_values = [['', '2004', '10', ''], ['', '2004', '7', '']];
+      params.related_table_values = [['2', 'Leaf 2', 'Other Leaf 2'], ['', 'Leaf 10', ''], ['', 'Leaf 7', '']];
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_POPUP);
     });
   });
 });

@@ -781,6 +781,10 @@
                         [
                             "product-unordered-related-tables-links",
                             "static_to_accommodation_w_dropdown_fkey"
+                        ],
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_accommodation_fkey"
                         ]
                     ]
                 },
@@ -3223,6 +3227,237 @@
                     "entry": {
                         "selector_ux_mode": "simple-search-dropdown"
                     },
+                    "row_name": {
+                        "row_markdown_pattern": "{{{details}}}"
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact": [
+                        "id",
+                        "details"
+                    ]
+                }
+            }
+        },
+        "association_table_w_three_fks": {
+            "comment": "For testing 'add records' prefill and using bulk create foreign key features with an annnotation defined since there are 3 foreign key relationships",
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "association_table_w_three_fks",
+            "column_definitions": [
+                {
+                    "name": "static_col1",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "main_fk_col",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "leaf_fk_col",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "third_fk_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "keys": [
+                {
+                    "unique_columns": [
+                        "RID"
+                    ]
+                },
+                {
+                    "unique_columns": [
+                        "main_fk_col",
+                        "leaf_fk_col"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "foreign_key_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "association_table_w_three_fks",
+                            "column_name": "leaf_fk_col"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "leaf_table_for_three_fks",
+                            "column_name": "id"
+                        }
+                    ],
+                    "names": [
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_leaf_fkey"
+                        ]
+                    ]
+                },
+                {
+                    "foreign_key_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "association_table_w_three_fks",
+                            "column_name": "main_fk_col"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "accommodation",
+                            "column_name": "id"
+                        }
+                    ],
+                    "names": [
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_accommodation_fkey"
+                        ]
+                    ]
+                },
+                {
+                    "foreign_key_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "association_table_w_three_fks",
+                            "column_name": "third_fk_col"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "schema_name": "product-unordered-related-tables-links",
+                            "table_name": "third_table_for_three_fks",
+                            "column_name": "id"
+                        }
+                    ],
+                    "names": [
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_third_fkey"
+                        ]
+                    ]
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "entry": [
+                        "static_col1",
+                        {
+                            "source": [
+                                {
+                                    "outbound": [
+                                        "product-unordered-related-tables-links",
+                                        "three_fks_to_accommodation_fkey"
+                                    ]
+                                },
+                                "RID"
+                            ],
+                            "display": {
+                                "bulk_create_foreign_key": [
+                                    "product-unordered-related-tables-links",
+                                    "three_fks_to_leaf_fkey"
+                                ]
+                            }
+                        },
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_leaf_fkey"
+                        ],
+                        [
+                            "product-unordered-related-tables-links",
+                            "three_fks_to_third_fkey"
+                        ]
+                    ],
+                    "compact": "entry",
+                    "detailed": "entry"
+                }
+            }
+        },
+        "leaf_table_for_three_fks": {
+            "comment": "leaf table for testing an association with 3 foreign keys and a bulk_create_foreign_key property in visible columns annotation",
+            "kind": "table",
+            "table_name": "leaf_table_for_three_fks",
+            "schema_name": "product-unordered-related-tables-links",
+            "keys": [
+                {
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "details",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{{details}}}"
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact": [
+                        "id",
+                        "details"
+                    ]
+                }
+            }
+        },
+        "third_table_for_three_fks": {
+            "comment": "third table for testing an association with 3 foreign keys and a bulk_create_foreign_key property in visible columns annotation",
+            "kind": "table",
+            "table_name": "third_table_for_three_fks",
+            "schema_name": "product-unordered-related-tables-links",
+            "keys": [
+                {
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "details",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
                     "row_name": {
                         "row_markdown_pattern": "{{{details}}}"
                     }
