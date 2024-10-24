@@ -59,7 +59,6 @@
         padding: 8px;
 
         min-height: 47px;
-        height: 47px;
 
         flex: none;
         position: relative;
@@ -121,6 +120,11 @@
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
+
+          // reset the changed height when the multi form input row is open
+          .inputs-row {
+            min-height: unset;
+          }
         }
 
         &.highlighted-row, &.with-inline-tooltip {
@@ -129,6 +133,7 @@
         }
 
         .inputs-row {
+          min-height: inherit; // the min-height of the parent row element can be changed if the key column has a taller height than the form row. We want to inherit that changed element's height value
           display: flex;
           flex-direction: row;
 
@@ -171,6 +176,7 @@
         }
 
         .multi-form-input-row {
+          flex-grow: 1; // fill the space in case of a really tall row because the column name is long in the KeyColumn element (entity-key)
           flex-direction: column;
           align-items: center;
 
