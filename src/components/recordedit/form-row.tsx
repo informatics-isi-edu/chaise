@@ -119,7 +119,21 @@ const FormRow = ({
         cachedHeight = newHeight;
         const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
         if (header) {
-          header.style.height = `${cachedHeight}px`;
+          // unset header height since the header content may have changed
+          header.style.height = 'unset';
+          const headerHeight = header.getBoundingClientRect().height;
+
+          // if header is taller than the FormRow container, change the cached height and update the form row container's height instead
+          if (headerHeight > cachedHeight) {
+            cachedHeight = headerHeight;
+            if (isActiveForm) {
+              container.current.style.height = `${cachedHeight}px`;
+            } else {
+              container.current.style.minHeight = `${cachedHeight}px`;
+            }
+          } else {
+            header.style.height = `${cachedHeight}px`;
+          }
         }
       }
 
@@ -139,7 +153,14 @@ const FormRow = ({
     return () => {
       sensor.detach();
     };
-  }, []);
+  }, [forms.length]);
+
+  // if the current form row has it's multi form input state changed, unset the min-height of the `container` set in the above useLayoutEffect
+  useEffect(() => {
+    if (!isActiveForm || !container.current) return;
+
+    container.current.style.height = 'unset';
+  }, [isActiveForm]);
 
   useEffect(() => {
     // This condition is to remove the form from the acitve forms if we delete the form.
@@ -250,7 +271,7 @@ const FormRow = ({
   const hasInlineComment = columnModel.column.comment && columnModel.column.comment.displayMode === CommentDisplayModes.INLINE;
 
   /**
-   * Returntrue if,
+   * Return true if,
    *  - columnModel is marked as disabled
    *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
    *  - show all
