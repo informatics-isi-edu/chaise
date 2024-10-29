@@ -467,7 +467,7 @@ const RecordsetTable = ({
   return (
     <div className='recordset-table-container' ref={tableContainer}>
       <div ref={stickyScrollbarRef}
-        className={`chaise-table-top-scroll-wrapper ${isBottomVisible ? 'no-scroll-bar' : ""}`}>
+        className={`chaise-table-top-scroll-wrapper ${isBottomVisible ? 'no-scroll-bar' : ''}`}>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
@@ -483,7 +483,7 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      <div ref={tableEndRef} style={{ height: "1px" }}></div>
+      <div ref={tableEndRef} style={{ height: '1px' }}></div>
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
           <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>
