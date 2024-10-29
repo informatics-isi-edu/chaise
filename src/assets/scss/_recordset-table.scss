@@ -252,3 +252,12 @@
     margin-left: 5px;
   }
 }
+
+.chaise-table-top-scroll-wrapper {
+  position: sticky;
+  top: 0;
+}
+.no-scroll-bar {
+  display: none !important; 
+  position: absolute !important;
+}

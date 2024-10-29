@@ -1,27 +1,27 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 // components
-import Accordion from 'react-bootstrap/Accordion';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record-main-section';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableHeader from '@isrd-isi-edu/chaise/src/components/record/related-table-header';
 import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-button';
-import Spinner from 'react-bootstrap/Spinner';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Accordion from 'react-bootstrap/Accordion';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -682,6 +682,7 @@ const RecordInner = ({
                   </Accordion.Button>
                   <Accordion.Body>
                     <RelatedTable
+                      intersectScroll={true}
                       relatedModel={rm}
                       displaynameForID={rm.initialReference.displayname.value}
                     />

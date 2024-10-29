@@ -18,11 +18,10 @@ import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // services
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { determineScrollElement, displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type RelatedTableProps = {
@@ -34,6 +33,8 @@ type RelatedTableProps = {
    * the displayname for the reference to be used in the id attached to the container
    */
   displaynameForID: string
+
+  intersectScroll: boolean,
 };
 
 /**
@@ -44,19 +45,21 @@ type RelatedTableProps = {
 const RelatedTable = ({
   relatedModel,
   displaynameForID,
+  intersectScroll
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} />
+      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} intersectScroll={intersectScroll}/>
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
-  displaynameForID
+  displaynameForID,
+  intersectScroll
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
@@ -111,6 +114,7 @@ const RelatedTableInner = ({
           <RecordsetTable
             config={relatedModel.recordsetProps.config}
             initialSortObject={usedRef.location.sortObject}
+            intersectScroll={intersectScroll}
           />
         </div>
       </div>

@@ -2,11 +2,11 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React from 'react';
 
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import Spinner from 'react-bootstrap/Spinner';
 import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -25,12 +25,14 @@ import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/sr
 type RecordsetTableProps = {
   config: RecordsetConfig,
   initialSortObject: any,
+  intersectScroll?: boolean,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
-  initialSortObject
+  initialSortObject,
+  intersectScroll=false
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -49,6 +51,7 @@ const RecordsetTable = ({
   } = useRecordset();
 
   const tableContainer = useRef<HTMLDivElement>(null);
+
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
@@ -79,6 +82,38 @@ const RecordsetTable = ({
       disabledRows.some((obj) => obj.uniqueId == tuple.uniqueId)
     ));
   }
+  const [isBottomVisible, setIsBottomVisible] = useState(false);
+  const stickyScrollbarRef = useRef(null);
+  const tableEndRef = useRef(null);
+
+  useEffect(() => {
+    //Only implement intersection observer for top scrollbar when intersectScroll is true otherwise top scrollbar will be sticky all the time
+    if(intersectScroll){
+
+    // Create a new IntersectionObserver instance to track the visibility of the bottom scrollbar(end of table)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        //Updating isBottomVisible when bottom scrollbar is visible in the viewport
+        setIsBottomVisible(entry.isIntersecting);
+      },
+      {
+        root: null, // Use viewport as the root
+        threshold: 0.1, // Triggers when 10% of the element is visible
+      }
+    );
+    //Observes when the table end is visible on viewport
+    if (tableEndRef.current) {
+      observer.observe(tableEndRef.current);
+    }
+
+    return () => {
+      if (tableEndRef.current) {
+        observer.unobserve(tableEndRef.current);
+      }
+    };
+  }
+  }, []);
+
 
   /**
    * add the top horizontal scroll if needed
@@ -429,10 +464,10 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
-
   return (
     <div className='recordset-table-container' ref={tableContainer}>
-      <div className='chaise-table-top-scroll-wrapper'>
+      <div ref={stickyScrollbarRef}
+        className={`chaise-table-top-scroll-wrapper ${isBottomVisible ? 'no-scroll-bar' : ""}`}>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
@@ -448,6 +483,7 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
+      <div ref={tableEndRef} style={{ height: "1px" }}></div>
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
           <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>
