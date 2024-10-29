@@ -19,13 +19,9 @@ var chaiseConfig = {
           enable: ["*"] // [] <- disable
         }
     },
-    maxColumns: 6,
-    feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
-    helpURL: '/help/using-the-data-browser/',
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
-    showFaceting: true,
     navbarBanner: [
         {
             markdown_pattern: "This is a development version of Chaise",
@@ -110,7 +106,3 @@ var chaiseConfig = {
         engine: 'handlebars'
     }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}

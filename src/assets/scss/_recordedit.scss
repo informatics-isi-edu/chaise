@@ -18,9 +18,18 @@
       width: auto;
       margin-left: auto;
 
-      .add-rows-input {
-        width: 50px;
-        padding-left: 5px;
+      .chaise-input-group {
+        width: auto;
+
+        .add-rows-input {
+          width: 45px;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+
+      #recordedit-add-more {
+        margin-left: 10px;
       }
     }
   }
@@ -50,7 +59,6 @@
         padding: 8px;
 
         min-height: 47px;
-        height: 47px;
 
         flex: none;
         position: relative;
@@ -112,6 +120,11 @@
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
+
+          // reset the changed height when the multi form input row is open
+          .inputs-row {
+            min-height: unset;
+          }
         }
 
         &.highlighted-row, &.with-inline-tooltip {
@@ -120,6 +133,7 @@
         }
 
         .inputs-row {
+          min-height: inherit; // the min-height of the parent row element can be changed if the key column has a taller height than the form row. We want to inherit that changed element's height value
           display: flex;
           flex-direction: row;
 
@@ -162,6 +176,7 @@
         }
 
         .multi-form-input-row {
+          flex-grow: 1; // fill the space in case of a really tall row because the column name is long in the KeyColumn element (entity-key)
           flex-direction: column;
           align-items: center;
 
@@ -404,61 +419,4 @@
     padding-top: 10px;
     padding-bottom: 20px;
   }
-
-  /****************** Upload modal css *****************/
-
-  // .progress-percent {
-  //   font-weight: bold;
-  //   margin-top: -25px;
-  //   margin-left: 50%;
-  // }
-
-  // .inner-progress-percent {
-  //   margin-top: -18px;
-  //   font-size: 12px;
-  // }
-
-  // table.upload-table {
-
-  // }
-
-  // table.upload-table > tbody {
-  //   border: none;
-  // }
-
-  // table.upload-table > tbody > tr > td:first-child {
-  //   padding-left: 20px;
-
-  // }
-
-  // table.upload-table > tbody > tr > td:last-child {
-  //   width: 40%;
-  // }
-
-  // table.upload-table > tbody > tr > td:nth-child(2) {
-  //   padding-left: 0px;
-  //   padding-right: 0px;
-  // }
-
-  // table.upload-table > tbody > tr:last-child > td {
-  //   border-bottom: 1px solid $disabled-background-color;
-  //   background-color: white;
-  // }
-
-  // table.upload-table > tbody > tr:first-child > td {
-  //   padding-left:0px;
-  //   padding-top: 15px;
-  //   border-bottom: 2px solid gainsboro;
-  //   font-weight: 600;
-  // }
-
-  // table.upload-table .progress {
-  //   height: 20px;
-  // }
-
-  // .upload-progress-bar {
-  //   width: 0%;
-  //   background-color: #8cacc7 !important;
-  // }
-
 }

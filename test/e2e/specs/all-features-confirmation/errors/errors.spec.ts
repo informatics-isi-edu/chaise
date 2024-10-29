@@ -1,5 +1,5 @@
 import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
-import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
@@ -7,6 +7,7 @@ import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { removeAuthCookieAndReload } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
+import { setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
 test.describe('error handling', () => {
   // run all test cases in here in parallel
@@ -54,7 +55,6 @@ test.describe('error handling', () => {
         await page.waitForURL('**' + getChaiseURL('recordset', 'accommodation', baseURL, testInfo) + '**');
       });
 
-      // why are we testing this? this was in the original protractor test
       await test.step('clicking back button should go back to the initial page', async () => {
         await page.goBack();
         await expect.soft(page).toHaveURL(recordPageURL);
@@ -244,7 +244,6 @@ test.describe('error handling', () => {
   });
 
   test.describe('recordedit app', () => {
-
     test('navigating to a page with that returns no record', async ({ page, baseURL }, testInfo) => {
       const errorModal = ModalLocators.getErrorModal(page);
       const recordPageURL = getChaiseURL('recordedit', 'accommodation', baseURL, testInfo) + '/id=11223312121';
@@ -332,6 +331,57 @@ test.describe('error handling', () => {
         await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText('Create 1 Accommodations record');
       });
 
+    });
+
+    test('editting a record without changing data', async ({ baseURL, page }, testInfo) => {
+      await test.step('open recordedit page', async () => {
+        await page.goto(getChaiseURL('recordedit', 'category', baseURL, testInfo) + '/id=10003');
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      await test.step('an alert should be displayed upon submission', async () => {
+        const alert = AlertLocators.getWarningAlert(page);
+        await RecordeditLocators.submitForm(page);
+        await expect.soft(alert).toBeVisible();
+        await expect.soft(alert).toHaveText([
+          'WarningNo data was changed in the update request. ',
+          'Please check the form content and resubmit the data.'
+        ].join(''));
+      });
+    });
+
+    test('duplicate key value and required errors while creating a record', async ({ baseURL, page }, testInfo) => {
+      const recordeditError = AlertLocators.getErrorAlert(page);
+      await test.step('open recordedit page', async () => {
+        await page.goto(getChaiseURL('recordedit', 'category', baseURL, testInfo));
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      await test.step('submitting without setting values should result in the required error', async () => {
+        await RecordeditLocators.submitForm(page);
+        await expect.soft(recordeditError).toBeVisible();
+        await expect.soft(recordeditError).toHaveText([
+          'ErrorSorry, the data could not be submitted because there are errors on the form. ',
+          'Please check all fields and try again.'
+        ].join(''));
+        const requiredError = 'Please enter a value for this field.';
+        await expect.soft(RecordeditLocators.getErrorMessageForAColumn(page, 'id', 1)).toHaveText(requiredError);
+        await expect.soft(RecordeditLocators.getErrorMessageForAColumn(page, 'term', 1)).toHaveText(requiredError);
+      });
+
+      await test.step('submitting after using a duplicate key value should return in the duplicate error.', async () => {
+        await setInputValue(page, 1, 'id', 'id', RecordeditInputType.INT_4, '99999');
+        await setInputValue(page, 1, 'term', 'term', RecordeditInputType.TEXT, 'Castle');
+        await RecordeditLocators.submitForm(page);
+        await expect.soft(recordeditError).toBeVisible();
+        await expect.soft(recordeditError).toHaveText([
+          'ErrorThe entry cannot be created/updated. ',
+          'Please use a different term for this record. ',
+          'Click here to see the conflicting record that already exists.'
+        ].join(''));
+
+      });
+      
     });
   });
 

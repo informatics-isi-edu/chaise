@@ -23,7 +23,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'navbarBrandImage', 'logoutURL', 'maxRecordsetRowHeight', 'dataBrowser', 'defaultAnnotationColor',
   'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTable',
   'signUpURL', 'navbarBanner', 'navbarMenu', 'sidebarPosition', 'attributesSidebarHeading', 'userGroups',
-  'allowErrorDismissal', 'footerMarkdown', 'showFaceting', 'hideTableOfContents',
+  'allowErrorDismissal', 'footerMarkdown', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
@@ -50,7 +50,6 @@ export const DEFAULT_CHAISE_CONFIG = {
   deleteRecord: false,
   signUpURL: '',
   allowErrorDismissal: false,
-  showFaceting: false,
   hideTableOfContents: false,
   navbarBanner: {},
   navbarMenu: {},
@@ -199,7 +198,22 @@ export const CUSTOM_EVENTS = {
 
 export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
 
-export const HELP_PAGES = {
+export const HELP_PAGES : {
+  [name: string]: {
+    /**
+     * the title of page (what users see)
+     */
+    title: string,
+    /**
+     * what should be used as the query parameter to find the page.
+     */
+    location: string,
+    /**
+     * whether this is a built-in component or a markdown help page.
+     */
+    isComponent: boolean
+  }
+} = {
   MARKDOWN_HELP: {
     title: 'Markdown Help',
     location: 'chaise/markdown-help',
@@ -213,6 +227,11 @@ export const HELP_PAGES = {
   VIEWER_ANNOTATION: {
     title: 'Viewer Annotation',
     location: 'chaise/viewer-annotation',
+    isComponent: false
+  },
+  FACET_PANEL: {
+    title: 'Filter panel',
+    location: 'chaise/facet-panel',
     isComponent: false
   }
 }

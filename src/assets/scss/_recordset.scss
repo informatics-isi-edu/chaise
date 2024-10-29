@@ -3,11 +3,10 @@
 
 .chaise-body {
   .recordset-container {
-    // override the minimum width of side-panel (written the same way as app.scss
-    // this is done to fit the more-filters message
+    // override the minimum width of side-panel (written the same way as app.scss)
     .top-panel-container .top-flex-panel .top-left-panel.open-panel,
     .bottom-panel-container .side-panel-resizable.open-panel {
-      min-width: 305px;
+      min-width: variables.$recordset-facet-panel-min-width;
     }
 
     .top-panel-container {
@@ -156,6 +155,18 @@
       .foreignkey-popup & {
         min-width: 95px;
       }
+    }
+  }
+
+  .modal-header-context {
+    color: map-get(variables.$color-map, 'modal-header-context');
+
+    .modal-header-context-separator {
+      padding: 0 0.3em;
+      font-size: 0.8em;
+    }
+    .modal-header-context-colon {
+      padding-left: 1px;
     }
   }
 

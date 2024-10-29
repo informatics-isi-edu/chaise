@@ -3,13 +3,14 @@ import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
+import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 export type RecordsetProviderGetDisabledTuples = (
   page: any, pageLimit: number, logStack: any,
   logStackPath: string, requestCauses?: any, reloadStartTime?: any
-) => Promise<{ page: any, disabledRows?: any }>;
+) => Promise<{ page: any, disabledRows?: DisabledRow[] }>;
 
-export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean
+export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean | string
 
 
 export type RecordsetProps = {
@@ -45,7 +46,14 @@ export type RecordsetProps = {
    * Currently used in recordset-modal to ensure the modal title's left-panel
    * is also closed with the panel
    */
-  onFacetPanelOpenChanged?: (newState: boolean) => void
+  onFacetPanelOpenChanged?: (newState: boolean) => void,
+
+  /**
+   * The context of the page (the breadcrumb titles displayed above the facet popup).
+   *
+   * used by the facet popups to summarize how many level deep we are.
+   */
+  uiContextTitles?: TitleProps[]
 };
 
 export enum RecordsetSelectMode {
@@ -62,6 +70,7 @@ export enum RecordsetDisplayMode {
   POPUP = 'popup',
   FACET_POPUP = 'popup/facet',
   FK_POPUP = 'popup/foreignkey',
+  FK_POPUP_BULK_CREATE = 'popup/foreignkey/bulk',
   FK_POPUP_CREATE = 'popup/foreignkey/create',
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
@@ -75,7 +84,10 @@ export type RecordsetConfig = {
   deletable: boolean,
   sortable: boolean,
   selectMode: RecordsetSelectMode,
-  showFaceting: boolean,
+  /**
+   * completely disable the faceting feature.
+   * if this is set to true, then we won't even show the facet chiclets
+   */
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
   /**
@@ -89,7 +101,19 @@ export type RecordsetConfig = {
    * limit the number of displayed records in the table (and trigger show more/less logic)
    * used in recordedit resultset-table
    */
-  maxDisplayedRows?: number
+  maxDisplayedRows?: number,
+
+  /**
+   * indicates how deep are we in the faceting feature.
+   * - 1 would be when we're showing a recordset page with facet (or a link/unlink popup with facet).
+   * - 2 is when you open the facet popup from the page or component with facetDepthLevel=1
+   * - 3 is when you open the facet popup from the page or component with disableFaceting=2
+   * - and so on.
+   *
+   * default: 1
+   */
+  facetDepthLevel?: number,
+
   // TODO enable favorites
   // enableFavorites: boolean
 }
@@ -133,10 +157,10 @@ export type FacetRequestModel = {
   // TODO why??
   // appliedFilters: [],
   registered: boolean,
-  processFacet: Function, // TODO
-  preProcessFacet: Function, //TODO
-  getAppliedFilters: Function, // TODO
-  removeAppliedFilters: Function, // TODO
+  processFacet: (reloadCauses: string[], reloadStartTime: number) => Promise<boolean>,
+  preProcessFacet: () => Promise<boolean>,
+  getAppliedFilters: () => FacetCheckBoxRow[],
+  removeAppliedFilters: () => void,
   reloadCauses: string[], // why the reload request is being sent to the server (might be empty)
   reloadStartTime: number, //when the facet became dirty
   // TODO log stuff
@@ -158,6 +182,16 @@ export type SelectedRow = {
   tupleReference?: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
+}
+
+export enum DisabledRowType {
+  ASSOCIATED= 'associated', // a row that is already associated
+  SELECTED= 'selected' // a row that is already selected in another recordedit form
+}
+
+export type DisabledRow = {
+  disabledType?: DisabledRowType;
+  tuple: any;
 }
 
 export type RecordsetProviderAddUpdateCauses = (
@@ -186,3 +220,13 @@ export type RecordsetProviderUpdateMainEntity = (
 export type RecordsetProviderFetchSecondaryRequests = (
   updatePageCB: Function, hideSpinner?: boolean
 ) => void;
+
+
+export type FacetOrderProps = {
+  isFacetOrderModified: boolean,
+  hasStoredFacetOrder: boolean,
+  isStoredFacetOrderApplied: boolean,
+  storeFacetOrder: () => void,
+  applyDefaultOrder: () => void,
+  applyStoredOrder: () => void
+}

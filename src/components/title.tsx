@@ -8,7 +8,7 @@ import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from
 
 
 
-type TitleProps = {
+export type TitleProps = {
   /**
    * The reference object.
    */

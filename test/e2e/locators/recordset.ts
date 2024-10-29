@@ -47,8 +47,8 @@ export default class RecordsetLocators {
     await expect.soft(container.locator('.table-column-spinner')).toHaveCount(0);
   }
 
-  static async waitForFacets(container: Page | Locator, timeout?: number): Promise<void> {
-    return container.locator('.facet-spinner').waitFor({ state: 'hidden', timeout });
+  static async waitForFacets(container: Page | Locator): Promise<void> {
+    await expect.soft(container.locator('.facet-spinner')).toHaveCount(0);
   }
 
   static getPageTitleElement(container: Page | Locator): Locator {
@@ -58,6 +58,10 @@ export default class RecordsetLocators {
   static getPageTitleTooltip(container: Page | Locator): Locator {
     return this.getPageTitleElement(container).locator('.chaise-icon-for-tooltip');
   }
+
+  static getPageTitleInlineComment(container: Page | Locator): Locator {
+    return this.getPageTitleElement(container).locator('.inline-tooltip');
+  };
 
   static getPermalinkButton(container: Page | Locator): Locator {
     return container.locator('#permalink');
@@ -269,6 +273,10 @@ export default class RecordsetLocators {
     return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.select-action-button');
   }
 
+  static getReadMore(container: Page | Locator): Locator {
+    return container.locator('.readmore');
+  }
+
 
   // ---------------- facet panel selectors ------------------ //
 
@@ -282,7 +290,27 @@ export default class RecordsetLocators {
 
   static getShowFilterPanelBtn(container: Page | Locator): Locator {
     return container.locator('.show-filter-panel-btn');
-}
+  }
+
+  static getSidePanelHeadingMenu(container: Page | Locator): Locator {
+    return container.locator('.side-panel-heading-menu .dropdown-toggle');
+  }
+
+  static getSaveFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.save-facet-order-btn');
+  }
+
+  static getShowDefaultFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.show-default-facet-order-btn');
+  }
+
+  static getApplySavedFacetOrderBtn(container: Page | Locator): Locator {
+    return container.locator('.apply-saved-facet-order-btn');
+  }
+
+  static getSidePanelHeadingMenuHelpBtn(container: Page | Locator): Locator {
+    return container.locator('.side-panel-heading-menu-help-btn');
+  }
 
   static getAllFacets(container: Page | Locator): Locator {
     return container.locator('.panel-group .facet-panel');

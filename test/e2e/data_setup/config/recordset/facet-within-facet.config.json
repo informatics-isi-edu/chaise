@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "facet-within-facet",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordset/facet-within-facet.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/facet-within-facet"
+    }
+}

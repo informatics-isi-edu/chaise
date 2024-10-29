@@ -13,6 +13,7 @@ import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname
 
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { disabledTuplesPromise } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
@@ -63,6 +64,8 @@ const FormRow = ({
     columnPermissionErrors,
     foreignKeyData,
     waitingForForeignKeyData,
+    bulkForeignKeySelectedRows,
+    updateBulkForeignKeySelectedRows,
     getRecordeditLogStack,
     getRecordeditLogAction,
     showCloneSpinner,
@@ -116,7 +119,21 @@ const FormRow = ({
         cachedHeight = newHeight;
         const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
         if (header) {
-          header.style.height = `${cachedHeight}px`;
+          // unset header height since the header content may have changed
+          header.style.height = 'unset';
+          const headerHeight = header.getBoundingClientRect().height;
+
+          // if header is taller than the FormRow container, change the cached height and update the form row container's height instead
+          if (headerHeight > cachedHeight) {
+            cachedHeight = headerHeight;
+            if (isActiveForm) {
+              container.current.style.height = `${cachedHeight}px`;
+            } else {
+              container.current.style.minHeight = `${cachedHeight}px`;
+            }
+          } else {
+            header.style.height = `${cachedHeight}px`;
+          }
         }
       }
 
@@ -136,7 +153,14 @@ const FormRow = ({
     return () => {
       sensor.detach();
     };
-  }, []);
+  }, [forms.length]);
+
+  // if the current form row has it's multi form input state changed, unset the min-height of the `container` set in the above useLayoutEffect
+  useEffect(() => {
+    if (!isActiveForm || !container.current) return;
+
+    container.current.style.height = 'unset';
+  }, [isActiveForm]);
 
   useEffect(() => {
     // This condition is to remove the form from the acitve forms if we delete the form.
@@ -161,10 +185,10 @@ const FormRow = ({
      * NOTE: it appears this useEffect is triggering after the "full repaint" even if there was a delay
      */
     if (columnModelIndex === 0) {
-        // only run this on the first form row to keep track of total forms visible
-        if (!formsRef || !formsRef.current || !showCloneSpinner) return;
+      // only run this on the first form row to keep track of total forms visible
+      if (!formsRef || !formsRef.current || !showCloneSpinner) return;
 
-        if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
+      if (formsRef.current.children.length === forms.length) setShowCloneSpinner(false);
     }
   }, [forms, removeClicked]);
 
@@ -247,7 +271,7 @@ const FormRow = ({
   const hasInlineComment = columnModel.column.comment && columnModel.column.comment.displayMode === CommentDisplayModes.INLINE;
 
   /**
-   * Returntrue if,
+   * Return true if,
    *  - columnModel is marked as disabled
    *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
    *  - show all
@@ -291,15 +315,16 @@ const FormRow = ({
   };
 
   const renderInput = (formNumber: number, formIndex?: number) => {
-    const colName = columnModel.column.name;
-    const colRID = columnModel.column.RID;
+    const column = columnModel.column;
+    const colName = column.name;
+    const colRID = column.RID;
 
     const isDisabled = getIsDisabled(formNumber, formNumber === MULTI_FORM_INPUT_FORM_VALUE);
 
     let placeholder = '';
     let permissionError = '';
     if (isDisabled) {
-      placeholder = getDisabledInputValue(columnModel.column);
+      placeholder = getDisabledInputValue(column);
 
       // TODO: extend this for edit mode
       // if value is empty string and we are in edit mode, use the previous value
@@ -312,7 +337,27 @@ const FormRow = ({
       permissionError = columnPermissionErrors[colName];
     }
 
-    const safeClassNameId = `${formNumber}-${makeSafeIdAttr(columnModel.column.displayname.value)}`;
+    const safeClassNameId = `${formNumber}-${makeSafeIdAttr(column.displayname.value)}`;
+
+    const tempForeignKeyCallbacks = { ...foreignKeyCallbacks };
+    const bulkFKObject = reference.bulkCreateForeignKeyObject;
+    /**
+     * add foreignkey callbacks to generated input if:
+     *  - there is a bulkCreateForeignKeyObject defined
+     *  - there is a pair of columns that create a unique assocation that use the prefill behavior
+     *  - the column is a foreignkey
+     *  - and the column is the one used for associating to the leaf table of the association
+     */
+    if (columnModel.isLeafInUniqueBulkForeignKeyCreate) {
+      tempForeignKeyCallbacks.getDisabledTuples = disabledTuplesPromise(
+        column.reference.contextualize.compactSelectBulkForeignKey,
+        bulkFKObject.disabledRowsFilter(),
+        bulkForeignKeySelectedRows
+      );
+
+      tempForeignKeyCallbacks.updateBulkForeignKeySelectedRows = updateBulkForeignKeySelectedRows;
+      tempForeignKeyCallbacks.bulkForeignKeySelectedRows = bulkForeignKeySelectedRows;
+    }
 
     return (
       <>
@@ -343,7 +388,7 @@ const FormRow = ({
           parentLogStackPath={getRecordeditLogAction(true)}
           foreignKeyData={foreignKeyData}
           waitingForForeignKeyData={waitingForForeignKeyData}
-          foreignKeyCallbacks={foreignKeyCallbacks}
+          foreignKeyCallbacks={tempForeignKeyCallbacks}
         />
         {typeof formIndex === 'number' && formIndex in showPermissionError &&
           <div className={`column-permission-warning column-permission-warning-${safeClassNameId}`}>{permissionError}</div>

@@ -1,6 +1,14 @@
 @use 'sass:map';
 @use 'variables';
 
+.side-panel-container {
+  .side-panel-heading-menu {
+    position: absolute;
+    top: -37px;
+    left: 125px;
+  }
+}
+
 .faceting-columns-container {
   // disable the animation from the accordion
   .accordion-collapse.collapsing {
@@ -64,6 +72,8 @@
         border: 0;
         border-radius: 0;
         padding: 10px 5px;
+        // reserve enough space for the spinner and drag icons:
+        padding-right: 40px;
         text-transform: none;
         position: relative;
         // Overriding accordian-button css to align right angle bracket icon to left

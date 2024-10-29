@@ -1,7 +1,7 @@
 // models
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { PrefillObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
@@ -142,6 +142,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     ref.table,
     { source: ref.compressedDataSource, entity: true }
   );
+
   return {
     index,
     isInline,
@@ -164,7 +165,6 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         deletable: true,
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
-        showFaceting: false,
         disableFaceting: true,
         displayMode: isInline ? RecordsetDisplayMode.INLINE : RecordsetDisplayMode.RELATED,
         containerDetails: { isInline, index }
@@ -313,33 +313,11 @@ function canRelatedForeignKeyBePrefilled(fk: any, origFKR: any) {
  * @param mainTuple the main tuple
  * @returns
  */
-export function getPrefillCookieObject(ref: any, mainTuple: any): {
-  /**
-   * the displayed value in the form
-   */
-  rowname: Displayname,
-  /**
-   * used for reading the actual foreign key data
-   */
-  origUrl: string,
-  /**
-   * the foreignkey columns that should be prefilled
-   */
-  fkColumnNames: string[],
-  /**
-   * raw values of the foreign key columns keyed by column name
-   */
-  keys: { [key: string]: any },
-  /**
-   * map of column names as keys to column RIDs as values
-   */
-  columnNameToRID: { [key: string]: string }
-} {
+export function getPrefillCookieObject(ref: any, mainTuple: any): PrefillObject {
 
   let origTable;
   if (ref.derivedAssociationReference) {
-    // add association relies on the object that this returns for
-    // prefilling the data.
+    // add association relies on the object that this returns for prefilling the data.
     origTable = ref.derivedAssociationReference.table;
   } else {
     // we should contextualize to make sure the same table is shown in create mode
@@ -373,7 +351,7 @@ export function getPrefillCookieObject(ref: any, mainTuple: any): {
 /**
  * Takes the displayname for a related table (both inline and related), and tries to find it on the record page.
  *   used for table of contents click event and scrrolling on click of previous/next
- * 
+ *
  * @param displayname the displayname of the column to scroll to
  * @returns Element | false - returns the related table element to scroll to
  *      - false if no element with displayname is found

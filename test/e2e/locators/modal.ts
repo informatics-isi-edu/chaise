@@ -24,8 +24,21 @@ export default class ModalLocators {
     return page.locator('.scalar-show-details-popup');
   }
 
+  static getFacetPopup(page: Page, depth?: number): Locator {
+    depth = typeof depth === 'number' ? depth : 1;
+    return page.locator(`.faceting-show-details-popup-depth-${depth}`);
+  }
+
+  static getAddPureBinaryPopup(page: Page): Locator {
+    return page.locator('.add-pure-and-binary-popup');
+  }
+
   static getForeignKeyPopup(page: Page): Locator {
     return page.locator('.foreignkey-popup');
+  }
+
+  static getRecordeditBulkFKPopup(page: Page): Locator {
+    return page.locator('.bulk-foreign-key-popup');
   }
 
   static getErrorModal(page: Page): Locator {
@@ -101,6 +114,12 @@ export default class ModalLocators {
 
   static getErrorDetails(modal: Locator): Locator {
     return modal.locator('.error-details');
+  }
+
+  // ------------- recordset modal functions -------------- //
+
+  static getModalHeaderContext(modal: Locator): Locator {
+    return modal.locator('.modal-header-context');
   }
 
   // --------- share cite related functions ------------ //

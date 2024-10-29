@@ -87,6 +87,10 @@ export default class RecordeditLocators {
     return container.locator('#bulk-delete-button');
   }
 
+  static getAddMoreButton(container: Locator | Page): Locator {
+    return container.locator('#recordedit-add-more');
+  }
+
   static getRecordeditForms(container: Locator | Page): Locator {
     return container.locator('.recordedit-form .form-header');
   }
@@ -123,6 +127,7 @@ export default class RecordeditLocators {
     return container.locator('button.remove-form-btn');
   }
 
+  // Forms are indexed starting with 1, delete row button is indexed with 0
   static getDeleteRowButton(container: Locator | Page, index: number): Locator {
     index = index || 0;
     return RecordeditLocators.getAllDeleteRowButtons(container).nth(index);
@@ -214,6 +219,15 @@ export default class RecordeditLocators {
     formNumber = formNumber || 1;
     columnDisplayName = makeSafeIdAttr(columnDisplayName);
     return container.locator(`.column-permission-warning-${formNumber}-${columnDisplayName}`)
+  }
+
+  /**
+   * only applicaple to inputs that have a "fake" placehodler: boolean, file, foriegnkey, and iframe.
+   */
+  static getInputPlaceholderMessage(container: Locator | Page, name: string, formNumber: number): Locator {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName}`).locator('.chaise-input-placeholder');
   }
 
   // -------------- file input selectors --------------- //
@@ -325,6 +339,12 @@ export default class RecordeditLocators {
     return container.locator(`.input-switch-container-${inputName} .dropdown-toggle`);
   }
 
+  static getDropdownMenuByName = (container: Locator | Page, name: string, formNumber: number) => {
+    formNumber = formNumber || 1;
+    const inputName = `c_${formNumber}-${name}`;
+    return container.locator(`.input-switch-container-${inputName} .dropdown-menu`);
+  }
+
   // --------------- foreign key dropdown selectors ------------- //
   static getFkeyDropdowns(container: Locator | Page): Locator {
     return container.locator('.fk-dropdown');
@@ -332,6 +352,18 @@ export default class RecordeditLocators {
 
   static getDropdownSelectableOptions(container: Locator | Page): Locator {
     return container.locator('.dropdown-menu.show').locator('.dropdown-select-value');
+  }
+
+  static getFKDropdownOptions(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show').locator('.dropdown-list li');
+  }
+
+  static getDropdownDisabledOptions(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show').locator('.dropdown-item.disabled');
+  }
+
+  static getDropdownRow(container: Locator | Page, index: number): Locator {
+    return this.getDropdownSelectableOptions(container).nth(index);
   }
 
   static getDropdownLoadMoreRow(container: Locator | Page): Locator {

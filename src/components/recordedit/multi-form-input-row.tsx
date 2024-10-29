@@ -58,7 +58,7 @@ const MultiFormInputRow = ({
 
   const colName = cm.column.name;
   const colRID = cm.column.RID;
-  
+
   const inputName = `c_${MULTI_FORM_INPUT_FORM_VALUE}-${colRID}`;
 
   const { formState: { errors }, getValues, setValue, setError, clearErrors } = useFormContext();
@@ -196,7 +196,7 @@ const MultiFormInputRow = ({
     if (textareaArrayField) {
       const addButton = document.querySelector('.multi-form-input .array-input-field-container-longtext .add-element-container .add-button') as HTMLElement
       const addButtonWidth = addButton.getBoundingClientRect().width + addButton.offsetWidth;
-      
+
       let newContainerWidth;
       if (windowRef.innerWidth < 1800) {
         newContainerWidth = nonScrollableDiv.offsetWidth - addButtonWidth;

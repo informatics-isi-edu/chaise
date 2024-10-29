@@ -388,7 +388,7 @@
                         "timestamp_disabled", "timestamptz_disabled", "json_disabled", "color_rgb_hex_disabled"
                     ],
                     "detailed": [
-                        "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled",
+                        "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_dropdown"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled",
                         "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz",
                         "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "color_rgb_hex", "color_rgb_hex_disabled"
                     ]

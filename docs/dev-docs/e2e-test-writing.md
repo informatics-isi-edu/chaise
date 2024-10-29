@@ -262,6 +262,11 @@ In here we've listed all the actions that we encountered and we found useful. Pl
 - Useful links
   - https://playwright.dev/docs/pages
 
+- Use `generateChaiseURL` for creating a chaise url:
+  ```ts
+  await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'schema', 'table', testInfo, baseURL) + '/id=12');
+  ```
+
 - Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
   ```ts
   const newPage = await PageLocators.clickNewTabLink(someButton, context);

@@ -1,12 +1,20 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
+//react-beatiful-dnd
+import {
+  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
+} from 'react-beautiful-dnd';
+
 // Components
 import Accordion from 'react-bootstrap/Accordion';
+import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Dropdown from 'react-bootstrap/Dropdown';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-choice-picker';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-presence';
 import FacetHeader from '@isrd-isi-edu/chaise/src/components/faceting/facet-header';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-range-picker';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -16,20 +24,21 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // servies
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
-//react-beatiful-dnd
+// utils
+import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
-  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
-} from 'react-beautiful-dnd';
-import ChaiseDroppable from '@isrd-isi-edu/chaise/src/components/chaise-droppable';
-import { getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+  getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder,
+  hasStoredFacetOrder
+} from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
+import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 
 type FacetingProps = {
@@ -42,7 +51,11 @@ type FacetingProps = {
    * NOTE we have to make sure this function is called after each update of
    *      state variables that they use. Otherwise we will face a staleness issues.
    */
-  registerRecordsetCallbacks: any,
+  registerRecordsetCallbacks: (
+    getAppliedFilters: () => FacetCheckBoxRow[][],
+    removeAppliedFilters: (index?: number | 'filters' | 'cfacets') => void,
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void,
+  ) => void,
   /**
    * the recordset's log stack path
    */
@@ -51,13 +64,19 @@ type FacetingProps = {
    * callback that should be called when we're ready to initalize the data
    */
   setReadyToInitialize: () => void,
+
+
+  recordsetFacetDepthLevel: number,
+  recordsetUIContextTitles?: TitleProps[]
 }
 
 const Faceting = ({
   facetPanelOpen,
   registerRecordsetCallbacks,
   recordsetLogStackPath,
-  setReadyToInitialize
+  setReadyToInitialize,
+  recordsetUIContextTitles,
+  recordsetFacetDepthLevel
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -108,6 +127,18 @@ const Faceting = ({
       });
     });
     return res;
+  });
+
+  /**
+   * this boolean indicates whether users made any changes to the facet list or not.
+   * when this is set to true, we should save the changes in the local storage and then change it back to false.
+   */
+  const [facetListModified, setFacetListModified] = useState(false);
+  /**
+   * whether the current order is based on teh stored facet order or not.
+   */
+  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(() => {
+    return hasStoredFacetOrder(reference);
   });
 
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
@@ -243,25 +274,12 @@ const Faceting = ({
    */
   useEffect(() => {
     registerFacetCallbacks(updateFacetStates, updateFacets);
-    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
-  /**
-   * store the facet order in the local stroage if any changes happened to the facets
-   */
   useEffect(() => {
-    if (!facetOrders || !facetOrders.length) return;
-    /**
-     * store isOpen state for facets to localStorage
-     */
-    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
-      return {
-        name: reference.facetColumns[i].sourceObjectWrapper.name,
-        open: facetModelsRef.current[i].isOpen
-      };
-    }));
-
-  }, [facetModels, facetOrders])
+    console.log('calling registered in faceting');
+    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
+  }, [facetModels, facetOrders, facetListModified, isStoredFacetOrderApplied]);
 
   //-------------------  flow-control related functions:   --------------------//
 
@@ -388,8 +406,13 @@ const Faceting = ({
    * Register the facet functions used for flow-control and recordset communication
    * When all the facets have called this function, it will ask flow-control to initialize data
    */
-  const registerFacet = (index: number, processFacet: Function, preprocessFacet: Function,
-    getAppliedFilters: Function, removeAppliedFilters: Function) => {
+  const registerFacet = (
+    index: number,
+    processFacet: (reloadCauses: string[], reloadStartTime: number) => Promise<boolean>,
+    preprocessFacet: () => Promise<boolean>,
+    getAppliedFilters: () => FacetCheckBoxRow[],
+    removeAppliedFilters: () => void
+  ) => {
 
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
@@ -472,7 +495,7 @@ const Faceting = ({
 
   const getFacetLogStack = (index: number, extraInfo?: any): any => {
     return getLogStack(facetRequestModels.current[index].logStackNode, extraInfo);
-  }
+  };
 
   //------------------- callbacks that recordset will call: ----------------//
   /**
@@ -600,6 +623,10 @@ const Faceting = ({
         return { ...fm, isOpen };
       });
     });
+
+    // make sure we're saving the new state
+    setFacetListModified(true);
+    setIsStoredFacetOrderApplied(false);
   };
 
   /**
@@ -654,9 +681,64 @@ const Faceting = ({
       return;
     }
 
-
     setFacetOrders(items);
+    setFacetListModified(true);
+    setIsStoredFacetOrderApplied(false);
+  };
+
+  const storeFacetOrder = () => {
+    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
+      return {
+        name: reference.facetColumns[i].sourceObjectWrapper.name,
+        open: facetModelsRef.current[i].isOpen
+      };
+    }));
+    setFacetListModified(false);
+    setIsStoredFacetOrderApplied(true);
+  };
+
+  const applyDefaultOrStoredFacetOrder = (useDefault: boolean) => {
+    // change their order
+    setFacetOrders(() => {
+      return getInitialFacetOrder(reference, useDefault).map((o) => o.facetIndex);
+    });
+
+    // open or close facets
+    setFacetModels((prevFacetModels) => {
+      const { openStatus: newOpenStatus } = getInitialFacetOpenStatus(reference, useDefault);
+      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+        const isOpen = newOpenStatus[`${fmIndex}`];
+
+        // if open status has not changed, just return it
+        if (fm.isOpen === isOpen) return fm;
+
+        // if we are closing
+        if (!isOpen) {
+          return { ...fm, isOpen,
+            // hide the spinner:
+            isLoading: false,
+            // if we were waiting for data, make sure to fetch it later
+            initialized: !fm.isLoading
+          }
+        }
+
+        // if we're opening and it's not initialized, initiate the request
+        if (!fm.initialized) {
+          // send a request
+          dispatchFacetUpdate(fmIndex, false);
+          return { ...fm, isOpen, isLoading: true };
+        }
+
+        // otherwise just open it
+        return { ...fm, isOpen };
+      });
+    });
+
+    // set the boolean states
+    setIsStoredFacetOrderApplied(!useDefault);
+    setFacetListModified(false);
   }
+
   //-------------------  render logic:   --------------------//
 
   const renderFacetList = () => {
@@ -720,9 +802,66 @@ const Faceting = ({
           dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
           facetPanelOpen={facetPanelOpen}
           getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
+          recordsetUIContextTitles={recordsetUIContextTitles}
+          recordsetFacetDepthLevel={recordsetFacetDepthLevel}
         />
     }
   };
+
+  const renderFacetDropdownMenu = () => {
+    const storedIsAvailable = hasStoredFacetOrder(reference);
+    const showChangeIndicator = facetListModified || (storedIsAvailable && !isStoredFacetOrderApplied);
+    const allowSave = showChangeIndicator;
+    const allowApplyDefault = facetListModified || isStoredFacetOrderApplied;
+    const allowApplySaved = storedIsAvailable && showChangeIndicator;
+
+    return (
+      <Dropdown className='chaise-dropdown chaise-dropdown-no-icon side-panel-heading-menu'>
+        <ChaiseTooltip
+          placement='right' tooltip='Customize the filter order'
+        >
+          <Dropdown.Toggle className={`chaise-btn chaise-btn-sm chaise-btn-tertiary${showChangeIndicator ? ' chaise-btn-with-indicator' : ''}`}>
+            <span className='fa-solid fa-bars'></span>
+          </Dropdown.Toggle>
+        </ChaiseTooltip>
+        <Dropdown.Menu>
+          <Dropdown.Item className='dropdown-item-w-icon save-facet-order-btn' disabled={!allowSave} onClick={() => storeFacetOrder()}>
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
+              <span>Save filter order</span>
+            </span>
+          </Dropdown.Item>
+          <Dropdown.Item
+            className='dropdown-item-w-icon show-default-facet-order-btn'
+            disabled={!allowApplyDefault} onClick={() => applyDefaultOrStoredFacetOrder(true)}
+          >
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-undo'></span>
+              <span>Reset to default</span>
+            </span>
+          </Dropdown.Item>
+          <Dropdown.Item
+            className='dropdown-item-w-icon apply-saved-facet-order-btn'
+            disabled={!allowApplySaved} onClick={() => applyDefaultOrStoredFacetOrder(false)}
+          >
+            <span>
+              <span className='dropdown-item-icon fa-solid fa-check'></span>
+              <span>Apply saved state</span>
+            </span>
+          </Dropdown.Item>
+          <Dropdown.Item
+            className='dropdown-item-w-icon side-panel-heading-menu-help-btn'
+            href={getHelpPageURL(HELP_PAGES.FACET_PANEL)} target='_blank'
+          >
+            <span>
+              <span className='dropdown-item-icon chaise-icon chaise-info'></span>
+              <span>Help</span>
+            </span>
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    )
+  }
 
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
@@ -737,6 +876,7 @@ const Faceting = ({
 
   return (
     <div className='side-panel-container' ref={sidePanelContainer}>
+      {renderFacetDropdownMenu()}
       <div className='faceting-columns-container'>
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <ChaiseDroppable droppableId={'facet-droppable'}>

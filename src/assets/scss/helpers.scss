@@ -88,8 +88,8 @@
   -moz-user-select: none;
   -ms-user-select: none;
   white-space: nowrap;
-  /** 
-  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to 
+  /**
+  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to
   * use this property  to override what bootstrap is defining.
   */
   display: inline-flex;
@@ -124,7 +124,7 @@
   height: variables.$btn-height-sm;
   min-width: variables.$btn-height-sm;
   font-size: 1rem;
-  padding: 2px 5px;
+  padding: variables.$btn-padding-sm-y variables.$btn-padding-sm-x;
 }
 
 // can be used to write media-queries

@@ -39,7 +39,7 @@ export function getNotNullFacetCheckBoxRow(selected?: boolean): FacetCheckBoxRow
  * @param initialReference the initial reference object
  */
 export function getInitialFacetPanelOpen(config: RecordsetConfig, initialReference: any): boolean {
-  if (config.disableFaceting || !config.showFaceting) return false;
+  if (config.disableFaceting || !initialReference.display.showFaceting) return false;
 
   let res = initialReference.display.facetPanelOpen;
   if (typeof res !== 'boolean') {
@@ -60,6 +60,12 @@ export const getFacetOrderStorageKey = (reference: any): string => {
   return `facet-order-${reference.table.schema.catalog.id}_${reference.table.schema.name}_${reference.table.name}`;
 }
 
+export const hasStoredFacetOrder = (reference: any): boolean => {
+  const facetListKey = getFacetOrderStorageKey(reference);
+  const facetOrder = LocalStorage.getStorage(facetListKey);
+  return facetOrder && Array.isArray(facetOrder) && facetOrder.length > 0;
+}
+
 /**
  * Return the order of facets that should be used initially.
  *
@@ -67,15 +73,18 @@ export const getFacetOrderStorageKey = (reference: any): string => {
  *
  * @param reference the reference that represents the main recordset page
  */
-export const getInitialFacetOrder = (reference: any): { facetIndex: number, isOpen: boolean }[] => {
+export const getInitialFacetOrder = (reference: any, ignoreStorage?: boolean): { facetIndex: number, isOpen: boolean }[] => {
   const res: { facetIndex: number, isOpen: boolean }[] = [];
   const facetColumns = reference.facetColumns;
   const facetListKey = getFacetOrderStorageKey(reference);
-  const facetOrder = LocalStorage.getStorage(facetListKey) as {
-    name: string,
-    open: boolean
-  }[] || undefined;
+  let facetOrder: { name: string, open: boolean }[] | undefined;
   let atLeastOneIsOpen = false;
+
+  if (ignoreStorage) {
+    facetOrder = [];
+  } else {
+    facetOrder = LocalStorage.getStorage(facetListKey);
+  }
 
   // no valid stored value was found in storage, so return the annotaion value.
   if (!facetOrder || !Array.isArray(facetOrder) || facetOrder.length === 0) {
@@ -157,11 +166,11 @@ export const getInitialFacetOrder = (reference: any): { facetIndex: number, isOp
  *
  * @param reference the reference that represents the main recordset page
  */
-export const getInitialFacetOpenStatus = (reference: any): {
+export const getInitialFacetOpenStatus = (reference: any, ignoreStorage?: boolean): {
   order: { facetIndex: number, isOpen: boolean }[],
   openStatus: { [facetIndex: string]: boolean }
 } => {
-  const storedOrder = getInitialFacetOrder(reference);
+  const storedOrder = getInitialFacetOrder(reference, ignoreStorage);
 
   const booleanRes: { [facetIndex: string]: boolean } = {};
   storedOrder.forEach((r) => { booleanRes[r.facetIndex] = r.isOpen; });

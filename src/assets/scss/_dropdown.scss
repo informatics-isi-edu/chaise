@@ -1,5 +1,10 @@
 @use 'sass:map';
 @use 'variables';
+@use 'helpers';
+
+.dropdown.chaise-dropdown-no-icon .dropdown-toggle::after{
+  display: none;
+}
 
 // the .dropdown selector is neede to ensure overriding default bootstrap and chaise styles
 .chaise-dropdown.dropdown {
@@ -111,6 +116,7 @@
   // style to override react-bootstrap
   .dropdown-item {
     padding: 0;
+
   }
 
   // change the default link behaviors to not show the underline
@@ -131,6 +137,13 @@
     margin-bottom: 2px;
     padding: 3px 15px 3px 15px;
     line-height: 1.4;
+
+    &.dropdown-item-w-icon {
+      padding: 3px 15px 3px 8px;
+      .dropdown-item-icon {
+        margin-right: 7px;
+      }
+    }
 
     &:focus,
     &:hover {
@@ -166,7 +179,7 @@
     right: unset;
   }
 
-  .disable-link {
+  .disable-link, .disabled {
     pointer-events: none !important;
     cursor: default !important;
     color: map-get(variables.$color-map, 'disabled') !important;
@@ -178,7 +191,17 @@
   }
 }
 
-// rules specifically for safari
-@at-root .chaise-safari .chaise-dropdown.dropdown div.dropdown-menu {
-  z-index: auto;
+// override the default behavior of dropdown toggle btn in bootstrap
+.dropdown.show > button.chaise-btn.dropdown-toggle {
+  &.chaise-btn-primary {
+    @include helpers.chaise-btn-primary();
+  }
+
+  &.chaise-btn-secondary, &.chaise-btn-tertiary {
+    @include helpers.chaise-btn-secondary();
+
+    &:focus {
+      background-color: none;
+    }
+  }
 }

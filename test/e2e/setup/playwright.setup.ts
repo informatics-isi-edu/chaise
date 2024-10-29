@@ -30,7 +30,6 @@ export default async function globalSetup(config: FullConfig) {
 
   const options: TestOptions = optionsEnv;
 
-  // TODO testConfiguration is a bit different in the protractor version
   // grab the data files
   let testConfiguration;
   if (options.configFileName) {
@@ -69,7 +68,7 @@ export default async function globalSetup(config: FullConfig) {
 
   // create the catalog
   try {
-    await createCatalog(testConfiguration, projectNames, options.mainSpecName, options.manualTestConfig);
+    await createCatalog(testConfiguration, projectNames, options.manualTestConfig);
   } catch (exp) {
     throw exp;
   }
@@ -77,11 +76,13 @@ export default async function globalSetup(config: FullConfig) {
   // take care of chaise-config
   let chaiseConfigFilePath = options.chaiseConfigFilePath;
   // use the default
-  if (typeof chaiseConfigFilePath !== 'string') {
+  if (typeof chaiseConfigFilePath !== 'string' && options.mainSpecName) {
     chaiseConfigFilePath = `test/e2e/specs/${options.mainSpecName}/chaise-config.js`;
   }
 
-  copyChaiseConfig(chaiseConfigFilePath, options.addDefaultCatalogToChaiseConfig);
+  if (chaiseConfigFilePath) {
+    copyChaiseConfig(chaiseConfigFilePath, options.addDefaultCatalogToChaiseConfig);
+  }
 
   registerCallbacks(testConfiguration);
 }
@@ -126,7 +127,7 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
 /**
  * create the catalog and data
  */
-async function createCatalog(testConfiguration: any, projectNames: string[], mainSpecName: string, isManual?: boolean) {
+async function createCatalog(testConfiguration: any, projectNames: string[], isManual?: boolean) {
 
   return new Promise(async (resolve, reject) => {
     testConfiguration.setup.url = process.env.ERMREST_URL;

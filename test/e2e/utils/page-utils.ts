@@ -1,4 +1,4 @@
-import { expect, Locator, Page, test } from '@playwright/test';
+import { expect, Locator, Page, test, TestInfo } from '@playwright/test';
 import fs from 'fs';
 
 // Locators
@@ -11,6 +11,7 @@ import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedi
 
 // utils
 import { APP_NAMES, DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 export async function getClipboardContent(page: Page): Promise<string> {
   return await page.evaluate('navigator.clipboard.readText()');
@@ -30,6 +31,16 @@ export async function getPageId(page: Page): Promise<string> {
     const windowRef: any = window;
     return windowRef.dcctx.contextHeaderParams.pid
   });
+}
+
+/**
+ * generate a url to the chaise app.
+ *
+ * Notes:
+ *   - The URL doesn't have any trailing `/`. if you need to append filter or facets, make sure to start with a `/`.
+ */
+export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableName: string, testInfo: TestInfo, baseURL?: string) : string {
+  return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schemaName}:${tableName}`;
 }
 
 /**
@@ -91,7 +102,6 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
  */
 export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean, hoverEl?: Locator) {
   await locator.hover();
-  await locator.page().pause();
 
   const el = PageLocators.getTooltipContainer(locator.page());
 

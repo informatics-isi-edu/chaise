@@ -30,7 +30,7 @@
 - Run the "make testmanually" command in Chaise. This will set up a recordset table named Accommodation with long tooltips on the last column (Number of Rooms) and the "Operation Since" column.
 - Manually check the position of the tooltips by hovering over these columns and resizing the window so that these columns are on the window margins.
 - End the test spec by pressing ^D in the terminal
-- The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
+- The test spec is present at "chaise/test/manual/specs/recordset.spec.ts"
 - The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
 
 ## Recordset - auto truncation of cell content
@@ -41,7 +41,7 @@
 - Run the "make testmanually" command in Chaise. This will set up a recordset table named Accommodation with long text in 2 columns, "Summary" and "Description"
 - Maunually check that those 2 columns are truncated and have the "...more" hyperlink. Click that and make sure the column expands to show the full text. Click "...less" and make sure it properly truncates again.
 - End the test spec by pressing ^D in the terminal
-- The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
+- The test spec is present at "chaise/test/manual/specs/recordset.spec.ts"
 - The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
 
 

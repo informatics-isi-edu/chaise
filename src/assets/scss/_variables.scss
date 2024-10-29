@@ -14,6 +14,8 @@ $btn-height-sm: 24px;
 $btn-border-width: 1px;
 $btn-padding-y: 4px;
 $btn-padding-x: 10px;
+$btn-padding-sm-y: 2px;
+$btn-padding-sm-x: 5px;
 
 // input
 $input-remove-width: 18px;
@@ -31,6 +33,13 @@ $chaise-checkbox-height: 20px;
 
 // currently only used in recordedit. content/input shouldn't be wider than this
 $re-max-allowed-input-width: 1200px;
+
+/**
+ * the value is set this so it would:
+ * - fit the more-filters message
+ * - have enough space for the drag icon and the rest of items on the header.
+ */
+$recordset-facet-panel-min-width: 305px;
 
 // fonts
 $font-size: 14px;

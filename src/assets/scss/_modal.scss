@@ -245,8 +245,22 @@ div.modal-title {
     .modal-header {
       padding: 0;
       padding-top: 20px;
+      &.modal-header-reduced-top-padding {
+        padding-top: 10px;
+      }
+
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
+
+      /**
+       * we have to make sure we're setting the min-width here as well,
+       * because the modal-header is outside of the recordset-container, so the _recordset.scss rule is not applied here
+       * (written the same way as app.scss and _recordset.scss)
+       */
+      .top-panel-container .top-flex-panel .top-left-panel.open-panel,
+      .bottom-panel-container .side-panel-resizable.open-panel {
+        min-width: variables.$recordset-facet-panel-min-width;
+      }
     }
 
     .modal-body {
