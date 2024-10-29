@@ -1,27 +1,27 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_record-main-section.scss';
 
 // components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
+import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
-import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // utils
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * Returns Main Section of the record page.
@@ -128,6 +128,7 @@ const RecordMainSection = (): JSX.Element => {
                   <RelatedTable
                     relatedModel={cm.relatedModel}
                     displaynameForID={cm.column.displayname.value}
+                    intersectScroll={true}
                   />
                 </div>
               </span>

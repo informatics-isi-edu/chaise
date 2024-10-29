@@ -2,9 +2,8 @@
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 
 // models
-import { RecordsetConfig } from '@isrd-isi-edu/chaise/src/models/recordset'
-import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
@@ -13,11 +12,13 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 type ResultsetTableProps = {
-  page: any
+  page: any,
+  intersectScroll: boolean,
 }
 
 const ResultsetTable = ({
   page,
+  intersectScroll,
 }: ResultsetTableProps) : JSX.Element => {
 
   const logStack = [LogService.getStackNode(LogStackPaths.SET, page.reference.table, page.reference.filterInfo)];
@@ -48,21 +49,23 @@ const ResultsetTable = ({
       }}
       initialPage={page}
     >
-      <ResultsetTableInner config={config} reference={page.reference} />
+      <ResultsetTableInner config={config} reference={page.reference} intersectScroll={intersectScroll}/>
     </RecordsetProvider>
   )
 }
 
 const ResultsetTableInner = ({
   reference,
-  config
+  config,
+  intersectScroll,
 }: {
   config: RecordsetConfig
   reference: any
+  intersectScroll: boolean,
 }) : JSX.Element => {
   return (
     <div>
-      <RecordsetTable config={config} initialSortObject={reference.location.sortObject} />
+      <RecordsetTable config={config} initialSortObject={reference.location.sortObject} intersectScroll={intersectScroll}/>
     </div>
   )
 }

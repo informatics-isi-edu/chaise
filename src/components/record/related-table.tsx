@@ -34,7 +34,7 @@ type RelatedTableProps = {
    */
   displaynameForID: string
 
-  intersectScroll: boolean,
+  intersectScroll?: boolean,
 };
 
 /**

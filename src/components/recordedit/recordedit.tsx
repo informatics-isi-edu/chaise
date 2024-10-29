@@ -1,33 +1,33 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordedit.scss';
 
 // components
-import { Accordion, Modal } from 'react-bootstrap';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
-import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
+import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
-import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { Accordion, Modal } from 'react-bootstrap';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  RecordeditConfig, RecordeditDisplayMode,
-  RecordeditModalOptions, RecordeditProps
+  RecordeditDisplayMode,
+  RecordeditProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
@@ -35,16 +35,16 @@ import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/provid
 import RecordeditProvider from '@isrd-isi-edu/chaise/src/providers/recordedit';
 
 // services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const Recordedit = ({
   appMode,
@@ -534,7 +534,9 @@ const RecordeditInner = ({
                       </p>
                     </div>
                   }
-                  <ResultsetTable page={resultsetProps.success.page} />
+                  {/* Intersecting behaviour of scroll should be visible if there are multiple tables 
+                  on one page which here seems to be the case when there are successful as well as failed records */}
+                  <ResultsetTable page={resultsetProps.success.page} intersectScroll={!!resultsetProps.failed}/>
                 </Accordion.Body>
               </Accordion.Item>
               {resultsetProps.failed &&
@@ -545,7 +547,7 @@ const RecordeditInner = ({
                       exploreLink={resultsetProps.failed.exploreLink}
                     />
                   </Accordion.Button>
-                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} intersectScroll={!!resultsetProps.failed}/></Accordion.Body>
                 </Accordion.Item>
               }
             </Accordion>
