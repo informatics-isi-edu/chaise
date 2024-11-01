@@ -8,14 +8,11 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     allow:
       - dependency-name: "@playwright/test"
     # https://github.com/dependabot/dependabot-core/issues/1778#issuecomment-1988140219
     target-branch: master
-    assignees:
-      - "jrchudy"
-      - "RFSH"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -31,6 +28,8 @@ updates:
       - dependency-name: "prettier"
       - dependency-name: "patch-package"
       - dependency-name: "uglify-js"
+      - dependency-name: "q"
+      - dependency-name: "@types/q"
     groups:
       babel:
         patterns:
