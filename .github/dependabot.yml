@@ -47,6 +47,3 @@ updates:
           - "@types/react-dom"
           - "react"
           - "react-dom"
-    assignees:
-      - "jrchudy"
-      - "RFSH"
