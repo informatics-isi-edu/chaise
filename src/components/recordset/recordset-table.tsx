@@ -519,7 +519,7 @@ const RecordsetTable = ({
   return (
     <div className='recordset-table-container' ref={tableContainer}>
       <div ref={stickyScrollbarRef}
-        className={`chaise-table-top-scroll-wrapper`}>
+        className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
