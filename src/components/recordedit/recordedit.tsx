@@ -1,28 +1,28 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordedit.scss';
 
 // components
+import { Accordion, Modal } from 'react-bootstrap';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
-import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
-import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
+import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { Accordion, Modal } from 'react-bootstrap';
+import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
 // hooks
-import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
+import { useEffect, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -40,8 +40,8 @@ import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/provid
 import RecordeditProvider from '@isrd-isi-edu/chaise/src/providers/recordedit';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { RECORDEDIT_MAX_ROWS, RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -806,7 +806,7 @@ const RecordeditInner = ({
                   }
                   {/* Intersecting behaviour of scroll should be visible if there are multiple tables 
                   on one page which here seems to be the case when there are successful as well as failed records */}
-                  <ResultsetTable page={resultsetProps.success.page} intersectScroll={!!resultsetProps.failed}/>
+                  <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed}/>
                 </Accordion.Body>
               </Accordion.Item>
               {resultsetProps.failed &&
@@ -817,7 +817,7 @@ const RecordeditInner = ({
                       exploreLink={resultsetProps.failed.exploreLink}
                     />
                   </Accordion.Button>
-                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} intersectScroll={!!resultsetProps.failed}/></Accordion.Body>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} showSingleScrollbar={!!resultsetProps.failed}/></Accordion.Body>
                 </Accordion.Item>
               }
             </Accordion>

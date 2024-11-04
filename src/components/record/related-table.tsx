@@ -17,12 +17,11 @@ import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
-// services
-
 // utils
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+
 
 type RelatedTableProps = {
   /**
@@ -33,8 +32,10 @@ type RelatedTableProps = {
    * the displayname for the reference to be used in the id attached to the container
    */
   displaynameForID: string
-
-  intersectScroll?: boolean,
+  /**
+   * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
+   */
+  showSingleScrollbar?: boolean,
 };
 
 /**
@@ -45,21 +46,21 @@ type RelatedTableProps = {
 const RelatedTable = ({
   relatedModel,
   displaynameForID,
-  intersectScroll
+  showSingleScrollbar
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} intersectScroll={intersectScroll}/>
+      <RelatedTableInner relatedModel={relatedModel} displaynameForID={displaynameForID} showSingleScrollbar={showSingleScrollbar}/>
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
   displaynameForID,
-  intersectScroll
+  showSingleScrollbar
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
@@ -114,7 +115,7 @@ const RelatedTableInner = ({
           <RecordsetTable
             config={relatedModel.recordsetProps.config}
             initialSortObject={usedRef.location.sortObject}
-            intersectScroll={intersectScroll}
+            showSingleScrollbar={showSingleScrollbar}
           />
         </div>
       </div>

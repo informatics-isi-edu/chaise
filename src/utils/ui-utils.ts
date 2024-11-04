@@ -1,11 +1,11 @@
 /**
  * Utility functions related to dom manipulation
  */
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
-import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import Tooltip from 'bootstrap/js/dist/tooltip';
 
 /**

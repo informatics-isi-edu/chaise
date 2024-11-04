@@ -2,8 +2,9 @@
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
 
 // models
+import { RecordsetConfig } from '@isrd-isi-edu/chaise/src/models/recordset'
+import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
@@ -13,12 +14,15 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 type ResultsetTableProps = {
   page: any,
-  intersectScroll: boolean,
+  /**
+  * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
+  */
+  showSingleScrollbar: boolean,
 }
 
 const ResultsetTable = ({
   page,
-  intersectScroll,
+  showSingleScrollbar,
 }: ResultsetTableProps) : JSX.Element => {
 
   const logStack = [LogService.getStackNode(LogStackPaths.SET, page.reference.table, page.reference.filterInfo)];
@@ -48,7 +52,7 @@ const ResultsetTable = ({
       }}
       initialPage={page}
     >
-      <ResultsetTableInner config={config} reference={page.reference} intersectScroll={intersectScroll}/>
+      <ResultsetTableInner config={config} reference={page.reference} showSingleScrollbar={showSingleScrollbar}/>
     </RecordsetProvider>
   )
 }
@@ -56,15 +60,15 @@ const ResultsetTable = ({
 const ResultsetTableInner = ({
   reference,
   config,
-  intersectScroll,
+  showSingleScrollbar,
 }: {
   config: RecordsetConfig
   reference: any
-  intersectScroll: boolean,
+  showSingleScrollbar: boolean,
 }) : JSX.Element => {
   return (
     <div>
-      <RecordsetTable config={config} initialSortObject={reference.location.sortObject} intersectScroll={intersectScroll}/>
+      <RecordsetTable config={config} initialSortObject={reference.location.sortObject} showSingleScrollbar={showSingleScrollbar}/>
     </div>
   )
 }
