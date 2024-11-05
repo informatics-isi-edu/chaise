@@ -157,10 +157,7 @@ const RecordsetTable = ({
     }
 
     return () => {
-      if (tableEndRef.current) {
-        observer.unobserve(tableEndRef.current);
         observer.disconnect();
-      }
     }
   }, []);
 
@@ -535,8 +532,9 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      {/*  This div will be used as the target (end of table) for the intersection observer to hide the top scrollbar when the bottom one is visible */}
-      <div ref={tableEndRef} style={{ height: '1px' }}></div>
+      {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
+      top scrollbar when the bottom one is visible */}
+      <div className='dummy-table-end-div' ref={tableEndRef}/>
 
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
