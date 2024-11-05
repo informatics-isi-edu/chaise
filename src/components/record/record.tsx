@@ -684,6 +684,7 @@ const RecordInner = ({
                     <RelatedTable
                       relatedModel={rm}
                       displaynameForID={rm.initialReference.displayname.value}
+                      showSingleScrollbar={true}
                     />
                   </Accordion.Body>
                 </Accordion.Item>

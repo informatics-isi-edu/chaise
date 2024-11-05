@@ -804,7 +804,9 @@ const RecordeditInner = ({
                       </p>
                     </div>
                   }
-                  <ResultsetTable page={resultsetProps.success.page} />
+                  {/* Intersecting behaviour of scroll should be visible if there are multiple tables 
+                  on one page which here seems to be the case when there are successful as well as failed records */}
+                  <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed}/>
                 </Accordion.Body>
               </Accordion.Item>
               {resultsetProps.failed &&
@@ -815,7 +817,7 @@ const RecordeditInner = ({
                       exploreLink={resultsetProps.failed.exploreLink}
                     />
                   </Accordion.Button>
-                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} showSingleScrollbar={!!resultsetProps.failed}/></Accordion.Body>
                 </Accordion.Item>
               }
             </Accordion>

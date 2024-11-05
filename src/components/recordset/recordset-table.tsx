@@ -29,12 +29,17 @@ import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/sr
 type RecordsetTableProps = {
   config: RecordsetConfig,
   initialSortObject: any,
+  /**
+   * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
+   */
+  showSingleScrollbar?: boolean,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
-  initialSortObject
+  initialSortObject,
+  showSingleScrollbar = false
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -53,6 +58,9 @@ const RecordsetTable = ({
   } = useRecordset();
 
   const tableContainer = useRef<HTMLDivElement>(null);
+  const stickyScrollbarRef = useRef<HTMLDivElement>(null);
+  const tableEndRef = useRef<HTMLDivElement>(null);
+
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
@@ -90,7 +98,7 @@ const RecordsetTable = ({
         isDisabled: false,
         disabledType: undefined
       };
-    // page.tuples.forEach((tuple: any, index: number) => {
+      // page.tuples.forEach((tuple: any, index: number) => {
       if (hasSelectedRows) {
         const row = selectedRows.find((obj: SelectedRow) => {
           // ermrestjs always returns a string for uniqueId, but internally we don't
@@ -115,11 +123,44 @@ const RecordsetTable = ({
       }
 
       tempRowDetails[i] = rowConfig;
-    // });
+      // });
     }
 
     rowDetails = tempRowDetails;
   }
+
+  useEffect(() => {
+    //Only implement intersection observer for top scrollbar when showSingleScrollbar is true otherwise top scrollbar will be shown as sticky
+    if (!showSingleScrollbar) return;
+
+    // Create a new IntersectionObserver instance to track the visibility of the bottom scrollbar(end of table)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        //Updating isBottomVisible when bottom scrollbar is visible in the viewport
+        if (stickyScrollbarRef.current) {
+          if (entry.isIntersecting) {
+            stickyScrollbarRef.current.classList.add('no-scroll-bar');
+          }
+          else {
+            stickyScrollbarRef.current.classList.remove('no-scroll-bar');
+          }
+        }
+      },
+      {
+        root: null, // Use viewport as the root
+        threshold: 0.1, // Triggers when 10% of the element is visible
+      }
+    );
+    //Observes when the table end is visible on viewport
+    if (tableEndRef.current) {
+      observer.observe(tableEndRef.current);
+    }
+
+    return () => {
+        observer.disconnect();
+    }
+  }, []);
+
 
   /**
    * add the top horizontal scroll if needed
@@ -472,10 +513,10 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
-
   return (
     <div className='recordset-table-container' ref={tableContainer}>
-      <div className='chaise-table-top-scroll-wrapper'>
+      <div ref={stickyScrollbarRef}
+        className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
@@ -491,6 +532,10 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
+      {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
+      top scrollbar when the bottom one is visible */}
+      <div className='dummy-table-end-div' ref={tableEndRef}/>
+
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
           <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>
