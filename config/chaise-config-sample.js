@@ -24,7 +24,7 @@ var chaiseConfig = {
     maxRecordsetRowHeight: 160,
     navbarBanner: [
         {
-            markdown_pattern: "This is a development version of Chaise",
+            markdownPattern: "This is a development version of Chaise",
             // // to make the banner dismissible:
             // dismissible: true,
             // // to ensure showing the banner only to certain users:
