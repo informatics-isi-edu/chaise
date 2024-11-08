@@ -50,9 +50,17 @@ $h4-font-size: 1.25rem;
 
 /**
  * map syntax doesn't allow multiline, so we have to have them in separate files.
+ * NOTE: these lines used to use @import, but since it was deprecated I had to rewrite them with @use.
+ *       but that broke the way we're using our variables, so I had to rename them with the second lines.
  */
- @import 'maps/record-page-spacing';
- @import 'maps/chaise-accordion';
- @import 'maps/z-index-map';
- @import 'maps/color-map';
+@use 'maps/record-page-spacing';
+$record-spacing-map: record-page-spacing.$map;
 
+@use 'maps/chaise-accordion';
+$chaise-accordion-spacing-map: chaise-accordion.$map;
+
+@use 'maps/z-index-map';
+$z-index-map: z-index-map.$map;
+
+@use 'maps/color-map';
+$color-map: color-map.$map;

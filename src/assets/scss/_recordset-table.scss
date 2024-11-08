@@ -6,8 +6,8 @@
 }
 
 .chaise-table.table {
-  border-top: 1px solid map-get(variables.$color-map, 'table-border');
-  border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
+  border-top: 1px solid map.get(variables.$color-map, 'table-border');
+  border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
   margin: 0;
 
   // override the default bootstrap styles as we're going to apply our own styles below
@@ -23,7 +23,7 @@
 
     /* table hover */
     > tr:hover {
-      background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
+      background-color: map.get(variables.$color-map, 'table-highlight-background') !important;
 
       .hover-show {
         visibility: visible;
@@ -32,18 +32,18 @@
 
     /* odd row hover for striped table */
     > tr:nth-child(odd):hover {
-      background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
+      background-color: map.get(variables.$color-map, 'table-striped-highlight-background') !important;
     }
   }
 
   tr {
-    border-left: 1px solid map-get(variables.$color-map, 'table-border');
+    border-left: 1px solid map.get(variables.$color-map, 'table-border');
     border-bottom: none;
   }
 
   .table-heading {
-    background-color: map-get(variables.$color-map, 'table-header-background');
-    color: map-get(variables.$color-map, 'black');
+    background-color: map.get(variables.$color-map, 'table-header-background');
+    color: map.get(variables.$color-map, 'black');
 
     .actions-header {
       width: 100px;
@@ -78,11 +78,11 @@
   }
 
   & > tbody > tr:nth-child(odd) {
-    background: map-get(variables.$color-map, 'table-striped-background');
+    background: map.get(variables.$color-map, 'table-striped-background');
   }
 
   > thead > tr > th {
-    border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
+    border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
     white-space: nowrap;
   }
 
@@ -94,7 +94,7 @@
   > tfoot > tr > td {
     border-top: none;
     border-bottom: none;
-    border-right: 1px solid map-get(variables.$color-map, 'table-border');
+    border-right: 1px solid map.get(variables.$color-map, 'table-border');
     word-wrap: break-word;
   }
 
@@ -105,7 +105,7 @@
 
   th {
     font-weight: 400;
-    border-top: 1px solid map-get(variables.$color-map, 'table-border');
+    border-top: 1px solid map.get(variables.$color-map, 'table-border');
     position: relative;
 
     &.actions-header {
@@ -136,7 +136,7 @@
 
         .spinner-border {
           // NOTE: we should not customize the width/height since it causes wobbling effect
-          color: map-get(variables.$color-map, 'table-header-spinner');
+          color: map.get(variables.$color-map, 'table-header-spinner');
           border-width: .16em;
         }
       }
@@ -193,7 +193,7 @@
         font-size: 1.6rem;
         // added here instead of to the button as padding-top to only affect these buttons/icons
         margin-top: 1px;
-        background-color: map-get(variables.$color-map, 'white') !important;
+        background-color: map.get(variables.$color-map, 'white') !important;
         border-radius: inherit;
       }
     }
@@ -227,11 +227,11 @@
 
     .disabled {
       cursor: not-allowed;
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
 
     .delete-loader {
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
   }
 

@@ -4,7 +4,7 @@
 // range picker directive
 .range-picker {
   hr {
-    color: map-get(variables.$color-map, 'border');
+    color: map.get(variables.$color-map, 'border');
     width: 1px;
   }
 

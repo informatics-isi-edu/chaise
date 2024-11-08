@@ -28,6 +28,8 @@ const webpack = require('webpack');
  *                if missing, we will use CHAISE_BASE_PATH.
  * - rootFolderLocation: the location of root folder. used to find the code (e.g. ../src)
  * - resolveAliases: the aliases that will be used in import statements.
+ * - extraWebpackProps: props that you want to directly pass to webpack. be mindful what you're passing as you might break the configuration
+ *                 by overriding the props that we already rely on. Currently only used for passing externals (https://webpack.js.org/configuration/externals/)
  *
  * @param {Object} appConfigs
  *  the app configurations
@@ -53,6 +55,10 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
   }
   if (!options.resolveAliases || typeof options.resolveAliases !== 'object') {
     options.resolveAliases = {};
+  }
+
+  if (!options.extraWebpackProps || typeof options.extraWebpackProps !== 'object') {
+    options.extraWebpackProps = {};
   }
 
   const entries = {}, appHTMLPlugins = [];
@@ -256,16 +262,13 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         },
       },
     },
-    externals: {
-      // treat plotly as an external dependency and don't compute it
-      'plotly.js-basic-dist-min': 'Plotly'
-    },
     performance: {
       assetFilter: (assetFilename) => {
         // ignore the fonts
         return !/\.(woff(2)?|eot|ttf|otf|svg|)$/.test(assetFilename);
       }
-    }
+    },
+    ...options.extraWebpackProps
   }
 }
 

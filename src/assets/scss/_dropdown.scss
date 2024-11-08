@@ -1,3 +1,4 @@
+@use "sass:color";
 @use 'sass:map';
 @use 'variables';
 @use 'helpers';
@@ -17,7 +18,7 @@
     padding: 3px 15px 3px 15px;
     cursor: default;
     font-size: variables.$font-size;
-    color: map-get(variables.$color-map, 'black');
+    color: map.get(variables.$color-map, 'black');
     font-weight: 600;
   }
 
@@ -44,7 +45,7 @@
     border-style: solid;
     border-width: 6px 0 6px 6px;
     /* was 5px 0 5px 5px */
-    border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu-icon');
+    border-left-color: map.get(variables.$color-map, 'navbar-dropdown-submenu-icon');
     // to center
     margin: auto;
     margin-right: -15px;
@@ -55,7 +56,7 @@
 
   .dropdown-submenu:hover > a:after,
   .dropdown-submenu:hover > div > div > a:after {
-    border-left-color: map-get(variables.$color-map, 'navbar-dropdown-submenu');
+    border-left-color: map.get(variables.$color-map, 'navbar-dropdown-submenu');
   }
 
   .dropdown-submenu.pull-left {
@@ -133,7 +134,7 @@
     cursor: pointer;
     display: flex;
     justify-content: space-between;
-    color: map-get(variables.$color-map, 'black');
+    color: map.get(variables.$color-map, 'black');
     margin-bottom: 2px;
     padding: 3px 15px 3px 15px;
     line-height: 1.4;
@@ -147,8 +148,8 @@
 
     &:focus,
     &:hover {
-      color: lighten(map-get(variables.$color-map, 'black'), 10%);
-      background-color: darken(map-get(variables.$color-map, 'white'), 10%);
+      color: color.adjust(map.get(variables.$color-map, 'black'), $lightness: 10%);
+      background-color: color.adjust(map.get(variables.$color-map, 'white'), $lightness: -10%);
     }
   }
 
@@ -182,11 +183,11 @@
   .disable-link, .disabled {
     pointer-events: none !important;
     cursor: default !important;
-    color: map-get(variables.$color-map, 'disabled') !important;
+    color: map.get(variables.$color-map, 'disabled') !important;
 
     // the arrow icon
     &:after {
-      border-left-color: map-get(variables.$color-map, 'disabled') !important;
+      border-left-color: map.get(variables.$color-map, 'disabled') !important;
     }
   }
 }

@@ -19,6 +19,8 @@ jobs:
       - name: Check if version has been updated
         id: version-check
         uses: EndBug/version-check@v2
+        with:
+          diff-search: true
       - name: Publish new version
         if: steps.version-check.outputs.changed == 'true'
         run: |
