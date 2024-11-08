@@ -51,9 +51,9 @@
 
       .entity-key {
         width: variables.$chaise-caption-column-width;
-        border-left: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-left: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         // margin-left: 10px;
         background: white;
         padding: 8px;
@@ -89,8 +89,8 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      color: map-get(variables.$color-map, 'black');
-      background-color: map-get(variables.$color-map, 'white');
+      color: map.get(variables.$color-map, 'black');
+      background-color: map.get(variables.$color-map, 'white');
       min-width: 250px;
       overflow-x: auto;
 
@@ -119,7 +119,7 @@
         max-width: 100%;
 
         &.highlighted-row {
-          background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
+          background-color: map.get(variables.$color-map, 'recordedit-highlighted-row');
 
           // reset the changed height when the multi form input row is open
           .inputs-row {
@@ -161,8 +161,8 @@
         .inline-comment-row {
           flex-direction: column;
 
-          color: map-get(variables.$color-map, 'column-inline-tooltip');
-          border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+          color: map.get(variables.$color-map, 'column-inline-tooltip');
+          border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
 
           padding: 8px 10px 0 8px;
 
@@ -180,7 +180,7 @@
           flex-direction: column;
           align-items: center;
 
-          z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
+          z-index: map.get(variables.$z-index-map, 'multi-form-input-row');
 
           // Adding a div to align the content center always
           .center-align {
@@ -215,7 +215,7 @@
               }
               .multi-form-input-how-to {
                 cursor: default;
-                color: map-get(variables.$color-map, 'black');
+                color: map.get(variables.$color-map, 'black');
               }
 
               .multi-form-input-how-to:hover {
@@ -301,13 +301,13 @@
           top: 0;
           height: 100%;
           width: 100%;
-          z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
+          z-index: map.get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
         }
 
         .column-permission-warning {
           margin: 0;
           padding: 5px;
-          color: map-get(variables.$color-map, 'recordedit-column-permission-warning');
+          color: map.get(variables.$color-map, 'recordedit-column-permission-warning');
         }
       }
 
@@ -315,8 +315,8 @@
       .match-entity-value {
         word-wrap: break-word;
         min-width: 250px;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
 
         // border-left: none;
         // border-top: none;
@@ -328,7 +328,7 @@
 
       // This is added to show the form is selected to apply the change
       .entity-active {
-        outline: 2px solid map-get(variables.$color-map, 'primary');
+        outline: 2px solid map.get(variables.$color-map, 'primary');
         outline-offset: -2px;
       }
 
@@ -336,15 +336,15 @@
       .column-cell {
         border-left: none;
         border-top: none;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         border-radius: 0;
         // height: 47px;
         min-height: 47px;
         padding: 8px 10px;
 
         .chaise-input-control.column-cell-input {
-          border: 1px solid map-get(variables.$color-map, 'border');
+          border: 1px solid map.get(variables.$color-map, 'border');
           border-radius: 4px;
           padding: 0 10px;
           display: flex;
@@ -360,8 +360,8 @@
     // in both entity-key-column and form
     .form-header {
       height: 47px;
-      border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-      color: map-get(variables.$color-map, 'disabled');
+      border-top: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+      color: map.get(variables.$color-map, 'disabled');
 
       .form-header-buttons-container {
         float: right;
@@ -387,11 +387,11 @@
   .record-number {
     font-size: 14px;
     margin-left: 10px;
-    color: map-get(variables.$color-map, 'disabled');
+    color: map.get(variables.$color-map, 'disabled');
   }
 
   .chaise-input-control[readonly] {
-    background-color: map-get(variables.$color-map, 'white');
+    background-color: map.get(variables.$color-map, 'white');
     opacity: 1;
   }
 

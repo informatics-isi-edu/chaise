@@ -19,7 +19,7 @@
     &:active,
     &:focus,
     &:hover {
-      z-index: map-get(variables.$z-index-map, 'button-active');
+      z-index: map.get(variables.$z-index-map, 'button-active');
     }
   }
 }

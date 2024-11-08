@@ -200,7 +200,7 @@
     /******Related Entities in record **************/
 
     .row-focus {
-      border: map-get(variables.$record-spacing-map, 'row-focus-border-width') solid map-get(variables.$color-map, 'primary') !important;
+      border: map.get(variables.$record-spacing-map, 'row-focus-border-width') solid map.get(variables.$color-map, 'primary') !important;
     }
 
     .chaise-table-header {

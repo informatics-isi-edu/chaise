@@ -7,11 +7,11 @@
   display: flex;
   align-items: center;
   top: 50%;
-  color: map-get(variables.$color-map, 'split-view-divider');
+  color: map.get(variables.$color-map, 'split-view-divider');
   left: 2px;
   margin-right: -20px;
   width: 20px;
-  z-index: map-get(variables.$z-index-map, 'split-view-divider');
+  z-index: map.get(variables.$z-index-map, 'split-view-divider');
 
   span {
     padding-left: 3px;

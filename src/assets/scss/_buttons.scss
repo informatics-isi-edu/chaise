@@ -1,3 +1,4 @@
+@use "sass:color";
 @use 'sass:map';
 @use 'variables';
 @use 'helpers';
@@ -53,37 +54,37 @@
   &.chaise-btn.chaise-btn-secondary[disabled],
   &.chaise-btn.chaise-btn-primary.disabled,
   &.chaise-btn.chaise-btn-secondary.disabled {
-    color: map-get(variables.$color-map, 'disabled');
-    background-color: map-get(variables.$color-map, 'disabled-background');
-    border-color: map-get(variables.$color-map, 'disabled-background');
+    color: map.get(variables.$color-map, 'disabled');
+    background-color: map.get(variables.$color-map, 'disabled-background');
+    border-color: map.get(variables.$color-map, 'disabled-background');
   }
 
   &.chaise-btn-tertiary {
-    color: map-get(variables.$color-map, 'primary');
+    color: map.get(variables.$color-map, 'primary');
     border: none;
     background: transparent;
 
     &[disabled],
     &.disabled {
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
 
     // the link color is more prominent than our button/control color,
     // we should use this class if we want to make the button to be as prominent as links
     &.chaise-btn-link:not([disabled]):not(.disabled) {
-      color: map-get(variables.$color-map, 'link');
+      color: map.get(variables.$color-map, 'link');
     }
   }
 
   &.chaise-btn-default {
-    color: map-get(variables.$color-map, 'black');
-    border-color: map-get(variables.$color-map, 'border');
+    color: map.get(variables.$color-map, 'black');
+    border-color: map.get(variables.$color-map, 'border');
   }
 
   &.chaise-btn-danger {
-    color: map-get(variables.$color-map, 'white');
-    background-color: map-get(variables.$color-map, 'danger');
-    border-color: darken(map-get(variables.$color-map, 'danger'), 10%);
+    color: map.get(variables.$color-map, 'white');
+    background-color: map.get(variables.$color-map, 'danger');
+    border-color: color.adjust(map.get(variables.$color-map, 'danger'), $lightness: -10%);
   }
 
   &.chaise-download-btn {
@@ -99,7 +100,7 @@
   // this is currently designed mostly for 
   &.chaise-btn-with-indicator:before {
     content: '';
-    background-color: map-get(variables.$color-map, 'primary');
+    background-color: map.get(variables.$color-map, 'primary');
     position: absolute;
     top: -1px;
     right: -1px;

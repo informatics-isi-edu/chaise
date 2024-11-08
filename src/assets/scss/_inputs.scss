@@ -69,11 +69,11 @@
     // as our inputs.
     .chaise-btn {
       position: relative;
-      z-index: map-get(variables.$z-index-map, 'input-group-append-btn'); // should be above input even if input is focused
+      z-index: map.get(variables.$z-index-map, 'input-group-append-btn'); // should be above input even if input is focused
       @include helpers.border-left-radius(0);
 
       &:focus {
-        z-index: map-get(variables.$z-index-map, 'input-group-append-btn-focus');
+        z-index: map.get(variables.$z-index-map, 'input-group-append-btn-focus');
       }
     }
 
@@ -127,11 +127,11 @@
   padding: variables.$btn-padding-y variables.$btn-padding-x;
   margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
   font-size: 1rem;
-  color: map-get(variables.$color-map, 'black');
+  color: map.get(variables.$color-map, 'black');
   text-align: center;
   white-space: nowrap;
-  background-color: map-get(variables.$color-map, 'table-striped-background');
-  border: variables.$btn-border-width solid map-get(variables.$color-map, 'border');
+  background-color: map.get(variables.$color-map, 'table-striped-background');
+  border: variables.$btn-border-width solid map.get(variables.$color-map, 'border');
   @include helpers.border-radius(variables.$btn-border-radius);
 
   // dt meaning "datetime"
@@ -175,9 +175,9 @@
   height: variables.$btn-height;
   min-height: variables.$btn-height;
   padding: variables.$btn-padding-y variables.$btn-padding-x;
-  background-color: map-get(variables.$color-map, 'white');
+  background-color: map.get(variables.$color-map, 'white');
   background-clip: padding-box;
-  border: variables.$btn-border-width solid map-get(variables.$color-map, 'border');
+  border: variables.$btn-border-width solid map.get(variables.$color-map, 'border');
 
   @include helpers.border-radius(variables.$btn-border-radius);
 
@@ -214,7 +214,7 @@
   // Placeholder
   &::placeholder,
   input::placeholder {
-    color: map-get(variables.$color-map, 'placeholder');
+    color: map.get(variables.$color-map, 'placeholder');
     // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526.
     opacity: 1;
   }
@@ -229,9 +229,9 @@
   &[readonly],
   &[readonly][disabled],
   &.input-disabled {
-    background-color: map-get(variables.$color-map, 'disabled-background');
-    border-color: map-get(variables.$color-map, 'disabled-background');
-    color: map-get(variables.$color-map, 'disabled');
+    background-color: map.get(variables.$color-map, 'disabled-background');
+    border-color: map.get(variables.$color-map, 'disabled-background');
+    color: map.get(variables.$color-map, 'disabled');
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
     opacity: 1;
     cursor: not-allowed;
@@ -247,7 +247,7 @@
     }
 
     .chaise-input-placeholder {
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
   }
 
@@ -258,8 +258,8 @@
   // form-control:focus changes the z-index of the form control from 2 to 3.
   // use z index 5 so it isn't hidden when focused
   .chaise-input-control-feedback {
-    z-index: map-get(variables.$z-index-map, 'input-control-feedback');
-    color: map-get(variables.$color-map, 'black');
+    z-index: map.get(variables.$z-index-map, 'input-control-feedback');
+    color: map.get(variables.$color-map, 'black');
     position: absolute;
     right: 0;
     top: 5px;
@@ -276,7 +276,7 @@
   // NOTE: cannot be used for `input` tags or placeholders with HTML
   div[contenteditable='false']:empty:not(:focus):before {
     content: attr(data-placeholder); // required data-placeholder being present
-    color: map-get(variables.$color-map, 'placeholder');
+    color: map.get(variables.$color-map, 'placeholder');
   }
 
   // adds a grey placeholder into input fields (inputs) that are also editable
@@ -285,7 +285,7 @@
     position: absolute;
     top: variables.$btn-padding-y;
     left: variables.$btn-padding-x;
-    color: map-get(variables.$color-map, 'placeholder');
+    color: map.get(variables.$color-map, 'placeholder');
 
     // show ellipsis if there aren't enough space:
     width: calc(100% - 10px); // we have to account for the padding-left of .button-text

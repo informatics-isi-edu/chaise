@@ -20,17 +20,17 @@
 
       // reduce the spacing of table cells (overrides bootstrap default)
       > tbody > tr.row {
-        border-top: map-get(variables.$record-spacing-map, 'record-table-cell-border-width') solid map-get(variables.$color-map, 'border');
+        border-top: map.get(variables.$record-spacing-map, 'record-table-cell-border-width') solid map.get(variables.$color-map, 'border');
         margin: 0px;
 
         > td {
           border-top: 0;
-          padding: map-get(variables.$record-spacing-map, 'record-table-cell-padding');
+          padding: map.get(variables.$record-spacing-map, 'record-table-cell-padding');
 
           // make sure the inline related content are aligned with the related content
           // so Explore button in inine related, table in inline related, Explore
           // button in related, and table in related are all aligned.
-          padding-right: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
+          padding-right: map.get(variables.$chaise-accordion-spacing-map, 'header-padding');
 
           &.entity-value {
             overflow-wrap: break-word;
@@ -42,7 +42,7 @@
         // rest of headers
         &.hidden-header {
           > .entity-value {
-            padding-left: map-get(variables.$record-spacing-map, 'record-header-padding-left');
+            padding-left: map.get(variables.$record-spacing-map, 'record-header-padding-left');
           }
         }
 
@@ -50,27 +50,27 @@
           // row-focus will change the border top and bottom size,
           // so we should adjust that and account for the default border
           td {
-            $_row_focus_padding: map-get(variables.$record-spacing-map, 'record-table-cell-padding') - (map-get(variables.$record-spacing-map, 'row-focus-border-width') - map-get(variables.$record-spacing-map, 'record-table-cell-border-width'));
+            $_row_focus_padding: map.get(variables.$record-spacing-map, 'record-table-cell-padding') - (map.get(variables.$record-spacing-map, 'row-focus-border-width') - map.get(variables.$record-spacing-map, 'record-table-cell-border-width'));
             padding-top: $_row_focus_padding;
             padding-bottom: $_row_focus_padding;
 
             // if the size of row-focus is bigger than the current border width,
             // we should adjust the content of inline tables so the whole page doesn't shift
-            @if map-get(variables.$record-spacing-map, 'row-focus-border-width') > map-get(variables.$record-spacing-map, 'record-table-cell-border-width') {
+            @if map.get(variables.$record-spacing-map, 'row-focus-border-width') > map.get(variables.$record-spacing-map, 'record-table-cell-border-width') {
               .inline-table-display {
-                padding-bottom: map-get(variables.$record-spacing-map, 'row-focus-border-width');
+                padding-bottom: map.get(variables.$record-spacing-map, 'row-focus-border-width');
               }
             }
           }
 
           // when there are two of them, the bottom should use the default padding
           + tr.row-focus td {
-            padding-top:  map-get(variables.$record-spacing-map, 'record-table-cell-padding');
+            padding-top:  map.get(variables.$record-spacing-map, 'record-table-cell-padding');
           }
         }
 
         .entity-key {
-          padding-left: map-get(variables.$record-spacing-map, 'record-header-padding-left');
+          padding-left: map.get(variables.$record-spacing-map, 'record-header-padding-left');
           border-bottom-width: 0px;
           position: relative;
           padding-right: 15px;
@@ -88,7 +88,7 @@
     }
 
     .inline-tooltip {
-      color: map-get(variables.$color-map, 'column-inline-tooltip');
+      color: map.get(variables.$color-map, 'column-inline-tooltip');
       padding-bottom: 5px;
     }
   }

@@ -1,3 +1,4 @@
+@use "sass:map";
 @use 'variables';
 
 
@@ -48,7 +49,7 @@
 
 .input-switch-longtext {
   .md-editor {
-    border: 1px solid map-get(variables.$color-map, 'border');
+    border: 1px solid map.get(variables.$color-map, 'border');
     border-radius: 4px;
 
     .md-header {
@@ -109,7 +110,7 @@
   }
 
   .hex-sign {
-    color: map-get(variables.$color-map, 'placeholder');
+    color: map.get(variables.$color-map, 'placeholder');
   }
 
   .chaise-color-picker-preview {
@@ -187,15 +188,15 @@
       left: 0;
       height: 100%;
       width: 100%;
-      z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
-      background: map-get(variables.$color-map, 'disabled-background');
+      z-index: map.get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop');
+      background: map.get(variables.$color-map, 'disabled-background');
       opacity: 0.55;
     }
 
     .spinner-border-sm {
       top: 8px;
       position: absolute;
-      z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner');
+      z-index: map.get(variables.$z-index-map, 'recordedit-column-cell-spinner');
     }
   }
 
@@ -223,7 +224,7 @@
     */
     >.chaise-input-group:not([aria-disabled="true"]),
     .dropdown-menu {
-      border: 2px solid map-get(variables.$color-map, 'primary');
+      border: 2px solid map.get(variables.$color-map, 'primary');
       border-radius: 6px;
     }
   }
@@ -275,7 +276,7 @@
           // bootstrap stylesheets have :hover defined before :disabled so disabled always takes precedence
           // redefine with the same hover color to override bootstrap order
           &:hover {
-            background-color: map-get(variables.$color-map, 'recordedit-dropdown-hover');
+            background-color: map.get(variables.$color-map, 'recordedit-dropdown-hover');
           }
         }
 
@@ -341,11 +342,11 @@
 
 .input-switch-error {
   &.input-switch-error-danger {
-    color: map-get(variables.$color-map, 'input-error-message-danger');
+    color: map.get(variables.$color-map, 'input-error-message-danger');
   }
 
   &.input-switch-error-warning {
-    color: map-get(variables.$color-map, 'input-error-message-warning');
+    color: map.get(variables.$color-map, 'input-error-message-warning');
   }
 }
 

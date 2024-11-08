@@ -50,7 +50,7 @@
   }
 
   .chaise-table-header-spinner {
-    color: map-get(variables.$color-map, 'spinner');
+    color: map.get(variables.$color-map, 'spinner');
     margin-left: 4px;
   }
 }

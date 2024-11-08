@@ -42,7 +42,7 @@
     // each facet panel
     .facet-panel {
       border-radius: 0;
-      border: 1px solid map-get(variables.$color-map, 'border');
+      border: 1px solid map.get(variables.$color-map, 'border');
 
       // active style
       &.active,
@@ -80,8 +80,8 @@
         flex-direction: row-reverse;
         justify-content: flex-end;
 
-        background-color: map-get(variables.$color-map, 'table-header-background');
-        color: map-get(variables.$color-map, 'black');
+        background-color: map.get(variables.$color-map, 'table-header-background');
+        color: map.get(variables.$color-map, 'black');
 
         // Overriding accordian-button css to align right angle bracket icon to left
         &::after {
