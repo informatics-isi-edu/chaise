@@ -1,7 +1,7 @@
 {
   "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "license": "Apache-2.0",
   "engines": {
     "node": ">= 18.18.0 || >= 20.0.0",
