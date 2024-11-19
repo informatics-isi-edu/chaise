@@ -220,22 +220,28 @@ export const updateCatalogAlias = async (catalogId: string, alias: string): Prom
   });
 }
 
-export const copyFileToChaiseDir = (fileLocation: string, destinationFilename: string) => {
+/**
+ * copy from the given location to the deployed location of chaise
+ * @param fileLocation the file or folder that we want to copy
+ * @param destinationFilename the relative path that we want this file or folder to be added to (relative to remote chaise)
+ * @param isFolder whether this is a  file or folder
+ */
+export const copyFileToChaiseDir = (fileLocation: string, destinationFilename: string, isFolder?: boolean) => {
   const remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
   // The tests will take this path when it is not running on CI and remoteChaseDirPath is not null
   let cmd;
   if (typeof remoteChaiseDirPath === 'string') {
-    cmd = `scp ${fileLocation} ${remoteChaiseDirPath}/${destinationFilename}`;
+    cmd = `scp ${isFolder ? '-r ' : ''}${fileLocation} ${remoteChaiseDirPath}/${destinationFilename}`;
   } else {
-    cmd = `sudo cp ${fileLocation} /var/www/html/chaise/${destinationFilename}`;
+    cmd = `sudo cp ${isFolder ? '-r ' : ''}${fileLocation} /var/www/html/chaise/${destinationFilename}`;
   }
 
   try {
     execSync(cmd);
-    console.log('copied the file into proper location');
+    console.log(`copied ${destinationFilename} ${isFolder ? 'folder' : 'file'} into the proper location.`);
   } catch (exp) {
     console.log(exp);
-    console.log('Unable to copy the iframe into proper location');
+    console.log(`Unable to copy ${destinationFilename} ${isFolder ? 'folder' : 'file'}!`);
     process.exit(1);
   }
 }

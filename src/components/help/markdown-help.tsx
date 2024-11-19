@@ -1,4 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_md-help-app.scss';
+import USCLogo from '@isrd-isi-edu/chaise/src/assets/images/USC-Shield.png';
 
 const MarkdownHelp = (): JSX.Element => {
 
@@ -92,7 +93,7 @@ const MarkdownHelp = (): JSX.Element => {
               <br /> [1]: http://xyz/a.png
             </td>
             <td className='markdown-container'>
-              <img src='../images/USC-Shield.png' height='50' alt='Markdown' />
+              <img src={USCLogo} height='50' alt='Markdown' />
             </td>
           </tr>
           <tr>
