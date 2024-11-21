@@ -185,7 +185,7 @@ const RecordeditInner = ({
     delayError: undefined
   });
 
-  const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+  const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord !== false;
   /**
    * enable the button if at least one row can be deleted
    */
@@ -804,7 +804,7 @@ const RecordeditInner = ({
                       </p>
                     </div>
                   }
-                  {/* Intersecting behaviour of scroll should be visible if there are multiple tables 
+                  {/* Intersecting behaviour of scroll should be visible if there are multiple tables
                   on one page which here seems to be the case when there are successful as well as failed records */}
                   <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed}/>
                 </Accordion.Body>

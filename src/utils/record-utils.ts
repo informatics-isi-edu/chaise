@@ -73,12 +73,7 @@ export function canEditRelated(relatedRef: any): boolean {
  * Whether we can delete instances of a related reference
  */
 export function canDeleteRelated(relatedRef: any): boolean {
-  /**
-   * TODO this is replicating the Angularjs behavior but we should consider the following:
-   * - why do we need to check editRecord?
-   * - why deleteRecord check is backwards?
-   */
-  if (ConfigService.chaiseConfig.editRecord === false || ConfigService.chaiseConfig.deleteRecord !== true) {
+  if (ConfigService.chaiseConfig.deleteRecord === false) {
     return false;
   }
 
