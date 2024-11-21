@@ -409,21 +409,21 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### editRecord
- If not present or equal to `true`, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to `false`, a dialog appears on recordedit that disallows use of the app for both create and edit, and the create/edit button does not appear in the record app.
+If present and equal to `false`, the chaise pages will hide all the edit and create buttons regardless of user ACLs. Chaise will also disallow users from accessing recordedit app in this case.
    - Type: Boolean
-   - Default behavior: Allows for inserting and editing records through the recordedit page
+   - Default behavior: Allows for inserting and editing records through the recordedit page if the user has proper ACLs.
    - Sample syntax:
      ```
      editRecord: false
      ```
 
  #### deleteRecord
- If present and equal to `true`, the recordedit page will show delete button if editRecord is also true, and record page will show delete button if this is true. Otherwise, hide delete buttons.
+ If present and equal to `false`, the chaise pages will hide all the delete buttons regardless of user ACLs. Otherwise chaise will consult the user ACL for conditonally hiding or showing delete buttons.
    - Type: Boolean
-   - Default behavior: recordset and record page will not show a delete buttons
+   - Default behavior: Chaise pages display delete buttons based on user ACLs.
    - Sample syntax:
      ```
-     deleteRecord: true
+     deleteRecord: false
      ```
 
  #### allowErrorDismissal

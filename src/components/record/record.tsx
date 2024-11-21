@@ -380,7 +380,7 @@ const RecordInner = ({
 
   const canCreate = reference.canCreate && modifyRecord;
   const canEdit = tuple.canUpdate && modifyRecord;
-  const canDelete = tuple.canDelete && modifyRecord && ConfigService.chaiseConfig.deleteRecord === true;
+  const canDelete = tuple.canDelete && ConfigService.chaiseConfig.deleteRecord !== false;
 
   const copyRecord = () => {
     const appLink = reference.contextualize.entryCreate.appLink;

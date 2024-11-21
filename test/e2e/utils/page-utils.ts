@@ -48,7 +48,7 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
  *
  * Example:
  *
- * const newPage = await PageLocators.clickNewTabLink(someButton, context);
+ * const newPage = await clickNewTabLink(someButton, context);
  *
  * await newPage.waitForURL('someURL');
  *
