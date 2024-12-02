@@ -93,6 +93,7 @@ const getConfig = (options: TestOptions) => {
         dependencies: [PW_PROJECT_NAMES.PRETEST],
         use: {
           ...devices['Desktop Chrome'],
+          channel: 'chromium', // https://github.com/microsoft/playwright/issues/33566
           ...extraBrowserParams,
           permissions: ['clipboard-read', 'clipboard-write']
         },

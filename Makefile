@@ -403,7 +403,7 @@ npm-install-modules:
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
-	@npx playwright install --with-deps
+	@npx playwright install --no-shell
 
 # for test cases we have to make sure we're installing dev dependencies and playwright is installed
 .PHONY: deps-test

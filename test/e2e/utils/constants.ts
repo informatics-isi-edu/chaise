@@ -43,7 +43,7 @@ export const ENTITIES_PATH = 'entities.json';
 
 export enum PW_PROJECT_NAMES {
   PRETEST = 'pretest',
-  CHROME = 'chrome',
+  CHROME = 'chromium',
   FIREFOX = 'firefox',
   SAFARI = 'safari'
 }
