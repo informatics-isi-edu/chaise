@@ -2,7 +2,8 @@
 @use 'variables';
 
 .recordset-table {
-  overflow-y: hidden;
+  // overflow-y: hidden;
+  max-height: 500px;
 }
 
 .chaise-table.table {
@@ -44,6 +45,9 @@
   .table-heading {
     background-color: map.get(variables.$color-map, 'table-header-background');
     color: map.get(variables.$color-map, 'black');
+    position: sticky;
+    top:0;
+    z-index: 2;
 
     .actions-header {
       width: 100px;

@@ -388,7 +388,7 @@ const RecordsetTable = ({
       return (
         <th
           key={index}
-          className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
+          className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '') +' sticky_header'}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
           {col.column.comment ?
