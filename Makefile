@@ -108,7 +108,7 @@ ALL_MANUAL_TESTS=$(Manualrecordset)
 define make_test
 	rc=0; \
 	for file in $(1); do \
-		 npx playwright test --project=chrome $(2) --config $$file || rc=1; \
+		 npx playwright test --project=chromium $(2) --config $$file || rc=1; \
 	done; \
 	exit $$rc;
 endef
