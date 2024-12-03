@@ -108,7 +108,7 @@ ALL_MANUAL_TESTS=$(Manualrecordset)
 define make_test
 	rc=0; \
 	for file in $(1); do \
-		 npx playwright test --project=chrome $(2) --config $$file || rc=1; \
+		 npx playwright test --project=chromium $(2) --config $$file || rc=1; \
 	done; \
 	exit $$rc;
 endef
@@ -400,10 +400,11 @@ npm-install-modules:
 
 # install packages needed for production and development (including testing)
 # --include=dev makes sure to ignore NODE_ENV and install everything
+# --no-shell: https://github.com/microsoft/playwright/issues/33566
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
-	@npx playwright install --with-deps
+	@npx playwright install --with-deps --no-shell
 
 # for test cases we have to make sure we're installing dev dependencies and playwright is installed
 .PHONY: deps-test
