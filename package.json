@@ -77,7 +77,7 @@
     "react-hook-form": "^7.36.1",
     "react-imask": "^6.5.0-alpha.0",
     "react-plotly.js": "^2.5.1",
-    "sass": "^1.80.6",
+    "sass": "^1.81.0",
     "sass-loader": "^16.0.3",
     "spark-md5": "^3.0.2",
     "typescript": "~5.5.4",
