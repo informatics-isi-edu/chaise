@@ -269,8 +269,8 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@npx sass --quiet --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@npx sass --quiet --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 # should eventually be removed
 DEPRECATED_JS_CONFIG=chaise-config.js
@@ -396,7 +396,7 @@ $(BUILD_VERSION):
 # using clean-install instead of install to ensure usage of pacakge-lock.json
 .PHONY: npm-install-modules
 npm-install-modules:
-	@npm clean-install
+	@npm clean-install --loglevel=error
 
 # install packages needed for production and development (including testing)
 # --include=dev makes sure to ignore NODE_ENV and install everything
