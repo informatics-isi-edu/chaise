@@ -171,7 +171,7 @@ const RecordsetTable = ({
     setHeaderTop(headRef.current!.getBoundingClientRect().top);
   },[isInitialized]);
 
-  console.log(headerTop, headRef.current?.getBoundingClientRect());
+  console.log(headRef.current, headRef.current?.getBoundingClientRect());
 
   useEffect(()=>{
     if(!outerTableRef.current || !headRef.current || !stickyHeaderRef.current){
