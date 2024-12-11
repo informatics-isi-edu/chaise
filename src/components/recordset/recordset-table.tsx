@@ -60,6 +60,10 @@ const RecordsetTable = ({
   const tableContainer = useRef<HTMLDivElement>(null);
   const stickyScrollbarRef = useRef<HTMLDivElement>(null);
   const tableEndRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const outerTableRef = useRef<HTMLDivElement>(null);
+  const headRef = useRef<HTMLTableSectionElement>(null);
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
 
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
@@ -70,6 +74,7 @@ const RecordsetTable = ({
   // tracks whether a paging action has successfully occurred for this table
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
+  const [headerTop, setHeaderTop] = useState<number>(0);
 
   type RowConfig = {
     isSelected: boolean;
@@ -161,7 +166,167 @@ const RecordsetTable = ({
     }
   }, []);
 
+  useEffect(()=>{
+    console.log('calllled');
+    setHeaderTop(headRef.current!.getBoundingClientRect().top);
+  },[isInitialized]);
 
+  console.log(headerTop, headRef.current?.getBoundingClientRect());
+
+  useEffect(()=>{
+    if(!outerTableRef.current || !headRef.current || !stickyHeaderRef.current){
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if(stickyHeaderRef.current){
+        if (!entry.isIntersecting) {
+          stickyHeaderRef.current.style.visibility = 'visible';
+          const hasScrollbar = outerTableRef.current!.scrollWidth > outerTableRef.current!.clientWidth;
+          console.log('hasScrollbar ',hasScrollbar);
+          stickyHeaderRef.current.style.top = `${headerTop}px`;
+        } else {
+          stickyHeaderRef.current.style.visibility = 'hidden';
+        }
+      }
+      },
+      { root: null, threshold: 0 }
+    );
+    observer.observe(headRef.current);
+
+    // Sync widths of the columns
+    const syncWidths = () => {
+      if(stickyHeaderRef.current && tableRef.current){
+
+      const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
+      const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
+
+      // Loop through columns and set widths
+      stickyThs!.forEach((headerCol, index) => {
+        const dataCol = originalThs[index];
+        if (dataCol instanceof HTMLElement) { // Ensure it's an HTML element
+          const colWidth = dataCol.offsetWidth; // Get the actual width of the column
+          headerCol.style.width = `${colWidth}px`; // Set width on sticky header
+        } 
+        
+      });
+      stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
+    }
+    };
+    const handleScroll = () => {
+      if (stickyHeaderRef.current && stickyScrollbarRef.current) {
+        stickyHeaderRef.current.scrollLeft = stickyScrollbarRef.current.scrollLeft;
+      }
+    };
+  
+    stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
+  
+    // Sync column widths on resize
+    window.addEventListener('resize', syncWidths);
+  
+    // Perform initial sync
+    syncWidths();
+  
+    // Cleanup function
+    return () => {
+      observer.disconnect();
+      stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', syncWidths);
+    };
+  
+  },[isLoading, headerTop]);
+
+  // useEffect(() => {
+  //   if (!outerTableRef.current || !headRef.current || !stickyHeaderRef.current) return;
+  
+  //   // Intersection Observer for bottom scrollbar visibility
+  //   const bottomObserver = new IntersectionObserver(
+  //     ([entry]) => {
+  //       if (stickyScrollbarRef.current) {
+  //         if (entry.isIntersecting) {
+  //           stickyScrollbarRef.current.classList.add('no-scroll-bar');
+  //           if(stickyHeaderRef.current){
+  //           stickyHeaderRef.current.style.visibility = 'hidden';
+  //           }
+  //         } else {
+  //           stickyScrollbarRef.current.classList.remove('no-scroll-bar');
+  //         }
+  //       }
+  //     },
+  //     { root: null, threshold: 0.1 }
+  //   );
+  
+  //   // Intersection Observer for sticky header visibility
+  //   const headerObserver = new IntersectionObserver(
+  //     ([entry]) => {
+  //       if (stickyHeaderRef.current) {
+  //         if (!entry.isIntersecting) {
+  //           stickyHeaderRef.current.style.visibility = 'visible';
+  //           stickyHeaderRef.current.style.top = `calc(${stickyScrollbarRef.current!.getBoundingClientRect().top}px + 15px)`;
+  //         } else {
+  //           stickyHeaderRef.current.style.visibility = 'hidden';
+  //         }
+  //       }
+  //     },
+  //     { root: null, threshold: 0 }
+  //   );
+  
+  //   // Observe elements
+  //   if (tableEndRef.current) bottomObserver.observe(tableEndRef.current);
+  //   headerObserver.observe(headRef.current);
+  
+  //   // Sync widths of the columns
+  //   const syncWidths = () => {
+  //     if (!stickyHeaderRef.current || !tableRef.current) return;
+  
+  //     const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
+  //     const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
+  
+  //     stickyThs!.forEach((headerCol, index) => {
+  //       const dataCol = originalThs[index];
+  //       if (dataCol instanceof HTMLElement) {
+  //         const colWidth = dataCol.offsetWidth;
+  //         headerCol.style.width = `${colWidth}px`;
+  //       }
+  //     });
+  
+  //     stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
+  
+  //     console.log('headRef.current:', headRef.current?.offsetWidth, 
+  //                 'outerTableRef.current:', outerTableRef.current?.offsetWidth, 
+  //                 'stickyHeaderRef.current:', stickyHeaderRef.current.offsetWidth);
+  //   };
+  
+  //   // Scroll synchronization
+  //   const handleScroll = () => {
+  //     if (stickyHeaderRef.current && stickyScrollbarRef.current) {
+  //       stickyHeaderRef.current.scrollLeft = stickyScrollbarRef.current.scrollLeft;
+  //     }
+  //   };
+  
+  //   stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
+  
+  //   // Sync column widths on resize
+  //   window.addEventListener('resize', syncWidths);
+  
+  //   // Perform initial sync
+  //   syncWidths();
+  
+  //   // Cleanup function
+  //   return () => {
+  //     bottomObserver.disconnect();
+  //     headerObserver.disconnect();
+  //     stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
+  //     window.removeEventListener('resize', syncWidths);
+  //   };
+  // }, [isLoading, showSingleScrollbar]);
+  
+
+useEffect(()=>{
+  console.log(stickyScrollbarRef.current?.scrollLeft, outerTableRef.current?.scrollLeft, tableContainer.current?.scrollLeft);
+
+},[stickyScrollbarRef.current?.scrollLeft])
   /**
    * add the top horizontal scroll if needed
    */
@@ -380,6 +545,7 @@ const RecordsetTable = ({
       </span>
     )
   }
+  console.log(columnModels.length);
 
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
@@ -519,9 +685,9 @@ const RecordsetTable = ({
         className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
-      <div className={outerTableClassname()}>
-        <table className='table chaise-table table-hover'>
-          <thead className='table-heading'>
+      <div className={outerTableClassname()} ref={outerTableRef}>
+        <table className='table chaise-table table-hover' ref={tableRef}>
+          <thead className='table-heading' ref={headRef}>
             <tr>
               {showActionButtons && renderActionsHeader()}
               {renderColumnHeaders()}
@@ -535,6 +701,17 @@ const RecordsetTable = ({
       {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
       top scrollbar when the bottom one is visible */}
       <div className='dummy-table-end-div' ref={tableEndRef}/>
+
+      <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
+      <table className='sticky-header-table'>
+      <thead className='table-heading'>
+            <tr>
+              {showActionButtons && renderActionsHeader()}
+              {renderColumnHeaders()}
+            </tr>
+          </thead>
+      </table>
+      </div>
 
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
