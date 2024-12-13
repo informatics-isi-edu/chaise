@@ -69,7 +69,10 @@ export const MESSAGE_MAP = {
     showDetails: 'Click to show more details about the filters',
     saveQuery: 'Click to save the current search criteria',
     export: 'Click to choose an export format.',
-    liveData: 'You are viewing snapshotted data. Click here to return to the live data catalog.'
+    liveData: 'You are viewing snapshotted data. Click here to return to the live data catalog.',
+    // tooltips for disabled rows in recordset single select modal for foreignkey-field and foreignkey-dropdown-field
+    selectedDisabledRow: 'This row is selected in another input in the form',
+    associatedDisabledRow: 'This row is already associated'
   },
   URLLimitMessage: 'Maximum URL length reached. Cannot perform the requested action.',
   queryTimeoutList: '<ul class=\'show-list-style\'><li>Reduce the number of facet constraints.</li><li>Minimize the use of \'No value\' and \'All Records with Value\' filters.</li></ul>',

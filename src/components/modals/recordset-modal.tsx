@@ -49,7 +49,7 @@ export type RecordestModalProps = {
    * and instead is just going to call this function. This is done this way
    * so we can apply the logic to disable the submit button
    */
-  onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean,
+  onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean | string,
   /**
    * The function that will be called on submit
    * Note: the modal won't close on submit and if that's the expected behavior,
@@ -126,7 +126,7 @@ const RecordsetModal = ({
    * This will also allow us to set the state of submit button
    */
   const [submittedRows, setSubmittedRows] = useState<SelectedRow[]>(() => (
-    Array.isArray(recordsetProps.initialSelectedRows) ? recordsetProps.initialSelectedRows : []
+    (Array.isArray(recordsetProps.initialSelectedRows) && selectMode !== RecordsetSelectMode.SINGLE_SELECT) ? recordsetProps.initialSelectedRows : []
   ));
 
   /**
@@ -156,8 +156,7 @@ const RecordsetModal = ({
       // against it.
       if (submittedRows.length === 0) return;
       submit();
-    }
-    else {
+    } else {
       let cannotSubmit = false;
       if (onSelectedRowsChanged) {
         cannotSubmit = onSelectedRowsChanged(submittedRows) === false;
@@ -251,6 +250,16 @@ const RecordsetModal = ({
         </>
       )
       break;
+    case RecordsetDisplayMode.FK_POPUP_BULK_CREATE:
+      submitText = 'Continue';
+      submitTooltip = (
+        <>
+          <span>Submit the selected records to fill in </span>
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>
+          <span> forms</span>.
+        </>
+      )
+      break;
   }
 
   let uiContextTitles: TitleProps[] | undefined, // the ui contexts that should be passed to recordset for the next level
@@ -288,6 +297,18 @@ const RecordsetModal = ({
               }
             </span>
           }
+        </div>
+      );
+      break;
+    case RecordsetDisplayMode.FK_POPUP_BULK_CREATE:
+      titleEl = (
+        <div>
+          <span>Select a set of </span>
+          <Title displayname={displayname} />
+          <span>
+            <span> for </span>
+            <Title reference={recordsetProps.parentReference} />
+          </span>
         </div>
       );
       break;

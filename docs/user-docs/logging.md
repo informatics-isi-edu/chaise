@@ -213,10 +213,13 @@ Where,
   - `pcol`: Based on `pcol` stack node `type`.
   - `related`, `related-inline`: Based on `related` stack node `type`.
   - `related-link-picker`: Used for the association link picker.
+  - `related-unlink-picker`: Used for the association unlink picker.
   - `facet`: Based on `facet` stack node `type`.
   - `facet-picker`: Used for facet picker.
   - `fk`: Based on `fk` stack node `type`.
   - `fk-picker`: Used for foreign key picker.
+  - `fk-bulk-picker`: Used for foreign key picker when the selections fill the same foreign key field in multiple recordedit forms
+  - `fk-dropdown`: Used for foreign key inputs when they are a dropdown.
   - `saved-query-entity`: Used for saved query create popup.
   - `saved-query-picker`: Used for saved query apply picker.
   - `annotation-set`: Annotation list displayed on the viewer app.

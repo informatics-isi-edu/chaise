@@ -128,6 +128,7 @@ const RecordMainSection = (): JSX.Element => {
                   <RelatedTable
                     relatedModel={cm.relatedModel}
                     displaynameForID={cm.column.displayname.value}
+                    showSingleScrollbar={true}
                   />
                 </div>
               </span>

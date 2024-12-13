@@ -108,7 +108,7 @@ ALL_MANUAL_TESTS=$(Manualrecordset)
 define make_test
 	rc=0; \
 	for file in $(1); do \
-		 npx playwright test --project=chrome $(2) --config $$file || rc=1; \
+		 npx playwright test --project=chromium $(2) --config $$file || rc=1; \
 	done; \
 	exit $$rc;
 endef
@@ -269,8 +269,8 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@npx sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@npx sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@npx sass --quiet --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@npx sass --quiet --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 # should eventually be removed
 DEPRECATED_JS_CONFIG=chaise-config.js
@@ -396,14 +396,15 @@ $(BUILD_VERSION):
 # using clean-install instead of install to ensure usage of pacakge-lock.json
 .PHONY: npm-install-modules
 npm-install-modules:
-	@npm clean-install
+	@npm clean-install --loglevel=error
 
 # install packages needed for production and development (including testing)
 # --include=dev makes sure to ignore NODE_ENV and install everything
+# --no-shell: https://github.com/microsoft/playwright/issues/33566
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
 	@npm clean-install --include=dev
-	@npx playwright install --with-deps
+	@npx playwright install --with-deps --no-shell
 
 # for test cases we have to make sure we're installing dev dependencies and playwright is installed
 .PHONY: deps-test

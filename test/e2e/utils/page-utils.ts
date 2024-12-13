@@ -50,7 +50,7 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
  *
  * Example:
  *
- * const newPage = await PageLocators.clickNewTabLink(someButton, context);
+ * const newPage = await clickNewTabLink(someButton, context);
  *
  * await newPage.waitForURL('someURL');
  *
@@ -104,7 +104,6 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
  */
 export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean, hoverEl?: Locator) {
   await locator.hover();
-  await locator.page().pause();
 
   const el = PageLocators.getTooltipContainer(locator.page());
 

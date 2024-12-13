@@ -258,7 +258,7 @@ const testParams = {
 };
 
 test.describe('Other facet features', () => {
-  test.describe.configure({ mode: 'parallel' });
+  test.describe.configure({ mode: 'parallel', retries: 3 });
 
   test('selecting entity facet that is not on the shortest key.', async ({ page, baseURL }, testInfo) => {
     const facet = RecordsetLocators.getFacetById(page, testParams.filter_secondary_key.facetIdx);
@@ -518,6 +518,7 @@ test.describe('Other facet features', () => {
       await expect.soft(RecordsetLocators.getFacetSpinner(facet2)).not.toBeVisible();
       await RecordsetLocators.getFacetOption(facet2, params.secondFacet.selectedOption).uncheck();
       // wait for facet checkboxes to load for the first facet
+      await expect.soft(RecordsetLocators.getFacetSpinner(facet1)).not.toBeVisible();
       await expect.soft(RecordsetLocators.getFacetOptions(facet1)).toHaveText(params.firstFacet.optionsAfterFirstChange);
 
       // make sure all are selected

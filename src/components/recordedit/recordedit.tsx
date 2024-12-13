@@ -9,13 +9,14 @@ import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -24,11 +25,15 @@ import { FormProvider, useForm } from 'react-hook-form';
 import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
-  RecordeditConfig, RecordeditDisplayMode,
-  RecordeditModalOptions, RecordeditProps
+  appModes, RecordeditColumnModel,
+  RecordeditDisplayMode, RecordeditProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  RecordsetConfig, RecordsetDisplayMode,
+  RecordsetProps, RecordsetSelectMode, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -39,12 +44,14 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { RECORDEDIT_MAX_ROWS, RECORDSET_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import {
+  copyOrClearValue, disabledTuplesPromise, populateCreateInitialValues
+} from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const Recordedit = ({
   appMode,
@@ -78,7 +85,7 @@ const Recordedit = ({
       onSubmitSuccess={onSubmitSuccess}
       onSubmitError={onSubmitError}
     >
-      <RecordeditInner parentContainer={parentContainer} />
+      <RecordeditInner parentContainer={parentContainer} prefillRowData={prefillRowData} />
     </RecordeditProvider>
   );
 
@@ -92,23 +99,33 @@ const Recordedit = ({
 
 export type RecordeditInnerProps = {
   parentContainer?: HTMLElement;
+  prefillRowData?: any[];
 }
 
 const RecordeditInner = ({
-  parentContainer
+  parentContainer,
+  prefillRowData
 }: RecordeditInnerProps): JSX.Element => {
 
   const { validateSessionBeforeMutation } = useAuthn();
   const { errors, dispatchError } = useError();
-  const { addAlert } = useAlert();
+  const { addTooManyFormsAlert } = useAlert();
   const {
-    appMode, columnModels, config, foreignKeyData, initialized, modalOptions, reference, tuples, waitingForForeignKeyData,
-    addForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm,
-    showCloneSpinner, setShowCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
+    appMode, columnModels, config, foreignKeyData, initialized, modalOptions,
+    prefillObject, bulkForeignKeySelectedRows, setBulkForeignKeySelectedRows,
+    reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
+    getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
+    showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
+
+  // the next 3 state variables are used when there is a prefill object for starting recordedit with more than one form to associate on creation
+  const [showBulkForeignKeyModal, setShowBulkForeignKeyModal] = useState<boolean>(false);
+  const [bulkForeignKeyRecordsetProps, setBulkForeignKeyRecordsetProps] = useState<RecordsetProps | null>(null);
+  // when initializing the page, the selections in the modal that appears first should fill the first form
+  const [bulkForeignKeySelectionsFillFirstForm, setBulkForeignKeySelectionsFillFirstForm] = useState<boolean>(true);
 
   /**
    * The following state variable and function for modifying the state are defined here instead of the recordedit context for the reason
@@ -168,7 +185,7 @@ const RecordeditInner = ({
     delayError: undefined
   });
 
-  const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+  const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord !== false;
   /**
    * enable the button if at least one row can be deleted
    */
@@ -251,7 +268,7 @@ const RecordeditInner = ({
           // data is an object of key/value pairs for each piece of key information
           // { keycol1: val, keycol2: val2, ... }
           // TODO should be adjusted if we changed how we're tracking the tuples
-          const idx = tuples.findIndex(function (tuple: any) {
+          const idx = tuples.findIndex((tuple: any) => {
             return Object.keys(data).every(function (key) {
               return tuple.data[key] === data[key];
             });
@@ -261,6 +278,7 @@ const RecordeditInner = ({
             removedForms.push(idx);
           }
         });
+
         removeForm(removedForms, true);
       };
       /**
@@ -292,9 +310,19 @@ const RecordeditInner = ({
     windowRef.location.reload();
   };
 
-  // once data is fetched, initialize the form data with react hook form
+  // once data is fetched, initialize the form data with RHF
   useEffect(() => {
     if (!initialized) return;
+
+    /**
+     * used to trigger recordset select view when selecting multiple foreign key values
+     *
+     * trigger the bulk foreign key modal when there are 2 foreign keys and
+     * we know the leaf column for the relation is visible in create mode
+     *
+     * if `bulkCreateForeignKeyObject` is defined on `reference`, we know the above is true
+     */
+    if (reference.bulkCreateForeignKeyObject) openBulkForeignKeyModal();
 
     const initialValues = getInitialFormValues(forms, columnModels);
     methods.reset(initialValues);
@@ -302,10 +330,11 @@ const RecordeditInner = ({
     // in create mode, we need to fetch the foreignkey data
     // for prefilled and foreignkeys that have default values
     if (appMode === appModes.CREATE) {
+      // updates React hook form state with `setValue`
       getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
     }
 
-    setFormProviderInitialized(true)
+    setFormProviderInitialized(true);
   }, [initialized]);
 
   /**
@@ -334,7 +363,7 @@ const RecordeditInner = ({
 
     setAddFormsEffect(false);
     callAddForm();
-  }, [addFormsEffect])
+  }, [addFormsEffect]);
 
   const callAddForm = () => {
     // converts to number type. If NaN is returned, 1 is used instead
@@ -350,41 +379,16 @@ const RecordeditInner = ({
     // refactor so provider manages the forms
     const numberForms = forms.length;
     if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
-      const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
-      addAlert(alertMessage, ChaiseAlertType.ERROR);
+      // calculate the number of forms the user can still add
+      const numberFormsAllowed = MAX_ROWS_TO_ADD - numberForms
+      let alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
+      if (numberFormsAllowed === 0) alertMessage = `Cannot add ${numberFormsToAdd} records. Maximum number of forms already added.`;
+      addTooManyFormsAlert(alertMessage, ChaiseAlertType.ERROR);
       setShowCloneSpinner(false);
       return true;
     }
 
-    // the indices used for tracking input values in react-hook-form
-    const newFormValues: number[] = addForm(numberFormsToAdd);
-
-    // the index for the data from last form being cloned
-    const lastFormValue = newFormValues[0] - 1;
-
-    const tempFormValues: any = methods.getValues();
-    // add data to tempFormValues to initailize new forms
-    for (let i = 0; i < newFormValues.length; i++) {
-      const formValue = newFormValues[i];
-      columnModels.forEach((cm: RecordeditColumnModel) => {
-        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
-      });
-
-      // the code above is just copying the displayed rowname for foreignkeys,
-      // we still need to copy the raw values
-      // but we cannot go basd on visible columns since some of these data might be for invisible fks.
-      reference.activeList.allOutBounds.forEach((col: any) => {
-        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
-        foreignKeyData.current[`c_${formValue}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
-
-        // copy the raw data (submitted to ermrestjs)
-        col.foreignKey.colset.columns.forEach((col: any) => {
-          const val = tempFormValues[`c_${lastFormValue}-${col.RID}`];
-          if (val === null || val === undefined) return;
-          tempFormValues[`c_${formValue}-${col.RID}`] = val;
-        });
-      });
-    }
+    const newFormsObj: { tempFormValues: any, lastFormValue: number } = createNewForms(methods.getValues(), numberFormsToAdd);
 
     /**
      * NOTE: This might be able to be optimized to use setValue for each value in the new forms instead of resetting EVERY form in react hook form
@@ -398,8 +402,274 @@ const RecordeditInner = ({
      * means all input fields (already existing and new ones) will be rendered when new forms are added. Refactoring this might not change
      * rendering performance at all. Maybe to prevent previous input fields from rerendering, the input-switch component should be memoized?
      */
-    methods.reset(tempFormValues);
+    methods.reset(newFormsObj.tempFormValues);
   };
+
+  /**
+   * creates new forms by copying values from previous form
+   *
+   * @param formValues values for ALL forms
+   * @param numberFormsToAdd the number of forms to copy values for
+   * @returns an object with the new formValues and the form number for the last form
+   */
+  const createNewForms = (formValues: any, numberFormsToAdd: number) => {
+    // the indices used for tracking input values in react-hook-form
+    const newFormValues: number[] = addForm(numberFormsToAdd);
+
+    // the index for the data from last form being cloned
+    const lastFormValue = newFormValues[0] - 1;
+
+    let tempFormValues = { ...formValues };
+    // add data to tempFormValues to initailize new forms
+    for (let i = 0; i < newFormValues.length; i++) {
+      const formValue = newFormValues[i];
+      columnModels.forEach((cm: RecordeditColumnModel) => {
+        // don't copy the value for the leaf column for an assoication that is unique
+        if (cm.isLeafInUniqueBulkForeignKeyCreate) return;
+
+        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
+      });
+
+      // the code above is just copying the displayed rowname for foreignkeys,
+      // we still need to copy the raw values
+      // but we cannot go based on visible columns since some of this data might be for invisible fks.
+      tempFormValues = setOutboundForeignKeyValues(tempFormValues, formValue, lastFormValue);
+    }
+
+    return { tempFormValues, lastFormValue };
+  }
+
+  /**
+   * set values in foreignkey data and formValues for all out foreign key columns
+   *
+   * @param formValues the existing values in the form
+   * @param formNumber the form number we are setting values for
+   * @param lastFormValue the last form number that values are copied from
+   * @param checkPrefill if prefill should be checked for copying
+   * @returns updated form values to set in react hook form
+   */
+  const setOutboundForeignKeyValues = (formValues: any, formNumber: number, lastFormValue: number, checkPrefill?: boolean) => {
+    const tempFormValues = { ...formValues };
+    reference.activeList.allOutBounds.forEach((col: any) => {
+      const bulkFKObject = reference.bulkCreateForeignKeyObject;
+      // don't copy the value if the column is the leaf column in a unique key for bullk foreign key create
+      if (bulkFKObject?.isUnique && col.name === bulkFKObject.leafColumn.name) return;
+
+      // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+      foreignKeyData.current[`c_${formNumber}-${col.RID}`] = simpleDeepCopy(foreignKeyData.current[`c_${lastFormValue}-${col.RID}`]);
+
+      if (checkPrefill) {
+        // check prefill object for the columns that are being prefilled to update the new forms since we aren't calling getPrefilledDefaultForeignKeyData()
+        if (prefillObject?.fkColumnNames.indexOf(col.name) !== -1) {
+          tempFormValues[`c_${formNumber}-${col.RID}`] = formValues[`c_${lastFormValue}-${col.RID}`];
+        }
+      }
+
+      // copy the raw data (submitted to ermrestjs)
+      col.foreignKey.colset.columns.forEach((col: any) => {
+        const val = formValues[`c_${lastFormValue}-${col.RID}`];
+        if (val === null || val === undefined) return;
+
+        tempFormValues[`c_${formNumber}-${col.RID}`] = val;
+      });
+    });
+
+    return tempFormValues;
+  }
+
+  // show the prefill bulk foreign key modal if we have a prefill object and bulk foreign key recordset props
+  const openBulkForeignKeyModal = () => {
+    const bulkFKObject = reference.bulkCreateForeignKeyObject;
+    // check for bulkCreateForeignKeyObject being defined since a malformed prefillObject should be ignored
+    //   and the `bulkCreateForeignKeyObject` constructor will handle those malformed cases
+    if (!bulkFKObject) return;
+
+    const domainRef: any = bulkFKObject.leafColumn.reference;
+    const andFilters: any[] = bulkFKObject.andFiltersForLeaf();
+
+    const modalReference = domainRef.addFacets(andFilters).contextualize.compactSelectBulkForeignKey;
+
+    const recordsetConfig: RecordsetConfig = {
+      viewable: false,
+      editable: false,
+      deletable: false,
+      sortable: true,
+      selectMode: RecordsetSelectMode.MULTI_SELECT,
+      disableFaceting: false,
+      displayMode: RecordsetDisplayMode.FK_POPUP_BULK_CREATE
+    };
+
+    const stackElement = LogService.getStackNode(
+      LogStackTypes.FOREIGN_KEY,
+      domainRef.table,
+      { source: domainRef.compressedDataSource, entity: true, picker: 1 }
+    );
+
+    const logInfo = {
+      logStack: [stackElement],
+      logStackPath: LogService.getStackPath(null, LogStackPaths.FOREIGN_KEY_BULK_POPUP),
+    };
+
+    let getDisabledTuples;
+    if (bulkFKObject.isUnique) {
+      /**
+       * The existing rows in this table must be disabled so users doesn't resubmit them.
+       *
+       * set getDisabledTuples again since the selected rows could have changed since the last time the modal was opened
+       * selected rows can be changed by updating a single foreign key input, removing the value, or removing a form entirely
+       */
+      getDisabledTuples = disabledTuplesPromise(
+        domainRef.contextualize.compactSelectBulkForeignKey,
+        bulkFKObject.disabledRowsFilter(),
+        bulkForeignKeySelectedRows
+      );
+    }
+
+    const pageSize = modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize : RECORDSET_DEFAULT_PAGE_SIZE;
+
+    // set recordset select view then set selected rows on "submit"
+    setBulkForeignKeyRecordsetProps({
+      initialReference: modalReference,
+      initialPageLimit: pageSize,
+      config: recordsetConfig,
+      logInfo: logInfo,
+      parentReference: reference,
+      getDisabledTuples
+    });
+
+    setShowBulkForeignKeyModal(true);
+  }
+
+  const onBulkForeignKeyModalRowsChanged = (rows: SelectedRow[]) => {
+    // return "false" to disable submit button in modal
+    let numForms = forms.length;
+
+    // if we fill the first form, then reduce our calculation by 1
+    // NOTE: forms.length "should" be 1 at this point before subtracting 1
+    if (bulkForeignKeySelectionsFillFirstForm) numForms--;
+
+    if (rows.length + numForms < RECORDEDIT_MAX_ROWS) {
+      return true;
+    }
+
+    // there are too many forms trying to be added
+    const numberFormsAllowed = RECORDEDIT_MAX_ROWS - numForms;
+    let alertMessage = `Cannot select ${rows.length} records. Please input a value between 1 and ${numberFormsAllowed}, inclusive.`;
+    if (numberFormsAllowed === 0) alertMessage = `Cannot select ${rows.length} records. Maximum number of forms already added.`;
+
+    return alertMessage;
+  }
+
+  // user closes the modal without making any selections
+  const closeBulkForeignKeyCB = () => {
+    // if the page was loaded with a modal showing and it is dismissed, update app state variable and do nothing else
+    // ensure `bulkForeignKeySelectedRows` is initialized with an empty value
+    if (bulkForeignKeySelectionsFillFirstForm) {
+      setBulkForeignKeySelectionsFillFirstForm(false);
+      setBulkForeignKeySelectedRows([null]);
+    }
+
+    setShowBulkForeignKeyModal(false);
+  }
+
+  /**
+   * user makes selections in the multi select foreign key modal and clicks submit
+   * this function updates the selected rows (if the foreign keys are part of a unique key) and fills in the new forms based
+   * on the state of the app and the number of selected rows
+   *
+   * if the first modal is submitted after load of app page, one of the selected values will
+   * fill in the first form. After that, the selections will copy the last form's values or use default
+   * values based on what is set in the annotation (pending annotation implementation)
+   *
+   * NOTE: This should only be called if reference.bulkCreateForeignKeyObject is defined
+   *
+   * @param modalSelectedRows the selected rows from the foreign key modal
+   */
+  const submitBulkForeignKeyCB = (modalSelectedRows: SelectedRow[]) => {
+    setShowBulkForeignKeyModal(false);
+
+    // should not happen since submit button is greyed out
+    if (!modalSelectedRows || modalSelectedRows.length === 0) return;
+
+    const bulkFKObject = reference.bulkCreateForeignKeyObject
+    if (bulkFKObject.isUnique) {
+      /**
+       * copy modalSelectedRows 2nd to preserve indexes in bulkForeignKeySelectedRows
+       *
+       * this function does 2 different things:
+       *  - fills the first form and adds new forms
+       *  - OR only adds new forms
+       *
+       * in both cases, the selected rows are added to the forms in the same order that
+       * the rows were selected in the modal. As we are adding new forms, we copy the
+       * values from the modalSelectedRows in the same index order
+       **/
+      const newRows = [...bulkForeignKeySelectedRows, ...modalSelectedRows]
+      setBulkForeignKeySelectedRows(newRows);
+    }
+
+    // recordedit has already been initialized so start adding new forms
+    const tempFormValues = methods.getValues();
+    let initialValues = tempFormValues,
+      startFormNumber: number;
+
+    if (bulkForeignKeySelectionsFillFirstForm) {
+      if (modalSelectedRows.length > 1) {
+        initialValues = createNewForms(tempFormValues, modalSelectedRows.length - 1).tempFormValues;
+      }
+
+      startFormNumber = 1;
+
+      setBulkForeignKeySelectionsFillFirstForm(false);
+    } else {
+      // use default values to fill new forms
+      const newFormValues: number[] = addForm(modalSelectedRows.length);
+      const newRowsModel = populateCreateInitialValues(columnModels, newFormValues, prefillObject, prefillRowData);
+      const newValues = newRowsModel.values;
+
+      foreignKeyData.current = {
+        ...foreignKeyData.current,
+        ...newRowsModel.foreignKeyData
+      };
+
+      // NOTE: should we call getPrefilledDefaultForeignKeyData here instead of checking the prefillObject?
+
+      startFormNumber = newFormValues[0];
+      newFormValues.forEach((formNumber: number) => {
+        // copy values to object we want to use for RHF
+        Object.keys(newValues).forEach((key: string) => {
+          // we want to make sure we are only copying the data for newly created rows
+          if (key.startsWith(`c_${formNumber}-`)) {
+            initialValues[key] = newValues[key];
+          }
+        });
+
+        initialValues = setOutboundForeignKeyValues(initialValues, formNumber, startFormNumber - 1, true);
+      });
+    }
+
+    // iterate selectedRows to fill in the fkey information
+    modalSelectedRows.forEach((row: SelectedRow, index: number) => {
+      if (foreignKeyData && foreignKeyData.current) {
+        foreignKeyData.current[`c_${startFormNumber + index}-${bulkFKObject.leafColumn.RID}`] = row.data;
+      }
+
+      // find the raw value of the fk columns that correspond to the selected row
+      // since we've already added a not-null hidden filter, the values will be not-null.
+      bulkFKObject.leafColumn.foreignKey.colset.columns.forEach((col: any) => {
+        const referencedCol = bulkFKObject.leafColumn.foreignKey.mapping.get(col);
+
+        // setFunction(`c_${formNumber}-${col.RID}`, selectedRow.data[referencedCol.name]);
+        initialValues[`c_${startFormNumber + index}-${col.RID}`] = row.data[referencedCol.name];
+      });
+
+      // update "display" value
+      initialValues[`c_${startFormNumber + index}-${bulkFKObject.leafColumn.RID}`] = row.displayname.value;
+    });
+
+    // required to set values in all new forms in the RHF model
+    methods.reset(initialValues);
+  }
 
   const renderSpinner = () => {
     if (errors.length === 0 && (showDeleteSpinner || showSubmitSpinner || showCloneSpinner || showApplyAllSpinner)) {
@@ -490,7 +760,7 @@ const RecordeditInner = ({
 
   const renderBulkDeleteButton = () => {
     if (!canShowBulkDelete) return;
-    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.': 'None of the displayed records can be deleted.';
+    const tooltip = canEnableBulkDelete ? 'Delete the displayed set of records.' : 'None of the displayed records can be deleted.';
     return <ChaiseTooltip placement='bottom' tooltip={tooltip}>
       <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick} disabled={!canEnableBulkDelete}>
         <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
@@ -534,7 +804,9 @@ const RecordeditInner = ({
                       </p>
                     </div>
                   }
-                  <ResultsetTable page={resultsetProps.success.page} />
+                  {/* Intersecting behaviour of scroll should be visible if there are multiple tables
+                  on one page which here seems to be the case when there are successful as well as failed records */}
+                  <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed}/>
                 </Accordion.Body>
               </Accordion.Item>
               {resultsetProps.failed &&
@@ -545,7 +817,7 @@ const RecordeditInner = ({
                       exploreLink={resultsetProps.failed.exploreLink}
                     />
                   </Accordion.Button>
-                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} showSingleScrollbar={!!resultsetProps.failed}/></Accordion.Body>
                 </Accordion.Item>
               }
             </Accordion>
@@ -576,6 +848,16 @@ const RecordeditInner = ({
           rows={uploadProgressModalProps.rows}
           onSuccess={uploadProgressModalProps.onSuccess}
           onCancel={uploadProgressModalProps.onCancel}
+        />
+      }
+      {showBulkForeignKeyModal && bulkForeignKeyRecordsetProps &&
+        <RecordsetModal
+          modalClassName='bulk-foreign-key-popup'
+          recordsetProps={bulkForeignKeyRecordsetProps}
+          onSelectedRowsChanged={onBulkForeignKeyModalRowsChanged}
+          onSubmit={submitBulkForeignKeyCB}
+          onClose={closeBulkForeignKeyCB}
+          displayname={reference.bulkCreateForeignKeyObject.leafColumn.displayname}
         />
       }
     </>);
@@ -705,42 +987,63 @@ const RecordeditInner = ({
                       </button>
                     </ChaiseTooltip>
                     :
-                    <div className='chaise-input-group'>
-                      <span className='chaise-input-group-prepend'>
-                        <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
-                      </span>
-                      <input
-                        id='copy-rows-input'
-                        ref={copyFormRef}
-                        type='number'
-                        className='chaise-input-control chaise-input-control-sm add-rows-input'
-                        placeholder='1'
-                        min='1'
-                      />
-                      <span className='chaise-input-group-append'>
+                    <>
+                      <div className='chaise-input-group'>
+                        <span className='chaise-input-group-prepend'>
+                          <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
+                        </span>
+                        <input
+                          id='copy-rows-input'
+                          ref={copyFormRef}
+                          type='number'
+                          className='chaise-input-control chaise-input-control-sm add-rows-input'
+                          placeholder='1'
+                          min='1'
+                          max='200'
+                        />
+                        <span className='chaise-input-group-append'>
+                          <ChaiseTooltip
+                            tooltip={
+                              allFormDataLoaded ?
+                                'Duplicate rightmost form the specified number of times.' :
+                                'Waiting for some columns to properly load.'
+                            }
+                            placement='bottom-end'
+                          >
+                            <button
+                              id='copy-rows-submit'
+                              className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
+                              onClick={() => {
+                                setShowCloneSpinner(true);
+                                setAddFormsEffect(true);
+                              }}
+                              type='button'
+                              disabled={!allFormDataLoaded}
+                            >
+                              <span>Clone</span>
+                            </button>
+                          </ChaiseTooltip>
+                        </span>
+                      </div>
+                      {bulkForeignKeyRecordsetProps &&
+                        // only show bulk foreign key modal button if we started with a bulk foreing key picker
+                        // bulkForeignKeyRecordsetProps only get set if there is a `reference.bulkCreateForeignKeyObject` defined when the recordedit app loads
                         <ChaiseTooltip
-                          tooltip={
-                            allFormDataLoaded ?
-                              'Duplicate rightmost form the specified number of times.' :
-                              'Waiting for some columns to properly load.'
-                          }
+                          tooltip={`Select more ${reference.bulkCreateForeignKeyObject.leafColumn.displayname.value} for new forms`}
                           placement='bottom-end'
                         >
                           <button
-                            id='copy-rows-submit'
-                            className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                            onClick={() => {
-                              setShowCloneSpinner(true);
-                              setAddFormsEffect(true);
-                            }}
+                            id='recordedit-add-more'
+                            className='chaise-btn chaise-btn-sm chaise-btn-secondary'
+                            onClick={openBulkForeignKeyModal}
                             type='button'
-                            disabled={!allFormDataLoaded}
                           >
-                            <span>Clone</span>
+                            <span className='chaise-btn-icon fa-solid fa-plus' />
+                            <span>Add more</span>
                           </button>
                         </ChaiseTooltip>
-                      </span>
-                    </div>
+                      }
+                    </>
                   }
                 </div>
               </div>}

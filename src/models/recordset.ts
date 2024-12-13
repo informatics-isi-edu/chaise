@@ -8,9 +8,9 @@ import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 export type RecordsetProviderGetDisabledTuples = (
   page: any, pageLimit: number, logStack: any,
   logStackPath: string, requestCauses?: any, reloadStartTime?: any
-) => Promise<{ page: any, disabledRows?: any }>;
+) => Promise<{ page: any, disabledRows?: DisabledRow[] }>;
 
-export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean
+export type RecordsetProviderOnSelectedRowsChanged = (selectedRows: SelectedRow[]) => boolean | string
 
 
 export type RecordsetProps = {
@@ -70,6 +70,7 @@ export enum RecordsetDisplayMode {
   POPUP = 'popup',
   FACET_POPUP = 'popup/facet',
   FK_POPUP = 'popup/foreignkey',
+  FK_POPUP_BULK_CREATE = 'popup/foreignkey/bulk',
   FK_POPUP_CREATE = 'popup/foreignkey/create',
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
@@ -183,6 +184,16 @@ export type SelectedRow = {
   // cannotBeRemoved?: boolean;
 }
 
+export enum DisabledRowType {
+  ASSOCIATED= 'associated', // a row that is already associated
+  SELECTED= 'selected' // a row that is already selected in another recordedit form
+}
+
+export type DisabledRow = {
+  disabledType?: DisabledRowType;
+  tuple: any;
+}
+
 export type RecordsetProviderAddUpdateCauses = (
   /**
    * an array of strings that will be logged with the request
@@ -209,3 +220,13 @@ export type RecordsetProviderUpdateMainEntity = (
 export type RecordsetProviderFetchSecondaryRequests = (
   updatePageCB: Function, hideSpinner?: boolean
 ) => void;
+
+
+export type FacetOrderProps = {
+  isFacetOrderModified: boolean,
+  hasStoredFacetOrder: boolean,
+  isStoredFacetOrderApplied: boolean,
+  storeFacetOrder: () => void,
+  applyDefaultOrder: () => void,
+  applyStoredOrder: () => void
+}

@@ -427,6 +427,11 @@
                 "markdown_name": "2nd layer timestamptz",
                 "source": "timestamptz_col",
                 "open": true
+              },
+              {
+                "markdown_name": "2nd layer choice scalar",
+                "source": "facet_col",
+                "open": true
               }
             ]
           }
@@ -572,6 +577,11 @@
               {
                 "markdown_name": "2nd layer timestamptz",
                 "source": "timestamptz_col",
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer choice scalar",
+                "source": "facet_col",
                 "open": true
               }
             ]
@@ -775,6 +785,11 @@
                 "markdown_name": "2nd layer timestamptz",
                 "source": "timestamptz_col",
                 "open": true
+              },
+              {
+                "markdown_name": "2nd layer choice scalar",
+                "source": "facet_col",
+                "open": true
               }
             ]
           }
@@ -899,6 +914,11 @@
               {
                 "markdown_name": "2nd layer timestamptz",
                 "source": "timestamptz_col",
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer choice scalar",
+                "source": "facet_col",
                 "open": true
               }
             ]
@@ -1082,6 +1102,11 @@
               {
                 "markdown_name": "2nd layer timestamptz",
                 "source": "timestamptz_col",
+                "open": true
+              },
+              {
+                "markdown_name": "2nd layer choice scalar",
+                "source": "facet_col",
                 "open": true
               }
             ]

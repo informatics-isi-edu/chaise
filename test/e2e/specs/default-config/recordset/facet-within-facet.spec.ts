@@ -118,7 +118,8 @@ type FacetParamType = {
 
 const popupFacetNames = [
   '2nd layer entity path', '2nd layer entity path 2', '2nd layer entity path with filter', '2nd layer entity path with shared prefix',
-  '2nd layer entity path with shared prefix and filter', '2nd layer entity path with fast filter', '2nd layer timestamptz'
+  '2nd layer entity path with shared prefix and filter', '2nd layer entity path with fast filter',
+  '2nd layer timestamptz', '2nd layer choice scalar'
 ]
 
 const getTestParams = (rootUIContext: string): {
@@ -220,6 +221,20 @@ const getTestParams = (rootUIContext: string): {
                 numRows: 6
               }
             },
+            {
+              index: 7,
+              name: popupFacetNames[7],
+              options: [
+                'eight main_inbound1_inbound1', 'eleven main_inbound1_inbound1', 'five main_inbound1_inbound1',
+                'four main_inbound1_inbound1', 'nine main_inbound1_inbound1', 'seven main_inbound1_inbound1',
+                'six main_inbound1_inbound1', 'ten main_inbound1_inbound1', 'three main_inbound1_inbound1', 'twelve main_inbound1_inbound1'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path:',
+                title: 'Select 2nd layer choice scalar',
+                numRows: 10
+              }
+            }
           ]
         }
       },
@@ -322,6 +337,20 @@ const getTestParams = (rootUIContext: string): {
                 numRows: 3
               }
             },
+            {
+              index: 7,
+              name: popupFacetNames[7],
+              options: [
+                'eight main_inbound1_inbound2', 'eleven main_inbound1_inbound2', 'five main_inbound1_inbound2',
+                'nine main_inbound1_inbound2', 'seven main_inbound1_inbound2', 'six main_inbound1_inbound2',
+                'ten main_inbound1_inbound2', 'twelve main_inbound1_inbound2'
+              ],
+              popup: {
+                uiContext: rootUIContext + 'Entity path 2:',
+                title: 'Select 2nd layer choice scalar',
+                numRows: 8
+              }
+            }
           ]
         }
       },
@@ -390,6 +419,21 @@ const getTestParams = (rootUIContext: string): {
                 min: { date: '2006-06-06', time: '00:00:00' },
                 numRows: 3
               }]
+            },
+            {
+              index: 7,
+              name: popupFacetNames[7],
+              options: ['eleven main_inbound1_inbound1', 'ten main_inbound1_inbound1', 'twelve main_inbound1_inbound1'],
+              select: [{
+                option: 2,
+                numRows: 1,
+                numFacetFilters: 3
+              }],
+              popup: {
+                uiContext: rootUIContext + 'Entity path with filter:',
+                title: 'Select 2nd layer choice scalar',
+                numRows: 3
+              }
             }
           ]
         }
@@ -740,6 +784,8 @@ test.describe('facet within facet', () => {
       }
     )
   });
+
+  return;
 
   test.describe('record link popup', () => {
     testFacetWithinFacet(

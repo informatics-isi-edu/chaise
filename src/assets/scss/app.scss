@@ -3,13 +3,13 @@
 @use 'helpers';
 
 // globally used
-@import "chaise-icon";
-@import "markdown-container";
-@import "buttons";
-@import "button-group";
-@import "inputs";
-@import "dropdown";
-@import "modal";
+@use "chaise-icon";
+@use "markdown-container";
+@use "buttons";
+@use "button-group";
+@use "inputs";
+@use "dropdown";
+@use "modal";
 
 // if we want to hide the page and then show navbar and content together
 .wait-for-navbar {
@@ -43,8 +43,8 @@ html {
   height: 100%;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
     sans-serif;
-  background-color: map-get(variables.$color-map, 'white');
-  color: map-get(variables.$color-map, 'black');
+  background-color: map.get(variables.$color-map, 'white');
+  color: map.get(variables.$color-map, 'black');
   font-size: variables.$font-size;
   font-weight: 400;
   line-height: 1.428;
@@ -110,7 +110,7 @@ html {
   .h4-class small {
     font-weight: 400;
     line-height: 1;
-    color: map-get(variables.$color-map, 'header-small');
+    color: map.get(variables.$color-map, 'header-small');
     font-size: 65%;
   }
 
@@ -131,7 +131,7 @@ html {
   a,
   a:not([href]):not([class]) {
     cursor: pointer;
-    color: map-get(variables.$color-map, 'link');
+    color: map.get(variables.$color-map, 'link');
     text-decoration: none;
   }
   // the last selector is added to override bootstrap default behavior
@@ -145,8 +145,8 @@ html {
   code {
     padding: 2px 4px;
     font-size: 90%;
-    color: map-get(variables.$color-map, 'code-block');
-    background-color: map-get(variables.$color-map, 'code-block-background');
+    color: map.get(variables.$color-map, 'code-block');
+    background-color: map.get(variables.$color-map, 'code-block-background');
     border-radius: 4px;
   }
   // make sure the pre style is consistent with old bootstrap styles
@@ -156,11 +156,11 @@ html {
     margin: 0 0 10px;
     font-size: 13px;
     line-height: 1.42857143;
-    color: map-get(variables.$color-map, 'black');
+    color: map.get(variables.$color-map, 'black');
     word-break: break-all;
     word-wrap: break-word;
-    background-color: map-get(variables.$color-map, 'code-block-background-alt');
-    border: 1px solid map-get(variables.$color-map, 'border');
+    background-color: map.get(variables.$color-map, 'code-block-background-alt');
+    border: 1px solid map.get(variables.$color-map, 'border');
     border-radius: 4px;
   }
 
@@ -255,15 +255,15 @@ html {
   }
   .tooltip code,
   .tooltip-inner code {
-    background: map-get(variables.$color-map, 'code-block-background-in-tooltip');
-    color: map-get(variables.$color-map, 'white');
+    background: map.get(variables.$color-map, 'code-block-background-in-tooltip');
+    color: map.get(variables.$color-map, 'white');
     padding: 0.5px;
   }
 
   // disabled row and form
   .disabled-form,
   .disabled-row {
-    color: map-get(variables.$color-map, 'disabled') !important;
+    color: map.get(variables.$color-map, 'disabled') !important;
   }
 
   .disabled-form *,
@@ -273,7 +273,7 @@ html {
 
   .disabled-form a,
   .disabled-row a {
-    color: map-get(variables.$color-map, 'disabled') !important;
+    color: map.get(variables.$color-map, 'disabled') !important;
   }
 
   .disabled-form .remove-input-btn {
@@ -288,8 +288,8 @@ html {
   }
 
   .disabled-form .btn.btn-inverted[disabled]:hover {
-    background-color: map-get(variables.$color-map, 'white') !important;
-    border-color: map-get(variables.$color-map, 'border') !important;
+    background-color: map.get(variables.$color-map, 'white') !important;
+    border-color: map.get(variables.$color-map, 'border') !important;
   }
 
   .disabled-element {
@@ -302,13 +302,13 @@ html {
 
   // spinner
   .spinner-container:not(.bottom-left-spinner) {
-    background: map-get(variables.$color-map, 'white');
-    color: map-get(variables.$color-map, 'spinner');
+    background: map.get(variables.$color-map, 'white');
+    color: map.get(variables.$color-map, 'spinner');
     width: 130px;
     margin: 0 auto;
     text-align: center;
     padding: 14px 0;
-    border: 1px solid map-get(variables.$color-map, 'border');
+    border: 1px solid map.get(variables.$color-map, 'border');
     border-radius: 7px;
     &:not(.manual-position-spinner) {
       top: 50vh;
@@ -316,22 +316,22 @@ html {
       left: 50%;
       margin-top: -75px;
       margin-left: -75px;
-      z-index: map-get(variables.$z-index-map, 'spinner');
+      z-index: map.get(variables.$z-index-map, 'spinner');
     }
     .spinner-message {
-      color: map-get(variables.$color-map, 'black');
+      color: map.get(variables.$color-map, 'black');
       margin-top: 15px;
     }
   }
   .spinner-container.bottom-left-spinner {
     float: left;
     position: fixed;
-    z-index: map-get(variables.$z-index-map, 'spinner');
+    z-index: map.get(variables.$z-index-map, 'spinner');
     bottom: 0;
-    background: map-get(variables.$color-map, 'spinner-background');
+    background: map.get(variables.$color-map, 'spinner-background');
     margin: 5px;
     padding: 5px 20px;
-    border: solid map-get(variables.$color-map, 'spinner-border') 1.5px;
+    border: solid map.get(variables.$color-map, 'spinner-border') 1.5px;
     .spinner-message {
       display: inline-block;
       margin-left: 5px;
@@ -347,7 +347,7 @@ html {
     position: sticky;
     position: -webkit-sticky;
     top: min(50px, 50%);
-    z-index: map-get(variables.$z-index-map, 'spinner');
+    z-index: map.get(variables.$z-index-map, 'spinner');
     .spinner-container {
       height: variables.$main-spinner-height;
     }
@@ -373,7 +373,7 @@ html {
     margin: 0;
 
     .link-decoration {
-      color: map-get(variables.$color-map, 'link');
+      color: map.get(variables.$color-map, 'link');
     }
   }
 
@@ -411,7 +411,7 @@ html {
 
   // record and recordedit column headers
   .entity-key {
-    color: map-get(variables.$color-map, 'black');
+    color: map.get(variables.$color-map, 'black');
     font-weight: normal;
     font-size: 1rem;
     word-wrap: break-word;
@@ -420,7 +420,7 @@ html {
   // record and recordedit column values
   .entity-value {
     font-size: 1rem;
-    color: map-get(variables.$color-map, 'black');
+    color: map.get(variables.$color-map, 'black');
   }
 
   // show more/show less ellipsis
@@ -460,11 +460,11 @@ html {
 
     .footer-content {
       height: 30px;
-      background-color: map-get(variables.$color-map, 'footer-background');
+      background-color: map.get(variables.$color-map, 'footer-background');
       padding-right: 5px;
       padding-left: 5px;
       padding-top: 5px;
-      color: map-get(variables.$color-map, 'footer');
+      color: map.get(variables.$color-map, 'footer');
       font-size: 11px;
 
       li {
@@ -482,8 +482,8 @@ html {
       code {
         padding-left: 0;
         padding-right: 0;
-        color: map-get(variables.$color-map, 'black');
-        background-color: map-get(variables.$color-map, 'code-block-background-alt');
+        color: map.get(variables.$color-map, 'black');
+        background-color: map.get(variables.$color-map, 'code-block-background-alt');
       }
     }
   }
@@ -596,6 +596,10 @@ html {
             padding: 0;
             padding-bottom: 3px;
           }
+
+          .pull-left {
+            display: flex;
+          }
         }
       }
 
@@ -687,7 +691,7 @@ html {
 
   // copy to clipboard btn (used in share dialog)
   .chaise-copy-to-clipboard-btn {
-    color: map-get(variables.$color-map, 'primary');
+    color: map.get(variables.$color-map, 'primary');
     font-size: 65%;
     cursor: pointer;
   }
@@ -713,7 +717,7 @@ html {
       appearance: none;
 
       position: absolute;
-      z-index: map-get(variables.$z-index-map, 'checkbox-input');
+      z-index: map.get(variables.$z-index-map, 'checkbox-input');
       cursor: pointer;
       width: variables.$chaise-checkbox-width;
       height: variables.$chaise-checkbox-height;
@@ -725,15 +729,15 @@ html {
         // we have to attach the checkmark to the label otherwise firefox won't show it.
         & + label:before,
         &:checked + label:after {
-          color: map-get(variables.$color-map, 'disabled');
-          border-color: map-get(variables.$color-map, 'disabled');
+          color: map.get(variables.$color-map, 'disabled');
+          border-color: map.get(variables.$color-map, 'disabled');
         }
       }
 
       // we have to attach the checkmark to the label otherwise firefox won't show it.
       & + label:before,
       &:checked + label:after {
-        color: map-get(variables.$color-map, 'primary');
+        color: map.get(variables.$color-map, 'primary');
         -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -748,9 +752,9 @@ html {
         height: variables.$chaise-checkbox-height;
         left: 0;
         top: 0;
-        border: 1px solid map-get(variables.$color-map, 'primary');
+        border: 1px solid map.get(variables.$color-map, 'primary');
         border-radius: 3px;
-        background-color: map-get(variables.$color-map, 'white');
+        background-color: map.get(variables.$color-map, 'white');
       }
 
       &:indeterminate + label:after {
@@ -793,7 +797,7 @@ html {
     font-size: 18px;
 
     &.fa-solid.fa-star {
-      color: map-get(variables.$color-map, 'favorite');
+      color: map.get(variables.$color-map, 'favorite');
     }
 
     &.hover-show {
@@ -815,13 +819,13 @@ html {
 
   // changes the color of alert fa-triangle-exclamation (used for timeout error)
   .fa-triangle-exclamation {
-    color: map-get(variables.$color-map, 'warning') !important;
+    color: map.get(variables.$color-map, 'warning') !important;
     border: none;
   }
 
   // spinner
   .fa-circle-notch {
-    color: map-get(variables.$color-map, 'spinner');
+    color: map.get(variables.$color-map, 'spinner');
   }
 
   /* Rule for Chrome */
@@ -851,7 +855,7 @@ html {
     position: sticky;
     width: -moz-available;
     width: -webkit-fill-available;
-    z-index: map-get(variables.$z-index-map, 'top-horzontal-scroll-wrapper');
+    z-index: map.get(variables.$z-index-map, 'top-horzontal-scroll-wrapper');
     display: none;
   }
 
@@ -877,7 +881,7 @@ html {
         display: inline-block;
         cursor: pointer;
         padding-right: 3px;
-        color: map-get(variables.$color-map, 'black');
+        color: map.get(variables.$color-map, 'black');
         font-size: 1.3em;
         vertical-align: middle;
       }
@@ -913,8 +917,8 @@ html {
 
   // section accordion (used both in record and recordedit)
   .chaise-accordions {
-    $_space-between-accordions: map-get(variables.$chaise-accordion-spacing-map, 'space-between');
-    $_row-focus-border-width: map-get(variables.$chaise-accordion-spacing-map, 'row-focus-border-width');
+    $_space-between-accordions: map.get(variables.$chaise-accordion-spacing-map, 'space-between');
+    $_row-focus-border-width: map.get(variables.$chaise-accordion-spacing-map, 'row-focus-border-width');
 
     .panel-group {
       margin-bottom: 20px;
@@ -957,11 +961,11 @@ html {
         cursor: pointer;
         height: 44px;
         text-transform: inherit;
-        padding: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
-        color: map-get(variables.$color-map, 'white');
+        padding: map.get(variables.$chaise-accordion-spacing-map, 'header-padding');
+        color: map.get(variables.$color-map, 'white');
         border: none;
         border-radius: inherit;
-        background: map-get(variables.$color-map, 'section-background');
+        background: map.get(variables.$color-map, 'section-background');
         // Overriding accordian-button css to align right angle bracket icon to left
         flex-direction: row-reverse;
         justify-content: flex-end;
@@ -1024,9 +1028,9 @@ html {
 
       .accordion-body {
         // make sure content is alidned with header on the left
-        padding-left: map-get(variables.$chaise-accordion-spacing-map, 'body-padding-left');
+        padding-left: map.get(variables.$chaise-accordion-spacing-map, 'body-padding-left');
         // make sure content is aligned with header on the right.
-        padding-right: map-get(variables.$chaise-accordion-spacing-map, 'header-padding');
+        padding-right: map.get(variables.$chaise-accordion-spacing-map, 'header-padding');
         padding-top: 10px;
       }
 
@@ -1048,7 +1052,7 @@ html {
     width: 35px;
     cursor: pointer;
     overflow: hidden;
-    z-index: map-get(variables.$z-index-map, 'back-to-top-btn');
+    z-index: map.get(variables.$z-index-map, 'back-to-top-btn');
   }
 
   // an spinner with backdrop blocking the whole app content
@@ -1059,13 +1063,13 @@ html {
       left: 0;
       height: 100%;
       width: 100%;
-      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner-backdrop');
+      z-index: map.get(variables.$z-index-map, 'app-blocking-spinner-backdrop');
       background: black;
       opacity: 0.5;
     }
     .spinner-container {
       top: 50% !important;
-      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner') !important;
+      z-index: map.get(variables.$z-index-map, 'app-blocking-spinner') !important;
     }
   }
 
@@ -1075,6 +1079,10 @@ html {
       // in other apps .alerts-container is adding the padding-top
       padding-top: 20px;
       padding-bottom: 20px;
+    }
+
+    .help-page-icon {
+      margin: 0 5px;
     }
   }
 
@@ -1090,7 +1098,7 @@ html {
 
     position: relative;
     display: block;
-    border: 1px solid map-get(variables.$color-map, 'border');
+    border: 1px solid map.get(variables.$color-map, 'border');
     text-align: center;
 
     /**
@@ -1187,5 +1195,5 @@ html {
 // change default bootstap variables
 :root {
   // interpolation (#{}) is needed here, more info: https://sass-lang.com/documentation/breaking-changes/css-vars/
-  --bs-body-color: #{map-get(variables.$color-map, 'black')};
+  --bs-body-color: #{map.get(variables.$color-map, 'black')};
 }

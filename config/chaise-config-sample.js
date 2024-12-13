@@ -1,33 +1,23 @@
 // Configure deployment-specific data here
+// for more info: https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md
 
 var chaiseConfig = {
-    name: "Sample",
     defaultCatalog: "1",
     resolverImplicitCatalog: "1",
-    allowErrorDismissal: true,
-    confirmDelete: true,
     headTitle: 'Chaise',
     customCSS: '/assets/css/chaise.css',
     navbarBrand: '/',
-    navbarBrandImage: null,
-    logoutURL: '/image-annotation',
     // signUpURL: '', The URL at a which a user can create a new account
-    dataBrowser: '',
     shareCite: {
         acls: {
           show: ["*"],  // [] <- hide
           enable: ["*"] // [] <- disable
         }
     },
-    maxColumns: 6,
-    feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
-    helpURL: '/help/using-the-data-browser/',
-    editRecord: true,
-    deleteRecord: true,
     maxRecordsetRowHeight: 160,
     navbarBanner: [
         {
-            markdown_pattern: "This is a development version of Chaise",
+            markdownPattern: "This is a development version of Chaise",
             // // to make the banner dismissible:
             // dismissible: true,
             // // to ensure showing the banner only to certain users:
@@ -92,16 +82,16 @@ var chaiseConfig = {
     footerMarkdown: "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     configRules: [
         {
-            host: ["www.rebuildingakidney.org", "staging.rebuildingakidney.org", "dev.rebuildingakidney.org"], // array of host names
+            host: ["www.example.org", "staging.example.org", "dev.example.org"], // array of host names
             config: {
-                headTitle: "RBK/GUDMAP",
-                navbarBrand: "/resources/"
+                headTitle: "Example",
+                navbarBrandText: "Example website"
             }
         }, {
-            host: ["www.gudmap.org", "staging.gudmap.org", "dev.gudmap.org"], // array of host names
+            host: ["www.example-2.org", "staging.examle-2.org", "dev.example-2.org"], // array of host names
             config: {
-                headTitle: "GUDMAP/RBK",
-                navbarBrand: "/"
+                headTitle: "Example 2",
+                navbarBrandText: "Example 2 website"
             }
         }
     ],
@@ -109,7 +99,3 @@ var chaiseConfig = {
         engine: 'handlebars'
     }
 };
-
-if (typeof module === 'object' && module.exports && typeof require === 'function') {
-    exports.config = chaiseConfig;
-}

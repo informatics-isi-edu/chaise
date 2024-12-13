@@ -57,11 +57,11 @@
             }
 
             .chaise-btn:focus {
-              background-color: map-get(variables.$color-map, 'white');
+              background-color: map.get(variables.$color-map, 'white');
             }
 
             .chaise-btn.chaise-btn-secondary {
-              border-color: map-get(variables.$color-map, 'border');
+              border-color: map.get(variables.$color-map, 'border');
               height: 25px;
               min-width: 25px;
               padding: 2px 5px;
@@ -104,12 +104,12 @@
             }
 
             span {
-              color: map-get(variables.$color-map, 'black');
+              color: map.get(variables.$color-map, 'black');
               cursor: default;
             }
 
             button span {
-              color: map-get(variables.$color-map, 'primary');
+              color: map.get(variables.$color-map, 'primary');
               cursor: pointer;
             }
           }
@@ -159,7 +159,7 @@
   }
 
   .modal-header-context {
-    color: map-get(variables.$color-map, 'modal-header-context');
+    color: map.get(variables.$color-map, 'modal-header-context');
 
     .modal-header-context-separator {
       padding: 0 0.3em;

@@ -1,3 +1,4 @@
+@use "sass:color";
 @use 'sass:map';
 @use 'variables';
 
@@ -38,7 +39,7 @@
 }
 
 @mixin download-btn() {
-  color: map-get(variables.$color-map, 'primary');
+  color: map.get(variables.$color-map, 'primary');
   white-space: nowrap;
   // touch action
   -ms-touch-action: manipulation;
@@ -88,8 +89,8 @@
   -moz-user-select: none;
   -ms-user-select: none;
   white-space: nowrap;
-  /** 
-  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to 
+  /**
+  * Fixing button spacing issue. Fix- center aligning the buttons. Adding line-height will make the children of button to
   * use this property  to override what bootstrap is defining.
   */
   display: inline-flex;
@@ -99,23 +100,23 @@
 }
 
 @mixin chaise-btn-primary() {
-  color: map-get(variables.$color-map, 'white');
-  background-color: map-get(variables.$color-map, 'primary');
-  border-color: map-get(variables.$color-map, 'black');
+  color: map.get(variables.$color-map, 'white');
+  background-color: map.get(variables.$color-map, 'primary');
+  border-color: map.get(variables.$color-map, 'black');
 
   &:focus {
-    background-color: darken(map-get(variables.$color-map, 'primary'), 10%);
+    background-color: color.adjust(map.get(variables.$color-map, 'primary'), $lightness: -10%);
     box-shadow: none;
   }
 }
 
 @mixin chaise-btn-secondary {
-  color: map-get(variables.$color-map, 'primary');
-  background-color: map-get(variables.$color-map, 'white');
-  border: 1px solid map-get(variables.$color-map, 'primary');
+  color: map.get(variables.$color-map, 'primary');
+  background-color: map.get(variables.$color-map, 'white');
+  border: 1px solid map.get(variables.$color-map, 'primary');
 
   &:focus {
-    background-color: darken(map-get(variables.$color-map, 'white'), 10%);
+    background-color: color.adjust(map.get(variables.$color-map, 'white'), $lightness: -10%);
     box-shadow: none;
   }
 }
@@ -124,7 +125,7 @@
   height: variables.$btn-height-sm;
   min-width: variables.$btn-height-sm;
   font-size: 1rem;
-  padding: 2px 5px;
+  padding: variables.$btn-padding-sm-y variables.$btn-padding-sm-x;
 }
 
 // can be used to write media-queries

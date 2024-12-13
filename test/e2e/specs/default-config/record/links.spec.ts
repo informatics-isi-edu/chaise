@@ -4,6 +4,7 @@ import { test, expect, TestInfo, Page } from '@playwright/test';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
+import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
@@ -101,6 +102,27 @@ test('export button', async ({ page, baseURL }, testInfo) => {
   await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`], APP_NAMES.RECORD);
 });
 
+
+test('default behavior of editRecord and deleteRecord chaise-config props', async ({page, baseURL}, testInfo) => {
+  await goToPage(page, baseURL, testInfo, testParams.table_name);
+
+  await test.step('delete button should be visible', async () => {
+    const deleteBtn = RecordLocators.getDeleteRecordButton(page);
+    await expect.soft(deleteBtn).toBeVisible();
+    // actual delete tests are done in other specs
+  });
+
+  // this must be the last step here as it will change the page location
+  await test.step('edit button should be visible', async () => {
+    const editBtn = RecordLocators.getEditRecordButton(page);
+    await expect.soft(editBtn).toBeVisible();
+    await editBtn.click();
+    await expect.soft(page).toHaveURL(/recordedit/);
+    await RecordeditLocators.waitForRecordeditPageReady(page);
+    // actual edit tests are done in other specs
+  });
+});
+
 test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
   await goToPage(page, baseURL, testInfo, testParams.table_name);
 
@@ -115,8 +137,6 @@ test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
     await expect.soft(columns.nth(2)).toBeVisible();
   });
 });
-
-
 
 
 /********************** helper functions ************************/

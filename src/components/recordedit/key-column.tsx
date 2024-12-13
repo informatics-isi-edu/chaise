@@ -75,6 +75,12 @@ const KeyColumn = ({
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
 
+    // hide the button if the foreign key values for this column are part of a unique key
+    // and the other part of that key is the prefiiled column that triggered the bulkForeignKey UI
+    if (cm.isLeafInUniqueBulkForeignKeyCreate) {
+      return false
+    }
+
     // if we're already showing the multi form UI, then we have to show the button
     if (activeMultiForm === columnIndex) {
       return true;

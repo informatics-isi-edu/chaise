@@ -66,6 +66,14 @@ module.exports = (env) => {
       }
     ],
     mode,
-    env
+    env,
+    {
+      extraWebpackProps: {
+        externals: {
+          // treat plotly as an external dependency and don't compute it
+          'plotly.js-basic-dist-min': 'Plotly'
+        }
+      }
+    }
   );
 }
