@@ -32,8 +32,6 @@ updates:
       - dependency-name: "q"
       - dependency-name: "@types/q"
       - dependency-name: "moment*"
-      # the recent updates break the array support (https://github.com/informatics-isi-edu/chaise/pull/2517#issuecomment-2292041258)
-      - dependency-name: "react-hook-form"
       # we don't need to update these dependencies as frequently:
       - dependency-name: "@babel/*"
       - dependency-name: "babel-loader"
