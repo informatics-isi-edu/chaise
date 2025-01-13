@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DroppableProps, Droppable } from 'react-beautiful-dnd';
+import { DroppableProps, Droppable } from '@hello-pangea/dnd';
 
-/** Since we're using strict mode, react-beautiful-dnd misbehaves due to multiple renders caused by strict mode.
+/** Since we're using strict mode, @hello-pangea/dnd misbehaves due to multiple renders caused by strict mode.
  *  This is to guard against it
  */
 const ChaiseDroppable = React.memo(function StrictModeDroppable({ children, ...props }: DroppableProps) {
