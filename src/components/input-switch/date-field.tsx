@@ -61,6 +61,14 @@ const DateField = (props: DateFieldProps): JSX.Element => {
                 return true;
               }}
               {...field}
+              /**
+               * The following two will make sure react-hook-form can access the input properly.
+               * `inputRef` in react-imask refers to the underlying input, and ref referrs to the wrapper (MaskedComponent).
+               *  without this, the react-hook-form would call focus on the MaskedComponent for array inputs,
+               *  which was throwing a terminal error
+               */
+              ref={undefined}
+              inputRef={field.ref}
               // ------------ IMask specific props ----------- //
               mask={Date}
               pattern={dataFormats.date}
