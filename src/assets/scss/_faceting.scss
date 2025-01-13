@@ -83,6 +83,11 @@
         background-color: map.get(variables.$color-map, 'table-header-background');
         color: map.get(variables.$color-map, 'black');
 
+        // overriding the default border-radius that bootstrap is adding.
+        &.collapsed {
+          border-radius: 0;
+        }
+
         // Overriding accordian-button css to align right angle bracket icon to left
         &::after {
           margin: 0px 8px;
