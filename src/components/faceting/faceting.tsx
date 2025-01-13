@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 //react-beatiful-dnd
 import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
-} from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
