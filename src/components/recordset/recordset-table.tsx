@@ -167,11 +167,8 @@ const RecordsetTable = ({
   }, []);
 
   useEffect(()=>{
-    console.log('calllled');
     setHeaderTop(headRef.current!.getBoundingClientRect().top);
   },[isInitialized]);
-
-  console.log(headerTop, headRef.current?.getBoundingClientRect());
 
   useEffect(()=>{
     if(!outerTableRef.current || !headRef.current || !stickyHeaderRef.current){
@@ -183,8 +180,6 @@ const RecordsetTable = ({
         if(stickyHeaderRef.current){
         if (!entry.isIntersecting) {
           stickyHeaderRef.current.style.visibility = 'visible';
-          const hasScrollbar = outerTableRef.current!.scrollWidth > outerTableRef.current!.clientWidth;
-          console.log('hasScrollbar ',hasScrollbar);
           stickyHeaderRef.current.style.top = `${headerTop}px`;
         } else {
           stickyHeaderRef.current.style.visibility = 'hidden';
@@ -237,96 +232,6 @@ const RecordsetTable = ({
   
   },[isLoading, headerTop]);
 
-  // useEffect(() => {
-  //   if (!outerTableRef.current || !headRef.current || !stickyHeaderRef.current) return;
-  
-  //   // Intersection Observer for bottom scrollbar visibility
-  //   const bottomObserver = new IntersectionObserver(
-  //     ([entry]) => {
-  //       if (stickyScrollbarRef.current) {
-  //         if (entry.isIntersecting) {
-  //           stickyScrollbarRef.current.classList.add('no-scroll-bar');
-  //           if(stickyHeaderRef.current){
-  //           stickyHeaderRef.current.style.visibility = 'hidden';
-  //           }
-  //         } else {
-  //           stickyScrollbarRef.current.classList.remove('no-scroll-bar');
-  //         }
-  //       }
-  //     },
-  //     { root: null, threshold: 0.1 }
-  //   );
-  
-  //   // Intersection Observer for sticky header visibility
-  //   const headerObserver = new IntersectionObserver(
-  //     ([entry]) => {
-  //       if (stickyHeaderRef.current) {
-  //         if (!entry.isIntersecting) {
-  //           stickyHeaderRef.current.style.visibility = 'visible';
-  //           stickyHeaderRef.current.style.top = `calc(${stickyScrollbarRef.current!.getBoundingClientRect().top}px + 15px)`;
-  //         } else {
-  //           stickyHeaderRef.current.style.visibility = 'hidden';
-  //         }
-  //       }
-  //     },
-  //     { root: null, threshold: 0 }
-  //   );
-  
-  //   // Observe elements
-  //   if (tableEndRef.current) bottomObserver.observe(tableEndRef.current);
-  //   headerObserver.observe(headRef.current);
-  
-  //   // Sync widths of the columns
-  //   const syncWidths = () => {
-  //     if (!stickyHeaderRef.current || !tableRef.current) return;
-  
-  //     const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
-  //     const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
-  
-  //     stickyThs!.forEach((headerCol, index) => {
-  //       const dataCol = originalThs[index];
-  //       if (dataCol instanceof HTMLElement) {
-  //         const colWidth = dataCol.offsetWidth;
-  //         headerCol.style.width = `${colWidth}px`;
-  //       }
-  //     });
-  
-  //     stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
-  
-  //     console.log('headRef.current:', headRef.current?.offsetWidth, 
-  //                 'outerTableRef.current:', outerTableRef.current?.offsetWidth, 
-  //                 'stickyHeaderRef.current:', stickyHeaderRef.current.offsetWidth);
-  //   };
-  
-  //   // Scroll synchronization
-  //   const handleScroll = () => {
-  //     if (stickyHeaderRef.current && stickyScrollbarRef.current) {
-  //       stickyHeaderRef.current.scrollLeft = stickyScrollbarRef.current.scrollLeft;
-  //     }
-  //   };
-  
-  //   stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
-  
-  //   // Sync column widths on resize
-  //   window.addEventListener('resize', syncWidths);
-  
-  //   // Perform initial sync
-  //   syncWidths();
-  
-  //   // Cleanup function
-  //   return () => {
-  //     bottomObserver.disconnect();
-  //     headerObserver.disconnect();
-  //     stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
-  //     window.removeEventListener('resize', syncWidths);
-  //   };
-  // }, [isLoading, showSingleScrollbar]);
-  
-
-useEffect(()=>{
-  console.log(stickyScrollbarRef.current?.scrollLeft, outerTableRef.current?.scrollLeft, tableContainer.current?.scrollLeft);
-
-},[stickyScrollbarRef.current?.scrollLeft])
   /**
    * add the top horizontal scroll if needed
    */
@@ -545,7 +450,6 @@ useEffect(()=>{
       </span>
     )
   }
-  console.log(columnModels.length);
 
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
