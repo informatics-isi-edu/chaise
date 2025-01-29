@@ -152,6 +152,39 @@
     font-size: 85%;
   }
 
+  .chaise-gene-sequence {
+    counter-reset: sequence;
+    font-family: Courier, monospace;
+    background-color: map.get(variables.$color-map, 'code-block-background-in-md');
+    padding-top: 10px;
+
+    // added for recordset tables, might not be needed
+    min-width: 300px;
+
+    .chaise-gene-sequence-chunk {
+      display: inline-block;
+      margin: 1rem 0 0.5rem 1rem;
+      position: relative;
+      white-space: nowrap;
+
+      &:not(:last-child)::before {
+        content: counter(sequence);
+        counter-increment: sequence 10;
+        position: absolute;
+        top: -1em;
+        right: 0;
+        opacity: .7;
+      }
+    }
+
+    &.chaise-gene-sequence-compact {
+      padding-top: 0;
+      .chaise-gene-sequence-chunk {
+        margin: 1rem 0 0 0.5rem;
+      }
+    }
+  }
+
   ul {
     list-style-type: disc;
   }
