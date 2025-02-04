@@ -1163,7 +1163,7 @@ html {
     --bs-table-hover-color: var(--bs-body-color);
   }
 
-  /****** classes referenced by webapps ******/
+  /****** classes referenced by webapps or annotations ******/
 
   /** horizontal alignment **/
   .chaise-content-left {
@@ -1190,6 +1190,11 @@ html {
   .chaise-content-bottom {
     align-items: end;
   }
+
+  .chaise-word-break-all {
+    word-break: break-all;
+  }
+
 }
 
 // change default bootstap variables

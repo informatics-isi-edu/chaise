@@ -1,3 +1,4 @@
+// TODO why is this added here? it should be removed!
 import '@isrd-isi-edu/chaise/src/assets/scss/_markdown-container.scss';
 
 // components
