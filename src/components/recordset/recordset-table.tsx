@@ -608,7 +608,7 @@ const RecordsetTable = ({
 
       <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
       <table className='sticky-header-table'>
-      <thead className='table-heading'>
+      <thead className='table-heading sticky'>
             <tr>
               {showActionButtons && renderActionsHeader()}
               {renderColumnHeaders()}

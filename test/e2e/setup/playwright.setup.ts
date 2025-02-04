@@ -315,8 +315,10 @@ function copyChaiseConfig(chaiseConfigFilePath?: string, addDefaultCatalogToChai
     content += `\nchaiseConfig.defaultCatalog = '${catId}'`;
 
     // write the new content into the temporary location
-    execSync(`mkdir -p ${UPLOAD_FOLDER}`);
-    chaiseFilePath = path.resolve(UPLOAD_FOLDER, 'chaise-config.js');
+    // const UPLOAD_FOLDER = path.resolve(__dirname, '../../test/e2e/.upload');
+
+    fs.mkdirSync(UPLOAD_FOLDER, { recursive: true });
+        chaiseFilePath = path.resolve(UPLOAD_FOLDER, 'chaise-config.js');
     fs.writeFileSync(chaiseFilePath, content);
   }
 

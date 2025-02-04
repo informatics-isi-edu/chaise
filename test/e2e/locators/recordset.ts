@@ -178,7 +178,7 @@ export default class RecordsetLocators {
   }
 
   static getColumnNames(container: Page | Locator): Locator {
-    return container.locator('.table-column-displayname > span');
+    return container.locator('.table-column-displayname > span:not(.sticky)');
   };
 
   static getFirstColumn(container: Page | Locator): Locator {
