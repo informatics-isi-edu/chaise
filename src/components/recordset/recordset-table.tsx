@@ -166,6 +166,35 @@ const RecordsetTable = ({
     }
   }, []);
 
+  // useEffect(() => {
+  //   if (!headRef.current) return;
+  
+  //   const updateHeaderTop = () => {
+  //     if (headRef.current) {
+  //       const newTop = headRef.current.getBoundingClientRect().top;
+  //       setHeaderTop((prevTop) => (prevTop !== newTop ? newTop : prevTop));
+  //     }
+  //   };
+  
+  //   // **Step 2: Observe only relevant DOM changes**
+  //   const observer = new MutationObserver((mutationsList) => {
+  //     for (const mutation of mutationsList) {
+  //       if (mutation.removedNodes.length > 0) {
+  //         updateHeaderTop();
+  //         break;
+  //       }
+  //     }
+  //   });
+  
+  //   const observedNode = headRef.current.parentElement || document.body;
+  //   observer.observe(observedNode, { childList: true, subtree: true });
+  
+  //   // Cleanup function
+  //   return () => {
+  //     observer.disconnect();
+  //   };
+  // }, [isInitialized]);
+
   useEffect(()=>{
     setHeaderTop(headRef.current!.getBoundingClientRect().top);
   },[isInitialized]);
@@ -605,8 +634,7 @@ const RecordsetTable = ({
       {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
       top scrollbar when the bottom one is visible */}
       <div className='dummy-table-end-div' ref={tableEndRef}/>
-
-      <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
+      {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
       <table className='sticky-header-table'>
       <thead className='table-heading sticky'>
             <tr>
@@ -615,7 +643,7 @@ const RecordsetTable = ({
             </tr>
           </thead>
       </table>
-      </div>
+      </div>}
 
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>

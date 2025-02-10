@@ -162,7 +162,7 @@ export default class RecordsetLocators {
   }
 
   static getActionsHeader(container: Page | Locator): Locator {
-    return container.locator('.actions-header');
+    return container.locator('.actions-header:not(.sticky)');
   }
 
   static getRows(container: Page | Locator): Locator {
