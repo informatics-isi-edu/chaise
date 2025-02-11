@@ -166,35 +166,6 @@ const RecordsetTable = ({
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (!headRef.current) return;
-  
-  //   const updateHeaderTop = () => {
-  //     if (headRef.current) {
-  //       const newTop = headRef.current.getBoundingClientRect().top;
-  //       setHeaderTop((prevTop) => (prevTop !== newTop ? newTop : prevTop));
-  //     }
-  //   };
-  
-  //   // **Step 2: Observe only relevant DOM changes**
-  //   const observer = new MutationObserver((mutationsList) => {
-  //     for (const mutation of mutationsList) {
-  //       if (mutation.removedNodes.length > 0) {
-  //         updateHeaderTop();
-  //         break;
-  //       }
-  //     }
-  //   });
-  
-  //   const observedNode = headRef.current.parentElement || document.body;
-  //   observer.observe(observedNode, { childList: true, subtree: true });
-  
-  //   // Cleanup function
-  //   return () => {
-  //     observer.disconnect();
-  //   };
-  // }, [isInitialized]);
-
   useEffect(()=>{
     setHeaderTop(headRef.current!.getBoundingClientRect().top);
   },[isInitialized]);
@@ -229,7 +200,7 @@ const RecordsetTable = ({
       // Loop through columns and set widths
       stickyThs!.forEach((headerCol, index) => {
         const dataCol = originalThs[index];
-        if (dataCol instanceof HTMLElement) { // Ensure it's an HTML element
+        if (dataCol instanceof HTMLElement) { 
           const colWidth = dataCol.offsetWidth; // Get the actual width of the column
           headerCol.style.width = `${colWidth}px`; // Set width on sticky header
         } 
