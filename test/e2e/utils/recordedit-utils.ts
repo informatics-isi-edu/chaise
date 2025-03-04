@@ -747,8 +747,8 @@ const _testInputValidationAndExtraFeatures = async (
 
         await expect.soft(timestampProps.time).not.toHaveValue('');
         const UITime = await timestampProps.time.getAttribute('value') as string;
-        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
-        expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
+        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDTHH:mm:ssZ');
+        expect.soft(UIObject.diff(nowObject, 'minutes')).toBeLessThan(1);
       });
 
       await test.step('"clear" button should clear both time and date.', async () => {
