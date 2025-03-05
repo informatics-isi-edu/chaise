@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
 import { ErrorBoundary, FallbackProps, useErrorBoundary } from 'react-error-boundary';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';

@@ -16,6 +16,8 @@ import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-util
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
+import type { JSX } from 'react';
+
 const ViewerAnnotationFormContainer = (): JSX.Element => {
 
   const {

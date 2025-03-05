@@ -8,7 +8,7 @@ import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';

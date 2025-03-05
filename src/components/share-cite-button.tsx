@@ -5,7 +5,7 @@ import ShareCiteModal, { ShareCiteModalProps } from '@isrd-isi-edu/chaise/src/co
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models

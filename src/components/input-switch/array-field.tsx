@@ -6,7 +6,7 @@ import { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switc
 // utils
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import { CUSTOM_ERROR_TYPES, ERROR_MESSAGES, formatDatetime, getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import React from 'react';
+import React, { type JSX } from 'react';
 import {
   DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
 } from '@hello-pangea/dnd';

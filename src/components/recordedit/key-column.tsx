@@ -15,6 +15,8 @@ import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
+import type { JSX } from 'react';
+
 type KeyColumnProps = {
   /* the index of column that is showing the select all input */
   activeMultiForm: number;
@@ -155,9 +157,8 @@ const KeyColumn = ({
               </ChaiseTooltip>
             }
           </span>
-        )
+        );
       })}
-
     </div>
   );
 }

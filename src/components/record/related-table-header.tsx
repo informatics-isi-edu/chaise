@@ -7,7 +7,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';

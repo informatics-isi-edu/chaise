@@ -6,6 +6,8 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
+import type { JSX } from 'react';
+
 const SwitchUserAccountsHelp = (): JSX.Element => {
   const { logout, popupLogin } = useAuthn();
 
