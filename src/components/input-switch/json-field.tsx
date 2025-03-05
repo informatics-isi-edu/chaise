@@ -3,7 +3,7 @@ import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
 //hooks
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';

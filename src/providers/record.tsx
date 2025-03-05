@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 

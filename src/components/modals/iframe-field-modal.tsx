@@ -7,7 +7,7 @@ import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confir
 import Modal from 'react-bootstrap/Modal';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 // models

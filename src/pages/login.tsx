@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // components

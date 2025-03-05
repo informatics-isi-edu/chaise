@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import Modal from 'react-bootstrap/Modal';
 
@@ -22,7 +22,7 @@ const ExternalLinkModal = ({
 }: ExternalLinkModalProps): JSX.Element => {
   const [counter, setCounter] = useState(COUNT_DOWN_SECONDS);
 
-  const linkRef = useRef<any>();
+  const linkRef = useRef<any>(undefined);
 
   const interval = useRef<ReturnType<typeof setInterval> | null>(null);
 

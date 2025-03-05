@@ -19,7 +19,7 @@ import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-hea
 import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
@@ -776,7 +776,7 @@ const RecordsetInner = ({
     )
   }
 
-  const facetingSection = (leftRef: React.RefObject<HTMLDivElement>) => (
+  const facetingSection = (leftRef: React.RefObject<HTMLDivElement | null>) => (
     <div
       className={`side-panel-resizable ${panelClassName}`}
       ref={leftRef}

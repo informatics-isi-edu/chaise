@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip'
 import { Placement } from 'react-bootstrap/types';
 

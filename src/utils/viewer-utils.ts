@@ -193,7 +193,7 @@ export const initializeOSDParams = (pageQueryParams: any, imageURI: string, defa
  * @returns
  */
 export const loadImageMetadata = (
-  osdViewerParameters: React.MutableRefObject<any>,
+  osdViewerParameters: React.RefObject<any>,
   viewerLogStack: any,
   viewerLogStackPath: string,
   imageID: string,

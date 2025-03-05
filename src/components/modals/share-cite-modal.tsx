@@ -1,5 +1,5 @@
 // hooks
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 
 // components
 import Alert from 'react-bootstrap/Alert';

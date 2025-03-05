@@ -6,7 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';

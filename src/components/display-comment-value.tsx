@@ -7,6 +7,8 @@ import { CommentType } from '@isrd-isi-edu/chaise/src/models/displayname';
 // utils
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
+import type { JSX } from 'react';
+
 type DisplayCommentValueProps = {
   comment: CommentType
 };

@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 
 // models
 import { Client } from '@isrd-isi-edu/chaise/src/models/user';

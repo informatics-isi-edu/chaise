@@ -1,5 +1,7 @@
 import Spinner from 'react-bootstrap/Spinner';
 
+import type { JSX } from 'react';
+
 interface SpinnerProps {
   /**
    * displayed message

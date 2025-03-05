@@ -4,7 +4,7 @@ import MultiFormInputRow from '@isrd-isi-edu/chaise/src/components/recordedit/mu
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 
 // hooks
-import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models

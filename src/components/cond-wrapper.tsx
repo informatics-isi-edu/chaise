@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement, type JSX } from 'react';
 
 type ConditionalWrapperProps = {
   /**
@@ -9,7 +9,7 @@ type ConditionalWrapperProps = {
    * A function that returns the wrapper. Make sure the children is properly
    * used in here.
    */
-  wrapper: (children: ReactElement) => JSX.Element;
+  wrapper: (children: ReactElement<any>) => JSX.Element;
   /**
    * The inner element
    */

@@ -3,6 +3,8 @@ import Tooltip from 'react-bootstrap/Tooltip'
 import { Placement } from 'react-bootstrap/types';
 import { IS_DEV_MODE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
+import type { JSX } from 'react';
+
 type ChaiseTooltipProps = {
   /**
    * The displayed tooltip.

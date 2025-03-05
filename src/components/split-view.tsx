@@ -1,7 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_split-view.scss';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 
 // utils
@@ -11,7 +11,7 @@ type LeftPaneProps = {
   /**
    * The elements displayed on the left side of the page
    */
-  children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
+  children: (ref: React.RefObject<HTMLDivElement | null>) => JSX.Element,
   /**
    * default width of the left panel
    */
@@ -59,7 +59,7 @@ type SplitViewProps = {
    * a function that returns the left-pane component in the resizable layout
    * pass the leftRef as a ref to the outermost element of your left-pane component
    */
-  left: ((ref: React.RefObject<HTMLDivElement>) => JSX.Element),
+  left: ((ref: React.RefObject<HTMLDivElement | null>) => JSX.Element),
 
   /**
    * the other elements that we should change their width alongside left

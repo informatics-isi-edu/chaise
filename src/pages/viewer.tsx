@@ -6,7 +6,7 @@ import Viewer from '@isrd-isi-edu/chaise/src/components/viewer/viewer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';

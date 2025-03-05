@@ -5,7 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';

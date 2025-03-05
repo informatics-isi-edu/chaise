@@ -1,4 +1,4 @@
-import { createContext, useMemo, useRef, useState } from 'react';
+import { createContext, useMemo, useRef, useState, type JSX } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 // TODO should we move the types to somewhere else?

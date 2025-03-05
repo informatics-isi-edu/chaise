@@ -6,7 +6,7 @@ import { HexColorPicker, HexColorInput } from 'react-colorful';
 import Overlay from 'react-bootstrap/Overlay';
 
 // hooks
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, type JSX } from 'react';
 import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 
 // utils
@@ -46,10 +46,10 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
   const close = useCallback(() => setShowColorPopup(false), []);
 
   // used by Overlay to position the popup
-  const colorMainInput = useRef<any>();
+  const colorMainInput = useRef<HTMLDivElement>(null);
 
   // used for the outside click
-  const colorPopup = useRef<any>();
+  const colorPopup = useRef<HTMLElement>(null);
 
   // close the popup when clicked outside
   useClickOutside(colorPopup, close);
@@ -107,7 +107,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
           <Overlay placement={openPopupUp ? 'top-start' : 'bottom-start'} target={colorMainInput.current} show={showColorPopup} ref={colorPopup}>
             {({ placement, arrowProps, show: _show, popper, ...props }) => (
               // `props` are passed from Overlay to its child. it will attach the css rules for positioning and etc.
-              <div {...props} className='popover chaise-color-picker-popup'>
+              (<div {...props} className='popover chaise-color-picker-popup'>
                 <HexColorPicker color={field.value} onChange={onChange} />
                 <div className='popover-controls'>
                   {renderInput(field.value, onChange)}
@@ -121,13 +121,12 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
                     </ChaiseTooltip>
                   </div>
                 </div>
-              </div>
+              </div>)
             )}
           </Overlay>
         </div>
       )}
     </InputField>
-
   );
 };
 

@@ -1,4 +1,4 @@
-import { MouseEvent, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { MouseEvent, MouseEventHandler, useRef, useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // components

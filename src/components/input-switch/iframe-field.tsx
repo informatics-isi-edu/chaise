@@ -7,7 +7,7 @@ import IframeFieldModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useState, useRef } from 'react';
+import { useState, useRef, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 

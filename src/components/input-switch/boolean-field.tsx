@@ -8,7 +8,7 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 
 type BooleanFieldProps = InputFieldProps & {
   columnModel?: any,

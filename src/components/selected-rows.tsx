@@ -1,7 +1,7 @@
 import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset'
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { ResizeSensor } from 'css-element-queries';
 
 

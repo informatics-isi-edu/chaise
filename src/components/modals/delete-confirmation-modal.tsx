@@ -1,6 +1,8 @@
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
+import type { JSX } from 'react';
+
 export enum DeleteConfirmationModalTypes {
   RECORD_MAIN = 'record-main',
   BULK = 'bulk',

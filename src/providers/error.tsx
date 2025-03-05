@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from 'react';
+import { createContext, useMemo, useState, type JSX } from 'react';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -98,7 +98,7 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
     // if not a dismissible error then exception should be suppressed
     const canShowOtherErrors = (
       // in this case ok is behaving like a dissmiss
-      payload.error instanceof windowRef.ERMrest.UnsupportedFilters
+      (payload.error instanceof windowRef.ERMrest.UnsupportedFilters)
     );
     if (!payload.isDismissible && !payload.error?.showContinueBtn && !payload.error?.clickOkToDismiss && !canShowOtherErrors) {
       setDontAllowOtherErrors(true);

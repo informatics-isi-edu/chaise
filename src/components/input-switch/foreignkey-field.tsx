@@ -7,7 +7,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef, useState, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models

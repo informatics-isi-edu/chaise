@@ -8,7 +8,7 @@ import MarkdownPreviewModal from '@isrd-isi-edu/chaise/src/components/modals/mar
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useState, useRef } from 'react';
+import { useState, useRef, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // utils

@@ -23,6 +23,8 @@ import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-util
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
+import type { JSX } from 'react';
+
 /**
  * Returns Main Section of the record page.
  */

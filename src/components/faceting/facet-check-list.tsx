@@ -6,7 +6,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 // models
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -136,7 +136,7 @@ const FacetCheckList = ({
         <li key={'empty'} className='chaise-checkbox ellipsis-text no-left-padding'>
           <FacetCheckListRowLabel row={{ displayname: { value: 'No results found', isHTML: false } }} />
         </li>
-      )
+      );
     }
 
     return rows.map((row: FacetCheckBoxRow, index: number) => {

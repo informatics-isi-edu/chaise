@@ -16,7 +16,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';

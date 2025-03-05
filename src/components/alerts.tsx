@@ -17,6 +17,9 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { toTitlecase } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
+import type { JSX } from 'react';
+
+
 export const Alerts = (): JSX.Element => {
   const { alerts, removeAlert } = useAlert();
   const { popupLogin } = useAuthn();

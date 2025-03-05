@@ -2,6 +2,8 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
+import type { JSX } from 'react';
+
 const TextField = (props: InputFieldProps): JSX.Element => {
 
   return (

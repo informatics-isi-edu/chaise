@@ -11,6 +11,8 @@ import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-uti
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+import type { JSX } from 'react';
+
 type DateFieldProps = InputFieldProps & {
   /**
    * whether we should show the extra buttons or not

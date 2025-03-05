@@ -12,7 +12,7 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 const Plot = createPlotlyComponent(Plotly);
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
 

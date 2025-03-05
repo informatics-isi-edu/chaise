@@ -17,7 +17,7 @@ import IframeField from '@isrd-isi-edu/chaise/src/components/input-switch/iframe
 
 // models
 import { RecordeditColumnModel, RecordeditForeignkeyCallbacks } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 export type InputSwitchProps = {
   /**

@@ -9,7 +9,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models

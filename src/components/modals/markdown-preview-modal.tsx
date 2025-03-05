@@ -5,6 +5,8 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 // utilites
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+import type { JSX } from 'react';
+
 const COUNT_DOWN_SECONDS = 5;
 
 type MarkdownPreviewModalProps = {

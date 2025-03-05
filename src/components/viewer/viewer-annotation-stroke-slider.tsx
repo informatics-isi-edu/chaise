@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 
 // hooks
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
@@ -23,7 +23,7 @@ const ViewerAnnotationStrokeSlider = (): JSX.Element => {
   const [strokeValue, setStrokeValue, strokeValueRef] = useStateRef(1);
 
   const strokeChangePromise = useRef<any>(null);
-  const oldStrokeValue = useRef<number>();
+  const oldStrokeValue = useRef<number>(undefined);
 
   useEffect(() => {
     const recieveIframeMessage = (event: any) => {

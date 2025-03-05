@@ -7,7 +7,7 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState, type JSX } from 'react';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';

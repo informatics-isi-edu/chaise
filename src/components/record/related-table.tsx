@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, type JSX } from 'react';
 
 // components
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';

@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type JSX } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils

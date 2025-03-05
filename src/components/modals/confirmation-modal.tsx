@@ -1,5 +1,7 @@
 import Modal from 'react-bootstrap/Modal';
 
+import type { JSX } from 'react';
+
 type ConfirmationModalProps = {
   /**
    * the modal class name

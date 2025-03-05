@@ -3,7 +3,7 @@
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
 
 // hooks
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
