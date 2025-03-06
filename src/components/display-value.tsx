@@ -1,5 +1,5 @@
 // hooks
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type JSX } from 'react';
 
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';

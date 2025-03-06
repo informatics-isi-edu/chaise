@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -249,7 +249,7 @@ export default function ViewerProvider({
   } | null>(null)
 
   // passed to osd-viewer
-  const osdViewerParameters = useRef<any>();
+  const osdViewerParameters = useRef<any>({});
 
   /**
    * whether the main image is loaded or not.

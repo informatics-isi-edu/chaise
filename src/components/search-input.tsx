@@ -6,7 +6,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';

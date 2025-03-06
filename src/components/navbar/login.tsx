@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState, type JSX } from 'react';
 
 // components
 import Nav from 'react-bootstrap/Nav';

@@ -18,7 +18,7 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -633,7 +633,7 @@ const RecordInner = ({
   }
 
   // Function to render the full table of contents
-  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
+  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement | null>) => (
     <div
       id='record-side-pan'
       className={`side-panel-resizable record-toc resizable small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'

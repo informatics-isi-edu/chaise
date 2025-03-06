@@ -1,4 +1,4 @@
-import { MouseEvent, useLayoutEffect, useRef, useState } from 'react';
+import { MouseEvent, useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
