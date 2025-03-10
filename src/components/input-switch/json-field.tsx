@@ -8,6 +8,7 @@ import { useRef, type JSX } from 'react';
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 const JsonField = (props: InputFieldProps): JSX.Element => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -16,7 +17,7 @@ const JsonField = (props: InputFieldProps): JSX.Element => {
 
     try {
       JSON.parse(value);
-      return true;
+      return VALIDATE_VALUE_BY_TYPE['text'](value);
     } catch (error) {
       return ERROR_MESSAGES.INVALID_JSON;
     }
@@ -32,13 +33,13 @@ const JsonField = (props: InputFieldProps): JSX.Element => {
         <div className='input-switch-json'>
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <textarea
-              placeholder={props.placeholder} 
-              rows={5} 
+              placeholder={props.placeholder}
+              rows={5}
               className={`${props.inputClasses} input-switch ${props.inputClassName} ${
                 hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
               }`}
-              {...field} 
-              onChange={onChange} 
+              {...field}
+              onChange={onChange}
               disabled={props.disableInput}
               ref={textAreaRef}
             />

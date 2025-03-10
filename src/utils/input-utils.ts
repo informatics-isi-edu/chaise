@@ -6,7 +6,10 @@
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
-import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -166,6 +169,7 @@ export const ERROR_MESSAGES = {
   INVALID_COLOR: 'Please enter a valid color value.',
   INVALID_JSON: 'Please enter a valid JSON value.',
   INVALID_BOOLEAN: 'Please enter a valid boolean value.',
+  NON_ASCII_NOT_ACCEPTED: 'Please enter ASCII characters.',
   ARRAY_ADD_OR_DISCARD_VALUE: 'Click \'Add\' to include the value or clear the entry to discard.',
 }
 
@@ -327,6 +331,19 @@ const colorFieldValidation = (value: string) => {
   return (/#[0-9a-fA-F]{6}$/i.test(value)) || ERROR_MESSAGES.INVALID_COLOR;
 }
 
+const textValidation = (value: string) => {
+  if (ConfigService.chaiseConfig.asciiTextValidation !== true) return;
+
+  if (!value || typeof value !== 'string' || value.length === 0) return;
+
+  for (let i = 0; i < value.length; i++) {
+    if (value.charCodeAt(i) > 127) {
+      return `Only ASCII characters are accepted. Invalid character: ${value[i]} (position ${i+1} of ${value.length})`;
+    }
+  }
+  return true;
+};
+
 export const VALIDATE_VALUE_BY_TYPE: {
   [key: string]: any;
 } = {
@@ -341,6 +358,7 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'timestamp': timestampFieldValidation,
   'timestamptz': timestamptzFieldValidation,
   'color': colorFieldValidation,
+  'text': textValidation
 };
 /**
  * Function to check if there is scrollbar for textarea

@@ -76,7 +76,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     const externalFiles = [
       // ermrestjs
       `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
-      `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
+      `${ermrestjsPath}${isDevMode ? 'ermrest.js' : 'ermrest.min.js'}?v=${buildVersion}`,
       // old chaise-config location TODO should be removed
       `${chaisePath}chaise-config.js?v=${buildVersion}`,
       // chaise-config

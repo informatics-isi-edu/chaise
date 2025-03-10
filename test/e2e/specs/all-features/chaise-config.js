@@ -111,5 +111,6 @@ var chaiseConfig = {
                 ]
             }
         ]
-    }
+    },
+    asciiTextValidation: true
 };
