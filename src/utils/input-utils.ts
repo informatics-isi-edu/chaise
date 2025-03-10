@@ -331,6 +331,38 @@ const colorFieldValidation = (value: string) => {
   return (/#[0-9a-fA-F]{6}$/i.test(value)) || ERROR_MESSAGES.INVALID_COLOR;
 }
 
+/**
+ * This function has been added to support `asciiTextValidation`.
+ *
+ * TODO while discussing this, we came up with the other following solutions which are more general,
+ * but could potentially cause performance issues. If other use cases for this came up, we should explore
+ * them:
+ *
+ * If we want to give more control over what's allowed and what's node, we could have something like a `unicodeValidation`
+ * property:
+ *
+ * ```
+ * {
+ *   unicodeValidation: {
+ *      allowlist: [],
+ *      blocklist: [],
+ *      errorMessage: ""
+ *   }
+ * }
+ * ```
+ *
+ * or maybe just something like
+ *
+ * ```
+ * {
+ *   acceptableUnicode: [
+ *     ["U+0030", "U+0039"], // a range
+ *     "U+002B" // just one character
+ *   ]
+ * }
+ * ```
+ *
+ */
 const textValidation = (value: string) => {
   if (ConfigService.chaiseConfig.asciiTextValidation !== true) return;
 
