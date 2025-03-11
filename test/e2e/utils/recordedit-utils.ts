@@ -141,6 +141,7 @@ type SetInputValueProps = string | RecordeditFile | {
  * Notes:
  *  - this function assumes the input already has a value and doesn't double check.
 *   - in most cases it will click on the "x" for the input.
+*   - in case of arrays, it will click on the "delete" icons until there aren't any.
  */
 export const clearInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,

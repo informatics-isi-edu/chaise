@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu'
+  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
 ];
 
 /**
@@ -80,7 +80,8 @@ export const DEFAULT_CHAISE_CONFIG = {
       show: [],
       enable: []
     }
-  }
+  },
+  asciiTextValidation: false
 };
 
 export const dataFormats = {
