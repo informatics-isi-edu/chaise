@@ -1,5 +1,5 @@
 // models
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 
 // servies
@@ -16,12 +16,12 @@ export default class FlowControl {
 
   logStack: any;
   logStackPath: string;
-  logObject: any;
+  logObject: LogObjectType | undefined;
   logAppMode: string | undefined;
 
   constructor(
     logInfo: {
-      logObject?: any,
+      logObject?: LogObjectType,
       logStack: any,
       logStackPath: string,
       logAppMode?: string

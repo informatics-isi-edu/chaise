@@ -11,9 +11,10 @@ import {
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
   RecordeditModalOptions, UpdateBulkForeignKeyRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src//models/events';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -169,7 +170,11 @@ export const RecordeditContext = createContext<{
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
+  /**
+   * call the parent page
+   */
+  notifyParentPage: (message: RecordeditNotifyEventType) => void,
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -229,7 +234,7 @@ type RecordeditProviderProps = {
    */
   logInfo: {
     logAppMode: string;
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   },
@@ -566,34 +571,16 @@ export default function RecordeditProvider({
           // make sure the leave alert is disabled
           canLeaveRecordedit.current = true;
 
-          // communicate with the caller page that the request is done
-          if (appMode === appModes.EDIT) {
-            // TODO should most probably be added when we implement assets
-            // const data = checkUpdate(submissionRowsCopy, rsTuples);
-            try {
-              // check if there is a window that opened the current one
-              // make sure the update function is defined for that window
-              // verify whether we still have a valid vaue to call that function with
-              if (windowRef.opener && windowRef.opener.updated && queryParams.invalidate) {
-                windowRef.opener.updated(queryParams.invalidate);
-              }
-            } catch (exp) {
-              // if windowRef.opener is from another origin, this will result in error on accessing any attribute in windowRef.opener
-              // And if it's from another origin, we don't need to call updated since it's not
-              // the same row that we wanted to update in recordset (table directive)
-            }
-          } else {
-            // cleanup the prefill query parameter
-            if (queryParams.prefill) {
-              CookieService.deleteCookie(queryParams.prefill);
-            }
-
-            // add cookie indicating record successfully added
-            if (queryParams.invalidate) {
-              // the value of the cookie is not important as other apps are just looking for the cookie name
-              CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
-            }
+          // cleanup the prefill query parameter
+          if (queryParams.prefill) {
+            CookieService.deleteCookie(queryParams.prefill);
           }
+
+          // if there is a parent page, send a message that the edit/create is finished
+          notifyParentPage({
+            id: queryParams.invalidate,
+            type: appMode === appModes.EDIT ? RecordeditNotifyActions.EDIT : RecordeditNotifyActions.CREATE,
+          });
 
           const page = response.successful;
           const failedPage = response.failed;
@@ -953,6 +940,15 @@ export default function RecordeditProvider({
 
     flowControl.current.setValue = setValue;
     processForeignKeyRequests();
+  };
+
+  const notifyParentPage = (message: RecordeditNotifyEventType) => {
+    if (!logInfo || !logInfo.logObject || !logInfo.logObject.ppid || !logInfo.logObject.pcid) return;
+    const logObject = logInfo.logObject;
+    const channelName = `chaise-${logObject.pcid}-${logObject.ppid}`;
+    const channel = new BroadcastChannel(channelName);
+    console.log(`sending a message to ${channelName}`);
+    channel.postMessage(message);
   }
 
   // ---------------- fk flow-control related function --------------------------- //
@@ -1166,6 +1162,7 @@ export default function RecordeditProvider({
       tuples,
       waitingForForeignKeyData,
       foreignKeyCallbacks,
+      notifyParentPage,
 
       // form
       forms,

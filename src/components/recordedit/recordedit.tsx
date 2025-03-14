@@ -34,6 +34,7 @@ import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProps, RecordsetSelectMode, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordeditNotifyActions } from '@isrd-isi-edu/chaise/src/models/events';
 
 // providers
 import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -85,7 +86,11 @@ const Recordedit = ({
       onSubmitSuccess={onSubmitSuccess}
       onSubmitError={onSubmitError}
     >
-      <RecordeditInner parentContainer={parentContainer} prefillRowData={prefillRowData} />
+      <RecordeditInner
+        parentContainer={parentContainer}
+        prefillRowData={prefillRowData}
+        queryParams={queryParams}
+      />
     </RecordeditProvider>
   );
 
@@ -100,11 +105,13 @@ const Recordedit = ({
 export type RecordeditInnerProps = {
   parentContainer?: HTMLElement;
   prefillRowData?: any[];
+  queryParams?: any;
 }
 
 const RecordeditInner = ({
   parentContainer,
-  prefillRowData
+  prefillRowData,
+  queryParams
 }: RecordeditInnerProps): JSX.Element => {
 
   const { validateSessionBeforeMutation } = useAuthn();
@@ -115,8 +122,8 @@ const RecordeditInner = ({
     prefillObject, bulkForeignKeySelectedRows, setBulkForeignKeySelectedRows,
     reference, tuples, waitingForForeignKeyData, addForm, getInitialFormValues,
     getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
-    showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction
-  } = useRecordedit()
+    showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction, notifyParentPage
+  } = useRecordedit();
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
@@ -258,6 +265,14 @@ const RecordeditInner = ({
     // TODO should be adjusted if we changed how we're tracking the tuples
     reference.delete(tuples, logObj).then((response: any) => {
       const allDeleted = response.failedTupleData.length === 0;
+      // let the caller record or recordset page know about this event
+      notifyParentPage({
+        id: queryParams ? queryParams.invalidate : '',
+        type: RecordeditNotifyActions.DELETE,
+        details: {
+          partial: !allDeleted
+        }
+      });
       /**
        * * will be called when some records failed to delete
        */
@@ -669,6 +684,13 @@ const RecordeditInner = ({
 
     // required to set values in all new forms in the RHF model
     methods.reset(initialValues);
+  };
+
+  const sendMessageToCaller = (message: RecordeditNotifyActions) => {
+    notifyParentPage({
+      id: queryParams.invalidate,
+      type: message
+    })
   }
 
   const renderSpinner = () => {
@@ -806,7 +828,7 @@ const RecordeditInner = ({
                   }
                   {/* Intersecting behaviour of scroll should be visible if there are multiple tables
                   on one page which here seems to be the case when there are successful as well as failed records */}
-                  <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed}/>
+                  <ResultsetTable page={resultsetProps.success.page} showSingleScrollbar={!!resultsetProps.failed} />
                 </Accordion.Body>
               </Accordion.Item>
               {resultsetProps.failed &&
@@ -817,7 +839,7 @@ const RecordeditInner = ({
                       exploreLink={resultsetProps.failed.exploreLink}
                     />
                   </Accordion.Button>
-                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} showSingleScrollbar={!!resultsetProps.failed}/></Accordion.Body>
+                  <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} showSingleScrollbar={!!resultsetProps.failed} /></Accordion.Body>
                 </Accordion.Item>
               }
             </Accordion>

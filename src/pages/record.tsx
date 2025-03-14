@@ -13,7 +13,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
@@ -54,7 +54,7 @@ const RecordApp = (): JSX.Element => {
     if (setupStarted.current) return;
     setupStarted.current = true;
 
-    const logObject: any = {};
+    const logObject: LogObjectType = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;

@@ -7,7 +7,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { ChaiseAlert, ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import {
   DisabledRow,
@@ -233,7 +233,7 @@ type RecordsetProviderProps = {
    * log related props
    */
   logInfo: {
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string
