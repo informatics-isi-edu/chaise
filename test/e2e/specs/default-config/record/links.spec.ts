@@ -21,8 +21,6 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('links on the record page', () => {
   test('The proper permalink should appear in the share popup if resolverImplicitCatalog is undefined', async ({ page, baseURL }, testInfo) => {
-    // test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
-
     await goToPage(page, baseURL, testInfo, testParams.table_name, true);
 
     // open the share popup on the first tab

@@ -521,13 +521,13 @@ test.describe('View recordset', () => {
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3)
       });
 
-      if (!process.env.CI) {
+      // if (!process.env.CI) {
         await test.step('delete files downloaded during the tests', async () => {
           await deleteDownloadedFiles(params.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      }
+      // }
 
     });
 

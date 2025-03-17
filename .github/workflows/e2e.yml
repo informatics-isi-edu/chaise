@@ -114,8 +114,10 @@ jobs:
           cd ermresolve
           sudo pip3 install .
           sudo useradd -m -g apache -r ermresolve
-          sudo make deploy
+          sudo cp samples/ermresolve_config.json /home/ermresolve/
+          sudo chmod a+r /home/ermrest/ermrest_config.json
           sudo chmod og+rx /home/ermresolve
+          sudo make deploy
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
