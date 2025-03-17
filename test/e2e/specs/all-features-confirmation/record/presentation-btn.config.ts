@@ -8,6 +8,7 @@ export default getConfig({
     'presentation.spec.ts',
     'create-btn.spec.ts',
     'delete-btn.spec.ts',
-    'edit-btn.spec.ts'
+    'edit-btn.spec.ts',
+    'related-table-actions.spec.ts',
   ]
 });

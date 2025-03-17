@@ -19,7 +19,7 @@ export default class FlowControl {
   logObject: LogObjectType | undefined;
   logAppMode: string | undefined;
 
-  constructor(
+constructor(
     logInfo: {
       logObject?: LogObjectType,
       logStack: any,

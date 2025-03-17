@@ -34,7 +34,6 @@ import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
