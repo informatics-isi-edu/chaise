@@ -111,9 +111,9 @@ jobs:
           echo "ls output"
           ls -la /home/deriva/conf.d/export/
           echo "$DERIVA_WEB_EXPORT_CONIFG"
-          echo -n "$DERIVA_WEB_EXPORT_CONIFG" > /home/deriva/conf.d/export/export_config.json
-          sudo chmod og+rx /home/deriva/conf.d/export/export_config.json
+          sudo echo -n "$DERIVA_WEB_EXPORT_CONIFG" > /home/deriva/conf.d/export/export_config.json
           echo "file is here"
+          ls -la /home/deriva/conf.d/export/
           cat /home/deriva/conf.d/export/export_config.json
         env:
           DERIVA_WEB_EXPORT_CONIFG: ${{vars.DERIVA_WEB_EXPORT_CONIFG}}
