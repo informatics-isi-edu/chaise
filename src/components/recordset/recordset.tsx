@@ -25,8 +25,12 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
 import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogActions, LogObjectType, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  FacetCheckBoxRow, RecordsetConfig,
+  RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src/models/events';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -34,7 +38,6 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -100,7 +103,7 @@ type RecordsetInnerProps = {
   initialReference: any,
   config: RecordsetConfig,
   logInfo: {
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string
@@ -194,6 +197,11 @@ const RecordsetInner = ({
    * used to figure out if we need to update the page after edit request or not
    */
   const editRequestIsDone = useRef(false);
+  /**
+   * used to figure out if we need to update the page after edit request resulted in delete
+   * (users can delete the row from the recordedit page)
+   */
+  const editRequestResultedInDelete = useRef(false);
 
   /**
    * to make sure we're running the setup (following useEffect) only once
@@ -399,10 +407,16 @@ const RecordsetInner = ({
 
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
+
+    const channelName = `chaise-${ConfigService.contextHeaderParams.cid}-${ConfigService.contextHeaderParams.pid}`;
+    const channel = new BroadcastChannel(channelName);
+    channel.onmessage = onMessageRecived;
+
     return () => {
       windowRef.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
       windowRef.removeEventListener('focus', onFocus);
+      channel.close();
     };
   }, [update]);
 
@@ -446,24 +460,29 @@ const RecordsetInner = ({
     let completed = 0;
     const addReqs = addRecordRequests ? addRecordRequests.current : {};
     for (const id in addReqs) {
-      if (CookieService.checkIfCookieExists(id)) {
+      if (addRecordRequests.current[id].completed) {
         // remove it from the captured requests
         delete addRecordRequests.current[id];
-        // remove the cookie
-        CookieService.deleteCookie(id);
         completed++;
       }
     }
 
     // see if the edit request is done or not
-    const updateDone = editRequestIsDone && editRequestIsDone.current;
+    const updateDone = editRequestIsDone.current;
+    const updateResultedInDelete = editRequestResultedInDelete.current;
 
     // call flow-control if the create or edit requests are done
-    if (completed > 0 || updateDone) {
-      const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
+    if (completed > 0 || updateDone || updateResultedInDelete) {
+      let cause = LogReloadCauses.ENTITY_DELETE;
+      if (updateDone) {
+        cause = LogReloadCauses.ENTITY_UPDATE;
+      } else if (completed > 0) {
+        cause = LogReloadCauses.ENTITY_CREATE
+      }
 
       // clear the value
       editRequestIsDone.current = false;
+      editRequestResultedInDelete.current = false;
 
       update({ updateResult: true, updateFacets: true, updateCount: true }, null, { cause, lastActiveFacet: -1 });
     }
@@ -475,15 +494,29 @@ const RecordsetInner = ({
   const onAddIntend = ((event: CustomEvent) => {
     const id = event.detail.id;
     if (typeof id !== 'string') return;
-    addRecordRequests.current[id] = 1;
+    addRecordRequests.current[id] = { completed: false };
   }) as EventListener;
 
   /**
-   * The callback that recoredit app expects and calls after edit is done.
+   * the listener for the messages recived from recordedit.
    */
-  windowRef.updated = () => {
-    editRequestIsDone.current = true;
-  };
+  const onMessageRecived = (event: MessageEvent<RecordeditNotifyEventType>) => {
+    const eventType = event.data.type;
+    const id = event.data.id;
+    switch (eventType) {
+      case RecordeditNotifyActions.CREATE:
+        if (id && !!addRecordRequests.current[id]) {
+          addRecordRequests.current[id].completed = true;
+        }
+        break;
+      case RecordeditNotifyActions.EDIT:
+        editRequestIsDone.current = true;
+        break;
+      case RecordeditNotifyActions.DELETE:
+        editRequestResultedInDelete.current = true;
+        break;
+    }
+  }
 
   /**
    * call the update function

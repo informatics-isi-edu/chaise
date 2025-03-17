@@ -1,9 +1,14 @@
+// components
+import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
+
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
+
+// utils
 import { SavedQuery } from '@isrd-isi-edu/chaise/src/utils/config-utils';
-import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 export type RecordsetProviderGetDisabledTuples = (
   page: any, pageLimit: number, logStack: any,
@@ -17,7 +22,7 @@ export type RecordsetProps = {
   initialReference: any,
   config: RecordsetConfig,
   logInfo: {
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string

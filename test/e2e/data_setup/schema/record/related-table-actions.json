@@ -1,0 +1,58 @@
+{
+  "schema_name": "related-table-actions",
+  "tables": {
+    "main": {
+      "kind": "table",
+      "table_name": "main",
+      "keys": [{"unique_columns": ["id"]}],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {"typename": "text"}
+        }
+      ]
+    }
+    ,
+    "inbound1": {
+      "kind": "table",
+      "table_name": "inbound1",
+      "keys": [{"unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [["related-table-actions", "inbound1_to_main_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "related-table-actions",
+              "table_name": "inbound1",
+              "column_name": "fk1_col"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "related-table-actions",
+              "table_name": "main",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "text_col",
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "fk1_col",
+          "nullok": true,
+          "type": {"typename": "text"}
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,8 @@
+import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   RecordsetProviderGetDisabledTuples, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
+
 
 export enum appModes {
   COPY = 'copy',
@@ -26,7 +28,7 @@ export type RecordeditProps = {
    */
   logInfo: {
     logAppMode: string;
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   },

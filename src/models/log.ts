@@ -257,3 +257,31 @@ export enum LogReloadCauses {
   SORT= 'sort', // sort changed
   SEARCH_BOX= 'search-box' // search box value changed
 }
+
+/**
+ * the object
+ */
+export type LogObjectType = {
+  /**
+   * the cid of the parent page
+   */
+  pcid?: string,
+  /**
+   * the pid of the parent page
+   */
+  ppid?: string,
+  /**
+   * the parent action that resulted in this page
+   */
+  paction?: string,
+  /**
+   * whether the url is using query parameter instead of hash
+   */
+  cqp?: number,
+  /**
+   * only applied to recordset page
+   * the rid of the saved query
+   */
+  sq_rid?: string
+
+};

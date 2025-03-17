@@ -14,7 +14,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 // models
 import { appModes, RecordeditDisplayMode, RecordeditProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
@@ -55,7 +55,7 @@ const RecordeditApp = (): JSX.Element => {
     if (setupStarted.current) return;
     setupStarted.current = true;
 
-    const logObject: any = {};
+    const logObject: LogObjectType = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;

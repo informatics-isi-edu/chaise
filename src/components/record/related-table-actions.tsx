@@ -329,7 +329,6 @@ const RelatedTableActions = ({
     );
 
     const logInfo = {
-      logObject: null,
       logStack: getRecordLogStack(stackElement),
       logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
     };
@@ -486,7 +485,6 @@ const RelatedTableActions = ({
     );
 
     const logInfo = {
-      logObject: null,
       logStack: getRecordLogStack(stackElement),
       logStackPath: LogService.getStackPath(null, LogStackPaths.UNLINK_PB_POPUP),
     };

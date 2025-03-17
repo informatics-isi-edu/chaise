@@ -236,7 +236,7 @@ export const HELP_PAGES : {
     location: 'chaise/facet-panel',
     isComponent: false
   }
-}
+};
 
 // NOTE: this should be added to windowRef similar to "isSafari" if this check is needed elsewhere
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);
