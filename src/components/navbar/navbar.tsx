@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 
-import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState, type JSX, } from 'react';
 
 // components
 import Nav from 'react-bootstrap/Nav';

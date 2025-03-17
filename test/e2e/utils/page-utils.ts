@@ -48,6 +48,8 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
 /**
  * click on the given link and return the opened page instance.
  *
+ * @param forceNewTab setting this to true, will ensure "middle clicking" instead of left click.
+ *
  * Example:
  *
  * const newPage = await clickNewTabLink(someButton, context);
@@ -56,10 +58,11 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
  *
  * await newPage.close();
  */
-export async function clickNewTabLink(locator: Locator) {
+export async function clickNewTabLink(locator: Locator, forceNewTab?: boolean) {
   const pagePromise = locator.page().context().waitForEvent('page');
-  await locator.click();
+  await locator.click(forceNewTab ? {'button': 'middle'} : undefined);
   const newPage = await pagePromise;
+  await newPage.bringToFront();
   await newPage.waitForLoadState();
   return newPage;
 }

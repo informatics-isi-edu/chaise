@@ -1,4 +1,4 @@
-import { MouseEvent, useLayoutEffect, useRef, useState } from 'react';
+import { MouseEvent, useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -329,7 +329,6 @@ const RelatedTableActions = ({
     );
 
     const logInfo = {
-      logObject: null,
       logStack: getRecordLogStack(stackElement),
       logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
     };
@@ -486,7 +485,6 @@ const RelatedTableActions = ({
     );
 
     const logInfo = {
-      logObject: null,
       logStack: getRecordLogStack(stackElement),
       logStackPath: LogService.getStackPath(null, LogStackPaths.UNLINK_PB_POPUP),
     };

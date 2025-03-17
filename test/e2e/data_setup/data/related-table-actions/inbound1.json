@@ -1,0 +1,4 @@
+[
+  {"id": "1", "text_col": "one", "fk1_col": "1"},
+  {"id": "2", "text_col": "two", "fk1_col": "1"}
+]

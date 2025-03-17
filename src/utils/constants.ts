@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu'
+  'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
 ];
 
 /**
@@ -80,7 +80,8 @@ export const DEFAULT_CHAISE_CONFIG = {
       show: [],
       enable: []
     }
-  }
+  },
+  asciiTextValidation: false
 };
 
 export const dataFormats = {
@@ -235,7 +236,7 @@ export const HELP_PAGES : {
     location: 'chaise/facet-panel',
     isComponent: false
   }
-}
+};
 
 // NOTE: this should be added to windowRef similar to "isSafari" if this check is needed elsewhere
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(windowRef.navigator.userAgent);

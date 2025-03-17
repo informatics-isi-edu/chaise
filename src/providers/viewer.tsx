@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -9,7 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { CustomError, DifferentUserConflictError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { DisabledRow } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -151,7 +151,7 @@ type ViewerProviderProps = {
   queryParams: any;
   reference: any;
   logInfo: {
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   }
@@ -249,7 +249,7 @@ export default function ViewerProvider({
   } | null>(null)
 
   // passed to osd-viewer
-  const osdViewerParameters = useRef<any>();
+  const osdViewerParameters = useRef<any>({});
 
   /**
    * whether the main image is loaded or not.
@@ -297,7 +297,7 @@ export default function ViewerProvider({
       hasAnnotationQueryParam = true;
     }
 
-    const logParams = logInfo.logObject ? logInfo.logObject : {};
+    const logParams : any = logInfo.logObject ? logInfo.logObject : {};
     logParams.action = LogService.getActionString(LogActions.LOAD, logInfo.logStackPath);
     logParams.stack = logInfo.logStack;
 

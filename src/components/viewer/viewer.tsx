@@ -14,12 +14,11 @@ import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useViewer from '@isrd-isi-edu/chaise/src/hooks/viewer';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { ViewerProps, ViewerZoomFunction } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { ViewerProps } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
@@ -122,7 +121,7 @@ const ViewerInner = ({
 
   const panelClassName = !hideAnnotationSidebar ? 'open-panel' : 'close-panel';
 
-  const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement>) => (
+  const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement | null>) => (
     <div
       className={`side-panel-resizable resizable ${panelClassName}`}
       ref={leftRef}

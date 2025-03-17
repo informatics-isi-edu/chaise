@@ -3,6 +3,8 @@ import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wra
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
+import type { JSX } from 'react';
+
 type FilterChicletIdentifier = 'filters' | 'cfacets' | number;
 type FilterChicletProps = {
   /**

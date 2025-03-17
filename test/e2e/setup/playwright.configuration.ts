@@ -33,9 +33,9 @@ const getConfig = (options: TestOptions) => {
     testMatch: options.testMatch ? options.testMatch : /.*\.spec\.ts/,
 
     // increase the default timeout
-    timeout: 60 * 1000,
+    timeout: 60_000,
     expect: {
-      timeout: 15 * 1000
+      timeout: 15_000
     },
 
     // Look for test files in the "tests" directory, relative to this configuration file.

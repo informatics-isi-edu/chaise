@@ -18,14 +18,15 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src/models/events';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -33,7 +34,6 @@ import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -68,7 +68,7 @@ export type RecordProps = {
     /**
      * the object that will be logged with the first request
      */
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string
@@ -85,7 +85,8 @@ const Record = ({
     <AlertsProvider>
       <RecordProvider reference={reference} logInfo={logInfo}>
         <RecordInner
-          parentContainer={parentContainer} scrollToDisplayname={scrollToDisplayname}
+          parentContainer={parentContainer}
+          scrollToDisplayname={scrollToDisplayname}
         />
       </RecordProvider>
     </AlertsProvider>
@@ -246,6 +247,10 @@ const RecordInner = ({
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
 
+    const channelName = `chaise-${ConfigService.contextHeaderParams.cid}-${ConfigService.contextHeaderParams.pid}`;
+    const channel = new BroadcastChannel(channelName);
+    channel.onmessage = onMessageRecived;
+
     windowRef.removeEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
     windowRef.addEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
     return () => {
@@ -253,6 +258,7 @@ const RecordInner = ({
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
       windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
+      channel.close();
       windowRef.removeEventListener(CUSTOM_EVENTS.RELATED_TABLE_PAGING_SUCCESS, onPagingSuccess);
     };
   }, [updateRecordPage]);
@@ -299,21 +305,27 @@ const RecordInner = ({
       });
     };
 
-    //find the completed edit requests
+    //find the completed or deleted edit requests
     for (const id in editRecordRequests.current) {
       if (editRecordRequests.current[id].completed) {
         addToChangedContainers(editRecordRequests.current[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
         delete editRecordRequests.current[id];
       }
+      else if (editRecordRequests.current[id].deleted) {
+        addToChangedContainers(editRecordRequests.current[id], [uc.RELATED_DELETE, uc.RELATED_INLINE_DELETE]);
+        delete editRecordRequests.current[id];
+      }
+      else if (editRecordRequests.current[id].partiallyDeleted) {
+        addToChangedContainers(editRecordRequests.current[id], [uc.RELATED_DELETE, uc.RELATED_INLINE_DELETE]);
+        // the edit request could still be completed.
+      }
     }
 
     // find the completed create requests
     for (const id in addRecordRequests.current) {
-      if (CookieService.checkIfCookieExists(id)) { // add request has been completed
+      if (addRecordRequests.current[id].completed) {
         addToChangedContainers(addRecordRequests.current[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
-
-        // remove cookie and request
-        CookieService.deleteCookie(id);
+        // remove the request
         delete addRecordRequests.current[id];
       }
     }
@@ -333,7 +345,7 @@ const RecordInner = ({
     if (typeof id !== 'string' || !isObjectAndNotNull(containerDetails)) {
       return;
     }
-    addRecordRequests.current[id] = containerDetails;
+    addRecordRequests.current[id] = { ...containerDetails, completed: false };
   }) as EventListener;
 
   /**
@@ -359,11 +371,42 @@ const RecordInner = ({
   }) as EventListener;
 
   /**
-   * The callback that recoredit app expects and calls after edit is done.
+   * the listener for the messages recived from recordedit.
    */
-  windowRef.updated = (id: string) => {
-    if (!!editRecordRequests.current[id]) {
-      editRecordRequests.current[id].completed = true;
+  const onMessageRecived = (event: MessageEvent<RecordeditNotifyEventType>) => {
+    const eventType = event.data.type;
+    const id = event.data.id;
+    switch (eventType) {
+      case RecordeditNotifyActions.CREATE:
+        if (id && !!addRecordRequests.current[id]) {
+          addRecordRequests.current[id].completed = true;
+        }
+        break;
+      case RecordeditNotifyActions.EDIT:
+        if (id && !!editRecordRequests.current[id]) {
+          editRecordRequests.current[id].completed = true;
+        } else {
+          // if users opened the bulk edit link in a new tab, we don't have the id information
+          editRecordRequests.current[-1] = { index: -1, isInline: false, completed: true };
+        }
+        break;
+      case RecordeditNotifyActions.DELETE:
+        const isPartial = event.data.details?.partial;
+        if (id && !!editRecordRequests.current[id]) {
+          if (isPartial) {
+            editRecordRequests.current[id].partiallyDeleted = true;
+          } else {
+            editRecordRequests.current[id].deleted = true;
+          }
+        } else {
+          // if users opened the bulk edit link in a new tab, we don't have the id information
+          editRecordRequests.current[-1] = {
+            index: -1, isInline: false,
+            ...(isPartial && { deletePartial: true }),
+            ...(!isPartial && { deleted: true })
+          };
+        }
+        break;
     }
   }
 
@@ -633,7 +676,7 @@ const RecordInner = ({
   }
 
   // Function to render the full table of contents
-  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
+  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement | null>) => (
     <div
       id='record-side-pan'
       className={`side-panel-resizable record-toc resizable small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'

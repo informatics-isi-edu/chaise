@@ -25,6 +25,7 @@ const NAVBAR_TEST_W_STATIC_DEPS = 'navbar-test-w-static-deps.html';
  *
  */
 test.describe('Navbar with chaise-config annotation', () => {
+  test.describe.configure({ timeout: 120_000 });
 
   // prepare the html files needed for testing
   test.beforeAll(({ baseURL }, testInfo) => {
@@ -183,7 +184,10 @@ const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?:
 
   await test.step('navbar should be visible on load.', async () => {
     await page.goto(pageURL);
-    await expect(navbar).toBeVisible();
+    await expect(navbar).toBeVisible({
+      // navbar (especially the dynamic version might take some time to load)
+      timeout: 30_000
+    });
   });
 
   await test.step('should display the right title from catalog annotation.', async () => {

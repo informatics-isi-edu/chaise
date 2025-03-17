@@ -14,6 +14,7 @@ Each chaise config property below can be defined in each place that we allow for
 Notes: as the `configRules` are checked, properties set in step 2 will be overridden by properties defined in step 3 that have the same name. This allows the server wide configuration to be a base configuration for the chaise apps and allows for further configuration based on a combination of hostname and catalog id. This applies for step 4 and 5 as well when reading the values from the catalog annotation.
 
 If a property appears in the same configuration twice, the property defined later will be used.
+
 ## Table of Contents:
  * [General Configuration:](#general-configuration)
    * [ermrestLocation](#ermrestlocation)
@@ -47,6 +48,8 @@ If a property appears in the same configuration twice, the property defined late
    * [facetPanelDisplay](#facetpaneldisplay)
    * [templating](#templating)
    * [hideRecordeditLeaveAlert](#hiderecordeditleavealert)
+ * [Data Entry Configuration:](#data-entry-configuration)
+   * [asciiTextValidation](#asciitextvalidation)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportServicePath](#exportservicepath)
@@ -68,8 +71,8 @@ If a property appears in the same configuration twice, the property defined late
    * [footerMarkdown](#footermarkdown)
    * [assetDownloadPolicyURL](#assetdownloadpolicyurl)
 
-### General Configuration:
- #### ermrestLocation
+## General Configuration:
+ ### ermrestLocation
  The location of the ERMrest service.
 
  > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
@@ -80,7 +83,7 @@ If a property appears in the same configuration twice, the property defined late
      ermrestLocation: "www.isrd.isi.edu/ermrest"
      ```
 
- #### defaultCatalog
+ ### defaultCatalog
  Use this parameter to specify which catalog Chaise shows by default.
 
  > :warning: This property is only allowed in `chaise-config.js` file. Defining this on the catalog annotation has no effect.
@@ -95,7 +98,7 @@ If a property appears in the same configuration twice, the property defined late
      defaultCatalog: "1"
      ```
 
- #### defaultTable
+ ### defaultTable
  Use this parameter to specify which table Chaise shows by default for the current catalog.
    - Type: Object
    - General syntax:
@@ -113,8 +116,8 @@ If a property appears in the same configuration twice, the property defined late
      }
      ```
 
-### Navbar Configuration:
- #### headTitle
+## Navbar Configuration:
+ ### headTitle
  The application name to display in the browser tab and browser history.
    - Type: String
    - Default behavior:	"Chaise" will be used
@@ -123,7 +126,7 @@ If a property appears in the same configuration twice, the property defined late
      headTitle: "Chaise development"
      ```
 
- #### navbarBanner
+ ### navbarBanner
  Use this parameter to define banners that will be displayed on top or below the banner.
    - Type: Object or array of objects.
    - Default behavior:	no banner will be shown
@@ -171,7 +174,7 @@ If a property appears in the same configuration twice, the property defined late
        markdownPattern: "Let us know how you use and what you think of this data repository. [Please fill out the survey](https://survey.com)!"
      }
      ```
- #### navbarBrand
+ ### navbarBrand
  The URL for the branding logo in the top navigation bar.
    - Type: String - URL
    - Sample syntax:
@@ -179,7 +182,7 @@ If a property appears in the same configuration twice, the property defined late
      navbarBrand: "/"
      ```
 
- #### navbarBrandText
+ ### navbarBrandText
  The value to be displayed in the navigation bar.
    - Type: String
    - Default behavior:	"Chaise" will be used
@@ -188,7 +191,7 @@ If a property appears in the same configuration twice, the property defined late
      navbarBrandText: "Chaise development"
      ```
 
- #### navbarBrandImage
+ ### navbarBrandImage
  The URL for an image to be displayed in the navigation bar.
    - Type: String - URL
    - Sample syntax:
@@ -196,7 +199,7 @@ If a property appears in the same configuration twice, the property defined late
      navbarBrandImage: "/path/to/logo.png"
      ```
 
- #### navbarMenu
+ ### navbarMenu
  Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Consult the `chaise-config-sample.js` file for more details about format.
    - Type: Object
    - General syntax:
@@ -274,8 +277,8 @@ If a property appears in the same configuration twice, the property defined late
      }
      ```
 
-### Login Configuration:
- #### logoutURL
+## Login Configuration:
+ ### logoutURL
  The URL to the logout page, root if not defined.
    - Type: String - URL
    - Default behavior: assumed that the logout page is at the root
@@ -284,7 +287,7 @@ If a property appears in the same configuration twice, the property defined late
      logoutURL: "/"
      ```
 
- #### dataBrowser
+ ### dataBrowser
  The URL to continue after a logout. Also used when an error is thrown and we don't know where to redirect the user.
    - Type: String - URL
    - Default behavior: navigate the user to the root of the server (homepage) on logout
@@ -293,7 +296,7 @@ If a property appears in the same configuration twice, the property defined late
      dataBrowser: "/"
      ```
 
- #### signUpURL
+ ### signUpURL
  Use this parameter to specify what the "Sign Up" link in the navbar should link to. If `signUpURL` is unspecified, the navbar will not display a "Sign Up" link.
    - Type: String - URL
    - Default behavior: no signup link will be shown
@@ -302,7 +305,7 @@ If a property appears in the same configuration twice, the property defined late
      signUpURL: "<your-url>"
      ```
 
- #### termsAndConditionsConfig
+ ### termsAndConditionsConfig
  Use this property to enforce joining a globus group before continuing use of the application as a logged in user. This config property defaults to `null` when undefined. If the property is not an object containing all of the above 3 properties, this will be set to `null`.
    - Type: Object
    - Default behavior: group inclusion check won't be enforced to continue login
@@ -327,7 +330,7 @@ If a property appears in the same configuration twice, the property defined late
      }
      ```
 
- #### loggedInMenu
+ ### loggedInMenu
  Use this parameter to customize the menu items displayed in the navbar under the login dropdown after a user has logged into the system by supplying an object with your links and/or dropdown menus.
    - Type: Object
    - Default behavior: The user's full name will be shown. Upon clicking, a dropdown menu will appear with a "My Profile" link that opens a modal popup to see information about the logged in user. The other dropdown menu option will be "Logout".
@@ -381,8 +384,8 @@ If a property appears in the same configuration twice, the property defined late
      }
      ```
 
-### Display Configuration:
- #### customCSS
+## Display Configuration:
+ ### customCSS
  The URL for a style sheet file to be applied to the application header (`<head>` tag). This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's `/assets/css/chaise.css` in the rbk-www repo). More information can be found [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/custom-css.md).
    - Type: String - URL
    - Sample syntax:
@@ -390,7 +393,7 @@ If a property appears in the same configuration twice, the property defined late
      customCSS: "/assets/css/chaise.css"
      ```
 
- #### maxRecordsetRowHeight
+ ### maxRecordsetRowHeight
  Set this property to `false` if you don't want content to be clipped in tables else set it to a number which represents the maximum row height when not expanded.
    - Type: Boolean || Number
    - Default behavior: 160 will be used if no value is supplied
@@ -399,7 +402,7 @@ If a property appears in the same configuration twice, the property defined late
      maxRecordsetRowHeight: 200
      ```
 
- #### confirmDelete
+ ### confirmDelete
  If `false`, the user will not be prompted by a modal when deleting an item
    - Type: Boolean
    - Default behavior: user will be prompted with a dialog to confirm they want to delete
@@ -408,7 +411,7 @@ If a property appears in the same configuration twice, the property defined late
      confirmDelete: false
      ```
 
- #### editRecord
+ ### editRecord
 If present and equal to `false`, the chaise pages will hide all the edit and create buttons regardless of user ACLs. Chaise will also disallow users from accessing recordedit app in this case.
    - Type: Boolean
    - Default behavior: Allows for inserting and editing records through the recordedit page if the user has proper ACLs.
@@ -417,7 +420,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      editRecord: false
      ```
 
- #### deleteRecord
+ ### deleteRecord
  If present and equal to `false`, the chaise pages will hide all the delete buttons regardless of user ACLs. Otherwise chaise will consult the user ACL for conditonally hiding or showing delete buttons.
    - Type: Boolean
    - Default behavior: Chaise pages display delete buttons based on user ACLs.
@@ -426,7 +429,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      deleteRecord: false
      ```
 
- #### allowErrorDismissal
+ ### allowErrorDismissal
  Set this property to `true` if you want to allow dismissable error message dialogs. This property when defined as `true` will cause a degraded UX experience that will prevent future errors from being thrown and other functionality might not behave as expected. This should ONLY be used in development environments.
    - Type: Boolean
    - Default behavior: All terminal error message display an error message dialog that is not dismissable
@@ -435,7 +438,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      allowErrorDismissal: true
      ```
 
- #### showWriterEmptyRelatedOnLoad
+ ### showWriterEmptyRelatedOnLoad
  This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics.
    - Type: Boolean
    - Default behavior: the heuristics to show empty related tables based on the user being able to write to at least one of them will be used
@@ -444,7 +447,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      showWriterEmptyRelatedOnLoad: false
      ```
 
- #### hideTableOfContents
+ ### hideTableOfContents
  If true, hides the table of contents panel on the record app.
    - Type: Boolean
    - Default behavior:  table of contents will be visible
@@ -453,7 +456,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      hideTableOfContents: true
      ```
 
- #### disableExternalLinkModal
+ ### disableExternalLinkModal
  Set this to true to disable the external link notification.
    - Type: Boolean
    - Default behavior: a notification that you are navigating to an external page in 5 seconds will show
@@ -462,7 +465,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      disableExternalLinkModal: true
      ```
 
- #### hideGoToRID
+ ### hideGoToRID
  Use this property to hide the RID search box in the navbar. The RID search box is present in the navbar when `resolverImplicitCatalog !== null` (meaning the resolver is in use) and `hideGoToRID !== true`
    - Type: Boolean
    - Default behavior: the RID search box will show in the navbar to the left of the login button or the logged in user information
@@ -471,7 +474,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      hideGoToRID: true
      ```
 
- #### facetPanelDisplay
+ ### facetPanelDisplay
  Use this property to change the settings related to the facet panel.
 
    - Type: Object
@@ -500,7 +503,7 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      }
      ```
 
-#### templating
+### templating
 Use this property to change the default engine that is used for templating throughout chaise and ermrestjs.
    - Type: Object
    - Default behavior: `mustache` will be used as the default template engine.
@@ -519,7 +522,7 @@ Use this property to change the default engine that is used for templating throu
      }
      ```
 
-#### hideRecordeditLeaveAlert
+### hideRecordeditLeaveAlert
 Use this property to avoid recordedit app from showing an alert when users are trying to navigate away.
    - Type: Boolean
    - Default behavior: Recordedit app will warn users when they are about to navigate away from recordedit to preserve the editted content.
@@ -528,8 +531,23 @@ Use this property to avoid recordedit app from showing an alert when users are t
      hideRecordeditLeaveAlert: true
      ```
 
-### Export Configuration:
- #### disableDefaultExport
+## Data Entry Configuration:
+
+### asciiTextValidation
+
+Use this proprety to ensure users can only use [ASCII characters](https://en.wikipedia.org/wiki/ASCII#Table_of_codes) while entering text values in the recordedit app.
+
+> :warning: This is just a client-side validation and only affects the inputs in the recordedit app.
+
+- Type: Boolean
+ - Default behavior: Users can use any characters while entering values in the recordedit app.
+ - Sample syntax:
+   ```
+   asciiTextValidation: true
+   ```
+
+## Export Configuration:
+ ### disableDefaultExport
  When the export annotation is missing from table and schema, ermrestjs will use the heuristics to generate a default export template. Set this attribute to `true` to avoid using the heuristics.
    - Type: Boolean
    - Default behavior:  ermrestjs will use the heuristics to generate a default export template
@@ -538,7 +556,7 @@ Use this property to avoid recordedit app from showing an alert when users are t
      disableDefaultExport: true
      ```
 
- #### exportServicePath
+ ### exportServicePath
  You can use this variable to switch between different export services that might be available in the deployment.
    - Type: String
    - Default behavior: "/deriva/export/" will be used as the defailt path
@@ -547,7 +565,7 @@ Use this property to avoid recordedit app from showing an alert when users are t
      exportServicePath: "/deriva/export/"
      ```
 
-#### exportConfigsSubmenu
+### exportConfigsSubmenu
 Use this property to modify the display setting for the "Configurations" submenu in the export menu. This option would allow users to download the raw config file that is used for communicating with export service.
 
 - Type: Object
@@ -566,8 +584,8 @@ Use this property to modify the display setting for the "Configurations" submenu
        - If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default.
        - An empty array (`[]`) will hide the option or disable it for everyone
 
-### Share and Cite Configuration:
- #### resolverImplicitCatalog
+## Share and Cite Configuration:
+ ### resolverImplicitCatalog
  Set to a catalog id, `N`, if your resolver accepts `/id/X` instead of `/id/N/X` and you prefer to share records with this shorter URL. If the property is `null`, the resolver functionality will be turned off and the default permalink will be used. Anything else will be ignored and the default behavior will be applied which is to always use the catalog-qualified form, `/id/N/X`.
    - Type: String || null
    - Default behavior: assume the resolver service uses the catalog-qualified form, `/id/N/X`
@@ -576,7 +594,7 @@ Use this property to modify the display setting for the "Configurations" submenu
      resolverImplicitCatalog: "1"
      ```
 
- #### shareCite
+ ### shareCite
 Use this property to modify the display settings for the "share and cite" button and dialog on Record app.
 
    - Type: Object
@@ -595,8 +613,8 @@ Use this property to modify the display settings for the "share and cite" button
        - If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default.
        - An empty array (`[]`) will hide the button or disable it for everyone.
 
-### System Columns Configuration:
- #### systemColumnsDisplayCompact
+## System Columns Configuration:
+ ### systemColumnsDisplayCompact
  If set to `true`, apply the system columns heuristics when no visible columns list is defined. This will put the RID system column as the first self referencing key column. 'RCB', 'RMB', 'RCT', 'RMT' will be placed at the very end of the list respectively. If set to an array, only system columns in the array will be displayed in the order mentioned earlier. Defining this property as `[]` will hide all system columns. Setting to `false` will fall back to the default behavior. This applies to compact and all subcontexts.
    - Type: Boolean || Array
    - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
@@ -605,7 +623,7 @@ Use this property to modify the display settings for the "share and cite" button
      systemColumnsDisplayCompact: ["RMB", "RMT"]
      ```
 
- #### systemColumnsDisplayDetailed
+ ### systemColumnsDisplayDetailed
  See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the detailed context.
    - Type: Boolean || Array
    - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
@@ -614,7 +632,7 @@ Use this property to modify the display settings for the "share and cite" button
      systemColumnsDisplayDetailed: true
      ```
 
- #### systemColumnsDisplayEntry
+ ### systemColumnsDisplayEntry
  See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the entry contexts.
    - Type: Boolean || Array
    - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
@@ -623,8 +641,8 @@ Use this property to modify the display settings for the "share and cite" button
      systemColumnsDisplayEntry: ["RMT", "RCT"]
      ```
 
-### System Configuration:
- #### internalHosts
+## System Configuration:
+ ### internalHosts
  If external link notification is enabled, Chaise will use this array to determine whether the current host is external. List any hostnames that should be considered internal. If defined, `<current hostname>` will not be automatically added to the list.
    - Type: Array
    - Default behavior: the current hostname will be treated as an internal host
@@ -633,7 +651,7 @@ Use this property to modify the display settings for the "share and cite" button
      internaleHosts: ["dev.rebuildingakidney.org", "dev.gudmap.org"]
      ```
 
- #### includeCanonicalTag
+ ### includeCanonicalTag
  This variable can be used to force chaise to include a tag in the tag that defines the canonical link for each of the entities and other resource pages.
    - Type: Boolean
    - Default behavior: canonical tag will not be included
@@ -642,7 +660,7 @@ Use this property to modify the display settings for the "share and cite" button
      includeCanonicalTag: true
      ```
 
- #### logClientActions
+ ### logClientActions
  Set this to `false` to disable the logging of client side actions which occurs when users interact with the app in ways that don't generate a request to the database.
    - Type: Boolean
    - Default behavior: client actions that don't normally interact with the database will be logged
@@ -651,7 +669,7 @@ Use this property to modify the display settings for the "share and cite" button
      logClientActions: false
      ```
 
- #### configRules
+ ### configRules
  Allows for host specific configuration rules. Each object in the array contains 2 properties, `host` and `config`. `host` is expected to be in the format of a single string value or an array of string values. `host` is being matched against the hostname for the current browser location. `config` mimics the chaise-config properties. All chaise config properties can be defined in this block except this property (`configRules`).
    - Type: Array
    - General syntax:
@@ -684,7 +702,7 @@ Use this property to modify the display settings for the "share and cite" button
      ]
      ```
 
- #### savedQueryConfig
+ ### savedQueryConfig
  Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 4 properties, `catalog`, `schema`, `table`, and `columnNameMapping`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
    - Type: Object
    - Default behavior: the saved query feature will be turned off
@@ -752,8 +770,8 @@ Use this property to modify the display settings for the "share and cite" button
      }
      ```
 
-### Other Configuration:
- #### footerMarkdown
+## Other Configuration:
+ ### footerMarkdown
  If present, it creates a footer at the bottom of the app with the markdown text.
    - Type: String
    - Default behavior: no footer will be shown
@@ -762,7 +780,7 @@ Use this property to modify the display settings for the "share and cite" button
      footerMarkdown: "* Please check [Privacy Policy](/privacy-policy/){target='_blank'}"
      ```
 
- #### assetDownloadPolicyURL
+ ### assetDownloadPolicyURL
  Set this property to the url that points to the download policy for when an asset is fetched but the user is unauthorized to fetch that asset.
    - Type: String - URL
    - Default behavior: no asset policy link will be shown in the error modal

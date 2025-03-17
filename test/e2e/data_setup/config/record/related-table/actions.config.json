@@ -1,15 +1,15 @@
 {
     "catalog": {},
     "schema": {
-        "name": "product-unordered-related-tables-actions",
+        "name": "related-table-actions",
         "createNew": true,
-        "path": "test/e2e/data_setup/schema/record/product-unordered-related-tables-actions.json"
+        "path": "test/e2e/data_setup/schema/record/related-table-actions.json"
     },
     "tables": {
         "createNew": true
     },
     "entities": {
         "createNew": true,
-        "path": "test/e2e/data_setup/data/product"
+        "path": "test/e2e/data_setup/data/related-table-actions"
     }
 }

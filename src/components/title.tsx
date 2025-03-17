@@ -8,6 +8,10 @@ import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from
 
 
 
+import type { JSX } from 'react';
+
+
+
 export type TitleProps = {
   /**
    * The reference object.

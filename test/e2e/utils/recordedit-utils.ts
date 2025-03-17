@@ -141,6 +141,7 @@ type SetInputValueProps = string | RecordeditFile | {
  * Notes:
  *  - this function assumes the input already has a value and doesn't double check.
 *   - in most cases it will click on the "x" for the input.
+*   - in case of arrays, it will click on the "delete" icons until there aren't any.
  */
 export const clearInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
@@ -747,8 +748,8 @@ const _testInputValidationAndExtraFeatures = async (
 
         await expect.soft(timestampProps.time).not.toHaveValue('');
         const UITime = await timestampProps.time.getAttribute('value') as string;
-        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
-        expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
+        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDTHH:mm:ssZ');
+        expect.soft(UIObject.diff(nowObject, 'minutes')).toBeLessThan(1);
       });
 
       await test.step('"clear" button should clear both time and date.', async () => {

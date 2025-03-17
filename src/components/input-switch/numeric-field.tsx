@@ -5,6 +5,8 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 // utils
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
+import type { JSX } from 'react';
+
 const NumericField = (props: InputFieldProps): JSX.Element => {
   const rules = {
     validate: VALIDATE_VALUE_BY_TYPE[props.type]

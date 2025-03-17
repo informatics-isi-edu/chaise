@@ -7,11 +7,49 @@ This document is a summary of code changes in Chaise. This is the vocabulary use
   - `[Fixed]`: bug fixes.
   - `[No changes]` means that Chaise hasn't been changed in the described duration.
 
-# 1//24
+# 1/27/25
+
+- [Added] sticky horizontal scrollbar to recordset tables ([link](https://github.com/informatics-isi-edu/chaise/pull/2564)).
+- [Changed] he default behavior of deleteRecord chaise-config property ([link](https://github.com/informatics-isi-edu/chaise/pull/2582)).
+- [Improved] updated the included version of several dependencies.
+
+# 10/31/24
+
+- [Added] the ability to reorder facets ([link](https://github.com/informatics-isi-edu/chaise/pull/2522))
+- [Changed] link/unlink behaviour to directly apply changes without showing modal or message ([link](https://github.com/informatics-isi-edu/chaise/pull/2523)).
+- [Added] support for showing facet modal on top of another facet modal ([link1](https://github.com/informatics-isi-edu/chaise/pull/2545), [link2](https://github.com/informatics-isi-edu/chaise/pull/2548), [link3](https://github.com/informatics-isi-edu/chaise/pull/2558)).
+- [Added] ability to add "almost pure and binary" related entities ([link](https://github.com/informatics-isi-edu/chaise/pull/2490)).
+- [Improved] updated the included version of several dependencies.
+
+# 7/31/24
+
+- [Fixed] the `defaultTable` chaise-config property support ([link](https://github.com/informatics-isi-edu/chaise/pull/2454)).
+- [Improved] support for array inputs ([link](https://github.com/informatics-isi-edu/chaise/pull/2340)).
+- [Fixed] support for column names with special character ([link1](https://github.com/informatics-isi-edu/chaise/pull/2463), [link2](https://github.com/informatics-isi-edu/chaise/pull/2468), [link3](https://github.com/informatics-isi-edu/chaise/pull/2491)).
+- [Improved] Clicking on next or previous in related entities is now scrolling the page to the top of the table ([link](https://github.com/informatics-isi-edu/chaise/pull/2462)).
+- [Improved] Continue file upload if recordedit hasn't reloaded ([link](https://github.com/informatics-isi-edu/chaise/pull/2457)).
+- [Fixed] Avoid parsing url to find the catalog id on static sites ([link](https://github.com/informatics-isi-edu/chaise/pull/2473)).
+- [Added] null option to range facets ([link](https://github.com/informatics-isi-edu/chaise/pull/2492)).
+- [Improved] updated the included version of several dependencies.
+
+# 4/30/24
+
+  - [Added] support for inline comments in the recordedit app ([link](https://github.com/informatics-isi-edu/chaise/pull/2396))
+  - [Improved] support for `domain_filter` in the select all/some input ([link](https://github.com/informatics-isi-edu/chaise/pull/2400).
+  - [Improved] the delete confirmation modal by providing the list of affected tables and related entities ([link](https://github.com/informatics-isi-edu/chaise/pull/2404)).
+  - [Fixed] the `shareCiteAcls` support([link](https://github.com/informatics-isi-edu/chaise/pull/2409)).
+  - [Fixed] Navbar submenu stays open ([link](https://github.com/informatics-isi-edu/chaise/pull/2407)).
+  - [Improved] allow using scientific notation for float inputs ([link](https://github.com/informatics-isi-edu/chaise/pull/2405)).
+  - [Added] a new submenu to export dropdown to allow downloading the export configuration ([link](https://github.com/informatics-isi-edu/chaise/pull/2413)).
+  - [Fixed] a bug in facet range picker where the zoom in button would not be disabled if min or max were set to 0 ([link](https://github.com/informatics-isi-edu/chaise/commit/679e826f5ed7b96398c44721e5bb031c28f7559b)).
+  - [Improved] updated the included version of several dependencies.
+
+# 1/31/24
   - [Fixed] Recordset might not display all content with "show more" not displayed with images that take a long time to load
-  - [Improved] Recordedit app performance improved
+  - [Improved] Recordedit app performance improved ([link](https://github.com/informatics-isi-edu/chaise/pull/2389).
   - [Added] Show a spinner when adding more forms in recordedit app using the clone button
   - [Changed] Set all input in recordedit app to allow for selecting some (or all) inputs to set a value for
+  - [Added] new property called `externalStyleFiles` to `webpack/app.config.js`.
 
 # 9/12/23
   - [Fixed] Enter does not submit recordedit form
