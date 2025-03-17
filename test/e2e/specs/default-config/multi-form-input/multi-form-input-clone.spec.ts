@@ -46,7 +46,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
     await RecordeditLocators.getSubmitRecordButton(page).click();
 
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
-    await expect.soft(resultset).toBeVisible({ timeout: 30 * 1000 });
+    await expect.soft(resultset).toBeVisible({ timeout: 30_000 });
     await expect.soft(RecordsetLocators.getRows(resultset)).toHaveCount(testParams.max_input_rows + 1);
   });
 
