@@ -112,8 +112,9 @@ jobs:
           sudo make deploy
           echo "env variable:"
           echo "$DERIVA_WEB_EXPORT_CONIFG"
-          sudo su -c 'echo -n "$DERIVA_WEB_EXPORT_CONIFG" > /home/deriva/conf.d/export/export_config.json'
-          ls -la /home/deriva/conf.d/export/
+          echo "file content before changing"
+          sudo cat /home/deriva/conf.d/export/export_config.json
+          sudo su -c 'echo "$DERIVA_WEB_EXPORT_CONIFG" > /home/deriva/conf.d/export/export_config.json'
           echo "file content:"
           sudo cat /home/deriva/conf.d/export/export_config.json
       - name: Install ermresolve
@@ -206,7 +207,7 @@ jobs:
             chaise/har-files/
           retention-days: 30
       - name: Diagnosis after failure
-        if: ${{ failure() }}
+        if: always()
         run: |
           sudo ls -lR /etc/apache2
           sudo ls -lR /var/run/apache2
