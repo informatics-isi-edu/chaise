@@ -110,11 +110,7 @@ jobs:
           sudo make install
           sudo useradd -m -g apache -r deriva
           sudo make deploy
-          echo "file content before changing"
-          sudo cat /home/deriva/conf.d/export/export_config.json
           echo "$DERIVA_WEB_EXPORT_CONIFG" | sudo tee /home/deriva/conf.d/export/export_config.json
-          echo "file content:"
-          sudo cat /home/deriva/conf.d/export/export_config.json
       - name: Install ermresolve
         run: |
           git clone https://github.com/informatics-isi-edu/ermresolve.git ermresolve
@@ -150,52 +146,42 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Run record presentation
+      - name: Run all features test spec
+        id: test-all-features
         continue-on-error: true
         run: |
           cd chaise
-          npx playwright test --workers=1 --project=chromium --config test/e2e/specs/all-features-confirmation/record/presentation-btn.config.ts
-      - name: Run recordset presentation
+          make testallfeatures
+      - name: Run all features confirmation test spec
+        id: test-all-features-confirmation
         continue-on-error: true
         run: |
           cd chaise
-          npx playwright test --workers=1 --project=chromium --config test/e2e/specs/all-features-confirmation/recordset/presentation.config.ts
-      # - name: Run all features test spec
-      #   id: test-all-features
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeatures
-      # - name: Run all features confirmation test spec
-      #   id: test-all-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeaturesconfirmation
-      # - name: Run default config test spec
-      #   id: test-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig
-      # - name: Run delete prohibited test spec
-      #   id: test-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
-      # - name: Check on all features test spec
-      #   if: always() && steps.test-all-features.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on all features confirmation test spec
-      #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec
-      #   if: always() && steps.test-default-config.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited test spec
-      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+          make testallfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
+      - name: Check on all features test spec
+        if: always() && steps.test-all-features.outcome != 'success'
+        run: exit 1
+      - name: Check on all features confirmation test spec
+        if: always() && steps.test-all-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -205,7 +191,7 @@ jobs:
             chaise/har-files/
           retention-days: 30
       - name: Diagnosis after failure
-        if: always()
+        if: ${{ failure() }}
         run: |
           sudo ls -lR /etc/apache2
           sudo ls -lR /var/run/apache2
