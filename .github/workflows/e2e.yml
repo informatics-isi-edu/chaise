@@ -114,7 +114,7 @@ jobs:
           echo "$DERIVA_WEB_EXPORT_CONIFG"
           echo "file content before changing"
           sudo cat /home/deriva/conf.d/export/export_config.json
-          sudo su -c 'echo "$DERIVA_WEB_EXPORT_CONIFG" > /home/deriva/conf.d/export/export_config.json'
+          echo "$DERIVA_WEB_EXPORT_CONIFG" | sudo tee -a /home/deriva/conf.d/export/export_config.json
           echo "file content:"
           sudo cat /home/deriva/conf.d/export/export_config.json
       - name: Install ermresolve
