@@ -58,7 +58,7 @@ const getConfig = (options: TestOptions) => {
     // Reporter to use
     reporter: process.env.CI ? [
       ['html', { open: 'never', outputFolder: reporterFolder }],
-      ['list', { printSteps: true }]
+      ['github']
     ] : [
       ['html', { open: 'never', outputFolder: reporterFolder }],
       ['list', { printSteps: true }]
