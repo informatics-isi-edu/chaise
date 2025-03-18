@@ -107,6 +107,13 @@ const getConfig = (options: TestOptions) => {
           ...extraBrowserParams,
           permissions: ['clipboard-read', 'clipboard-write'],
           channel: 'chromium', // https://github.com/microsoft/playwright/issues/33566
+          contextOptions: {
+            recordHar: {
+              path: `./har-files/${options.testName}.har`,
+              // without the following the HAR file would be too large and in some cases would throw "RangeError: Invalid string length"
+              content: 'omit'
+            }
+          }
         },
       },
       // {

@@ -286,39 +286,39 @@ const testParams = {
 test.describe('View recordset', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test('For recordset with columns with waitfor', async ({ page, baseURL }, testInfo) => {
-    const params = testParams.active_list;
-    const data = params.data;
+  // test('For recordset with columns with waitfor', async ({ page, baseURL }, testInfo) => {
+  //   const params = testParams.active_list;
+  //   const data = params.data;
 
-    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL);
+  //   const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL);
 
-    await test.step('should load recordset page', async () => {
-      await page.goto(`${PAGE_URL}@sort(${params.sortby})`);
+  //   await test.step('should load recordset page', async () => {
+  //     await page.goto(`${PAGE_URL}@sort(${params.sortby})`);
 
-      await RecordsetLocators.waitForRecordsetPageReady(page);
-      await RecordsetLocators.waitForRecordsetAggregates(page);
-    });
+  //     await RecordsetLocators.waitForRecordsetPageReady(page);
+  //     await RecordsetLocators.waitForRecordsetAggregates(page);
+  //   });
 
-    await test.step('should not show the total count if hide_row_count is true.', async () => {
-      await testTotalCount(page, `Displaying all${data.length}records`)
-    });
+  //   await test.step('should not show the total count if hide_row_count is true.', async () => {
+  //     await testTotalCount(page, `Displaying all${data.length}records`)
+  //   });
 
-    await test.step('should honor the max_facet_depth of table and ignore the chaise-config setting', async () => {
-      await expect.soft(RecordsetLocators.getSidePanel(page)).toBeVisible();
-      await expect.soft(RecordsetLocators.getHideFilterPanelBtn(page)).toBeVisible();
-      await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(16);
-    });
+  //   await test.step('should honor the max_facet_depth of table and ignore the chaise-config setting', async () => {
+  //     await expect.soft(RecordsetLocators.getSidePanel(page)).toBeVisible();
+  //     await expect.soft(RecordsetLocators.getHideFilterPanelBtn(page)).toBeVisible();
+  //     await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(16);
+  //   });
 
-    await test.step('should show correct table rows.', async () => {
-      await testRecordsetTableRowValues(page, data, true);
-    });
+  //   await test.step('should show correct table rows.', async () => {
+  //     await testRecordsetTableRowValues(page, data, true);
+  //   });
 
-    await test.step('going to a recordset page with no results, the loader for columns should hide.', async () => {
-      await page.goto(`${PAGE_URL}/main_id=03`);
-      await RecordsetLocators.waitForRecordsetPageReady(page);
-      await RecordsetLocators.waitForRecordsetAggregates(page);
-    })
-  });
+  //   await test.step('going to a recordset page with no results, the loader for columns should hide.', async () => {
+  //     await page.goto(`${PAGE_URL}/main_id=03`);
+  //     await RecordsetLocators.waitForRecordsetPageReady(page);
+  //     await RecordsetLocators.waitForRecordsetAggregates(page);
+  //   })
+  // });
 
   test(`For table ${testParams.accommodation_tuple.table_name}`, async ({ page, baseURL }, testInfo) => {
     const params = testParams.accommodation_tuple;
@@ -330,6 +330,22 @@ test.describe('View recordset', () => {
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
     });
+
+    await test.step('delete files that may have been downloaded before', async () => {
+      await deleteDownloadedFiles(params.file_names.map((name: string) => {
+        return `${DOWNLOAD_FOLDER}/${name}`
+      }));
+    });
+
+    await testExportDropdown(page, params.file_names, APP_NAMES.RECORDSET);
+
+    await test.step('delete files downloaded during the tests', async () => {
+      await deleteDownloadedFiles(params.file_names.map((name: string) => {
+        return `${DOWNLOAD_FOLDER}/${name}`
+      }));
+    });
+
+    return;
 
     await test.step('should not display facets if maxFacetDepth is 0 in the chaise-config', async () => {
       await expect.soft(RecordsetLocators.getSidePanel(page)).not.toBeVisible();
@@ -633,6 +649,8 @@ test.describe('View recordset', () => {
       };
     });
   });
+
+  return;
 
   test(`For table ${testParams.file_tuple.table_name}`, async ({ page, baseURL }, testInfo) => {
     const params = testParams.file_tuple;

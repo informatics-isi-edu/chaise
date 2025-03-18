@@ -75,6 +75,11 @@ export async function clickNewTabLink(locator: Locator, forceNewTab?: boolean) {
  */
 export async function clickAndVerifyDownload(locator: Locator, expectedFileName: string | undefined, waitCond?: () => Promise<void>) {
   const downloadPromise = locator.page().waitForEvent('download');
+  const logMessage = (msg: any) => {
+    console.log('console message:');
+    console.log(msg.text());
+  }
+  locator.page().on('console', logMessage);
   await locator.click();
 
   if (waitCond) {
@@ -90,6 +95,8 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
   if (expectedFileName) {
     expect.soft(filename).toEqual(expectedFileName);
   }
+
+  locator.page().removeListener('console', logMessage);
 
   await download.delete();
 }

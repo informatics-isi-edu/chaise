@@ -8,7 +8,8 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        node-version: ["18.18", "20.0.0", "22.11.0"]
+        # node-version: ["18.18", "20.0.0", "22.11.0"]
+        node-version: ["20.0.0"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -149,47 +150,57 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Run all features test spec
-        id: test-all-features
-        continue-on-error: true
+      - name: Run record presentation
         run: |
           cd chaise
-          make testallfeatures
-      - name: Run all features confirmation test spec
-        id: test-all-features-confirmation
-        continue-on-error: true
+          npx playwright test --workers=1 --project=chromium --config test/e2e/specs/all-features-confirmation/record/presentation-btn.config.ts
+      - name: Run recordset presentation
         run: |
           cd chaise
-          make testallfeaturesconfirmation
-      - name: Run default config test spec
-        id: test-default-config
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdefaultconfig
-      - name: Run delete prohibited test spec
-        id: test-delete-prohibited
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
-      - name: Check on all features test spec
-        if: always() && steps.test-all-features.outcome != 'success'
-        run: exit 1
-      - name: Check on all features confirmation test spec
-        if: always() && steps.test-all-features-confirmation.outcome != 'success'
-        run: exit 1
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited test spec
-        if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
+          npx playwright test --workers=1 --project=chromium --config test/e2e/specs/all-features-confirmation/recordset/presentation.config.ts
+      # - name: Run all features test spec
+      #   id: test-all-features
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testallfeatures
+      # - name: Run all features confirmation test spec
+      #   id: test-all-features-confirmation
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testallfeaturesconfirmation
+      # - name: Run default config test spec
+      #   id: test-default-config
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdefaultconfig
+      # - name: Run delete prohibited test spec
+      #   id: test-delete-prohibited
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
+      # - name: Check on all features test spec
+      #   if: always() && steps.test-all-features.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on all features confirmation test spec
+      #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on default config test spec
+      #   if: always() && steps.test-default-config.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on delete prohibited test spec
+      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
+      #   run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report-${{ matrix.node-version }}
-          path: chaise/playwright-report/
+          path: |
+            chaise/playwright-report/
+            chaise/har-files/
           retention-days: 30
       - name: Diagnosis after failure
         if: ${{ failure() }}

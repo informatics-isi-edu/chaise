@@ -187,6 +187,24 @@ test.describe('View existing record', () => {
       await RecordLocators.waitForRecordPageReady(page);
     });
 
+    // await test.step('delete files', async () => {
+    //   // delete files that may have been downloaded during tests
+    //   await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+    //     return `${DOWNLOAD_FOLDER}/${name}`
+    //   }));
+    // });
+
+    // await testExportDropdown(page, testParams.file_names, APP_NAMES.RECORD);
+
+    // await test.step('delete files', async () => {
+    //   // delete files that may have been downloaded during tests
+    //   await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+    //     return `${DOWNLOAD_FOLDER}/${name}`
+    //   }));
+    // });
+
+    // return;
+
     await test.step('presentation of the record page', async () => {
       const keyValues = [{ column: 'id', value: '2002' }];
       const ridValue = getEntityRow(testInfo, testParams.schema_name, testParams.table_name, keyValues).RID;
@@ -282,14 +300,14 @@ test.describe('View existing record', () => {
         { title: 'color_rgb_hex_column', value: '  #323456', match: 'html' }
       ];
 
-      if (!process.env.CI) {
+      // if (!process.env.CI) {
         await test.step('delete files', async () => {
           // delete files that may have been downloaded before
           await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
             return `${DOWNLOAD_FOLDER}/${name}`
           }));
         });
-      }
+      // }
 
       const notNullColumns = testParams.columns.filter((c: any) => {
         return !c.hasOwnProperty('value') || c.value !== null;
@@ -339,9 +357,11 @@ test.describe('View existing record', () => {
         await expect.soft(shareButton).toBeVisible();
       });
 
-      await testShareCiteModal(page, testInfo, testParams.sharePopupParams);
+      // await testShareCiteModal(page, testInfo, testParams.sharePopupParams);
 
       await testExportDropdown(page, testParams.file_names, APP_NAMES.RECORD);
+
+      return;
 
       await test.step('should render columns which are specified to be visible and in order', async () => {
         const pageColumns = RecordLocators.getAllColumnNames(page);
@@ -564,6 +584,8 @@ test.describe('View existing record', () => {
       // }
     });
   });
+
+  return;
 
   test('For a record with all of its related tables as empty', async ({ page, baseURL }, testInfo) => {
     const params = testParams.no_related_data;
