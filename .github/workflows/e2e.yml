@@ -120,7 +120,7 @@ jobs:
           sudo chmod og+rx /home/ermresolve
           sudo make deploy
           echo "config:"
-          sudo cat /home/ermrest/ermresolve_config.json
+          sudo cat /home/ermresolve/ermresolve_config.json
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
