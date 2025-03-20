@@ -207,5 +207,5 @@ jobs:
           sudo ls -lR /var/log/apache2
           sudo cat /var/log/apache2/error.log
           sudo cat /var/log/apache2/access.log
-          sudo cat /var/log/messages
+          sudo cat /var/log/syslog
           sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn
