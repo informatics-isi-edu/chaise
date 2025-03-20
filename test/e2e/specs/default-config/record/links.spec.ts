@@ -45,9 +45,21 @@ test.describe('links on the record page', () => {
   });
 
   test('Searching in go to RID input should navigate the user to the resolved record page matching that RID', async ({ page, baseURL }, testInfo) => {
+    /**
+     * TODO resolver is installed but most probably not fully configured. we should eventually figure out why
+     *
+     * I spent some time on this and got the resolver working to the point that it doesn't throw any errors anymore.
+     * but it's still not working for some reason
+     */
     // test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
     await goToPage(page, baseURL, testInfo, testParams.table_name, true, true);
+
+    const logMessage = (msg: any) => {
+      console.log('console message:');
+      console.log(msg.text());
+    }
+    page.on('console', logMessage);
 
     const RIDVal = getEntityRow(testInfo, 'links', testParams.table_name, [{ column: 'id', value: '1' }]).RID;
     await NavbarLocators.getGoToRIDInput(page).clear();
@@ -55,6 +67,7 @@ test.describe('links on the record page', () => {
     const newPage = await clickNewTabLink(NavbarLocators.getGoToRIDButton(page));
     await newPage.waitForURL(`**/record/#${getCatalogID(testInfo.project.name)}/links:${testParams.table_name}/RID=${RIDVal}**`);
     await newPage.close();
+    page.removeListener('console', logMessage);
   });
 
 });

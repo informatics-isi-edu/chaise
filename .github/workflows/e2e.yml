@@ -193,7 +193,6 @@ jobs:
           name: playwright-report-${{ matrix.node-version }}
           path: |
             chaise/playwright-report/
-            chaise/har-files/
           retention-days: 30
       - name: Diagnosis after failure
         if: ${{ failure() }}
