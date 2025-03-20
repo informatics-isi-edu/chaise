@@ -121,6 +121,8 @@ jobs:
           sudo make deploy
           echo "config:"
           sudo cat /home/ermresolve/ermresolve_config.json
+          echo "is unique_id_module available?"
+          sudo apachectl -M | grep unique_id
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
@@ -198,6 +200,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           sudo ls -lR /etc/apache2
+          sudo ls -lR /etc/apache2/mods-enabled
           sudo ls -lR /var/run/apache2
           sudo cat /etc/apache2/conf.d/webauthn.conf
           sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
