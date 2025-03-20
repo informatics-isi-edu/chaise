@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        # node-version: ["18.18", "20.0.0", "22.11.0"]
-        node-version: ["20.0.0"]
+        node-version: ["18.18", "20.0.0", "22.11.0"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -119,8 +118,6 @@ jobs:
           sudo useradd -m -g apache -r ermresolve
           sudo chmod og+rx /home/ermresolve
           sudo make deploy
-          echo "config:"
-          sudo cat /home/ermresolve/ermresolve_config.json
           sudo ln -s /etc/apache2/mods-available/unique_id.load /etc/apache2/mods-enabled/unique_id.load
           sudo service apache2 restart
       - name: Install ermrestjs
@@ -147,46 +144,42 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      - name: Run links spec
+      - name: Run all features test spec
+        id: test-all-features
+        continue-on-error: true
         run: |
           cd chaise
-          npx playwright test --workers=1 --project=chromium --config test/e2e/specs/default-config/record/links.config.ts
-      # - name: Run all features test spec
-      #   id: test-all-features
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeatures
-      # - name: Run all features confirmation test spec
-      #   id: test-all-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testallfeaturesconfirmation
-      # - name: Run default config test spec
-      #   id: test-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig
-      # - name: Run delete prohibited test spec
-      #   id: test-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
-      # - name: Check on all features test spec
-      #   if: always() && steps.test-all-features.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on all features confirmation test spec
-      #   if: always() && steps.test-all-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec
-      #   if: always() && steps.test-default-config.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited test spec
-      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+          make testallfeatures
+      - name: Run all features confirmation test spec
+        id: test-all-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testallfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
+      - name: Check on all features test spec
+        if: always() && steps.test-all-features.outcome != 'success'
+        run: exit 1
+      - name: Check on all features confirmation test spec
+        if: always() && steps.test-all-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:

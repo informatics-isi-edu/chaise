@@ -51,103 +51,95 @@ test.describe('links on the record page', () => {
      * I spent some time on this and got the resolver working to the point that it doesn't throw any errors anymore.
      * but it's still not working for some reason
      */
-    // test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
+    test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
     await goToPage(page, baseURL, testInfo, testParams.table_name, true, true);
-
-    const logMessage = (msg: any) => {
-      console.log('console message:');
-      console.log(msg.text());
-    }
-    page.on('console', logMessage);
-
     const RIDVal = getEntityRow(testInfo, 'links', testParams.table_name, [{ column: 'id', value: '1' }]).RID;
     await NavbarLocators.getGoToRIDInput(page).clear();
     await NavbarLocators.getGoToRIDInput(page).fill(RIDVal);
     const newPage = await clickNewTabLink(NavbarLocators.getGoToRIDButton(page));
     await newPage.waitForURL(`**/record/#${getCatalogID(testInfo.project.name)}/links:${testParams.table_name}/RID=${RIDVal}**`);
     await newPage.close();
-    page.removeListener('console', logMessage);
   });
 
 });
 
 
-// test.describe('show/hide empty section button state', () => {
-//   test('for a table with a related association table that user can create', async ({ page, baseURL }, testInfo) => {
-//     await goToPage(page, baseURL, testInfo, testParams.table_name);
+test.describe('show/hide empty section button state', () => {
+  test('for a table with a related association table that user can create', async ({ page, baseURL }, testInfo) => {
+    await goToPage(page, baseURL, testInfo, testParams.table_name);
 
-//     await test.step('should show the empty related association tables and table of contents on page load', async () => {
-//       const tocHeaders = RecordLocators.getSidePanelHeadings(page);
-//       await expect.soft(tocHeaders).toHaveCount(2);
-//       await expect.soft(tocHeaders).toHaveText(['Summary', 'association_table (0)']);
+    await test.step('should show the empty related association tables and table of contents on page load', async () => {
+      const tocHeaders = RecordLocators.getSidePanelHeadings(page);
+      await expect.soft(tocHeaders).toHaveCount(2);
+      await expect.soft(tocHeaders).toHaveText(['Summary', 'association_table (0)']);
 
-//       const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
-//       await expect.soft(headers).toHaveCount(1);
-//       await expect.soft(headers).toHaveText(['association_table']);
-//     });
-//   });
+      const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
+      await expect.soft(headers).toHaveCount(1);
+      await expect.soft(headers).toHaveText(['association_table']);
+    });
+  });
 
-//   test('for a table with an inline association table that user can create', async ({ page, baseURL }, testInfo) => {
-//     await goToPage(page, baseURL, testInfo, 'inline_table');
+  test('for a table with an inline association table that user can create', async ({ page, baseURL }, testInfo) => {
+    await goToPage(page, baseURL, testInfo, 'inline_table');
 
-//     await test.step('should show the empty inline related association tables and table of contents on page load', async () => {
-//       const tocHeaders = RecordLocators.getSidePanelHeadings(page);
-//       await expect.soft(tocHeaders).toHaveCount(2);
-//       await expect.soft(tocHeaders).toHaveText(['Summary', 'inline_association_table (0)']);
+    await test.step('should show the empty inline related association tables and table of contents on page load', async () => {
+      const tocHeaders = RecordLocators.getSidePanelHeadings(page);
+      await expect.soft(tocHeaders).toHaveCount(2);
+      await expect.soft(tocHeaders).toHaveText(['Summary', 'inline_association_table (0)']);
 
-//       const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
-//       await expect.soft(headers).toHaveCount(0);
+      const headers = RecordLocators.getDisplayedRelatedTableTitles(page);
+      await expect.soft(headers).toHaveCount(0);
 
-//       const el = RecordLocators.getEntityRelatedTable(page, 'inline_association_table');
-//       await expect.soft(el).toBeVisible();
-//     })
-//   });
-// });
-
-
-// test('export button', async ({ page, baseURL }, testInfo) => {
-//   await goToPage(page, baseURL, testInfo, testParams.table_name);
-
-//   const ridValue = getEntityRow(testInfo, 'links', 'links-table', [{ column: 'id', value: '1' }]).RID;
-//   await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`], APP_NAMES.RECORD);
-// });
+      const el = RecordLocators.getEntityRelatedTable(page, 'inline_association_table');
+      await expect.soft(el).toBeVisible();
+    })
+  });
+});
 
 
-// test('default behavior of editRecord and deleteRecord chaise-config props', async ({page, baseURL}, testInfo) => {
-//   await goToPage(page, baseURL, testInfo, testParams.table_name);
+test('export button', async ({ page, baseURL }, testInfo) => {
+  await goToPage(page, baseURL, testInfo, testParams.table_name);
 
-//   await test.step('delete button should be visible', async () => {
-//     const deleteBtn = RecordLocators.getDeleteRecordButton(page);
-//     await expect.soft(deleteBtn).toBeVisible();
-//     // actual delete tests are done in other specs
-//   });
+  const ridValue = getEntityRow(testInfo, 'links', 'links-table', [{ column: 'id', value: '1' }]).RID;
+  await testExportDropdown(page, ['links-table.csv', `links-table_${ridValue}.zip`], APP_NAMES.RECORD);
+});
 
-//   // this must be the last step here as it will change the page location
-//   await test.step('edit button should be visible', async () => {
-//     const editBtn = RecordLocators.getEditRecordButton(page);
-//     await expect.soft(editBtn).toBeVisible();
-//     await editBtn.click();
-//     await expect.soft(page).toHaveURL(/recordedit/);
-//     await RecordeditLocators.waitForRecordeditPageReady(page);
-//     // actual edit tests are done in other specs
-//   });
-// });
 
-// test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
-//   await goToPage(page, baseURL, testInfo, testParams.table_name);
+test('default behavior of editRecord and deleteRecord chaise-config props', async ({page, baseURL}, testInfo) => {
+  await goToPage(page, baseURL, testInfo, testParams.table_name);
 
-//   await test.step('should hide the text column based on hide_column_header property of column-display annotation', async () => {
-//     const columns = RecordLocators.getColumns(page);
-//     await expect.soft(columns).toHaveCount(3);
+  await test.step('delete button should be visible', async () => {
+    const deleteBtn = RecordLocators.getDeleteRecordButton(page);
+    await expect.soft(deleteBtn).toBeVisible();
+    // actual delete tests are done in other specs
+  });
 
-//     await expect.soft(columns.nth(0)).toBeVisible();
+  // this must be the last step here as it will change the page location
+  await test.step('edit button should be visible', async () => {
+    const editBtn = RecordLocators.getEditRecordButton(page);
+    await expect.soft(editBtn).toBeVisible();
+    await editBtn.click();
+    await expect.soft(page).toHaveURL(/recordedit/);
+    await RecordeditLocators.waitForRecordeditPageReady(page);
+    // actual edit tests are done in other specs
+  });
+});
 
-//     await expect.soft(columns.nth(1)).toBeHidden();
+test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
+  await goToPage(page, baseURL, testInfo, testParams.table_name);
 
-//     await expect.soft(columns.nth(2)).toBeVisible();
-//   });
-// });
+  await test.step('should hide the text column based on hide_column_header property of column-display annotation', async () => {
+    const columns = RecordLocators.getColumns(page);
+    await expect.soft(columns).toHaveCount(3);
+
+    await expect.soft(columns.nth(0)).toBeVisible();
+
+    await expect.soft(columns.nth(1)).toBeHidden();
+
+    await expect.soft(columns.nth(2)).toBeVisible();
+  });
+});
 
 
 /********************** helper functions ************************/
