@@ -121,8 +121,7 @@ jobs:
           sudo make deploy
           echo "config:"
           sudo cat /home/ermresolve/ermresolve_config.json
-          echo "is unique_id_module available?"
-          sudo apachectl -M | grep unique_id
+          sudo ln -s /etc/apache2/mods-available/unique_id.load /etc/apache2/mods-enabled/unique_id.load
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
