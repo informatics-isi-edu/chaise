@@ -204,6 +204,8 @@ jobs:
           sudo cat /etc/apache2/conf.d/webauthn.conf
           sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
           sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+          sudo ls -lR /var/log/apache2
           sudo cat /var/log/apache2/error.log
           sudo cat /var/log/apache2/access.log
+          sudo cat /var/log/messages
           sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn
