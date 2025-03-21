@@ -1,4 +1,4 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, Locator, Page, test } from '@playwright/test';
 import moment from 'moment';
 
 //locators
@@ -10,12 +10,14 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 //utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
-  testAddAssociationTable, testAddRelatedTable, testBatchUnlinkAssociationTable,
-  testRelatedTablePresentation, testShareCiteModal
+  testAddAssociationTable, testAddRelatedTable, testAddRelatedWithForeignKeyMultiPicker,
+  testBatchUnlinkAssociationTable, testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testModalClose, testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const testParams = {
@@ -42,7 +44,10 @@ const testParams = {
     'inbound related with filter on related table', // related entity with filter on related table
     'association with filter on main table',
     'association with filter on related table', // association with filter on related table
-    'path of length 3 with filters' // path of length 3 with filters
+    'path of length 3 with filters', // path of length 3 with filters
+    'association_table_w_static_column', // "almost" pure and binary multi create foreign key with fk input modals
+    'association_table_w_static_column_dropdown', // "almost" pure and binary multi create foreign key with fk input dropdowns
+    'association_table_w_three_fks' // association table with 3 foreign keys and multi create foreign key with annotation
   ],
   tocHeaders: [
     'Summary', 'booking (6)', 'schedule (2)', 'media (1)', 'association_table (1)',
@@ -54,7 +59,10 @@ const testParams = {
     'inbound related with filter on related table (1)',
     'association with filter on main table (1)',
     'association with filter on related table (1)',
-    'path of length 3 with filters (1)'
+    'path of length 3 with filters (1)',
+    'association_table_w_static_column (1)',
+    'association_table_w_static_column_dropdown (1)',
+    'association_table_w_three_fks (1)'
   ],
   scrollToDisplayname: 'table_w_aggregates'
 };
@@ -62,14 +70,10 @@ const testParams = {
 // TODO playwright: we should break this file into at least two files
 
 test.describe('Related tables', () => {
-  const keys = [];
-  keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-  const URL_PATH = `${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
-
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${URL_PATH}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    const keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/${keys.join('&')}`)
 
     await RecordLocators.waitForRecordPageReady(page);
   });
@@ -91,7 +95,7 @@ test.describe('Related tables', () => {
   test('share popup when the citation annotation has wait_for of all-outbound', async ({ page, baseURL }, testInfo) => {
     const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
     const ridValue = getEntityRow(testInfo, testParams.schemaName, testParams.table_name, keyValues).RID;
-    const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/RID=${ridValue}`;
+    const link = generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/RID=${ridValue}`;
     await testShareCiteModal(
       page,
       testInfo,
@@ -126,8 +130,7 @@ test.describe('Related tables', () => {
         canEdit: true,
         inlineComment: 'booking inline comment',
         bulkEditLink: [
-          `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
-          'product-unordered-related-tables-links:booking',
+          generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-unordered-related-tables-links', 'booking', testInfo, baseURL),
           // we cannot test the actual facet blob since it's based on RID
           // and we also don't have access to ermrestjs here to encode it for us
           '*::facets::'
@@ -831,15 +834,153 @@ test.describe('Related tables', () => {
     });
   });
 
+  /**
+   * The following tests are for testing the prefill functionality when the inbound foreign key is part of a table that is "almost" pure and binary
+   *
+   * For the first 3 tests, this means there are 2 foreign keys that are part of the same key (making the pair unique) and there are other columns that are not foreign keys
+   *
+   * For the 4th test, there are still 2 foreign keys that are part of the same key but there is another foreign key on this table. This means the heuristics won't trigger
+   *   for the bulk create foreign key functionality requiring an annotation to be defined instead.
+   */
+  test.describe('for a table that is almost pure and binary and the foreign keys are a unique key', async () => {
+    const params = {
+      table_name: 'association_table_w_static_column',
+      prefill_col: 'main_fk_col',
+      leaf_col: 'leaf_fk_col',
+      leaf_fk_name: 'leaf_fk_col',
+      prefill_value: 'Super 8 North Hollywood Motel',
+      column_names: ['static1', 'main_fk_col', 'leaf_fk_col'],
+      resultset_values: [['', '2004', '10'], ['', '2004', '7']],
+      related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']],
+      bulk_modal_title: 'Select a set of leaf_fk_col for association_table_w_static_column'
+    }
+
+    test('with fk inputs as modals', async ({ page }) => {
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_POPUP);
+    });
+
+    /**
+     * this test verifies the functionality when the first modal is closed and does NOT fill in the first form
+     * subsequent actions in add more should continue to add new forms without filling the first form
+     *
+     * This test ensures the tracking of bulkForeignKeySelectedRows is done right when the first form has no value filled in by the initial modal
+     */
+    test('closing the initial modal and using "Add more" to add more forms with values', async ({ page }) => {
+      let newPage: Page, bulkFKModal: Locator;
+
+      await test.step('should open recordedit with a modal picker showing', async () => {
+        const addBtn = RecordLocators.getRelatedTableAddButton(page, params.table_name);
+
+        newPage = await clickNewTabLink(addBtn);
+        await RecordeditLocators.waitForRecordeditPageReady(newPage);
+
+        bulkFKModal = ModalLocators.getRecordeditBulkFKPopup(newPage);
+        await expect.soft(bulkFKModal).toBeAttached();
+      });
+
+      await test.step('modal should have 3 disabled rows', async () => {
+        const rows = RecordsetLocators.getRows(bulkFKModal);
+        await expect.soft(rows).toHaveCount(10);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
+
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
+        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
+        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
+        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+      });
+
+      await test.step('closing the initial modal should not add any new forms AND not fill the first form', async () => {
+        await testModalClose(bulkFKModal);
+
+        await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(1);
+        await testInputValue(newPage, 1, params.prefill_col, params.prefill_col, RecordeditInputType.FK_POPUP, false, params.prefill_value);
+        await testInputValue(newPage, 1, params.leaf_col, params.leaf_col, RecordeditInputType.FK_POPUP, false, 'Select a value');
+      });
+
+      await test.step('clicking "add more" should have 3 rows disabled', async () => {
+        await RecordeditLocators.getAddMoreButton(newPage).click();
+        // The same modal when the page loaded should show again
+        await expect.soft(bulkFKModal).toBeAttached();
+
+        const rows = RecordsetLocators.getRows(bulkFKModal);
+        await expect.soft(rows).toHaveCount(10);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
+
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
+        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
+        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
+        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+      });
+
+      await test.step('select 2 more rows and submit the selection', async () => {
+        await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 0).click();
+        await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 4).click();
+
+        await ModalLocators.getSubmitButton(bulkFKModal).click();
+        await expect.soft(bulkFKModal).not.toBeAttached();
+
+        await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(3);
+      });
+
+      await test.step('first form should still not be filled in', async () => {
+        await testInputValue(newPage, 1, params.leaf_col, params.leaf_col, RecordeditInputType.FK_POPUP, false, 'Select a value');
+      });
+
+      await test.step('2 new forms should have expected values filled in for prefill and new modal selections', async () => {
+        await testInputValue(newPage, 2, params.prefill_col, params.prefill_col, RecordeditInputType.FK_POPUP, false, params.prefill_value);
+        await testInputValue(newPage, 3, params.prefill_col, params.prefill_col, RecordeditInputType.FK_POPUP, false, params.prefill_value);
+
+        await testInputValue(newPage, 2, params.leaf_col, params.leaf_col, RecordeditInputType.FK_POPUP, false, 'Leaf 1');
+        await testInputValue(newPage, 3, params.leaf_col, params.leaf_col, RecordeditInputType.FK_POPUP, false, 'Leaf 5');
+      });
+
+      await test.step('removing the 2nd form should have the correct rows disabled in the "Add more" modal', async () => {
+        await RecordeditLocators.getDeleteRowButton(newPage, 1).click();
+
+        await RecordeditLocators.getAddMoreButton(newPage).click();
+        // The same modal when the page loaded should show again
+        await expect.soft(bulkFKModal).toBeAttached();
+
+        const rows = RecordsetLocators.getRows(bulkFKModal);
+        await expect.soft(rows).toHaveCount(10);
+        await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(4);
+
+        await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(4);
+        await expect.soft(rows.nth(0)).not.toHaveClass(/disabled-row/); // Leaf 1 - the row that was just removed
+        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
+        await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/); // Leaf 5
+        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
+        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+      });
+    });
+
+    test('with fk inputs as dropdowns', async ({ page }) => {
+      params.table_name = 'association_table_w_static_column_dropdown';
+      params.leaf_fk_name = 'U0KYeFQJ-lwuLEaGb2RNRg';
+      params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_static_column_dropdown'
+
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
+    });
+
+    test('with a third foreign key and an annotation on main_fk_col', async ({ page }) => {
+      params.table_name = 'association_table_w_three_fks';
+      params.leaf_fk_name = 'leaf_fk_col';
+      params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_three_fks'
+
+      params.column_names = ['static1', 'main_fk_col', 'leaf_fk_col', 'third_fk_col'];
+      params.resultset_values = [['', '2004', '10', ''], ['', '2004', '7', '']];
+      params.related_table_values = [['2', 'Leaf 2', 'Other Leaf 2'], ['', 'Leaf 10', ''], ['', 'Leaf 7', '']];
+      await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_POPUP);
+    });
+  });
 });
 
 test.describe('Scroll to query parameter', () => {
   test('after page load should scroll to the related table', async ({ page, baseURL }, testInfo) => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}?scrollTo=${testParams.scrollToDisplayname}`);
+    const url = generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/${keys.join('&')}`;
+    await page.goto(`${url}?scrollTo=${testParams.scrollToDisplayname}`);
 
     await RecordLocators.waitForRecordPageReady(page);
 

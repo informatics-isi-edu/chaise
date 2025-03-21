@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type JSX } from 'react';
 import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils
@@ -131,7 +131,7 @@ const InputField = ({
   additionalControllerRules,
 }: InputFieldCompProps): JSX.Element => {
 
-  const { setValue, control, clearErrors ,trigger} = useFormContext();
+  const { setValue, control, clearErrors, trigger} = useFormContext();
 
   controllerRules = isObjectAndNotNull(controllerRules) ? controllerRules : {};
   if (requiredInput) {
@@ -191,6 +191,7 @@ const InputField = ({
     if (handleChange && !handleChange(e)) {
       return;
     }
+
     field.onChange(e);
     field.onBlur();
   };

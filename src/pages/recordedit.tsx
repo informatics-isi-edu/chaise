@@ -6,7 +6,7 @@ import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedi
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -14,7 +14,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 // models
 import { appModes, RecordeditDisplayMode, RecordeditProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
@@ -22,12 +22,13 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { addAppContainerClasses } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const recordeditSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORDEDIT,
@@ -54,7 +55,7 @@ const RecordeditApp = (): JSX.Element => {
     if (setupStarted.current) return;
     setupStarted.current = true;
 
-    const logObject: any = {};
+    const logObject: LogObjectType = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;
@@ -85,16 +86,22 @@ const RecordeditApp = (): JSX.Element => {
       }
 
 
+      let prefillObj = null;
       let logAppMode = LogAppModes.EDIT;
       if (appMode === appModes.COPY) {
         logAppMode = LogAppModes.CREATE_COPY;
       } else if (appMode === appModes.CREATE) {
         if (res.queryParams.invalidate && res.queryParams.prefill) {
           logAppMode = LogAppModes.CREATE_PRESELECT;
+
+          prefillObj = getPrefillObject(res.queryParams);
         } else {
           logAppMode = LogAppModes.CREATE;
         }
       }
+
+      // initialize `ERMrest.BulkCreateForeignKeyObject` object on reference even if we don't have a prefillObj
+      reference.computeBulkCreateForeignKeyObject(prefillObj);
 
       const logStack = [
         LogService.getStackNode(

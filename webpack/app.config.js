@@ -28,6 +28,8 @@ const webpack = require('webpack');
  *                if missing, we will use CHAISE_BASE_PATH.
  * - rootFolderLocation: the location of root folder. used to find the code (e.g. ../src)
  * - resolveAliases: the aliases that will be used in import statements.
+ * - extraWebpackProps: props that you want to directly pass to webpack. be mindful what you're passing as you might break the configuration
+ *                 by overriding the props that we already rely on. Currently only used for passing externals (https://webpack.js.org/configuration/externals/)
  *
  * @param {Object} appConfigs
  *  the app configurations
@@ -55,6 +57,10 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     options.resolveAliases = {};
   }
 
+  if (!options.extraWebpackProps || typeof options.extraWebpackProps !== 'object') {
+    options.extraWebpackProps = {};
+  }
+
   const entries = {}, appHTMLPlugins = [];
 
   // define entries and add plugins based on appConfigs
@@ -70,7 +76,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     const externalFiles = [
       // ermrestjs
       `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
-      `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
+      `${ermrestjsPath}${isDevMode ? 'ermrest.js' : 'ermrest.min.js'}?v=${buildVersion}`,
       // old chaise-config location TODO should be removed
       `${chaisePath}chaise-config.js?v=${buildVersion}`,
       // chaise-config
@@ -256,16 +262,13 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         },
       },
     },
-    externals: {
-      // treat plotly as an external dependency and don't compute it
-      'plotly.js-basic-dist-min': 'Plotly'
-    },
     performance: {
       assetFilter: (assetFilename) => {
         // ignore the fonts
         return !/\.(woff(2)?|eot|ttf|otf|svg|)$/.test(assetFilename);
       }
-    }
+    },
+    ...options.extraWebpackProps
   }
 }
 

@@ -4,10 +4,11 @@ import { test, expect } from '@playwright/test';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { 
+import {
   openFacet, openRecordsetAndResetFacetState, testSelectFacetOption
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams: any = {
   schema_name: 'faceting',
@@ -32,7 +33,7 @@ const testParams: any = {
 
 test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, testInfo) => {
   await openRecordsetAndResetFacetState(page,
-    `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
+    generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL) + testParams.sort,
     testParams.totalNumFacets,
     [0, 1, 11],
     testParams.defaults.pageSize
@@ -48,7 +49,7 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
         await openFacet(page, facet, facetParams.facetIdx, facetParams.numOptionsCumulative, 1);
         await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
         await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, index + 1);
-        
+
         // close the facet
         await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.facetIdx).click();
       });
@@ -59,7 +60,7 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
 test('Testing four facet selections in quick sequence and verifying data after all selections', async ({ page, baseURL }, testInfo) => {
 
   await openRecordsetAndResetFacetState(page,
-    `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`,
+    generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL) + testParams.sort,
     testParams.totalNumFacets,
     [0, 1, 11],
     testParams.defaults.pageSize
@@ -79,7 +80,7 @@ test('Testing four facet selections in quick sequence and verifying data after a
     for (let k = 0; k < testParams.multipleFacets; k++) {
       facetParams = testParams.multipleFacets[k];
       facet = RecordsetLocators.getFacetById(page, facetParams.facetIdx);
-      await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, k + 1);  
+      await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, k + 1);
     }
   });
 });

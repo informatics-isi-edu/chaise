@@ -1,6 +1,8 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_md-help-app.scss';
 import USCLogo from '@isrd-isi-edu/chaise/src/assets/images/USC-Shield.png';
 
+import type { JSX } from 'react';
+
 const MarkdownHelp = (): JSX.Element => {
 
   return (

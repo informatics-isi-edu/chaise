@@ -1,6 +1,14 @@
 @use 'sass:map';
 @use 'variables';
 
+.side-panel-container {
+  .side-panel-heading-menu {
+    position: absolute;
+    top: -37px;
+    left: 125px;
+  }
+}
+
 .faceting-columns-container {
   // disable the animation from the accordion
   .accordion-collapse.collapsing {
@@ -34,7 +42,7 @@
     // each facet panel
     .facet-panel {
       border-radius: 0;
-      border: 1px solid map-get(variables.$color-map, 'border');
+      border: 1px solid map.get(variables.$color-map, 'border');
 
       // active style
       &.active,
@@ -72,8 +80,13 @@
         flex-direction: row-reverse;
         justify-content: flex-end;
 
-        background-color: map-get(variables.$color-map, 'table-header-background');
-        color: map-get(variables.$color-map, 'black');
+        background-color: map.get(variables.$color-map, 'table-header-background');
+        color: map.get(variables.$color-map, 'black');
+
+        // overriding the default border-radius that bootstrap is adding.
+        &.collapsed {
+          border-radius: 0;
+        }
 
         // Overriding accordian-button css to align right angle bracket icon to left
         &::after {

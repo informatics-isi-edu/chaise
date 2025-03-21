@@ -14,7 +14,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { APP_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { clickNewTabLink, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, generateChaiseURL, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 export type RecordeditExpectedColumn = {
@@ -141,11 +141,13 @@ type SetInputValueProps = string | RecordeditFile | {
  * Notes:
  *  - this function assumes the input already has a value and doesn't double check.
 *   - in most cases it will click on the "x" for the input.
+*   - in case of arrays, it will click on the "delete" icons until there aren't any.
  */
 export const clearInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
 ) => {
   switch (inputType) {
+    case RecordeditInputType.FK_DROPDOWN:
     case RecordeditInputType.FK_POPUP:
       const fkBtn = RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber);
       await fkBtn.click();
@@ -606,8 +608,25 @@ const _testInputValidationAndExtraFeatures = async (
 
     case RecordeditInputType.FK_POPUP:
       const displayedValue = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
+      const rsModal = ModalLocators.getForeignKeyPopup(page);
 
       if (typeof existingValue === 'string') {
+        // before clearing the value, ensure the selected row has the right tooltip in the fk input modal first
+        await test.step('check the tooltip of the selected row in the modal before clearing the value', async () => {
+          await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
+          await expect.soft(rsModal).toBeVisible();
+
+          // In the multi edit spec, we have 2 forms
+          //   in the 1st form, the 1st row is selected
+          //   in the 2nd form, the 3rd row is selected
+          const selectedRowIndex = formNumber === 1 ? 0 : 2;
+          await testTooltip(RecordsetLocators.getRowSelectButton(rsModal, selectedRowIndex), 'Selected', APP_NAMES.RECORDSET, true);
+
+          await ModalLocators.getCloseBtn(rsModal).click();
+          await expect.soft(rsModal).not.toBeAttached();
+        });
+
+        // value should be unchanged from previous test since the modal was closed with no selection made
         await test.step('clicking the "x" should remove the value in the foreign key field.', async () => {
           await expect.soft(displayedValue).toHaveText(existingValue);
           await RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber).click();
@@ -616,7 +635,6 @@ const _testInputValidationAndExtraFeatures = async (
       }
 
       await test.step('popup selector', async () => {
-        const rsModal = ModalLocators.getForeignKeyPopup(page);
         await test.step('should have the proper title.', async () => {
           await RecordeditLocators.getForeignKeyInputButton(page, displayname, formNumber).click();
           await expect.soft(rsModal).toBeVisible();
@@ -730,8 +748,8 @@ const _testInputValidationAndExtraFeatures = async (
 
         await expect.soft(timestampProps.time).not.toHaveValue('');
         const UITime = await timestampProps.time.getAttribute('value') as string;
-        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
-        expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
+        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDTHH:mm:ssZ');
+        expect.soft(UIObject.diff(nowObject, 'minutes')).toBeLessThan(1);
       });
 
       await test.step('"clear" button should clear both time and date.', async () => {
@@ -946,7 +964,7 @@ export const testFormPresentationAndValidation = async (
     await expect.soft(titleEl).toHaveText(pageTitle);
 
     const linkEl = RecordeditLocators.getPageTitleLink(page);
-    const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
+    const expectedLink = generateChaiseURL(APP_NAMES.RECORDSET, params.schemaName, params.tableName, testInfo, baseURL) + '?pcid='
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
 

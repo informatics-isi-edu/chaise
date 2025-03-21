@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -8,11 +8,13 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import {
   appModes, LastChunkMap, PrefillObject, RecordeditColumnModel,
-  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks, RecordeditModalOptions
+  RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
+  RecordeditModalOptions, UpdateBulkForeignKeyRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src//models/events';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -30,8 +32,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
-  allForeignKeyColumnsPrefilled,
-  columnToColumnModel, getPrefillObject,
+  allForeignKeyColumnsPrefilled, columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -45,13 +46,19 @@ type ResultsetProps = {
 }
 
 export const RecordeditContext = createContext<{
-  /* which mode of recordedit we are in */
+  /**
+   * which mode of recordedit we are in
+   */
   appMode: string,
   config: RecordeditConfig,
   modalOptions?: RecordeditModalOptions,
-  /* the main entity reference */
+  /**
+   * the main entity reference
+   */
   reference: any,
-  /* the tuples correspondeing to the displayed form */
+  /**
+   * the tuples correspondeing to the displayed form
+   */
   tuples: any,
   /**
    * the raw data of outbound foreign keys. used in foreignkey-field to support domain-filter
@@ -60,27 +67,49 @@ export const RecordeditContext = createContext<{
    */
   foreignKeyData: any,
   waitingForForeignKeyData: boolean,
-  /* the created column models from reference.columns */
+  /**
+   * the created column models from reference.columns
+   */
   columnModels: RecordeditColumnModel[],
-  /* whether a value can be updated or not (key-value pair where key is the same structure as form values ) */
+  /**
+   * whether a value can be updated or not (key-value pair where key is the same structure as form values )
+   */
   canUpdateValues: { [key: string]: boolean };
-  /** precomputed column permission error that should be displayed to the users */
+  /**
+   * precomputed column permission error that should be displayed to the users
+   */
   columnPermissionErrors: { [columnName: string]: string };
-  /* Whether the data for the main entity is fetched and the model is initialized  */
+  /**
+   * Whether the data for the main entity is fetched and the model is initialized
+   */
   initialized: boolean,
-  /* Array of numbers for initalizing form data */
+  /**
+   * Array of numbers for initalizing form data
+   */
   forms: number[],
-  /* callback to add form(s) to the forms array */
+  /**
+   * callback to add form(s) to the forms array
+   */
   addForm: (count: number) => number[],
-  /* callback to remove from(s) from the forms array */
+  /**
+   * callback to remove from(s) from the forms array
+   */
   removeForm: (indexes: number[], skipLogging?: boolean) => void,
-  /* returns the initial values for all forms to display */
+  /**
+   * returns the initial values for all forms to display
+   */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
-  /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
+  /**
+   * initiate the process of handling prefilled and default foreignkeys (in create mode)
+   */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
-  /* callback for react-hook-form to call when forms are valid */
+  /**
+   * callback for react-hook-form to call when forms are valid
+   */
   onSubmitValid: (data: any) => void,
-  /* callback for react-hook-form to call when forms are NOT valid */
+  /**
+   * callback for react-hook-form to call when forms are NOT valid
+   */
   onSubmitInvalid: (errors: any, e?: any) => void,
   /**
    * whether we should show the spinner indicating cloning form data
@@ -98,12 +127,31 @@ export const RecordeditContext = createContext<{
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
-  /* for updating the last contiguous chunk tracking info */
+  /**
+   * for updating the last contiguous chunk tracking info
+   */
   setLastContiguousChunk: (arg0: any) => void,
-  /* useRef react hook to current value */
+  /**
+   * useRef react hook to current value
+   */
   lastContiguousChunkRef: any,
-  /* max rows allowed to add constant */
+  /**
+   * max rows allowed to add constant
+   */
   MAX_ROWS_TO_ADD: number,
+  /**
+   * the prefill object from cookie storage based on prefill query param
+   */
+  prefillObject: PrefillObject | null,
+  /**
+   * the rows that are already in use in recoredit if we have a prefill object and the association is unique
+   */
+  bulkForeignKeySelectedRows: (SelectedRow | null)[],
+  setBulkForeignKeySelectedRows: (val: (SelectedRow | null)[]) => void,
+  /**
+   * function for foreign key inputs to update the rows that are already in use in recoredit if we have a prefill object and the association is unique
+   */
+  updateBulkForeignKeySelectedRows: UpdateBulkForeignKeyRowsCallback,
   /**
    * log client actions
    * Notes:
@@ -122,7 +170,11 @@ export const RecordeditContext = createContext<{
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks,
+  /**
+   * call the parent page
+   */
+  notifyParentPage: (message: RecordeditNotifyEventType) => void,
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -182,7 +234,7 @@ type RecordeditProviderProps = {
    */
   logInfo: {
     logAppMode: string;
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   },
@@ -256,6 +308,9 @@ export default function RecordeditProvider({
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
 
+  const [prefillObject, setPrefillObject] = useState<PrefillObject | null>(null);
+  const [bulkForeignKeySelectedRows, setBulkForeignKeySelectedRows] = useState<(SelectedRow | null)[]>([]);
+
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
    * foreignkey-field.tsx for domain-filter support.
@@ -276,10 +331,12 @@ export default function RecordeditProvider({
     if (!reference || setupStarted.current) return;
     setupStarted.current = true;
 
+    // should only be available in create mode
+    const prefillObj = getPrefillObject(queryParams);
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const isHidden = Array.isArray(hiddenColumns) && hiddenColumns.indexOf(column.name) !== -1;
-      const cm = columnToColumnModel(column, isHidden, queryParams);
+      const cm = columnToColumnModel(column, isHidden, prefillObj, reference.bulkCreateForeignKeyObject);
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
@@ -401,6 +458,8 @@ export default function RecordeditProvider({
           updateHeadTitle('Create new ' + reference.displayname.value);
         }
 
+        if (prefillObj) setPrefillObject(prefillObj);
+
         setInitialized(true);
       } else if (session) {
         const errMessage = MESSAGE_MAP.unauthorizedMessage + MESSAGE_MAP.reportErrorToAdmin;
@@ -512,34 +571,16 @@ export default function RecordeditProvider({
           // make sure the leave alert is disabled
           canLeaveRecordedit.current = true;
 
-          // communicate with the caller page that the request is done
-          if (appMode === appModes.EDIT) {
-            // TODO should most probably be added when we implement assets
-            // const data = checkUpdate(submissionRowsCopy, rsTuples);
-            try {
-              // check if there is a window that opened the current one
-              // make sure the update function is defined for that window
-              // verify whether we still have a valid vaue to call that function with
-              if (windowRef.opener && windowRef.opener.updated && queryParams.invalidate) {
-                windowRef.opener.updated(queryParams.invalidate);
-              }
-            } catch (exp) {
-              // if windowRef.opener is from another origin, this will result in error on accessing any attribute in windowRef.opener
-              // And if it's from another origin, we don't need to call updated since it's not
-              // the same row that we wanted to update in recordset (table directive)
-            }
-          } else {
-            // cleanup the prefill query parameter
-            if (queryParams.prefill) {
-              CookieService.deleteCookie(queryParams.prefill);
-            }
-
-            // add cookie indicating record successfully added
-            if (queryParams.invalidate) {
-              // the value of the cookie is not important as other apps are just looking for the cookie name
-              CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
-            }
+          // cleanup the prefill query parameter
+          if (queryParams.prefill) {
+            CookieService.deleteCookie(queryParams.prefill);
           }
+
+          // if there is a parent page, send a message that the edit/create is finished
+          notifyParentPage({
+            id: queryParams.invalidate,
+            type: appMode === appModes.EDIT ? RecordeditNotifyActions.EDIT : RecordeditNotifyActions.CREATE,
+          });
 
           const page = response.successful;
           const failedPage = response.failed;
@@ -769,9 +810,26 @@ export default function RecordeditProvider({
     return newFormValues;
   };
 
+  /**
+   *
+   * @param indexes array of indexes to remove from forms array (and tuples array)
+   * @param skipLogging boolean to skip logging the remove action
+   */
   const removeForm = (indexes: number[], skipLogging?: boolean) => {
     if (!skipLogging) {
       logRecordeditClientAction(LogActions.FORM_REMOVE);
+    }
+
+    // bulkForeignKeySelectedRows is only used when there is a prefill object and there is a unique association
+    if (reference.bulkCreateForeignKeyObject?.isUnique) {
+      const tempSelectedRows = [...bulkForeignKeySelectedRows];
+
+      indexes.forEach((index: number) => {
+        // use splice to remove the element from the array and shift all array values after this element forward
+        tempSelectedRows.splice(index, 1);
+      });
+
+      setBulkForeignKeySelectedRows(tempSelectedRows);
     }
 
     // remove the forms based on the given indexes
@@ -783,18 +841,42 @@ export default function RecordeditProvider({
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
   }
 
+  /**
+   * when a single foreignkey input field value is changed or removed, removes old row from association selected rows
+   * and adds the new one if a new value was selected. Used when there is a prefill object and the association is unique
+   *
+   * @param formNumber the form number from forms array to remove
+   * @param newRow the new row to keep track of, if not defined removes the previous row
+   */
+  const updateBulkForeignKeySelectedRows = (formNumber: number, newRow?: SelectedRow) => {
+    if (!reference.bulkCreateForeignKeyObject) return;
+
+    const tempSelectedRows = [...bulkForeignKeySelectedRows];
+
+    // find the index in forms for the form number
+    const indexToChange = forms.indexOf(formNumber);
+
+    if (newRow) {
+      // change the value at 'formNumber'
+      tempSelectedRows[indexToChange] = newRow
+    } else {
+      // remove value at form number without shifting other array values
+      // leaves an `empty` or `undefined` value at `indexToChange` in array
+      delete tempSelectedRows[indexToChange];
+    }
+
+    setBulkForeignKeySelectedRows(tempSelectedRows);
+  }
+
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
     let initialModel: any = { values: {} };
     if (appMode === appModes.CREATE) {
       // NOTE: should only be 1 form for create...
-      initialModel = populateCreateInitialValues(columnModels, forms, queryParams, prefillRowData);
+      initialModel = populateCreateInitialValues(columnModels, forms, prefillObject, prefillRowData);
 
       setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
-
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
-
-
       // using page.tuples here instead of forms
       initialModel = populateEditInitialValues(reference, columnModels, forms, tuplesRef.current, appMode);
 
@@ -823,14 +905,12 @@ export default function RecordeditProvider({
       return;
     }
 
-    const prefillObj = getPrefillObject(queryParams);
-
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
 
       // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
-      if (prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
+      if (prefillObject && prefillObject.fkColumnNames.indexOf(column.name) !== -1) {
         return;
       }
 
@@ -838,8 +918,8 @@ export default function RecordeditProvider({
       const defaultValue = initialValues[`c_1-${column.RID}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
-      if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
-        const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+      if (prefillObject && allForeignKeyColumnsPrefilled(column, prefillObject)) {
+        const defaultDisplay = column.getDefaultDisplay(prefillObject.keys);
 
         // if the data is missing, ermrestjs will return null
         // although the previous allPrefilled should already guard against this.
@@ -860,6 +940,15 @@ export default function RecordeditProvider({
 
     flowControl.current.setValue = setValue;
     processForeignKeyRequests();
+  };
+
+  const notifyParentPage = (message: RecordeditNotifyEventType) => {
+    if (!logInfo || !logInfo.logObject || !logInfo.logObject.ppid || !logInfo.logObject.pcid) return;
+    const logObject = logInfo.logObject;
+    const channelName = `chaise-${logObject.pcid}-${logObject.ppid}`;
+    const channel = new BroadcastChannel(channelName);
+    console.log(`sending a message to ${channelName}`);
+    channel.postMessage(message);
   }
 
   // ---------------- fk flow-control related function --------------------------- //
@@ -961,17 +1050,17 @@ export default function RecordeditProvider({
   }
 
   /**
- * In case of prefill and default we only have a reference to the foreignkey,
- * we should do extra reads to get the actual data.
- *
- * NOTE for default we don't want to send the raw data to the ermrestjs request,
- * that's why after fetching the data we're only changing the displayed rowname
- * and the foreignKeyData, not the raw values sent to ermrestjs.
- * @param formValue which form it is
- * @param colRIDs the columns RIDs that will use this data
- * @param fkRef the foreignkey reference that should be used for fetching data
- * @param logObject
- */
+   * In case of prefill and default we only have a reference to the foreignkey,
+   * we should do extra reads to get the actual data.
+   *
+   * NOTE for default we don't want to send the raw data to the ermrestjs request,
+   * that's why after fetching the data we're only changing the displayed rowname
+   * and the foreignKeyData, not the raw values sent to ermrestjs.
+   * @param formValue which form it is
+   * @param colRIDs the columns RIDs that will use this data
+   * @param fkRef the foreignkey reference that should be used for fetching data
+   * @param logObject
+   */
   function fetchForeignKeyData(colRIDs: string[], fkRef: any, logObject: any, setValue: any) {
     // NOTE since this is create mode and we're disabling the addForm,
     // we can assume this is the first form
@@ -1073,6 +1162,7 @@ export default function RecordeditProvider({
       tuples,
       waitingForForeignKeyData,
       foreignKeyCallbacks,
+      notifyParentPage,
 
       // form
       forms,
@@ -1094,6 +1184,12 @@ export default function RecordeditProvider({
       lastContiguousChunkRef,
       MAX_ROWS_TO_ADD: maxRowsToAdd,
 
+      // prefill association modal
+      prefillObject,
+      bulkForeignKeySelectedRows,
+      setBulkForeignKeySelectedRows,
+      updateBulkForeignKeySelectedRows,
+
       // log related:
       logRecordeditClientAction,
       getRecordeditLogAction,
@@ -1102,7 +1198,8 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     columnModels, columnPermissionErrors, initialized, reference, tuples, waitingForForeignKeyData,
-    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps
+    forms, showCloneSpinner, showApplyAllSpinner, showSubmitSpinner, resultsetProps,
+    prefillObject, bulkForeignKeySelectedRows
   ]);
 
   return (

@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
+import moment from 'moment';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { deleteHatracNamespaces } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
   TestFormPresentationAndValidation, testSubmission,
   TestSubmissionParams
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import moment from 'moment';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const currentTimestampTimeStr = moment().format('x');
 
@@ -99,9 +102,9 @@ const testParams: {
         ],
         inputs: [
           {
-            'title': 'new title 1', 'website': 'https://example1.com', 'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
-            'rating': '1', 'summary': 'This is the summary of this column 1.', 'description': '## Description 1',
-            'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
+            'title': 'new title 1 ™', 'website': 'https://example1.com', 'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
+            'rating': '1', 'summary': 'This is the summary of this column 1.', 'description': '## Description 1 ©',
+            'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple ®' }, 'customer': 'John Smith' }, undefined, 2),
             'no_of_rooms': '1', 'opened_on': { date_value: '2017-01-01', time_value: '01:01:01' }, 'date_col': '2017-01-01', 'luxurious': 'false',
             'text_array': ['v1', 'v2'], 'boolean_array': ['true'],
             'int4_array': ['1', '2'], 'float4_array': ['1', '2.2'],
@@ -130,10 +133,10 @@ const testParams: {
         ],
         resultRowValues: [
           [
-            'new title 1', { url: 'https://example1.com', caption: 'Link to Website' },
+            'new title 1 ™', { url: 'https://example1.com', caption: 'Link to Website' },
             { url: '/product-add:category/term=Hotel', caption: 'Hotel' },
-            '1.0000', 'This is the summary of this column 1.', 'Description 1',
-            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
+            '1.0000', 'This is the summary of this column 1.', 'Description 1 ©',
+            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple ®' }, 'customer': 'John Smith' }, undefined, 2),
             '1', '2017-01-01 01:01:01', '2017-01-01', 'false',
             'v1, v2', 'true', '1, 2', '1.0000, 2.2000', '2001-01-01, 2002-02-02', '2001-01-01 01:01:01', '2001-01-01 01:01:01',
             '#123456'
@@ -277,8 +280,7 @@ test.describe('Recordedit create', () => {
       const numForms = presentation.inputs.length;
 
       await test.step('open recordedit page', async () => {
-        const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
-        await page.goto(url);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL));
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 

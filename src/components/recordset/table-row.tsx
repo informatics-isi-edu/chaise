@@ -10,10 +10,10 @@ import { ResizeSensor } from 'css-element-queries';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 // models
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { DisabledRowType, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogParentActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -22,11 +22,12 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { disabledRowTooltip } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -39,7 +40,8 @@ type TableRowProps = {
   showActionButtons: boolean,
   selected: boolean,
   onSelectChange: (tuple: any) => void,
-  disabled: boolean
+  disabled: boolean,
+  disabledType?: DisabledRowType
 }
 
 type ReadMoreStateProps = {
@@ -56,7 +58,8 @@ const TableRow = ({
   showActionButtons,
   selected,
   onSelectChange,
-  disabled
+  disabled,
+  disabledType
 }: TableRowProps): JSX.Element => {
 
   /**
@@ -120,7 +123,13 @@ const TableRow = ({
    *   - the parent says that it should be disabled
    *   - we're waiting for the delete request
    */
-  const rowDisabled = disabled || waitingForDelete;
+  const rowDisabled = (disabled && !selected) || waitingForDelete;
+  let singleSelectIconTooltip = `Select${selected ? 'ed' : ''}`;
+
+  if (rowDisabled && disabledType) {
+    // disabled will be a small grey button without an icon
+    singleSelectIconTooltip = disabledRowTooltip(disabledType);
+  }
 
   // TODO: logging
   const initializeOverflows = () => {
@@ -179,7 +188,7 @@ const TableRow = ({
     // attach an onload function that updates how many have loaded
     const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
       `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
-      )).filter(img => !img.complete);
+    )).filter(img => !img.complete);
     if (imgTags.length > numImages.current) numImages.current = imgTags.length
 
     const onImageLoad = () => {
@@ -409,24 +418,21 @@ const TableRow = ({
   }
 
   const renderActionButtons = () => {
-
     switch (config.selectMode) {
       case RecordsetSelectMode.SINGLE_SELECT:
-        return (
-          <ChaiseTooltip
-            placement='bottom-start'
-            tooltip='Select'
+        return (<ChaiseTooltip
+          placement='bottom-start'
+          tooltip={singleSelectIconTooltip}
+        >
+          <button
+            className={'select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn'}
+            type='button'
+            disabled={rowDisabled}
+            onClick={() => onSelectChange(tuple)}
           >
-            <button
-              className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
-              type='button' 
-              disabled={rowDisabled}
-              onClick={() => onSelectChange(tuple)}
-            >
-              <span className='chaise-btn-icon fa-solid fa-circle'></span>
-            </button>
-          </ChaiseTooltip>
-        )
+            {selected && <span className={'chaise-btn-icon fa-solid fa-circle'}></span>}
+          </button>
+        </ChaiseTooltip>);
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
@@ -564,13 +570,11 @@ const TableRow = ({
         ref={rowContainer}
         style={{ 'position': 'relative' }}
       >
-        {showActionButtons &&
-          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
-            <div className='action-btns-inner-container'>
-              {renderActionButtons()}
-            </div>
-          </td>
-        }
+        {showActionButtons && <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
+          <div className='action-btns-inner-container'>
+            {renderActionButtons()}
+          </div>
+        </td>}
         {renderCells()}
       </tr>
       {showDeleteConfirmationModal &&

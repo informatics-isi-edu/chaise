@@ -2,7 +2,7 @@
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 
 // utils
 import { NavbarBanner } from '@isrd-isi-edu/chaise/src/utils/menu-utils';

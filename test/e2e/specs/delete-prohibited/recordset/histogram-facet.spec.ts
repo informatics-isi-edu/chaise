@@ -4,12 +4,13 @@ import { test, expect } from '@playwright/test';
 import RecordsetLocators, { TimestampDateTime } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   testRangePickerInputsAfterZoom,
   testTimestampRangePickerInputsAfterZoom,
   testTotalCount
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   schema_name: 'histogram-faceting',
@@ -72,9 +73,7 @@ test.describe('Testing features for range picker facet types with histograms', (
       const histogramButtons = RecordsetLocators.getFacetHistogramButtons(facet);
 
       await test.step('should load recordset page', async () => {
-        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-        await page.goto(`${baseURL}${PAGE_URL}`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
         await RecordsetLocators.waitForRecordsetPageReady(page);
       });
 
@@ -326,10 +325,10 @@ test.describe('Testing features for range picker facet types with histograms', (
 
   test('going to a page with filters that return no data', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+      const url = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
       const filters = '/int_col::leq::0&float_col::leq::0&date_col::leq::2000-01-01&timestamp_col::leq::2000-01-01';
 
-      await page.goto(`${baseURL}${PAGE_URL}${filters}`);
+      await page.goto(`${url}${filters}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 

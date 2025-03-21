@@ -4,7 +4,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // models
@@ -28,7 +28,6 @@ const FormContainer = ({
   const {
     columnModels, config, forms, onSubmitValid, onSubmitInvalid, removeForm
   } = useRecordedit();
-
 
   const { handleSubmit } = useFormContext();
 
@@ -77,6 +76,7 @@ const FormContainer = ({
   const handleRemoveForm = (formIndex: number, formNumber: number) => {
     setRemoveFormIndex(formNumber);
     setRemoveClicked(true);
+
     removeForm([formIndex]);
   };
 

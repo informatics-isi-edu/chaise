@@ -1,13 +1,15 @@
 import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { removeAuthCookieAndReload } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
 import { setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('error handling', () => {
   // run all test cases in here in parallel
@@ -18,7 +20,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('An error modal should appear with proper title and message', async () => {
-        await page.goto(getChaiseURL('record', 'accommodation_not_found', baseURL, testInfo) + '/id=11223312121');
+        await page.goto(getChaiseURL(APP_NAMES.RECORD, 'accommodation_not_found', baseURL, testInfo) + '/id=11223312121');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Item Not Found',
@@ -35,7 +37,7 @@ test.describe('error handling', () => {
 
     test('navigating to a page with that returns no record', async ({ page, baseURL }, testInfo) => {
       const errorModal = ModalLocators.getErrorModal(page);
-      const recordPageURL = getChaiseURL('record', 'accommodation', baseURL, testInfo) + '/id=11223312121';
+      const recordPageURL = getChaiseURL(APP_NAMES.RECORD, 'accommodation', baseURL, testInfo) + '/id=11223312121';
 
       await test.step('An error modal should appear with proper title and message', async () => {
         await page.goto(recordPageURL);
@@ -52,7 +54,7 @@ test.describe('error handling', () => {
 
       await test.step('clicking on OK button should redirect to the recordset page', async () => {
         await ModalLocators.getOkButton(errorModal).click();
-        await page.waitForURL('**' + getChaiseURL('recordset', 'accommodation', baseURL, testInfo) + '**');
+        await page.waitForURL('**' + getChaiseURL(APP_NAMES.RECORDSET, 'accommodation', baseURL, testInfo) + '**');
       });
 
       await test.step('clicking back button should go back to the initial page', async () => {
@@ -65,7 +67,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('An error modal should appear with proper title and message', async () => {
-        await page.goto(getChaiseURL('record', 'multiple_records', baseURL, testInfo) + '/id=10007');
+        await page.goto(getChaiseURL(APP_NAMES.RECORD, 'multiple_records', baseURL, testInfo) + '/id=10007');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Multiple Records Found',
@@ -76,7 +78,7 @@ test.describe('error handling', () => {
       await test.step('clicking on OK button should redirect to the recordset page', async () => {
         await ModalLocators.getOkButton(errorModal).click();
         // using wildcard since the url might have query parameters and sort
-        await page.waitForURL('**' + getChaiseURL('recordset', 'multiple_records', '', testInfo) + '/id=10007**');
+        await page.waitForURL('**' + getChaiseURL(APP_NAMES.RECORDSET, 'multiple_records', '', testInfo) + '/id=10007**');
       });
     });
 
@@ -84,7 +86,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('users should see an error with proper information about the issue', async () => {
-        await page.goto(getChaiseURL('record', 'accommodation', baseURL, testInfo) + '/id=2002');
+        await page.goto(getChaiseURL(APP_NAMES.RECORD, 'accommodation', baseURL, testInfo) + '/id=2002');
         await RecordLocators.waitForRecordPageReady(page);
 
         await RecordLocators.getDeleteRecordButton(page).click();
@@ -118,7 +120,7 @@ test.describe('error handling', () => {
     });
 
     test('session expired alert', async ({ page, baseURL }, testInfo) => {
-      await testSessionExpiredAlert(page, getChaiseURL('record', 'accommodation', baseURL, testInfo) + '/id=2004');
+      await testSessionExpiredAlert(page, getChaiseURL(APP_NAMES.RECORD, 'accommodation', baseURL, testInfo) + '/id=2004');
     });
   });
 
@@ -127,7 +129,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('An error errorModal window should appear with proper title and message', async () => {
-        await page.goto(getChaiseURL('recordset', 'multiple_records', baseURL, testInfo));
+        await page.goto(getChaiseURL(APP_NAMES.RECORDSET, 'multiple_records', baseURL, testInfo));
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Invalid Input',
@@ -146,7 +148,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('users should see an error with proper information about the issue', async () => {
-        await page.goto(getChaiseURL('recordset', 'file', baseURL, testInfo));
+        await page.goto(getChaiseURL(APP_NAMES.RECORDSET, 'file', baseURL, testInfo));
         await RecordsetLocators.waitForRecordsetPageReady(page);
 
         await RecordsetLocators.getRowDeleteButton(page, 0).click();
@@ -174,7 +176,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('should display the Invalid Page Criteria error', async () => {
-        await page.goto(getChaiseURL('recordset', 'accommodation', baseURL, testInfo) + '/id=2002@after()');
+        await page.goto(getChaiseURL(APP_NAMES.RECORDSET, 'accommodation', baseURL, testInfo) + '/id=2002@after()');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Invalid Page Criteria',
@@ -209,7 +211,7 @@ test.describe('error handling', () => {
          * }
          */
         const facet = 'N4IghgdgJiBcDaoDOB7ArgJwMYFM6JADMBLAGwBccM4RS0APTY9JEAGhBQAcrIoB9LmHKUMEGgEYATCAC+HYjAC6HLAAsUxXKwQgpABn0BmEEtlmgA';
-        await page.goto(getChaiseURL('recordset', 'accommodation', baseURL, testInfo) + '/*::facets::' + facet);
+        await page.goto(getChaiseURL(APP_NAMES.RECORDSET, 'accommodation', baseURL, testInfo) + '/*::facets::' + facet);
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Conflict',
@@ -239,14 +241,14 @@ test.describe('error handling', () => {
     });
 
     test('session expired alert', async ({ page, baseURL }, testInfo) => {
-      await testSessionExpiredAlert(page, getChaiseURL('recordset', 'accommodation', baseURL, testInfo));
+      await testSessionExpiredAlert(page, getChaiseURL(APP_NAMES.RECORDSET, 'accommodation', baseURL, testInfo));
     });
   });
 
   test.describe('recordedit app', () => {
     test('navigating to a page with that returns no record', async ({ page, baseURL }, testInfo) => {
       const errorModal = ModalLocators.getErrorModal(page);
-      const recordPageURL = getChaiseURL('recordedit', 'accommodation', baseURL, testInfo) + '/id=11223312121';
+      const recordPageURL = getChaiseURL(APP_NAMES.RECORDEDIT, 'accommodation', baseURL, testInfo) + '/id=11223312121';
 
       await test.step('An error modal window should appear with proper title and message', async () => {
         await page.goto(recordPageURL);
@@ -263,7 +265,7 @@ test.describe('error handling', () => {
 
       await test.step('clicking on OK button should redirect to the recordset page', async () => {
         await ModalLocators.getOkButton(errorModal).click();
-        await page.waitForURL('**' + getChaiseURL('recordset', 'accommodation', '', testInfo) + '**');
+        await page.waitForURL('**' + getChaiseURL(APP_NAMES.RECORDSET, 'accommodation', '', testInfo) + '**');
       });
     });
 
@@ -271,7 +273,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('An error popup should appear with proper title and message', async () => {
-        await page.goto(getChaiseURL('recordedit', 'multiple_records', baseURL, testInfo) + '/?limit=-1');
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'multiple_records', baseURL, testInfo) + '/?limit=-1');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Invalid Input',
@@ -281,7 +283,7 @@ test.describe('error handling', () => {
 
       await test.step('clicking on OK button should redirect to recordset', async () => {
         await ModalLocators.getOkButton(errorModal).click();
-        await page.waitForURL('**' + getChaiseURL('recordset', 'multiple_records', '', testInfo) + '**');
+        await page.waitForURL('**' + getChaiseURL(APP_NAMES.RECORDSET, 'multiple_records', '', testInfo) + '**');
       });
     });
 
@@ -289,7 +291,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('should display the Invalid Page Criteria error', async () => {
-        await page.goto(getChaiseURL('recordedit', 'accommodation', baseURL, testInfo) + '/id=2002@after()');
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'accommodation', baseURL, testInfo) + '/id=2002@after()');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Invalid Page Criteria',
@@ -307,7 +309,7 @@ test.describe('error handling', () => {
       const errorModal = ModalLocators.getErrorModal(page);
 
       await test.step('should display the Invalid Page Criteria error', async () => {
-        await page.goto(getChaiseURL('recordedit', 'accommodation', baseURL, testInfo) + '/id::gt:2002@after()');
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'accommodation', baseURL, testInfo) + '/id::gt:2002@after()');
         await expect.soft(errorModal).toBeVisible();
         await testModalTitleAndText(errorModal,
           'Invalid Page Criteria',
@@ -335,7 +337,7 @@ test.describe('error handling', () => {
 
     test('editting a record without changing data', async ({ baseURL, page }, testInfo) => {
       await test.step('open recordedit page', async () => {
-        await page.goto(getChaiseURL('recordedit', 'category', baseURL, testInfo) + '/id=10003');
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'category', baseURL, testInfo) + '/id=10003');
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 
@@ -353,7 +355,7 @@ test.describe('error handling', () => {
     test('duplicate key value and required errors while creating a record', async ({ baseURL, page }, testInfo) => {
       const recordeditError = AlertLocators.getErrorAlert(page);
       await test.step('open recordedit page', async () => {
-        await page.goto(getChaiseURL('recordedit', 'category', baseURL, testInfo));
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'category', baseURL, testInfo));
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 
@@ -381,15 +383,15 @@ test.describe('error handling', () => {
         ].join(''));
 
       });
-      
+
     });
   });
 
 });
 
 /******************** helpers ************************/
-const getChaiseURL = (appName: string, tableName: string, baseURL: string | undefined, testInfo: TestInfo) => {
-  return `${baseURL}/${appName}/#${getCatalogID(testInfo.project.name)}/product-record:${tableName}`;
+const getChaiseURL = (appName: APP_NAMES, tableName: string, baseURL: string | undefined, testInfo: TestInfo) => {
+  return generateChaiseURL(appName, 'product-record', tableName, testInfo, baseURL);
 };
 
 const testModalTitleAndText = async (errorModal: Locator, expectedTitle: string, expectedText: string) => {

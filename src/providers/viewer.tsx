@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -9,9 +9,10 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { CustomError, DifferentUserConflictError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions, LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { DisabledRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -150,7 +151,7 @@ type ViewerProviderProps = {
   queryParams: any;
   reference: any;
   logInfo: {
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   }
@@ -248,7 +249,7 @@ export default function ViewerProvider({
   } | null>(null)
 
   // passed to osd-viewer
-  const osdViewerParameters = useRef<any>();
+  const osdViewerParameters = useRef<any>({});
 
   /**
    * whether the main image is loaded or not.
@@ -296,7 +297,7 @@ export default function ViewerProvider({
       hasAnnotationQueryParam = true;
     }
 
-    const logParams = logInfo.logObject ? logInfo.logObject : {};
+    const logParams : any = logInfo.logObject ? logInfo.logObject : {};
     logParams.action = LogService.getActionString(LogActions.LOAD, logInfo.logStackPath);
     logParams.stack = logInfo.logStack;
 
@@ -870,7 +871,7 @@ export default function ViewerProvider({
   const getAnnotatedTermDisabledTuples = (
     page: any, pageLimit: number, logStack: any,
     logStackPath: string, requestCauses?: any, reloadStartTime?: any
-  ): Promise<{ page: any, disabledRows?: any }> => {
+  ): Promise<{ page: any, disabledRows?: DisabledRow[] }> => {
     return new Promise((resolve, reject) => {
 
       const annotConfig = ViewerConfigService.annotationConfig;
@@ -920,7 +921,7 @@ export default function ViewerProvider({
 
         return ref.contextualize.compactSelect.setSamePaging(page).read(pageLimit, logObj, false, true);
       }).then((disabeldPage: any) => {
-        const disabledRows: any = [];
+        const disabledRows: DisabledRow[] = [];
 
         disabeldPage.tuples.forEach((disabledTuple: any) => {
           // currently selected value should not be disabled
@@ -930,7 +931,7 @@ export default function ViewerProvider({
           const index = page.tuples.findIndex((tuple: any) => {
             return tuple.uniqueId === disabledTuple.uniqueId;
           });
-          if (index > -1) disabledRows.push(page.tuples[index]);
+          if (index > -1) disabledRows.push({tuple: page.tuples[index]});
         });
 
         resolve({ page, disabledRows });

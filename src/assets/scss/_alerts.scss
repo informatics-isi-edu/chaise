@@ -12,8 +12,8 @@
 
   // by default we're using red color for code blocks which can be misleading in a success alert
   .alert-success code {
-    color: map-get(variables.$color-map, 'code-block-success');
-    background-color: map-get(variables.$color-map, 'code-block-background-alt');
+    color: map.get(variables.$color-map, 'code-block-success');
+    background-color: map.get(variables.$color-map, 'code-block-background-alt');
   }
 }
 

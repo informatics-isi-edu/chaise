@@ -8,36 +8,37 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     allow:
       - dependency-name: "@playwright/test"
     # https://github.com/dependabot/dependabot-core/issues/1778#issuecomment-1988140219
     target-branch: master
-    assignees:
-      - "jrchudy"
-      - "RFSH"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "monthly"
+    versioning-strategy: "increase"
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: "@playwright/test"
-      - dependency-name: "moment*"
-      - dependency-name: "protractor"
+      # newer versions of eslint drop support for node 18:
       - dependency-name: "@typescript-eslint/*"
       - dependency-name: "eslint-*"
       - dependency-name: "eslint"
-      - dependency-name: "prettier"
-      - dependency-name: "patch-package"
+      # the included version of typescript-eslint/typescript-estree doesn't support 5.6+ typescript:
+      - dependency-name: "typescript"
+      # dependencies for old code that we don't need to update:
       - dependency-name: "uglify-js"
+      - dependency-name: "q"
+      - dependency-name: "@types/q"
+      - dependency-name: "moment*"
+      # we don't need to update these dependencies as frequently:
+      - dependency-name: "@babel/*"
+      - dependency-name: "babel-loader"
+      - dependency-name: "css-loader"
+      - dependency-name: "sass-loader"
+      - dependency-name: "prettier"
     groups:
-      babel:
-        patterns:
-          - "@babel/*"
-          - "babel-loader"
-          - "css-loader"
-          - "sass-loader"
       bootstrap:
         patterns:
           - "react-bootstrap"
@@ -48,6 +49,3 @@ updates:
           - "@types/react-dom"
           - "react"
           - "react-dom"
-    assignees:
-      - "jrchudy"
-      - "RFSH"

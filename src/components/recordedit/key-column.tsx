@@ -15,6 +15,8 @@ import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
+import type { JSX } from 'react';
+
 type KeyColumnProps = {
   /* the index of column that is showing the select all input */
   activeMultiForm: number;
@@ -74,6 +76,12 @@ const KeyColumn = ({
    */
   const canShowMultiFormBtn = (columnIndex: number) => {
     const cm = columnModels[columnIndex];
+
+    // hide the button if the foreign key values for this column are part of a unique key
+    // and the other part of that key is the prefiiled column that triggered the bulkForeignKey UI
+    if (cm.isLeafInUniqueBulkForeignKeyCreate) {
+      return false
+    }
 
     // if we're already showing the multi form UI, then we have to show the button
     if (activeMultiForm === columnIndex) {
@@ -149,9 +157,8 @@ const KeyColumn = ({
               </ChaiseTooltip>
             }
           </span>
-        )
+        );
       })}
-
     </div>
   );
 }

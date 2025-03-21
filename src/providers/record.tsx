@@ -1,10 +1,10 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import {
@@ -121,7 +121,7 @@ type RecordProviderProps = {
   children: JSX.Element,
   reference: any,
   logInfo: {
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string

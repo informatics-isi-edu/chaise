@@ -1,4 +1,4 @@
-# Chaise (Computer-Human Access Interface with Schema Evolution) [![Build Status](https://github.com/informatics-isi-edu/chaise/workflows/Chaise%20end-to-end%20tests/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
+# Chaise (Computer-Human Access Interface with Schema Evolution) [![Build Status](https://github.com/informatics-isi-edu/chaise/actions/workflows/e2e.yml/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
 
 
 A suite of web applications that adapt to the data model for data discovery, analysis, visualization, editing, sharing and collaboration.

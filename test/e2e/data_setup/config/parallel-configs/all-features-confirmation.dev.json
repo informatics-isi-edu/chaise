@@ -5,6 +5,7 @@
             "record/create-btn.config.json",
             "record/delete-btn.config.json",
             "record/edit-btn.config.json",
+            "record/related-table/actions.config.json",
 
             "recordedit/add.config.json",
             "recordedit/edit.config.json",

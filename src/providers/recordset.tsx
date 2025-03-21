@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -6,9 +6,11 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { ChaiseAlert, ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { LogActions, LogObjectType, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import {
+  DisabledRow,
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
@@ -25,7 +27,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 
 // utils
-import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDEDIT_MAX_ROWS,RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -126,7 +128,7 @@ export const RecordsetContext = createContext<{
   /**
    * The rows that should be disabled
    */
-  disabledRows: any,
+  disabledRows: DisabledRow[],
   /**
    * The rows that are selected
    */
@@ -231,7 +233,7 @@ type RecordsetProviderProps = {
    * log related props
    */
   logInfo: {
-    logObject?: any,
+    logObject?: LogObjectType,
     logStack: any,
     logStackPath: string,
     logAppMode?: string
@@ -286,7 +288,10 @@ export default function RecordsetProvider({
   savedQueryConfig,
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
-  const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
+  const {
+    addTooManyFormsAlert, removeTooManyFormsAlert,
+    addURLLimitAlert,  removeURLLimitAlert
+  } = useAlert();
 
   const [reference, setReference, referenceRef] = useStateRef<any>(initialReference);
 
@@ -326,7 +331,7 @@ export default function RecordsetProvider({
 
   const [totalRowCount, setTotalRowCount] = useState<number | null>(null);
 
-  const [disabledRows, setDisabledRows] = useState<any>([]);
+  const [disabledRows, setDisabledRows] = useState<DisabledRow[]>([]);
 
   /**
    * The selected rows
@@ -334,6 +339,7 @@ export default function RecordsetProvider({
   const [selectedRows, setStateSelectedRows] = useState<SelectedRow[]>(() => {
     return Array.isArray(initialSelectedRows) ? initialSelectedRows : [];
   });
+
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
    *
@@ -351,6 +357,12 @@ export default function RecordsetProvider({
             addURLLimitAlert();
           } else {
             removeURLLimitAlert();
+          }
+        } else if (config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE) {
+          if (typeof temp === 'string') {
+            addTooManyFormsAlert(temp, ChaiseAlertType.WARNING);
+          } else {
+            removeTooManyFormsAlert();
           }
         } else {
           return temp === false ? prevRows : res;
@@ -751,7 +763,7 @@ export default function RecordsetProvider({
         } else {
           return { page: result.page };
         }
-      }).then((result: { page: any, disabledRows?: any }) => {
+      }).then((result: { page: any, disabledRows?: DisabledRow[] }) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;

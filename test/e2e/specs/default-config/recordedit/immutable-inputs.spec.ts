@@ -1,11 +1,13 @@
 import { expect, Locator, test } from '@playwright/test';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { testInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { testInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
-  schemaTable: 'defaults:defaults-table',
+  schemaName: 'defaults',
+  tableName: 'defaults-table',
   create: {
     columns: [
       { name: 'asset_disabled', displayname: 'asset_disabled', type: RecordeditInputType.FILE, value: '28110_191_z.jpg', disabled: false },
@@ -147,7 +149,7 @@ test.describe('Immutable and Generated columns', () => {
 
   test('Create mode', async ({ page, baseURL }, testInfo) => {
     await test.step('open recordedit page', async () => {
-      await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schemaTable}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schemaName, testParams.tableName, testInfo, baseURL));
       await RecordeditLocators.waitForRecordeditPageReady(page);
     });
 
@@ -187,7 +189,7 @@ test.describe('Immutable and Generated columns', () => {
 
   test('Edit mode', async ({ page, baseURL }, testInfo) => {
     await test.step('open recordedit page', async () => {
-      await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schemaTable}/id=2`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schemaName, testParams.tableName, testInfo, baseURL) + '/id=2');
       await RecordeditLocators.waitForRecordeditPageReady(page);
     });
 

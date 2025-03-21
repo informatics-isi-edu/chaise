@@ -1,5 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -14,7 +14,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 // models
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow, SortColumn } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  DisabledRow, DisabledRowType, RecordsetConfig,
+  RecordsetDisplayMode, RecordsetSelectMode,
+  SelectedRow, SortColumn
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -25,12 +29,17 @@ import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/sr
 type RecordsetTableProps = {
   config: RecordsetConfig,
   initialSortObject: any,
+  /**
+   * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
+   */
+  showSingleScrollbar?: boolean,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
-  initialSortObject
+  initialSortObject,
+  showSingleScrollbar = false
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -49,6 +58,9 @@ const RecordsetTable = ({
   } = useRecordset();
 
   const tableContainer = useRef<HTMLDivElement>(null);
+  const stickyScrollbarRef = useRef<HTMLDivElement>(null);
+  const tableEndRef = useRef<HTMLDivElement>(null);
+
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
@@ -59,26 +71,96 @@ const RecordsetTable = ({
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
+  type RowConfig = {
+    isSelected: boolean;
+    isDisabled: boolean;
+    disabledType: DisabledRowType | undefined;
+  }
   /**
    * capture the state of selected and disabled of rows in here so
    * we don't have to populate this multiple times
    */
-  let isRowSelected = Array(page ? page.length : 0).fill(false);
-  if (page && page.length && Array.isArray(selectedRows) && selectedRows.length > 0) {
-    isRowSelected = page.tuples.map((tuple: any) => (
-      // ermrestjs always returns a string for uniqueId, but internally we don't
-      // eslint-disable-next-line eqeqeq
-      selectedRows.some((obj) => obj.uniqueId == tuple.uniqueId)
-    ));
+  let rowDetails: RowConfig[] = Array(page ? page.length : 0).fill({
+    isSelected: false,
+    isDisabled: false,
+    disabledType: undefined
+  });
+
+  const hasSelectedRows = Array.isArray(selectedRows) && selectedRows.length > 0,
+    hasDisabledRows = Array.isArray(disabledRows) && disabledRows.length > 0;
+
+  if (page && page.length && (hasSelectedRows || hasDisabledRows)) {
+    const tempRowDetails: RowConfig[] = []
+    for (let i = 0; i < page.tuples.length; i++) {
+      const tuple = page.tuples[i];
+      const rowConfig: RowConfig = {
+        isSelected: false,
+        isDisabled: false,
+        disabledType: undefined
+      };
+      // page.tuples.forEach((tuple: any, index: number) => {
+      if (hasSelectedRows) {
+        const row = selectedRows.find((obj: SelectedRow) => {
+          // ermrestjs always returns a string for uniqueId, but internally we don't
+          // eslint-disable-next-line eqeqeq
+          return obj.uniqueId == tuple.uniqueId
+        });
+
+        if (row) rowConfig.isSelected = true;
+      }
+
+      if (hasDisabledRows) {
+        const row = disabledRows.find((obj: DisabledRow) => {
+          // ermrestjs always returns a string for uniqueId, but internally we don't
+          // eslint-disable-next-line eqeqeq
+          return obj.tuple.uniqueId == tuple.uniqueId
+        });
+
+        if (row) {
+          rowConfig.isDisabled = true;
+          rowConfig.disabledType = row.disabledType;
+        }
+      }
+
+      tempRowDetails[i] = rowConfig;
+      // });
+    }
+
+    rowDetails = tempRowDetails;
   }
-  let isRowDisabled = Array(page ? page.length : 0).fill(false);
-  if (page && page.length && Array.isArray(disabledRows) && disabledRows.length > 0) {
-    isRowDisabled = page.tuples.map((tuple: any) => (
-      // ermrestjs always returns a string for uniqueId, but internally we don't
-      // eslint-disable-next-line eqeqeq
-      disabledRows.some((obj) => obj.uniqueId == tuple.uniqueId)
-    ));
-  }
+
+  useEffect(() => {
+    //Only implement intersection observer for top scrollbar when showSingleScrollbar is true otherwise top scrollbar will be shown as sticky
+    if (!showSingleScrollbar) return;
+
+    // Create a new IntersectionObserver instance to track the visibility of the bottom scrollbar(end of table)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        //Updating isBottomVisible when bottom scrollbar is visible in the viewport
+        if (stickyScrollbarRef.current) {
+          if (entry.isIntersecting) {
+            stickyScrollbarRef.current.classList.add('no-scroll-bar');
+          }
+          else {
+            stickyScrollbarRef.current.classList.remove('no-scroll-bar');
+          }
+        }
+      },
+      {
+        root: null, // Use viewport as the root
+        threshold: 0.1, // Triggers when 10% of the element is visible
+      }
+    );
+    //Observes when the table end is visible on viewport
+    if (tableEndRef.current) {
+      observer.observe(tableEndRef.current);
+    }
+
+    return () => {
+        observer.disconnect();
+    }
+  }, []);
+
 
   /**
    * add the top horizontal scroll if needed
@@ -156,8 +238,8 @@ const RecordsetTable = ({
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       if (!page) return res;
       page.tuples.forEach((tuple: any, index: number) => {
-        if (isRowDisabled[index]) return;
-        if (!isRowSelected[index]) {
+        if (rowDetails[index].isDisabled) return;
+        if (!rowDetails[index].isSelected) {
           res.push({
             displayname: tuple.displayname,
             uniqueId: tuple.uniqueId,
@@ -192,7 +274,8 @@ const RecordsetTable = ({
    */
   const onSelectChange = (tuple: any) => {
     setSelectedRows((currRows: SelectedRow[]) => {
-      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      // since single select can have a row selected when the modal loads (foreign key input), we want to make sure the set is empty before adding to it
+      const res: SelectedRow[] = (Array.isArray(currRows) && config.selectMode !== RecordsetSelectMode.SINGLE_SELECT) ? [...currRows] : [];
       // see if the tuple is list of selected rows or not
       const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
       // if it's currently selected, then we should deselect (and vice versa)
@@ -393,9 +476,10 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
-          selected={isRowSelected[index]}
+          selected={rowDetails[index].isSelected}
           onSelectChange={onSelectChange}
-          disabled={isRowDisabled[index]}
+          disabled={rowDetails[index].isDisabled}
+          disabledType={rowDetails[index].disabledType}
         />)
     })
   }
@@ -429,10 +513,10 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
-
   return (
     <div className='recordset-table-container' ref={tableContainer}>
-      <div className='chaise-table-top-scroll-wrapper'>
+      <div ref={stickyScrollbarRef}
+        className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
       <div className={outerTableClassname()}>
@@ -448,6 +532,10 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
+      {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
+      top scrollbar when the bottom one is visible */}
+      <div className='dummy-table-end-div' ref={tableEndRef}/>
+
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
           <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>

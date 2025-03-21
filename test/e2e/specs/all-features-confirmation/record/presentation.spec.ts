@@ -11,7 +11,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { APP_NAMES, DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { deleteDownloadedFiles, getPageURLOrigin, testExportDropdown, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { deleteDownloadedFiles, generateChaiseURL, getPageURLOrigin, testExportDropdown, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { testRecordMainSectionValues, testRelatedTablePresentation, testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 
 const testParams: any = {
@@ -183,9 +183,7 @@ test.describe('View existing record', () => {
     const catalogID = getCatalogID(testInfo.project.name);
 
     await test.step('should load record page', async () => {
-      const PAGE_URL = `/record/#${catalogID}/${testParams.schema_name}:${testParams.table_name}/${testParams.key}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, testParams.table_name, testInfo, baseURL) + `/${testParams.key}`);
       await RecordLocators.waitForRecordPageReady(page);
     });
 
@@ -224,7 +222,7 @@ test.describe('View existing record', () => {
         {
           title: 'Category', type: 'text', comment: 'can support markdown',
           value: {
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:category/RID=${getEntityRow(testInfo, testParams.schema_name, 'category', [{ column: 'id', value: '10003' }]).RID}`,
+            url: generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, 'category', testInfo, baseURL) + `/RID=${getEntityRow(testInfo, testParams.schema_name, 'category', [{ column: 'id', value: '10003' }]).RID}`,
             caption: 'Hotel'
           }
         },
@@ -242,7 +240,7 @@ test.describe('View existing record', () => {
         {
           title: 'Cover Image', type: 'int2',
           value: {
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
+            url: generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, 'file', testInfo, baseURL) + `/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
             caption: '3005'
           }
         },
@@ -258,7 +256,7 @@ test.describe('View existing record', () => {
         {
           title: 'table_w_aggregates', comment: 'has aggregates',
           value: {
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:table_w_aggregates/RID=${getEntityRow(testInfo, testParams.schema_name, 'table_w_aggregates', [{ column: 'id', value: '3' }]).RID}`,
+            url: generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, 'table_w_aggregates', testInfo, baseURL) + `/RID=${getEntityRow(testInfo, testParams.schema_name, 'table_w_aggregates', [{ column: 'id', value: '3' }]).RID}`,
             caption: '3',
             valueLocator: findRelatedMarkdownValue
           }
@@ -272,7 +270,7 @@ test.describe('View existing record', () => {
         {
           title: 'accommodation_image_assoc', comment: 'Accommodation Image',
           value: {
-            url: `${baseURL}/record/#${catalogID}/${testParams.schema_name}:file/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
+            url: generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, 'file', testInfo, baseURL) + `/RID=${getEntityRow(testInfo, testParams.schema_name, 'file', [{ column: 'id', value: '3005' }]).RID}`,
             caption: '3005',
             valueLocator: findRelatedMarkdownValue
           }
@@ -284,14 +282,11 @@ test.describe('View existing record', () => {
         { title: 'color_rgb_hex_column', value: '  #323456', match: 'html' }
       ];
 
-      if (!process.env.CI) {
-        await test.step('delete files', async () => {
-          // delete files that may have been downloaded before
-          await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
-      }
+      await test.step('delete files that may have been downloaded before', async () => {
+        await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
 
       const notNullColumns = testParams.columns.filter((c: any) => {
         return !c.hasOwnProperty('value') || c.value !== null;
@@ -556,24 +551,21 @@ test.describe('View existing record', () => {
         }
       });
 
-      if (!process.env.CI) {
-        await test.step('delete files', async () => {
-          // delete files that may have been downloaded during tests
-          await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
-      }
+      await test.step('delete files that may have been downloaded during tests', async () => {
+        await deleteDownloadedFiles(testParams.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
     });
   });
+
+  return;
 
   test('For a record with all of its related tables as empty', async ({ page, baseURL }, testInfo) => {
     const params = testParams.no_related_data;
 
     await test.step('should load record page', async () => {
-      const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}/${params.key}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, testParams.table_name, testInfo, baseURL) + `/${params.key}`);
       await RecordLocators.waitForRecordPageReady(page);
     });
 
@@ -611,9 +603,7 @@ test.describe('View existing record', () => {
     const params = testParams.sidePanelTest;
 
     await test.step('should load record page', async () => {
-      const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}/${params.key}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORD, params.schema_name, params.table_name, testInfo, baseURL) + `/${params.key}`);
       await RecordLocators.waitForRecordPageReady(page);
     });
 

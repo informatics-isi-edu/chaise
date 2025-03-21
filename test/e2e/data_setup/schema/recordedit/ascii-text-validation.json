@@ -1,0 +1,53 @@
+{
+  "schema_name": "ascii-text-validation",
+  "tables": {
+    "main": {
+      "kind": "table",
+      "keys": [
+        {
+          "unique_columns": ["id"]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": {"typename": "text"},
+          "nullok": false
+        },
+        {
+          "name": "text_col",
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "longtext_col",
+          "type": {"typename": "longtext"}
+        },
+        {
+          "name": "markdown_col",
+          "type": {"typename": "markdown"}
+        },
+        {
+          "name": "json_col",
+          "type": {"typename": "jsonb"}
+        },
+        {
+          "name": "array_text",
+          "type": {
+            "is_array": true,
+            "typename": "text[]",
+            "base_type": {
+                "typename": "text"
+            }
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id", "text_col", "longtext_col", "markdown_col", "json_col", "array_text"
+          ]
+        }
+      }
+    }
+  }
+}

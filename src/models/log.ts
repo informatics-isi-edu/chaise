@@ -189,12 +189,13 @@ export enum LogStackPaths {
   ADD_PB_POPUP= 'related-link-picker',
   UNLINK_PB_POPUP= 'related-unlink-picker',
   FOREIGN_KEY_POPUP= 'fk-picker',
+  FOREIGN_KEY_BULK_POPUP= 'fk-bulk-picker',
   FOREIGN_KEY_DROPDOWN= 'fk-dropdown',
   FACET_POPUP= 'facet-picker',
   SAVED_QUERY_CREATE_POPUP= 'saved-query-entity',
   SAVED_QUERY_SELECT_POPUP= 'saved-query-picker',
   // these two have been added to the tables that recordedit is showing
-  // (but not used in logs technically since we're not showing any controls he)
+  // (but not used in logs technically since we're not showing any controls)
   RESULT_SUCCESFUL_SET= 'result-successful-set',
   RESULT_FAILED_SET= 'result-failed-set',
   RESULT_DISABLED_SET= 'result-disabled-set',
@@ -225,6 +226,7 @@ export enum LogParentActions {
 
 // why we had to reload a request
 export enum LogReloadCauses {
+  BULK_FK_ROWS_CHANGED= 'bulk-foreignkey-selected-rows', // selected rows for bulk foreign key picker have changed
   CLEAR_ALL= 'clear-all', // clear all button
   CLEAR_CFACET= 'clear-cfacet',
   CLEAR_CUSTOM_FILTER= 'clear-custom-filter',
@@ -253,5 +255,33 @@ export enum LogReloadCauses {
   RELATED_INLINE_DELETE= 'related-inline-delete', // a row in one of the related (inline) tables has been deleted
   RELATED_INLINE_UPDATE= 'related-inline-update', // a row in one of the related (inline) tables has been edited
   SORT= 'sort', // sort changed
-  SEARCH_BOX= 'search-box', // search box value changed
+  SEARCH_BOX= 'search-box' // search box value changed
 }
+
+/**
+ * the object
+ */
+export type LogObjectType = {
+  /**
+   * the cid of the parent page
+   */
+  pcid?: string,
+  /**
+   * the pid of the parent page
+   */
+  ppid?: string,
+  /**
+   * the parent action that resulted in this page
+   */
+  paction?: string,
+  /**
+   * whether the url is using query parameter instead of hash
+   */
+  cqp?: number,
+  /**
+   * only applied to recordset page
+   * the rid of the saved query
+   */
+  sq_rid?: string
+
+};

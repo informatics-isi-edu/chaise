@@ -1,14 +1,15 @@
 import { test, expect } from '@playwright/test';
+
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test('Bulk delete in recordedit', async ({ page, baseURL }, testInfo) => {
 
   await test.step('navigate to recordedit page', async () => {
-    const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/product-delete:accommodation/id=2000;id=4004`;
-    await page.goto(url);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-delete', 'accommodation', testInfo, baseURL) + '/id=2000;id=4004');
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 

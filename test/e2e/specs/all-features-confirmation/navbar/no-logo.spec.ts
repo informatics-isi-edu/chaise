@@ -5,14 +5,15 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
+import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'product-navbar', 'accommodation', testInfo, baseURL));
   });
 
   test('basic features', async ({ page }) => {
@@ -88,37 +89,38 @@ test.describe('Navbar', () => {
       await expect.soft(menu.locator('a')).toHaveCount(7);
     });
 
-    // TODO why only local?
-    if (!process.env.CI) {
-      // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
-      await test.step('top level menu with no children should use default "newTab" value and navigate in a new tab', async () => {
-        const searchOption = menu.locator('.chaise-nav-item').nth(0);
+    // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
+    await test.step('top level menu with no children should use default "newTab" value and navigate in a new tab', async () => {
+      const searchOption = menu.locator('.chaise-nav-item').nth(0);
 
-        await expect.soft(searchOption, 'first top level menu option text missmatch').toHaveText('Search');
+      await expect.soft(searchOption, 'first top level menu option text missmatch').toHaveText('Search');
 
-        const newPage = await clickNewTabLink(searchOption);
-        await newPage.waitForURL('**/chaise/search/#1/isa:dataset**');
-        await newPage.close();
-      });
+      const newPage = await clickNewTabLink(searchOption);
+      await newPage.waitForURL('**/chaise/search/#1/isa:dataset**');
+      await newPage.close();
+    });
 
-      await test.step('first level nested link should inherit newTab value from parent and navigate in a new tab', async () => {
-        const recordsetsMenu = menu.locator('.chaise-nav-item').nth(1);
+    await test.step('first level nested link should inherit newTab value from parent and navigate in a new tab', async () => {
+      const recordsetsMenu = menu.locator('.chaise-nav-item').nth(1);
 
-        await expect.soft(recordsetsMenu.locator('.dropdown-toggle'), 'Second top level menu option text missmatch').toHaveText('RecordSets');
+      await expect.soft(recordsetsMenu.locator('.dropdown-toggle'), 'Second top level menu option text missmatch').toHaveText('RecordSets');
 
-        // click the option
-        await recordsetsMenu.click();
+      // click the option
+      await recordsetsMenu.click();
 
-        const datasetOption = recordsetsMenu.locator('a').nth(1);
+      const datasetOption = recordsetsMenu.locator('a').nth(1);
 
-        await expect.soft(datasetOption, 'First 2nd level option for RecordSets missmatch').toHaveText('Dataset');
+      await expect.soft(datasetOption, 'First 2nd level option for RecordSets missmatch').toHaveText('Dataset');
 
-        // check that clicking opens the link
-        const newPage = await clickNewTabLink(datasetOption);
-        await newPage.waitForURL(`**/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset**`);
-        await newPage.close();
-      });
-    }
+      // check that clicking opens the link
+      const newPage = await clickNewTabLink(datasetOption);
+      /**
+       * this used to use newPage.waitForURL() but for some reason it wasn't working properly on CI, so I rewrote it this way.
+       */
+      await newPage.waitForLoadState('domcontentloaded');
+      expect.soft(newPage.url()).toContain(`/chaise/recordset/#${getCatalogID(testInfo.project.name)}/isa:dataset`)
+      await newPage.close();
+    });
   });
 
   test('login menu support', async ({ page }) => {

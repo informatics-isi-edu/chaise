@@ -11,6 +11,8 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'main',
@@ -62,9 +64,7 @@ test.describe('View recordset page and form a query,', () => {
   test('For table ' + testParams.table_name + ',', async ({ page, baseURL }, testInfo) => {
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'saved_query', testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 
@@ -214,15 +214,13 @@ test('should have proper citation in share cite modal', async ({ page, baseURL }
   const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
   const entityRow = getEntityRow(testInfo, 'saved_query', testParams.table_name, keyValues);
   const ridValue = entityRow.RID, rctValue = entityRow.RCT;
-  const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/RID=${ridValue}`;
+  const recordPageURL = generateChaiseURL(APP_NAMES.RECORD, 'saved_query', testParams.table_name, testInfo, baseURL);
+  const link = `${recordPageURL}/RID=${ridValue}`;
 
   await test.step('should load record page', async () => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/saved_query:${testParams.table_name}/${keys.join('')}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}`);
-
+    await page.goto(`${recordPageURL}/${keys.join('')}`);
     await RecordLocators.waitForRecordPageReady(page);
   });
 

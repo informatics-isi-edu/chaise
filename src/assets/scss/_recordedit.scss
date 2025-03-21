@@ -18,9 +18,18 @@
       width: auto;
       margin-left: auto;
 
-      .add-rows-input {
-        width: 50px;
-        padding-left: 5px;
+      .chaise-input-group {
+        width: auto;
+
+        .add-rows-input {
+          width: 45px;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+
+      #recordedit-add-more {
+        margin-left: 10px;
       }
     }
   }
@@ -42,15 +51,14 @@
 
       .entity-key {
         width: variables.$chaise-caption-column-width;
-        border-left: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-left: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         // margin-left: 10px;
         background: white;
         padding: 8px;
 
         min-height: 47px;
-        height: 47px;
 
         flex: none;
         position: relative;
@@ -81,8 +89,8 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      color: map-get(variables.$color-map, 'black');
-      background-color: map-get(variables.$color-map, 'white');
+      color: map.get(variables.$color-map, 'black');
+      background-color: map.get(variables.$color-map, 'white');
       min-width: 250px;
       overflow-x: auto;
 
@@ -111,7 +119,12 @@
         max-width: 100%;
 
         &.highlighted-row {
-          background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
+          background-color: map.get(variables.$color-map, 'recordedit-highlighted-row');
+
+          // reset the changed height when the multi form input row is open
+          .inputs-row {
+            min-height: unset;
+          }
         }
 
         &.highlighted-row, &.with-inline-tooltip {
@@ -120,6 +133,7 @@
         }
 
         .inputs-row {
+          min-height: inherit; // the min-height of the parent row element can be changed if the key column has a taller height than the form row. We want to inherit that changed element's height value
           display: flex;
           flex-direction: row;
 
@@ -147,8 +161,8 @@
         .inline-comment-row {
           flex-direction: column;
 
-          color: map-get(variables.$color-map, 'column-inline-tooltip');
-          border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+          color: map.get(variables.$color-map, 'column-inline-tooltip');
+          border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
 
           padding: 8px 10px 0 8px;
 
@@ -162,10 +176,11 @@
         }
 
         .multi-form-input-row {
+          flex-grow: 1; // fill the space in case of a really tall row because the column name is long in the KeyColumn element (entity-key)
           flex-direction: column;
           align-items: center;
 
-          z-index: map-get(variables.$z-index-map, 'multi-form-input-row');
+          z-index: map.get(variables.$z-index-map, 'multi-form-input-row');
 
           // Adding a div to align the content center always
           .center-align {
@@ -200,7 +215,7 @@
               }
               .multi-form-input-how-to {
                 cursor: default;
-                color: map-get(variables.$color-map, 'black');
+                color: map.get(variables.$color-map, 'black');
               }
 
               .multi-form-input-how-to:hover {
@@ -286,13 +301,13 @@
           top: 0;
           height: 100%;
           width: 100%;
-          z-index: map-get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
+          z-index: map.get(variables.$z-index-map, 'recordedit-foreignkey-input-spinner-backdrop')
         }
 
         .column-permission-warning {
           margin: 0;
           padding: 5px;
-          color: map-get(variables.$color-map, 'recordedit-column-permission-warning');
+          color: map.get(variables.$color-map, 'recordedit-column-permission-warning');
         }
       }
 
@@ -300,8 +315,8 @@
       .match-entity-value {
         word-wrap: break-word;
         min-width: 250px;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
 
         // border-left: none;
         // border-top: none;
@@ -313,7 +328,7 @@
 
       // This is added to show the form is selected to apply the change
       .entity-active {
-        outline: 2px solid map-get(variables.$color-map, 'primary');
+        outline: 2px solid map.get(variables.$color-map, 'primary');
         outline-offset: -2px;
       }
 
@@ -321,15 +336,15 @@
       .column-cell {
         border-left: none;
         border-top: none;
-        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         border-radius: 0;
         // height: 47px;
         min-height: 47px;
         padding: 8px 10px;
 
         .chaise-input-control.column-cell-input {
-          border: 1px solid map-get(variables.$color-map, 'border');
+          border: 1px solid map.get(variables.$color-map, 'border');
           border-radius: 4px;
           padding: 0 10px;
           display: flex;
@@ -345,8 +360,8 @@
     // in both entity-key-column and form
     .form-header {
       height: 47px;
-      border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
-      color: map-get(variables.$color-map, 'disabled');
+      border-top: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
+      color: map.get(variables.$color-map, 'disabled');
 
       .form-header-buttons-container {
         float: right;
@@ -372,11 +387,11 @@
   .record-number {
     font-size: 14px;
     margin-left: 10px;
-    color: map-get(variables.$color-map, 'disabled');
+    color: map.get(variables.$color-map, 'disabled');
   }
 
   .chaise-input-control[readonly] {
-    background-color: map-get(variables.$color-map, 'white');
+    background-color: map.get(variables.$color-map, 'white');
     opacity: 1;
   }
 
@@ -404,61 +419,4 @@
     padding-top: 10px;
     padding-bottom: 20px;
   }
-
-  /****************** Upload modal css *****************/
-
-  // .progress-percent {
-  //   font-weight: bold;
-  //   margin-top: -25px;
-  //   margin-left: 50%;
-  // }
-
-  // .inner-progress-percent {
-  //   margin-top: -18px;
-  //   font-size: 12px;
-  // }
-
-  // table.upload-table {
-
-  // }
-
-  // table.upload-table > tbody {
-  //   border: none;
-  // }
-
-  // table.upload-table > tbody > tr > td:first-child {
-  //   padding-left: 20px;
-
-  // }
-
-  // table.upload-table > tbody > tr > td:last-child {
-  //   width: 40%;
-  // }
-
-  // table.upload-table > tbody > tr > td:nth-child(2) {
-  //   padding-left: 0px;
-  //   padding-right: 0px;
-  // }
-
-  // table.upload-table > tbody > tr:last-child > td {
-  //   border-bottom: 1px solid $disabled-background-color;
-  //   background-color: white;
-  // }
-
-  // table.upload-table > tbody > tr:first-child > td {
-  //   padding-left:0px;
-  //   padding-top: 15px;
-  //   border-bottom: 2px solid gainsboro;
-  //   font-weight: 600;
-  // }
-
-  // table.upload-table .progress {
-  //   height: 20px;
-  // }
-
-  // .upload-progress-bar {
-  //   width: 0%;
-  //   background-color: #8cacc7 !important;
-  // }
-
 }

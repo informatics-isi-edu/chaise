@@ -7,7 +7,7 @@ import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -193,6 +193,7 @@ const SavedQueryDropdown = ({
     const columnModels: any[] = [];
     const rows: any[] = [];
     const tempSavedQueryReference = savedQueryReference.contextualize.entryCreate;
+    tempSavedQueryReference.computeBulkCreateForeignKeyObject(null);
 
     // set columns list
     tempSavedQueryReference.columns.forEach((col: any) => {

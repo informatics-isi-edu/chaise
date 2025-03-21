@@ -57,5 +57,5 @@
 }
 
 .range-input-error {
-    color: map-get(variables.$color-map, 'danger');
+    color: map.get(variables.$color-map, 'danger');
 }

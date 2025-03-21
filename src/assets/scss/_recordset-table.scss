@@ -6,8 +6,8 @@
 }
 
 .chaise-table.table {
-  border-top: 1px solid map-get(variables.$color-map, 'table-border');
-  border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
+  border-top: 1px solid map.get(variables.$color-map, 'table-border');
+  border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
   margin: 0;
 
   // override the default bootstrap styles as we're going to apply our own styles below
@@ -21,48 +21,29 @@
     display: table-row-group;
     vertical-align: middle;
 
-    > tr > td.disabled-cell {
-      background-color: map-get(variables.$color-map, 'table-disabled-background');
-    }
-
     /* table hover */
     > tr:hover {
-      background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-
-      /* match color from row highlight for disabled cells */
-      > td.disabled-cell {
-        background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
-      }
+      background-color: map.get(variables.$color-map, 'table-highlight-background') !important;
 
       .hover-show {
         visibility: visible;
       }
     }
 
-    /* odd disabled cells need to be darker */
-    > tr:nth-child(odd) > td.disabled-cell {
-      background-color: map-get(variables.$color-map, 'table-striped-disabled-background');
-    }
-
     /* odd row hover for striped table */
     > tr:nth-child(odd):hover {
-      background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-
-      /* odd disabled cells need to match odd row hover for striped table above */
-      > td.disabled-cell {
-        background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
-      }
+      background-color: map.get(variables.$color-map, 'table-striped-highlight-background') !important;
     }
   }
 
   tr {
-    border-left: 1px solid map-get(variables.$color-map, 'table-border');
+    border-left: 1px solid map.get(variables.$color-map, 'table-border');
     border-bottom: none;
   }
 
   .table-heading {
-    background-color: map-get(variables.$color-map, 'table-header-background');
-    color: map-get(variables.$color-map, 'black');
+    background-color: map.get(variables.$color-map, 'table-header-background');
+    color: map.get(variables.$color-map, 'black');
 
     .actions-header {
       width: 100px;
@@ -97,11 +78,11 @@
   }
 
   & > tbody > tr:nth-child(odd) {
-    background: map-get(variables.$color-map, 'table-striped-background');
+    background: map.get(variables.$color-map, 'table-striped-background');
   }
 
   > thead > tr > th {
-    border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
+    border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
     white-space: nowrap;
   }
 
@@ -113,7 +94,7 @@
   > tfoot > tr > td {
     border-top: none;
     border-bottom: none;
-    border-right: 1px solid map-get(variables.$color-map, 'table-border');
+    border-right: 1px solid map.get(variables.$color-map, 'table-border');
     word-wrap: break-word;
   }
 
@@ -124,7 +105,7 @@
 
   th {
     font-weight: 400;
-    border-top: 1px solid map-get(variables.$color-map, 'table-border');
+    border-top: 1px solid map.get(variables.$color-map, 'table-border');
     position: relative;
 
     &.actions-header {
@@ -155,7 +136,7 @@
 
         .spinner-border {
           // NOTE: we should not customize the width/height since it causes wobbling effect
-          color: map-get(variables.$color-map, 'table-header-spinner');
+          color: map.get(variables.$color-map, 'table-header-spinner');
           border-width: .16em;
         }
       }
@@ -194,7 +175,27 @@
     }
 
     .chaise-btn.select-action-button {
-      border-radius: 10px;
+      border-radius: 12px;
+
+      &.chaise-btn-secondary {
+        border-width: 2px;
+      }
+
+      &[disabled] {
+        min-width: 12px;
+        width: 12px;
+        height: 12px;
+        margin-top: 5px;
+      }
+
+      // change size of single select icon to "fill" the whole button
+      .fa-regular.fa-circle, .fa-circle-check {
+        font-size: 1.6rem;
+        // added here instead of to the button as padding-top to only affect these buttons/icons
+        margin-top: 1px;
+        background-color: map.get(variables.$color-map, 'white') !important;
+        border-radius: inherit;
+      }
     }
 
     // make the button smaller (only visible for primary buttons. for others won't make a difference in UI and that's fine)
@@ -226,11 +227,11 @@
 
     .disabled {
       cursor: not-allowed;
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
 
     .delete-loader {
-      color: map-get(variables.$color-map, 'disabled');
+      color: map.get(variables.$color-map, 'disabled');
     }
   }
 
@@ -251,4 +252,13 @@
     width: 75px;
     margin-left: 5px;
   }
+}
+
+.chaise-table-top-scroll-wrapper {
+  position: sticky;
+  top: 0;
+}
+.no-scroll-bar {
+  display: none !important; 
+  position: absolute !important;
 }

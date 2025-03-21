@@ -33,9 +33,9 @@ const getConfig = (options: TestOptions) => {
     testMatch: options.testMatch ? options.testMatch : /.*\.spec\.ts/,
 
     // increase the default timeout
-    timeout: 60 * 1000,
+    timeout: 60_000,
     expect: {
-      timeout: 15 * 1000
+      timeout: 15_000
     },
 
     // Look for test files in the "tests" directory, relative to this configuration file.
@@ -50,7 +50,6 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    // workers: process.env.CI ? 4 : undefined,
     workers: options.runSequentially ? 1 : 4,
 
     // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways
@@ -86,7 +85,19 @@ const getConfig = (options: TestOptions) => {
       {
         name: PW_PROJECT_NAMES.PRETEST,
         testDir: __dirname,
-        testMatch: 'playwright.pretest.ts'
+        testMatch: 'playwright.pretest.ts',
+        use: {
+          /**
+           * To reduce the download size, I've added "no-shell" to the npm-install-all-modules make target.
+           * so only the new headless mode is available and that's why we need to define the channel.
+           *
+           * Once we decided to run the test cases on all browsers, we should see if defining this channel
+           * causes any issues or not. If it does, we should remove this property from here and "no-shell" from make target.
+           *
+           * https://github.com/microsoft/playwright/issues/33566
+           */
+          channel: 'chromium',
+        }
       },
       {
         name: PW_PROJECT_NAMES.CHROME,
@@ -94,7 +105,8 @@ const getConfig = (options: TestOptions) => {
         use: {
           ...devices['Desktop Chrome'],
           ...extraBrowserParams,
-          permissions: ['clipboard-read', 'clipboard-write']
+          permissions: ['clipboard-read', 'clipboard-write'],
+          channel: 'chromium', // https://github.com/microsoft/playwright/issues/33566
         },
       },
       // {

@@ -1,15 +1,16 @@
-import { test, expect, TestInfo, Page } from '@playwright/test';
+import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
 
 // locators
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState,
   testDisplayedFacets
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
-import { dragAndDropWithScroll } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, dragAndDropWithScroll, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const testParams = {
@@ -36,7 +37,8 @@ const testParams = {
       'f3 (term)', 'from_name', 'to_name', 'F1 with Term', 'Check Presence Text',
       'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
       'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
-    ]
+    ],
+    facetsToOpenAfterReorder: [4, 10]
   },
   savedStateWInvalids: {
     storage: [
@@ -153,6 +155,10 @@ test.describe('Facet reorder feature', () => {
 
   test('changing the order of facets', async ({ page, baseURL }, testInfo) => {
     const currParams = testParams.initialState;
+    const menuBtn = RecordsetLocators.getSidePanelHeadingMenu(page);
+    const saveBtn = RecordsetLocators.getSaveFacetOrderBtn(page);
+    const applyDefaultBtn = RecordsetLocators.getShowDefaultFacetOrderBtn(page);
+    const applySavedBtn = RecordsetLocators.getApplySavedFacetOrderBtn(page);
 
     // this will close all the facets
     await openRecordsetAndResetFacetState(
@@ -172,14 +178,72 @@ test.describe('Facet reorder feature', () => {
     });
 
     await test.step('interacting with the reordered facets', async () => {
+      // test facet selection
       await testFacetSelection(page, []);
+
+      // open some of the facets
+      for await (const facetId of testParams.initialState.facetsToOpenAfterReorder) {
+        const facet = RecordsetLocators.getFacetById(page, facetId);
+        await RecordsetLocators.getFacetHeaderButtonById(facet, facetId).click();
+      }
+    });
+
+    await test.step('the Save button should be available and clicking on it should save the order.', async () => {
+      await testMenuBtnIndicator(menuBtn, true);
+      await menuBtn.click();
+
+      await testMenuBtnDisabled(saveBtn, false);
+      await testMenuBtnDisabled(applyDefaultBtn, false);
+      await testMenuBtnDisabled(applySavedBtn, true);
+      await saveBtn.click();
+
+      await testMenuBtnIndicator(menuBtn, false);
+      await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder, ['timestamp_col', 'F1']);
+    });
+
+    await test.step('clicking on "Reset to default" should display the default order.', async () => {
+      await menuBtn.click();
+      await testMenuBtnDisabled(saveBtn, true);
+      await testMenuBtnDisabled(applyDefaultBtn, false);
+      await testMenuBtnDisabled(applySavedBtn, true);
+      await applyDefaultBtn.click();
+
+      await testMenuBtnIndicator(menuBtn, true);
+      await testDisplayedFacets(page, testParams.initialState.facetNames, ['to_name']);
+    });
+
+    await test.step('clicking on "Apply saved state" should display the saved state.', async () => {
+      await menuBtn.click();
+      await testMenuBtnDisabled(saveBtn, false);
+      await testMenuBtnDisabled(applyDefaultBtn, true);
+      await testMenuBtnDisabled(applySavedBtn, false)
+      await applySavedBtn.click();
+
+      await testMenuBtnIndicator(menuBtn, false);
+      await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder, ['timestamp_col', 'F1']);
     });
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
       await page.reload();
-      // int_col and id will always be open
-      await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder, ['int_col', 'id']);
+      // id and int have filters so they will be opened anyways
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+      await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder, ['int_col', 'id', 'timestamp_col', 'F1']);
     });
+
+    await test.step('changing the order of facets without clicking on save should not save the order.', async () => {
+      await moveFacet(page, 0, 2);
+      await page.reload();
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+      await testDisplayedFacets(page, testParams.initialState.facetNamesAfterReorder, ['int_col', 'id', 'timestamp_col', 'F1']);
+    });
+
+    await test.step('"Help" option should navigate to the help page.', async () => {
+      await menuBtn.click();
+      const newPage = await clickNewTabLink(RecordsetLocators.getSidePanelHeadingMenuHelpBtn(page));
+      await newPage.waitForURL('**/help/?page=chaise%2Ffacet-panel');
+      await newPage.close();
+    });
+
   });
 
   test('opening a page where the saved state has extra or invalid facets', async ({ page, baseURL }, testInfo) => {
@@ -200,7 +264,7 @@ test.describe('Facet reorder feature', () => {
       // open a facet since all of them are closed due to the previous test
       await RecordsetLocators.getFacetHeaderButtonById(RecordsetLocators.getFacetById(page, 12), 12).click();
       await page.reload();
-      await testDisplayedFacets(page, currParams.facetNames, ['id', 'int_col', 'f3 (term)']);
+      await testDisplayedFacets(page, currParams.facetNames, currParams.openFacets.names);
     });
   });
 
@@ -220,7 +284,7 @@ test.describe('Facet reorder feature', () => {
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
       await page.reload();
-      await testDisplayedFacets(page, currParams.facetNames);
+      await testDisplayedFacets(page, currParams.facetNames, currParams.openFacets.names);
     });
   });
 
@@ -229,7 +293,7 @@ test.describe('Facet reorder feature', () => {
 /********************** helper functions ************************/
 
 const getURL = (testInfo: TestInfo, baseURL?: string) => {
-  return `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
+  return generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name,testInfo, baseURL) + testParams.sort;
 }
 
 /**
@@ -275,4 +339,22 @@ const changeStoredOrder = async (page: Page, testInfo: TestInfo, order: any) => 
   }, { keyName, orderStr });
 
   await page.reload();
+}
+
+const testMenuBtnDisabled = async (locator: Locator, disabled: boolean) => {
+  await expect.soft(locator).toBeVisible();
+  if (disabled) {
+    await expect.soft(locator).toHaveClass(/disabled/);
+  } else {
+    await expect.soft(locator).not.toHaveClass(/disabled/);
+  }
+}
+
+const testMenuBtnIndicator = async (locator: Locator, hasIndicator: boolean) => {
+  await expect.soft(locator).toBeVisible();
+  if (hasIndicator) {
+    await expect.soft(locator).toHaveClass(/chaise-btn-with-indicator/);
+  } else {
+    await expect.soft(locator).not.toHaveClass(/chaise-btn-with-indicator/);
+  }
 }

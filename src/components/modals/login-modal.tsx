@@ -4,6 +4,9 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 
+import type { JSX } from 'react';
+
+
 const LoginModal = (): JSX.Element => {
   const { loginModal, closeLoginModal } = useError();
   const { popupLogin } = useAuthn();

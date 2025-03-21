@@ -4,7 +4,7 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 import DateField from '@isrd-isi-edu/chaise/src/components/input-switch/date-field';
 
 // hooks
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 
 // utils

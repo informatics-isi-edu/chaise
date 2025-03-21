@@ -1,7 +1,10 @@
 import { test, expect, TestInfo } from '@playwright/test';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
@@ -50,12 +53,12 @@ const testParams = {
 }
 
 test.describe('Regarding multi form input button', () => {
-  const getURL = (testInfo: TestInfo, schema_table: string) => {
-    return `/recordedit/#${getCatalogID(testInfo.project.name)}/${schema_table}`;
+  const getURL = (schema_table: string, testInfo: TestInfo, baseURL?: string) => {
+    return generateChaiseURL(APP_NAMES.RECORDEDIT, '', schema_table, testInfo, baseURL);
   }
 
   test('in single edit the toggle button should not be available', async ({ page, baseURL }, testInfo) => {
-    await page.goto(`${baseURL}${getURL(testInfo, 'multi-form-input:main')}/id=9001`);
+    await page.goto(`${getURL('multi-form-input:main', testInfo, baseURL)}/id=9001`);
     await RecordeditLocators.waitForRecordeditPageReady(page);
 
     await expect.soft(RecordeditLocators.getMultiFormToggleButton(page, 'markdown_col')).not.toBeVisible();
@@ -63,7 +66,7 @@ test.describe('Regarding multi form input button', () => {
 
   test('in multi edit', async ({ page, baseURL }, testInfo) => {
     await test.step('the toggle button should be offered on all non-disabled columns.', async () => {
-      await page.goto(`${baseURL}${getURL(testInfo, 'multi-form-input:main')}/${testParams.multiEdit.filter}`);
+      await page.goto(`${getURL('multi-form-input:main', testInfo, baseURL)}/${testParams.multiEdit.filter}`);
       await RecordeditLocators.waitForRecordeditPageReady(page);
 
       await expect.soft(RecordeditLocators.getMultiFormToggleButton(page, 'id')).not.toBeVisible();
@@ -104,7 +107,7 @@ test.describe('Regarding multi form input button', () => {
     const params = testParams.domainFilter;
 
     await test.step('page should load properly', async () => {
-      await page.goto(`${baseURL}${getURL(testInfo, 'multi-form-input:' + params.tableName)}/${params.filter}`);
+      await page.goto(`${getURL('multi-form-input:' + params.tableName, testInfo, baseURL)}/${params.filter}`);
       await RecordeditLocators.waitForRecordeditPageReady(page);
     });
 

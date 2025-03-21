@@ -357,12 +357,12 @@ div.modal-title {
 
         .entity-key-column .entity-key {
           border: none;
-          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+          border-top: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         }
 
         .recordedit-form .entity-value {
           border: none;
-          border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+          border-top: variables.$chaise-RE-border-width solid map.get(variables.$color-map, 'recordedit-border');
         }
       }
     }
@@ -380,58 +380,58 @@ div.modal-title {
 /*************** z-index for modal backdrops ***************/
 div.modal-backdrop {
   // override the default bootstrap value
-  z-index: map-get(variables.$z-index-map, 'modal-backdrop');
+  z-index: map.get(variables.$z-index-map, 'modal-backdrop');
 
   &.modal-error-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-error-backdrop');
+    z-index: map.get(variables.$z-index-map, 'modal-error-backdrop');
   }
 
   &.export-progress-backdrop {
-    z-index: map-get(variables.$z-index-map, 'export-progress-backdrop');
+    z-index: map.get(variables.$z-index-map, 'export-progress-backdrop');
   }
 
   &.modal-login-instruction-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-login-instruction-backdrop');
+    z-index: map.get(variables.$z-index-map, 'modal-login-instruction-backdrop');
   }
 
   // allows modal on modal (only two levels)
   ~ .modal-backdrop {
-    z-index: map-get(variables.$z-index-map, 'modal-backdrop-on-modal');
+    z-index: map.get(variables.$z-index-map, 'modal-backdrop-on-modal');
   }
 }
 
 /*************** z-index for modals ***************/
 div.modal {
   // override the default bootstrap value
-  z-index: map-get(variables.$z-index-map, 'modal');
+  z-index: map.get(variables.$z-index-map, 'modal');
 
   &.modal-error {
-    z-index: map-get(variables.$z-index-map, 'modal-error');
+    z-index: map.get(variables.$z-index-map, 'modal-error');
   }
 
   &.export-progress {
-    z-index: map-get(variables.$z-index-map, 'export-progress');
+    z-index: map.get(variables.$z-index-map, 'export-progress');
   }
 
   &.modal-login-instruction {
-    z-index: map-get(variables.$z-index-map, 'modal-login-instruction');
+    z-index: map.get(variables.$z-index-map, 'modal-login-instruction');
   }
 
   // make sure errors show up properly on top of search-popup
   &.search-popup {
     ~ .modal-error-backdrop,
     ~ .modal-login-instruction-backdrop {
-      z-index: map-get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
+      z-index: map.get(variables.$z-index-map, 'modal-error-backdrop-on-search-popup');
     }
 
     ~ .modal-error,
     ~ .modal-login-instruction {
-      z-index: map-get(variables.$z-index-map, 'modal-error-on-search-popup');
+      z-index: map.get(variables.$z-index-map, 'modal-error-on-search-popup');
     }
   }
 
   // allows modal on modal (only two levels)
   ~ .modal {
-    z-index: map-get(variables.$z-index-map, 'modal-on-modal');
+    z-index: map.get(variables.$z-index-map, 'modal-on-modal');
   }
 }

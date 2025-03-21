@@ -6,7 +6,7 @@ import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-butt
 
 // hooks
 import useViewer from '@isrd-isi-edu/chaise/src/hooks/viewer';
-import { useRef, useState } from 'react';
+import { useRef, useState, type JSX } from 'react';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -28,7 +28,7 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const searchTimeout = useRef<any>();
+  const searchTimeout = useRef<any>(undefined);
 
   // ------------------------ callbacks ------------------------- //
 
