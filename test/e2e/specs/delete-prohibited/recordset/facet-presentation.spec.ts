@@ -5,9 +5,9 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams: any = {
   schema_name: 'faceting',
@@ -45,9 +45,8 @@ const testParams: any = {
 
 test('Viewing Recordset with Faceting, default presentation based on facets annotation', async ({ page, baseURL }, testInfo) => {
   await test.step('should load recordset page', async () => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
 
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL) + testParams.sort);
     await RecordsetLocators.waitForRecordsetPageReady(page);
   });
 

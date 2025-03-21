@@ -5,11 +5,12 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 
 // utils
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState,
   testDisplayedFacets
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
-import { clickNewTabLink, dragAndDropWithScroll } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, dragAndDropWithScroll, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const testParams = {
@@ -292,7 +293,7 @@ test.describe('Facet reorder feature', () => {
 /********************** helper functions ************************/
 
 const getURL = (testInfo: TestInfo, baseURL?: string) => {
-  return `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}${testParams.sort}`;
+  return generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name,testInfo, baseURL) + testParams.sort;
 }
 
 /**

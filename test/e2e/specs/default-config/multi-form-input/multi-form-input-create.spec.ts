@@ -1,9 +1,11 @@
 import { test, expect, Page } from '@playwright/test';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   createFiles, deleteFiles, setInputValue, testFormValuesForAColumn, testSubmission
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
 
@@ -543,8 +545,7 @@ test.describe('multi form input in create mode', () => {
   });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, '', testParams.schema_table, testInfo, baseURL));
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 

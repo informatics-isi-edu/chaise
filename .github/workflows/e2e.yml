@@ -17,6 +17,7 @@ jobs:
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
       NODE_TLS_REJECT_UNAUTHORIZED: '0'
+      DERIVA_WEB_EXPORT_CONIFG: ${{ vars.DERIVA_WEB_EXPORT_CONIFG }}
     timeout-minutes: 60
     steps:
       - name: Checkout repository code
@@ -101,6 +102,24 @@ jobs:
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
           sudo service apache2 restart
+      - name: Install deriva-web
+        run: |
+          git clone https://github.com/informatics-isi-edu/deriva-web.git
+          cd deriva-web
+          sudo make install
+          sudo useradd -m -g apache -r deriva
+          sudo make deploy
+          echo "$DERIVA_WEB_EXPORT_CONIFG" | sudo tee /home/deriva/conf.d/export/export_config.json
+      - name: Install ermresolve
+        run: |
+          git clone https://github.com/informatics-isi-edu/ermresolve.git ermresolve
+          cd ermresolve
+          sudo pip3 install .
+          sudo useradd -m -g apache -r ermresolve
+          sudo chmod og+rx /home/ermresolve
+          sudo make deploy
+          sudo ln -s /etc/apache2/mods-available/unique_id.load /etc/apache2/mods-enabled/unique_id.load
+          sudo service apache2 restart
       - name: Install ermrestjs
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
@@ -165,16 +184,21 @@ jobs:
         if: always()
         with:
           name: playwright-report-${{ matrix.node-version }}
-          path: chaise/playwright-report/
+          path: |
+            chaise/playwright-report/
           retention-days: 30
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
           sudo ls -lR /etc/apache2
+          sudo ls -lR /etc/apache2/mods-enabled
           sudo ls -lR /var/run/apache2
           sudo cat /etc/apache2/conf.d/webauthn.conf
           sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
           sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+          sudo cat /etc/apache2/conf.d/wsgi_ermresolve.conf
+          sudo ls -lR /var/log/apache2
           sudo cat /var/log/apache2/error.log
           sudo cat /var/log/apache2/access.log
+          sudo cat /var/log/syslog
           sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn

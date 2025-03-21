@@ -5,15 +5,15 @@ import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
 
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/product-navbar:accommodation`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'product-navbar', 'accommodation', testInfo, baseURL));
   })
 
   test('basic features,', async ({ page }) => {
@@ -65,6 +65,7 @@ test.describe('Navbar', () => {
       expect.soft(html).toContain('<strong>Recordedit</strong>');
     });
 
+    // CI and local options are different due to the navbar acls
     if (!process.env.CI) {
       const editMenu = menu.locator('.chaise-nav-item').nth(3);
       const disabledSubMenuOptions = editMenu.locator('a.disable-link');

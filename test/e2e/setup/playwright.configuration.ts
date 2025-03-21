@@ -50,7 +50,6 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    // workers: process.env.CI ? 4 : undefined,
     workers: options.runSequentially ? 1 : 4,
 
     // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways

@@ -1,8 +1,10 @@
 import { expect, test, TestInfo, Page } from '@playwright/test';
+
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testButtonState } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Viewing Recordset app with permission related annotations', () => {
 
@@ -132,7 +134,7 @@ test.describe('Viewing Recordset app with permission related annotations', () =>
 
 const openThePage = async (tableName: string, page: Page, baseURL: string | undefined, testInfo: TestInfo) => {
   await test.step('should load the page properly', async () => {
-    await page.goto(`${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/multi-permissions:${tableName}/id=1`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'multi-permissions', tableName, testInfo, baseURL) + '/id=1');
     await RecordsetLocators.waitForRecordsetPageReady(page);
   });
 }

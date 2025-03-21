@@ -14,7 +14,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { APP_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { clickNewTabLink, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, generateChaiseURL, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 export type RecordeditExpectedColumn = {
@@ -964,7 +964,7 @@ export const testFormPresentationAndValidation = async (
     await expect.soft(titleEl).toHaveText(pageTitle);
 
     const linkEl = RecordeditLocators.getPageTitleLink(page);
-    const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
+    const expectedLink = generateChaiseURL(APP_NAMES.RECORDSET, params.schemaName, params.tableName, testInfo, baseURL) + '?pcid='
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
 

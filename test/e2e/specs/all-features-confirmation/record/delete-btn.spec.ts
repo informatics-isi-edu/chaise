@@ -5,8 +5,9 @@ import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testDeleteConfirm } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   schema_name: 'product-delete-btn',
@@ -18,10 +19,10 @@ const testParams = {
 
 test.describe('Delete functionality in record page with confirm dialog', () => {
   test('when the deleted row is from a table without any inline fks with on delete cascade', async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name1}`;
+    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, testParams.table_name1, testInfo, baseURL);
 
     await test.step('should load record page', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}/${testParams.key1}`);
+      await page.goto(`${PAGE_URL}/${testParams.key1}`);
       await RecordLocators.waitForRecordPageReady(page);
     });
 
@@ -36,16 +37,16 @@ test.describe('Delete functionality in record page with confirm dialog', () => {
       const message = 'Are you sure you want to delete delete_table: one?';
       await testDeleteConfirm(page, RecordLocators.getDeleteRecordButton(page), message);
 
-      await expect.soft(page).toHaveURL(`${baseURL}${PAGE_URL.replace('record', 'recordset')}@sort(RID)`);
+      await expect.soft(page).toHaveURL(`${PAGE_URL.replace('record', 'recordset')}@sort(RID)`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
   });
 
   test('when the deleted row is from a table with inline fks with on delete cascade', async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name2}`;
+    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, testParams.table_name2, testInfo, baseURL);
 
     await test.step('should load record page', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}/${testParams.key2}`);
+      await page.goto(`${PAGE_URL}/${testParams.key2}`);
       await RecordLocators.waitForRecordPageReady(page);
     });
 
@@ -68,7 +69,7 @@ test.describe('Delete functionality in record page with confirm dialog', () => {
       ].join('');
       await testDeleteConfirm(page, RecordLocators.getDeleteRecordButton(page), message);
 
-      await expect.soft(page).toHaveURL(`${baseURL}${PAGE_URL.replace('record', 'recordset')}@sort(RID)`);
+      await expect.soft(page).toHaveURL(`${PAGE_URL.replace('record', 'recordset')}@sort(RID)`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
   });

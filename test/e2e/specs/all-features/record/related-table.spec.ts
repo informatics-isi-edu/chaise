@@ -15,8 +15,9 @@ import {
   testAddAssociationTable, testAddRelatedTable, testAddRelatedWithForeignKeyMultiPicker,
   testBatchUnlinkAssociationTable, testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { testInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { testModalClose, testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import { testInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const testParams = {
@@ -69,14 +70,10 @@ const testParams = {
 // TODO playwright: we should break this file into at least two files
 
 test.describe('Related tables', () => {
-  const keys = [];
-  keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-  const URL_PATH = `${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
-
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${URL_PATH}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    const keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/${keys.join('&')}`)
 
     await RecordLocators.waitForRecordPageReady(page);
   });
@@ -98,7 +95,7 @@ test.describe('Related tables', () => {
   test('share popup when the citation annotation has wait_for of all-outbound', async ({ page, baseURL }, testInfo) => {
     const keyValues = [{ column: testParams.key.name, value: testParams.key.value }];
     const ridValue = getEntityRow(testInfo, testParams.schemaName, testParams.table_name, keyValues).RID;
-    const link = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/RID=${ridValue}`;
+    const link = generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/RID=${ridValue}`;
     await testShareCiteModal(
       page,
       testInfo,
@@ -133,8 +130,7 @@ test.describe('Related tables', () => {
         canEdit: true,
         inlineComment: 'booking inline comment',
         bulkEditLink: [
-          `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}`,
-          'product-unordered-related-tables-links:booking',
+          generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-unordered-related-tables-links', 'booking', testInfo, baseURL),
           // we cannot test the actual facet blob since it's based on RID
           // and we also don't have access to ermrestjs here to encode it for us
           '*::facets::'
@@ -983,9 +979,8 @@ test.describe('Scroll to query parameter', () => {
   test('after page load should scroll to the related table', async ({ page, baseURL }, testInfo) => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-    const PAGE_URL = `/record/#${getCatalogID(testInfo.project.name)}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}?scrollTo=${testParams.scrollToDisplayname}`);
+    const url = generateChaiseURL(APP_NAMES.RECORD, testParams.schemaName, testParams.table_name, testInfo, baseURL) + `/${keys.join('&')}`;
+    await page.goto(`${url}?scrollTo=${testParams.scrollToDisplayname}`);
 
     await RecordLocators.waitForRecordPageReady(page);
 
