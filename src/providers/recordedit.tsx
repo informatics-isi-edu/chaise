@@ -1,3 +1,6 @@
+// components
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+
 // hooks
 import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -11,7 +14,7 @@ import {
   RecordeditConfig, RecordeditDisplayMode, RecordeditForeignkeyCallbacks,
   RecordeditModalOptions, UpdateBulkForeignKeyRowsCallback, UploadProgressProps
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { LogActions, LogObjectType, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogObjectType, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src//models/events';
@@ -33,7 +36,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled, columnToColumnModel, getPrefillObject,
-  populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
+  populateCreateInitialValues, populateEditInitialValues, populateLinkedData, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -530,10 +533,14 @@ export default function RecordeditProvider({
     // remove all existing alerts
     removeAllAlerts();
 
+    // used for upload
     const submissionRows: any[] = [];
+    const submissionRowsLinkedData : any[] = [];
+
     // f is the number in forms array that is
     forms.forEach((f: number) => {
       submissionRows.push(populateSubmissionRow(reference, f, data, prefillRowData));
+      submissionRowsLinkedData.push(populateLinkedData(reference, f, foreignKeyData.current));
     });
     if (modifySubmissionRows) {
       modifySubmissionRows(submissionRows);
@@ -563,7 +570,7 @@ export default function RecordeditProvider({
       // show spinner
       setShowSubmitSpinner(true);
 
-      uploadFiles(submissionRows, () => {
+      uploadFiles(submissionRows, submissionRowsLinkedData, () => {
         // close the modal
         setUploadProgressModalProps(undefined);
 
@@ -651,7 +658,9 @@ export default function RecordeditProvider({
 
             const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
             addAlert(exception.message, alertType);
-          })
+          }).catch(() => {
+            // validateSession always resolves a promise
+          });
 
 
         };
@@ -704,8 +713,14 @@ export default function RecordeditProvider({
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
   }
 
-  const uploadFiles = (submissionRowsCopy: any[], onSuccess: () => void) => {
-    const uploadInfo = areFilesValid(submissionRowsCopy);
+  /**
+   * if there are any assets, it will set the proper pros for upload progress modal so it shows up.
+   * @param submissionRowsCopy the main table data
+   * @param submissionRowsLinkedData the foreign key data (linked data)
+   * @param onSuccess
+   */
+  const uploadFiles = (submissionRowsCopy: any[], submissionRowsLinkedData: any[], onSuccess: () => void) => {
+    const uploadInfo = areFilesValid(submissionRowsCopy, submissionRowsLinkedData);
     // if there are no file inputs, or no files to upload
     if (!uploadInfo.hasAssetColumn) {
       onSuccess();
@@ -713,6 +728,7 @@ export default function RecordeditProvider({
       // If url is valid
       setUploadProgressModalProps({
         rows: submissionRowsCopy,
+        linkedData: submissionRowsLinkedData,
         onSuccess: onSuccess,
         onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
@@ -743,12 +759,10 @@ export default function RecordeditProvider({
     }
   }
 
-  const areFilesValid = (rows: any[]) => {
-    let isValid = true, index = 0, hasAssetColumn = false;
+  const areFilesValid = (rows: any[], linkedData: any[]) => {
+    let isValid = true, hasAssetColumn = false;
     // Iterate over all rows that are passed as parameters to the modal controller
-    rows.forEach((row) => {
-
-      index++;
+    rows.forEach((row, rowIndex) => {
 
       // Iterate over each property/column of a row
       for (const k in row) {
@@ -769,18 +783,22 @@ export default function RecordeditProvider({
           if (column && column.isAsset) {
             hasAssetColumn = true;
 
+            const messageContext = <>column <code><DisplayValue value={column.displayname} /></code> for record {rowIndex+1}</>;
+
             if (row[k].url === '' && !column.nullok) {
               isValid = false;
-              addAlert('Please select file for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+              addAlert(<>Please select a file for {messageContext}.</>, ChaiseAlertType.ERROR);
             } else if (row[k] !== null && typeof row[k] === 'object' && row[k].file) {
               try {
-                if (!row[k].hatracObj.validateURL(row)) {
+                if (!row[k].hatracObj.validateURL(row, linkedData[rowIndex])) {
                   isValid = false;
-                  addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+                  addAlert(<>Invalid url template for {messageContext}.</>, ChaiseAlertType.ERROR);
                 }
               } catch (e) {
                 isValid = false;
-                addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+                $log.error('error while validating url_pattern:')
+                $log.error(e);
+                addAlert(<>Invalid url template for {messageContext}.</>, ChaiseAlertType.ERROR);
               }
             }
           }

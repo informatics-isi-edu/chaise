@@ -868,6 +868,7 @@ const RecordeditInner = ({
         <UploadProgressModal
           show={!!uploadProgressModalProps}
           rows={uploadProgressModalProps.rows}
+          linkedData={uploadProgressModalProps.linkedData}
           onSuccess={uploadProgressModalProps.onSuccess}
           onCancel={uploadProgressModalProps.onCancel}
         />

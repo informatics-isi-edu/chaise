@@ -191,7 +191,17 @@ export interface UploadFileObject {
   versionedUrl?: string;
   column: any,
   reference: any,
+  /**
+   * main table data
+   */
   row: any,
+  /**
+   * outbound fk data
+   */
+  linkedData: any,
+  /**
+   * which row this is
+   */
   rowIdx: number
 }
 
@@ -236,9 +246,13 @@ export interface LastChunkObject {
 
 export interface UploadProgressProps {
   /**
-   * rows of data from recordedit form to get file values from
+   * rows of data from recordedit forms to get file values from
    */
   rows: any[];
+  /**
+   * the outbound fk values (linke data) for all the forms
+   */
+  linkedData: any[];
   /**
    * prop to trigger on delete confirmation
    */

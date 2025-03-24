@@ -457,7 +457,6 @@ const FacetChoicePicker = ({
     };
 
     const logInfo = {
-      logObject: null,
       logStack: LogService.addExtraInfoToStack(getDefaultLogInfo().stack, { picker: 1 }),
       logStackPath: LogService.getStackPath(facetModel.parentLogStackPath, LogStackPaths.FACET_POPUP),
     };

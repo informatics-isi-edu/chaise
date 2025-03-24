@@ -31,6 +31,12 @@ export type ChaiseAlert = {
 };
 
 type AddAlertFunction = (
+  /**
+   * the message that will be displayed.
+   *
+   * Notes:
+   *  - if it's a string, will be rendered as HTML. so it can have HTML tags.
+   */
   message: string | JSX.Element,
   type: ChaiseAlertType,
   onRemove?: () => void,
@@ -74,7 +80,7 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
 
   /**
    * create add an alert
-   * @param message the message that will be displayed
+   * @param message the message that will be displayed (if it's a string, will be treated like HTML. so it can have HTML tags)
    * @param type type of message
    * @param onRemove the callback that will be called when the users remove the alert.
    * @return the newly created alert
