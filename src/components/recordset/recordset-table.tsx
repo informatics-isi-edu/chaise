@@ -391,7 +391,7 @@ const RecordsetTable = ({
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          {col.column.comment ?
+          {col.column.comment && col.column.comment.value ?
             // if comment, show tooltip
             <ChaiseTooltip
               placement='top'
@@ -532,7 +532,7 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
+      {/*  This div will be used as the target (end of table) for the intersection observer to hide the
       top scrollbar when the bottom one is visible */}
       <div className='dummy-table-end-div' ref={tableEndRef}/>
 

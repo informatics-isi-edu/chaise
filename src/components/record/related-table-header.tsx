@@ -27,7 +27,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const contentRef = useRef(null);
 
   const usedRef = relatedModel.initialReference;
-  const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
+  const hasTooltip = !!usedRef.comment && !!usedRef.comment.value && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
 
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;
