@@ -113,7 +113,7 @@ const ViewerAnnotationFormContainer = (): JSX.Element => {
         (!cm.isHidden && <div key={idx} className='viewer-annotation-form-row'>
           <div className='viewer-annotation-form-row-header'>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
-            {cm.column.comment ?
+            {cm.column.comment && cm.column.comment.value ?
               <ChaiseTooltip
                 placement='right'
                 tooltip={<DisplayCommentValue comment={cm.column.comment} />}

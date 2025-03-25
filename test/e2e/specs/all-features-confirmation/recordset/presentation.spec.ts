@@ -309,6 +309,10 @@ test.describe('View recordset', () => {
       await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(16);
     });
 
+    await test.step('title should not have any tooltips (suppressed by using `false`).', async () => {
+      await expect.soft(RecordsetLocators.getPageTitleTooltip(page)).not.toBeAttached();
+    });
+
     await test.step('should show correct table rows.', async () => {
       await testRecordsetTableRowValues(page, data, true);
     });

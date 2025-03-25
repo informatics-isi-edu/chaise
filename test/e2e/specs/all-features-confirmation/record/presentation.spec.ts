@@ -173,7 +173,19 @@ const testParams: any = {
         value: '2002'
       }]]
     }
-  ]
+  ],
+  noTooltipHeaderTest: {
+    commentFalse: {
+      schemaName: 'product-record',
+      tableName: 'booking',
+      key: 'id=1'
+    },
+    noComment: {
+      schemaName: 'product-record',
+      tableName: 'accommodation_outbound1',
+      key: 'id=o1_1'
+    }
+  }
 };
 
 test.describe('View existing record', () => {
@@ -559,8 +571,6 @@ test.describe('View existing record', () => {
     });
   });
 
-  return;
-
   test('For a record with all of its related tables as empty', async ({ page, baseURL }, testInfo) => {
     const params = testParams.no_related_data;
 
@@ -640,5 +650,19 @@ test.describe('View existing record', () => {
       await expect.soft(showTocBtn.locator('.chaise-icon')).toHaveClass(/chaise-sidebar-open/);
       await expect.soft(recPan).toHaveClass(/close-panel/);
     });
+  });
+
+  test('using comment:false should suppress the model comment and hide subtitle tooltip', async ({page, baseURL}, testInfo) => {
+    const params = testParams.noTooltipHeaderTest.commentFalse;
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, params.schemaName, params.tableName, testInfo, baseURL) + `/${params.key}`);
+    await RecordLocators.waitForRecordPageReady(page);
+    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toHaveClass(/chaise-icon-for-tooltip/);
+  });
+
+  test('tables without any comment should not show the subtitle tooltip', async ({page, baseURL}, testInfo) => {
+    const params = testParams.noTooltipHeaderTest.noComment;
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, params.schemaName, params.tableName, testInfo, baseURL) + `/${params.key}`);
+    await RecordLocators.waitForRecordPageReady(page);
+    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toHaveClass(/chaise-icon-for-tooltip/);
   });
 });

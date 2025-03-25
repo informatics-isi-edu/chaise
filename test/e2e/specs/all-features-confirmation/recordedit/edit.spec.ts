@@ -281,6 +281,45 @@ const testParams: {
           ]
         ]
       }
+    },
+    {
+      num_files: 2,
+      filter: 'id=any(1,2)@sort(id)',
+      presentation: {
+        description: 'file upload with outbound fkey usage in url_pattern',
+        schemaName: 'product-edit',
+        tableName: 'file_w_fk_in_url_pattern',
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        columns: [
+          { name: 'id', displayname: 'id', type: RecordeditInputType.TEXT, isRequired: true, skipValidation: true },
+          { name: 'category', displayname: 'Category', type: RecordeditInputType.FK_POPUP, isRequired: false, skipValidation: true },
+          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE , skipValidation: true},
+          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
+        ],
+        values: [
+          {  'id': '1', 'category': 'Select a value', 'asset_col': 'Select a file', 'timestamp_txt': '' },
+          {  'id': '2', 'category': 'Motel', 'asset_col': 'Select a file', 'timestamp_txt': '' }
+        ],
+        inputs: [
+          {
+            'asset_col': testFiles[0],
+            'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'asset_col': testFiles[1],
+            'timestamp_txt': currentTimestampTimeStr
+          }
+        ]
+      },
+      submission: {
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        resultColumnNames: ['id', 'Category', 'asset_col'],
+        resultRowValues: [
+          [ '1', '10003', { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Hotel/1/` } ],
+          [ '2', '10005', { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Motel/2/` } ]
+        ]
+      }
     }
   ]
 }

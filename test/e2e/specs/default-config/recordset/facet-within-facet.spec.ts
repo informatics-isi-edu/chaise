@@ -785,8 +785,6 @@ test.describe('facet within facet', () => {
     )
   });
 
-  return;
-
   test.describe('record link popup', () => {
     testFacetWithinFacet(
       'main association',

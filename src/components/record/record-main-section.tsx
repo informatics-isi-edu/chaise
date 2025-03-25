@@ -62,7 +62,7 @@ const RecordMainSection = (): JSX.Element => {
     const hideAllHeaders = reference.display.hideColumnHeaders;
     return columnModels.map((cm: RecordColumnModel, index: number) => {
       const hideHeader = hideAllHeaders || cm.column.hideColumnHeader;
-      const hasTooltip = !!cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.TOOLTIP;
+      const hasTooltip = !!cm.column.comment && !!cm.column.comment.value && cm.column.comment.displayMode === CommentDisplayModes.TOOLTIP;
       const hasError = showError(cm);
       const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
         cm.relatedModel.recordsetState.isInitialized;
@@ -124,7 +124,7 @@ const RecordMainSection = (): JSX.Element => {
               <span id={`entity-${cm.index}-table`}>
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
-                  {cm.column.comment && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
+                  {cm.column.comment && cm.column.comment.value && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
                     <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable

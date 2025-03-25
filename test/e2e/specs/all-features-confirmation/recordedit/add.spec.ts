@@ -258,6 +258,50 @@ const testParams: {
           ]
         ]
       }
+    },
+    {
+      num_files: 2,
+      presentation: {
+        description: 'file upload with outbound fkey usage in url_pattern',
+        schemaName: 'product-add',
+        tableName: 'file_w_fk_in_url_pattern',
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        columns: [
+          { name: 'id', displayname: 'id', type: RecordeditInputType.TEXT, isRequired: true, skipValidation: true },
+          { name: 'category', displayname: 'Category', type: RecordeditInputType.FK_POPUP, isRequired: false, skipValidation: true },
+          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE , skipValidation: true},
+          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
+        ],
+        inputs: [
+          {
+            'id': '3',
+            'asset_col': testFiles[0],
+            'category': { modal_num_rows: 5, modal_option_index: 1, rowName: 'Ranch' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'id': '4',
+            'asset_col': testFiles[1],
+            'category': { modal_num_rows: 5, modal_option_index: 3, rowName: 'Resort' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          // the form will be removed:
+          {
+            'id': '5',
+            'asset_col': testFiles[1],
+            'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
+            'timestamp_txt': currentTimestampTimeStr
+          }
+        ]
+      },
+      submission: {
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        resultColumnNames: ['id', 'Category', 'asset_col'],
+        resultRowValues: [
+          [ '3', '10004', { caption: 'testfile1MB_add.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Ranch/3/` } ],
+          [ '4', '10006', { caption: 'testfile500kb_add.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Resort/4/` } ]
+        ]
+      }
     }
   ]
 }

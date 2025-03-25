@@ -268,7 +268,8 @@ const FormRow = ({
   // -------------------------- render logic ---------------------- //
 
   const columnModel = columnModels[columnModelIndex];
-  const hasInlineComment = columnModel.column.comment && columnModel.column.comment.displayMode === CommentDisplayModes.INLINE;
+  const columnComment = columnModel.column.comment;
+  const hasInlineComment = !!columnComment && !!columnComment.value && columnComment.displayMode === CommentDisplayModes.INLINE;
 
   /**
    * Return true if,

@@ -681,6 +681,85 @@
         }
       }
     },
+    "file_w_fk_in_url_pattern": {
+      "kind": "table",
+      "schema_name": "product-edit",
+      "table_name": "file_w_fk_in_url_pattern",
+      "keys": [{"unique_columns": ["id"]}],
+      "foreign_keys": [
+        {
+          "names": [["product-edit", "file_w_fk_in_url_pattern_fk1"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "file_w_fk_in_url_pattern",
+              "schema_name": "product-edit",
+              "column_name": "fk_to_category"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "table_name": "category",
+              "schema_name": "product-edit",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {"typename": "text"}
+        },
+        {
+          "name": "asset_col",
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "tag:isrd.isi.edu,2017:asset": {
+              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{$fkey_product-edit_file_w_fk_in_url_pattern_fk1.values.term}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
+              "filename_column" : "asset_filename_col"
+            }
+          }
+        },
+        {
+          "name": "asset_filename_col",
+          "nullok": true,
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_to_category",
+          "type": {"typename": "int4"}
+        },
+        {
+          "name": "timestamp_txt",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id", ["product-edit", "file_w_fk_in_url_pattern_fk1"], "asset_col"
+          ],
+          "entry": [
+            "id",
+            {
+              "source": [{"outbound": ["product-edit", "file_w_fk_in_url_pattern_fk1"]}, "RID"],
+              "comment": false,
+              "markdown_name": "Category"
+            },
+            "asset_col",
+            "timestamp_txt"
+          ]
+        }
+      }
+    },
     "accommodation_image": {
       "comment": "this contains asset/thumbnails",
       "kind": "table",
@@ -851,13 +930,6 @@
       }
     }
   },
-  "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking"
-  ],
   "comment": null,
   "annotations": {
     "tag:misd.isi.edu,2015:display": {

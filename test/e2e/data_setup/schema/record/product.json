@@ -649,7 +649,7 @@
             }
         },
         "booking": {
-            "comment": null,
+            "comment": "model comment that should not be visible due to display annot",
             "kind": "table",
             "entityCount": 0,
             "keys": [{
@@ -789,6 +789,9 @@
                             "column": "id"
                         }]
                     }
+                },
+                "tag:misd.isi.edu,2015:display" : {
+                    "comment": false
                 }
             }
         },
