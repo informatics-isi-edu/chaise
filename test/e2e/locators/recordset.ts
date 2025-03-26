@@ -162,7 +162,7 @@ export default class RecordsetLocators {
   }
 
   static getActionsHeader(container: Page | Locator): Locator {
-    return container.locator('.actions-header').filter({ hasNot: container.locator('.sticky-header') });
+    return container.locator('.actions-header');
   }
 
   static getRows(container: Page | Locator): Locator {
@@ -178,7 +178,7 @@ export default class RecordsetLocators {
   }
 
   static getColumnNames(container: Page | Locator): Locator {
-    return container.locator('.table-column-displayname > span').filter({ hasNot: container.locator('.sticky-header') });
+    return container.locator('.table-column-displayname > span');
   };
 
   static getFirstColumn(container: Page | Locator): Locator {

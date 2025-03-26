@@ -3,9 +3,6 @@
 # Make sure to use volume mounts to mount the chaise directory to the container.
 # for more information refer - docs/dev-docs/e2e-test-docker.md
 FROM ubuntu:20.04
-FROM node:20
-
-
 
 RUN apt-get update \
     && apt-get install -y wget gnupg \
@@ -24,7 +21,7 @@ RUN apt-get update && \
     rsync \
     git \
     sudo \
-    openjdk-17-jdk 
+    openjdk-8-jdk 
 
 # Install Node.js 16.x
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -

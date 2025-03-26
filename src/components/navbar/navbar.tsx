@@ -38,6 +38,7 @@ import {
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import useNavbar from '@isrd-isi-edu/chaise/src/hooks/navbar';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = ConfigService.catalogID;
@@ -61,10 +62,15 @@ const ChaiseNavbar = (): JSX.Element => {
   const [openedDropDownIndex, setOpenedDropDownIndex] = useState<number>();
 
   const dropdownWrapper = useRef<any>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   const isValueDefined = (val: any): boolean => (val !== undefined && val !== null);
 
   const isVersioned = (): boolean => (!!catalogId.split('@')[1]);
+
+  //To set the navHeader's height
+  const {setNavHeaderHeight} = useNavbar();
+
 
   useEffect(() => {
     const root = typeof cc.navbarMenu === 'object' ? { ...cc.navbarMenu } : {};
@@ -377,8 +383,21 @@ const ChaiseNavbar = (): JSX.Element => {
     });
   };
 
+  // To create a ResizeObserver to monitor height changes of the nav header element
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (entries[0].contentRect) {
+        setNavHeaderHeight(entries[0].contentRect.height);
+      }
+    });
+  
+    if (headerRef.current) resizeObserver.observe(headerRef.current);
+  
+    return () => resizeObserver.disconnect();
+  }, []);
+
   return (
-    <header id='navheader'>
+    <header id='navheader' ref={headerRef}>
       {!ConfigService.appSettings.hideNavbar &&
         <>
           {renderBanners(topBanners)}

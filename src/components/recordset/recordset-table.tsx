@@ -25,6 +25,7 @@ import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import useNavbar from '@isrd-isi-edu/chaise/src/hooks/navbar';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -33,13 +34,15 @@ type RecordsetTableProps = {
    * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
    */
   showSingleScrollbar?: boolean,
+  appContentRef?: React.RefObject<HTMLDivElement>,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
   initialSortObject,
-  showSingleScrollbar = false
+  showSingleScrollbar = false,
+  appContentRef,
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -74,7 +77,8 @@ const RecordsetTable = ({
   // tracks whether a paging action has successfully occurred for this table
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
-  const [headerTop, setHeaderTop] = useState<number>(0);
+  const [showStickyHeader, setShowStickyHeader] = useState<boolean>(true);
+  const { navHeaderHeight, topContainerHeight } = useNavbar();
 
   type RowConfig = {
     isSelected: boolean;
@@ -162,29 +166,49 @@ const RecordsetTable = ({
     }
 
     return () => {
-        observer.disconnect();
+      observer.disconnect();
     }
   }, []);
 
-  useEffect(()=>{
-    setHeaderTop(headRef.current!.getBoundingClientRect().top);
-  },[isInitialized]);
 
-  useEffect(()=>{
-    if(!outerTableRef.current || !headRef.current || !stickyHeaderRef.current){
+  // Function to check if the app content container should have a sticky header
+  const checkForScrollableContainer = () => {
+    if (appContentRef?.current) {
+      const hasClass = !(appContentRef.current ? appContentRef.current.classList.contains('app-content-container-scrollable') || appContentRef.current.offsetWidth < 900 : true);
+      setShowStickyHeader((prev) => prev !== hasClass ? hasClass : prev);
+    }
+  }
+
+  // Effect to listen for window resize events and re-check scrollability
+  useEffect(() => {
+    const handleResize = () => {
+      checkForScrollableContainer();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+
+  //To handle sticky header visibility based on element intersection
+  useLayoutEffect(() => {
+    if (!outerTableRef.current || !headRef.current || !stickyHeaderRef.current || !stickyScrollbarRef.current) {
       return;
     }
 
+    // Create an IntersectionObserver to track when the table header is visible
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if(stickyHeaderRef.current){
-        if (!entry.isIntersecting) {
-          stickyHeaderRef.current.style.visibility = 'visible';
-          stickyHeaderRef.current.style.top = `${headerTop}px`;
-        } else {
-          stickyHeaderRef.current.style.visibility = 'hidden';
+        if (stickyHeaderRef.current) {
+          if (!entry.isIntersecting) {
+            stickyHeaderRef.current.style.visibility = 'visible';
+            // Adjust the sticky header position based on the presence of a scrollbar height, navbar height and top panel container's height
+            const scrollbarHeight = stickyScrollbarRef.current?.offsetHeight || 0;
+            stickyHeaderRef.current.style.top = `${navHeaderHeight + topContainerHeight + scrollbarHeight + 20}px`;
+          } else {
+            stickyHeaderRef.current.style.visibility = 'hidden';
+          }
         }
-      }
       },
       { root: null, threshold: 0 }
     );
@@ -192,45 +216,47 @@ const RecordsetTable = ({
 
     // Sync widths of the columns
     const syncWidths = () => {
-      if(stickyHeaderRef.current && tableRef.current){
+      if (stickyHeaderRef.current && tableRef.current) {
 
-      const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
-      const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
+        const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
+        const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
 
-      // Loop through columns and set widths
-      stickyThs!.forEach((headerCol, index) => {
-        const dataCol = originalThs[index];
-        if (dataCol instanceof HTMLElement) { 
-          const colWidth = dataCol.offsetWidth; // Get the actual width of the column
-          headerCol.style.width = `${colWidth}px`; // Set width on sticky header
-        } 
-        
-      });
-      stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
-    }
+        // Loop through columns and set widths
+        stickyThs!.forEach((headerCol, index) => {
+          const dataCol = originalThs[index];
+          if (dataCol instanceof HTMLElement) {
+            const colWidth = dataCol.offsetWidth; // Get the actual width of the column
+            headerCol.style.width = `${colWidth}px`; // Set width on sticky header
+          }
+
+        });
+        stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
+      }
     };
+
+    // Function to synchronize the horizontal scroll position of the sticky header with the scrollbar
     const handleScroll = () => {
       if (stickyHeaderRef.current && stickyScrollbarRef.current) {
         stickyHeaderRef.current.scrollLeft = stickyScrollbarRef.current.scrollLeft;
       }
     };
-  
+
     stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
-  
+
     // Sync column widths on resize
     window.addEventListener('resize', syncWidths);
-  
+
     // Perform initial sync
     syncWidths();
-  
+
     // Cleanup function
     return () => {
       observer.disconnect();
       stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', syncWidths);
     };
-  
-  },[isLoading, headerTop]);
+
+  }, [isInitialized, navHeaderHeight]);
 
   /**
    * add the top horizontal scroll if needed
@@ -604,16 +630,16 @@ const RecordsetTable = ({
       </div>
       {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
       top scrollbar when the bottom one is visible */}
-      <div className='dummy-table-end-div' ref={tableEndRef}/>
-      {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
-      <table className='sticky-header-table'>
-      <thead className='table-heading sticky'>
+      <div className='dummy-table-end-div' ref={tableEndRef} />
+      {showStickyHeader && config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
+        <table className='sticky-header-table'>
+          <thead className='table-heading sticky'>
             <tr>
               {showActionButtons && renderActionsHeader()}
               {renderColumnHeaders()}
             </tr>
           </thead>
-      </table>
+        </table>
       </div>}
 
       {!hasTimeoutError && numHiddenRecords > 0 &&

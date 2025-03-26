@@ -1,7 +1,6 @@
 # This creates a docker image with chaise and all the test dependencies installed. This can be directly used in a CI for headless testing.
 # for more information refer - docs/dev-docs/e2e-test-docker.md
 FROM ubuntu:20.04
-FROM node:20
 
 RUN apt-get update \
     && apt-get install -y wget gnupg \
@@ -20,7 +19,7 @@ RUN apt-get update && \
     rsync \
     git \
     sudo \
-    openjdk-17-jdk 
+    openjdk-8-jdk 
 
 # Install Node.js 16.x
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
