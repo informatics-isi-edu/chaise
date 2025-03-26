@@ -50,6 +50,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import useNavbar from '@isrd-isi-edu/chaise/src/hooks/navbar';
 
 const Recordset = ({
   initialReference,
@@ -130,6 +131,7 @@ const RecordsetInner = ({
 }: RecordsetInnerProps): JSX.Element => {
 
   const { dispatchError, errors } = useError();
+  const { setTopContainerHeight } = useNavbar();
 
   const {
     logRecordsetClientAction,
@@ -170,12 +172,17 @@ const RecordsetInner = ({
   const [facetsRegistered, setFacetsRegistered] = useState(false);
 
   const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(true);
+
 
   const [permalinkTooltip, setPermalinkTooltip] = useState(MESSAGE_MAP.tooltip.permalink);
 
   const mainContainer = useRef<HTMLDivElement>(null);
+  const topContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
   const topLeftContainer = useRef<HTMLDivElement>(null);
+  const appContentContainer = useRef<HTMLDivElement>(null);
+  let showHeader = true;
 
   /**
    * The callbacks from faceting.tsx that we will use here
@@ -377,6 +384,7 @@ const RecordsetInner = ({
     // handle the scrollable container
     const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea);
 
+
     // log the right click event on the permalink button
     const permalink = document.getElementById('permalink');
     const logPermalink = () => (logRecordsetClientAction(LogActions.PERMALINK_RIGHT));
@@ -442,6 +450,19 @@ const RecordsetInner = ({
     }
 
   }, [isLoading]);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (entries[0].contentRect) {
+        setTopContainerHeight(entries[0].contentRect.height);
+      }
+    });
+
+    if (topContainer.current) resizeObserver.observe(topContainer.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
 
   const scrollMainContainerToTop = () => {
     if (!mainContainer.current) return;
@@ -844,6 +865,7 @@ const RecordsetInner = ({
           <RecordsetTable
             config={config}
             initialSortObject={initialReference.location.sortObject}
+            appContentRef={appContentContainer}
           />
         </div>
         {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
@@ -862,8 +884,8 @@ const RecordsetInner = ({
   });
 
   return (
-    <div className='recordset-container app-content-container'>
-      <div className='top-panel-container'>
+    <div className='recordset-container app-content-container' ref={appContentContainer}>
+      <div className='top-panel-container' ref={topContainer}>
         {/* recordset level alerts */}
         <Alerts />
         <div className='top-flex-panel'>

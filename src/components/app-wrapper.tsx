@@ -34,6 +34,7 @@ import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import NavbarProvider from '@isrd-isi-edu/chaise/src/providers/navbar';
 
 type AppWrapperProps = {
   /**
@@ -353,6 +354,7 @@ const AppWrapper = ({
   return (
     <ErrorProvider>
       <AuthnProvider>
+        <NavbarProvider>
         <ConditionalWrapper
           condition={includeAlerts === true}
           wrapper={children => (
@@ -373,6 +375,7 @@ const AppWrapper = ({
             {children}
           </AppWrapperInner>
         </ConditionalWrapper>
+        </NavbarProvider>
       </AuthnProvider>
     </ErrorProvider>
   );

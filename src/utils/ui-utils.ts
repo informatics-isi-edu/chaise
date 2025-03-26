@@ -53,6 +53,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
       appContent.style.overflowY = 'auto';
       appContent.style.height = ((parentUsableHeight / windowRef.innerHeight) * 100) + 'vh';
       container.style.height = 'unset';
+      appContent.classList.add('app-content-container-scrollable');
     }
 
     let tm: any;
@@ -85,6 +86,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
         //remove the styles that might have been added to appContent
         appContent.style.overflowY = 'unset';
         appContent.style.height = 'unset';
+        appContent.classList.remove('app-content-container-scrollable');
 
         // set the container's height
         container.style.height = containerHeight + 'vh';
