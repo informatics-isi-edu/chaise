@@ -99,7 +99,8 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
         }
       }
       if (heightChangeCallback) {
-        heightChangeCallback(containerSticky.offsetHeight + parentContainerSticky.offsetHeight);  // <-- Notify height change
+        //To notify height change
+        heightChangeCallback(containerSticky.offsetHeight + parentContainerSticky.offsetHeight);
       }
     }
 

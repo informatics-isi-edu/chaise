@@ -170,13 +170,11 @@ const RecordsetInner = ({
 
   const [topPanelHeight, setTopPanelHeight] = useState<number>(0);
 
-
   const [permalinkTooltip, setPermalinkTooltip] = useState(MESSAGE_MAP.tooltip.permalink);
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const topRightContainer = useRef<HTMLDivElement>(null);
   const topLeftContainer = useRef<HTMLDivElement>(null);
-  const appContentContainer = useRef<HTMLDivElement>(null);
 
   /**
    * The callbacks from faceting.tsx that we will use here
@@ -835,7 +833,7 @@ const RecordsetInner = ({
   });
 
   return (
-    <div className='recordset-container app-content-container' ref={appContentContainer}>
+    <div className='recordset-container app-content-container'>
       <div className='top-panel-container'>
         {/* recordset level alerts */}
         <Alerts />

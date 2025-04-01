@@ -128,6 +128,7 @@ async function checkUserSessions(): Promise<{ session: any, authCookie: string }
  * create the catalog and data
  */
 async function createCatalog(testConfiguration: any, projectNames: string[], isManual?: boolean) {
+  
   return new Promise(async (resolve, reject) => {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
