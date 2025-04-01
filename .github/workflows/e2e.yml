@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        node-version: ["18.18", "20.0.0", "22.11.0"]
+        node-version: ["20.0.0", "22.11.0"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -30,12 +30,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Setup the system
         run: |
-          echo "node version:"
-          node --version
-          echo "npm version:"
-          npm --version
-          echo "env variables:"
-          printenv
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
