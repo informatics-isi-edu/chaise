@@ -171,6 +171,8 @@ const RecordsetInner = ({
 
   const [savedQueryUpdated, setSavedQueryUpdated] = useState<boolean>(false);
 
+  const [topPanelHeight, setTopPanelHeight] = useState<number>(0);
+
   const [permalinkTooltip, setPermalinkTooltip] = useState(MESSAGE_MAP.tooltip.permalink);
 
   const mainContainer = useRef<HTMLDivElement>(null);
@@ -375,7 +377,8 @@ const RecordsetInner = ({
     }
 
     // handle the scrollable container
-    const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea);
+    const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea, undefined, setTopPanelHeight);
+
 
     // log the right click event on the permalink button
     const permalink = document.getElementById('permalink');
@@ -844,6 +847,7 @@ const RecordsetInner = ({
           <RecordsetTable
             config={config}
             initialSortObject={initialReference.location.sortObject}
+            headerTop={topPanelHeight}
           />
         </div>
         {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
