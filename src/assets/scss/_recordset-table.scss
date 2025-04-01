@@ -265,57 +265,22 @@
 .sticky-header {
   position: fixed;
   top: 0;
-  // z-index: 1000;
-  visibility:none;
+  visibility: none;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   overflow-x: hidden;
 }
-.sticky-header > table > thead > tr > th{
-    font-weight: 400;
-    border-top: 1px solid map.get(variables.$color-map, 'table-border');
-    position: relative;
-    padding: 7px;
 
-
-    &.actions-header {
-      white-space: nowrap;
-      text-align: center;
-      font-size: variables.$h4-font-size;
-      padding: 8px;
-    }
-
-    .table-column-displayname {
-      font-size: variables.$h4-font-size;
-    }
-
-    // preserve space for the icon on the right
-    // 20 for the "icon space"
-    // 10 for the "right indentation"
-    padding-right: 30px;
-    .table-heading-icons {
-      position: absolute;
-      bottom: 7px;
-      right: 10px;
-      font-size: variables.$h4-font-size;
-
-      .table-column-spinner {
-        position: absolute;
-        bottom: 2px;
-        right: -5px;
-
-        .spinner-border {
-          // NOTE: we should not customize the width/height since it causes wobbling effect
-          color: map.get(variables.$color-map, 'table-header-spinner');
-          border-width: .16em;
-        }
-      }
-    }
+.sticky-header > table > thead > tr > th {
+  font-weight: 400;
+  border-top: 1px solid map.get(variables.$color-map, 'table-border');
+  position: relative;
+  padding: 7px;
+  padding-right: 30px;
 }
-.sticky-header{
-.sticky-header-table{
+
+.sticky-header .sticky-header-table {
   table-layout: fixed;
   width: 100%;
-}
 }
 
 .app-content-container-scrollable .sticky-header {
