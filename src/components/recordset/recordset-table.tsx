@@ -25,7 +25,6 @@ import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import useNavbar from '@isrd-isi-edu/chaise/src/hooks/navbar';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -34,7 +33,7 @@ type RecordsetTableProps = {
    * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
    */
   showSingleScrollbar?: boolean,
-  appContentRef?: React.RefObject<HTMLDivElement>,
+  headerTop?: number,
   sortCallback?: (sortColumn: SortColumn) => any
 }
 
@@ -42,7 +41,7 @@ const RecordsetTable = ({
   config,
   initialSortObject,
   showSingleScrollbar = false,
-  appContentRef,
+  headerTop,
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -77,8 +76,6 @@ const RecordsetTable = ({
   // tracks whether a paging action has successfully occurred for this table
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
-  const [showStickyHeader, setShowStickyHeader] = useState<boolean>(true);
-  const { navHeaderHeight, topContainerHeight } = useNavbar();
 
   type RowConfig = {
     isSelected: boolean;
@@ -170,26 +167,6 @@ const RecordsetTable = ({
     }
   }, []);
 
-
-  // Function to check if the app content container should have a sticky header
-  const checkForScrollableContainer = () => {
-    if (appContentRef?.current) {
-      const hasClass = !(appContentRef.current ? appContentRef.current.classList.contains('app-content-container-scrollable') || appContentRef.current.offsetWidth < 900 : true);
-      setShowStickyHeader((prev) => prev !== hasClass ? hasClass : prev);
-    }
-  }
-
-  // Effect to listen for window resize events and re-check scrollability
-  useEffect(() => {
-    const handleResize = () => {
-      checkForScrollableContainer();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-
   //To handle sticky header visibility based on element intersection
   useLayoutEffect(() => {
     if (!outerTableRef.current || !headRef.current || !stickyHeaderRef.current || !stickyScrollbarRef.current) {
@@ -202,9 +179,9 @@ const RecordsetTable = ({
         if (stickyHeaderRef.current) {
           if (!entry.isIntersecting) {
             stickyHeaderRef.current.style.visibility = 'visible';
-            // Adjust the sticky header position based on the presence of a scrollbar height, navbar height and top panel container's height
+            // Adjust the sticky header position based on the presence of a scrollbar height and top panel container's height
             const scrollbarHeight = stickyScrollbarRef.current?.offsetHeight || 0;
-            stickyHeaderRef.current.style.top = `${navHeaderHeight + topContainerHeight + scrollbarHeight + 20}px`;
+            stickyHeaderRef.current.style.top=`${headerTop ? headerTop + scrollbarHeight:0}px`;
           } else {
             stickyHeaderRef.current.style.visibility = 'hidden';
           }
@@ -256,7 +233,7 @@ const RecordsetTable = ({
       window.removeEventListener('resize', syncWidths);
     };
 
-  }, [isInitialized, navHeaderHeight]);
+  }, [isInitialized, headerTop]);
 
   /**
    * add the top horizontal scroll if needed
@@ -631,7 +608,7 @@ const RecordsetTable = ({
       {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
       top scrollbar when the bottom one is visible */}
       <div className='dummy-table-end-div' ref={tableEndRef} />
-      {showStickyHeader && config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
+      {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
         <table className='sticky-header-table'>
           <thead className='table-heading sticky'>
             <tr>

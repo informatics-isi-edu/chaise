@@ -12,6 +12,7 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
  * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `.app-header-container` will be used.
  * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
+ * @param   {Callback Function} heightChangeCallback - Callback allows external functions to receive height updates.
  * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
  * If you don't pass any parentContainer, it will use the body
  * It will assume the following structure in the given parentContainer:
@@ -22,7 +23,7 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
  *
  * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
-export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
+export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean, heightChangeCallback?: (newHeight: number) => void) {
   try {
     const appRootId = `#${ID_NAMES.APP_ROOT}`;
 
@@ -80,6 +81,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
       }
 
       const containerHeight = ((parentUsableHeight - stickyHeight) / windowRef.innerHeight) * 100;
+
       if (containerHeight < 15) {
         resetHeight();
       } else {
@@ -95,6 +97,9 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
         if (container.offsetHeight < 300) {
           resetHeight();
         }
+      }
+      if (heightChangeCallback) {
+        heightChangeCallback(containerSticky.offsetHeight + parentContainerSticky.offsetHeight);  // <-- Notify height change
       }
     }
 
