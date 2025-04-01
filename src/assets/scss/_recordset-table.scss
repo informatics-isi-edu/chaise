@@ -271,11 +271,8 @@
 }
 
 .sticky-header > table > thead > tr > th {
-  font-weight: 400;
-  border-top: 1px solid map.get(variables.$color-map, 'table-border');
-  position: relative;
   padding: 7px;
-  padding-right: 30px;
+  color: map.get(variables.$color-map, 'navbar-inverse');
 }
 
 .sticky-header .sticky-header-table {
