@@ -221,16 +221,14 @@ const RecordsetTable = ({
     stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
 
     // Sync column widths on resize
-    window.addEventListener('resize', syncWidths);
-
-    // Perform initial sync
-    syncWidths();
+    const resizeObserver = new ResizeObserver(syncWidths);
+    resizeObserver.observe(outerTableRef.current);
 
     // Cleanup function
     return () => {
       observer.disconnect();
       stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', syncWidths);
+      resizeObserver.disconnect();
     };
 
   }, [isInitialized, headerTop]);
