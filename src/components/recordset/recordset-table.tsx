@@ -33,6 +33,7 @@ type RecordsetTableProps = {
    * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
    */
   showSingleScrollbar?: boolean,
+  // Determines the top for the sticky header
   headerTop?: number,
   sortCallback?: (sortColumn: SortColumn) => any
 }
@@ -221,14 +222,14 @@ const RecordsetTable = ({
     stickyScrollbarRef.current?.addEventListener('scroll', handleScroll);
 
     // Sync column widths on resize
-    const resizeObserver = new ResizeObserver(syncWidths);
-    resizeObserver.observe(outerTableRef.current);
+    const headerWidthResizeObserver = new ResizeObserver(syncWidths);
+    headerWidthResizeObserver.observe(outerTableRef.current);
 
     // Cleanup function
     return () => {
       observer.disconnect();
       stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
-      resizeObserver.disconnect();
+      headerWidthResizeObserver.disconnect();
     };
 
   }, [isInitialized, headerTop]);
@@ -494,6 +495,15 @@ const RecordsetTable = ({
     })
   }
 
+  const renderHeader = () => {
+    return(
+            <tr>
+              {showActionButtons && renderActionsHeader()}
+              {renderColumnHeaders()}
+            </tr>
+    );
+  } 
+
   const renderRows = () => {
     if (hasTimeoutError) {
       return (
@@ -593,10 +603,7 @@ const RecordsetTable = ({
       <div className={outerTableClassname()} ref={outerTableRef}>
         <table className='table chaise-table table-hover' ref={tableRef}>
           <thead className='table-heading' ref={headRef}>
-            <tr>
-              {showActionButtons && renderActionsHeader()}
-              {renderColumnHeaders()}
-            </tr>
+            {renderHeader()}
           </thead>
           <tbody>
             {renderRows()}
@@ -609,10 +616,7 @@ const RecordsetTable = ({
       {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 && <div className='sticky-header' id='sticky-header' ref={stickyHeaderRef}>
         <table className='sticky-header-table'>
           <thead className='table-heading sticky'>
-            <tr>
-              {showActionButtons && renderActionsHeader()}
-              {renderColumnHeaders()}
-            </tr>
+          {renderHeader()}
           </thead>
         </table>
       </div>}

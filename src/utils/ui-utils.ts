@@ -23,7 +23,7 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
  *
  * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
-export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean, heightChangeCallback?: (newHeight: number) => void) {
+export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean, onContainerHeightChange?: (dimensions: any) => void) {
   try {
     const appRootId = `#${ID_NAMES.APP_ROOT}`;
 
@@ -98,9 +98,11 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
           resetHeight();
         }
       }
-      if (heightChangeCallback) {
+      if (onContainerHeightChange) {
         //To notify height change
-        heightChangeCallback(containerSticky.offsetHeight + parentContainerSticky.offsetHeight);
+        onContainerHeightChange({
+          top: containerSticky.offsetHeight + parentContainerSticky.offsetHeight,
+        });
       }
     }
 
