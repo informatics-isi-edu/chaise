@@ -18,19 +18,19 @@ module.exports = function (templateParams) {
   // create a string representation of both
   const CSS_DEPS = `${externalStyleFiles.slice(0, -1)},${webpackStyleFiles.substring(1)}`;
 
-  // this is already stringified, so we have to remove the last `]` and add the rest
-  let externalFiles = templateParams.htmlWebpackPlugin.options.external_files;
-  let webpackFiles = JSON.stringify(templateParams.htmlWebpackPlugin.files.js);
+  // this is already stringified
+  const EXTERNAL_FILES = templateParams.htmlWebpackPlugin.options.external_files;
 
-  // create a string representation of both
-  const JS_DEPS = `${externalFiles.slice(0, -1)},${webpackFiles.substring(1)}`;
+  // this is not stringified, so we have to stringify it
+  const JS_DEPS = JSON.stringify(templateParams.htmlWebpackPlugin.files.js);
 
   return `
 
+  var EXTERNAL_FILES = ${EXTERNAL_FILES};
   var JS_DEPS = ${JS_DEPS};
   var CSS_DEPS = ${CSS_DEPS};
 
-
+  var numLoadedExternalFiles = 0;
   var head = document.getElementsByTagName('head')[0];
 
   function loadStylesheet (url, callback) {
@@ -77,10 +77,25 @@ module.exports = function (templateParams) {
     return foundInResources || foundInTag;
   }
 
-  function loadDependencies() {
+  function loadJSDeps() {
     JS_DEPS.forEach(function (url) {
       loadScript(url);
     });
+  }
+
+  function loadDependencies() {
+    if (EXTERNAL_FILES.length === 0) {
+      loadJSDeps();
+    } else {
+      EXTERNAL_FILES.forEach(function (url) {
+        loadScript(url, function () {
+          numLoadedExternalFiles++;
+          if (numLoadedExternalFiles === EXTERNAL_FILES.length) {
+            loadJSDeps();
+          }
+        });
+      });
+    }
 
     CSS_DEPS.forEach(function (url) {
       loadStylesheet(url);

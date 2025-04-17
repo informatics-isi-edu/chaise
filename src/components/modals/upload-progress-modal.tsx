@@ -199,10 +199,11 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
     setIsUpload(false);
     uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
       row.forEach((item: UploadFileObject) => {
-        item.hatracObj.calculateChecksum(item.row, item.linkedData).then(
-          (url: string) => onChecksumCompleted(item, url),
-          onError,
-          (uploaded: number) => onChecksumProgressChanged(item, uploaded));
+        item.hatracObj.calculateChecksum(
+          item.row,
+          item.linkedData,
+          (uploaded: number) => onChecksumProgressChanged(item, uploaded)
+        ).then((url: string) => onChecksumCompleted(item, url)).catch(onError);
       });
     });
   };
@@ -286,10 +287,10 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
     let startChunkIdx = 0;
     if (item.partialUpload) startChunkIdx = lastContiguousChunkRef.current?.[item.uploadKey].lastChunkIdx + 1;
 
-    item.hatracObj.start(startChunkIdx).then(
-      () => onUploadCompleted(item),
-      onError,
-      (size: number) => onProgressChanged(item, size));
+    item.hatracObj.start(
+      startChunkIdx,
+      (size: number) => onProgressChanged(item, size)
+    ).then(() => onUploadCompleted(item)).catch(onError)
   };
 
   // Complete upload jobs one by one
