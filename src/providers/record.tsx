@@ -290,6 +290,7 @@ export default function RecordProvider({
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
+      m.tableMarkdownContentProcessed = false;
     });
 
     // related table
@@ -300,6 +301,7 @@ export default function RecordProvider({
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
+      m.tableMarkdownContentProcessed = false;
     });
 
     // update the cause list
@@ -369,9 +371,14 @@ export default function RecordProvider({
   }
 
   // -------------------------- flow control function ---------------------- //
-  const printDebugMessage = (message: string, counter?: number): void => {
+  const printDebugMessage = (message: string, relatedModel?: RecordRelatedModel, counter?: number): void => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
-    $log.debug(`${Date.now()}, ${counter}: ${message}`);
+    let dm = `${Date.now()}, ${counter}: `;
+    if (relatedModel) {
+      dm += `${relatedModel.isInline ? 'inline' : 'related'}(index=${relatedModel.index}), `;
+    }
+    dm += `${message}`;
+    $log.debug(dm);
   };
 
   /**
@@ -652,6 +659,7 @@ export default function RecordProvider({
           // this indicates that we got the waitfor data:
           // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
           waitForDataLoaded: !col.hasWaitFor,
+          tableMarkdownContentProcessed: false,
           updateMainEntity: () => { throw new Error('function not registered') },
           fetchSecondaryRequests: () => { throw new Error('function not registered') },
           addUpdateCauses: () => { throw new Error('function not registered') },
@@ -679,6 +687,7 @@ export default function RecordProvider({
         index,
         hasWaitFor: ref.display.sourceHasWaitFor,
         waitForDataLoaded: false,
+        tableMarkdownContentProcessed: false,
         updateMainEntity: () => { throw new Error('function not registered') },
         fetchSecondaryRequests: () => { throw new Error('function not registered') },
         addUpdateCauses: () => { throw new Error('function not registered') },
@@ -708,10 +717,30 @@ export default function RecordProvider({
    * @param values the updated values
    */
   const updateRelatedRecordsetState = (index: number, isInline: boolean, values: RecordRelatedModelRecordsetProps) => {
+    printDebugMessage(`${isInline ? 'inline' : 'related'}(index=${index}), updating recordset state isLoading: ${values.isLoading}`);
+    const updatedValues: { [key: string]: any } = { recordsetState: values };
+
+    /**
+     * There might be a delay between recieving the data and updating the state. If the delay is long enough that the
+     * waitForDataLoaded is set to true but the recordsetState still is not updated, the attachPseudoColumnValue might not
+     * be able to process the markdown content. So the following checks if that the case and if so, it would compute the
+     * markdown content.
+     */
+    const rm = isInline ? flowControl.current.inlineRelatedRequestModels[index] : flowControl.current.relatedRequestModels[index];
+    const m = isInline ? columnModels[index].relatedModel : relatedModels[index];
+    const hasMainData = values.page && !values.isLoading;
+    const hasWaitForData = !rm.hasWaitFor || rm.waitForDataLoaded;
+    if (!rm.tableMarkdownContentProcessed && hasMainData && hasWaitForData) {
+      printDebugMessage('updating markdown content in updateRelatedRecordsetState', m);
+      rm.tableMarkdownContentProcessed = true;
+      updatedValues.tableMarkdownContentInitialized = true;
+      updatedValues.tableMarkdownContent = values.page.getContent(flowControl.current.templateVariables);
+    }
+
     if (isInline) {
-      setColumnModelsRelatedModelByIndex(index, { recordsetState: values });
+      setColumnModelsRelatedModelByIndex(index, updatedValues);
     } else {
-      setRelatedModelsByIndex(index, { recordsetState: values });
+      setRelatedModelsByIndex(index, updatedValues);
     }
   };
 
@@ -754,13 +783,19 @@ export default function RecordProvider({
       reqModel.processed = !res.success;
 
       const rm = isInline ? flowControl.current.inlineRelatedRequestModels[index] : flowControl.current.relatedRequestModels[index];
+      const m = isInline ? columnModels[index].relatedModel : relatedModels[index];
 
       /*
       * the returned `res` boolean indicates whether we should consider this response final or not.
       * it doesn't necessarily mean that the response was successful, so we should not use the page blindly.
       * If the request errored out (timeout or other types of error) page will be undefined.
       */
-      if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
+     const hasMainData = res.success && res.page;
+     const hasWaitForData = !rm.hasWaitFor || rm.waitForDataLoaded;
+      if (hasMainData && hasWaitForData) {
+        printDebugMessage('updating markdown content in afterUpdateRelatedEntity', m);
+
+        rm.tableMarkdownContentProcessed = true;
         const updatedValues = {
           tableMarkdownContentInitialized: true,
           tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
@@ -770,6 +805,8 @@ export default function RecordProvider({
         } else {
           setRelatedModelsByIndex(index, updatedValues);
         }
+      } else {;
+        printDebugMessage(`unable to update markdown content, main:${hasMainData}, waitFor: ${hasWaitForData}`, m);
       }
     };
   };
@@ -810,11 +847,27 @@ export default function RecordProvider({
         cb = activeListModel.column.getAggregatedValue(pageRef.current, logObj);
       }
 
+      const dependentSummary = activeListModel.objects.map((obj: any) => {
+        let objType;
+        if (obj.column) {
+          objType = 'column';
+        } else if (obj.inline) {
+          objType = 'inline';
+        } else {
+          objType = 'related';
+        }
+        return `${objType}(index=${obj.index})`;
+      });
+
+      const description = `(${activeListModel.entityset ? 'entityset' : 'aggregate'}) for: ${dependentSummary.join(', ')}`;
+      printDebugMessage(`fetching 2nd req ${description}`);
       cb.then(function (values: any) {
         if (flowControl.current.queue.counter !== current) {
           resolve(false);
           return;
         }
+
+        printDebugMessage(`successful 2nd req fetch ${description}`);
 
         // remove the column error (they might retry)
         const errroIndexes: any = {};
@@ -875,6 +928,8 @@ export default function RecordProvider({
           reject(false);
           return;
         }
+
+        printDebugMessage(`failed 2nd req ${description}`);
 
         const errorIndexes: any = {};
         activeListModel.objects.forEach(function (obj: any) {
@@ -959,6 +1014,7 @@ export default function RecordProvider({
           reqModel = flowControl.current.inlineRelatedRequestModels[obj.index];
         }
         const hasAll = ref.display.sourceWaitFor.every(hasColumnData);
+        printDebugMessage(`hasAll: ${hasAll}`, obj.related ? relatedModelsRef.current[obj.index] : columnModelsRef.current[obj.index].relatedModel);
         if (!hasAll) return;
 
         // in case the main request was slower, this will just signal so the other
@@ -973,6 +1029,8 @@ export default function RecordProvider({
         }
       }
     });
+
+    printDebugMessage(`attachPseudoColumnValue, doneInlines: ${Object.keys(doneInlines)}, doneRelated: ${Object.keys(doneRelated)}`);
 
     // set the values
     setRecordValues((prevValues: any) => (
@@ -995,10 +1053,15 @@ export default function RecordProvider({
           // otherwise we should just wait for the related/inline table data to get back to popuplate the tableMarkdownContent
           let mdProps: { tableMarkdownContentInitialized: boolean, tableMarkdownContent: string | null } | object = {};
           if (val.relatedModel.recordsetState.page && !val.relatedModel.recordsetState.isLoading) {
+            printDebugMessage('updating markdown content in attachPseudoColumnValue', val.relatedModel);
+            const rm = flowControl.current.inlineRelatedRequestModels[index];
+            rm.tableMarkdownContentProcessed = true;
             mdProps = {
               tableMarkdownContentInitialized: true,
               tableMarkdownContent: val.relatedModel.recordsetState.page.getContent(flowControl.current.templateVariables),
             }
+          }  else {
+            printDebugMessage('unable to update markdown content since main page is still not loaded', val.relatedModel);
           }
           return { ...val, isLoading: false, relatedModel: { ...val.relatedModel, ...mdProps } };
         }
@@ -1013,11 +1076,16 @@ export default function RecordProvider({
           // if the page data is already fetched, we can just popuplate the tableMarkdownContent value.
           // otherwise we should just wait for the related/inline table data to get back to popuplate the tableMarkdownContent
           if (val.recordsetState.page && !val.recordsetState.isLoading) {
+            printDebugMessage('updating markdown content in attachPseudoColumnValue', val);
+            const rm = flowControl.current.relatedRequestModels[index];
+            rm.tableMarkdownContentProcessed = true;
             return {
               ...val,
               tableMarkdownContentInitialized: true,
               tableMarkdownContent: val.recordsetState.page.getContent(flowControl.current.templateVariables),
             }
+          } else {
+            printDebugMessage('unable to update markdown content since main page is still not loaded', val);
           }
         }
         return val;

@@ -6,9 +6,6 @@ import {
   RecordsetProviderUpdateMainEntity
 } from '@isrd-isi-edu/chaise/src/models/recordset'
 
-// utils
-import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-
 export interface RecordRelatedModelRecordsetProps {
   page: any,
   isLoading: boolean,
@@ -21,12 +18,27 @@ export interface RecordRelatedModel {
   isInline: boolean,
   isPureBinary: boolean,
   initialReference: any,
+  /**
+   * whether we're showing the tabular view or custom view
+   */
   isTableDisplay: boolean,
-  // this indicates that the tableMarkdownContent has been initialized:
-  // we should not show the related table before initialzing the tableMarkdownContent
+  /**
+   * this indicates that the tableMarkdownContent has been initialized:
+   * we should not show the related table before initialzing the tableMarkdownContent
+   */
   tableMarkdownContentInitialized: boolean,
-  tableMarkdownContent: string|null, // TODO
+  /**
+   * the "custom display" content.
+   */
+  tableMarkdownContent: string|null,
+  /**
+   * information that the recordset provider shares with record page
+   * (has page, isLoading, etc)
+   */
   recordsetState: RecordRelatedModelRecordsetProps,
+  /**
+   * The props that will be passed to the recordset provider for the related model
+   */
   recordsetProps: {
     initialPageLimit: number,
     config: RecordsetConfig,
@@ -54,11 +66,19 @@ export interface RecordColumnModel {
 
 export interface RecordRelatedRequestModel {
   index: number,
-  // whether we should do the waitfor logic:
+  /**
+   * whether we should do the waitfor logic:
+   */
   hasWaitFor: boolean,
-  // this indicates that we got the waitfor data:
-  // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+  /**
+   * this indicates that we got the waitfor data:
+   * only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+   */
   waitForDataLoaded: boolean,
+  /**
+   * to avoid computing this multiple times.
+   */
+  tableMarkdownContentProcessed: boolean,
   registered: boolean,
   updateMainEntity: RecordsetProviderUpdateMainEntity,
   fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
