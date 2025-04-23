@@ -27,10 +27,6 @@ CHAISE_BASE_PATH:=$(WEB_URL_ROOT)$(CHAISE_REL_PATH)
 ERMRESTJS_BASE_PATH:=$(WEB_URL_ROOT)$(ERMRESTJS_REL_PATH)
 OSD_VIEWER_BASE_PATH:=$(WEB_URL_ROOT)$(OSD_VIEWER_REL_PATH)
 
-# ERMrestjs dependencies
-ERMRESTJS_DEPS=ermrest.vendor.min.js \
-	ermrest.min.js
-
 # Project name
 PROJ=chaise
 
