@@ -433,16 +433,16 @@ export default function RecordeditProvider({
           setInitialized(true);
         }, (response: any) => {
           const errorData: any = {};
-          errorData.redirectUrl = reference.unfilteredReference.contextualize.compact.appLink;
           errorData.gotoTableDisplayname = reference.displayname.value;
-          response.errorData = errorData;
-
           if (isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
             let redirectLink = createRedirectLinkFromPath(response.errorData.redirectPath);
             if (response instanceof ERMrest.InvalidFilterOperatorError) redirectLink = redirectLink.replace('recordedit', 'recordset');
-            response.errorData.redirectUrl = redirectLink;
+            errorData.redirectUrl = redirectLink;
+          } else {
+            errorData.redirectUrl = reference.unfilteredReference.contextualize.compact.appLink;
           }
 
+          response.errorData = errorData;
           dispatchError({ error: response });
         });
       } else if (session) {

@@ -332,7 +332,58 @@ test.describe('error handling', () => {
         await expect.soft(errorModal).not.toBeAttached();
         await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText('Create 1 Accommodations record');
       });
+    });
 
+    test('navigating to a page with invalid sort criteria', async ({ page, baseURL }, testInfo) => {
+      const errorModal = ModalLocators.getErrorModal(page);
+
+      await test.step('should display the Invalid Sort Criteria error', async () => {
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'accommodation', baseURL, testInfo) + '/id=2002@sort(some_column_that_does_not_exist)');
+        await expect.soft(errorModal).toBeVisible();
+        await testModalTitleAndText(errorModal,
+          'Invalid Sort Criteria',
+          'Given column name `some_column_that_does_not_exist` in sort is not valid.Click OK to reload this page without Invalid Sort Criteria.'
+        );
+      });
+
+      await test.step('On click of OK button the page should reload the page without the sort.', async () => {
+        await ModalLocators.getOkButton(errorModal).click();
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+        await expect.soft(errorModal).not.toBeAttached();
+        await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText('Edit Accommodations:  Sherathon Hotel');
+      });
+    });
+
+    test('navigating to a page with invalid sort criteria and valid facets', async ({ page, baseURL }, testInfo) => {
+      const errorModal = ModalLocators.getErrorModal(page);
+
+      await test.step('should display the Invalid Page Criteria error', async () => {
+        /**
+         * facet blob:
+         * {
+         *   "and": [
+         *     {
+         *       "source": ["id"],
+         *       "choices": ["2001", "2003"]
+         *     }
+         *   ]
+         * }
+         */
+        const facet = 'N4IghgdgJiBcDaoDOB7ArgJwMYFM7xAEsYBdAGhCwAsVDcl8QAmABhYEYQLWWBmEEgF8hQA';
+        await page.goto(getChaiseURL(APP_NAMES.RECORDEDIT, 'accommodation', baseURL, testInfo) + '/*::facets::' + facet + '@sort(invalid_col)');
+        await expect.soft(errorModal).toBeVisible();
+        await testModalTitleAndText(errorModal,
+          'Invalid Sort Criteria',
+          'Given column name `invalid_col` in sort is not valid.Click OK to reload this page without Invalid Sort Criteria.'
+        );
+      });
+
+      await test.step('On click of OK button the page should reload the page without the sort but keep the facets.', async () => {
+        await ModalLocators.getOkButton(errorModal).click();
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+        await expect.soft(errorModal).not.toBeAttached();
+        await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText('Edit 2 Accommodations records');
+      });
     });
 
     test('editting a record without changing data', async ({ baseURL, page }, testInfo) => {
