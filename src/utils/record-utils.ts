@@ -7,6 +7,7 @@ import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { CLASS_NAMES, RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
