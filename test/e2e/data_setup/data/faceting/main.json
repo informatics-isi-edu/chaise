@@ -116,14 +116,14 @@
     {
         "id": "16", "fk_to_f1": "2", "fk_to_f2": "3",
         "int_col": 8, "float_col": 8.8, "date_col": "2008-08-08", "timestamp_col": "2008-08-08T08:08:08-07:00", "text_col": "eight", "shorttext_col": "eight", "longtext_col": "eight", "markdown_col": "**eight**",
-        "boolean_col": false, "jsonb_col": {"key": "eight"}, "jsonb_sort_col": "08",
+        "boolean_col": false, "jsonb_col": 8, "jsonb_sort_col": "08",
         "col_w_long_values": "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016",
         "col_w_column_order": "06", "col_w_column_order_column_order" : "08", "col_w_column_order_false": "02", "col_w_column_order_false_facet_order": "06"
     },
     {
         "id": "17", "fk_to_f1": "2", "fk_to_f2": "3",
         "int_col": 9, "float_col": 9.9, "date_col": "2009-09-09", "timestamp_col": "2009-09-09T09:09:09-07:00", "text_col": "one", "shorttext_col": "one", "longtext_col": "nine", "markdown_col": "**nine**",
-        "boolean_col": false, "jsonb_col": {"key": "nine"}, "jsonb_sort_col": "09",
+        "boolean_col": false, "jsonb_col": "nine", "jsonb_sort_col": "09",
         "col_w_long_values": "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000017",
         "col_w_column_order": "05", "col_w_column_order_column_order" : "09", "col_w_column_order_false": "02", "col_w_column_order_false_facet_order": "06"
     },
