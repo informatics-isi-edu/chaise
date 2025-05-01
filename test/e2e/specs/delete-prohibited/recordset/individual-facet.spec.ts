@@ -197,14 +197,14 @@ const testParams: {
       index: 9,
       name: 'jsonb_col',
       type: 'choice',
-      option: 4,
+      option: 5,
       filter: 'jsonb_col{\n"key": "four"\n}',
       numRows: 1,
       options: [
-        'All records with value', '{\n"key": "one"\n}', '{\n"key": "two"\n}',
+        'All records with value', 'No value',
+        '{\n"key": "one"\n}', '{\n"key": "two"\n}',
         '{\n"key": "three"\n}', '{\n"key": "four"\n}', '{\n"key": "five"\n}',
-        '{\n"key": "six"\n}', '{\n"key": "seven"\n}', '{\n"key": "eight"\n}',
-        '{\n"key": "nine"\n}', '{\n"key": "ten"\n}'
+        '{\n"key": "six"\n}', '{\n"key": "seven"\n}', '8', '"nine"', '{\n"key": "ten"\n}'
       ]
     },
     {
