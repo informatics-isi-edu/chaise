@@ -187,7 +187,7 @@ const goToRecordPageAndCheckExportConfigsBtn = async (
     await configOption.click();
     await expect(ExportLocators.getExportSubmenuOptions(page)).toHaveCount(1);
   } else {
-    await expect(configOption).toHaveClass(/disable-link/);
+    await expect(configOption).toContainClass('disable-link');
   }
 };
 

@@ -884,9 +884,9 @@ test.describe('Related tables', () => {
         await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
 
         await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
-        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
-        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
-        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+        await expect.soft(rows.nth(1)).toContainClass('disabled-row'); // Leaf 2
+        await expect.soft(rows.nth(6)).toContainClass('disabled-row'); // Leaf 7
+        await expect.soft(rows.nth(9)).toContainClass('disabled-row'); // Leaf 10
       });
 
       await test.step('closing the initial modal should not add any new forms AND not fill the first form', async () => {
@@ -907,9 +907,9 @@ test.describe('Related tables', () => {
         await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
 
         await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
-        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
-        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
-        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+        await expect.soft(rows.nth(1)).toContainClass('disabled-row'); // Leaf 2
+        await expect.soft(rows.nth(6)).toContainClass('disabled-row'); // Leaf 7
+        await expect.soft(rows.nth(9)).toContainClass('disabled-row'); // Leaf 10
       });
 
       await test.step('select 2 more rows and submit the selection', async () => {
@@ -946,11 +946,11 @@ test.describe('Related tables', () => {
         await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(4);
 
         await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(4);
-        await expect.soft(rows.nth(0)).not.toHaveClass(/disabled-row/); // Leaf 1 - the row that was just removed
-        await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/); // Leaf 2
-        await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/); // Leaf 5
-        await expect.soft(rows.nth(6)).toHaveClass(/disabled-row/); // Leaf 7
-        await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/); // Leaf 10
+        await expect.soft(rows.nth(0)).not.toContainClass('disabled-row'); // Leaf 1 - the row that was just removed
+        await expect.soft(rows.nth(1)).toContainClass('disabled-row'); // Leaf 2
+        await expect.soft(rows.nth(4)).toContainClass('disabled-row'); // Leaf 5
+        await expect.soft(rows.nth(6)).toContainClass('disabled-row'); // Leaf 7
+        await expect.soft(rows.nth(9)).toContainClass('disabled-row'); // Leaf 10
       });
     });
 
@@ -993,6 +993,6 @@ test.describe('Scroll to query parameter', () => {
     await expect.soft(heading).toBeInViewport();
 
     // make sure it is open
-    await expect.soft(heading).toHaveClass(/show/);
+    await expect.soft(heading).toContainClass('show');
   });
 });
