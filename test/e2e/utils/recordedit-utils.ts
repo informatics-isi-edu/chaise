@@ -310,7 +310,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+        await expect.soft(inputControl).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;
@@ -333,7 +333,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(input).toHaveClass(/input-disabled/);
+        await expect.soft(input).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;
@@ -358,7 +358,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+        await expect.soft(inputControl).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;

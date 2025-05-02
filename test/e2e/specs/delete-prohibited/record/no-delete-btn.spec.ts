@@ -50,7 +50,7 @@ test.describe('record page with specific chaise-config properties', () => {
     await test.step('Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.', async () => {
       const showTocBtn = RecordLocators.getShowTocBtn(page);
       await expect.soft(showTocBtn).toBeVisible();
-      await expect.soft(RecordLocators.getSidePanel(page)).toHaveClass(/close-panel/);
+      await expect.soft(RecordLocators.getSidePanel(page)).toContainClass('close-panel');
 
       // open toc for next test
       await showTocBtn.click();

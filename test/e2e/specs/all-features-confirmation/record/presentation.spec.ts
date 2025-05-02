@@ -600,7 +600,7 @@ test.describe('View existing record', () => {
       const btn = RecordLocators.getRelatedTableBulkEditLink(page, 'booking', true);
 
       await expect.soft(btn).toBeVisible();
-      await expect.soft(btn).toHaveClass(/disabled/);
+      await expect.soft(btn).toContainClass('disabled');
     });
 
     await test.step('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows present', async () => {
@@ -627,7 +627,7 @@ test.describe('View existing record', () => {
       await RecordLocators.getSidePanelItemById(page, 5).click();
       // related table should be visible
       await expect.soft(rtTableHeading).toBeVisible();
-      await expect.soft(rtTableHeading).toHaveClass(/show/);
+      await expect.soft(rtTableHeading).toContainClass('show');
     });
 
     await test.step('Record count along with heading should match for the panel and related table content should be in correct order', async () => {
@@ -641,14 +641,14 @@ test.describe('View existing record', () => {
       const recPan = RecordLocators.getSidePanel(page);
       const hideTocBtn = RecordLocators.getHideTocBtn(page);
 
-      await expect.soft(hideTocBtn.locator('.chaise-icon')).toHaveClass(/chaise-sidebar-close/);
-      await expect.soft(recPan).toHaveClass(/open-panel/);
+      await expect.soft(hideTocBtn.locator('.chaise-icon')).toContainClass('chaise-sidebar-close');
+      await expect.soft(recPan).toContainClass('open-panel');
 
       await hideTocBtn.click();
       const showTocBtn = RecordLocators.getShowTocBtn(page);
 
-      await expect.soft(showTocBtn.locator('.chaise-icon')).toHaveClass(/chaise-sidebar-open/);
-      await expect.soft(recPan).toHaveClass(/close-panel/);
+      await expect.soft(showTocBtn.locator('.chaise-icon')).toContainClass('chaise-sidebar-open');
+      await expect.soft(recPan).toContainClass('close-panel');
     });
   });
 
@@ -656,13 +656,13 @@ test.describe('View existing record', () => {
     const params = testParams.noTooltipHeaderTest.commentFalse;
     await page.goto(generateChaiseURL(APP_NAMES.RECORD, params.schemaName, params.tableName, testInfo, baseURL) + `/${params.key}`);
     await RecordLocators.waitForRecordPageReady(page);
-    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toHaveClass(/chaise-icon-for-tooltip/);
+    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toContainClass('chaise-icon-for-tooltip');
   });
 
   test('tables without any comment should not show the subtitle tooltip', async ({page, baseURL}, testInfo) => {
     const params = testParams.noTooltipHeaderTest.noComment;
     await page.goto(generateChaiseURL(APP_NAMES.RECORD, params.schemaName, params.tableName, testInfo, baseURL) + `/${params.key}`);
     await RecordLocators.waitForRecordPageReady(page);
-    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toHaveClass(/chaise-icon-for-tooltip/);
+    await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toContainClass('chaise-icon-for-tooltip');
   });
 });

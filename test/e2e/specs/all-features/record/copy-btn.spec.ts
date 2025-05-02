@@ -95,7 +95,7 @@ test.describe('View existing record,', function () {
       for (const i of [0, 1, 2]) {
         await expect.soft(RecordLocators.getColumns(page).nth(i)).not.toBeVisible();
       }
-      await expect.soft(RecordLocators.getSidePanel(page)).toHaveClass(/close-panel/);
+      await expect.soft(RecordLocators.getSidePanel(page)).toContainClass('close-panel');
     });
 
     // test that no citation appears in share modal when no citation is defined on table
