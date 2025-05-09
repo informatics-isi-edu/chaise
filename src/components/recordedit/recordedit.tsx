@@ -1038,7 +1038,10 @@ const RecordeditInner = ({
                               className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
                               onClick={() => {
                                 setShowCloneSpinner(true);
-                                setAddFormsEffect(true);
+                                // adding setTimeout to allow the spinner to show before calling addForms
+                                setTimeout(() => {
+                                  setAddFormsEffect(true);
+                                });
                               }}
                               type='button'
                               disabled={!allFormDataLoaded}
