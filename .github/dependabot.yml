@@ -16,7 +16,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     versioning-strategy: "increase"
     open-pull-requests-limit: 10
     ignore:
