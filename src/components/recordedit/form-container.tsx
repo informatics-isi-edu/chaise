@@ -59,7 +59,7 @@ const FormContainer = ({
        * NOTE: it's a bit hacky as we're looking at the children
        *       of the component. But given that it's useLayoutEffect it should be fine.
        */
-      document.querySelector('.form-inputs-row') as HTMLElement
+      document.querySelector('.form-header-row') as HTMLElement
     );
 
     return () => {
