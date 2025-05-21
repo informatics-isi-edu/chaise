@@ -29,6 +29,10 @@ export interface UploadProgressModalProps {
    */
   linkedData: any[];
   /**
+   * the result of secondary requests (waitfors)
+   */
+  templateVariables: any;
+  /**
    * prop to show modal
    */
   show: boolean;
@@ -42,7 +46,7 @@ export interface UploadProgressModalProps {
   onCancel: (exception?: any) => void;
 }
 
-const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: UploadProgressModalProps) => {
+const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSuccess, onCancel }: UploadProgressModalProps) => {
 
   const { reference, setLastContiguousChunk, lastContiguousChunkRef } = useRecordedit();
 
@@ -153,7 +157,7 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
             tempFilesCt++;
             tempTotalSize += row[k].file.size;
 
-            tuple.push(createUploadFileObject(row[k], column, row, linkedData[rowIdx], rowIdx));
+            tuple.push(createUploadFileObject(row[k], column, row, linkedData[rowIdx], templateVariables[rowIdx], rowIdx));
           } else {
             row[k] = (row[k] && row[k].url && row[k].url.length) ? row[k].url : null;
           }
@@ -202,6 +206,7 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
         item.hatracObj.calculateChecksum(
           item.row,
           item.linkedData,
+          item.templateVariables,
           (uploaded: number) => onChecksumProgressChanged(item, uploaded)
         ).then((url: string) => onChecksumCompleted(item, url)).catch(onError);
       });
@@ -349,7 +354,9 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
    * @desc
    * Creates an uploadFile obj to keep track of file and its upload.
    */
-  const createUploadFileObject = (data: FileObject, column: any, row: any, linkedData: any, rowIdx: number): UploadFileObject => {
+  const createUploadFileObject = (
+    data: FileObject, column: any, row: any, linkedData: any, templateVariables: any, rowIdx: number
+  ): UploadFileObject => {
     const file = data.file;
 
     const uploadFileObject: UploadFileObject = {
@@ -376,8 +383,9 @@ const UploadProgressModal = ({ rows, linkedData, show, onSuccess, onCancel }: Up
       reference: reference,
       row: row,
       rowIdx: rowIdx,
-      linkedData: linkedData
-    }
+      linkedData: linkedData,
+      templateVariables,
+    };
 
     return uploadFileObject;
   };

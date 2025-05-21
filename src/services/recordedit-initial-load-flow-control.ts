@@ -9,7 +9,10 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utils
 import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
-export default class RecordeditFlowControl {
+/**
+ * The flow control for loading the default and preffiled fk values
+ */
+export default class RecordeditInitialLoadFlowControl {
   queue: FlowControlQueueInfo;
 
   /**
@@ -40,11 +43,16 @@ export default class RecordeditFlowControl {
    * @param queryParams the query parameters on the page (used for finding the prefill object)
    * @param queue should be passed if we want a existing queue
    */
-  constructor(queryParams: any, queue?: FlowControlQueueInfo) {
+  constructor(queryParams?: any, queue?: FlowControlQueueInfo) {
     this.queue = queue ? queue : new FlowControlQueueInfo();
 
-    this.prefillObj = getPrefillObject(queryParams);
-    this.prefillProcessed = !this.prefillObj;
+    if (queryParams) {
+      this.prefillObj = getPrefillObject(queryParams);
+      this.prefillProcessed = !this.prefillObj;
+    } else {
+      this.prefillObj = null;
+      this.prefillProcessed = true;
+    }
 
     this.foreignKeyRequests = [];
   }
