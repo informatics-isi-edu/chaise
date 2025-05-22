@@ -441,6 +441,7 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
     // provide more information about what went wrong
     const alertContent = await AlertLocators.getErrorAlert(page).textContent();
     expect(alertContent).toEqual('');
+    return;
   }
 
   await expect.soft(RecordeditLocators.getSubmitSpinner(page)).not.toBeAttached({ timeout: timeout });
@@ -1104,7 +1105,12 @@ export type TestCreateRecordsParams = {
   }[]
 };
 
-
+/**
+ * can be used for testing create scenario. works for single or multi create.
+ * This function will also make sure that we can remove forms.
+ *  - if num_files > 0, it will remove the last form.
+ *  - otherwise will add an extra form and remove it.
+ */
 export const testCreateRecords = (usedParams: TestCreateRecordsParams) => {
   for (const params of usedParams.tables) {
     const presentation = params.presentation;

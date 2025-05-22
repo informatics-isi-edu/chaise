@@ -55,7 +55,6 @@ export default class RecordeditWaitForFlowControl {
 
     if (reference.activeList) {
       reference.activeList.requests.forEach((activeListModel: any) => {
-        // TODO this feels hacky
         if (!activeListModel.firstOutbound) return;
 
         const logStackNode = LogService.getStackNode(
