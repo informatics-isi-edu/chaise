@@ -1120,7 +1120,6 @@ export const testCreateRecords = (usedParams: TestCreateRecordsParams) => {
 
       await test.step('open recordedit page', async () => {
         await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL));
-        await page.pause();
         await RecordeditLocators.waitForRecordeditPageReady(page);
       });
 
