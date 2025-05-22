@@ -55,7 +55,25 @@ const fileTableDefaultPresentationProps = {
     { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
     { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
   ]
-}
+};
+
+const fileWitWaitForDefaultPresentationProps = {
+  schemaName: 'product-add',
+  tableName: 'file_w_wait_for_in_url_pattern_1',
+  tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
+  columns: [
+    { name: 'id', displayname: 'id', type: RecordeditInputType.INT_4, isRequired: true, skipValidation: true },
+    {
+      name: 'fk_col',
+      displayname: 'fk_col',
+      type: RecordeditInputType.FK_POPUP,
+      isRequired: false, skipValidation: true
+    },
+    { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE, skipValidation: true },
+    { name: 'asset_col_2', displayname: 'asset_col_2', type: RecordeditInputType.FILE, skipValidation: true },
+    { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true },
+  ],
+};
 
 const testParams: TestCreateRecordsParams = {
   tables: [
@@ -212,22 +230,8 @@ const testParams: TestCreateRecordsParams = {
     {
       num_files: 2,
       presentation: {
-        description: 'upload with wait_for in url_pattern',
-        schemaName: 'product-add',
-        tableName: 'file_w_wait_for_in_url_pattern_1',
-        tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
-        columns: [
-          { name: 'id', displayname: 'id', type: RecordeditInputType.INT_4, isRequired: true, skipValidation: true },
-          {
-            name: 'fk_col',
-            displayname: 'fk_col',
-            type: RecordeditInputType.FK_POPUP,
-            isRequired: false, skipValidation: true
-          },
-          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE, skipValidation: true },
-          { name: 'asset_col_2', displayname: 'asset_col_2', type: RecordeditInputType.FILE, skipValidation: true },
-          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true },
-        ],
+        ...fileWitWaitForDefaultPresentationProps,
+        description: 'upload with wait_for in url_pattern (single)',
         inputs: [
           {
             'id': '1',
@@ -235,17 +239,6 @@ const testParams: TestCreateRecordsParams = {
             'asset_col_2': testFiles[5],
             'fk_col': { modal_num_rows: 5, modal_option_index: 1, rowName: 'two' },
             'timestamp_txt': currentTimestampTimeStr
-          },
-          {
-            'id': '2',
-            'asset_col': testFiles[4],
-            'asset_col_2': testFiles[4],
-            'fk_col': { modal_num_rows: 5, modal_option_index: 2, rowName: 'three' },
-            'timestamp_txt': currentTimestampTimeStr
-          },
-          {
-            'id': '3',
-            // testing that the wait-for can ignore empty rows
           },
           // the form will be removed (making sure that the removed form is not causing any validation issues):
           {
@@ -258,20 +251,127 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
-        resultColumnNames: ['id', 'fk_col', 'asset_col', 'assst_col_2'],
+        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2'],
         resultRowValues: [
           [
-            '1', '2',
+            '1',
+            { caption: 'two', url: '/product-add:file_w_wait_for_in_url_pattern_1_o1/' },
             { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-twenty-two/1/` },
             { caption: 'testfile128kb_add_seq_6.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-twenty-two/1/` }
+          ]
+        ]
+      }
+    },
+    {
+      num_files: 3,
+      presentation: {
+        ...fileWitWaitForDefaultPresentationProps,
+        description: 'upload with wait_for in url_pattern (multi)',
+        inputs: [
+          {
+            'id': '2',
+            'asset_col': testFiles[3],
+            'asset_col_2': testFiles[5],
+            'fk_col': { modal_num_rows: 5, modal_option_index: 1, rowName: 'two' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'id': '3',
+            'asset_col': testFiles[4],
+            'asset_col_2': testFiles[4],
+            'fk_col': { modal_num_rows: 5, modal_option_index: 2, rowName: 'three' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'id': '4',
+            // testing that the wait-for can ignore empty rows
+          },
+          // the form will be removed (making sure that the removed form is not causing any validation issues):
+          {
+            'id': '5',
+            'asset_col': testFiles[5],
+            'asset_col_2': testFiles[5],
+            'timestamp_txt': currentTimestampTimeStr
+          },
+        ],
+      },
+      submission: {
+        tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
+        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2'],
+        resultRowValues: [
+          [
+            '2', '2',
+            { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-twenty-two/2/` },
+            { caption: 'testfile128kb_add_seq_6.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-twenty-two/2/` }
           ],
           [
-            '2', '3',
-            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-thirty-three/2/` },
-            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-thirty-three/2/` }
+            '3', '3',
+            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-thirty-three/3/` },
+            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-thirty-three/3/` }
           ],
           [
-            '3', '', '', ''
+            '4', '', '', ''
+          ]
+        ]
+      }
+    },
+    {
+      num_files: 2,
+      presentation: {
+        description: 'upload with wait_for in url_pattern (composite fk w inbound agg)',
+        schemaName: 'product-add',
+        tableName: 'file_w_wait_for_in_url_pattern_2',
+        tableDisplayname: 'file_w_wait_for_in_url_pattern_2',
+        columns: [
+          { name: 'id', displayname: 'id', type: RecordeditInputType.INT_4, isRequired: true, skipValidation: true },
+          {
+            name: 'Composite Foreign key',
+            displayname: 'Composite Foreign key',
+            type: RecordeditInputType.FK_POPUP,
+            isRequired: false, skipValidation: true
+          },
+          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE, skipValidation: true },
+          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true },
+        ],
+        inputs: [
+          {
+            'id': '1',
+            'asset_col': testFiles[3],
+            'Composite Foreign key': { modal_num_rows: 5, modal_option_index: 1, rowName: 'two' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'id': '2',
+            'asset_col': testFiles[4],
+            'Composite Foreign key': { modal_num_rows: 5, modal_option_index: 2, rowName: 'three' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'id': '3',
+            // testing that the wait-for can ignore empty rows
+          },
+          // the form will be removed (making sure that the removed form is not causing any validation issues):
+          {
+            'id': '4',
+            'asset_col': testFiles[5],
+            'timestamp_txt': currentTimestampTimeStr
+          },
+        ],
+      },
+      submission: {
+        tableDisplayname: 'file_w_wait_for_in_url_pattern_2',
+        resultColumnNames: ['id', 'Composite Foreign key', 'asset_col'],
+        resultRowValues: [
+          [
+            '1', '12:22',
+            { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-3-o1_i1_twenty-two/1/` },
+          ],
+          [
+            '2', '13:23',
+            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-3-o1_i1_thirty-three/2/` },
+          ],
+          [
+            '3', '', '',
           ]
         ]
       }
