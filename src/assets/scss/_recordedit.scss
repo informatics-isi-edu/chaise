@@ -80,9 +80,6 @@
       height: 100%;
       overflow-x: hidden;
 
-      .chaise-table-top-scroll-wrapper {
-        position: fixed;
-      }
     }
 
     .recordedit-form {
@@ -104,6 +101,15 @@
 
       .form-header-row {
         display: flex;
+        /**
+         * the following ensures the row reports the correct width. without this, the reported with only inlcudes the visible
+         * portion of the row (doesn't report the scrollable width).
+         * We need the reported with to be the same as the scrollable width so that the logic for the sticky scrollbar can
+         * detect width changes as the user adds or removes forms.
+         */
+        width: fit-content;
+        // without the following, the row will not expand to the full width of the container
+        min-width: 100%;
       }
 
       .form-inputs-row {
@@ -418,5 +424,17 @@
   .resultset-tables {
     padding-top: 10px;
     padding-bottom: 20px;
+  }
+
+  .bottom-panel-container {
+    // this is needed for position fixed to work (https://stackoverflow.com/a/38796408)
+    transform: translateZ(0);
+
+    .form-container .chaise-table-top-scroll-wrapper {
+      // we want the scrollbar to be always be displayed above the form
+      position: fixed;
+      // the react code will change the height if we're supposed to show it.
+      height: 0;
+    }
   }
 }
