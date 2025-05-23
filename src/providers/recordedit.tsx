@@ -27,7 +27,8 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import RecordeditFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-flow-control';
+import RecordeditInitialLoadFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-initial-load-flow-control';
+import RecordeditWaitForFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-wait-for-flow-control';
 
 // utilities
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
@@ -324,7 +325,10 @@ export default function RecordeditProvider({
    */
   const foreignKeyData = useRef<any>({});
   const shouldFetchForeignKeyData = useRef<boolean>(false);
-  const flowControl = useRef(new RecordeditFlowControl(queryParams));
+  const flowControl = useRef(new RecordeditInitialLoadFlowControl(queryParams));
+
+  // this is currently used for fetching the wait-for data of the assets
+  const assetWaitForFlowControl = useRef(new RecordeditWaitForFlowControl(reference));
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -720,47 +724,52 @@ export default function RecordeditProvider({
    * @param onSuccess
    */
   const uploadFiles = (submissionRowsCopy: any[], submissionRowsLinkedData: any[], onSuccess: () => void) => {
+    // reset the flow control
+    assetWaitForFlowControl.current.reset();
+
+    // see if there are any files to upload
     const uploadInfo = areFilesValid(submissionRowsCopy, submissionRowsLinkedData);
-    // if there are no file inputs, or no files to upload
     if (!uploadInfo.hasAssetColumn) {
       onSuccess();
-    } else if (uploadInfo.filesValid) {
-      // If url is valid
-      setUploadProgressModalProps({
-        rows: submissionRowsCopy,
-        linkedData: submissionRowsLinkedData,
-        onSuccess: onSuccess,
-        onCancel: (exception: any) => {
-          setShowSubmitSpinner(false);
-
-          // NOTE: This check was being done in angularJS since the modal was closed with a message if the user aborted uploading
-          //   - in ReactJS it's handling the case when the modal is closed and no "exception" is returned (undefined)
-          //   - when we abort the upload, we're calling onCancel without any parameters
-          if (isObjectAndNotNull(exception)) {
-            let message;
-            if (exception.message) {
-              message = exception.message;
-              if (exception.code === 403) message = MESSAGE_MAP.hatracUnauthorizedMessage + ' ' + message;
-            } else {
-              // happens with an error with code 0 (Timeout Error)
-              message = MESSAGE_MAP.errorMessageMissing;
-            }
-
-            // we don't know how to handle the error in the code, show error to user as alert
-            addAlert(message, ChaiseAlertType.ERROR);
-          }
-
-          // close the modal
-          setUploadProgressModalProps(undefined);
-        }
-      })
-    } else {
+    } else if (!uploadInfo.filesValid) {
+      // the areFilesValid already shows the alerts, so we should just hide the spinner.
       setShowSubmitSpinner(false);
+    } else if (!uploadInfo.hasAssetWaitFor) {
+      showUploadProgressModal(submissionRowsCopy, submissionRowsLinkedData, onSuccess);
+    } else {
+      new Promise((resolve: (success: boolean) => void, reject: (error: any) => void) => {
+        processWaitForRequests(submissionRowsCopy, resolve, reject);
+      }).then((res) => {
+        // there was an error displayed, so we should not proceed
+        if (!res) return;
+
+        $log.debug('all wait_for requests are done. starting the upload process...');
+        const uploadInfo = areFilesValid(submissionRowsCopy, submissionRowsLinkedData, true);
+        setShowSubmitSpinner(false);
+
+        if (!uploadInfo.filesValid) {
+          // the areFilesValid already shows the alerts, so we should just hide the spinner.
+          return;
+        }
+
+        showUploadProgressModal(submissionRowsCopy, submissionRowsLinkedData, onSuccess);
+      }).catch((err) => {
+        dispatchError({ error: err, isDismissible: true });
+      });
     }
   }
 
-  const areFilesValid = (rows: any[], linkedData: any[]) => {
-    let isValid = true, hasAssetColumn = false;
+  /**
+   * go through all the rows and check if there are any assets or not. if there are,
+   *   - if there are any wait_for, then add the requests to the flow control
+   *   - if no wait_for, then validate the url template
+   * @param rows the main table data
+   * @param linkedData the foreign key data (linked data)
+   * @param recievedWaitFors whether we have already received the waitFor data or not
+   */
+  const areFilesValid = (rows: any[], linkedData: any[], recievedWaitFors?: boolean) => {
+    let isValid = true, hasAssetColumn = false, hasAssetWaitFor = false;
+
     // Iterate over all rows that are passed as parameters to the modal controller
     rows.forEach((row, rowIndex) => {
 
@@ -783,20 +792,27 @@ export default function RecordeditProvider({
           if (column && column.isAsset) {
             hasAssetColumn = true;
 
-            const messageContext = <>column <code><DisplayValue value={column.displayname} /></code> for record {rowIndex+1}</>;
+            const messageContext = <>column <code><DisplayValue value={column.displayname} /></code> in record {rowIndex+1}</>;
 
             if (row[k].url === '' && !column.nullok) {
               isValid = false;
               addAlert(<>Please select a file for {messageContext}.</>, ChaiseAlertType.ERROR);
             } else if (row[k] !== null && typeof row[k] === 'object' && row[k].file) {
               try {
-                if (!row[k].hatracObj.validateURL(row, linkedData[rowIndex])) {
-                  isValid = false;
-                  addAlert(<>Invalid url template for {messageContext}.</>, ChaiseAlertType.ERROR);
+                if (!recievedWaitFors && Array.isArray(column.waitFor) && column.waitFor.length > 0) {
+                  hasAssetWaitFor = true;
+                } else {
+                  if (!row[k].hatracObj.validateURL(row, linkedData[rowIndex], assetWaitForFlowControl.current.templateVariables[rowIndex])) {
+                    isValid = false;
+                    addAlert(
+                      <>Upload path is empty for {messageContext}. This could be due to missing dependent column inputs.</>,
+                      ChaiseAlertType.ERROR
+                    );
+                  }
                 }
               } catch (e) {
                 isValid = false;
-                $log.error('error while validating url_pattern:')
+                $log.error('error while validating url_pattern:');
                 $log.error(e);
                 addAlert(<>Invalid url template for {messageContext}.</>, ChaiseAlertType.ERROR);
               }
@@ -808,7 +824,39 @@ export default function RecordeditProvider({
       }
     });
 
-    return { filesValid: isValid, hasAssetColumn: hasAssetColumn };
+    return { filesValid: isValid, hasAssetColumn: hasAssetColumn, hasAssetWaitFor };
+  };
+
+  const showUploadProgressModal = (submissionRowsCopy: any[], submissionRowsLinkedData: any[], onSuccess: () => void) => {
+    setUploadProgressModalProps({
+      rows: submissionRowsCopy,
+      linkedData: submissionRowsLinkedData,
+      templateVariables: assetWaitForFlowControl.current.templateVariables,
+      onSuccess: onSuccess,
+      onCancel: (exception: any) => {
+        setShowSubmitSpinner(false);
+
+        // NOTE: This check was being done in angularJS since the modal was closed with a message if the user aborted uploading
+        //   - in ReactJS it's handling the case when the modal is closed and no "exception" is returned (undefined)
+        //   - when we abort the upload, we're calling onCancel without any parameters
+        if (isObjectAndNotNull(exception)) {
+          let message;
+          if (exception.message) {
+            message = exception.message;
+            if (exception.code === 403) message = MESSAGE_MAP.hatracUnauthorizedMessage + ' ' + message;
+          } else {
+            // happens with an error with code 0 (Timeout Error)
+            message = MESSAGE_MAP.errorMessageMissing;
+          }
+
+          // we don't know how to handle the error in the code, show error to user as alert
+          addAlert(message, ChaiseAlertType.ERROR);
+        }
+
+        // close the modal
+        setUploadProgressModalProps(undefined);
+      }
+    });
   }
 
   const addForm = (count: number) => {
@@ -1112,6 +1160,75 @@ export default function RecordeditProvider({
       }
     })
 
+  }
+
+  /**
+   * process the wait_for requests.
+   * - if there are still requests to be sent, calls itself again.
+   * - if there was an error, calls reject with the error.
+   * - if sent all requests successfully, calls resolve with true.
+   *
+   * @param submissionRows the form data
+   * @param resolve the resolve function to call when all requests are done
+   * @param reject the reject function to call when there is an error
+   * @returns
+   */
+  function processWaitForRequests(submissionRows: Array<any>, resolve: (success: boolean) => void, reject: (error: any) => void) {
+    if (!assetWaitForFlowControl.current.haveFreeSlot()) {
+      return;
+    }
+
+    assetWaitForFlowControl.current.waitForRequests.forEach((req) => {
+      if (req.processed || !flowControl.current.haveFreeSlot()) {
+        return;
+      }
+
+      assetWaitForFlowControl.current.queue.occupiedSlots++;
+      req.processed = true;
+
+      const logObj = {
+        action: getRecordeditLogAction(LogActions.LOAD, LogStackPaths.PSEUDO_COLUMN),
+        stack: getRecordeditLogStack(req.logStackNode)
+      };
+      req.waitForColumn.getFirstOutboundValue(submissionRows, logObj).then((values: any) => {
+        assetWaitForFlowControl.current.queue.occupiedSlots--;
+        req.isLoading = false;
+
+        $log.debug(`got the wait for values for ${req.waitForColumn.displayname.value}`);
+
+        // attach the recieved value to the appropriate row
+        const sourceDefinitions = reference.table.sourceDefinitions;
+        values.forEach((val: any, valIndex: number) => {
+          if (!assetWaitForFlowControl.current.templateVariables[valIndex]) {
+            assetWaitForFlowControl.current.templateVariables[valIndex] = {};
+          }
+
+          sourceDefinitions.sourceMapping[req.waitForColumn.name].forEach((k: any) => {
+            if (val.templateVariables.$self) {
+              assetWaitForFlowControl.current.templateVariables[valIndex][k] = val.templateVariables.$self;
+            }
+            if (val.templateVariables.$_self) {
+              assetWaitForFlowControl.current.templateVariables[valIndex][`_${k}`] = val.templateVariables.$_self;
+            }
+          });
+        });
+
+        if (loginModal || errors.length > 0) {
+          // if there is an error, we should not proceed
+          resolve(false);
+        } else if (assetWaitForFlowControl.current.allRequestsFinished()) {
+          // we got all the requests, so call the main resolve
+          resolve(true);
+        } else {
+          // send the other requests
+          processWaitForRequests(submissionRows, resolve, reject);
+        }
+      }).catch((error: any) => {
+        req.isLoading = false;
+        setShowSubmitSpinner(false);
+        reject(error);
+      })
+    });
   }
 
   // ---------------- log related function --------------------------- //

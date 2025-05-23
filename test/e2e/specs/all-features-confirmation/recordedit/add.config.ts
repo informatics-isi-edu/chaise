@@ -5,6 +5,7 @@ export default getConfig({
   configFileName: 'recordedit/add.dev.json',
   mainSpecName: 'all-features-confirmation',
   testMatch: [
-    'add.spec.ts'
+    'add.spec.ts',
+    'add-sequential.spec.ts'
   ]
 });

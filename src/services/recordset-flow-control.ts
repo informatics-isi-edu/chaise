@@ -1,6 +1,5 @@
 // models
-import { LogActions, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // servies
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';

@@ -200,6 +200,10 @@ export interface UploadFileObject {
    */
   linkedData: any,
   /**
+   * the waitfor data
+   */
+  templateVariables: any,
+  /**
    * which row this is
    */
   rowIdx: number
@@ -253,6 +257,10 @@ export interface UploadProgressProps {
    * the outbound fk values (linke data) for all the forms
    */
   linkedData: any[];
+  /**
+   * the template variables (wait for data) for all the forms
+   */
+  templateVariables: any[];
   /**
    * prop to trigger on delete confirmation
    */
