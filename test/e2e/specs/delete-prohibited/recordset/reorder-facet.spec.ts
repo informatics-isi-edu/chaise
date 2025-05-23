@@ -344,17 +344,17 @@ const changeStoredOrder = async (page: Page, testInfo: TestInfo, order: any) => 
 const testMenuBtnDisabled = async (locator: Locator, disabled: boolean) => {
   await expect.soft(locator).toBeVisible();
   if (disabled) {
-    await expect.soft(locator).toHaveClass(/disabled/);
+    await expect.soft(locator).toContainClass('disabled');
   } else {
-    await expect.soft(locator).not.toHaveClass(/disabled/);
+    await expect.soft(locator).not.toContainClass('disabled');
   }
 }
 
 const testMenuBtnIndicator = async (locator: Locator, hasIndicator: boolean) => {
   await expect.soft(locator).toBeVisible();
   if (hasIndicator) {
-    await expect.soft(locator).toHaveClass(/chaise-btn-with-indicator/);
+    await expect.soft(locator).toContainClass('chaise-btn-with-indicator');
   } else {
-    await expect.soft(locator).not.toHaveClass(/chaise-btn-with-indicator/);
+    await expect.soft(locator).not.toContainClass('chaise-btn-with-indicator');
   }
 }

@@ -210,11 +210,10 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   const setTopScrollStyles = () => {
     if (fixedPos) {
       topScrollElementWrapper!.style.width = `${scrollableContent.clientWidth}px`;
-      topScrollElementWrapper!.style.marginTop = '-15px';
     }
 
     // there is no need of a scrollbar, content is not overflowing
-    if (scrollableContent!.scrollWidth == scrollableContent!.clientWidth) {
+    if (scrollableContent!.scrollWidth === scrollableContent!.clientWidth) {
       topScrollElement!.style.width = '0';
       topScrollElementWrapper!.style.height = '0';
     }
@@ -236,7 +235,7 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   // make top scroll visible after adding the handlers to ensure its visible only when working
   topScrollElementWrapper.style.display = 'block';
   // show only if content is overflowing
-  if (scrollableContent.scrollWidth == scrollableContent.clientWidth) {
+  if (scrollableContent.scrollWidth !== scrollableContent.clientWidth) {
     topScrollElementWrapper.style.height = '15px';
   }
 

@@ -89,6 +89,55 @@ const testParams = {
       }
     }
   },
+  json_support: {
+    facetIdx: 9,
+    totalNumOptions: 12,
+    numRows: 25,
+    tests: [
+      {
+        description: 'not-null',
+        option: 0,
+        filter: 'jsonb_colAll records with value',
+        numRows: 20,
+      },
+      {
+        description: 'null',
+        option: 1,
+        filter: 'jsonb_colNo value ',
+        numRows: 10,
+      },
+      {
+        description: 'json object',
+        option: 2,
+        filter: '"one"',
+        numRows: 5,
+        modal: {
+          numRows: 12,
+          checkedOption: 0
+        }
+      },
+      {
+        description: 'number',
+        option: 9,
+        filter: 'jsonb_col8',
+        numRows: 1,
+        modal: {
+          numRows: 12,
+          checkedOption: 7
+        }
+      },
+      {
+        description: 'string literal',
+        option: 10,
+        filter: 'jsonb_col"nine"',
+        numRows: 1,
+        modal: {
+          numRows: 12,
+          checkedOption: 8
+        }
+      }
+    ]
+  },
   hide_row_count: {
     hidden: {
       facetIdx: 11,
@@ -477,6 +526,52 @@ test.describe('Other facet features', () => {
       await test.step('after selecting one, other such facets should not provide null option.', async () => {
         const facet = RecordsetLocators.getFacetById(page, params.secondFacet.idx);
         await openFacetAndTestFilterOptions(page, facet, params.secondFacet.idx, params.secondFacet.options, 6);
+      });
+    });
+  });
+
+  test.describe('json/jsonb support', () => {
+    testParams.json_support.tests.forEach((params) => {
+      test(`${params.description}`, async ({ page, baseURL }, testInfo) => {
+        const facet = RecordsetLocators.getFacetById(page, testParams.json_support.facetIdx);
+        const numRowsWhenCleared = testParams.json_support.numRows;
+
+        const checkPageStatusAfterSelection = async () => {
+          await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
+          await expect.soft(RecordsetLocators.getFacetFilters(page).nth(0)).toContainText(params.filter);
+        }
+
+        await test.step('should load recordset page, clear all filters, and open the json facet', async () => {
+          await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
+          await RecordsetLocators.waitForRecordsetPageReady(page);
+          await testClearAllFilters(page, numRowsWhenCleared);
+
+          // 4 open facets because 3 are already open on page load
+          await openFacet(page, facet, testParams.json_support.facetIdx, testParams.json_support.totalNumOptions, 4);
+        });
+
+        await test.step('choosing the option should work properly.', async () => {
+          await testSelectFacetOption(page, facet, params.option, params.numRows, 1);
+          await checkPageStatusAfterSelection();
+        });
+
+        await test.step('refreshing the page should keep the selected filter.', async () => {
+          await page.reload();
+          await RecordsetLocators.waitForRecordsetPageReady(page);
+          await checkPageStatusAfterSelection();
+        });
+
+        if ('modal' in params) {
+          await test.step('the modal should show the selected option.', async () => {
+            const modal = ModalLocators.getRecordsetSearchPopup(page);
+            await testShowMoreClick(facet, modal, params.modal!.numRows, 1);
+            await expect.soft(RecordsetLocators.getCheckboxInputs(modal).nth(params.modal!.checkedOption)).toBeChecked();
+            await ModalLocators.getSubmitButton(modal).click();
+            await expect.soft(modal).not.toBeVisible();
+            await checkPageStatusAfterSelection();
+          });
+        }
       });
     });
   });
