@@ -237,7 +237,7 @@ export class ConfigService {
       templating: chaiseConfig.templating
     });
 
-    ERMrest.setClientSession(session);
+    ERMrest.AuthnService.setClientSession(session);
 
     ConfigService._setupDone = true;
     ConfigService._ermrest = ERMrest;

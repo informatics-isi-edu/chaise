@@ -12,7 +12,6 @@ import { ConfigService, ContextHeaderParams } from '@isrd-isi-edu/chaise/src/ser
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -290,13 +289,13 @@ export function renderName(option: MenuOption): string {
 
 // option - navbar menu object form children array
 export function canShow(option: MenuOption, session: Session | null): boolean {
-  return option.acls && isGroupIncluded(option.acls.show, session);
+  return option.acls && ConfigService.ERMrest.AuthnService.isUserInAcl(option.acls.show, session);
 }
 
 // option - navbar menu object form children array
 // session - Session factory
 export function canEnable(option: MenuOption, session: Session | null): boolean {
-  return option.acls && isGroupIncluded(option.acls.enable, session);
+  return option.acls && ConfigService.ERMrest.AuthnService.isUserInAcl(option.acls.enable, session);
 }
 
 // NOTE: hard coded action
