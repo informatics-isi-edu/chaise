@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -209,6 +210,9 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
          * added to remove the warning.
          */
         ignoreOrder: true
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
       })
     ],
     optimization: {
