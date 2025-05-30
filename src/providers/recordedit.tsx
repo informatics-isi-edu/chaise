@@ -1013,7 +1013,7 @@ export default function RecordeditProvider({
     const logObject = logInfo.logObject;
     const channelName = `chaise-${logObject.pcid}-${logObject.ppid}`;
     const channel = new BroadcastChannel(channelName);
-    console.log(`sending a message to ${channelName}`);
+    $log.debug(`sending a message to ${channelName}`);
     channel.postMessage(message);
   }
 

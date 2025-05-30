@@ -311,15 +311,17 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // post login callback function
   const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
-    windowRef.addEventListener('message', (args) => {
-      if (args && args.data && (typeof args.data === 'string')) {
-        AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
-        AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
-        const obj = queryStringToJSON(args.data);
-
-        if (obj.referrerid === referrerId && (typeof cb === 'function')) cb();
-      }
-    });
+    // TODO when users login, we should technically broadcast that to every page and reload all of them.
+    //      if we do that, then this should go to a useEffect for the provider. and we don't need to pass any referrerId
+    const channelName = `chaise-successful_login-${referrerId}`;
+    const channel = new BroadcastChannel(channelName);
+    channel.onmessage = () => {
+      $log.debug(`Broadcast channel ${channelName} received a message.`);
+      channel.close();
+      AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
+      AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
+      cb();
+    };
   };
 
   /**
