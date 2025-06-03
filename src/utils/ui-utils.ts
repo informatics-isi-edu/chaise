@@ -8,6 +8,14 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import Tooltip from 'bootstrap/js/dist/tooltip';
 
+
+export type ContainerHeightSensorDimensions = {
+  /**
+   * stores 'top' of the container calculated by height of top panel
+   */
+  top: number;
+}
+
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
  * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `.app-header-container` will be used.
@@ -23,7 +31,11 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
  *
  * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
-export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean, onContainerHeightChange?: (dimensions: any) => void) {
+export function attachContainerHeightSensors(
+  parentContainer?: any, 
+  parentContainerSticky?: any, 
+  useDocHeight?: boolean, 
+  onContainerHeightChange?: (dimensions: any) => void) {
   try {
     const appRootId = `#${ID_NAMES.APP_ROOT}`;
 
