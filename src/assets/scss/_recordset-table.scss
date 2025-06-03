@@ -5,7 +5,7 @@
   overflow-y: hidden;
 }
 
-.chaise-table.table, .sticky-header > table {
+.chaise-table.table, .chaise-table-sticky-header > table {
   border-top: 1px solid map.get(variables.$color-map, 'table-border');
   border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
   margin: 0;
@@ -262,7 +262,7 @@
   display: none !important;
   position: absolute !important;
 }
-.sticky-header {
+.chaise-table-sticky-header {
   position: fixed;
   top: 0;
   visibility: none;
@@ -270,16 +270,16 @@
   overflow-x: hidden;
 }
 
-.sticky-header > table > thead > tr > th {
+.chaise-table-sticky-header > table > thead > tr > th {
   padding: 7px;
   color: map.get(variables.$color-map, 'navbar-inverse');
 }
 
-.sticky-header .sticky-header-table {
+.chaise-table-sticky-header .sticky-header-table {
   table-layout: fixed;
   width: 100%;
 }
 
-.app-content-container-scrollable .sticky-header {
+.app-content-container-scrollable .chaise-table-sticky-header {
   display: none;
 }

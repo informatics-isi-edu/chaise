@@ -175,7 +175,8 @@ export const CLASS_NAMES = {
   IMAGE_PREVIEW: 'chaise-image-preview',
   IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in',
   COMMENT: 'chaise-comment',
-  COMMENT_IS_HTML: 'chaise-comment-html'
+  COMMENT_IS_HTML: 'chaise-comment-html',
+  SCROLLABLE_APP_CONTENT_CONTAINER: 'app-content-container-scrollable',
 };
 
 export const ID_NAMES = {
