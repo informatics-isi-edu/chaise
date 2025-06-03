@@ -80,7 +80,7 @@ const RecordsetTable = ({
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
-  const enableStickyHeader=config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0;
+  const enableStickyHeader = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0;
 
   type RowConfig = {
     isSelected: boolean;
@@ -199,7 +199,7 @@ const RecordsetTable = ({
     // Sync widths of the columns
     const syncWidths = () => {
       if (stickyHeaderRef.current && tableRef.current) {
-      //For syncing the width of sticky header w.r.t the table body cells for each column
+        //For syncing the width of sticky header w.r.t the table body cells for each column
         const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
         const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
 
