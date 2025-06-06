@@ -84,7 +84,7 @@ test.describe('Navbar', () => {
         await expect.soft(editMenu.locator('.chaise-dropdown-header').first(), 'submenu header text missmatch').toHaveText('For Mutating Data');
 
         await expect.soft(disabledSubMenuOptions, 'wrong number of disabled options').toHaveCount(4);
-        await expect.soft(disabledSubMenuOptions.nth(0), 'first disabled link text missmatch').toHaveText('Edit Existing Record');
+        await expect.soft(disabledSubMenuOptions.nth(0), 'first disabled link text missmatch').toHaveText('Edit Existing Record (tester)');
       });
 
       await test.step('should have disabled "Edit Records" submenu link (has children)', async() => {

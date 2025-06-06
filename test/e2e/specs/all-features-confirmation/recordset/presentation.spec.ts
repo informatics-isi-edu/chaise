@@ -259,7 +259,7 @@ const testParams = {
         'current: 12,345,221, 12345221, 12,345,111', //min_i2
         '1,234,525', //max_i1
         'current: 12,345,225, 12345225', //max_i2
-        'virtual col value is 12,345,225', //virtual column
+        'virtual col value is 12,345,225 (for All features confirmation)', //virtual column
       ],
       [
         'main two', '', '1,234,502',

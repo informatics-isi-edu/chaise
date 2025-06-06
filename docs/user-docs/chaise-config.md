@@ -504,17 +504,38 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
      ```
 
 ### templating
-Use this property to change the default engine that is used for templating throughout chaise and ermrestjs.
+Use this property to change the settings related to templating environment throughout chaise and ermrestjs.
    - Type: Object
    - Default behavior: `mustache` will be used as the default template engine.
    - General syntax:
      ```
      templating: {
-         engine: 'handlebars' or 'mustache'
+         engine: 'handlebars' or 'mustache',
+         site_var: <any object>
      }
      ```
-   - `templating` attributes:
-     - `engine`: The template engine used in ermrestjs.
+   - Attributes:
+     - `engine`: The default template engine, `"handlebars"` or `"mustache"`.
+     - `site_var`: Allows injecting values into the environment. The defined object can have any attribute that you would like. In all templating environments, you may refer to the values inside this object using the `$site_var` namespace. For example, with the following definition:
+        ```json
+        {
+          "templating": {
+            "site_var": {
+              "repository_name": "Chaise",
+              "acl_groups": {
+                "group1": "http://group-1-globus-id",
+                "group2": "http://group-2-globus-id",
+              }
+            }
+          }
+        }
+        ```
+        You may use the following templates:
+        ```
+        current repository: {{{ $site_var.repository_name }}}
+        {{#if (isUserInAcl $site_var.acl_groups.group1 )}}allowed{{else}}not_allowed{{/if}}
+        ```
+
    - Sample syntax:
      ```
      templating: {

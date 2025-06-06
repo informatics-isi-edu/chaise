@@ -28,7 +28,10 @@ var chaiseConfig = {
         "table": "accommodation"
     },
     templating: {
-      engine: 'handlebars'
+      engine: 'handlebars',
+      site_var: {
+        test_name: "All features confirmation"
+      }
     },
     shareCite: {
         acls: {

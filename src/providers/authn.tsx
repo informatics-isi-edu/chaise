@@ -311,8 +311,12 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // post login callback function
   const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
-    // TODO when users login, we should technically broadcast that to every page and reload all of them.
-    //      if we do that, then this should go to a useEffect for the provider. and we don't need to pass any referrerId
+    /**
+     * TODO
+     * when users login, we should technically broadcast that to every page. We could then only reload the page that
+     * initiated the login, and then for other pages we should most probably just show an alert letting users know
+     * about the session change. The alert should also have a button to reload the page.
+     */
     const channelName = `chaise-successful_login-${referrerId}`;
     const channel = new BroadcastChannel(channelName);
     channel.onmessage = () => {
