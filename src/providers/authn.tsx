@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
@@ -311,15 +311,21 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // post login callback function
   const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
-    windowRef.addEventListener('message', (args) => {
-      if (args && args.data && (typeof args.data === 'string')) {
-        AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
-        AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
-        const obj = queryStringToJSON(args.data);
-
-        if (obj.referrerid === referrerId && (typeof cb === 'function')) cb();
-      }
-    });
+    /**
+     * TODO
+     * when users login, we should technically broadcast that to every page. We could then only reload the page that
+     * initiated the login, and then for other pages we should most probably just show an alert letting users know
+     * about the session change. The alert should also have a button to reload the page.
+     */
+    const channelName = `chaise-successful_login-${referrerId}`;
+    const channel = new BroadcastChannel(channelName);
+    channel.onmessage = () => {
+      $log.debug(`Broadcast channel ${channelName} received a message.`);
+      channel.close();
+      AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
+      AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
+      cb();
+    };
   };
 
   /**

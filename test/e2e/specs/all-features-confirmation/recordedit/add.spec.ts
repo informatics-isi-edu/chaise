@@ -1,56 +1,9 @@
-import { test, expect } from '@playwright/test';
-import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import {
-  createFiles, deleteFiles, testFormPresentationAndValidation,
-  TestFormPresentationAndValidation, testSubmission,
-  TestSubmissionParams
-} from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import moment from 'moment';
+import { test } from '@playwright/test';
 
-const currentTimestampTimeStr = moment().format('x');
+import { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import { testCreateRecords, TestCreateRecordsParams } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 
-const testFiles = [
-  {
-    name: 'testfile1MB_add.txt',
-    size: '1024000',
-    path: 'testfile1MB_add.txt',
-    tooltip: '- testfile1MB_add.txt\n- 1000 kB'
-  },
-  {
-    name: 'testfile500kb_add.png',
-    size: '512000',
-    path: 'testfile500kb_add.png',
-    tooltip: '- testfile500kb_add.png\n- 500 kB'
-  },
-  {
-    name: 'testfile10MB_add.txt',
-    size: '10240000',
-    path: 'testfile10MB_add.txt',
-    tooltip: '- testfile10MB_add.txt\n- 9.77 MB'
-  },
-];
-
-// we're testing this table multiple times
-const fileTableDefaultPresentationProps = {
-  schemaName: 'product-add',
-  tableName: 'file',
-  tableDisplayname: 'file',
-  tableComment: 'asset/object',
-  columns: [
-    { name: 'fileid', displayname: 'fileid', type: RecordeditInputType.INT_4, skipValidation: true },
-    { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
-    { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
-  ]
-}
-
-const testParams: {
-  tables: {
-    num_files: number,
-    presentation: TestFormPresentationAndValidation,
-    submission: TestSubmissionParams
-  }[]
-} = {
+const parallelTestParams: TestCreateRecordsParams = {
   tables: [
     {
       num_files: 0,
@@ -99,9 +52,9 @@ const testParams: {
         ],
         inputs: [
           {
-            'title': 'new title 1', 'website': 'https://example1.com', 'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
-            'rating': '1', 'summary': 'This is the summary of this column 1.', 'description': '## Description 1',
-            'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
+            'title': 'new title 1 ™', 'website': 'https://example1.com', 'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
+            'rating': '1', 'summary': 'This is the summary of this column 1.', 'description': '## Description 1 ©',
+            'json_col': JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple ®' }, 'customer': 'John Smith' }, undefined, 2),
             'no_of_rooms': '1', 'opened_on': { date_value: '2017-01-01', time_value: '01:01:01' }, 'date_col': '2017-01-01', 'luxurious': 'false',
             'text_array': ['v1', 'v2'], 'boolean_array': ['true'],
             'int4_array': ['1', '2'], 'float4_array': ['1', '2.2'],
@@ -130,10 +83,10 @@ const testParams: {
         ],
         resultRowValues: [
           [
-            'new title 1', { url: 'https://example1.com', caption: 'Link to Website' },
+            'new title 1 ™', { url: 'https://example1.com', caption: 'Link to Website' },
             { url: '/product-add:category/term=Hotel', caption: 'Hotel' },
-            '1.0000', 'This is the summary of this column 1.', 'Description 1',
-            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
+            '1.0000', 'This is the summary of this column 1.', 'Description 1 ©',
+            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple ®' }, 'customer': 'John Smith' }, undefined, 2),
             '1', '2017-01-01 01:01:01', '2017-01-01', 'false',
             'v1, v2', 'true', '1, 2', '1.0000, 2.2000', '2001-01-01, 2002-02-02', '2001-01-01 01:01:01', '2001-01-01 01:01:01',
             '#123456'
@@ -149,192 +102,12 @@ const testParams: {
           ]
         ]
       }
-    },
-    {
-      num_files: 2, // only two forms will be submitted
-      presentation: {
-        ...fileTableDefaultPresentationProps,
-        description: 'multi create with new files',
-        inputs: [
-          { 'fileid': '1', 'uri': testFiles[0], 'timestamp_txt': currentTimestampTimeStr },
-          { 'fileid': '2', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr },
-          { 'fileid': '3', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr } // the form will be removed
-        ]
-      },
-      submission: {
-        tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
-        resultRowValues: [
-          [
-            '1',
-            { caption: 'testfile1MB_add.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/3a8c740953a168d9761d0ba2c9800475:` },
-            'testfile1MB_add.txt',
-            '1.02 MB'
-          ],
-          [
-            '2',
-            { caption: 'testfile500kb_add.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add.png',
-            '512 kB'
-          ]
-        ]
-      }
-    },
-    {
-      num_files: 2, // only two forms will be submitted
-      presentation: {
-        description: 'multi create when one file previously uploaded to hatrac',
-        schemaName: 'product-add',
-        tableName: 'file',
-        tableDisplayname: 'file',
-        tableComment: 'asset/object',
-        columns: [
-          { name: 'fileid', displayname: 'fileid', type: RecordeditInputType.INT_4, skipValidation: true },
-          { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
-          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
-        ],
-        inputs: [
-          { 'fileid': '1', 'uri': testFiles[2], 'timestamp_txt': currentTimestampTimeStr }, // this is new
-          { 'fileid': '2', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr }, // this is uploaded in the previous test
-          { 'fileid': '3', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr } // the form will be removed
-        ]
-      },
-      submission: {
-        tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
-        resultRowValues: [
-          [
-            '1',
-            { caption: 'testfile10MB_add.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/b5dad28809685d9764dbd08fa23600bc:` },
-            'testfile10MB_add.txt',
-            '10.2 MB'
-          ],
-          [
-            '2',
-            { caption: 'testfile500kb_add.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add.png',
-            '512 kB'
-          ]
-        ]
-      }
-    },
-    {
-      num_files: 2, // only two forms will be submitted
-      presentation: {
-        description: 'multi create when both files previously uploaded to hatrac',
-        schemaName: 'product-add',
-        tableName: 'file',
-        tableDisplayname: 'file',
-        tableComment: 'asset/object',
-        columns: [
-          { name: 'fileid', displayname: 'fileid', type: RecordeditInputType.INT_4, skipValidation: true },
-          { name: 'uri', displayname: 'uri', type: RecordeditInputType.FILE, comment: 'asset/reference' },
-          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
-        ],
-        inputs: [
-          { 'fileid': '1', 'uri': testFiles[0], 'timestamp_txt': currentTimestampTimeStr }, // this is uploaded in the previous test
-          { 'fileid': '2', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr }, // this is uploaded in the previous test
-          { 'fileid': '3', 'uri': testFiles[1], 'timestamp_txt': currentTimestampTimeStr } // the form will be removed
-        ]
-      },
-      submission: {
-        tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
-        resultRowValues: [
-          [
-            '1',
-            { caption: 'testfile1MB_add.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/3a8c740953a168d9761d0ba2c9800475:` },
-            'testfile1MB_add.txt',
-            '1.02 MB'
-          ],
-          [
-            '2',
-            { caption: 'testfile500kb_add.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add.png',
-            '512 kB'
-          ]
-        ]
-      }
     }
   ]
 }
 
-
-test.describe('Recordedit create', () => {
-  /**
-   * we have to make sure we're running test cases sequentially since upload test cases are testing that users
-   * can upload the same file to the same location. That's why we're not running tests here in parallel
-   */
-
-  test.beforeAll(async () => {
-    await createFiles(testFiles);
-  });
-
-  for (const params of testParams.tables) {
-    const presentation = params.presentation;
-
-    test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
-      const numForms = presentation.inputs.length;
-
-      await test.step('open recordedit page', async () => {
-        const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
-        await page.goto(url);
-        await RecordeditLocators.waitForRecordeditPageReady(page);
-      });
-
-      if (numForms > 1) {
-        await test.step('clone more forms', async () => {
-          let cnt = 1;
-          while (cnt < numForms) {
-            await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
-            await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(++cnt);
-          }
-        });
-      }
-
-      // test everything related to the form
-      await testFormPresentationAndValidation(page, baseURL, testInfo, presentation, false);
-
-      // this test clones the form and then remove the extra one. just to make sure nothing is affected by this.
-      await test.step('remove form', async () => {
-        // for the tests with file, we want to remove the actual form instead of adding a new one.
-        const addExtraForm = params.num_files === 0;
-
-        if (numForms === 1) {
-          await test.step('remove button should not be offered when only one form is visible', async () => {
-            await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(0);
-          });
-        }
-
-        if (addExtraForm) {
-          await test.step('clone an extra form', async () => {
-            await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
-            await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(numForms + 1);
-            await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(numForms + 1);
-          });
-        }
-
-        await test.step('remove the last form', async () => {
-          const cnt = addExtraForm ? numForms : numForms - 1;
-          await RecordeditLocators.getDeleteRowButton(page, cnt).click();
-          await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(cnt);
-          await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(cnt === 1 ? 0 : cnt);
-        });
-      });
-
-      await test.step('submit and save the data', async () => {
-        let timeout: number | undefined;
-        if (params.num_files > 0) {
-          timeout = params.num_files * 30 * 1000;
-        }
-        await testSubmission(page, params.submission, false, timeout);
-      });
-    });
-  }
-
-  test.afterAll(async () => {
-    await deleteFiles(testFiles);
-    await deleteHatracNamespaces([`/hatrac/js/chaise/${currentTimestampTimeStr}`]);
-  });
-
+test.describe('Recordedit create (parallel)', () => {
+  test.describe.configure({ mode: 'parallel' });
+  testCreateRecords(parallelTestParams);
 });
+

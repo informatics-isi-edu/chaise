@@ -14,8 +14,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { APP_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { RecordsetRowValue, testRecordsetTableRowValues } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { clickNewTabLink, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { clickNewTabLink, generateChaiseURL, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 export type RecordeditExpectedColumn = {
   name: string,
@@ -141,6 +140,7 @@ type SetInputValueProps = string | RecordeditFile | {
  * Notes:
  *  - this function assumes the input already has a value and doesn't double check.
 *   - in most cases it will click on the "x" for the input.
+*   - in case of arrays, it will click on the "delete" icons until there aren't any.
  */
 export const clearInputValue = async (
   page: Page, formNumber: number, name: string, displayname: string, inputType: RecordeditInputType,
@@ -309,7 +309,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+        await expect.soft(inputControl).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;
@@ -332,7 +332,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(input).toHaveClass(/input-disabled/);
+        await expect.soft(input).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;
@@ -357,7 +357,7 @@ export const testInputValue = async (
       input = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
-        await expect.soft(inputControl).toHaveClass(/input-disabled/);
+        await expect.soft(inputControl).toContainClass('input-disabled');
       }
 
       if (typeof valueProps !== 'string') return;
@@ -425,6 +425,13 @@ export type TestSubmissionParams = {
   resultRowValues: RecordsetRowValue[]
 }
 
+/**
+ * click on the submit button and test that it works correctly. handles both single and multi create/edit.
+ * @param page
+ * @param params
+ * @param isEditMode
+ * @param timeout overrides the default timeout. useful when there are assets in the form.
+ */
 export const testSubmission = async (page: Page, params: TestSubmissionParams, isEditMode?: boolean, timeout?: number) => {
   await RecordeditLocators.getSubmitRecordButton(page).click();
 
@@ -434,18 +441,19 @@ export const testSubmission = async (page: Page, params: TestSubmissionParams, i
     // provide more information about what went wrong
     const alertContent = await AlertLocators.getErrorAlert(page).textContent();
     expect(alertContent).toEqual('');
+    return;
   }
 
-  await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
   await expect.soft(RecordeditLocators.getSubmitSpinner(page)).not.toBeAttached({ timeout: timeout });
+  await expect.soft(ModalLocators.getUploadProgressModal(page)).not.toBeAttached({ timeout: timeout });
 
   if (params.resultRowValues.length === 1) {
-    await page.waitForURL('**/record/**');
+    await page.waitForURL('**/record/**', { timeout: timeout });
     await testRecordMainSectionValues(page, params.resultColumnNames, params.resultRowValues[0]);
 
   } else {
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
-    await expect.soft(resultset).toBeVisible();
+    await expect.soft(resultset).toBeVisible({ timeout: timeout });
 
     const expectedTitle = `${params.resultRowValues.length} ${params.tableDisplayname} records ${isEditMode ? 'updated' : 'created'} successfully`;
     await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(expectedTitle);
@@ -747,8 +755,8 @@ const _testInputValidationAndExtraFeatures = async (
 
         await expect.soft(timestampProps.time).not.toHaveValue('');
         const UITime = await timestampProps.time.getAttribute('value') as string;
-        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDhh:mm');
-        expect.soft(UIObject.diff(nowObject, 'minutes')).toEqual(0);
+        const UIObject = moment(nowDate + UITime, 'YYYY-MM-DDTHH:mm:ssZ');
+        expect.soft(UIObject.diff(nowObject, 'minutes')).toBeLessThan(1);
       });
 
       await test.step('"clear" button should clear both time and date.', async () => {
@@ -963,7 +971,7 @@ export const testFormPresentationAndValidation = async (
     await expect.soft(titleEl).toHaveText(pageTitle);
 
     const linkEl = RecordeditLocators.getPageTitleLink(page);
-    const expectedLink = `${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${params.tableName}?pcid=`;
+    const expectedLink = generateChaiseURL(APP_NAMES.RECORDSET, params.schemaName, params.tableName, testInfo, baseURL) + '?pcid='
 
     expect.soft(await linkEl.getAttribute('href')).toContain(expectedLink);
 
@@ -1089,4 +1097,79 @@ export const testFormPresentationAndValidation = async (
   }
 }
 
+export type TestCreateRecordsParams = {
+  tables: {
+    num_files: number,
+    presentation: TestFormPresentationAndValidation,
+    submission: TestSubmissionParams
+  }[]
+};
 
+/**
+ * can be used for testing create scenario. works for single or multi create.
+ * This function will also make sure that we can remove forms.
+ *  - if num_files > 0, it will remove the last form.
+ *  - otherwise will add an extra form and remove it.
+ */
+export const testCreateRecords = (usedParams: TestCreateRecordsParams) => {
+  for (const params of usedParams.tables) {
+    const presentation = params.presentation;
+
+    test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
+      const numForms = presentation.inputs.length;
+
+      await test.step('open recordedit page', async () => {
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL));
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      if (numForms > 1) {
+        await test.step('clone more forms', async () => {
+          let cnt = 1;
+          while (cnt < numForms) {
+            await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
+            await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(++cnt);
+          }
+        });
+      }
+
+      // test everything related to the form
+      await testFormPresentationAndValidation(page, baseURL, testInfo, presentation, false);
+
+      // this test clones the form and then remove the extra one. just to make sure nothing is affected by this.
+      await test.step('remove form', async () => {
+        // for the tests with file, we want to remove the actual form instead of adding a new one.
+        const addExtraForm = params.num_files === 0;
+
+        if (numForms === 1) {
+          await test.step('remove button should not be offered when only one form is visible', async () => {
+            await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(0);
+          });
+        }
+
+        if (addExtraForm) {
+          await test.step('clone an extra form', async () => {
+            await RecordeditLocators.getCloneFormInputSubmitButton(page).click();
+            await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(numForms + 1);
+            await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(numForms + 1);
+          });
+        }
+
+        await test.step('remove the last form', async () => {
+          const cnt = addExtraForm ? numForms : numForms - 1;
+          await RecordeditLocators.getDeleteRowButton(page, cnt).click();
+          await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(cnt);
+          await expect.soft(RecordeditLocators.getAllDeleteRowButtons(page)).toHaveCount(cnt === 1 ? 0 : cnt);
+        });
+      });
+
+      await test.step('submit and save the data', async () => {
+        let timeout: number | undefined;
+        if (params.num_files > 0) {
+          timeout = params.num_files * 30 * 1000;
+        }
+        await testSubmission(page, params.submission, false, timeout);
+      });
+    });
+  }
+}

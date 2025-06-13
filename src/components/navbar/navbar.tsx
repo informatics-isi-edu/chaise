@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 
-import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState, type JSX, } from 'react';
 
 // components
 import Nav from 'react-bootstrap/Nav';
@@ -28,7 +28,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // utilities
-import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, NavbarBanner, addLogParams,
@@ -104,7 +103,7 @@ const ChaiseNavbar = (): JSX.Element => {
 
       // if acls.show is defined, process it
       if (isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
-        if (!isGroupIncluded(conf.acls.show, session)) {
+        if (!ERMrest.AuthnService.isUserInAcl(conf.acls.show, session)) {
           // don't add the banner because of acls
           return;
         }
@@ -246,7 +245,7 @@ const ChaiseNavbar = (): JSX.Element => {
     logObj.action = LogService.getActionString(LogActions.NAVBAR_RID_SEARCH, '', '');
     logObj.rid = formModel.ridSearchTerm;
 
-    headers[ConfigService.ERMrest.contextHeaderName] = logObj;
+    headers[ERMrest.contextHeaderName] = logObj;
 
     // try to fetch the resolver link to see if the path resolves before sending the user
     ConfigService.http.get(url, { headers: headers }).then(() => {

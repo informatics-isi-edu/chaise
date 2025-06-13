@@ -6,7 +6,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -24,7 +24,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { saveObjectAsJSONFile } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { MenuOption, MenuOptionTypes } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
@@ -252,7 +251,7 @@ const Export = ({
     });
   });
 
-  const showConfigsSubmenu = isGroupIncluded(ConfigService.chaiseConfig.exportConfigsSubmenu.acls.show, session);
+  const showConfigsSubmenu = ConfigService.ERMrest.AuthnService.isUserInAcl(ConfigService.chaiseConfig.exportConfigsSubmenu.acls.show, session);
   if (showConfigsSubmenu && configsSubmenuOptions.length > 0) {
     configsSubmenu.push({
       type: MenuOptionTypes.MENU,

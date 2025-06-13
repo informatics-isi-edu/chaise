@@ -8,7 +8,7 @@ import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
@@ -121,16 +121,17 @@ const FacetChoicePicker = ({
 
   const listContainer = useRef<HTMLDivElement>(null);
 
-  // populate facetReference and columnName that are used throughout the component
-  let facetReference: any, columnName: string;
+  // populate facetReference and baseColumn that are used throughout the component
+  let facetReference: any, baseColumn: any;
   if (facetColumn.isEntityMode) {
     facetReference = facetColumn.sourceReference.contextualize.compactSelect;
-    columnName = facetColumn.column.name;
+    baseColumn = facetColumn.column;
   } else {
     facetReference = facetColumn.scalarValuesReference;
     // the first column will be the value column
-    columnName = facetReference.columns[0].name;
+    baseColumn = facetReference.columns[0];
   }
+  const baseColumnIsJSON = baseColumn.type.name === 'json' || baseColumn.type.name === 'jsonb';
 
   // make sure to add the search term
   if (searchTerm) {
@@ -338,7 +339,7 @@ const FacetChoicePicker = ({
             }
 
             // filter and tuple uniqueId might be different
-            const value = getFilterUniqueId(tuple, columnName);
+            const value = getFilterUniqueId(tuple);
 
             const i = updatedRows.findIndex(function (row) {
               // ermrestjs always returns a string for uniqueId, but internally we don't
@@ -396,15 +397,16 @@ const FacetChoicePicker = ({
   }
 
   /**
-   * Given tuple and the columnName that should be used, return
+   * Given the tuple object, return the filter's uniqueId
    * the filter's uniqueId (in case of entityPicker, it might be different from the tuple's uniqueId)
    * @param  {Object} tuple      the tuple object
-   * @param  {string} columnName name of column (in scalar it is 'value')
    * @return {string}            filter's uniqueId
    */
-  const getFilterUniqueId = (tuple: any, columnName: string) => {
-    if (tuple.data && columnName in tuple.data) {
-      return tuple.data[columnName];
+  const getFilterUniqueId = (tuple: any) => {
+    if (tuple.data && baseColumn.name in tuple.data) {
+      // if the column is JSON, we need to stringify it otherwise it will print [object Object]
+      // NOTE this is the exact same logic as ermrestjs
+      return baseColumnIsJSON ? JSON.stringify(tuple.data[baseColumn.name], undefined, 0) : tuple.data[baseColumn.name];
     }
     return tuple.uniqueId;
   }
@@ -457,7 +459,6 @@ const FacetChoicePicker = ({
     };
 
     const logInfo = {
-      logObject: null,
       logStack: LogService.addExtraInfoToStack(getDefaultLogInfo().stack, { picker: 1 }),
       logStackPath: LogService.getStackPath(facetModel.parentLogStackPath, LogStackPaths.FACET_POPUP),
     };
@@ -508,7 +509,7 @@ const FacetChoicePicker = ({
       // create the list of choice filters
       let hasNull = false;
       const filters = selectedRows.map(function (t: any) {
-        const val = getFilterUniqueId(t, columnName);
+        const val = getFilterUniqueId(t);
         hasNull = hasNull || (val === null);
         return val;
       });
@@ -535,7 +536,7 @@ const FacetChoicePicker = ({
 
         selectedRows.forEach((row: any) => {
           // filter and tuple uniqueId might be different
-          const value = getFilterUniqueId(row, columnName);
+          const value = getFilterUniqueId(row);
 
           updatedRows.push({
             selected: true,

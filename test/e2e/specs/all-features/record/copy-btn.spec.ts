@@ -5,9 +5,11 @@ import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 
-import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'editable-id-table',
@@ -52,7 +54,7 @@ test.describe('View existing record,', function () {
 
   test('disableDefaultExport=true and showWriterEmptyRelatedOnLoad=false chaise-config support', async ({ page, baseURL }, testInfo) => {
     await test.step('should load the page properly', async () => {
-      await page.goto(`${baseURL}/record/#${getCatalogID(testInfo.project.name)}/product-max-RT:accommodation/id=2002`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'product-max-RT', 'accommodation', testInfo, baseURL) + '/id=2002');
       await RecordLocators.waitForRecordPageReady(page);
     });
 
@@ -73,7 +75,7 @@ test.describe('View existing record,', function () {
 
   // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal, and disabled export button
   test(`for table ${testParams.html_table_name} table`, async ({ page, baseURL, context }, testInfo) => {
-    const baseAppURL = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/editable-id:${testParams.html_table_name}`;
+    const baseAppURL = generateChaiseURL(APP_NAMES.RECORD, 'editable-id', testParams.html_table_name, testInfo, baseURL);
 
     await test.step('should load the page properly', async () => {
       await page.goto(`${baseAppURL}/id=1`);
@@ -93,7 +95,7 @@ test.describe('View existing record,', function () {
       for (const i of [0, 1, 2]) {
         await expect.soft(RecordLocators.getColumns(page).nth(i)).not.toBeVisible();
       }
-      await expect.soft(RecordLocators.getSidePanel(page)).toHaveClass(/close-panel/);
+      await expect.soft(RecordLocators.getSidePanel(page)).toContainClass('close-panel');
     });
 
     // test that no citation appears in share modal when no citation is defined on table
@@ -113,7 +115,7 @@ test.describe('View existing record,', function () {
     await test.step('open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears', async () => {
       // go to recordedit in a new tab
       const newPage = await context.newPage();
-      await newPage.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/editable-id:${testParams.html_table_name}/id=1`);
+      await newPage.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'editable-id', testParams.html_table_name, testInfo, baseURL) + '/id=1');
       await RecordeditLocators.waitForRecordeditPageReady(newPage);
 
       // set a field and submit
@@ -145,7 +147,7 @@ test.describe('View existing record,', function () {
 
   test(`for table ${testParams.copy_test.table_name} table`, async ({ page, baseURL }, testInfo) => {
     await test.step('should load the page properly', async () => {
-      await page.goto(`${baseURL}/record/#${getCatalogID(testInfo.project.name)}/editable-id:${testParams.copy_test.table_name}/id=1`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'editable-id', testParams.copy_test.table_name, testInfo, baseURL) + '/id=1');
       await RecordLocators.waitForRecordPageReady(page);
     });
 

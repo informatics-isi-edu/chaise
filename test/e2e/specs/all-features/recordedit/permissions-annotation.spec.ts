@@ -1,9 +1,11 @@
 import { test, expect, TestInfo, Page } from '@playwright/test';
+
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Viewing Recordedit app with permission related annotations', () => {
 
@@ -59,7 +61,7 @@ test.describe('Viewing Recordedit app with permission related annotations', () =
 /********************** helper functions ************************/
 
 const openThePage = async (tableName: string, page: Page, baseURL: string | undefined, testInfo: TestInfo) => {
-  await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:${tableName}/id=1`);
+  await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'multi-permissions', tableName, testInfo, baseURL) + '/id=1');
 }
 
 const testUnauthorizedAccess = async (page: Page) => {

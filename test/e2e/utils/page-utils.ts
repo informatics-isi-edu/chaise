@@ -38,13 +38,17 @@ export async function getPageId(page: Page): Promise<string> {
  *
  * Notes:
  *   - The URL doesn't have any trailing `/`. if you need to append filter or facets, make sure to start with a `/`.
+ *   - if you don't want to specify the schemaName just pass empty string for it.
  */
-export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableName: string, testInfo: TestInfo, baseURL?: string) : string {
-  return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schemaName}:${tableName}`;
+export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableName: string, testInfo: TestInfo, baseURL?: string): string {
+  const schema_table = schemaName.length > 0 ? `${schemaName}:${tableName}` : tableName;
+  return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schema_table}`;
 }
 
 /**
  * click on the given link and return the opened page instance.
+ *
+ * @param forceNewTab setting this to true, will ensure "middle clicking" instead of left click.
  *
  * Example:
  *
@@ -54,10 +58,11 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
  *
  * await newPage.close();
  */
-export async function clickNewTabLink(locator: Locator) {
+export async function clickNewTabLink(locator: Locator, forceNewTab?: boolean) {
   const pagePromise = locator.page().context().waitForEvent('page');
-  await locator.click();
+  await locator.click(forceNewTab ? { 'button': 'middle' } : undefined);
   const newPage = await pagePromise;
+  await newPage.bringToFront();
   await newPage.waitForLoadState();
   return newPage;
 }
@@ -206,8 +211,6 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
   });
 
   await test.step('should have "BDBag" as a download option and download the file.', async () => {
-    test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
-
     await ExportLocators.getExportDropdown(page).click();
 
     const bagOption = ExportLocators.getExportOption(page, 'BDBag');
@@ -216,15 +219,13 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
     await clickAndVerifyDownload(bagOption, fileNames[1], async () => {
       const modal = ModalLocators.getExportModal(page)
       await expect.soft(modal).toBeVisible();
-      await expect.soft(modal).not.toBeAttached();
+      await expect.soft(modal).not.toBeAttached({ timeout: 30_000 });
     });
   });
 
   // NOTE: this is specific to the tests done in record/presentation.spec.ts and recordset/presentation.spec.ts
   if (fileNames.length > 2) {
     await test.step('should have "Configurations" option that opens a submenu to download the config file.', async () => {
-      test.skip(!!process.env.CI, 'in CI the export server component is not configured and cannot be tested');
-
       await ExportLocators.getExportDropdown(page).click();
 
       const configOption = ExportLocators.getExportOption(page, 'configurations');

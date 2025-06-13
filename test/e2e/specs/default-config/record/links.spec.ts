@@ -11,6 +11,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'links-table'
@@ -20,8 +21,6 @@ test.describe.configure({ mode: 'parallel' });
 
 test.describe('links on the record page', () => {
   test('The proper permalink should appear in the share popup if resolverImplicitCatalog is undefined', async ({ page, baseURL }, testInfo) => {
-    test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
-
     await goToPage(page, baseURL, testInfo, testParams.table_name, true);
 
     // open the share popup on the first tab
@@ -46,10 +45,15 @@ test.describe('links on the record page', () => {
   });
 
   test('Searching in go to RID input should navigate the user to the resolved record page matching that RID', async ({ page, baseURL }, testInfo) => {
+    /**
+     * TODO resolver is installed but most probably not fully configured. we should eventually figure out why
+     *
+     * I spent some time on this and got the resolver working to the point that it doesn't throw any errors anymore.
+     * but it's still not working for some reason
+     */
     test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
 
-    await goToPage(page, baseURL, testInfo, testParams.table_name, true);
-
+    await goToPage(page, baseURL, testInfo, testParams.table_name, true, true);
     const RIDVal = getEntityRow(testInfo, 'links', testParams.table_name, [{ column: 'id', value: '1' }]).RID;
     await NavbarLocators.getGoToRIDInput(page).clear();
     await NavbarLocators.getGoToRIDInput(page).fill(RIDVal);
@@ -139,10 +143,25 @@ test('hide_column_header support', async ({ page, baseURL }, testInfo) => {
 
 
 /********************** helper functions ************************/
-const goToPage = async (page: Page, baseURL: string | undefined, testInfo: TestInfo, tableName: string, dontWrapAroundStep?: boolean) => {
+const goToPage = async (
+  page: Page, baseURL: string | undefined, testInfo: TestInfo, tableName: string,
+  dontWrapAroundStep?: boolean, useRecordset?: boolean
+) => {
   const steps = async () => {
-    await page.goto(`${baseURL}/record/#${getCatalogID(testInfo.project.name)}/${tableName}/id=1`);
-    await RecordLocators.waitForRecordPageReady(page);
+    let url;
+    if (useRecordset) {
+      url = generateChaiseURL(APP_NAMES.RECORDSET, '', tableName, testInfo, baseURL);
+    } else {
+      url = generateChaiseURL(APP_NAMES.RECORD, '', tableName, testInfo, baseURL) + '/id=1';
+    }
+
+    await page.goto(url);
+
+    if (useRecordset) {
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+    } else {
+      await RecordLocators.waitForRecordPageReady(page);
+    }
   }
 
   if (dontWrapAroundStep) {

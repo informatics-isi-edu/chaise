@@ -1,6 +1,5 @@
 // models
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // servies
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -35,7 +34,7 @@ export default class RecordsetFlowControl extends FlowControl {
   constructor(
     reference: any,
     logInfo: {
-      logObject?: any,
+      logObject?: LogObjectType,
       logStack: any,
       logStackPath: string,
       logAppMode?: string

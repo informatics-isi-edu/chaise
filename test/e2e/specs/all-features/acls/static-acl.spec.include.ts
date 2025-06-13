@@ -1,15 +1,17 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, TestInfo } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { getCatalogID, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { performLogin, removeAuthCookieAndReload } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 export const runStaticACLTests = () => {
 
   test('anonymous user should be shown login modal when viewing recoredit app', async ({ page, baseURL }, testInfo) => {
-    await page.goto(`${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/multi-permissions:static_acl_table/id=1`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, 'multi-permissions', 'static_acl_table', testInfo, baseURL) + '/id=1');
     await removeAuthCookieAndReload(page);
 
     const modal = ModalLocators.getLoginModal(page);
@@ -23,7 +25,7 @@ export const runStaticACLTests = () => {
       await updateCatalogAnnotation(catalogId, {
         'tag:isrd.isi.edu,2019:chaise-config': { 'shareCite': { 'acls': { 'show': ['*'] } } }
       });
-      await gotToRecordPageAndCheckShareBtn(page, baseURL, catalogId, true, true);
+      await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, true, true);
     });
 
     test('using only `enable` should show and enable the button', async ({ page, baseURL }, testInfo) => {
@@ -31,7 +33,7 @@ export const runStaticACLTests = () => {
       await updateCatalogAnnotation(catalogId, {
         'tag:isrd.isi.edu,2019:chaise-config': { 'shareCite': { 'acls': { 'show': ['*'] } } }
       });
-      await gotToRecordPageAndCheckShareBtn(page, baseURL, catalogId, true, true);
+      await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, true, true);
     });
 
     test.describe('defining show and enable', () => {
@@ -53,23 +55,22 @@ export const runStaticACLTests = () => {
 
       test('should be enabled for the main user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
         // main user should be able to see and click
-        await gotToRecordPageAndCheckShareBtn(page, baseURL, getCatalogID(testInfo.project.name), true, true);
+        await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, true, true);
       });
 
       test('should be disabled for the restricted user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
         await performLogin(process.env.RESTRICTED_AUTH_COOKIE, '', page);
 
         // should be disabled for restricted user
-        await gotToRecordPageAndCheckShareBtn(page, baseURL, getCatalogID(testInfo.project.name), true, false);
+        await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, true, false);
       });
 
       test('should be hidden for anonymous user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
-        const catalogId = getCatalogID(testInfo.project.name);
-        await page.goto(`${baseURL}/record/#${catalogId}/multi-permissions:static_acl_table/id=1`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'multi-permissions', 'static_acl_table', testInfo, baseURL) + '/id=1');
         await removeAuthCookieAndReload(page);
 
         // anonymous user should not even see it
-        await gotToRecordPageAndCheckShareBtn(page, baseURL, catalogId, false, false);
+        await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, false, false);
       });
 
       test.afterAll(async ({ }, testInfo) => {
@@ -85,7 +86,7 @@ export const runStaticACLTests = () => {
       await updateCatalogAnnotation(catalogId, {
         'tag:isrd.isi.edu,2019:chaise-config': { 'exportConfigsSubmenu': { 'acls': { 'show': ['*'] } } }
       });
-      await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, catalogId, true, true);
+      await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, true, true);
     });
 
     test('using only `enable` should show and enable the button', async ({ page, baseURL }, testInfo) => {
@@ -93,7 +94,7 @@ export const runStaticACLTests = () => {
       await updateCatalogAnnotation(catalogId, {
         'tag:isrd.isi.edu,2019:chaise-config': { 'exportConfigsSubmenu': { 'acls': { 'show': ['*'] } } }
       });
-      await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, catalogId, true, true);
+      await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, true, true);
     });
 
     test.describe('defining show and enable', () => {
@@ -115,23 +116,22 @@ export const runStaticACLTests = () => {
 
       test('should be enabled for the main user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
         // main user should be able to see and click
-        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, getCatalogID(testInfo.project.name), true, true);
+        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, true, true);
       });
 
       test('should be disabled for the restricted user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
         await performLogin(process.env.RESTRICTED_AUTH_COOKIE, '', page);
 
         // should be disabled for restricted user
-        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, getCatalogID(testInfo.project.name), true, false);
+        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, true, false);
       });
 
       test('should be hidden for anonymous user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
-        const catalogId = getCatalogID(testInfo.project.name);
-        await page.goto(`${baseURL}/record/#${catalogId}/multi-permissions:static_acl_table/id=1`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'multi-permissions', 'static_acl_table', testInfo, baseURL) + '/id=1');
         await removeAuthCookieAndReload(page);
 
         // anonymous user should not even see it
-        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, catalogId, false, false);
+        await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, false, false);
       });
 
       test.afterAll(async ({ }, testInfo) => {
@@ -149,9 +149,9 @@ export const runStaticACLTests = () => {
 /********************** helper functions ************************/
 
 const gotToRecordPageAndCheckShareBtn = async (
-  page: Page, baseURL: string | undefined, catalogId: string, isPresent: boolean, isEnabled: boolean
+  page: Page, baseURL: string | undefined, testInfo: TestInfo, isPresent: boolean, isEnabled: boolean
 ) => {
-  await page.goto(`${baseURL}/record/#${catalogId}/multi-permissions:static_acl_table/id=1`);
+  await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'multi-permissions', 'static_acl_table', testInfo, baseURL) + '/id=1');
   await RecordLocators.waitForRecordPageReady(page);
 
   const btn = RecordLocators.getShareButton(page);
@@ -169,9 +169,9 @@ const gotToRecordPageAndCheckShareBtn = async (
 };
 
 const goToRecordPageAndCheckExportConfigsBtn = async (
-  page: Page, baseURL: string | undefined, catalogId: string, isPresent: boolean, isEnabled: boolean
+  page: Page, baseURL: string | undefined, testInfo: TestInfo, isPresent: boolean, isEnabled: boolean
 ) => {
-  await page.goto(`${baseURL}/record/#${catalogId}/multi-permissions:static_acl_table/id=1`);
+  await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'multi-permissions', 'static_acl_table', testInfo, baseURL) + '/id=1');
   await RecordLocators.waitForRecordPageReady(page);
 
   await ExportLocators.getExportDropdown(page).click();
@@ -187,7 +187,7 @@ const goToRecordPageAndCheckExportConfigsBtn = async (
     await configOption.click();
     await expect(ExportLocators.getExportSubmenuOptions(page)).toHaveCount(1);
   } else {
-    await expect(configOption).toHaveClass(/disable-link/);
+    await expect(configOption).toContainClass('disable-link');
   }
 };
 

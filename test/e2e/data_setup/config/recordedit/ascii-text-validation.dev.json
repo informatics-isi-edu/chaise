@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordedit/ascii-text-validation.config.json"
+      ],
+      "schema": "ascii-text-validation"
+  },
+  "cleanup": true
+}

@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+
+
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   schema_table: 'multi-form-input:main',
@@ -14,8 +17,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
   const cloneFormSubmitButton = RecordeditLocators.getCloneFormInputSubmitButton(page);
 
   await test.step('should be visible on load', async () => {
-    const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, '', testParams.schema_table, testInfo, baseURL));
     await RecordeditLocators.waitForRecordeditPageReady(page);
 
     await expect(cloneFormInput).toBeVisible();
@@ -46,7 +48,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
     await RecordeditLocators.getSubmitRecordButton(page).click();
 
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
-    await expect.soft(resultset).toBeVisible({ timeout: 30 * 1000 });
+    await expect.soft(resultset).toBeVisible({ timeout: 30_000 });
     await expect.soft(RecordsetLocators.getRows(resultset)).toHaveCount(testParams.max_input_rows + 1);
   });
 

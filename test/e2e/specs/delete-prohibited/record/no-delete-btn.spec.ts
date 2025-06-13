@@ -3,8 +3,10 @@ import { test, expect } from '@playwright/test';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { getPageURLOrigin } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL, getPageURLOrigin } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 
 test.describe('record page with specific chaise-config properties', () => {
@@ -31,7 +33,7 @@ test.describe('record page with specific chaise-config properties', () => {
   });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const urlPrefix = `${baseURL}/record/#${getCatalogID(testInfo.project.name)}/product-record:accommodation`;
+    const urlPrefix = generateChaiseURL(APP_NAMES.RECORD, 'product-record', 'accommodation', testInfo, baseURL);
 
     RIDValue = getEntityRow(testInfo, 'product-record', 'accommodation', [{ column: 'id', value: '4004' }]).RID;
     pageURLWithRID = `${urlPrefix}/RID=${RIDValue}`;
@@ -48,7 +50,7 @@ test.describe('record page with specific chaise-config properties', () => {
     await test.step('Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.', async () => {
       const showTocBtn = RecordLocators.getShowTocBtn(page);
       await expect.soft(showTocBtn).toBeVisible();
-      await expect.soft(RecordLocators.getSidePanel(page)).toHaveClass(/close-panel/);
+      await expect.soft(RecordLocators.getSidePanel(page)).toContainClass('close-panel');
 
       // open toc for next test
       await showTocBtn.click();
@@ -75,8 +77,6 @@ test.describe('record page with specific chaise-config properties', () => {
   });
 
   test('should show an error dialog if an improper RID is typed into the RID search box', async ({ page }) => {
-    test.skip(!!process.env.CI, 'in CI the resolver server component is not configured and cannot be tested');
-
     await NavbarLocators.getGoToRIDInput(page).clear();
     await NavbarLocators.getGoToRIDInput(page).fill('someobviouslywrongRID');
     await NavbarLocators.getGoToRIDButton(page).click();

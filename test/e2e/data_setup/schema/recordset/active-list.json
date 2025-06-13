@@ -3,6 +3,7 @@
     "schema_name": "active_list_schema",
     "tables": {
         "main": {
+            "comment": "table comment that should not be visible!",
             "kind": "table",
             "table_name": "main",
             "schema_name": "active_list_schema",
@@ -347,7 +348,7 @@
                         {
                             "markdown_name": "virtual column",
                             "display": {
-                                "markdown_pattern": "virtual col value is {{{max_i2}}}",
+                                "markdown_pattern": "virtual col value is {{{max_i2}}} (for {{{$site_var.test_name}}})",
                                 "wait_for": ["max_i2", "entity_set_i2"]
                             }
                         }
@@ -551,7 +552,8 @@
                     },
                     "max_facet_depth": {
                       "*": 1
-                    }
+                    },
+                    "comment": false
                 }
             }
         },

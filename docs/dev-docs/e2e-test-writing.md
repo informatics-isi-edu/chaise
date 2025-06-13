@@ -180,14 +180,14 @@ This section summarizes the best practices for writing test cases in Chaise.
   await expect.soft(title).toContainText('Data Collect');
   ```
 
-- If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-class)):
+- If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-class)):
 
   ```ts
-  // partial regex match
-  await expect.soft(input).toHaveClass(/input\-disabled/);
+  // one class 
+  await expect.soft(input).toContainClass('input-disabled');
 
-  // full match
-  await expect.soft(input).toHaveClass('input-disabled');
+  // multiple classes
+  await expect.soft(input).toContainClass('chaise-input-control has-feedback input-disabled');
   ```
 
 - If you want to test value inside of an input ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-value)):

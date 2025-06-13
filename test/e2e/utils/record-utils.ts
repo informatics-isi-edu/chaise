@@ -557,9 +557,9 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
             input = RecordeditLocators.getForeignKeyInputDisplay(newPage, colName, 1);
             await expect.soft(input).toHaveText(expectedCol.value);
             if (expectedCol.isDisabled) {
-              await expect.soft(input).toHaveClass(/input-disabled/);
+              await expect.soft(input).toContainClass('input-disabled');
             } else {
-              await expect.soft(input).not.toHaveClass(/input-disabled/);
+              await expect.soft(input).not.toContainClass('input-disabled');
             }
             break
           // TODO we should add other types if we need to
@@ -808,7 +808,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(1);
 
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(1);
-    await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
+    await expect.soft(rows.nth(1)).toContainClass('disabled-row');
   });
 
   await test.step('select 2 rows and submit the selection', async () => {
@@ -851,6 +851,8 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     }
 
     await expect.soft(rows).toHaveCount(10);
+    // this is called for both row and dropdown, in dropdown the disabled class is called "disabled" while in
+    // the modal it is "disabled-row". so we're checking the regex to match both
     await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
     await expect.soft(rows.nth(4)).toHaveClass(/disabled/);
   });
@@ -905,9 +907,9 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
 
-    await expect.soft(rows.nth(1)).toHaveClass(/disabled-row/);
-    await expect.soft(rows.nth(4)).toHaveClass(/disabled-row/);
-    await expect.soft(rows.nth(9)).toHaveClass(/disabled-row/);
+    await expect.soft(rows.nth(1)).toContainClass('disabled-row');
+    await expect.soft(rows.nth(4)).toContainClass('disabled-row');
+    await expect.soft(rows.nth(9)).toContainClass('disabled-row');
   });
 
   await test.step('select 2 more rows and submit the selection', async () => {
@@ -949,6 +951,8 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     }
 
     await expect.soft(rows).toHaveCount(10);
+    // this is called for both row and dropdown, in dropdown the disabled class is called "disabled" while in
+    // the modal it is "disabled-row". so we're checking the regex to match both
     await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
     await expect.soft(rows.nth(4)).toHaveClass(/disabled/);
     await expect.soft(rows.nth(6)).toHaveClass(/disabled/);

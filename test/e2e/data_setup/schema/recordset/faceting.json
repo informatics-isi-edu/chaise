@@ -214,7 +214,7 @@
                             {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet.", "hide_not_null_choice": true, "hide_null_choice": true},
                             {"source": "markdown_col", "hide_null_choice": true, "hide_not_null_choice": true},
                             {"source": "boolean_col", "hide_null_choice": true},
-                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"], "hide_null_choice": true},
+                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"]},
                             {"sourcekey": "outbound_to_f1", "markdown_name": "**F1**", "hide_not_null_choice": true},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet", "hide_null_choice": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},

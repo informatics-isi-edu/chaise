@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, type JSX } from 'react';
 
 // components
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
@@ -96,7 +96,7 @@ const RelatedTableInner = ({
   return (
     <div>
       {/* in case of inline, the comments are already handled */}
-      {!relatedModel.isInline && usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.INLINE &&
+      {!relatedModel.isInline && usedRef.comment && usedRef.comment.value && usedRef.comment.displayMode === CommentDisplayModes.INLINE &&
         <div className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={usedRef.comment} /></div>
       }
       {displayCustomMode &&

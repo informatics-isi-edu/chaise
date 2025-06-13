@@ -1,5 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -466,7 +466,7 @@ const RecordsetTable = ({
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          {col.column.comment ?
+          {col.column.comment && col.column.comment.value ?
             // if comment, show tooltip
             <ChaiseTooltip
               placement='top'
@@ -613,7 +613,7 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      {/*  This div will be used as the target (end of table) for the intersection observer to hide the 
+      {/*  This div will be used as the target (end of table) for the intersection observer to hide the
       top scrollbar when the bottom one is visible */}
       <div className='dummy-table-end-div' ref={tableEndRef} />
       {enableStickyHeader && <div className='chaise-table-sticky-header' ref={stickyHeaderRef}>

@@ -5,12 +5,13 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testRecordMainSectionPartialValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test('composite key and custom boolean display support', async ({ page, baseURL }, testInfo) => {
   await test.step('should load the page.', async () => {
-    const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/product-person:accommodation`;
+    const url = generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-person', 'accommodation', testInfo, baseURL);
     await page.goto(url);
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });

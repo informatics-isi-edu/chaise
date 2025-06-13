@@ -20,6 +20,13 @@ var chaiseConfig = {
     },
     logClientActions: false,
     hideRecordeditLeaveAlert: true,
+    templating: {
+      site_var: {
+        groups: {
+          'testers': 'https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d'
+        }
+      }
+    },
     navbarMenu: {
         children: [
             {
@@ -66,7 +73,7 @@ var chaiseConfig = {
                         }
                     },
                     {
-                        name: "Edit Existing Record",
+                        nameMarkdownPattern: "Edit Existing Record {{#if (isUserInAcl $site_var.groups.testers)}}(tester){{/if}}",
                         url: "/chaise/recordedit/#1/isa:dataset/id=5776",
                         newTab: false,
                         acls: {
@@ -111,5 +118,6 @@ var chaiseConfig = {
                 ]
             }
         ]
-    }
+    },
+    asciiTextValidation: true
 };

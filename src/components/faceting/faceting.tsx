@@ -277,7 +277,6 @@ const Faceting = ({
   }, [facetModels]);
 
   useEffect(() => {
-    console.log('calling registered in faceting');
     registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels, facetOrders, facetListModified, isStoredFacetOrderApplied]);
 

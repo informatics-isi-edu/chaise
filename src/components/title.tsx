@@ -8,6 +8,10 @@ import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from
 
 
 
+import type { JSX } from 'react';
+
+
+
 export type TitleProps = {
   /**
    * The reference object.
@@ -22,7 +26,7 @@ export type TitleProps = {
    * if defined, we will use this instead of getting it from the reference
    * - use `false` to suppress adding the comment
    */
-  comment?: CommentType,
+  comment?: CommentType | false,
   /**
    * whether we should add a link or not.
    * - if `link` is passed, we will add the link regardless of this property.
@@ -68,11 +72,14 @@ const Title = ({
     showTooltip = comment || (reference.comment && reference.comment.displayMode === CommentDisplayModes.TOOLTIP);
   }
 
+  // make sure the comment has a valid value
+  showTooltip = showTooltip && !!comment && !!comment.value;
+
   const renderDisplayname = <DisplayValue value={displayname} />;
 
   const usedClassNames: string[] = [];
   if (className) usedClassNames.push(className);
-  if (showTooltip && comment) usedClassNames.push('chaise-icon-for-tooltip');
+  if (showTooltip) usedClassNames.push('chaise-icon-for-tooltip');
 
   const renderLinkOrContainer = () => {
     if (addLink) {

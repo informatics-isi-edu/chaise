@@ -33,9 +33,9 @@ const getConfig = (options: TestOptions) => {
     testMatch: options.testMatch ? options.testMatch : /.*\.spec\.ts/,
 
     // increase the default timeout
-    timeout: 60 * 1000,
+    timeout: 60_000,
     expect: {
-      timeout: 15 * 1000
+      timeout: 15_000
     },
 
     // Look for test files in the "tests" directory, relative to this configuration file.
@@ -50,7 +50,6 @@ const getConfig = (options: TestOptions) => {
     retries: 0,
 
     // Opt out of parallel tests on CI.
-    // workers: process.env.CI ? 4 : undefined,
     workers: options.runSequentially ? 1 : 4,
 
     // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways

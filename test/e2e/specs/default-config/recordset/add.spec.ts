@@ -7,9 +7,11 @@ import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/te
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { clickNewTabLink, manuallyTriggerFocus } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   schema_name: 'product-recordset-add',
@@ -21,11 +23,11 @@ const testParams = {
 };
 
 test('Recordset add record', async ({ page, baseURL }, testInfo) => {
-  const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+  const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
 
   let firstRow, testCell: any, dimensions;
   await test.step('should load recordset page', async () => {
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(PAGE_URL);
     await RecordsetLocators.waitForRecordsetPageReady(page);
 
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(6);
@@ -84,7 +86,7 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     let keyValues = [{ column: 'id', value: '2003' }];
     let rowRID = getEntityRow(testInfo, testParams.schema_name, testParams.table_name, keyValues).RID;
     // get first row view details button
-    expect.soft(await RecordsetLocators.getRowViewButton(page, 0).getAttribute('href')).toContain(`${baseURL}${baseViewUrl}${rowRID}`);
+    expect.soft(await RecordsetLocators.getRowViewButton(page, 0).getAttribute('href')).toContain(`${baseViewUrl}${rowRID}`);
 
     // search for a row that is not the first one after sorting
     await RecordsetLocators.getMainSearchInput(page).fill('hilton');
@@ -96,7 +98,7 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     keyValues = [{ column: 'id', value: '4004' }];
     rowRID = getEntityRow(testInfo, testParams.schema_name, testParams.table_name, keyValues).RID;
     // get first row view details button
-    expect.soft(await RecordsetLocators.getRowViewButton(page, 0).getAttribute('href')).toContain(`${baseURL}${baseViewUrl}${rowRID}`);
+    expect.soft(await RecordsetLocators.getRowViewButton(page, 0).getAttribute('href')).toContain(`${baseViewUrl}${rowRID}`);
 
     // clear search
     await RecordsetLocators.getSearchClearButton(page).click();

@@ -50,7 +50,7 @@ const FacetHeader = ({
    */
   const contentRef = useRef(null);
 
-  const hasTooltip = !!comment;
+  const hasTooltip = !!comment && !!comment.value;
   const renderedDisplayname = <DisplayValue value={displayname} />;
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={comment} /> : <></>;
 

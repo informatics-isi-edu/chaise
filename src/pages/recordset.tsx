@@ -6,7 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 
 // hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -14,7 +14,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
@@ -55,7 +55,7 @@ const RecordsetApp = (): JSX.Element => {
     if (setupStarted.current) return;
     setupStarted.current = true;
 
-    const logObject: any = {};
+    const logObject: LogObjectType = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;

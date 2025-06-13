@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.model';
-import { getCatalogID, removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { copyFileToChaiseDir, getCatalogID, removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { ENTITIES_PATH, PW_PROJECT_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { setCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
@@ -15,7 +15,8 @@ import { setCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils'
  * 2. check the user cookies
  * 3. create the catalog
  * 4. copy the chaise config
- * 5. add sigint and other callbacks.
+ * 5. copy the images folder
+ * 6. add sigint and other callbacks.
  *
  */
 export default async function globalSetup(config: FullConfig) {
@@ -83,6 +84,8 @@ export default async function globalSetup(config: FullConfig) {
   if (chaiseConfigFilePath) {
     copyChaiseConfig(chaiseConfigFilePath, options.addDefaultCatalogToChaiseConfig);
   }
+
+  copyFileToChaiseDir(path.resolve(__dirname, './../images'), 'images', true);
 
   registerCallbacks(testConfiguration);
 }
@@ -327,20 +330,18 @@ function copyChaiseConfig(chaiseConfigFilePath?: string, addDefaultCatalogToChai
   if (typeof remoteChaiseDirPath === 'string') {
     // since we're copying to a folder which might or might not exist, we have to use rsync and cannot use scp
     cmd = `rsync -v ${chaiseFilePath} ${remoteChaiseDirPath}/config/`;
-    console.log('Copying using rsync');
   } else {
     const configFolder = '/var/www/html/chaise/config';
     // make sure the config folder is defined and then copy the chaise-config.js
     cmd = `sudo mkdir -p ${configFolder} && sudo cp ${chaiseFilePath} ${configFolder}/chaise-config.js`;
-    console.log('Copying using cp');
   }
 
   try {
     execSync(cmd);
-    console.log(`Copied file ${chaiseFilePath} successfully to chaise-config.js \n`);
+    console.log(`Copied ${chaiseFilePath} into the proper location.`);
   } catch (exp) {
     console.log(exp);
-    console.log(`Unable to copy file ${chaiseFilePath} to chaise-config.js \n`);
+    console.log(`Unable to copy ${chaiseFilePath}!`);
     process.exit(1);
   }
 }

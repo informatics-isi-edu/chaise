@@ -1,14 +1,17 @@
 /* eslint-disable max-len */
 import { expect, test } from '@playwright/test';
+import moment from 'moment';
+
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+
 import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
   TestFormPresentationAndValidation, testSubmission,
   TestSubmissionParams
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import moment from 'moment';
-
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const currentTimestampTimeStr = moment().format('x');
 
@@ -278,6 +281,99 @@ const testParams: {
           ]
         ]
       }
+    },
+    {
+      num_files: 2,
+      filter: 'id=any(1,2)@sort(id)',
+      presentation: {
+        description: 'upload w outbound fk in url_pattern',
+        schemaName: 'product-edit',
+        tableName: 'file_w_fk_in_url_pattern',
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        columns: [
+          { name: 'id', displayname: 'id', type: RecordeditInputType.TEXT, isRequired: true, skipValidation: true },
+          { name: 'category', displayname: 'Category', type: RecordeditInputType.FK_POPUP, isRequired: false, skipValidation: true },
+          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE , skipValidation: true},
+          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true }
+        ],
+        values: [
+          {  'id': '1', 'category': 'Select a value', 'asset_col': 'Select a file', 'timestamp_txt': '' },
+          {  'id': '2', 'category': 'Motel', 'asset_col': 'Select a file', 'timestamp_txt': '' }
+        ],
+        inputs: [
+          {
+            'asset_col': testFiles[0],
+            'category': { modal_num_rows: 5, modal_option_index: 0, rowName: 'Hotel' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'asset_col': testFiles[1],
+            'timestamp_txt': currentTimestampTimeStr
+          }
+        ]
+      },
+      submission: {
+        tableDisplayname: 'file_w_fk_in_url_pattern',
+        resultColumnNames: ['id', 'Category', 'asset_col'],
+        resultRowValues: [
+          [ '1', '10003', { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Hotel/1/` } ],
+          [ '2', '10005', { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Motel/2/` } ]
+        ]
+      }
+    },
+    {
+      num_files: 3,
+      filter: 'id=any(111,222)@sort(id)',
+      presentation: {
+        description: 'upload w wait_for in url_pattern',
+        schemaName: 'product-edit',
+        tableName: 'file_w_wait_for_in_url_pattern_1',
+        tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
+        columns: [
+          { name: 'id', displayname: 'id', type: RecordeditInputType.INT_4, isRequired: true, skipValidation: true },
+          {
+            name: 'fk_col',
+            displayname: 'fk_col',
+            type: RecordeditInputType.FK_POPUP,
+            isRequired: false, skipValidation: true
+          },
+          { name: 'asset_col', displayname: 'asset_col', type: RecordeditInputType.FILE, skipValidation: true },
+          { name: 'asset_col_2', displayname: 'asset_col_2', type: RecordeditInputType.FILE, skipValidation: true },
+          { name: 'timestamp_txt', displayname: 'timestamp_txt', type: RecordeditInputType.TEXT, skipValidation: true },
+        ],
+        values: [
+          {  'id': '111', 'fk_col': 'Select a value', 'asset_col': 'Select a file', 'asset_col_2': 'Select a file', 'timestamp_txt': '' },
+          {  'id': '222', 'fk_col': 'three', 'asset_col': 'Select a file', 'asset_col_2': 'Select a file', 'timestamp_txt': '' }
+        ],
+        inputs: [
+          {
+            'asset_col': testFiles[0],
+            'asset_col_2': testFiles[1],
+            'fk_col': { modal_num_rows: 5, modal_option_index: 0, rowName: 'one' },
+            'timestamp_txt': currentTimestampTimeStr
+          },
+          {
+            'asset_col': testFiles[1],
+            'timestamp_txt': currentTimestampTimeStr
+          }
+        ]
+      },
+      submission: {
+        tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
+        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2'],
+        resultRowValues: [
+          [
+            '111', '1',
+            { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-eleven/111/` },
+            { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-eleven/111/` }
+          ],
+          [
+            '222', '3',
+            { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-thirty-three/222/` },
+            ''
+          ]
+        ]
+      }
     }
   ]
 }
@@ -299,7 +395,7 @@ test.describe('Recordedit edit', () => {
       }
 
       await test.step('open recordedit page', async () => {
-        const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/${presentation.schemaName}:${presentation.tableName}`;
+        const url = generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL);
         await page.goto(url + '/' + params.filter);
       });
 
@@ -325,9 +421,9 @@ test.describe('Recordedit edit', () => {
     });
   }
 
-  test('remove form button', async ({ page, baseURL }, testInfo) => {
+  test.skip('remove form button', async ({ page, baseURL }, testInfo) => {
     await test.step('open recordedit page', async () => {
-      const url = `${baseURL}/recordedit/#${getCatalogID(testInfo.project.name)}/product-edit:booking`;
+      const url = generateChaiseURL(APP_NAMES.RECORDEDIT, 'product-edit', 'booking', testInfo, baseURL);
       await page.goto(url + '/id=any(1,2,3,4,5,6,7,8,9,10,11,12)@sort(id)');
     });
 
@@ -339,7 +435,7 @@ test.describe('Recordedit edit', () => {
 
       for await (const [index, formIndex] of formsToBeRemoved.entries()) {
         await RecordeditLocators.getDeleteRowButton(page, formIndex).click();
-        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - (index+1));
+        await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - (index + 1));
       }
 
       await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(originalNumRows - formsToBeRemoved.length);

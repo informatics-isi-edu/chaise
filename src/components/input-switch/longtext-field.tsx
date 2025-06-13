@@ -8,13 +8,18 @@ import MarkdownPreviewModal from '@isrd-isi-edu/chaise/src/components/modals/mar
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
-import { useState, useRef } from 'react';
+import { useState, useRef, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { hasVerticalScrollbar } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+
 const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,8 +54,13 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
 
   const isMarkdown = props.type === 'markdown';
 
+
+  const rules = {
+    validate: VALIDATE_VALUE_BY_TYPE['text']
+  };
+
   return (
-    <InputField {...props}>
+    <InputField {...props} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='input-switch-longtext'>
           <div className='md-editor'>
@@ -168,9 +178,8 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                 <textarea
                   placeholder={props.placeholder}
                   rows={5}
-                  className={`${props.inputClasses} input-switch ${props.inputClassName} ${
-                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
-                  }`}
+                  className={`${props.inputClasses} input-switch ${props.inputClassName} ${hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar' : ''
+                    }`}
                   {...field}
                   disabled={props.disableInput}
                   onChange={onChange}
@@ -178,15 +187,14 @@ const LongTextField = (props: InputFieldProps): JSX.Element => {
                   data-provide='markdown'
                 />
                 <ClearInputBtn
-                  btnClassName={`${props.clearClasses} input-switch-clear ${
-                    hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
-                  }`}
+                  btnClassName={`${props.clearClasses} input-switch-clear ${hasVerticalScrollbar(textAreaRef.current) ? 'has-scrollbar-clear' : ''
+                    }`}
                   clickCallback={clearInput}
                   show={showClear && !props.disableInput}
                 />
               </div>
               : <div className='md-preview chaise-input-control' data-provide='markdown' style={{ 'height': textAreaRef.current?.offsetHeight }}>
-                <div className='disabled-textarea'><DisplayValue addClass value={{value: previewContent, isHTML: true}} /></div>
+                <div className='disabled-textarea'><DisplayValue addClass value={{ value: previewContent, isHTML: true }} /></div>
               </div>
             }
           </div>

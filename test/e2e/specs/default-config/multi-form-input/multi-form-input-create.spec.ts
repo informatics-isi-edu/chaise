@@ -1,9 +1,11 @@
 import { test, expect, Page } from '@playwright/test';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   createFiles, deleteFiles, setInputValue, testFormValuesForAColumn, testSubmission
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
 
@@ -543,8 +545,7 @@ test.describe('multi form input in create mode', () => {
   });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}`;
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, '', testParams.schema_table, testInfo, baseURL));
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 
@@ -589,7 +590,7 @@ test.describe('multi form input in create mode', () => {
       const formInputCell = RecordeditLocators.getFormInputCell(page, 'markdown_col', 3);
       const applyBtn = RecordeditLocators.getMultiFormApplyBtn(page);
       await formInputCell.click();
-      await expect.soft(formInputCell).toHaveClass(/entity-active/);
+      await expect.soft(formInputCell).toContainClass('entity-active');
       // close the multi-form-row
       await mdToggleBtn.click();
       // wait for it to close
@@ -599,7 +600,7 @@ test.describe('multi form input in create mode', () => {
       // wait for it to open again
       await expect.soft(applyBtn).toBeVisible();
       // make sure it still has the class
-      await expect.soft(formInputCell).toHaveClass(/entity-active/);
+      await expect.soft(formInputCell).toContainClass('entity-active');
     });
 
     await test.step('after closing the multi form input, clicking on cell should not have any effect.', async () => {
@@ -684,7 +685,7 @@ test.describe('multi form input in create mode', () => {
           // deselect the first form that is selected by default
           const cell = RecordeditLocators.getFormInputCell(page, params.column_name, 1, params.type === RecordeditInputType.ARRAY);
           await cell.click();
-          await expect.soft(cell).not.toHaveClass(/entity-active/);
+          await expect.soft(cell).not.toContainClass('entity-active');
 
           await expect.soft(applybtn).toBeDisabled();
           await expect.soft(clearBtn).toBeDisabled();
@@ -760,8 +761,8 @@ test.describe('multi form input in create mode', () => {
 
 const testFormInputCellSelected = async (page: Page, name: string, index: number, isSelected: boolean) => {
   if (isSelected) {
-    await expect.soft(RecordeditLocators.getFormInputCell(page, name, index)).toHaveClass(/entity-active/);
+    await expect.soft(RecordeditLocators.getFormInputCell(page, name, index)).toContainClass('entity-active');
   } else {
-    await expect.soft(RecordeditLocators.getFormInputCell(page, name, index)).not.toHaveClass(/entity-active/);
+    await expect.soft(RecordeditLocators.getFormInputCell(page, name, index)).not.toContainClass('entity-active');
   }
 };

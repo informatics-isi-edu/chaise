@@ -10,9 +10,9 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { 
-  FileObject, LastChunkMap, 
-  LastChunkObject, UploadFileObject 
+import {
+  FileObject, LastChunkMap,
+  LastChunkObject, UploadFileObject
 } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
@@ -24,6 +24,14 @@ export interface UploadProgressModalProps {
    * rows of data from recordedit form to get file values from
    */
   rows: any[];
+  /**
+   * the outbound fk values
+   */
+  linkedData: any[];
+  /**
+   * the result of secondary requests (waitfors)
+   */
+  templateVariables: any;
   /**
    * prop to show modal
    */
@@ -38,7 +46,7 @@ export interface UploadProgressModalProps {
   onCancel: (exception?: any) => void;
 }
 
-const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgressModalProps) => {
+const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSuccess, onCancel }: UploadProgressModalProps) => {
 
   const { reference, setLastContiguousChunk, lastContiguousChunkRef } = useRecordedit();
 
@@ -149,7 +157,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
             tempFilesCt++;
             tempTotalSize += row[k].file.size;
 
-            tuple.push(createUploadFileObject(row[k], column, row, rowIdx));
+            tuple.push(createUploadFileObject(row[k], column, row, linkedData[rowIdx], templateVariables[rowIdx], rowIdx));
           } else {
             row[k] = (row[k] && row[k].url && row[k].url.length) ? row[k].url : null;
           }
@@ -195,10 +203,12 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsUpload(false);
     uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
       row.forEach((item: UploadFileObject) => {
-        item.hatracObj.calculateChecksum(item.row).then(
-          (url: string) => onChecksumCompleted(item, url),
-          onError,
-          (uploaded: number) => onChecksumProgressChanged(item, uploaded));
+        item.hatracObj.calculateChecksum(
+          item.row,
+          item.linkedData,
+          item.templateVariables,
+          (uploaded: number) => onChecksumProgressChanged(item, uploaded)
+        ).then((url: string) => onChecksumCompleted(item, url)).catch(onError);
       });
     });
   };
@@ -282,10 +292,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     let startChunkIdx = 0;
     if (item.partialUpload) startChunkIdx = lastContiguousChunkRef.current?.[item.uploadKey].lastChunkIdx + 1;
 
-    item.hatracObj.start(startChunkIdx).then(
-      () => onUploadCompleted(item),
-      onError,
-      (size: number) => onProgressChanged(item, size));
+    item.hatracObj.start(
+      startChunkIdx,
+      (size: number) => onProgressChanged(item, size)
+    ).then(() => onUploadCompleted(item)).catch(onError)
   };
 
   // Complete upload jobs one by one
@@ -339,11 +349,14 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
    * @param {FileObject} data - FileObject for the file column
    * @param {Ermrest.Column} column - Column Object
    * @param {Object} row - Json key value Object of row values from the recordedit form
+   * @param {Object} linkedData - key value object of foreign key data (linked data) fro the recordedit form
    * @param {number} rowIdx - index of the record form this UploadFileObject is associated with (the attached `row`'s index)
    * @desc
    * Creates an uploadFile obj to keep track of file and its upload.
    */
-  const createUploadFileObject = (data: FileObject, column: any, row: any, rowIdx: number): UploadFileObject => {
+  const createUploadFileObject = (
+    data: FileObject, column: any, row: any, linkedData: any, templateVariables: any, rowIdx: number
+  ): UploadFileObject => {
     const file = data.file;
 
     const uploadFileObject: UploadFileObject = {
@@ -369,8 +382,10 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       column: column,
       reference: reference,
       row: row,
-      rowIdx: rowIdx
-    }
+      rowIdx: rowIdx,
+      linkedData: linkedData,
+      templateVariables,
+    };
 
     return uploadFileObject;
   };
@@ -426,7 +441,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         const lccMap: LastChunkObject = lastContiguousChunkRef.current[ufo.uploadKey];
 
         // the 'jobUrl' we stored in lastContiguousChunkRef is what was returned from the server where each part of the path is url encoded
-        // do the same for the newly generated url only for comparison 
+        // do the same for the newly generated url only for comparison
         // NOTE: handling the file upload path encoding is done per each folder in the path and is handled by the server
         const urlParts = url.split('/');
         urlParts.forEach((part: string, idx: number) => {

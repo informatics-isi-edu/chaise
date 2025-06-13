@@ -25,7 +25,8 @@ Development dependencies include:
 
 * [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any Unix systems.
 * [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any Unix systems.
-* [Node](https://nodejs.org/): usually present on any Unix systems. For development environments we recommends installing [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) which will allow you to easily install and switch between different versions.
+* [Node](https://nodejs.org/): usually present on any Unix systems. Please refer to the `engines` property in [pacakge.json](https://github.com/informatics-isi-edu/chaise/blob/master/package.json) to find the supported versions.
+  * For development environments we recommends installing [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) which will allow you to easily install and switch between different versions.
 * Additional dependencies specified in [package.json](./package.json) will be automatically retrieved by NPM.
 
 

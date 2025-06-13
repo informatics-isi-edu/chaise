@@ -6,7 +6,7 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // hooks
-import { useRef, useState } from 'react';
+import { useRef, useState, type JSX } from 'react';
 
 type ResultsetTableHeaderProps = {
   appMode: string;

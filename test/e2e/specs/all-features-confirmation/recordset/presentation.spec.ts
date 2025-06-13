@@ -12,7 +12,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { APP_NAMES, DOWNLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
-  clickNewTabLink, deleteDownloadedFiles, getPageId,
+  clickNewTabLink, deleteDownloadedFiles, generateChaiseURL, getPageId,
   getWindowName, testExportDropdown, testTooltip
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
@@ -259,7 +259,7 @@ const testParams = {
         'current: 12,345,221, 12345221, 12,345,111', //min_i2
         '1,234,525', //max_i1
         'current: 12,345,225, 12345225', //max_i2
-        'virtual col value is 12,345,225', //virtual column
+        'virtual col value is 12,345,225 (for All features confirmation)', //virtual column
       ],
       [
         'main two', '', '1,234,502',
@@ -290,10 +290,11 @@ test.describe('View recordset', () => {
     const params = testParams.active_list;
     const data = params.data;
 
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`;
+    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL);
 
     await test.step('should load recordset page', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}@sort(${params.sortby})`);
+      await page.goto(`${PAGE_URL}@sort(${params.sortby})`);
+
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
     });
@@ -308,12 +309,16 @@ test.describe('View recordset', () => {
       await expect.soft(RecordsetLocators.getAllFacets(page)).toHaveCount(16);
     });
 
+    await test.step('title should not have any tooltips (suppressed by using `false`).', async () => {
+      await expect.soft(RecordsetLocators.getPageTitleTooltip(page)).not.toBeAttached();
+    });
+
     await test.step('should show correct table rows.', async () => {
       await testRecordsetTableRowValues(page, data, true);
     });
 
     await test.step('going to a recordset page with no results, the loader for columns should hide.', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}/main_id=03`);
+      await page.goto(`${PAGE_URL}/main_id=03`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
     })
@@ -322,10 +327,10 @@ test.describe('View recordset', () => {
   test(`For table ${testParams.accommodation_tuple.table_name}`, async ({ page, baseURL }, testInfo) => {
     const params = testParams.accommodation_tuple;
     const catalogID = getCatalogID(testInfo.project.name);
-    const PAGE_URL = `/recordset/#${catalogID}/${params.schema_name}:${params.table_name}`
+    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL);
 
     await test.step('should load recordset page', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}/${params.key}@sort(${params.sortby})`);
+      await page.goto(`${PAGE_URL}/${params.key}@sort(${params.sortby})`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
     });
@@ -337,13 +342,11 @@ test.describe('View recordset', () => {
     });
 
     await test.step('presentation of the recordset page', async () => {
-      if (!process.env.CI) {
-        await test.step('delete files that may have been downloaded before', async () => {
-          await deleteDownloadedFiles(params.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
-      }
+      await test.step('delete files that may have been downloaded before', async () => {
+        await deleteDownloadedFiles(params.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
 
       await test.step(`should have ${params.title} as title`, async () => {
         await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText(params.title);
@@ -520,13 +523,11 @@ test.describe('View recordset', () => {
         await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3)
       });
 
-      if (!process.env.CI) {
-        await test.step('delete files downloaded during the tests', async () => {
-          await deleteDownloadedFiles(params.file_names.map((name: string) => {
-            return `${DOWNLOAD_FOLDER}/${name}`
-          }));
-        });
-      }
+      await test.step('delete files downloaded during the tests', async () => {
+        await deleteDownloadedFiles(params.file_names.map((name: string) => {
+          return `${DOWNLOAD_FOLDER}/${name}`
+        }));
+      });
 
     });
 
@@ -534,7 +535,7 @@ test.describe('View recordset', () => {
     //   because of this, the "sorting and paging" tests have to run in sequence following the above tests
     await test.step('sorting and paging features', async () => {
       await test.step('should load recordset page with a limit', async () => {
-        await page.goto(`${baseURL}${PAGE_URL}?limit=3`);
+        await page.goto(`${PAGE_URL}?limit=3`);
         await RecordsetLocators.waitForRecordsetPageReady(page);
 
         await expect.soft(RecordsetLocators.getRows(page).nth(2)).toBeVisible();
@@ -637,8 +638,7 @@ test.describe('View recordset', () => {
     const params = testParams.file_tuple;
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`;
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 
@@ -691,8 +691,8 @@ test.describe('View recordset', () => {
 
   test('For window ID and page ID', async ({ page, baseURL }, testInfo) => {
     const params = testParams.accommodation_tuple;
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`;
-    const URL = `${baseURL}${PAGE_URL}/${params.key}@sort(${params.sortby})`;
+    const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL);
+    const URL = `${PAGE_URL}/${params.key}@sort(${params.sortby})`;
 
     let windowId: string, pageId: string;
 
@@ -766,8 +766,7 @@ test.describe('View recordset', () => {
     const params = testParams.system_columns;
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${params.schema_name}:${params.table_name}`
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, params.schema_name, params.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 

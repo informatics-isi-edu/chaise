@@ -1,4 +1,4 @@
-
+import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 
 export type ViewerProps = {
   parentContainer?: HTMLElement;
@@ -7,7 +7,7 @@ export type ViewerProps = {
   /* The log related APIs */
   logInfo: {
     /* the object that will be logged with the first request */
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   }

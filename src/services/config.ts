@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Q from 'q';
 import 'regenerator-runtime'; // needed for async/await to work
 
 // models
@@ -19,9 +18,6 @@ import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
   CHAISE_CONFIG_STATIC_PROPERTIES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
 } from '@isrd-isi-edu/chaise/src/utils/constants';
-
-// this will ensure that we're configuring ermrestjs as soon as this file loads.
-windowRef.ERMrest.configure(axios, Q);
 
 export interface AppSettings {
   appName: string,
@@ -241,7 +237,7 @@ export class ConfigService {
       templating: chaiseConfig.templating
     });
 
-    ERMrest.setClientSession(session);
+    ERMrest.AuthnService.setClientSession(session);
 
     ConfigService._setupDone = true;
     ConfigService._ermrest = ERMrest;

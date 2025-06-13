@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // components
@@ -16,6 +16,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
@@ -70,9 +71,14 @@ const LoginPopupApp = (): JSX.Element => {
     // if the config is invalid, don't require group membership to continue automatically
     if (!validConfig || hasGroup) {
       const qString = queryStringToJSON(windowRef.location.search);
-      if (qString.referrerid && (typeof qString.action === 'undefined') && windowRef.opener) {
-        //For child window
-        windowRef.opener.postMessage(windowRef.location.search, windowRef.opener.location.href);
+
+      if (qString.referrerid && (typeof qString.action === 'undefined')) {
+
+        // tell the parent window that the login was successful
+        const channelName = `chaise-successful_login-${qString.referrerid}`;
+        $log.debug(`Broadcasting login message to channel: ${channelName}`);
+        const channel = new BroadcastChannel(channelName);
+        channel.postMessage({});
 
         // Create the user in 'user_profile" table with `onconflict=skip` if user exists already
         // POST /ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip

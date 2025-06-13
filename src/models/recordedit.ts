@@ -1,6 +1,8 @@
+import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   RecordsetProviderGetDisabledTuples, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
+
 
 export enum appModes {
   COPY = 'copy',
@@ -26,7 +28,7 @@ export type RecordeditProps = {
    */
   logInfo: {
     logAppMode: string;
-    logObject?: any;
+    logObject?: LogObjectType;
     logStack: any;
     logStackPath: string;
   },
@@ -189,7 +191,21 @@ export interface UploadFileObject {
   versionedUrl?: string;
   column: any,
   reference: any,
+  /**
+   * main table data
+   */
   row: any,
+  /**
+   * outbound fk data
+   */
+  linkedData: any,
+  /**
+   * the waitfor data
+   */
+  templateVariables: any,
+  /**
+   * which row this is
+   */
   rowIdx: number
 }
 
@@ -234,9 +250,17 @@ export interface LastChunkObject {
 
 export interface UploadProgressProps {
   /**
-   * rows of data from recordedit form to get file values from
+   * rows of data from recordedit forms to get file values from
    */
   rows: any[];
+  /**
+   * the outbound fk values (linke data) for all the forms
+   */
+  linkedData: any[];
+  /**
+   * the template variables (wait for data) for all the forms
+   */
+  templateVariables: any[];
   /**
    * prop to trigger on delete confirmation
    */

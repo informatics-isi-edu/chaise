@@ -232,11 +232,10 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   const setTopScrollStyles = () => {
     if (fixedPos) {
       topScrollElementWrapper!.style.width = `${scrollableContent.clientWidth}px`;
-      topScrollElementWrapper!.style.marginTop = '-15px';
     }
 
     // there is no need of a scrollbar, content is not overflowing
-    if (scrollableContent!.scrollWidth == scrollableContent!.clientWidth) {
+    if (scrollableContent!.scrollWidth === scrollableContent!.clientWidth) {
       topScrollElement!.style.width = '0';
       topScrollElementWrapper!.style.height = '0';
     }
@@ -258,7 +257,7 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
   // make top scroll visible after adding the handlers to ensure its visible only when working
   topScrollElementWrapper.style.display = 'block';
   // show only if content is overflowing
-  if (scrollableContent.scrollWidth == scrollableContent.clientWidth) {
+  if (scrollableContent.scrollWidth !== scrollableContent.clientWidth) {
     topScrollElementWrapper.style.height = '15px';
   }
 
@@ -317,9 +316,11 @@ export function asyncTimeout(ms: number) {
  * @param {boolean} cancelable - whether the event can be canceled using event.preventDefault
  * @param {boolean} composed - whether the event will propagate across the shadow DOM boundary into the standard DOM
  */
-export function fireCustomEvent(eventName = 'myEvent', targetElement: string | Element = 'body', detail = {},
-  bubbles = true, cancelable = true, composed = false) {
-  const customEvent = new CustomEvent(eventName, { detail, bubbles, cancelable, composed });
+export function fireCustomEvent<T>(
+  eventName = 'myEvent', targetElement: string | Element = 'body', detail : T,
+  bubbles = true, cancelable = true, composed = false
+) {
+  const customEvent = new CustomEvent<T>(eventName, { detail, bubbles, cancelable, composed });
 
   if (targetElement === 'body') {
     document.querySelector('body')?.dispatchEvent(customEvent);

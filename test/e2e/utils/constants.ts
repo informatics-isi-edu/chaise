@@ -16,7 +16,7 @@ export enum APP_NAMES {
   VIEWER = 'viewer'
 }
 
-export const ERMREST_URL = process.env.ERMREST_URL;
+export const ERMREST_URL : string = process.env.ERMREST_URL!;
 
 export const CHAISE_BASE_URL = process.env.CHAISE_BASE_URL;
 

@@ -9,7 +9,8 @@ import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedi
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 import {
   openFacet, openFacetAndTestFilterOptions, testColumnSort,
@@ -87,6 +88,55 @@ const testParams = {
         options: ['All records with value', 'one']
       }
     }
+  },
+  json_support: {
+    facetIdx: 9,
+    totalNumOptions: 12,
+    numRows: 25,
+    tests: [
+      {
+        description: 'not-null',
+        option: 0,
+        filter: 'jsonb_colAll records with value',
+        numRows: 20,
+      },
+      {
+        description: 'null',
+        option: 1,
+        filter: 'jsonb_colNo value ',
+        numRows: 10,
+      },
+      {
+        description: 'json object',
+        option: 2,
+        filter: '"one"',
+        numRows: 5,
+        modal: {
+          numRows: 12,
+          checkedOption: 0
+        }
+      },
+      {
+        description: 'number',
+        option: 9,
+        filter: 'jsonb_col8',
+        numRows: 1,
+        modal: {
+          numRows: 12,
+          checkedOption: 7
+        }
+      },
+      {
+        description: 'string literal',
+        option: 10,
+        filter: 'jsonb_col"nine"',
+        numRows: 1,
+        modal: {
+          numRows: 12,
+          checkedOption: 8
+        }
+      }
+    ]
   },
   hide_row_count: {
     hidden: {
@@ -264,9 +314,7 @@ test.describe('Other facet features', () => {
     const modal = ModalLocators.getRecordsetSearchPopup(page);
 
     await test.step('should load recordset page and clear all filters', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -335,9 +383,7 @@ test.describe('Other facet features', () => {
 
   test('facet modal rows and columns', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page and clear all filters', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -397,9 +443,7 @@ test.describe('Other facet features', () => {
     const facet = RecordsetLocators.getFacetById(page, params.facetIdx);
 
     await test.step('should load recordset page and clear all filters', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -452,9 +496,7 @@ test.describe('Other facet features', () => {
 
   test('No value (null) filter', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page and clear all filters', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -488,15 +530,60 @@ test.describe('Other facet features', () => {
     });
   });
 
+  test.describe('json/jsonb support', () => {
+    testParams.json_support.tests.forEach((params) => {
+      test(`${params.description}`, async ({ page, baseURL }, testInfo) => {
+        const facet = RecordsetLocators.getFacetById(page, testParams.json_support.facetIdx);
+        const numRowsWhenCleared = testParams.json_support.numRows;
+
+        const checkPageStatusAfterSelection = async () => {
+          await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
+          await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(1);
+          await expect.soft(RecordsetLocators.getFacetFilters(page).nth(0)).toContainText(params.filter);
+        }
+
+        await test.step('should load recordset page, clear all filters, and open the json facet', async () => {
+          await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
+          await RecordsetLocators.waitForRecordsetPageReady(page);
+          await testClearAllFilters(page, numRowsWhenCleared);
+
+          // 4 open facets because 3 are already open on page load
+          await openFacet(page, facet, testParams.json_support.facetIdx, testParams.json_support.totalNumOptions, 4);
+        });
+
+        await test.step('choosing the option should work properly.', async () => {
+          await testSelectFacetOption(page, facet, params.option, params.numRows, 1);
+          await checkPageStatusAfterSelection();
+        });
+
+        await test.step('refreshing the page should keep the selected filter.', async () => {
+          await page.reload();
+          await RecordsetLocators.waitForRecordsetPageReady(page);
+          await checkPageStatusAfterSelection();
+        });
+
+        if ('modal' in params) {
+          await test.step('the modal should show the selected option.', async () => {
+            const modal = ModalLocators.getRecordsetSearchPopup(page);
+            await testShowMoreClick(facet, modal, params.modal!.numRows, 1);
+            await expect.soft(RecordsetLocators.getCheckboxInputs(modal).nth(params.modal!.checkedOption)).toBeChecked();
+            await ModalLocators.getSubmitButton(modal).click();
+            await expect.soft(modal).not.toBeVisible();
+            await checkPageStatusAfterSelection();
+          });
+        }
+      });
+    });
+  });
+
   test('regarding the logic to show only certain number of selected items', async ({ page, baseURL }, testInfo) => {
     const params = testParams.hide_selected_items;
     const facet1 = RecordsetLocators.getFacetById(page, params.firstFacet.index);
     const facet2 = RecordsetLocators.getFacetById(page, params.secondFacet.index);
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}/*::facets::${params.facetBlob}`);
+      const url = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
+      await page.goto(`${url}/*::facets::${params.facetBlob}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 
@@ -559,9 +646,8 @@ test.describe('Other facet features', () => {
     const params = testParams.shared_path_prefix;
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}/*::facets::${params.facetBlob}`);
+      const url = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
+      await page.goto(`${url}/*::facets::${params.facetBlob}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
@@ -588,11 +674,11 @@ test.describe('Other facet features', () => {
 
   test('regarding UnsupportedFilters handling', async ({ page, baseURL }, testInfo) => {
     const params = testParams.unsupported_filters_error;
-    const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
+    const pageURL = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
     const modal = ModalLocators.getErrorModal(page);
 
     await test.step('should load recordset page', async () => {
-      await page.goto(`${baseURL}${PAGE_URL}/*::facets::${params.facetBlob}`);
+      await page.goto(`${pageURL}/*::facets::${params.facetBlob}`);
       await expect.soft(modal).toBeVisible();
     });
 
@@ -624,16 +710,14 @@ test.describe('Other facet features', () => {
       await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(params.numRows);
 
       // @sort(RID) gets appended by the app
-      const newURL = `${baseURL}${PAGE_URL}/*::facets::${params.facetBlobAfterOK}@sort(RID)`;
+      const newURL = `${pageURL}/*::facets::${params.facetBlobAfterOK}@sort(RID)`;
       await expect.soft(page).toHaveURL(newURL);
     });
   });
 
   test('regarding hide_row_count support in entity facet popups', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page and clear all filters', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -671,9 +755,8 @@ test.describe('Other facet features', () => {
     const facet = RecordsetLocators.getFacetById(page, params.facet);
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}/${params.ermrestFilter}`);
+      const url = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
+      await page.goto(`${url}/${params.ermrestFilter}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 
@@ -735,9 +818,7 @@ test.describe('Other facet features', () => {
     };
 
     await test.step('should load recordset page, clear all filters, and close the open facets', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}`);
+      await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
       await testClearAllFilters(page, 25);
@@ -822,9 +903,7 @@ test.describe('Other facet features', () => {
   test.describe('navigating to record and recordedit app with facets', () => {
     test('from recordset app with multiple records', async ({ page, baseURL }, testInfo) => {
       await test.step('should load recordset page and clear all filters', async () => {
-        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-        await page.goto(`${baseURL}${PAGE_URL}`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
         await RecordsetLocators.waitForRecordsetPageReady(page);
 
         await testClearAllFilters(page, 25);
@@ -842,9 +921,7 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       await test.step('should load recordset page, wait for `facets` to be added to the url, and change to recordedit app', async () => {
-        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-        await page.goto(`${baseURL}${PAGE_URL}`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
         await RecordsetLocators.waitForRecordsetPageReady(page);
         await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
 
@@ -898,9 +975,7 @@ test.describe('Other facet features', () => {
       const modal = ModalLocators.getRecordsetSearchPopup(page);
 
       await test.step('should load recordset page, wait for `facets` to be added to the url, and change to record app', async () => {
-        const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-        await page.goto(`${baseURL}${PAGE_URL}`);
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
         await RecordsetLocators.waitForRecordsetPageReady(page);
         await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
 
@@ -955,9 +1030,8 @@ test.describe('Other facet features', () => {
     const facet = RecordsetLocators.getFacetById(page, params.facet);
 
     await test.step('should load recordset page', async () => {
-      const PAGE_URL = `/recordset/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-      await page.goto(`${baseURL}${PAGE_URL}/*::cfacets::${params.cfacetBlob}`);
+      const url = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
+      await page.goto(`${url}/*::cfacets::${params.cfacetBlob}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
     });
 

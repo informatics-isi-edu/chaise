@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -75,7 +76,6 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // script tags that will be injected directly to the page
     const externalFiles = [
       // ermrestjs
-      `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
       `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
       // old chaise-config location TODO should be removed
       `${chaisePath}chaise-config.js?v=${buildVersion}`,
@@ -210,6 +210,9 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
          * added to remove the warning.
          */
         ignoreOrder: true
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
       })
     ],
     optimization: {

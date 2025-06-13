@@ -4,8 +4,9 @@ import { test, expect } from '@playwright/test';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
   table_name: 'fkey-dropdown',
@@ -20,9 +21,7 @@ const testParams = {
 
 test('Presentation and functionality of foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
   await test.step('should load recordedit page', async () => {
-    const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_name}:${testParams.table_name}`;
-
-    await page.goto(`${baseURL}${PAGE_URL}`);
+    await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schema_name, testParams.table_name, testInfo, baseURL));
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 

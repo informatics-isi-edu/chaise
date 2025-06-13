@@ -7,7 +7,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useRef } from 'react';
+import { useRef, type JSX } from 'react';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
@@ -27,7 +27,7 @@ const RelatedTableHeader = ({ relatedModel }: RelatedTableHeaderProps): JSX.Elem
   const contentRef = useRef(null);
 
   const usedRef = relatedModel.initialReference;
-  const hasTooltip = usedRef.comment && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
+  const hasTooltip = !!usedRef.comment && !!usedRef.comment.value && usedRef.comment.displayMode === CommentDisplayModes.TOOLTIP;
 
   const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
   const renderedTooltip = hasTooltip ? <DisplayCommentValue comment={usedRef.comment} /> : <></>;

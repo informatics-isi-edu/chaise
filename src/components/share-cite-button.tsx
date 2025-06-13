@@ -5,7 +5,7 @@ import ShareCiteModal, { ShareCiteModalProps } from '@isrd-isi-edu/chaise/src/co
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models
@@ -15,9 +15,6 @@ import { CitationModel } from '@isrd-isi-edu/chaise/src/models/record';
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-
-// utilities
-import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 
 type ShareCiteButtonProps = {
   reference: any,
@@ -102,8 +99,8 @@ const ShareCiteButton = ({
     });
   };
 
-  const canShowShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.show, session);
-  const canEnableShareCiteBtn = isGroupIncluded(ConfigService.chaiseConfig.shareCite.acls.enable, session);
+  const canShowShareCiteBtn = ConfigService.ERMrest.AuthnService.isUserInAcl(ConfigService.chaiseConfig.shareCite.acls.show, session);
+  const canEnableShareCiteBtn = ConfigService.ERMrest.AuthnService.isUserInAcl(ConfigService.chaiseConfig.shareCite.acls.enable, session);
 
   if (!btnTooltip) {
     btnTooltip = { pending: 'Opening the share and cite links...', ready: 'Show the share and cite links.' };

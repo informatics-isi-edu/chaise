@@ -12,6 +12,8 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
+import type { JSX } from 'react';
+
 type ResultsetTableProps = {
   page: any,
   /**
