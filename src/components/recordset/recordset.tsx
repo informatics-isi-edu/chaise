@@ -375,7 +375,8 @@ const RecordsetInner = ({
     }
 
     // handle the scrollable container
-    const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea);
+    const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea, undefined);
+
 
     // log the right click event on the permalink button
     const permalink = document.getElementById('permalink');
@@ -844,6 +845,7 @@ const RecordsetInner = ({
           <RecordsetTable
             config={config}
             initialSortObject={initialReference.location.sortObject}
+            parentContainer={mainContainer.current ? mainContainer.current : undefined}
           />
         </div>
         {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}

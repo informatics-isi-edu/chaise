@@ -5,7 +5,7 @@
   overflow-y: hidden;
 }
 
-.chaise-table.table {
+.chaise-table.table, .chaise-table-sticky-header > table {
   border-top: 1px solid map.get(variables.$color-map, 'table-border');
   border-bottom: 1px solid map.get(variables.$color-map, 'table-border');
   margin: 0;
@@ -259,6 +259,28 @@
   top: 0;
 }
 .no-scroll-bar {
-  display: none !important; 
+  display: none !important;
   position: absolute !important;
+}
+.chaise-table-sticky-header {
+  position: fixed;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-x: hidden;
+  // javascript will change the following:
+  top: 0;
+  visibility: hidden;
+}
+
+.chaise-table-sticky-header > table > thead > tr > th {
+  padding: 7px;
+  color: map.get(variables.$color-map, 'navbar-inverse');
+}
+
+.chaise-table-sticky-header .sticky-header-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.app-content-container-scrollable .chaise-table-sticky-header {
+  display: none;
 }

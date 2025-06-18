@@ -5,8 +5,16 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CLASS_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import Tooltip from 'bootstrap/js/dist/tooltip';
+
+
+export type ContainerHeightSensorDimensions = {
+  /**
+   * stores 'top' of the container calculated by height of top panel
+   */
+  top: number;
+}
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
@@ -22,7 +30,11 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
  *
  * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
-export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
+export function attachContainerHeightSensors(
+  parentContainer?: any,
+  parentContainerSticky?: any,
+  useDocHeight?: boolean
+) {
   try {
     const appRootId = `#${ID_NAMES.APP_ROOT}`;
 
@@ -53,6 +65,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
       appContent.style.overflowY = 'auto';
       appContent.style.height = ((parentUsableHeight / windowRef.innerHeight) * 100) + 'vh';
       container.style.height = 'unset';
+      appContent.classList.add(CLASS_NAMES.SCROLLABLE_APP_CONTENT_CONTAINER);
     }
 
     let tm: any;
@@ -79,12 +92,14 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
       }
 
       const containerHeight = ((parentUsableHeight - stickyHeight) / windowRef.innerHeight) * 100;
+
       if (containerHeight < 15) {
         resetHeight();
       } else {
         //remove the styles that might have been added to appContent
         appContent.style.overflowY = 'unset';
         appContent.style.height = 'unset';
+        appContent.classList.remove(CLASS_NAMES.SCROLLABLE_APP_CONTENT_CONTAINER);
 
         // set the container's height
         container.style.height = containerHeight + 'vh';
