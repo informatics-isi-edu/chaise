@@ -118,6 +118,11 @@ export default class RecordsetLocators {
 
   // --------------- table-level selectors ------------------- //
 
+  static getTableHeading(container: Page | Locator): Locator {
+    // this is to ensure we're not selecting the sticky header
+    return container.locator('.chaise-table .table-heading');
+  }
+
   /**
    * @param container pass `page` if on recordset app and the container's locator if on popups or other apps.
    */
@@ -162,7 +167,7 @@ export default class RecordsetLocators {
   }
 
   static getActionsHeader(container: Page | Locator): Locator {
-    return container.locator('.actions-header');
+    return RecordsetLocators.getTableHeading(container).locator('.actions-header');
   }
 
   static getRows(container: Page | Locator): Locator {
@@ -178,7 +183,7 @@ export default class RecordsetLocators {
   }
 
   static getColumnNames(container: Page | Locator): Locator {
-    return container.locator('.table-column-displayname > span');
+    return RecordsetLocators.getTableHeading(container).locator('.table-column-displayname > span');
   };
 
   static getFirstColumn(container: Page | Locator): Locator {
@@ -190,27 +195,27 @@ export default class RecordsetLocators {
   }
 
   static getColumnsWithTooltipIcon(container: Page | Locator): Locator {
-    return container.locator('.table-column-displayname.chaise-icon-for-tooltip');
+    return RecordsetLocators.getTableHeading(container).locator('.table-column-displayname.chaise-icon-for-tooltip');
   };
 
   // Currently only in modals but could be part of recordset in different contexts/views
   static getSelectAllBtn(container: Page | Locator): Locator {
-    return container.locator('.table-select-all-rows')
+    return RecordsetLocators.getTableHeading(container).locator('.table-select-all-rows')
   };
 
   /* sort selectors */
   static getColumnSortButton(container: Page | Locator, rawColumnName: string): Locator {
-    return container.locator(`.c_${rawColumnName} .not-sorted-icon`);
+    return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .not-sorted-icon`);
   };
 
   static getColumnSortAscButton(container: Page | Locator, rawColumnName: string): Locator {
     // the "desc-sorted-icon" shows on the button that changes the sort to "asc"
-    return container.locator(`.c_${rawColumnName} .desc-sorted-icon`);
+    return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .desc-sorted-icon`);
   };
 
   static getColumnSortDescButton(container: Page | Locator, rawColumnName: string): Locator {
     // the "asc-sorted-icon" shows on the button that changes the sort to "desc"
-    return container.locator(`.c_${rawColumnName} .asc-sorted-icon`);
+    return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .asc-sorted-icon`);
   };
 
   static getNoResultsRow(container: Page | Locator): Locator {

@@ -1,5 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import React, { type JSX } from 'react';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -33,18 +34,15 @@ type RecordsetTableProps = {
    * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
    */
   showSingleScrollbar?: boolean,
-  /**
-   * Determines the top for the sticky header
-   */
-  headerTop?: number,
-  sortCallback?: (sortColumn: SortColumn) => any
+  sortCallback?: (sortColumn: SortColumn) => any,
+  parentContainer?: HTMLElement,
 }
 
 const RecordsetTable = ({
   config,
   initialSortObject,
   showSingleScrollbar = false,
-  headerTop,
+  parentContainer,
 }: RecordsetTableProps): JSX.Element => {
 
   const {
@@ -80,6 +78,12 @@ const RecordsetTable = ({
   // used for related tables to fire an event when the content has loaded to scroll back to the top of the related table
   const [pagingSuccess, setPagingSuccess] = useState<boolean>(false);
 
+  // TODO this is added for the resultset table to work with the sticky header
+  //      it should technically work for related tables as well, but requires more changes to ensure
+  //      propperly hiding the previous sticky headers.
+  const usedParentContainer = parentContainer ? parentContainer : tableContainer.current?.parentElement || null;
+
+  // TODO the sticky header doesn't work properly in related tables. that's why the following is filtering them:
   const enableStickyHeader = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0;
 
   type RowConfig = {
@@ -172,48 +176,29 @@ const RecordsetTable = ({
     }
   }, []);
 
-  //To handle sticky header visibility based on element intersection
+  /**
+   * 1. handle sticky scrollbar visibility and scroll.
+   * 2. handle sticky header visibility and width of its columns.
+   */
   useLayoutEffect(() => {
     if (!outerTableRef.current || !headRef.current || !stickyHeaderRef.current || !stickyScrollbarRef.current) {
       return;
     }
 
+
+    let parentObserver = null;
+    if (usedParentContainer) {
+      /**
+       * if the parent container dimension is changed, we have to update the top position of the sticky header
+       */
+      parentObserver = new ResizeSensor(usedParentContainer, (_) => {
+        setStickyHeaderTop();
+      });
+    }
+
     // Create an IntersectionObserver to track when the table header is visible
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (stickyHeaderRef.current) {
-          if (!entry.isIntersecting) {
-            stickyHeaderRef.current.style.visibility = 'visible';
-            // Adjust the sticky header position based on the presence of a scrollbar height and top panel container's height
-            const scrollbarHeight = stickyScrollbarRef.current?.offsetHeight || 0;
-            stickyHeaderRef.current.style.top = `${headerTop ? headerTop + scrollbarHeight : 0}px`;
-          } else {
-            stickyHeaderRef.current.style.visibility = 'hidden';
-          }
-        }
-      },
-      { root: null, threshold: 0 }
-    );
-    observer.observe(headRef.current);
-
-    // Sync widths of the columns
-    const syncWidths = () => {
-      if (stickyHeaderRef.current && tableRef.current) {
-        //For syncing the width of sticky header w.r.t the table body cells for each column
-        const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
-        const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
-
-        // Loop through columns and set widths
-        stickyThs!.forEach((headerCol, index) => {
-          const dataCol = originalThs[index];
-          if (dataCol instanceof HTMLElement) {
-            const colWidth = dataCol.offsetWidth; // Get the actual width of the column
-            headerCol.style.width = `${colWidth}px`; // Set width on sticky header
-          }
-        });
-        stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
-      }
-    };
+    const stickyHeaderObserver = new IntersectionObserver(observeStickyHeader, { root: null, threshold: 0 });
+    stickyHeaderObserver.observe(headRef.current);
 
     // Function to synchronize the horizontal scroll position of the sticky header with the scrollbar
     const handleScroll = () => {
@@ -230,12 +215,14 @@ const RecordsetTable = ({
 
     // Cleanup function
     return () => {
-      observer.disconnect();
+      stickyHeaderObserver.disconnect();
+      parentObserver?.detach();
+
       stickyScrollbarRef.current?.removeEventListener('scroll', handleScroll);
       headerWidthResizeObserver.disconnect();
     };
 
-  }, [isInitialized, headerTop]);
+  }, [isInitialized]);
 
   /**
    * add the top horizontal scroll if needed
@@ -271,6 +258,54 @@ const RecordsetTable = ({
       });
     }
   }, [isLoading]);
+
+  //------------------- react hook callbacks: --------------------//
+  // Sync widths of the columns
+  const syncWidths = () => {
+    if (stickyHeaderRef.current && tableRef.current) {
+      console.log('Syncing sticky header widths');
+
+      //For syncing the width of sticky header w.r.t the table body cells for each column
+      const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
+      const stickyThs = stickyHeaderRef.current?.querySelectorAll('th');
+
+      // Loop through columns and set widths
+      stickyThs!.forEach((headerCol, index) => {
+        const dataCol = originalThs[index];
+        if (dataCol instanceof HTMLElement) {
+          const colWidth = dataCol.offsetWidth; // Get the actual width of the column
+          headerCol.style.width = `${colWidth}px`; // Set width on sticky header
+        }
+      });
+      stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
+    }
+  };
+
+
+  const observeStickyHeader = ([entry]: IntersectionObserverEntry[]) => {
+    if (!stickyHeaderRef.current || !usedParentContainer) return;
+
+    if (!entry.isIntersecting) {
+      stickyHeaderRef.current.style.visibility = 'visible';
+      setStickyHeaderTop();
+    } else {
+      stickyHeaderRef.current.style.visibility = 'hidden';
+    }
+  };
+
+  /**
+   * set the sticky header top position based on the parent container's top position
+   */
+  const setStickyHeaderTop = () => {
+    if (!stickyHeaderRef.current || !usedParentContainer) return;
+
+    // Adjust the sticky header position based on the presence of a scrollbar height and top panel container's height
+    const scrollbarHeight = stickyScrollbarRef.current?.offsetHeight || 0;
+    // const headerTop = tableContainer.current?.getBoundingClientRect().top || 0;
+    const headerTop = usedParentContainer.getBoundingClientRect().top || 0;
+    // stickyHeaderRef.current.style.top = `${headerTop ? headerTop + scrollbarHeight : 0}px`;
+    stickyHeaderRef.current.style.top = `${scrollbarHeight + headerTop}px`;
+  }
 
   //------------------- UI related callbacks: --------------------//
 
@@ -614,8 +649,9 @@ const RecordsetTable = ({
         </table>
       </div>
       {/*  This div will be used as the target (end of table) for the intersection observer to hide the
-      top scrollbar when the bottom one is visible */}
+      top scrollbar when the bottom one is visible: */}
       <div className='dummy-table-end-div' ref={tableEndRef} />
+      {/* The sticky header: */}
       {enableStickyHeader && <div className='chaise-table-sticky-header' ref={stickyHeaderRef}>
         <table className='sticky-header-table'>
           <thead className='table-heading sticky'>
@@ -623,7 +659,6 @@ const RecordsetTable = ({
           </thead>
         </table>
       </div>}
-
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
           <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>

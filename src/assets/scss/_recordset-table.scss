@@ -264,10 +264,11 @@
 }
 .chaise-table-sticky-header {
   position: fixed;
-  top: 0;
-  visibility: none;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   overflow-x: hidden;
+  // javascript will change the following:
+  top: 0;
+  visibility: hidden;
 }
 
 .chaise-table-sticky-header > table > thead > tr > th {
