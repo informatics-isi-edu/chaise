@@ -1,5 +1,4 @@
 import axios from 'axios';
-import 'regenerator-runtime'; // needed for async/await to work
 
 // models
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
