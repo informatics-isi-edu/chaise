@@ -1,4 +1,4 @@
-# Chaise (Computer-Human Access Interface with Schema Evolution) [![Build Status](https://github.com/informatics-isi-edu/chaise/actions/workflows/e2e.yml/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
+# Chaise (Computer-Human Access Interface with Schema Evolution) [![Chaise end-to-end tests](https://github.com/informatics-isi-edu/chaise/actions/workflows/e2e.yml/badge.svg)](https://github.com/informatics-isi-edu/chaise/actions/workflows/e2e.yml)
 
 
 A suite of web applications that adapt to the data model for data discovery, analysis, visualization, editing, sharing and collaboration.
@@ -116,7 +116,7 @@ The following are some of the documents and resources that we've prepared for us
   -  [Navbar app integration](docs/user-docs/navbar-app.md): Goes over how the Chaise's Navbar app can be embedded in other web applications.
   -  [Logging](docs/user-docs/logging.md): How Chaise is logging server requests as well as client actions.
   -  [Query parameters](docs/user-docs/query-parameters.md): Query parameters that can be used in different Chaise applications.
-- [Deveoper guides](docs/user-docs):
+- [Developer guides](docs/dev-docs):
   - [Chaise developer guide](docs/dev-docs/dev-guide.md): Useful information for developers of Chaise.
   - [End to End Testing](/docs/dev-docs/e2e-test.md): How end to end testing in Chaise works.
 
@@ -126,10 +126,11 @@ When developing new code for Chaise, please make sure you're following these ste
 
 1. create a new branch and make your updates to the code in the branch (avoid changing master branch directly);
 2. do your own quality assurance;
-4. update the e2e tests (if applicable);
-5. make sure the liner doesn't throw any errors (`make lint` should not fail);
-6. make sure you can deploy your code without any issues (`make dist && make deploy` should not fail);
-7. make sure that all tests are passing before submitting the pull request (`make testparallel` should be free of errors);
+3. update the e2e tests (if applicable);
+4. make sure the liner doesn't throw any errors (`make lint` should not fail);
+5. make sure you can deploy your code without any issues (`make dist && make deploy` should not fail);
+6. make sure that all tests are passing before submitting the pull request (`make testparallel` should be free of errors);
+7. Update user or developer guides (if applicaple);
 8. make your pull request, assign it to yourself, and ask someone to review your code.
    - Try to provide as much information as you can on your PR. Explain the issues that the PR is fixing, and the changes that you've done in the PR.
    - Provide examples if applicable.
