@@ -7,13 +7,13 @@ import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/erro
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 import { LoginModalProps } from '@isrd-isi-edu/chaise/src/providers/error';
+import DeferredPromise from '@isrd-isi-edu/chaise/src/models/deferred-promise';
 
 // services
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import Q from 'q';
 import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -92,7 +92,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       // This callback will be called whenever 401 HTTP error is encountered unless there is
       // already login flow in progress
       ConfigService.ERMrest.setHTTP401Handler(() => {
-        const defer = Q.defer();
+        const defer = new DeferredPromise();
 
         const successCB = () => {
 

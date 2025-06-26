@@ -1,4 +1,3 @@
-import Q from 'q';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
@@ -47,26 +46,27 @@ export function setWindowName() {
  * the file is loaded (or if the customCSS property is not defined)
  */
 async function addCustomCSS() {
-  const defer = Q.defer();
-  const chaiseConfig = ConfigService.chaiseConfig;
-  if (chaiseConfig.customCSS !== undefined) {
-    // if the file is already injected
-    if (document.querySelector(`link[href^='${chaiseConfig.customCSS}']`)) {
-      return defer.resolve(), defer.promise;
-    }
+  return new Promise<void>((resolve) => {
+    const chaiseConfig = ConfigService.chaiseConfig;
+    if (chaiseConfig.customCSS !== undefined) {
+      // if the file is already injected
+      if (document.querySelector(`link[href^='${chaiseConfig.customCSS}']`)) {
+        resolve();
+        return;
+      }
 
-    const customCSSElement = document.createElement('link');
-    customCSSElement.setAttribute('rel', 'stylesheet');
-    customCSSElement.setAttribute('type', 'text/css');
-    customCSSElement.setAttribute('href', chaiseConfig.customCSS);
-    // resolve the promise when the css is loaded
-    customCSSElement.onload = defer.resolve;
-    customCSSElement.onerror = defer.resolve;
-    document.getElementsByTagName('head')[0].appendChild(customCSSElement);
-  } else {
-    defer.resolve();
-  }
-  return defer.promise;
+      const customCSSElement = document.createElement('link');
+      customCSSElement.setAttribute('rel', 'stylesheet');
+      customCSSElement.setAttribute('type', 'text/css');
+      customCSSElement.setAttribute('href', chaiseConfig.customCSS);
+      // resolve the promise when the css is loaded
+      customCSSElement.onload = () => resolve();
+      customCSSElement.onerror = () => resolve();
+      document.getElementsByTagName('head')[0].appendChild(customCSSElement);
+    } else {
+      resolve();
+    }
+  });
 }
 
 /**
