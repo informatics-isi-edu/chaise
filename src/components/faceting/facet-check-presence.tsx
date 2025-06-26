@@ -15,7 +15,6 @@ import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import Q from 'q';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 type FacetCheckPresenceProps = {
@@ -87,30 +86,29 @@ const FacetCheckPresence = ({
    * The registered callback to pre-process facets
    */
   const preProcessFacet = () => {
-    const defer = Q.defer();
     // this function is expected but we don't need any extra logic here.
-    return defer.resolve(true), defer.promise;
+    return new Promise((resolve) => resolve(true));
   }
 
   /**
    * The registered callback to process and update facets
    */
   const processFacet = () => {
-    const defer = Q.defer();
+    return new Promise((resolve) => {
+      // we will set the checkboxRows to the value of this variable at the end
+      const updatedRows: FacetCheckBoxRow[] = [];
 
-    // we will set the checkboxRows to the value of this variable at the end
-    const updatedRows: FacetCheckBoxRow[] = [];
+      if (!facetColumnRef.current.hideNotNullChoice) {
+        updatedRows.push(getNotNullFacetCheckBoxRow(facetColumnRef.current.hasNotNullFilter));
+      }
+      if (!facetColumnRef.current.hideNullChoice) {
+        updatedRows.push(getNullFacetCheckBoxRow(facetColumnRef.current.hasNullFilter));
+      }
 
-    if (!facetColumnRef.current.hideNotNullChoice) {
-      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumnRef.current.hasNotNullFilter));
-    }
-    if (!facetColumnRef.current.hideNullChoice) {
-      updatedRows.push(getNullFacetCheckBoxRow(facetColumnRef.current.hasNullFilter));
-    }
+      setCheckboxRows(updatedRows);
 
-    setCheckboxRows(updatedRows);
-
-    return defer.resolve(true), defer.promise;
+      resolve(true);
+    });
   };
 
   /**

@@ -31,7 +31,6 @@ import {
 
 
 // services
-import Q from 'q';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
@@ -200,9 +199,7 @@ const FacetRangePicker = ({
   /**
    * The registered callback to pre-process facets
    */
-  const preProcessFacet = () => {
-    const defer = Q.defer();
-
+  const preProcessFacet = async () => {
     // if we have the not-null filter, other filters are not important and can be ignored
     if (facetColumnRef.current.hasNotNullFilter) {
       setRanges(() => {
@@ -212,7 +209,7 @@ const FacetRangePicker = ({
         }
         return res;
       });
-      defer.resolve(true);
+      return true;
     } else {
       // default value of ranges already handles whether null and notNull option should be present
       const updatedRows: FacetCheckBoxRow[] = [...rangesRef.current];
@@ -231,26 +228,21 @@ const FacetRangePicker = ({
       }
 
       setRanges(updatedRows);
-      defer.resolve(true);
+      return true;
     }
-
-    return defer.promise;
-  }
+  };
 
   /**
    * The registered callback to process and update facets
    */
   const processFacet = (reloadCauses: string[], reloadStartTime: number) => {
-    const defer = Q.defer();
-
-    updateFacetData(reloadCauses, reloadStartTime).then((result: any) => {
-
-      defer.resolve(result);
-    }).catch(function (err: any) {
-      defer.reject(err);
+    return new Promise((resolve, reject) => {
+      updateFacetData(reloadCauses, reloadStartTime).then((result: any) => {
+        resolve(result);
+      }).catch(function (err: any) {
+        reject(err);
+      });
     });
-
-    return defer.promise;
   };
 
   /**
@@ -364,163 +356,166 @@ const FacetRangePicker = ({
 
   /***** API call functions *****/
   const updateFacetData = (reloadCauses: string[], reloadStartTime: number) => {
-    const defer = Q.defer();
+    return new Promise((resolve, reject) => {
 
-    (function (uri, reloadCauses, reloadStartTime) {
-      if (!compState.relayout) {
-        // the captured uri is not the same as the initial data uri so we need to refetch the min/max
-        // this happens when another facet adds a filter that affects the facett object in the uri
-        const agg = facetColumnRef.current.column.aggregate;
-        const aggregateList = [
-          agg.minAgg,
-          agg.maxAgg
-        ];
+      (function (uri, reloadCauses, reloadStartTime) {
+        if (!compState.relayout) {
+          // the captured uri is not the same as the initial data uri so we need to refetch the min/max
+          // this happens when another facet adds a filter that affects the facett object in the uri
+          const agg = facetColumnRef.current.column.aggregate;
+          const aggregateList = [
+            agg.minAgg,
+            agg.maxAgg
+          ];
 
-        const facetLog = getDefaultLogInfo();
-        let action = LogActions.FACET_RANGE_LOAD;
-        if (reloadCauses.length > 0) {
-          action = LogActions.FACET_RANGE_RELOAD;
-          // add causes
-          facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-        }
-        facetLog.action = getFacetLogAction(facetIndex, action);
-        $log.debug('fetch aggregates')
-        facetColumnRef.current.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
-          if (facetColumnRef.current.sourceReference.uri !== uri) {
-            defer.resolve(false);
-            return defer.promise;
+          const facetLog = getDefaultLogInfo();
+          let action = LogActions.FACET_RANGE_LOAD;
+          if (reloadCauses.length > 0) {
+            action = LogActions.FACET_RANGE_RELOAD;
+            // add causes
+            facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
           }
+          facetLog.action = getFacetLogAction(facetIndex, action);
+          $log.debug('fetch aggregates')
+          facetColumnRef.current.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
+            if (facetColumnRef.current.sourceReference.uri !== uri) {
+              resolve(false);
+              return;
+            }
 
-          // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
-          const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
+            // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
+            const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
 
-          // if - the max/min are null or empty string (empty string is used for the timestamp)
-          //    - bar_plot in annotation is 'false'
-          //    - histogram not supported for column type
-          // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
-          const hasValue = minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null &&
-            minMaxRangeOptions.absMin !== '' && minMaxRangeOptions.absMax !== '';
+            // if - the max/min are null or empty string (empty string is used for the timestamp)
+            //    - bar_plot in annotation is 'false'
+            //    - histogram not supported for column type
+            // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
+            const hasValue = minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null &&
+              minMaxRangeOptions.absMin !== '' && minMaxRangeOptions.absMax !== '';
 
-          if (!(facetColumnRef.current.barPlot && hasValue)) {
+            if (!(facetColumnRef.current.barPlot && hasValue)) {
+              setCompState({
+                ...compState,
+                rangeOptions: minMaxRangeOptions
+              });
+              resolve(true);
+              return;
+            }
+
             setCompState({
               ...compState,
-              rangeOptions: minMaxRangeOptions
+              disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
+              histogramDataStack: [],
+              rangeOptions: minMaxRangeOptions,
+              relayout: false
             });
-            return defer.resolve(true);
-          }
+            // get initial histogram data
 
-          setCompState({
-            ...compState,
-            disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
-            histogramDataStack: [],
-            rangeOptions: minMaxRangeOptions,
-            relayout: false
+            return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
+          }).then((response: any) => {
+
+            resolve(response);
+            return;
+          }).catch((err: any) => {
+            console.log('catch facet data: ', err);
+            reject(err);
+            return;
           });
-          // get initial histogram data
-
-          return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
-        }).then((response: any) => {
-
-          defer.resolve(response);
-        }).catch((err: any) => {
-          console.log('catch facet data: ', err);
-          defer.reject(err);
-        });
-        // relayout case
-      } else {
-        histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
-          defer.resolve(response);
-        }).catch(function (err: any) {
-          defer.reject(err);
-        });
-      }
-    })(facetColumnRef.current.sourceReference.uri, reloadCauses, reloadStartTime);
-
-    // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
-    // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
-
-    return defer.promise;
+          // relayout case
+        } else {
+          histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
+            resolve(response);
+            return;
+          }).catch(function (err: any) {
+            reject(err);
+            return;
+          });
+        }
+      })(facetColumnRef.current.sourceReference.uri, reloadCauses, reloadStartTime);
+    });
   };
 
   // NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
   const histogramData = (min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any) => {
-    const defer = Q.defer();
+    return new Promise((resolve, reject) => {
 
-    (function (uri) {
-      const requestMin = min, requestMax = max;
-      const facetLog = getDefaultLogInfo();
-      let action = LogActions.FACET_HISTOGRAM_LOAD;
-      if (reloadCauses.length > 0) {
-        action = LogActions.FACET_HISTOGRAM_RELOAD;
+      (function (uri) {
+        const requestMin = min, requestMax = max;
+        const facetLog = getDefaultLogInfo();
+        let action = LogActions.FACET_HISTOGRAM_LOAD;
+        if (reloadCauses.length > 0) {
+          action = LogActions.FACET_HISTOGRAM_RELOAD;
 
-        // add causes
-        facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-      }
-
-      facetLog.action = getFacetLogAction(facetIndex, action);
-      $log.debug('fetch histogram data')
-      facetColumnRef.current.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
-        if (facetColumn.sourceReference.uri !== uri) {
-          // return breaks out of the current callback function
-          defer.resolve(false);
-          return defer.promise;
+          // add causes
+          facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
         }
 
-        let shouldRelayout = compState.relayout;
-        // after zooming in, we don't care about displaying values beyond the set the user sees
-        // if set is greater than bucketCount, remove last bin (we should only see this when the max+ bin is present)
-        if (shouldRelayout && response.x.length > numBuckets) {
-          response.x.splice(-1, 1);
-          response.y.splice(-1, 1);
-          shouldRelayout = false;
-        }
-
-        const plotData = [...compState.plot.data] as PlotData[];
-        plotData[0].x = response.x;
-        plotData[0].y = response.y;
-
-        const plotLayout = { ...compState.plot.layout };
-        // set xaxis range
-        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
-          plotLayout.xaxis.range = updateHistogramXRange(min, max);
-          plotLayout.xaxis.fixedrange = disableZoomIn(min, max);
-        }
-
-        response.min = requestMin;
-        response.max = requestMax;
-
-        // push the data on the stack to be used for unzoom and reset
-        const histogramDataStack = [...compState.histogramDataStack];
-        histogramDataStack.push(response)
-
-        setCompState({
-          ...compState,
-          disableZoomIn: disableZoomIn(min, max),
-          histogramDataStack: histogramDataStack,
-          plot: {
-            ...compState.plot,
-            data: plotData,
-            layout: plotLayout,
-            labels: response.labels
-          },
-          relayout: shouldRelayout,
-          rangeOptions: {
-            absMin: min,
-            absMax: max,
-            model: {
-              min: min,
-              max: max
-            }
+        facetLog.action = getFacetLogAction(facetIndex, action);
+        $log.debug('fetch histogram data')
+        facetColumnRef.current.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
+          if (facetColumn.sourceReference.uri !== uri) {
+            // return breaks out of the current callback function
+            resolve(false);
+            return;
           }
-        });
-        defer.resolve(true);
-      }).catch((err: any) => {
-        defer.reject(err);
-        console.log('catch histogram data: ', err);
-      });
-    })(facetColumnRef.current.sourceReference.uri);
 
-    return defer.promise;
+          let shouldRelayout = compState.relayout;
+          // after zooming in, we don't care about displaying values beyond the set the user sees
+          // if set is greater than bucketCount, remove last bin (we should only see this when the max+ bin is present)
+          if (shouldRelayout && response.x.length > numBuckets) {
+            response.x.splice(-1, 1);
+            response.y.splice(-1, 1);
+            shouldRelayout = false;
+          }
+
+          const plotData = [...compState.plot.data] as PlotData[];
+          plotData[0].x = response.x;
+          plotData[0].y = response.y;
+
+          const plotLayout = { ...compState.plot.layout };
+          // set xaxis range
+          if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
+            plotLayout.xaxis.range = updateHistogramXRange(min, max);
+            plotLayout.xaxis.fixedrange = disableZoomIn(min, max);
+          }
+
+          response.min = requestMin;
+          response.max = requestMax;
+
+          // push the data on the stack to be used for unzoom and reset
+          const histogramDataStack = [...compState.histogramDataStack];
+          histogramDataStack.push(response)
+
+          setCompState({
+            ...compState,
+            disableZoomIn: disableZoomIn(min, max),
+            histogramDataStack: histogramDataStack,
+            plot: {
+              ...compState.plot,
+              data: plotData,
+              layout: plotLayout,
+              labels: response.labels
+            },
+            relayout: shouldRelayout,
+            rangeOptions: {
+              absMin: min,
+              absMax: max,
+              model: {
+                min: min,
+                max: max
+              }
+            }
+          });
+          resolve(true);
+          return;
+        }).catch((err: any) => {
+          reject(err);
+          $log.error('catch histogram data: ', err);
+          return;
+        });
+      })(facetColumnRef.current.sourceReference.uri);
+
+    });
   }
 
 

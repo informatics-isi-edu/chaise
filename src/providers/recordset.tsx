@@ -6,9 +6,10 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { ChaiseAlert, ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { LogActions, LogObjectType, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import DeferredPromise from '@isrd-isi-edu/chaise/src/models/deferred-promise';
 import {
   DisabledRow,
   RecordsetConfig, RecordsetDisplayMode,
@@ -27,11 +28,10 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 
 // utils
-import { RECORDEDIT_MAX_ROWS,RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import Q from 'q';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 /**
@@ -712,7 +712,7 @@ export default function RecordsetProvider({
     flowControl.current.dirtyResult = false;
     setIsLoading(true);
 
-    const defer = Q.defer();
+    const defer = new DeferredPromise();
     const logParams: any = flowControl.current.logObject ? flowControl.current.logObject : {};
 
     const reloadCauses = flowControl.current.reloadCauses;
@@ -862,9 +862,8 @@ export default function RecordsetProvider({
    * This will generate the request for getting the count.
    * Returns a promise. If it's resolved with `true` then it has been successful.
    */
-  const fetchTotalRowCount = (current: number) => {
+  const fetchTotalRowCount = async (current: number) => {
     printDebugMessage('fetching the main count');
-    const defer = Q.defer();
     let aggList, hasError;
     try {
       // if the table doesn't have any simple key, this might throw error
@@ -874,8 +873,7 @@ export default function RecordsetProvider({
     }
     if (hasError) {
       setTotalRowCount(null);
-      defer.resolve(true);
-      return defer.promise;
+      return true;
     }
 
     const hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
@@ -884,13 +882,14 @@ export default function RecordsetProvider({
     if (hasCauses) {
       stack = LogService.addCausesToStack(stack, flowControl.current.recountCauses, flowControl.current.recountStartTime);
     }
-    referenceRef.current.getAggregates(
-      aggList,
-      { action: flowControl.current.getLogAction(action), stack: stack }
-    ).then((response: any) => {
+    try {
+
+      const response = await referenceRef.current.getAggregates(
+        aggList,
+        { action: flowControl.current.getLogAction(action), stack: stack }
+      );
       if (current !== flowControl.current.queue.counter) {
-        defer.resolve(false);
-        return defer.promise;
+        return false;
       }
 
       setHasCountTimeoutError(false);
@@ -900,11 +899,10 @@ export default function RecordsetProvider({
       flowControl.current.recountCauses = [];
       flowControl.current.recountStartTime = -1;
 
-      defer.resolve(true);
-    }).catch(function (err: any) {
+      return true;
+    } catch (err: any) {
       if (current !== flowControl.current.queue.counter) {
-        defer.resolve(false);
-        return defer.promise;
+        return false;
       }
 
       if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
@@ -913,10 +911,8 @@ export default function RecordsetProvider({
 
       // fail silently
       setTotalRowCount(null);
-      return defer.resolve(true), defer.promise;
-    });
-
-    return defer.promise;
+      return true;
+    }
   }
 
   /**
@@ -969,9 +965,8 @@ export default function RecordsetProvider({
    * a promise that is resolved with a boolean value denoting the success or failure.
    * A rejected promise should be displayed as an error.
    */
-  const updateColumnAggregate = (aggModel: any, current: number, hideSpinner?: boolean) => {
-    const defer = Q.defer(),
-      activeListModel = aggModel.activeListModel;
+  const updateColumnAggregate = async (aggModel: any, current: number, hideSpinner?: boolean) => {
+    const activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
     const updatedColumnModels: any = {};
@@ -993,10 +988,11 @@ export default function RecordsetProvider({
       action: flowControl.current.getLogAction(action, LogStackPaths.PSEUDO_COLUMN),
       stack,
     };
-    activeListModel.column.getAggregatedValue(pageRef.current, logObj).then((values: any) => {
+    try {
+      const values = await activeListModel.column.getAggregatedValue(pageRef.current, logObj)
       if (flowControl.current.queue.counter !== current) {
         printDebugMessage(`getAggregatedValue success counter missmatch, old cnt=${current}`);
-        return defer.resolve(false), defer.promise;
+        return false;
       }
 
       // remove the column error (they might retry)
@@ -1066,13 +1062,13 @@ export default function RecordsetProvider({
       aggModel.reloadCauses = [];
       aggModel.reloadStartTime = -1;
 
-      return defer.resolve(true);
-    }).catch((err: any) => {
+      return true;
+    } catch (err: any) {
       if (flowControl.current.queue.counter !== current) {
-        return defer.resolve(false), defer.promise;
+        return false;
       }
 
-      let errorIndexes: any = {};
+      const errorIndexes: any = {};
       activeListModel.objects.forEach((obj: any) => {
         if (!obj.column) return;
 
@@ -1084,15 +1080,13 @@ export default function RecordsetProvider({
         setColumnModelValues(errorIndexes, { isLoading: false, hasError: true });
 
         // mark this request as done
-        return defer.resolve(true), defer.promise;
+        return true;
       } else {
         setColumnModelValues(errorIndexes, { isLoading: false });
       }
 
-      defer.reject(err);
-    });
-
-    return defer.promise;
+      throw err;
+    }
   }
 
   /**
