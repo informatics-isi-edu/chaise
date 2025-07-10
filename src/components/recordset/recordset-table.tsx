@@ -263,7 +263,6 @@ const RecordsetTable = ({
   // Sync widths of the columns
   const syncWidths = () => {
     if (stickyHeaderRef.current && tableRef.current) {
-      console.log('Syncing sticky header widths');
 
       //For syncing the width of sticky header w.r.t the table body cells for each column
       const originalThs = tableRef.current.querySelectorAll('tbody > tr > td');
