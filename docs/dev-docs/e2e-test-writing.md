@@ -183,7 +183,7 @@ This section summarizes the best practices for writing test cases in Chaise.
 - If you want to test element classes ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-class)):
 
   ```ts
-  // one class 
+  // one class
   await expect.soft(input).toContainClass('input-disabled');
 
   // multiple classes
@@ -219,6 +219,21 @@ This section summarizes the best practices for writing test cases in Chaise.
   expect(await link.innerHTML()).toContain(partialExpected);
   expect(await link.innerHTML()).toBe(expected);
   ```
+
+- Testing page URL:
+
+  ```ts
+  // source: https://playwright.dev/docs/api/class-pageassertions#page-assertions-to-have-url
+
+  // Check for the page URL to contain '/recordset/'
+  await expect(page).toHaveURL(/\/recordset\//);
+
+  // testing if the URL contains some string
+  await expect(page).toHaveURL(url => {
+    return url.href.includes('@sort(my_column)')
+  });
+  ```
+
 
 ### Actions
 
