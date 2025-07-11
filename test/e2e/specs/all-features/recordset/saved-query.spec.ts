@@ -127,6 +127,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'description', 1)).toHaveValue(textAreaVal);
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
+      await expect.soft(createSavedQueryModal).not.toBeAttached();
 
       await expect.soft(AlertLocators.getSuccessAlert(page)).toHaveText('SuccessSearch criteria saved.');
     });
@@ -139,6 +140,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(RecordsetLocators.getRows(savedQueriesModal)).toHaveCount(1);
 
       await ModalLocators.getCloseBtn(savedQueriesModal).click();
+      await expect.soft(savedQueriesModal).not.toBeAttached();
     });
 
     await test.step('try to save the same query again', async () => {
@@ -152,6 +154,7 @@ test.describe('View recordset page and form a query,', () => {
       await expect.soft(ModalLocators.getModalText(duplicateQueryModal)).toContainText(`name "${testParams.firstSavedQueryName}"`);
 
       await ModalLocators.getCloseBtn(duplicateQueryModal).click();
+      await expect.soft(duplicateQueryModal).not.toBeAttached();
     });
 
     await test.step('apply filter in text_col facet and open save query form', async () => {
@@ -185,6 +188,7 @@ test.describe('View recordset page and form a query,', () => {
       await descriptionInput.fill('Second query description');
 
       await ModalLocators.saveQuerySubmit(createSavedQueryModal).click();
+      await expect.soft(createSavedQueryModal).not.toBeAttached();
       await expect.soft(AlertLocators.getAlerts(page)).toHaveCount(2);
     });
 
@@ -198,6 +202,7 @@ test.describe('View recordset page and form a query,', () => {
       // queries are in order of their "last_execution_time" which is set to "now" when the query is saved
       // 2nd saved query should be the first row in the modal, we want to click the 1st saved query
       await ModalLocators.getApplySavedQueryButtons(savedQueriesModal, 1).click();
+      await expect.soft(savedQueriesModal).not.toBeAttached();
     });
 
     await test.step('should change the filters applied and show first query that was saved', async () => {

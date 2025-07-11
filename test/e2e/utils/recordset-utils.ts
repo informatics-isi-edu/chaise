@@ -228,7 +228,9 @@ export async function testRecordsetDisplayWSortAfterPaging(
   await expect.soft(button).toBeVisible();
 
   // Check if the url has @sort by column name
-  expect.soft(page.url()).toContain(`@sort(${rawColumnName}${sortModifier},RID)`);
+  await expect.soft(page).toHaveURL(url => {
+    return url.href.includes(`@sort(${rawColumnName}${sortModifier},RID)`);
+  });
 }
 
 /**

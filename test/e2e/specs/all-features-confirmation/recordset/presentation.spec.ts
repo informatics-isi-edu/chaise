@@ -541,7 +541,7 @@ test.describe('View recordset', () => {
         await expect.soft(RecordsetLocators.getRows(page).nth(2)).toBeVisible();
       });
 
-      for (const [index, dataParams] of params.sortedData.entries()) {
+      for await (const dataParams of params.sortedData) {
         const recordsOnPage1 = dataParams.page1.asc.length,
           recordsOnPage2 = dataParams.page2.asc.length,
           totalRecords = recordsOnPage1 + recordsOnPage2;
@@ -662,7 +662,7 @@ test.describe('View recordset', () => {
 
       await previousBtn.click();
       // wait for it to be on the first page again
-      expect.soft(page.url()).toContain('@after');
+      await expect.soft(page).toHaveURL(/\@after/);
       await expect.soft(previousBtn).not.toBeEnabled();
 
       // make sure the dropdown is clickable
@@ -749,7 +749,7 @@ test.describe('View recordset', () => {
       await page.goto(`${baseURL}/recordset`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      expect.soft(page.url()).toContain(catalogSchemaTable);
+      await expect.soft(page).toHaveURL(url => url.href.includes(catalogSchemaTable));
       await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText('Accommodations');
     });
 
@@ -757,7 +757,7 @@ test.describe('View recordset', () => {
       await page.goto(`${baseURL}/recordset/#${getCatalogID(testInfo.project.name)}`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
 
-      expect.soft(page.url()).toContain(catalogSchemaTable);
+      await expect.soft(page).toHaveURL(url => url.href.includes(catalogSchemaTable));
       await expect.soft(RecordsetLocators.getPageTitleElement(page)).toHaveText('Accommodations');
     });
   });
