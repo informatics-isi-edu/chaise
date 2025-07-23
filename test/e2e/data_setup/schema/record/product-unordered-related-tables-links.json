@@ -594,7 +594,7 @@
                             "source": [
                                 {
                                     "filter": "id",
-                                    "operand_pattern": "2004"
+                                    "operand_pattern": "{{{id}}}"
                                 },
                                 {
                                     "inbound": [
@@ -736,8 +736,10 @@
                         {
                             "source": [
                                 {
-                                    "filter": "id",
-                                    "operand_pattern": "2004"
+                                  "or": [
+                                    {"filter": "id", "operand_pattern": "2004"},
+                                    {"filter": "category", "operand_pattern": "{{{$fkey_product-unordered-related-tables-links_fk_category.values.term}}}"}
+                                  ]
                                 },
                                 {
                                     "inbound": [
