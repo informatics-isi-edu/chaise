@@ -594,7 +594,7 @@
                             "source": [
                                 {
                                     "filter": "id",
-                                    "operand_pattern": "2004"
+                                    "operand_pattern": "{{{id}}}"
                                 },
                                 {
                                     "inbound": [
