@@ -41,7 +41,9 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { canShowInlineRelated, canShowRelated, determineScrollElement } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import {
+  canShowInlineRelated, canShowRelated, determineScrollElement, referenceHasRelatedEntities
+} from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -124,11 +126,7 @@ const RecordInner = ({
    * before fetching data, this should be true if we don't have any related or inlines.
    * after fetching data, this should be true if all the inline/related are hidden.
    */
-  const [disablePanel, setDisablePanel] = useState(() => {
-    return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
-      return col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
-    }));
-  });
+  const [disablePanel, setDisablePanel] = useState(() => referenceHasRelatedEntities(reference));
 
   /**
    * State variable to show or hide side panel
@@ -151,8 +149,7 @@ const RecordInner = ({
   } | null>(null);
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
-  // by default open all the sections
-  const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
+  const [openRelatedSections, setOpenRelatedSections] = useState<string[]>([]);
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
 
@@ -202,6 +199,19 @@ const RecordInner = ({
       dispatchError({ error });
     });
   }, []);
+
+  /**
+   * calling reference.related before reference.generateActiveList(tuple) might not return the related entities
+   * that are using filter in source and access the data. so we have to make sure we're updating the state after
+   * the models are initialized.
+   */
+  useEffect(() => {
+    if (!initialized) return;
+    // since this is before fetching related entities, we just need to check if there are any related entities
+    setDisablePanel(() => referenceHasRelatedEntities(reference));
+    // by default open all the sections
+    setOpenRelatedSections(Array.from(Array(reference.related.length), (e, i) => `${i}`));
+  }, [initialized]);
 
   // properly set scrollable section height
   useEffect(() => {

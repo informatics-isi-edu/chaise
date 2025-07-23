@@ -372,3 +372,12 @@ export function determineScrollElement(displayname: string): Element | false {
 
   return el;
 }
+
+/**
+ * returns true if there is at least one related entity or inline related entity
+ */
+export function referenceHasRelatedEntities(reference: any): boolean {
+  return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
+    return col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
+  }));
+}
