@@ -17,7 +17,7 @@ import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet
 import { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { JSX, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -713,7 +713,8 @@ const Faceting = ({
 
         // if we are closing
         if (!isOpen) {
-          return { ...fm, isOpen,
+          return {
+            ...fm, isOpen,
             // hide the spinner:
             isLoading: false,
             // if we were waiting for data, make sure to fetch it later
@@ -740,8 +741,8 @@ const Faceting = ({
 
   //-------------------  render logic:   --------------------//
 
-  const renderFacetList = () => {
-    return facetOrders.map((facetIndex: number, draggableIndex: number) => {
+  const renderFacetList = (droppableArgs: DroppableProvided) => {
+    const renderedItems = facetOrders.map((facetIndex: number, draggableIndex: number) => {
       return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
         {(draggableArgs: DraggableProvided) => (
           <div
@@ -775,6 +776,76 @@ const Faceting = ({
         )}
       </Draggable>
     })
+
+    const group1: JSX.Element[] = [], group2: JSX.Element[] = [], group3: JSX.Element[] = [];
+    renderedItems.forEach((item, index) => {
+      if (index < 4) {
+        group1.push(item);
+      } else if (index >= 4 && index < 9) {
+        group2.push(item);
+      } else {
+        group3.push(item);
+      }
+    });
+
+    return (
+      <Accordion
+        className='panel-group facet-groups' alwaysOpen
+        {...droppableArgs.droppableProps}
+        ref={droppableArgs.innerRef}
+        key={'facet-list-outer'}
+        defaultActiveKey={['project', 'donor', 'sample']}
+      >
+        <Accordion.Item eventKey='project' className='facet-group-item'>
+          <Accordion.Header className='facet-group-item-header'>
+            <FacetHeader
+              displayname={{value: 'Project', isHTML: false}}
+              isLoading={false}
+              facetHasTimeoutError={false}
+              noConstraints={false}
+            />
+          </Accordion.Header>
+          <Accordion.Body className='facet-group-item-body'>
+            <Accordion activeKey={activeKeys}>
+              {group1}
+              {droppableArgs.placeholder}
+            </Accordion>
+          </Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item eventKey='donor' className='facet-group-item'>
+          <Accordion.Header className='facet-group-item-header'>
+            <FacetHeader
+              displayname={{value: 'Donor', isHTML: false}}
+              isLoading={false}
+              facetHasTimeoutError={false}
+              noConstraints={false}
+            />
+          </Accordion.Header>
+          <Accordion.Body className='facet-group-item-body'>
+            <Accordion activeKey={activeKeys}>
+              {group2}
+            </Accordion>
+            {droppableArgs.placeholder}
+          </Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item eventKey='sample'className='facet-group-item'>
+          <Accordion.Header className='facet-group-item-header'>
+            <FacetHeader
+              displayname={{value: 'Sample', isHTML: false}}
+              isLoading={false}
+              facetHasTimeoutError={false}
+              noConstraints={false}
+            />
+          </Accordion.Header>
+          <Accordion.Body className='facet-group-item-body'>
+            <Accordion activeKey={activeKeys}>
+              {group3}
+            </Accordion>
+          </Accordion.Body>
+        </Accordion.Item>
+        {droppableArgs.placeholder}
+      </Accordion>
+    )
   }
 
   const renderFacet = (index: number) => {
@@ -880,15 +951,12 @@ const Faceting = ({
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <ChaiseDroppable droppableId={'facet-droppable'}>
             {(droppableArgs: DroppableProvided) => (
-              <Accordion
-                className='panel-group' activeKey={activeKeys} alwaysOpen
+              <div
                 {...droppableArgs.droppableProps}
                 ref={droppableArgs.innerRef}
-                key={'facet-list'}
               >
-                {renderFacetList()}
-                {droppableArgs.placeholder}
-              </Accordion>
+                {renderFacetList(droppableArgs)}
+              </div>
             )}
           </ChaiseDroppable>
         </DragDropContext>

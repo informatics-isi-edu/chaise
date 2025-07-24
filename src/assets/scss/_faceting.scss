@@ -142,7 +142,64 @@
       font-size: 1.25rem;
     }
 
+    // for version 1
+    // .facet-group-header {
+    //   height: 40px;
+    //   padding: 10px 5px;
+    //   padding-right: 40px;
+    //   margin: 0;
+    //   font-size: 1.25rem;
+    // }
+
   }
+
+  .facet-groups {
+    .facet-group-item {
+      // --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23212529' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M2 5L8 11L14 5'/%3e%3c/svg%3e");
+      --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
+      --bs-accordion-btn-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
+      --bs-accordion-btn-icon-transform: rotate(90deg);
+      // --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='black'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+
+      &:first {
+        border-top: 0;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      .facet-group-item-header .accordion-button {
+        padding: 10px 5px 5px 5px;
+        color: map.get(variables.$color-map, 'black');
+        background-color: map.get(variables.$color-map, 'white');
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .facet-group-item-body {
+        padding: 0;
+      }
+    }
+  }
+
+  // .facet-group-header-btn .accordion-button {
+  //   height: 40px;
+  //   border: 0;
+  //   border-radius: 0;
+  //   padding: 10px 5px;
+  //   padding-right: 40px;
+  //   text-transform: none;
+  //   position: relative;
+  //   flex-direction: row-reverse;
+  //   justify-content: flex-end;
+  //   background-color: #d0e0f0;
+  //   color: #333;
+  // }
 
   .range-picker {
     .facet-range-input {
