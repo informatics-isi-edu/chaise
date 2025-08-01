@@ -229,8 +229,7 @@
                                     {"inbound": ["faceting", "main_f5_fk1"]},
                                     {"inbound": ["faceting", "f5_fk1"]},
                                     {"and": [
-                                        {"filter": "term", "operand_pattern": "one", "negate": true},
-                                        {"filter": "RCB", "operand_pattern": "{{{$session.client.id}}}"}
+                                        {"filter": "term", "operand_pattern": "one", "negate": true}
                                     ]},
                                     "id"
                                 ],

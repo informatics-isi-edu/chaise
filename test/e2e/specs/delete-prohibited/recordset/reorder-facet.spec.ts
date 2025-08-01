@@ -13,6 +13,18 @@ import {
 import { clickNewTabLink, dragAndDropWithScroll, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
+const facetMapping = {
+  'F1': 'eqK7CNP-yhTDab74BW-7lQ',
+  'to_name': 'cD8qWek-pEc_of8BUq0kAw',
+  'f3 (term)': 'BLzaX0hgTVx7uaLkFXlKsw',
+  'from_name': 'ebn2okbwlp5O0XoSYfzGiA',
+  'F1 with Term': 'rtIZqlhTdgze1YnEizt_Vg',
+  'F3 Entity': '2LEfnTGwdKB6dv-TLbBSmg',
+  'F5': '8onrFoVWlj7BhbQ003jSHg',
+  'F5 with filter': 'DZJNLl86zoOj3GBHFcPIvA',
+  'Outbound1 (using F1)': 'cpvZOR762iRCtNVMPFIApg',
+}
+
 const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
@@ -48,11 +60,12 @@ const testParams = {
       { 'name': 'int_col', 'open': false }, { 'name': 'float_col', 'open': false }, { 'name': 'date_col', 'open': false },
       { 'name': 'RMB', 'open': true }, // this is a valid column but it's not part of the annotation
       { 'name': 'boolean_col', 'open': false }, { 'name': 'jsonb_col', 'open': false },
-      { 'name': 'eqK7CNP-yhTDab74BW-7lQ', 'open': false }, { 'name': 'cD8qWek-pEc_of8BUq0kAw', 'open': true },
-      { 'name': 'BLzaX0hgTVx7uaLkFXlKsw', 'open': false }, { 'name': 'ebn2okbwlp5O0XoSYfzGiA', 'open': false },
-      { 'name': 'rtIZqlhTdgze1YnEizt_Vg', 'open': false }, { 'name': 'text_col_2', 'open': true },
-      { 'name': '2LEfnTGwdKB6dv-TLbBSmg', 'open': false }, { 'name': '8onrFoVWlj7BhbQ003jSHg', 'open': false },
-      { 'name': 'Z5zkN76i7M1ZC9iGs6kZOQ' }, { 'name': 'cpvZOR762iRCtNVMPFIApg', 'open': true }, { 'name': 'col_w_long_values', 'open': false },
+      { 'name': facetMapping['F1'], 'open': false }, { 'name': facetMapping['to_name'], 'open': true },
+      { 'name': facetMapping['f3 (term)'], 'open': false }, { 'name': facetMapping['from_name'], 'open': false },
+      { 'name': facetMapping['F1 with Term'], 'open': false }, { 'name': 'text_col_2', 'open': true },
+      { 'name': facetMapping['F3 Entity'], 'open': false }, { 'name': facetMapping['F5'], 'open': false },
+      { 'name': facetMapping['F5 with filter'], 'open': false }, { 'name': facetMapping['Outbound1 (using F1)'], 'open': true },
+      { 'name': 'col_w_long_values', 'open': false },
       { 'name': 'col_w_column_order_false', 'open': false }, { 'name': 'col_w_column_order', 'open': false },
       { 'name': 'RCT', 'open': true }, // this is a valid column but it's not part of the annotation
     ],
