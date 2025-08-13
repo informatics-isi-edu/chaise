@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
@@ -143,7 +144,13 @@ export const errorMessages = {
   systemAdminMessage: 'An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.',
   viewerOSDFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
   viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
-  invalidHelpPage: 'The requested help page cannot be found.'
+  invalidHelpPage: 'The requested help page cannot be found.',
+  filePreview: {
+    largeFile: 'This file is too large to preview. Please download it to view the content.',
+    unauthorized: 'Login is required to view this file.',
+    forbidden: 'You do not have permission to view this file.',
+    unknownError: 'An unknown error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.'
+  }
 };
 
 export const BODY_CLASS_NAMES = {

@@ -349,7 +349,7 @@ const Faceting = ({
     if (typeof index === 'number') {
       flowControl.current.queue.occupiedSlots++;
       (function (i: number, currentCounter: number) {
-        printDebugMessage(`initializing facet (index=${index}`)
+        printDebugMessage(`initializing facet (index=${index})`);
         facetRequestModels.current[i].preProcessFacet().then(function (res: any) {
           printDebugMessage(`after facet (index=${i}) initialize: ${res ? 'successful.' : 'unsuccessful.'}`);
           flowControl.current.queue.occupiedSlots--;

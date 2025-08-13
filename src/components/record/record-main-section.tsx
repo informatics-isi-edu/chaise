@@ -8,6 +8,7 @@ import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/rela
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Spinner from 'react-bootstrap/Spinner';
+import FilePreview from '@isrd-isi-edu/chaise/src/components/file-preview';
 
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -30,7 +31,7 @@ import type { JSX } from 'react';
  */
 const RecordMainSection = (): JSX.Element => {
   const { errors } = useError();
-  const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections } = useRecord();
+  const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections, page } = useRecord();
 
   const canShow = (columnModel: RecordColumnModel): boolean => {
     if (columnModel.relatedModel) {
@@ -99,6 +100,13 @@ const RecordMainSection = (): JSX.Element => {
         </span>
       );
 
+      let isFilePreview = cm.column.isAsset && cm.column.filePreview !== null;
+      let fileURL;
+      if (isFilePreview && page.length > 0 && page.tuples[0].data[cm.column.name]) {
+        fileURL = page.tuples[0].data[cm.column.name];
+      }
+      isFilePreview = isFilePreview && fileURL && fileURL.length > 0;
+
       return (
         <tr key={`col-${index}`} id={`row-${makeSafeIdAttr(cm.column.name)}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
@@ -117,8 +125,11 @@ const RecordMainSection = (): JSX.Element => {
             className={entityValueClassName.join(' ')} colSpan={hideHeader ? 2 : 1}
             id={`entity-${idSafeDisplayname}`}
           >
-            {!cm.relatedModel && !hasError &&
+            {!cm.relatedModel && !hasError && !isFilePreview &&
               <DisplayValue addClass value={recordValues[cm.index]} />
+            }
+            {!cm.relatedModel && !hasError && isFilePreview &&
+              <FilePreview column={cm.column} url={fileURL} value={recordValues[cm.index]} />
             }
             {cm.relatedModel &&
               <span id={`entity-${cm.index}-table`}>

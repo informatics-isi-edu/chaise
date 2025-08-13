@@ -239,8 +239,8 @@ const FacetChoicePicker = ({
 
         const facetLog = getDefaultLogInfo();
         facetLog.action = getFacetLogAction(facetIndex, LogActions.PRESELECTED_FACETS_LOAD);
-        facetColumnRef.current.getChoiceDisplaynames(facetLog).then(function (filters: any) {
-          filters.forEach(function (f: any) {
+        facetColumnRef.current.getChoiceDisplaynames(facetLog).then((filters: any) => {
+          filters.forEach((f: any) => {
             res.push({
               uniqueId: f.uniqueId,
               displayname: f.displayname,
@@ -249,12 +249,13 @@ const FacetChoicePicker = ({
             });
           });
 
+          $log.debug(`facet index=${facetIndex}: preprocessing done`);
           setCheckboxRows(res);
 
           // this timeout will ensure that the set state is done before resolving
           setTimeout(() => {
             resolve(true);
-          });
+          }, 10);
         }).catch(function (error: any) {
           reject(error);
         });
@@ -289,6 +290,8 @@ const FacetChoicePicker = ({
       let appliedLen = updatedRows.length;
       if (facetColumn.hasNullFilter) appliedLen--;
       if (facetColumn.hasNotNullFilter) appliedLen--;
+
+      $log.debug(`facet index=${facetIndex}: start processing, already ${appliedLen} displayed filters.`);
 
       // there are more than PAGE_SIZE selected rows, just display them and don't fetch from the server.
       if (appliedLen >= FACET_PANEL_DEFAULT_PAGE_SIZE) {
@@ -368,6 +371,7 @@ const FacetChoicePicker = ({
             return;
           }
 
+          $log.debug(`facet index=${facetIndex}: processing done`);
           setCheckboxRows(updatedRows);
 
           resolve(result);
