@@ -2,9 +2,12 @@
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
+// third party
+import Papa from 'papaparse';
+
 // utils
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-
+import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * Utility functions for file operations and content processing
@@ -94,35 +97,26 @@ export const formatJSONContent = (content: string): string => {
 };
 
 /**
- * Parse CSV content into table structure
+ * Parse CSV content into table structure using PapaParse
+ * Returns null if parsing fails
  */
-export const parseCsvContent = (csvContent: string): string[][] => {
-  const lines = csvContent.trim().split('\n');
-  const result: string[][] = [];
+export const parseCsvContent = (csvContent: string): string[][] | null => {
+  try {
+    const parseResult = Papa.parse(csvContent, {
+      skipEmptyLines: true,
+      header: false
+    });
 
-  for (const line of lines) {
-    // Simple CSV parsing - handles basic quoted fields
-    const fields: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        fields.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
+    if (parseResult.errors && parseResult.errors.length > 0) {
+      $log.warn('CSV parsing errors:', parseResult.errors);
+      return null;
     }
-    fields.push(current.trim());
-    result.push(fields);
-  }
 
-  return result;
+    return parseResult.data as string[][];
+  } catch (error) {
+    $log.error('Failed to parse CSV content:', error);
+    return null;
+  }
 };
 
 
@@ -140,22 +134,23 @@ export interface FileInfo {
    * if non-empty, we should not show the file preview and show the error message instead
    */
   errorMessage?: string;
+  canHandleRange?: boolean;
 }
 
 /**
  * send a HEAD request to get the file information.
  */
 export const getFileInfo = async (url: string): Promise<FileInfo> => {
-  const MAX_SIZE = 1024 * 1024;
   let errorMessage = '';
 
   try {
     const response = await ConfigService.http.head(url, { skipHTTP401Handling: true, skipRetryBrowserError: true });
     const contentType = response.headers['content-type'] || '';
     const contentLength = response.headers['content-length'];
+    const canHandleRange = response.headers['accept-ranges'] !== 'none';
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
 
-    if (size && size > MAX_SIZE) {
+    if (!canHandleRange && size && size > FILE_PREVIEW.MAX_SIZE) {
       errorMessage = errorMessages.filePreview.largeFile;
     }
 
@@ -165,7 +160,9 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
       isPreviewable: isPreviewableFile(contentType, url),
       isMarkdown: checkIsMarkdownFile(contentType, url),
       isCsv: checkIsCsvFile(contentType, url),
-      isJSON: checkIsJSONFile(contentType, url)
+      isJSON: checkIsJSONFile(contentType, url),
+      canHandleRange,
+      errorMessage
     };
   } catch (exception) {
 

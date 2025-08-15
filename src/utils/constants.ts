@@ -146,7 +146,10 @@ export const errorMessages = {
   viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
   invalidHelpPage: 'The requested help page cannot be found.',
   filePreview: {
-    largeFile: 'This file is too large to preview. Please download it to view the content.',
+    // it doesn't support range.
+    largeFile: 'This file is too large to preview. Download it to view the content.',
+    // if it supports range
+    truncatedFile: 'The displayed content is truncated. Download the file to view the full content.',
     unauthorized: 'Login is required to view this file.',
     forbidden: 'You do not have permission to view this file.',
     unknownError: 'An unknown error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.'
@@ -164,6 +167,11 @@ export const BODY_CLASS_NAMES = {
 export const QUERY_PARAMS = {
   PROMPT_LOGIN: 'promptlogin',
   SCROLL_TO: 'scrollTo',
+};
+
+export const FILE_PREVIEW = {
+  TRUNCATED_SIZE: 0.5 * 1024 * 1024,
+  MAX_SIZE: 1 * 1024 * 1024
 };
 
 // these are the captured as `cid` value in logs
