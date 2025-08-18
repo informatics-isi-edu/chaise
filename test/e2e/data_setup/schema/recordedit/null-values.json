@@ -325,7 +325,12 @@
                       "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/multi-col-asset/{{{_asset_col.md5_hex}}}",
                       "filename_column" : "asset_col_filename",
                       "byte_count_column": "asset_col_bytes",
-                      "md5": "asset_col_md5"
+                      "md5": "asset_col_md5",
+                      "display": {
+                        "detailed": {
+                          "file_preview": false
+                        }
+                      }
                     }
                   }
                 },
@@ -349,7 +354,12 @@
                     "tag:isrd.isi.edu,2017:asset": {
                       "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/multi-col-asset-null/{{{_asset_null_col.md5_hex}}}",
                       "filename_column" : "asset_null_col_filename",
-                      "byte_count_column": "asset_null_col_bytes"
+                      "byte_count_column": "asset_null_col_bytes",
+                      "display": {
+                        "detailed": {
+                          "file_preview": false
+                        }
+                      }
                     }
                   }
                 },

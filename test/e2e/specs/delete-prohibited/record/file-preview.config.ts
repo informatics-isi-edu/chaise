@@ -1,10 +1,10 @@
 import getConfig from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.configuration';
 
 export default getConfig({
-  testName: 'delete-prohibited/record/no-delete',
-  configFileName: 'record/no-delete.dev.json',
+  testName: 'delete-prohibited/record/file-preview',
+  configFileName: 'record/file-preview.dev.json',
   mainSpecName: 'delete-prohibited',
   testMatch: [
-    'no-delete-btn.spec.ts'
+    'file-preview.spec.ts'
   ]
 });

@@ -323,7 +323,12 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}",
+                            "display": {
+                              "detailed": {
+                                "file_preview": false
+                              }
+                            }
                         },
                         "tag:isrd.isi.edu,2016:generated": null,
                         "tag:isrd.isi.edu,2016:immutable": null
@@ -337,7 +342,12 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}",
+                            "display": {
+                              "detailed": {
+                                "file_preview": false
+                              }
+                            }
                         },
                         "tag:isrd.isi.edu,2016:immutable": null
                     }
@@ -350,7 +360,12 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}",
+                            "display": {
+                              "detailed": {
+                                "file_preview": false
+                              }
+                            }
                         },
                         "tag:isrd.isi.edu,2016:generated": null,
                         "tag:isrd.isi.edu,2016:immutable": null

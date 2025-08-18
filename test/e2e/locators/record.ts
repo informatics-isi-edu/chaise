@@ -113,6 +113,28 @@ export default class RecordLocators {
     return el.locator('.markdown-container:not(.chaise-comment)');
   };
 
+  // --------------------- file preview ----------------- //
+
+  static getFilePreviewContainer(container: Locator | Page, columnName: string): Locator {
+    return container.locator(`#row-${columnName} .entity-value .chaise-file-preview-container`);
+  }
+
+  static getFilePreviewContent(filePreviewContainer: Locator): Locator {
+    return filePreviewContainer.locator('.file-preview-content');
+  }
+
+  static getFilePreviewToggleBtn(filePreviewContainer: Locator): Locator {
+    return filePreviewContainer.locator('.file-preview-toggle-btn');
+  }
+
+  static getFilePreviewError(filePreviewContainer: Locator): Locator {
+    return filePreviewContainer.locator('.file-preview-error');
+  }
+
+  static getFilePreviewDownloadBtn(filePreviewContainer: Locator): Locator {
+    return filePreviewContainer.locator('.file-preview-download-btn');
+  }
+
   // --------------------- related table selectors ----------------- //
 
   static getRelatedTableContainer(container: Locator | Page, displayname: string, isInline?: boolean): Locator {
