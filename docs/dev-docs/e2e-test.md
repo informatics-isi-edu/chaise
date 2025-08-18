@@ -221,7 +221,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/playwright/locators/rec
 
 test.describe('visual testing atlas', () => {
   test('Collection recordset page', async ({ page }) => {
-    await page.goto('https://atlas-d2k.org/chaise/recordset/#2/Common:Collection@sort(RMT::desc::,RID)');
+    await page.goto('https://dev.derivacloud.org/chaise/recordset/#2/Common:Collection@sort(RMT::desc::,RID)');
 
     await RecordsetLocators.waitForRecordsetPageReady(page);
     await RecordsetLocators.waitForAggregates(page);
@@ -233,7 +233,7 @@ test.describe('visual testing atlas', () => {
   })
 
   test('Collection record page', async ({ page }) => {
-    await page.goto('https://atlas-d2k.org/chaise/record/#2/Common:Collection/RID=17-E76T');
+    await page.goto('https://dev.derivacloud.org/chaise/record/#2/Common:Collection/RID=17-E76T');
 
     await RecordLocators.waitForRecordPageReady(page);
 
