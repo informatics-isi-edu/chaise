@@ -2627,6 +2627,43 @@
                     "type": {"typename": "int4"}
                 }
             ]
+        },
+        "file_preview_table": {
+          "kind": "table",
+          "schema_name": "product-record",
+          "table_name": "file_preview_table",
+          "keys": [{"unique_columns": ["id"]}],
+          "column_definitions": [
+            {
+              "name": "id",
+              "nullok": false,
+              "type": {"typename": "text"}
+            },
+            {
+              "name": "uri",
+              "type": {"typename": "text"},
+              "annotations": {
+                "tag:isrd.isi.edu,2017:asset": {
+                  "url_pattern":"/hatrac/js/chaise/filepreview/1/{{{_id}}}/{{{_uri.md5_hex}}}",
+                  "filename_column" : "filename"
+                }
+              }
+            },
+            {
+              "name": "filename",
+              "type": {
+                "typename": "text"
+              }
+            }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:visible-columns": {
+              "*": ["id", "uri"]
+            },
+            "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+              "detailed": []
+            }
+          }
         }
     },
     "comment": null,

@@ -57,8 +57,7 @@
   }
 
   .file-preview-content {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    border: 1px solid map.get(variables.$color-map, 'border');
     border-radius: 0;
     margin-bottom: 0;
     border: 0;
@@ -88,6 +87,7 @@
         .table {
           margin-bottom: 0;
           font-size: 0.875rem;
+          border: 0;
 
           th,
           td {
@@ -96,19 +96,18 @@
             white-space: nowrap;
           }
 
+          tr {
+            border: 0;
+          }
+
           thead th {
+            border-top: none;
             font-weight: 600;
-            background-color: #575a5e !important;
-            color: white;
-            border-color: #454d55;
+            background-color: #878787 !important;
+            color: map.get(variables.$color-map, 'white');
             position: sticky;
             top: 0;
             z-index: map.get(variables.$z-index-map, 'file-preview-csv-header');
-            border-top: none;
-          }
-
-          tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.075);
           }
         }
       }

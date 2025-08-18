@@ -13,6 +13,7 @@ import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { formatJSONContent, getFileInfo, parseCsvContent } from '@isrd-isi-edu/chaise/src/utils/file-utils';
@@ -45,17 +46,40 @@ const FilePreview = ({
   value,
   column,
 }: FilePreviewProps): JSX.Element => {
+  /**
+   * whether we're waiting for the file content to load
+   */
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * content of the file
+   */
   const [fileContent, setFileContent] = useState<string>('');
+  /**
+   * error that should be displayed to the users
+   */
   const [error, setError] = useState<string>('');
   const [isMarkdown, setIsMarkdown] = useState(false);
   const [isCsv, setIsCsv] = useState(false);
   const [isJSON, setIsJSON] = useState(false);
+
+  /**
+   * If the fileContent value is truncated or not
+   */
   const [isTruncated, setIsTruncated] = useState(false);
 
+  /**
+   * if the file is CSV or markdown, and the parser didn't throw an error, we can show the rendered content
+   */
   const [canShowRendered, setCanShowRendered] = useState(false);
+
+  /**
+   * whether we're currently showing the rendered markdown content
+   */
   const [showMarkdownRendered, setShowMarkdownRendered] = useState(true);
+  /**
+   * whether we're currently showing the rendered CSV content
+   */
   const [showCsvRendered, setShowCsvRendered] = useState(true);
 
   const isInitialized = useRef(false);
@@ -84,28 +108,32 @@ const FilePreview = ({
           const response = await ConfigService.http.get(url, {
             responseType: 'text',
             skipHTTP401Handling: true,
+            skipRetryBrowserError: true,
             headers
           });
+
+          const content = response.data;
 
           // if parsing the markdown or CSV throws an error, don't show the rendered content
           if (info.isMarkdown) {
             try {
-              void ConfigService.ERMrest.renderMarkdown(response.data, false, true);
+              void ConfigService.ERMrest.renderMarkdown(content, false, true);
               setCanShowRendered(true);
-            } catch {
+            } catch (exp) {
+              $log.warn('Unable to parse markdown content', exp);
             }
           }
 
           if (info.isCsv) {
-            const csvData = parseCsvContent(response.data);
+            const csvData = parseCsvContent(content);
             if (csvData !== null && csvData.length > 0) {
               setCanShowRendered(true);
             }
           }
 
-          setFileContent(response.data);
+          setFileContent(content);
         } catch (err: unknown) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to load file content';
+          const errorMessage = (err as Error).message ? (err as Error).message : 'Failed to load file content';
           setError(errorMessage);
         } finally {
           setIsLoading(false);
@@ -126,11 +154,12 @@ const FilePreview = ({
     const rows = parseCsvContent(csvContent);
     if (!rows || rows.length === 0) return <div>No data to display</div>;
 
-    const headers = column.filePreview.showCsvHeaders ? rows[0] : [];
+    const showHeaders = column && column.filePreview && column.filePreview.showCsvHeader;
+    const headers = showHeaders ? rows[0] : [];
 
     return (
       <div className='file-preview-csv-table'>
-        <table className='table table-striped table-hover'>
+        <table className='table chaise-table'>
           <thead>
             <tr>
               {headers.map((header, index) => (
@@ -143,7 +172,7 @@ const FilePreview = ({
           <tbody>
             {rows.map((row, rowIndex) => (
               // if we're showing headers, skip the first row
-              (rowIndex === 0 && column.showCsvHeaders) ? null : (
+              (rowIndex === 0 && showHeaders) ? null : (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
                     <td key={cellIndex}>
@@ -173,7 +202,7 @@ const FilePreview = ({
 
   return (
     <div className={containerClass}>
-      <div>
+      <div className='file-preview-download-btn'>
         <DisplayValue addClass value={value} />
       </div>
 
@@ -210,7 +239,7 @@ const FilePreview = ({
                       onClick={() => setShowCsvRendered(!showCsvRendered)}
                     >
                       <span className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}></span>
-                      <span>{showCsvRendered ? 'Display content' : 'Display Table'}</span>
+                      <span>{showCsvRendered ? 'Display content' : 'Display table'}</span>
                     </button>
                   </ChaiseTooltip>
                 )}
@@ -228,21 +257,19 @@ const FilePreview = ({
 
               {shouldShowContent && (
                 <>
-                  <div>
-                    {(canShowRendered && isMarkdown && showMarkdownRendered) ? (
-                      <div className='file-preview-content file-preview-markdown'>
-                        <DisplayValue addClass value={{ value: ConfigService.ERMrest.renderMarkdown(fileContent, false), isHTML: true }} />
-                      </div>
-                    ) : (canShowRendered && isCsv && showCsvRendered) ? (
-                      <div className='file-preview-content file-preview-csv'>
-                        {renderCsvTable(fileContent)}
-                      </div>
-                    ) : (
-                      <pre className='file-preview-content file-preview-text'>
-                        {isJSON ? formatJSONContent(fileContent) : fileContent}
-                      </pre>
-                    )}
-                  </div>
+                  {(canShowRendered && isMarkdown && showMarkdownRendered) ? (
+                    <div className='file-preview-content file-preview-markdown'>
+                      <DisplayValue addClass value={{ value: ConfigService.ERMrest.renderMarkdown(fileContent, false), isHTML: true }} />
+                    </div>
+                  ) : (canShowRendered && isCsv && showCsvRendered) ? (
+                    <div className='file-preview-content file-preview-csv'>
+                      {renderCsvTable(fileContent)}
+                    </div>
+                  ) : (
+                    <pre className='file-preview-content file-preview-text'>
+                      {isJSON ? formatJSONContent(fileContent) : fileContent}
+                    </pre>
+                  )}
                 </>
               )}
             </Card.Body>
