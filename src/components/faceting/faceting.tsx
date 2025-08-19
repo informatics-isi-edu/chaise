@@ -636,7 +636,7 @@ const Faceting = ({
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     if (!sidePanelContainer.current) return;
 
-    const el = sidePanelContainer.current.querySelector(`.facet-panel.fc-${index}`) as HTMLElement;
+    const el = sidePanelContainer.current.querySelector(`.facet-item-container.fc-${index}`) as HTMLElement;
     if (!el) return;
 
     if (!dontLog) {
@@ -746,7 +746,7 @@ const Faceting = ({
       return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
         {(draggableArgs: DraggableProvided) => (
           <div
-            className='facet-item-container'
+            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
             ref={draggableArgs.innerRef}
             {...draggableArgs.draggableProps}
           >
@@ -757,7 +757,7 @@ const Faceting = ({
             </ChaiseTooltip>
             <Accordion.Item
               eventKey={facetIndex + ''} key={facetIndex}
-              className={`facet-panel fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
+              className='facet-panel'
             >
               <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
                 <FacetHeader
@@ -778,13 +778,20 @@ const Faceting = ({
     })
 
     const group1: JSX.Element[] = [], group2: JSX.Element[] = [], group3: JSX.Element[] = [];
-    renderedItems.forEach((item, index) => {
-      if (index < 4) {
+    const orphan1: JSX.Element[] = [], orphan2: JSX.Element[] = []
+
+    renderedItems.forEach((item, index, arr) => {
+      if (index <= 1) {
+        orphan1.push(item);
+      }
+      else if (index > 1 && index < 4) {
         group1.push(item);
       } else if (index >= 4 && index < 9) {
         group2.push(item);
-      } else {
+      } else if (index < arr.length - 2) {
         group3.push(item);
+      } else {
+        orphan2.push(item);
       }
     });
 
@@ -796,6 +803,7 @@ const Faceting = ({
         key={'facet-list-outer'}
         defaultActiveKey={['project', 'donor', 'sample']}
       >
+        {orphan1}
         <Accordion.Item eventKey='project' className='facet-group-item'>
           <Accordion.Header className='facet-group-item-header'>
             <FacetHeader
@@ -843,6 +851,7 @@ const Faceting = ({
             </Accordion>
           </Accordion.Body>
         </Accordion.Item>
+        {orphan2}
         {droppableArgs.placeholder}
       </Accordion>
     )

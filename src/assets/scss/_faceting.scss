@@ -41,31 +41,6 @@
 
     // each facet panel
     .facet-panel {
-      border-radius: 0;
-      border: 1px solid map.get(variables.$color-map, 'border');
-
-      // active style
-      &.active,
-      &:hover {
-        border-color: rgb(51, 122, 183) !important;
-        animation-duration: 4s;
-
-        +.facet-panel {
-          margin-top: 0;
-          border-top: 0;
-        }
-      }
-
-      :focus {
-        outline: none;
-      }
-
-      // override bootstrap default
-      +.facet-panel {
-        margin-top: -1px;
-        // border-top: 0;
-      }
-
       .accordion-button {
         // override bootstrap default
         height: 40px;
@@ -155,49 +130,63 @@
 
   .facet-groups {
     .facet-group-item {
-      --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
-      --bs-accordion-btn-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
-      --bs-accordion-btn-icon-transform: rotate(90deg);
-
-      border-radius: 0;
-      border-left: 0;
-      border-right: 0;
-
-      &:first {
-        border-top: 0;
-      }
-
-      &:focus {
-        outline: none;
-      }
+      // --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
+      // --bs-accordion-btn-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
+      // --bs-accordion-btn-icon-transform: rotate(90deg);
 
       .facet-group-item-header .accordion-button {
-        padding: 10px 5px 5px 5px;
-        color: map.get(variables.$color-map, 'black');
-        background-color: map.get(variables.$color-map, 'white');
+        height: 40px;
+        padding: 10px;
         box-shadow: none;
         border-radius: 0;
+        border: 0;
+        color: map.get(variables.$color-map, 'black');
+        background-color: map.get(variables.$color-map, 'accordion-outer-header-background');
       }
 
       .facet-group-item-body {
         padding: 0;
+        .facet-item-container .accordion-button {
+          background-color: map.get(variables.$color-map, 'accordion-inner-header-background');
+        }
       }
     }
   }
 
-  // .facet-group-header-btn .accordion-button {
-  //   height: 40px;
-  //   border: 0;
-  //   border-radius: 0;
-  //   padding: 10px 5px;
-  //   padding-right: 40px;
-  //   text-transform: none;
-  //   position: relative;
-  //   flex-direction: row-reverse;
-  //   justify-content: flex-end;
-  //   background-color: #d0e0f0;
-  //   color: #333;
-  // }
+  .facet-item-container, .facet-group-item {
+    border-radius: 0;
+    border: 1px solid map.get(variables.$color-map, 'border');
+
+    // active style
+    &.active,
+    &:hover {
+      border-color: rgb(51, 122, 183) !important;
+      animation-duration: 4s;
+
+      & + .facet-group-item,  & + .facet-item-container {
+        margin-top: 0;
+        border-top: 0;
+      }
+    }
+
+    :focus {
+      outline: none;
+    }
+
+    // override bootstrap default
+    & + .facet-group-item,  & + .facet-item-container {
+      margin-top: -1px;
+    }
+
+    .accordion-item {
+      border-radius: 0;
+      border: 0;
+
+      :focus {
+        outline: none;
+      }
+    }
+  }
 
   .range-picker {
     .facet-range-input {
