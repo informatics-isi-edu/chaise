@@ -1,0 +1,128 @@
+@use 'sass:map';
+@use 'variables';
+
+.chaise-file-preview-container {
+  .file-preview-spinner {
+    position: absolute;
+    z-index: map.get(variables.$z-index-map, 'file-preview-spinner');
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: map.get(variables.$color-map, 'spinner');
+  }
+
+  .file-preview-card-wrapper {
+    margin-bottom: 5px;
+
+    &.reduce-space {
+      margin-top: -15px;
+    }
+
+    .file-preview-header-row {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+
+      .file-preview-message {
+        flex: 1;
+      }
+
+      .file-preview-controls {
+        align-self: flex-end;
+
+        .file-preview-toggle-btn {
+          border-color: map.get(variables.$color-map, 'border');
+          border-bottom: 0;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+      }
+    }
+
+  }
+
+  .file-preview-container-inner {
+    position: relative;
+    border-radius: 0;
+    resize: vertical;
+    overflow: auto;
+    height: 200px;
+    max-height: 80vh;
+
+    .card-body {
+      padding: 0;
+      min-height: 20px;
+      height: 100%;
+    }
+  }
+
+  .file-preview-content {
+    border: 1px solid map.get(variables.$color-map, 'border');
+    border-radius: 0;
+    margin-bottom: 0;
+    border: 0;
+    overflow: auto;
+    height: 100%;
+    min-height: 180px;
+
+    &.file-preview-text {
+      padding: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    &.file-preview-markdown {
+      padding: 1rem;
+    }
+
+    &.file-preview-csv {
+      padding: 0;
+
+      .file-preview-csv-table {
+        margin-bottom: 0;
+        height: 100%;
+
+        .table {
+          margin-bottom: 0;
+          font-size: 0.875rem;
+          border: 0;
+
+          th,
+          td {
+            padding: 0.375rem 0.75rem;
+            vertical-align: top;
+            white-space: nowrap;
+          }
+
+          tr {
+            border: 0;
+          }
+
+          thead th {
+            border-top: none;
+            font-weight: 600;
+            background-color: #878787 !important;
+            color: map.get(variables.$color-map, 'white');
+            position: sticky;
+            top: 0;
+            z-index: map.get(variables.$z-index-map, 'file-preview-csv-header');
+          }
+        }
+      }
+    }
+  }
+
+  .file-preview-error {
+    padding: 0 5px;
+    width: fit-content;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    .error-title {
+      padding-right: 5px;
+      padding-left: 3px;
+    }
+  }
+}

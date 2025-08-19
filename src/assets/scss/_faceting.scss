@@ -101,7 +101,7 @@
           right: 22px;
 
           .facet-spinner {
-            color: #828282;
+            color: map.get(variables.$color-map, 'spinner-alt');
             // NOTE: we should not customize the width/height since it causes wobbling effect
             border-width: .2em;
           }

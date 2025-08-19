@@ -531,7 +531,12 @@
               "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
-              "md5": "preview"
+              "md5": "preview",
+              "display": {
+                "detailed": {
+                  "file_preview": false
+                }
+              }
             }
           }
         },

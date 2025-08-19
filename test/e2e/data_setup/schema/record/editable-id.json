@@ -66,7 +66,12 @@
                     "tag:isrd.isi.edu,2017:asset": {
                       "url_pattern":"hatrac/js/chaise/{{{_fileid}}}/{{{_uri.md5_hex}}}",
                       "filename_column" : "asset1_filename",
-                      "byte_count_column": "asset1_bytes"
+                      "byte_count_column": "asset1_bytes",
+                      "display": {
+                        "detailed": {
+                          "file_preview": false
+                        }
+                      }
                     }
                   }
                 },

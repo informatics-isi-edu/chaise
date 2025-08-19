@@ -842,7 +842,7 @@ test.describe('Related tables', () => {
    * For the 4th test, there are still 2 foreign keys that are part of the same key but there is another foreign key on this table. This means the heuristics won't trigger
    *   for the bulk create foreign key functionality requiring an annotation to be defined instead.
    */
-  test.describe('for a table that is almost pure and binary and the foreign keys are a unique key', async () => {
+  test.describe('for a table that is almost p&b and the fks are a unique key', async () => {
     const params = {
       table_name: 'association_table_w_static_column',
       prefill_col: 'main_fk_col',
@@ -865,7 +865,7 @@ test.describe('Related tables', () => {
      *
      * This test ensures the tracking of bulkForeignKeySelectedRows is done right when the first form has no value filled in by the initial modal
      */
-    test('closing the initial modal and using "Add more" to add more forms with values', async ({ page }) => {
+    test('closing the initial modal and using "Add more"', async ({ page }) => {
       let newPage: Page, bulkFKModal: Locator;
 
       await test.step('should open recordedit with a modal picker showing', async () => {
@@ -962,7 +962,7 @@ test.describe('Related tables', () => {
       await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
     });
 
-    test('with a third foreign key and an annotation on main_fk_col', async ({ page }) => {
+    test('with a third fk and an annotation on main_fk_col', async ({ page }) => {
       params.table_name = 'association_table_w_three_fks';
       params.leaf_fk_name = 'leaf_fk_col';
       params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_three_fks'

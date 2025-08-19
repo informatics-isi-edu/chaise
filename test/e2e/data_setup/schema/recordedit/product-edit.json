@@ -630,7 +630,12 @@
               "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_fileid}}}/{{{_uri.filename_ext}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
-              "md5": "md5"
+              "md5": "md5",
+              "display": {
+                "detailed": {
+                  "file_preview": false
+                }
+              }
             }
           }
         },
@@ -720,7 +725,12 @@
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
               "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{$fkey_product-edit_file_w_fk_in_url_pattern_fk1.values.term}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
-              "filename_column" : "asset_filename_col"
+              "filename_column" : "asset_filename_col",
+              "display": {
+                "detailed": {
+                  "file_preview": false
+                }
+              }
             }
           }
         },
@@ -809,7 +819,12 @@
             "tag:isrd.isi.edu,2017:asset": {
               "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-1-{{{path_to_o1_o1.values.name}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
               "filename_column" : "asset_filename_col",
-              "wait_for": ["path_to_o1_o1"]
+              "wait_for": ["path_to_o1_o1"],
+              "display": {
+                "detailed": {
+                  "file_preview": false
+                }
+              }
             }
           }
         },
@@ -831,7 +846,12 @@
             "tag:isrd.isi.edu,2017:asset": {
               "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-2-{{{path_to_o1_o1.rowName}}}/{{{_id}}}/{{{_asset_col_2.md5_hex}}}",
               "filename_column" : "asset_filename_col_2",
-              "wait_for": ["path_to_o1_o1"]
+              "wait_for": ["path_to_o1_o1"],
+              "display": {
+                "detailed": {
+                  "file_preview": false
+                }
+              }
             }
           }
         },
