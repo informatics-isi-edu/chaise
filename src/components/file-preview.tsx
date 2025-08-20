@@ -217,14 +217,14 @@ const FilePreview = ({
                 {(canShowRendered && isMarkdown) && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={showMarkdownRendered ? 'Display the raw content of the file.' : 'Display rendered markdown content.'}
+                    tooltip={showMarkdownRendered ? 'Click to show the raw content of the file.' : 'Click to show rendered markdown content.'}
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowMarkdownRendered(!showMarkdownRendered)}
                     >
                       <span className={`chaise-btn-icon fas ${showMarkdownRendered ? 'fa-code' : 'fa-eye'} file-preview-btn-icon`}></span>
-                      <span>{showMarkdownRendered ? 'Display content' : 'Display markdown'}</span>
+                      <span>{showMarkdownRendered ? 'Show raw' : 'Show rendered'}</span>
                     </button>
                   </ChaiseTooltip>
                 )}
@@ -232,14 +232,14 @@ const FilePreview = ({
                 {(canShowRendered && isCsv) && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={showCsvRendered ? 'Display the raw content of the file.' : 'Display rendered CSV content.'}
+                    tooltip={showCsvRendered ? 'Click to show the raw content of the file.' : 'Click to show rendered CSV content.'}
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowCsvRendered(!showCsvRendered)}
                     >
                       <span className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}></span>
-                      <span>{showCsvRendered ? 'Display content' : 'Display table'}</span>
+                      <span>{showCsvRendered ? 'Show raw' : 'Show table'}</span>
                     </button>
                   </ChaiseTooltip>
                 )}

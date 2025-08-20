@@ -154,9 +154,9 @@ test.describe('file preview', () => {
           await test.step('toggle should show the raw content', async () => {
             const btn = RecordLocators.getFilePreviewToggleBtn(container);
             await expect.soft(btn).toBeVisible();
-            await expect.soft(btn).toHaveText('Display content');
+            await expect.soft(btn).toHaveText('Show raw');
             await btn.click();
-            await expect.soft(btn).toHaveText(params.type === 'csv' ? 'Display table' : 'Display markdown');
+            await expect.soft(btn).toHaveText(params.type === 'csv' ? 'Show table' : 'Show rendered');
             await expect.soft(RecordLocators.getFilePreviewContent(container)).toHaveText(params.file.content);
           });
 

@@ -1,9 +1,8 @@
+import Papa from 'papaparse';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-
-// third party
-import Papa from 'papaparse';
 
 // utils
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -22,13 +21,21 @@ export const isPreviewableFile = (contentType?: string, url?: string): boolean =
       contentType.startsWith('text/') ||
       contentType.includes('json') ||
       contentType.includes('javascript') ||
-      contentType.includes('csv')
+      contentType.includes('csv') ||
+      contentType === 'chemical/x-mmcif'
     );
   }
 
   if (url) {
-    const extension = url.split('.').pop()?.toLowerCase();
-    return ['txt', 'json', 'md', 'markdown', 'log', 'csv'].includes(extension || '');
+    let extension;
+    // hatrac files have a different format
+    const parts = url.match(/^\/hatrac\/([^\/]+\/)*([^\/:]+)(:[^:]+)?$/);
+    if (parts && parts.length === 4) {
+      extension = parts[2].split('.').pop()?.toLowerCase();
+    } else {
+      extension = url.split('.').pop()?.toLowerCase();
+    }
+    return ['txt', 'json', 'md', 'markdown', 'log', 'csv', 'cif', 'pdb'].includes(extension || '');
   }
 
   return false;
