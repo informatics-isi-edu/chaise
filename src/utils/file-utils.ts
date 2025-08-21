@@ -12,6 +12,18 @@ import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
  * Utility functions for file operations and content processing
  */
 
+const getFileExtention = (url: string): string => {
+  let extension;
+  // hatrac files have a different format
+  const parts = url.match(/^\/hatrac\/([^\/]+\/)*([^\/:]+)(:[^:]+)?$/);
+  if (parts && parts.length === 4) {
+    extension = parts[2].split('.').pop()?.toLowerCase();
+  } else {
+    extension = url.split('.').pop()?.toLowerCase();
+  }
+  return extension || '';
+}
+
 /**
  * Determine if file type is previewable based on URL or content type
  */
@@ -22,20 +34,13 @@ export const isPreviewableFile = (contentType?: string, url?: string): boolean =
       contentType.includes('json') ||
       contentType.includes('javascript') ||
       contentType.includes('csv') ||
+      contentType.includes('csv') ||
       contentType === 'chemical/x-mmcif'
     );
   }
 
   if (url) {
-    let extension;
-    // hatrac files have a different format
-    const parts = url.match(/^\/hatrac\/([^\/]+\/)*([^\/:]+)(:[^:]+)?$/);
-    if (parts && parts.length === 4) {
-      extension = parts[2].split('.').pop()?.toLowerCase();
-    } else {
-      extension = url.split('.').pop()?.toLowerCase();
-    }
-    return ['txt', 'json', 'md', 'markdown', 'log', 'csv', 'cif', 'pdb'].includes(extension || '');
+    return ['tsv', 'txt', 'json', 'md', 'markdown', 'log', 'csv', 'cif', 'pdb'].includes(getFileExtention(url));
   }
 
   return false;
@@ -66,8 +71,22 @@ export const checkIsCsvFile = (contentType?: string, url?: string): boolean => {
   }
 
   if (url) {
-    const extension = url.split('.').pop()?.toLowerCase();
-    return extension === 'csv';
+    return getFileExtention(url) === 'csv';
+  }
+
+  return false;
+};
+
+/**
+ * Check if file is TSV based on content type or URL extension
+ */
+export const checkIsTsvFile = (contentType?: string, url?: string): boolean => {
+  if (contentType) {
+    return contentType.includes('tab-separated-values')
+  }
+
+  if (url) {
+    return getFileExtention(url) === 'tsv';
   }
 
   return false;
@@ -107,11 +126,12 @@ export const formatJSONContent = (content: string): string => {
  * Parse CSV content into table structure using PapaParse
  * Returns null if parsing fails
  */
-export const parseCsvContent = (csvContent: string): string[][] | null => {
+export const parseCsvContent = (csvContent: string, isTSV?: boolean): string[][] | null => {
   try {
     const parseResult = Papa.parse(csvContent, {
       skipEmptyLines: true,
-      header: false
+      header: false,
+      delimiter: isTSV ? '\t' : undefined
     });
 
     if (parseResult.errors && parseResult.errors.length > 0) {
@@ -136,11 +156,15 @@ export interface FileInfo {
   isPreviewable: boolean;
   isMarkdown: boolean;
   isCsv: boolean;
+  isTsv: boolean;
   isJSON: boolean;
   /**
    * if non-empty, we should not show the file preview and show the error message instead
    */
   errorMessage?: string;
+  /**
+   * whether we can use HTTP range request to fetch the first part of the file
+   */
   canHandleRange?: boolean;
 }
 
@@ -167,6 +191,7 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
       isPreviewable: isPreviewableFile(contentType, url),
       isMarkdown: checkIsMarkdownFile(contentType, url),
       isCsv: checkIsCsvFile(contentType, url),
+      isTsv: checkIsTsvFile(contentType, url),
       isJSON: checkIsJSONFile(contentType, url),
       canHandleRange,
       errorMessage
@@ -187,6 +212,7 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
       isPreviewable: false,
       isMarkdown: false,
       isCsv: false,
+      isTsv: false,
       isJSON: false,
       errorMessage
     };

@@ -60,7 +60,8 @@ const FilePreview = ({
    */
   const [error, setError] = useState<string>('');
   const [isMarkdown, setIsMarkdown] = useState(false);
-  const [isCsv, setIsCsv] = useState(false);
+  const [isCsv, setIsCsv] = useState<boolean>(false);
+  const [isTsv, setIsTsv] = useState<boolean>(false);
   const [isJSON, setIsJSON] = useState(false);
 
   /**
@@ -93,6 +94,7 @@ const FilePreview = ({
       const info = await getFileInfo(url);
       setIsMarkdown(info.isMarkdown);
       setIsCsv(info.isCsv);
+      setIsTsv(info.isTsv);
       setIsJSON(info.isJSON);
       setError(info.errorMessage || '');
 
@@ -124,8 +126,8 @@ const FilePreview = ({
             }
           }
 
-          if (info.isCsv) {
-            const csvData = parseCsvContent(content);
+          if (info.isCsv || info.isTsv) {
+            const csvData = parseCsvContent(content, info.isTsv);
             if (csvData !== null && csvData.length > 0) {
               setCanShowRendered(true);
             }
@@ -229,10 +231,12 @@ const FilePreview = ({
                   </ChaiseTooltip>
                 )}
 
-                {(canShowRendered && isCsv) && (
+                {(canShowRendered && (isCsv || isTsv)) && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={showCsvRendered ? 'Click to show the raw content of the file.' : 'Click to show rendered CSV content.'}
+                    tooltip={(
+                      showCsvRendered ? 'Click to show the raw content of the file.' : `Click to show rendered ${isCsv ? 'CSV' : 'TSV'} content.`
+                    )}
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
@@ -261,7 +265,7 @@ const FilePreview = ({
                     <div className='file-preview-content file-preview-markdown'>
                       <DisplayValue addClass value={{ value: ConfigService.ERMrest.renderMarkdown(fileContent, false), isHTML: true }} />
                     </div>
-                  ) : (canShowRendered && isCsv && showCsvRendered) ? (
+                  ) : (canShowRendered && (isCsv || isTsv) && showCsvRendered) ? (
                     <div className='file-preview-content file-preview-csv'>
                       {renderCsvTable(fileContent)}
                     </div>
