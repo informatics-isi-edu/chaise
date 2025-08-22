@@ -636,7 +636,7 @@ const Faceting = ({
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     if (!sidePanelContainer.current) return;
 
-    const el = sidePanelContainer.current.querySelector(`.facet-panel.fc-${index}`) as HTMLElement;
+    const el = sidePanelContainer.current.querySelector(`.facet-item-container.fc-${index}`) as HTMLElement;
     if (!el) return;
 
     if (!dontLog) {
@@ -745,7 +745,7 @@ const Faceting = ({
       return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
         {(draggableArgs: DraggableProvided) => (
           <div
-            className='facet-item-container'
+            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
             ref={draggableArgs.innerRef}
             {...draggableArgs.draggableProps}
           >
@@ -756,7 +756,7 @@ const Faceting = ({
             </ChaiseTooltip>
             <Accordion.Item
               eventKey={facetIndex + ''} key={facetIndex}
-              className={`facet-panel fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
+              className='facet-panel'
             >
               <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
                 <FacetHeader

@@ -1161,6 +1161,7 @@ html {
     --bs-table-striped-color: var(--bs-body-color);
     --bs-table-active-color: var(--bs-body-color);
     --bs-table-hover-color: var(--bs-body-color);
+    --bs-table-color: var(--bs-body-color);
   }
 
   /****** classes referenced by webapps or annotations ******/
@@ -1201,4 +1202,5 @@ html {
 :root {
   // interpolation (#{}) is needed here, more info: https://sass-lang.com/documentation/breaking-changes/css-vars/
   --bs-body-color: #{map.get(variables.$color-map, 'black')};
+  --bs-black: #{map.get(variables.$color-map, 'black')};
 }

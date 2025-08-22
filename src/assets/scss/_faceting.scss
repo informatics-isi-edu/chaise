@@ -20,6 +20,30 @@
 
     .facet-item-container {
       position: relative;
+      border-radius: 0;
+      border: 1px solid map.get(variables.$color-map, 'border');
+
+      // active style
+      &.active,
+      &:hover {
+        border-color: rgb(51, 122, 183) !important;
+        animation-duration: 4s;
+
+        & + .facet-item-container {
+          margin-top: 0;
+          border-top: 0;
+        }
+      }
+
+      :focus {
+        outline: none;
+      }
+
+      & + .facet-item-container {
+        margin-top: -1px;
+        // border-top: 0;
+      }
+
 
       .move-icon {
         position: absolute;
@@ -34,7 +58,7 @@
         }
 
         i {
-          color: rgb(51, 51, 51, 0.47);
+          color: map.get(variables.$color-map, 'facet-header-icons');
         }
       }
     }
@@ -42,29 +66,7 @@
     // each facet panel
     .facet-panel {
       border-radius: 0;
-      border: 1px solid map.get(variables.$color-map, 'border');
-
-      // active style
-      &.active,
-      &:hover {
-        border-color: rgb(51, 122, 183) !important;
-        animation-duration: 4s;
-
-        +.facet-panel {
-          margin-top: 0;
-          border-top: 0;
-        }
-      }
-
-      :focus {
-        outline: none;
-      }
-
-      // override bootstrap default
-      +.facet-panel {
-        margin-top: -1px;
-        // border-top: 0;
-      }
+      border: 0;
 
       .accordion-button {
         // override bootstrap default
@@ -98,6 +100,7 @@
           transform: unset;
           font-size: 1.25rem;
           height: unset;
+          color: map.get(variables.$color-map, 'facet-header-icons');
         }
 
         &:not(.collapsed)::after {
