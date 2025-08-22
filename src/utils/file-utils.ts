@@ -12,6 +12,9 @@ import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
  * Utility functions for file operations and content processing
  */
 
+/**
+ * Return the file extension from a URL
+ */
 const getFileExtention = (url: string): string => {
   let extension;
   // hatrac files have a different format
@@ -22,86 +25,96 @@ const getFileExtention = (url: string): string => {
     extension = url.split('.').pop()?.toLowerCase();
   }
   return extension || '';
-}
+};
 
 /**
- * Determine if file type is previewable based on URL or content type
+ * Determine if file type is previewable based on extension or content type
  */
-export const isPreviewableFile = (contentType?: string, url?: string): boolean => {
-  if (contentType) {
-    return (
+export const isPreviewableFile = (contentType?: string, extension?: string): boolean => {
+  // files that are explicitly previewable
+  if (
+    checkIsMarkdownFile(contentType, extension) ||
+    checkIsCsvFile(contentType, extension) ||
+    checkIsTsvFile(contentType, extension) ||
+    checkIsJSONFile(contentType, extension)
+  ) {
+    return true;
+  }
+
+  // text-like files using content-type
+  if (
+    contentType &&
+    (
       contentType.startsWith('text/') ||
-      contentType.includes('json') ||
-      contentType.includes('javascript') ||
-      contentType.includes('csv') ||
-      contentType.includes('csv') ||
-      contentType === 'chemical/x-mmcif'
-    );
+      // cif files
+      (contentType === 'chemical/x-mmcif' || contentType === 'chemical/x-cif')
+    )
+  ) {
+    return true;
   }
 
-  if (url) {
-    return ['tsv', 'txt', 'json', 'md', 'markdown', 'log', 'csv', 'cif', 'pdb'].includes(getFileExtention(url));
-  }
-
-  return false;
-};
-
-/**
- * Check if file is markdown based on content type or URL extension
- */
-export const checkIsMarkdownFile = (contentType?: string, url?: string): boolean => {
-  if (contentType) {
-    return contentType.includes('markdown') || contentType.includes('md');
-  }
-
-  if (url) {
-    const extension = url.split('.').pop()?.toLowerCase();
-    return ['md', 'markdown'].includes(extension || '');
+  // text-like files using extension
+  if (extension) {
+    return ['txt', 'js', 'log', 'cif', 'pdb'].includes(extension);
   }
 
   return false;
 };
 
 /**
- * Check if file is CSV based on content type or URL extension
+ * Check if file is markdown based on content type or extension
  */
-export const checkIsCsvFile = (contentType?: string, url?: string): boolean => {
-  if (contentType) {
-    return contentType.includes('csv') || contentType.includes('comma-separated-values');
+export const checkIsMarkdownFile = (contentType?: string, extension?: string): boolean => {
+  if (contentType && (contentType.includes('markdown') || contentType.includes('md'))) {
+    return true;
   }
 
-  if (url) {
-    return getFileExtention(url) === 'csv';
+  if (extension && ['md', 'markdown'].includes(extension)) {
+    return true;
   }
 
   return false;
 };
 
 /**
- * Check if file is TSV based on content type or URL extension
+ * Check if file is CSV based on content type or extension
  */
-export const checkIsTsvFile = (contentType?: string, url?: string): boolean => {
-  if (contentType) {
-    return contentType.includes('tab-separated-values')
+export const checkIsCsvFile = (contentType?: string, extension?: string): boolean => {
+  if (contentType && (contentType.includes('csv') || contentType.includes('comma-separated-values'))) {
+    return true;
   }
 
-  if (url) {
-    return getFileExtention(url) === 'tsv';
+  if (extension && extension === 'csv') {
+    return true;
   }
 
   return false;
 };
 
 /**
- * Check if file is JSON based on content type or URL extension
+ * Check if file is TSV based on content type or extension
  */
-export const checkIsJSONFile = (contentType?: string, url?: string): boolean => {
-  if (contentType) {
-    return contentType.includes('json') || contentType.includes('application/json');
+export const checkIsTsvFile = (contentType?: string, extension?: string): boolean => {
+  if (contentType && contentType.includes('tab-separated-values')) {
+    return true;
   }
 
-  if (url) {
-    const extension = url.split('.').pop()?.toLowerCase();
+  if (extension && extension === 'tsv') {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Check if file is JSON based on content type or extension
+ */
+export const checkIsJSONFile = (contentType?: string, extension?: string): boolean => {
+  if (contentType && contentType.includes('application/json')) {
+    return true;
+  }
+
+  if (extension) {
     return extension === 'json';
   }
 
@@ -180,6 +193,7 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
     const contentLength = response.headers['content-length'];
     const canHandleRange = response.headers['accept-ranges'] !== 'none';
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
+    const extension = getFileExtention(url);
 
     if (!canHandleRange && size && size > FILE_PREVIEW.MAX_SIZE) {
       errorMessage = errorMessages.filePreview.largeFile;
@@ -188,11 +202,11 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
     return {
       size,
       contentType,
-      isPreviewable: isPreviewableFile(contentType, url),
-      isMarkdown: checkIsMarkdownFile(contentType, url),
-      isCsv: checkIsCsvFile(contentType, url),
-      isTsv: checkIsTsvFile(contentType, url),
-      isJSON: checkIsJSONFile(contentType, url),
+      isPreviewable: isPreviewableFile(contentType, extension),
+      isMarkdown: checkIsMarkdownFile(contentType, extension),
+      isCsv: checkIsCsvFile(contentType, extension),
+      isTsv: checkIsTsvFile(contentType, extension),
+      isJSON: checkIsJSONFile(contentType, extension),
       canHandleRange,
       errorMessage
     };
