@@ -7,7 +7,6 @@ import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 // hooks
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -62,14 +61,13 @@ const RelatedTableActions = ({
   } = useRecord();
 
   const { validateSessionBeforeMutation } = useAuthn();
-  const { addAlert } = useAlert();
   const { dispatchError } = useError();
-  const containerRef = useRef<any>(null);
-  const buttonRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showAllActionsAsDropdown, setShowAllActionsAsDropdown] = useState(false);
-  const [buttonsInDropdown, setButtonsInDropdown] = useState([]);
+  const [buttonsInDropdown, setButtonsInDropdown] = useState<Element[]>([]);
   // add Pure and Binary
   const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(
     null
@@ -109,22 +107,21 @@ const RelatedTableActions = ({
    * So we should put resize sensor on a container that won’t be affected by the logic inside it.
    * We are using ResizeSensor to listen to the resize event.
    */
-    const mainContainer: any = document.querySelector('.main-container');
+    const mainContainer = document.querySelector('.main-container') as HTMLElement;
     const calculateButtons = () => {
 
-      let buttons: any = [];
-      if (containerRef.current) {
+      if (containerRef.current && buttonRef.current) {
         const buttonContainer = buttonRef.current;
 
         const containerWidth = buttonContainer.getBoundingClientRect().width;
-        buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
+        const buttons = Array.from(buttonContainer.getElementsByClassName('chaise-btn'));
         /**
          * If there aren't any enough space to show even one button, just switch to showing all as dropdown.
          * 350 is based on the width of the container containing dropdown and last visible button. We choose 350
          * because that is when the space gets more congested and we need to push all buttons to the dropdown
          */
         setShowAllActionsAsDropdown(mainContainer?.offsetWidth < 350);
-        const tableHeaderButtonsToAddToDropdown: any = [];
+        const tableHeaderButtonsToAddToDropdown: Element[] = [];
         let buttonLeftOffset = 0;
         let totalWidth = 0;
 
@@ -137,7 +134,7 @@ const RelatedTableActions = ({
         // Loop through the buttons and calculate if the current button width plus the width of all visible buttons
         // is overflowing the container width. If yes, push the button to the dropdown
 
-        buttons.forEach((button: any, index: number) => {
+        buttons.forEach((button, index: number) => {
           const buttonWidth = button.getBoundingClientRect().width;
           if (index === 0) {
             buttonLeftOffset =
@@ -368,7 +365,7 @@ const RelatedTableActions = ({
               const index = page.tuples.findIndex(function (tuple: any) {
                 return tuple.uniqueId === newTuple.uniqueId;
               });
-              if (index > -1) disabledRows.push({tuple: page.tuples[index] });
+              if (index > -1) disabledRows.push({ tuple: page.tuples[index] });
             });
 
             resolve({ disabledRows: disabledRows, page: page });
@@ -615,7 +612,6 @@ const RelatedTableActions = ({
   const exploreLink = addQueryParamsToURL(usedRef.appLink, {
     paction: LogParentActions.EXPLORE,
   });
-  const editLink = usedRef.contextualize.entryEdit.appLink;
 
   const renderCustomModeBtn = (tertiary?: boolean) => {
     let tooltip: string | JSX.Element = '',
@@ -767,6 +763,7 @@ const RelatedTableActions = ({
         );
       case 'Bulk Edit':
         const disableBulkEdit = relatedModel.recordsetState.page?.length < 1;
+        const editLink = usedRef.contextualize.entryEdit.appLink;
         return (
           <ChaiseTooltip
             placement='top'
@@ -833,7 +830,7 @@ const RelatedTableActions = ({
       <div className={containerClassName} ref={containerRef}>
         {renderButtons()}
         {buttonsInDropdown.length > 0 && (
-          <Dropdown onToggle={(isOpen: boolean, event: any) => toggleDropdown(isOpen, event)}>
+          <Dropdown onToggle={(isOpen: boolean, event) => toggleDropdown(isOpen, event)}>
             <ChaiseTooltip
               placement='top'
               tooltip={
