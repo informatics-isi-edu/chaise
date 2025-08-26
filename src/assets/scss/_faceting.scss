@@ -130,10 +130,6 @@
 
   .facet-groups {
     .facet-group-item {
-      // --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
-      // --bs-accordion-btn-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2L11 8L5 14'/%3E%3C/svg%3E");
-      // --bs-accordion-btn-icon-transform: rotate(90deg);
-
       .facet-group-item-header .accordion-button {
         height: 40px;
         padding: 10px;
@@ -142,6 +138,23 @@
         border: 0;
         color: map.get(variables.$color-map, 'black');
         background-color: map.get(variables.$color-map, 'accordion-outer-header-background');
+
+        &:after {
+          background-image: none;
+          content: '\f077'; // fa-solid fa-chevron-up
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          transform: unset;
+          font-size: 1.25rem;
+          height: unset;
+          position: absolute;
+          right: 5px;
+          color: rgba(51, 51, 51, 0.47);
+        }
+
+        &:not(.collapsed):after {
+          content: '\f078'; // fa-solid fa-chevron-down
+        }
       }
 
       .facet-group-item-body {
