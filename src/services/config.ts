@@ -53,7 +53,11 @@ export interface ConfigServiceSettings {
    * TODO we might want to come up with a better name. other suggestions were `forceDefaultCatalog`,
    * and `hasChaiseURLFragment`.
    */
-  skipParsingURLForCatalogID?: boolean
+  skipParsingURLForCatalogID?: boolean,
+  /**
+   * if defined, this will be used instead of chaiseConfig.defaultCatalog
+   */
+  defaultCatalog?: string,
 }
 
 export interface ContextHeaderParams {
@@ -144,7 +148,7 @@ export class ConfigService {
     // if it already is not populated
     const service = ConfigService.ERMrestLocation;
 
-    const catalogId = getCatalogId(settings.skipParsingURLForCatalogID);
+    const catalogId = getCatalogId(settings.skipParsingURLForCatalogID, settings.defaultCatalog);
 
     ConfigService._catalogID = catalogId;
 

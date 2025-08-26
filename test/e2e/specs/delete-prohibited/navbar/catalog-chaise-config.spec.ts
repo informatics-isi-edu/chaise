@@ -5,12 +5,13 @@ import { readFileSync, writeFileSync, unlinkSync } from 'fs';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
-import { copyFileToChaiseDir } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { copyFileToChaiseDir, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { clickNewTabLink, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 const NAVBAR_TEST_W_DYNAMIC_DEPS = 'navbar-test-w-dynamic-deps.html';
 const NAVBAR_TEST_W_STATIC_DEPS = 'navbar-test-w-static-deps.html';
+const NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR = 'navbar-test-w-default-catalog.html';
 
 /**
  * NOTES:
@@ -29,9 +30,7 @@ test.describe('Navbar with chaise-config annotation', () => {
 
   // prepare the html files needed for testing
   test.beforeAll(({ baseURL }, testInfo) => {
-    if (allowNavbarStaticTest(testInfo)) prepareNavbarFiles(baseURL);
-
-    prepareNavbarFiles(baseURL);
+    if (allowNavbarStaticTest(testInfo)) prepareNavbarFiles(testInfo, baseURL);
   });
 
   test('should hide the navbar bar if the hideNavbar query parameter is set to true', async ({ page, baseURL }, testInfo) => {
@@ -80,6 +79,25 @@ test.describe('Navbar with chaise-config annotation', () => {
     await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_STATIC_DEPS}?example-of-a-query-fragment=1`, true);
   });
 
+  test('on a static page with default-catalog', async ({ page, baseURL }, testInfo) => {
+    const res = allowNavbarStaticTest(testInfo);
+    test.skip(!res.condition, res.reason);
+    await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}`, true);
+  });
+
+  test('on a static page with default-catalog and hash fragments', async ({ page, baseURL }, testInfo) => {
+    const res = allowNavbarStaticTest(testInfo);
+    test.skip(!res.condition, res.reason);
+    await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}#example-of-a-hash-fragment`, true);
+  });
+
+  test('on a static page with default-catalog and query parameters', async ({ page, baseURL }, testInfo) => {
+    const res = allowNavbarStaticTest(testInfo);
+    test.skip(!res.condition, res.reason);
+    await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}?example-of-a-query-fragment=1`, true);
+  });
+
+
   // remove the html files needed for testing
   test.afterAll(({ }, testInfo) => {
     if (allowNavbarStaticTest(testInfo)) removeExtraNavbarFiles();
@@ -89,7 +107,8 @@ test.describe('Navbar with chaise-config annotation', () => {
 /********************** helper functions ************************/
 const TEST_UTILS_FOLDER = resolve(__dirname, './../../../utils');
 const NAVBAR_DEPENDENCIES = resolve(__dirname, './../../../../../dist/react/lib/navbar/navbar-dependencies.html');
-const REPLACE_STRING = '<!--{%navbar-dependencies%}-->';
+const REPLACE_STRING_DEPS = '<!--{%navbar-dependencies%}-->';
+const REPLACE_STRING_ATTRS = 'NAVBAR_ATTR';
 
 /**
  * afterAll and beforeAll are called multiple times. these booleans will avoid creating/removing files multiple times
@@ -110,7 +129,7 @@ const allowNavbarStaticTest = (testInfo: TestInfo) => {
 /**
  * create the navbar files needed for static testing (it will generate the files and rsync to location)
  */
-const prepareNavbarFiles = (baseURL?: string) => {
+const prepareNavbarFiles = (testInfo: TestInfo, baseURL?: string) => {
   if (alreadyCreated) return;
   alreadyCreated = true;
 
@@ -129,9 +148,11 @@ const prepareNavbarFiles = (baseURL?: string) => {
 
     createNavbarFile(navbarTemplateStr, NAVBAR_TEST_W_STATIC_DEPS, staticDependencies);
 
+    const defCatalog = `data-default-catalog="${getCatalogID(testInfo.project.name, true)}"`;
+    createNavbarFile(navbarTemplateStr, NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR, staticDependencies, defCatalog);
   } catch (err) {
     console.log('something went wrong while creating the navbar test files');
-    console.log(err);
+    throw err;
   }
 };
 
@@ -139,11 +160,15 @@ const prepareNavbarFiles = (baseURL?: string) => {
  *
  * @param navbarTemplateStr the content of the file
  * @param filename the filename that we should use
- * @param dependenciesStr the dependencies string that should replace the REPLACE_STRING
+ * @param dependenciesStr the dependencies string that should replace the REPLACE_STRING_DEPS
  */
-const createNavbarFile = (navbarTemplateStr: string, filename: string, dependenciesStr: string) => {
+const createNavbarFile = (navbarTemplateStr: string, filename: string, dependenciesStr: string, attributes?: string) => {
   // create the dynamic dep file
-  const dynamicDepsContent = navbarTemplateStr.replace(REPLACE_STRING, dependenciesStr);
+  let dynamicDepsContent = navbarTemplateStr.replace(REPLACE_STRING_DEPS, dependenciesStr);
+  if (attributes) {
+    dynamicDepsContent = dynamicDepsContent.replace(REPLACE_STRING_ATTRS, attributes);
+  }
+
   const navbarTestFileWDynamicDeps = resolve(TEST_UTILS_FOLDER, `./${filename}`);
   writeFileSync(navbarTestFileWDynamicDeps, dynamicDepsContent);
 
@@ -164,6 +189,7 @@ const removeExtraNavbarFiles = () => {
     console.log('removing the files');
     unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_STATIC_DEPS}`));
     unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_DYNAMIC_DEPS}`));
+    unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}`));
   } catch (exp) {
     console.log('something went wrong while removing the navbar test files')
     console.log(exp);
