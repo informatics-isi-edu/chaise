@@ -19,8 +19,6 @@
     margin-bottom: 20px;
 
     .facet-item-container {
-      position: relative;
-
       .move-icon {
         position: absolute;
         top: 0px;
@@ -34,13 +32,16 @@
         }
 
         i {
-          color: rgb(51, 51, 51, 0.47);
+          color: map.get(variables.$color-map, 'facet-header-icons');
         }
       }
     }
 
     // each facet panel
     .facet-panel {
+      border-radius: 0;
+      border: 0;
+
       .accordion-button {
         // override bootstrap default
         height: 40px;
@@ -73,6 +74,7 @@
           transform: unset;
           font-size: 1.25rem;
           height: unset;
+          color: map.get(variables.$color-map, 'facet-header-icons');
         }
 
         &:not(.collapsed)::after {
@@ -117,15 +119,6 @@
       font-size: 1.25rem;
     }
 
-    // for version 1
-    // .facet-group-header {
-    //   height: 40px;
-    //   padding: 10px 5px;
-    //   padding-right: 40px;
-    //   margin: 0;
-    //   font-size: 1.25rem;
-    // }
-
   }
 
   .facet-groups {
@@ -149,7 +142,7 @@
           height: unset;
           position: absolute;
           right: 5px;
-          color: rgba(51, 51, 51, 0.47);
+          color: map.get(variables.$color-map, 'facet-header-icons');
         }
 
         &:not(.collapsed):after {
@@ -169,6 +162,7 @@
   .facet-item-container, .facet-group-item {
     border-radius: 0;
     border: 1px solid map.get(variables.$color-map, 'border');
+    position: relative;
 
     // active style
     &.active,

@@ -1,4 +1,4 @@
-import { test, expect, TestInfo, Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
@@ -6,7 +6,7 @@ import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { createFiles, deleteFiles, RecordeditFile, setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { createFiles, deleteFiles, RecordeditFile, setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
@@ -110,6 +110,26 @@ const testParams = {
         caption: 'html-01.html',
         url: '/hatrac/js/chaise/filepreview/1/5/',
       },
+    },
+    {
+      type: 'tsv',
+      file: {
+        path: 'tsv-01.tsv',
+        content: 'name\tage\nAlice\t30\nBob\t25'
+      },
+      inputs: {
+        id: '6',
+        file: {
+          name: 'tsv-01.tsv',
+          path: 'tsv-01.tsv',
+          size: 1024 // this is just to silence the error
+        }
+      },
+      downloadBtn: {
+        caption: 'tsv-01.tsv',
+        url: '/hatrac/js/chaise/filepreview/1/6/',
+      },
+      renderedContent: 'name age Alice 30 Bob 25',
     }
   ],
 };
@@ -145,6 +165,7 @@ test.describe('file preview', () => {
 
 
       switch (params.type) {
+        case 'tsv':
         case 'csv':
         case 'markdown':
           await test.step('the preview should show the rendered value.', async () => {
@@ -154,9 +175,9 @@ test.describe('file preview', () => {
           await test.step('toggle should show the raw content', async () => {
             const btn = RecordLocators.getFilePreviewToggleBtn(container);
             await expect.soft(btn).toBeVisible();
-            await expect.soft(btn).toHaveText('Display content');
+            await expect.soft(btn).toHaveText('Show raw');
             await btn.click();
-            await expect.soft(btn).toHaveText(params.type === 'csv' ? 'Display table' : 'Display markdown');
+            await expect.soft(btn).toHaveText(params.type === 'markdown' ? 'Show rendered' : 'Show table');
             await expect.soft(RecordLocators.getFilePreviewContent(container)).toHaveText(params.file.content);
           });
 

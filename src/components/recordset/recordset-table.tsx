@@ -272,11 +272,11 @@ const RecordsetTable = ({
       stickyThs!.forEach((headerCol, index) => {
         const dataCol = originalThs[index];
         if (dataCol instanceof HTMLElement) {
-          const colWidth = dataCol.offsetWidth; // Get the actual width of the column
+          const colWidth = dataCol.getBoundingClientRect().width; // Get the actual width of the column
           headerCol.style.width = `${colWidth}px`; // Set width on sticky header
         }
       });
-      stickyHeaderRef.current.style.width = `${outerTableRef.current?.offsetWidth}px`;
+      stickyHeaderRef.current.style.width = `${outerTableRef.current?.getBoundingClientRect().width}px`;
     }
   };
 
