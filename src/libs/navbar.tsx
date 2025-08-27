@@ -10,6 +10,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utilities
 import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { waitForElementToLoad } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 
 const navbarLibSettings: ConfigServiceSettings = {
@@ -27,9 +28,12 @@ const NAVBAR_SELECTOR = 'navbar';
 waitForElementToLoad(NAVBAR_SELECTOR).then(() => {
   const navbar = document.querySelector(NAVBAR_SELECTOR) as HTMLElement;
 
+  const defaultCatalog = isStringAndNotEmpty(navbar.dataset.defaultCatalog) ? navbar.dataset.defaultCatalog : undefined;
+
   createRoot(navbar).render(
     <AppWrapper
-      appSettings={navbarLibSettings} smallSpinnerContainer={navbar}
+      appSettings={{ ...navbarLibSettings, defaultCatalog }}
+      smallSpinnerContainer={navbar}
       includeNavbar ignoreHashChange
     >
       {/* navbar is already included and we don't want anything else */}
