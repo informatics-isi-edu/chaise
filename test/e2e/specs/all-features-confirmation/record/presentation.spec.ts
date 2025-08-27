@@ -134,6 +134,7 @@ const testParams: any = {
       associationLeafTableName: 'file',
       entityMarkdownName: '3005',
       count: 1,
+      pageSize: 2,
       canEdit: true,
       canCreate: true,
       canDelete: true, // NOTE: was canUnlink
