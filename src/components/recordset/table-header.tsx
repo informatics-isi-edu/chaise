@@ -264,7 +264,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                   disabled={shouldEditButtonDisabled()}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pen' />
-                  <span>Bulk Edit</span>
+                  <span>Bulk edit</span>
                 </button>
               </span>
             </ChaiseTooltip>

@@ -249,6 +249,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   const markdownToggleLink = RecordLocators.getRelatedTableToggleDisplay(page, params.displayname, params.isInline);
   const rows = RecordsetLocators.getRows(currentEl);
   const tableName = params.isAssociation && params.associationLeafTableName ? params.associationLeafTableName : params.tableName;
+  const pageSize = params.pageSize !== undefined ? params.pageSize : 25;
 
   // if it was markdown, we are changing the view, change it back. these booleans are used for that
   let hasNoRows = false, displayIsToggled = false;
@@ -360,7 +361,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
 
     // bulk edit
     if (typeof params.canEdit === 'boolean') {
-      const bulkEditTest = params.canEdit ? '`Bulk Edit` button should be visible with correct link' : '`Bulk Edit` button should not be offered.';
+      const bulkEditTest = params.canEdit ? '`Bulk edit` button should be visible with correct link' : '`Bulk edit` button should not be offered.';
       await test.step(bulkEditTest, async () => {
         const btn = RecordLocators.getRelatedTableBulkEditLink(page, params.displayname, params.isInline);
 
@@ -369,8 +370,10 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
         } else {
           await expect.soft(btn).toBeVisible();
 
+          const href = await btn.getAttribute('href');
+          expect.soft(href).toContain(`limit=${pageSize}`);
           if (params.bulkEditLink) {
-            expect.soft(await btn.getAttribute('href')).toContain(params.bulkEditLink);
+            expect.soft(href).toContain(params.bulkEditLink);
           }
         }
       });

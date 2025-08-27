@@ -725,7 +725,7 @@ const RelatedTableActions = ({
           *   - if they can't create, allow edit if there are some rows set
           *   - disable button if can create but no rows
           */}
-        {relatedModel.canEdit && (relatedModel.canCreate || relatedModel.recordsetState.page?.length > 0) && renderButton('Bulk Edit', false)}
+        {relatedModel.canEdit && (relatedModel.canCreate || relatedModel.recordsetState.page?.length > 0) && renderButton('Bulk edit', false)}
 
         {renderButton('Explore', false)}
       </div>
@@ -761,9 +761,11 @@ const RelatedTableActions = ({
             </a>
           </ChaiseTooltip>
         );
-      case 'Bulk Edit':
+      case 'Bulk edit':
         const disableBulkEdit = relatedModel.recordsetState.page?.length < 1;
-        const editLink = usedRef.contextualize.entryEdit.appLink;
+        const editLink = addQueryParamsToURL(usedRef.contextualize.entryEdit.appLink, {
+          limit: `${relatedModel.recordsetState.pageLimit}`
+        });
         return (
           <ChaiseTooltip
             placement='top'
@@ -779,7 +781,7 @@ const RelatedTableActions = ({
               aria-disabled={disableBulkEdit}
             >
               <span className='chaise-btn-icon fa fa-pencil'></span>
-              <span>Bulk Edit</span>
+              <span>Bulk edit</span>
             </a>
           </ChaiseTooltip>
         );

@@ -819,7 +819,7 @@ const RecordeditInner = ({
                     <div className='inline-tooltip inline-tooltip-lg'>
                       <p>
                         This table content displays user submitted values.
-                        Use the <a href={resultsetProps.success.editLink}>Bulk Edit</a> button
+                        Use the <a href={resultsetProps.success.editLink}>Bulk edit</a> button
                         to continue making changes to these entries,
                         or <a href={resultsetProps.success.exploreLink}>Explore</a> button
                         to navigate to the <code><Title reference={reference} comment={false} /></code> search page with these entries selected.
