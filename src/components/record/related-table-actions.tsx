@@ -36,6 +36,7 @@ import {
   allowCustomModeRelated,
   displayCustomModeRelated,
   getPrefillCookieObject,
+  isBulkEditEnabled,
 } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -688,13 +689,18 @@ const RelatedTableActions = ({
     );
   };
 
-  const renderBulkEditBtnTooltip = () => {
-    if (relatedModel.recordsetState.page?.length < 1) {
+  const renderBulkEditBtnTooltip = (page: any, isDisabled: boolean) => {
+    if (isDisabled) {
+      if (!page || page.length < 1) {
+        return <span>There are no {currentTable} records related to this {mainTable} to edit.</span>;
+      }
+      const hasNextOrPrev = page.hasNext || page.hasPrevious;
       return (
-        <span>
-          Unable to edit {currentTable} records until some are created.
-        </span>
-      )
+        <>
+          There are no {currentTable} records that you can edit in this page.
+          {hasNextOrPrev && <> <br />There may be editable records in other pages.</>}
+        </>
+      );
     }
 
     return (
@@ -720,12 +726,7 @@ const RelatedTableActions = ({
         {relatedModel.isPureBinary && relatedModel.canDelete && renderButton('Unlink records', false)}
 
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
-        {/*
-          * if user can edit, also check for create permission
-          *   - if they can't create, allow edit if there are some rows set
-          *   - disable button if can create but no rows
-          */}
-        {relatedModel.canEdit && (relatedModel.canCreate || relatedModel.recordsetState.page?.length > 0) && renderButton('Bulk edit', false)}
+        {relatedModel.canEdit && renderButton('Bulk edit', false)}
 
         {renderButton('Explore', false)}
       </div>
@@ -762,14 +763,15 @@ const RelatedTableActions = ({
           </ChaiseTooltip>
         );
       case 'Bulk edit':
-        const disableBulkEdit = relatedModel.recordsetState.page?.length < 1;
+        const page = relatedModel.recordsetState.page;
+        const disableBulkEdit = !isBulkEditEnabled(page);
         const editLink = addQueryParamsToURL(usedRef.contextualize.entryEdit.appLink, {
           limit: `${relatedModel.recordsetState.pageLimit}`
         });
         return (
           <ChaiseTooltip
             placement='top'
-            tooltip={renderBulkEditBtnTooltip()}
+            tooltip={renderBulkEditBtnTooltip(relatedModel.recordsetState.page, disableBulkEdit)}
           >
             <a
               className={`chaise-btn bulk-edit-link

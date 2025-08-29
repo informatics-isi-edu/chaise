@@ -669,7 +669,7 @@ const FacetChoicePicker = ({
               onClick={() => openRecordsetModal()}
             >
               <span className='chaise-btn-icon far fa-window-restore'></span>
-              <span>{useShowMore ? 'Show More' : 'Show Details'}</span>
+              <span>{useShowMore ? 'Show more' : 'Show details'}</span>
             </button>
           </ChaiseTooltip>
           {facetModel.noConstraints &&
