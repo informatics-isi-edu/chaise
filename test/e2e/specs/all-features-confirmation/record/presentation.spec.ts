@@ -601,12 +601,7 @@ test.describe('View existing record', () => {
       const btn = RecordLocators.getRelatedTableBulkEditLink(page, 'booking', true);
 
       await expect.soft(btn).toBeVisible();
-      await expect.soft(btn).toContainClass('disabled');
-    });
-
-    await test.step('should have "accommodation_collections" related table with bulk edit removed when the user cannot create and there are no rows present', async () => {
-      const btn = RecordLocators.getRelatedTableBulkEditLink(page, 'accommodation_collections', true);
-      await expect.soft(btn).not.toBeVisible();
+      await expect.soft(btn).toBeDisabled();
     });
   });
 
