@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "fk_col": 1,
+        "name": "related 2 one"
+    },
+    {
+        "id": 2,
+        "fk_col": 1,
+        "name": "related 2 two"
+    }
+]
