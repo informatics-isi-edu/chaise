@@ -114,8 +114,9 @@ export const checkIsJSONFile = (contentType?: string, extension?: string): boole
     return true;
   }
 
-  if (extension) {
-    return extension === 'json';
+  // mvsj: MolViewSpec JSON (mol* viewer)
+  if (extension && ['json', 'mvsj'].includes(extension)) {
+    return true;
   }
 
   return false;

@@ -5,7 +5,7 @@ var chaiseConfig = {
     editRecord: true,
     deleteRecord: true,
     // configuration for navbar spec with base condig
-    navbarBrand: 'test123',
+    navbarBrand: '/testpage/',
     navbarBrandImage: '../images/genetic-data.png',
     navbarBrandText: 'test123',
     headTitle: 'this one should be ignored in favor of navbarBrandText',

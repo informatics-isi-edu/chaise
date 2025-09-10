@@ -8,6 +8,7 @@ import {
 
 export interface RecordRelatedModelRecordsetProps {
   page: any,
+  pageLimit: number,
   isLoading: boolean,
   isInitialized: boolean,
   hasTimeoutError: boolean,

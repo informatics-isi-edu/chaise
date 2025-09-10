@@ -382,7 +382,7 @@ const ChaiseNavbar = (): JSX.Element => {
         <>
           {renderBanners(topBanners)}
           <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
-            <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
+            <Navbar.Brand href={(cc.navbarBrand ? cc.navbarBrand : '/')} onClick={handleOnBrandingClick}>
               {renderBrandImage()}
               {' '}
               {renderBrandingHTML()}

@@ -24,7 +24,8 @@ test.describe('Navbar', () => {
     });
 
     await test.step('should display the right title from chaiseConfig', async () => {
-      await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('test123')
+      await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('test123');
+      await expect.soft(NavbarLocators.getBrandLink(page)).toHaveAttribute('href', '/testpage/');
     });
 
     await test.step('should use the brand image/logo specified in chaiseConfig', async () => {

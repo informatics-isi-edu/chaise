@@ -8,7 +8,7 @@ import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import { getCatalogID, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { createFiles, deleteFiles, setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 /**
  * dynamic_acl_main_table rows:
@@ -27,6 +27,11 @@ import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-util
  *  2: non-edit, non-delete
  *  3: non-edit, deletable
  *  4: editable, non-delete
+ *  5: non-edit, deletable
+ *  6: non-edit, deletable
+ *
+ * dynamic_acl_related_table_2:
+ * just used for testing bulkedit, and none are editable
  *
  * dynamic_acl_assoc_table:
  *  (1, 1): non-delete
@@ -48,7 +53,8 @@ const testParams = {
     related: {
       main_id: 1,
       inbound_displayname: 'related_1',
-      assoc_displayname: 'related_2',
+      inbound_displayname2: 'related_2',
+      assoc_displayname: 'related_3',
     }
   },
   files: [{
@@ -188,7 +194,24 @@ export const runDynamicACLTests = () => {
                       {
                         'or': [
                           { 'filter': 'id', 'operand': 1 },
-                          { 'filter': 'id', 'operand': 4 }
+                          { 'filter': 'id', 'operand': 4 },
+                        ]
+                      },
+                      'id'
+                    ],
+                    'projection_type': 'nonnull'
+                  }
+                }
+              },
+              'dynamic_acl_related_table_2': {
+                'acl_bindings': {
+                  // row 9999 can be edited (a row that doesn't exist)
+                  'updatable_rows': {
+                    'types': ['update'],
+                    'projection': [
+                      {
+                        'or': [
+                          { 'filter': 'id', 'operand': 9999 },
                         ]
                       },
                       'id'
@@ -280,23 +303,54 @@ export const runDynamicACLTests = () => {
         await RecordLocators.waitForRecordPageReady(page);
       });
 
-      await test.step('for a related table', async () => {
-        await testRelatedTableEditAndDeleteButtons(
-          page,
-          testParams.dynamic_acl.related.inbound_displayname,
-          [true, false, false, true],
-          [true, false, true, false]
-        );
-      });
-
       await test.step('for an association table', async () => {
         await testRelatedTableEditAndDeleteButtons(
           page,
           testParams.dynamic_acl.related.assoc_displayname,
+          false,
           [true, false],
           [false, true],
           true
         );
+      });
+
+      await test.step('for a related table', async () => {
+        await test.step('with some editable rows', async () => {
+          await testRelatedTableEditAndDeleteButtons(
+            page,
+            testParams.dynamic_acl.related.inbound_displayname,
+            false,
+            [true, false, false, true],
+            [true, false, true, false]
+          );
+
+          await test.step('next page without any editable rows', async () => {
+            const disp = testParams.dynamic_acl.related.inbound_displayname;
+            const container = RecordLocators.getRelatedTableContainer(page, disp, false);
+            await RecordsetLocators.getNextButton(container).click();
+            await testRelatedTableEditAndDeleteButtons(
+              page,
+              disp,
+              true,
+              [false, false],
+              [false, false],
+              false,
+              'There are no related_1 records that you can edit in this page. There may be editable records in other pages.'
+            )
+          });
+        });
+
+        await test.step('with no editable rows', async () => {
+          await testRelatedTableEditAndDeleteButtons(
+            page,
+            testParams.dynamic_acl.related.inbound_displayname2,
+            true,
+            [false, false],
+            [false, false],
+            false,
+            'There are no related_2 records that you can edit in this page.'
+          );
+        });
       });
     });
 
@@ -460,14 +514,14 @@ export const runDynamicACLTests = () => {
       // NOTE recordset doesn't ask for tcrs and therefore cannot accurately guess the acl for id=5
       await testRecordSetEditAndDeleteButtons(
         page, baseURL, testInfo,
-        'id=1;id=2;id=3;id=4;id=5;id=6', 6, true,
+        'id=1;id=2;id=3;id=4;id=5;id=6', 6, false,
         [true, false, false, true, true, true],
         [true, false, true, false, true, true]
       );
     });
 
     test('when none of the displayed rows are editable, ', async ({ page, baseURL }, testInfo) => {
-      await testRecordSetEditAndDeleteButtons(page, baseURL, testInfo, 'id=2;id=3', 2, false, [false, false], [false, true]);
+      await testRecordSetEditAndDeleteButtons(page, baseURL, testInfo, 'id=2;id=3', 2, true, [false, false], [false, true]);
     });
   });
 
@@ -546,12 +600,28 @@ const testRecordAppEditAndDeleteButtons = async (
 };
 
 const testRelatedTableEditAndDeleteButtons = async (
-  page: Page, displayname: string, expectedEdit: boolean[], expectedDelete: boolean[], isAssoc?: boolean
+  page: Page, displayname: string, disableBulkEdit: boolean,
+  expectedEdit: boolean[], expectedDelete: boolean[], isAssoc?: boolean,
+  bulkEditTooltip?: string
 ) => {
   const container = RecordLocators.getRelatedTableContainer(page, displayname, false);
 
   await test.step('rows should be displayed properly', async () => {
     await expect(RecordsetLocators.getRows(container)).toHaveCount(expectedEdit.length);
+  });
+
+  await test.step(`Bulk edit button is displayed ${disableBulkEdit ? ' as disabled' : ''}`, async () => {
+    const link = RecordLocators.getRelatedTableBulkEditLink(page, displayname, false);
+    await expect.soft(link).toBeVisible();
+    if (disableBulkEdit) {
+      await expect.soft(link).toBeDisabled();
+    } else {
+      await expect.soft(link).toBeEnabled();
+    }
+
+    if (bulkEditTooltip) {
+      await testTooltip(link, bulkEditTooltip, APP_NAMES.RECORD, true);
+    }
   });
 
   await test.step('Edit button should display based on related table acls', async () => {
@@ -590,7 +660,7 @@ const getRecordeditURL = (filter: string, baseURL: string | undefined, testInfo:
 /******************** recordset helpers ************************/
 const testRecordSetEditAndDeleteButtons = async (
   page: Page, baseURL: string | undefined, testInfo: TestInfo,
-  uriFilter: string, rowCount: number, displayBulkEdit: boolean, expectedEditable: boolean[], expectedDeletable: boolean[]
+  uriFilter: string, rowCount: number, disableBulkEdit: boolean, expectedEditable: boolean[], expectedDeletable: boolean[]
 ) => {
   await test.step('should load the page properly and show correct number of rows', async () => {
     await page.goto(
@@ -600,12 +670,13 @@ const testRecordSetEditAndDeleteButtons = async (
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(rowCount);
   });
 
-  await test.step(`should ${displayBulkEdit ? '' : 'not'} display the buld edit link`, async () => {
+  await test.step(`should display the bulk edit link${disableBulkEdit ? ' as disabled' : ''}`, async () => {
     const link = RecordsetLocators.getBulkEditLink(page);
-    if (displayBulkEdit) {
-      await expect.soft(link).toBeVisible();
+    await expect.soft(link).toBeVisible();
+    if (disableBulkEdit) {
+      await expect.soft(link).toBeDisabled();
     } else {
-      await expect.soft(link).not.toBeAttached();
+      await expect.soft(link).toBeEnabled();
     }
   });
 

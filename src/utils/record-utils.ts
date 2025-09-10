@@ -7,7 +7,6 @@ import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { CLASS_NAMES, RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -152,6 +151,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
       isLoading: false,
       isInitialized: false,
       hasTimeoutError: false,
+      pageLimit: getRelatedPageLimit(ref),
     },
     recordsetProps: {
       initialPageLimit: getRelatedPageLimit(ref),
@@ -380,4 +380,13 @@ export function referenceHasRelatedEntities(reference: any): boolean {
   return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
     return col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
   }));
+}
+
+/**
+ * whether we can enable the bulk edit button.
+ * used in both the recordset and related tables
+ * @param page the displayed page of results
+ */
+export function isBulkEditEnabled(page: any): boolean {
+  return page && page.length > 0 && page.tuples.some((tuple: any) => tuple.canUpdate);
 }

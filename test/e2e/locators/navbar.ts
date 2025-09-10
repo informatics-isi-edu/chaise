@@ -23,6 +23,10 @@ export default class NavbarLocators {
     return banner.locator('.close');
   }
 
+  static getBrandLink(page: Page): Locator {
+    return page.locator('.navbar-brand');
+  }
+
   static getBrandImage(page: Page): Locator {
     return page.locator('#brand-image')
   }

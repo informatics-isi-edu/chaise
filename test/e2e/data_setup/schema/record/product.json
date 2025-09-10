@@ -2644,7 +2644,7 @@
               "type": {"typename": "text"},
               "annotations": {
                 "tag:isrd.isi.edu,2017:asset": {
-                  "url_pattern":"/hatrac/js/chaise/filepreview/1/{{{_id}}}/{{{_uri.md5_hex}}}",
+                  "url_pattern":"/hatrac/js/chaise/filepreview/1/{{{_id}}}/{{{_uri.filename}}}",
                   "filename_column" : "filename"
                 }
               }

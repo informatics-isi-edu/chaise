@@ -63,7 +63,7 @@ const RelatedTableInner = ({
   showSingleScrollbar
 }: RelatedTableProps) => {
   const {
-    page, isInitialized, hasTimeoutError, isLoading,
+    page, pageLimit, isInitialized, hasTimeoutError, isLoading,
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
   } = useRecordset();
 
@@ -78,8 +78,8 @@ const RelatedTableInner = ({
    * access to in the record provider.
    */
   useEffect(() => {
-    updateRelatedRecordsetState(relatedModel.index, relatedModel.isInline, { page, isInitialized, hasTimeoutError, isLoading });
-  }, [page, isInitialized, hasTimeoutError, isLoading]);
+    updateRelatedRecordsetState(relatedModel.index, relatedModel.isInline, { page, pageLimit, isInitialized, hasTimeoutError, isLoading });
+  }, [page, pageLimit, isInitialized, hasTimeoutError, isLoading]);
 
   /**
    * register the recordset functions in the recordProvider

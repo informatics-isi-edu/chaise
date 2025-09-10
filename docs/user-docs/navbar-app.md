@@ -114,6 +114,16 @@ The navbar React app expects a `navbar` tag on the page and will populate the ap
 </body>
 ```
 
+- You may use the `data-default-catalog` attribute to use a different catalog instead of what's described in `chaise-config.js`. This is useful for multi-tenet deployments where different static pages refer to different catalogs:
+
+  ```html
+  <body>
+    <navbar data-default-catalog="3" ></navbar>
+   <!-- the rest of the page  -->
+  </body>
+  ```
+
+
 ### 5. Avoid manually including bootstrap
 
 Chaise uses [Bootstrap version 5.1.9](https://getbootstrap.com/docs/5.1/getting-started/introduction/), so it will be included in pages using Navbar. Therefore there's no reason to include Bootstrap manually. Apart from an extra file that has to be fetched to render the page, the Bootstrap version you have included might be different from the one that Chaises uses, which might have some side effects.

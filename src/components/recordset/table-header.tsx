@@ -17,10 +17,11 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { CUSTOM_EVENTS, RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { isBulkEditEnabled } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 
 type TableHeaderProps = {
@@ -35,6 +36,22 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   } = useRecordset();
 
   const container = useRef<HTMLDivElement>(null);
+
+  /**
+ * as long as the table doesn't have any static update:false ACL, we should show the button.
+   * if user cannot edit any of the displayed rows, we should disable the button.
+   */
+  const canShowEditButton = config.displayMode === RecordsetDisplayMode.FULLSCREEN && config.editable && reference && reference.canUpdate;
+  const disableEditButton = canShowEditButton && !isBulkEditEnabled(page);
+  let editButtonTooltip: string | JSX.Element = 'Edit this page of records.';
+  if (disableEditButton) {
+    editButtonTooltip = (
+      <>
+        There are no records that you can edit in this result page.<br />
+        There may be editable records in other pages or with different search criteria
+      </>
+    );
+  }
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -180,34 +197,6 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     return isAddableDisplayMode && reference && reference.canCreate;
   }
 
-  /**
-   * whether to display edit button
-   */
-  const shouldShowEditButton = () => {
-    return config.displayMode === RecordsetDisplayMode.FULLSCREEN && canUpdate();
-  }
-
-  /**
-   * whether to disable edit button (check if pagelimit is more than maximum allowed)
-   */
-  const shouldEditButtonDisabled = () => {
-    return pageLimit > RECORDEDIT_MAX_ROWS;
-  }
-
-  /**
-   * Condition to make sure at least one row can be updated
-   */
-  const canUpdate = () => {
-    const res = config.editable && page && reference && reference.canUpdate;
-
-    if (res) {
-      return page.tuples.some(function (row: any) {
-        return row.canUpdate;
-      });
-    }
-    return false;
-  };
-
   return (
     <div className='chaise-table-header row' ref={container}>
       <div
@@ -252,19 +241,16 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
           )}
 
           {/* Edit Button */}
-          {shouldShowEditButton() && (
-            <ChaiseTooltip
-              placement='bottom-end'
-              tooltip={shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page of records.'}
-            >
+          {canShowEditButton && (
+            <ChaiseTooltip placement='bottom-end' tooltip={editButtonTooltip} >
               <span>
                 <button
                   className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
                   onClick={editRecord}
-                  disabled={shouldEditButtonDisabled()}
+                  disabled={disableEditButton}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pen' />
-                  <span>Bulk Edit</span>
+                  <span>Bulk edit</span>
                 </button>
               </span>
             </ChaiseTooltip>

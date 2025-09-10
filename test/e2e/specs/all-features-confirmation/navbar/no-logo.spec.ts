@@ -26,6 +26,7 @@ test.describe('Navbar', () => {
     await test.step('should display the right title from chaiseConfig.', async () => {
       // default heuristics
       await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('Chaise');
+      await expect.soft(NavbarLocators.getBrandLink(page)).toHaveAttribute('href', '/');
     });
 
     await test.step('should include the headTitle from chaiseConfig in the tab title (head > title)', async () => {

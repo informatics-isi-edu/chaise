@@ -363,7 +363,8 @@ export default function RecordeditProvider({
           if (numberRowsToRead > maxRowsToAdd) {
             let limitMessage = `Trying to edit ${numberRowsToRead} records. A maximum of ${maxRowsToAdd} records can be edited at once. `;
             limitMessage += `Showing the first ${maxRowsToAdd} records.`;
-            addAlert(limitMessage, ChaiseAlertType.ERROR);
+            addAlert(limitMessage, ChaiseAlertType.WARNING);
+            numberRowsToRead = maxRowsToAdd;
           }
         }
 

@@ -18,5 +18,15 @@
         "id": 4,
         "fk_col": 1,
         "name": "related four"
+    },
+    {
+        "id": 5,
+        "fk_col": 1,
+        "name": "related five"
+    },
+    {
+        "id": 6,
+        "fk_col": 1,
+        "name": "related six"
     }
 ]
