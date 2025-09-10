@@ -9,6 +9,51 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { createFiles, deleteFiles, RecordeditFile, setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
+
+const mvsjContent = {
+  'root': {
+    'kind': 'root',
+    'children': [
+      {
+        'kind': 'download',
+        'params': {
+          'url': 'https://example.com/files/test.bcif'
+        },
+        'children': [
+          {
+            'kind': 'parse',
+            'params': {
+              'format': 'mmcif'
+            },
+            'children': [
+              {
+                'kind': 'structure',
+                'params': {
+                  'type': 'model'
+                },
+                'children': [
+                  {
+                    'kind': 'component',
+                    'params': {
+                      'selector': 'all'
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  'metadata': {
+    'description': '- **red**: predicted structure',
+    'timestamp': '202r-04-14T19:05:11.202265+00:00',
+    'version': '1.4'
+  }
+};
+
+
 const testParams = {
   schemaName: 'product-record',
   tableName: 'file_preview_table',
@@ -130,6 +175,26 @@ const testParams = {
         url: '/hatrac/js/chaise/filepreview/1/6/',
       },
       renderedContent: 'name age Alice 30 Bob 25',
+    },
+    {
+      type: 'mvsj',
+      file: {
+        path: 'mvsj-01.mvsj',
+        content: JSON.stringify(mvsjContent)
+      },
+      inputs: {
+        id: '7',
+        file: {
+          name: 'mvsj-01.mvsj',
+          path: 'mvsj-01.mvsj',
+          size: 1024 // this is just to silence the error
+        },
+      },
+      downloadBtn: {
+        caption: 'mvsj-01.mvsj',
+        url: '/hatrac/js/chaise/filepreview/1/7/',
+      },
+      renderedContent: JSON.stringify(mvsjContent, undefined, 2),
     }
   ],
 };
