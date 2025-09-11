@@ -219,7 +219,9 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
       errorMessage = errorMessages.filePreview.unauthorized;
     } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
       errorMessage = errorMessages.filePreview.forbidden;
-    } else if (ermrestError instanceof ConfigService.ERMrest.UnknownError) {
+    } else if (ermrestError instanceof ConfigService.ERMrest.NotFoundError) {
+      errorMessage = errorMessages.filePreview.notFound;
+    } else {
       errorMessage = errorMessages.filePreview.unknownError;
     }
 

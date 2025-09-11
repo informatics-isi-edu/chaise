@@ -152,7 +152,8 @@ export const errorMessages = {
     truncatedFile: 'The displayed content is truncated. Download the file to view the full content.',
     unauthorized: 'Login is required to view this file.',
     forbidden: 'You do not have permission to view this file.',
-    unknownError: 'An unknown error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.'
+    unknownError: 'An error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.',
+    notFound: 'This file could not be found.'
   }
 };
 
