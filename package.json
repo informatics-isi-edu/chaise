@@ -1,7 +1,7 @@
 {
   "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "license": "Apache-2.0",
   "engines": {
     "node": ">= 20.0.0",
@@ -60,7 +60,7 @@
     "@types/q": "^1.5.5",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "axios": "^1.11.0",
+    "axios": "^1.12.1",
     "babel-loader": "9.2.1",
     "bootstrap": "^5.3.3",
     "compression-webpack-plugin": "^11.1.0",
