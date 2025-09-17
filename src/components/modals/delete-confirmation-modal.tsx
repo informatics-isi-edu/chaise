@@ -59,7 +59,7 @@ const DeleteConfirmationModal = ({
 
     const tableSummary: JSX.Element[] = [];
     reference.cascadingDeletedItems.forEach((curr: any, currIndex: number, arr: any[]) => {
-      const useTableIcon = (context === DeleteConfirmationModalTypes.RECORD_MAIN && curr.constructor.name !== 'Reference');
+      const useTableIcon = (context === DeleteConfirmationModalTypes.RECORD_MAIN && curr.constructor.name === 'Table');
       if (useTableIcon) tableIconUsed = true;
 
       // the table/reference displayname
@@ -88,7 +88,7 @@ const DeleteConfirmationModal = ({
       case DeleteConfirmationModalTypes.RECORD_MAIN:
         cascadingInfo = <p>
           Check the related records that are going to be deleted from the relevant sections in the side panel.
-          {tableIconUsed && <>Some of the affected tables (denoted by {tableIcon}) might not be visible in the side panel.</>}
+          {tableIconUsed && <> Some of the affected tables (denoted by {tableIcon}) might not be visible in the side panel.</>}
         </p>;
         break;
       case DeleteConfirmationModalTypes.BULK:

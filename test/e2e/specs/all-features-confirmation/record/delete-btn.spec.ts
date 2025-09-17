@@ -65,7 +65,7 @@ test.describe('Delete functionality in record page with confirm dialog', () => {
         'Are you sure you want to delete Accommodations: Hilton Hotel?',
         'This may also delete related records in the following 3 tables/sections: media, booking, and invisible_inbound_related_to_accommodation†',
         'Check the related records that are going to be deleted from the relevant sections in the side panel.',
-        'Some of the affected tables (denoted by †) might not be visible in the side panel.'
+        ' Some of the affected tables (denoted by †) might not be visible in the side panel.'
       ].join('');
       await testDeleteConfirm(page, RecordLocators.getDeleteRecordButton(page), message);
 
