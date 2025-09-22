@@ -89,8 +89,8 @@ const TableRow = ({
 
   const numImages = useRef<number>(0);
   const numImagesLoaded = useRef<number>(0);
+  const sensor = useRef<ResizeSensor | null>(null);
 
-  const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
   const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
     hideContent: true,
@@ -133,38 +133,56 @@ const TableRow = ({
 
   // TODO: logging
   const initializeOverflows = () => {
-    // Iterate over each <td> in the <tr>
-    const tempOverflow: boolean[] = [];
 
-    if (rowContainer.current && rowContainer.current.children) {
-      for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
-        let hasOverflow = overflow[i] || false;
+    setOverflow((prev) => {
+      // Iterate over each <td> in the <tr>
+      const newOverflow: boolean[] = [];
 
-        // children is each <td>, span is the cell wrapping the content
-        const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
+      if (rowContainer.current && rowContainer.current.children) {
+        for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
+          let hasOverflow = overflow[i] || false;
 
-        // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
-        if (dataCell && !hasOverflow) {
-          // overflow is true if the content overflows the cell
-          // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
-          hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+          // children is each <td>, span is the cell wrapping the content
+          const dataCell = rowContainer.current.children[i].querySelector(
+            '.display-value > span'
+          ) as HTMLSpanElement;
+
+          // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
+          if (dataCell && !hasOverflow) {
+            // overflow is true if the content overflows the cell
+            // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
+            // hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
+            hasOverflow = dataCell.getBoundingClientRect().height + tdPadding > maxHeight;
+          }
+
+          newOverflow[i] = hasOverflow;
         }
-
-        tempOverflow[i] = hasOverflow;
       }
-    }
 
-    setOverflow(tempOverflow);
+      // NOTE: this is intended to fix the case when there is only 1 column in the table and the resize sensor causes an extra cell to show
+      // if all overflows are false, detach the sensor
+      const justOverflows = newOverflow.filter((overflow: boolean) => {
+        return overflow === true
+      });
 
-    // NOTE: this is intended to fix the case when there is only 1 column in the table and the resize sensor causes an extra cell to show
-    // if all overflows are false, detach the sensor
-    const justOverflows = tempOverflow.filter((overflow: boolean) => {
-      return overflow === true
+      // add length check so this only triggers for the reason from the above comment
+      if (sensor.current && rowValues.length === 1 && justOverflows.length === 0) sensor.current.detach();
+
+      /**
+       * the following makes sure we're not rerendering the component if nothing has changed
+       * this is important since the resize sensor might trigger multiple times
+       * and we don't want to rerender the component if nothing has changed.
+       *
+       * This was causing issues in Firefox for rows with images. On each resize, the overflow was being recalculated
+       * which caused rerenders. And due to rerender the image had to be fetched again. If the image wasn't available,
+       * the row would keep jittering (https://github.com/informatics-isi-edu/chaise/issues/2661)
+       */
+      if (prev.length !== newOverflow.length || prev.some((val, idx) => val !== newOverflow[idx])) {
+        return newOverflow;
+      }
+      return prev;
     });
-
-    // add length check so this only triggers for the reason from the above comment
-    if (sensor && rowValues.length === 1 && justOverflows.length === 0) sensor.detach();
-  }
+  };
 
   // This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
   // NOTE: if the tuple changes, the table-row component isn't destroyed so the overflows need to be reset
@@ -182,7 +200,7 @@ const TableRow = ({
       () => initializeOverflows()
     )
 
-    setSensor(tempSensor);
+    sensor.current = tempSensor;
 
     // fetch all <img> tags with -chaise-post-load class and keep count of the total
     // attach an onload function that updates how many have loaded
