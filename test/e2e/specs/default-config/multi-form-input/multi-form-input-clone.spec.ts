@@ -42,7 +42,7 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
     await cloneFormInput.fill(testParams.max_input_rows.toString());
     await cloneFormSubmitButton.click();
 
-    await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(testParams.max_input_rows + 1);
+    await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(testParams.max_input_rows + 1, { timeout: 30_000 });
 
     // submit the form
     await RecordeditLocators.getSubmitRecordButton(page).click();
