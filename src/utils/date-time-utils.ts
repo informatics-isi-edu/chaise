@@ -7,11 +7,11 @@ const moment = windowRef.moment;
  * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
  * the timestamp is less than a week old. If more than a week old, the timestamp is displayed as just the date
  *
- * @param {number|string} tsMillis - a timestamp in milliseconds
+ * @param {number|string} datetimeValue - timestamp or any date presentation that moment accepts
  * @returns {string} either reltive time string or date in format YYYY-MM-DD
  */
-export function humanizeTimestamp(tsMillis: number | string) {
-  const versionTS = moment(tsMillis);
+export function humanizeTimestamp(datetimeValue: number | string) {
+  const versionTS = moment(datetimeValue);
   const weekAgo = moment().subtract(7, 'days').startOf('day');
   // if version is < a week old
   if (versionTS.isAfter(weekAgo)) {
@@ -24,6 +24,13 @@ export function humanizeTimestamp(tsMillis: number | string) {
   return versionTS.format(dataFormats.date);
 }
 
+/**
+ * Takes a timestamp and returns the value in a proper display format
+ */
+export function displayTimestamp(datetimeValue: number | string) {
+  return moment(datetimeValue).format(dataFormats.datetime.display);
+}
+
 
 /**
  * Given a location object, return the version in a date-time format
@@ -31,7 +38,7 @@ export function humanizeTimestamp(tsMillis: number | string) {
  * @returns {string} datetime in format YYYY-MM-DD hh:mm:ss
  */
 export function getVersionDate(location: any) {
-  return moment(location.versionAsMillis).format(dataFormats.datetime.display);
+  return moment(location.versionAsISOString).format(dataFormats.datetime.display);
 }
 
 /**
@@ -40,5 +47,5 @@ export function getVersionDate(location: any) {
  * @returns {string} humanize version od version date
  */
 export function getHumanizeVersionDate(location: any) {
-  return humanizeTimestamp(location.versionAsMillis);
+  return humanizeTimestamp(location.versionAsISOString);
 }
