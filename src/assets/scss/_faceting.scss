@@ -15,101 +15,34 @@
     transition: none !important;
   }
 
+  // Ensure accordion collapse doesn't break sticky positioning
+  .accordion-collapse {
+    overflow: visible !important;
+  }
+
   .panel-group {
     margin-bottom: 20px;
 
-    .facet-item-container {
-      .move-icon {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        padding: 11px 10px 11px 10px;
-        z-index: 5;
-        width: fit-content;
+    .move-icon {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      padding: 10px;
+      z-index: 21; // Must be above sticky headers (z-index: 20) to remain visible
+      width: fit-content;
 
-        &:hover{
-          cursor: grab;
-        }
+      &:hover{
+        cursor: grab;
+      }
 
-        i {
-          color: map.get(variables.$color-map, 'facet-header-icons');
-        }
+      i {
+        color: map.get(variables.$color-map, 'facet-header-icons');
       }
     }
 
+
     // each facet panel
     .facet-panel {
-      border-radius: 0;
-      border: 0;
-
-      .accordion-button {
-        // override bootstrap default
-        height: 40px;
-        border: 0;
-        border-radius: 0;
-        padding: 10px 5px;
-        // reserve enough space for the spinner and drag icons:
-        padding-right: 40px;
-        text-transform: none;
-        position: relative;
-        // Overriding accordian-button css to align right angle bracket icon to left
-        flex-direction: row-reverse;
-        justify-content: flex-end;
-
-        background-color: map.get(variables.$color-map, 'table-header-background');
-        color: map.get(variables.$color-map, 'black');
-
-        // overriding the default border-radius that bootstrap is adding.
-        &.collapsed {
-          border-radius: 0;
-        }
-
-        // Overriding accordian-button css to align right angle bracket icon to left
-        &::after {
-          margin: 0px 8px;
-          background-image: none;
-          content: '\f054'; // fa-solid fa-chevron-right
-          font-family: "Font Awesome 6 Free";
-          font-weight: 900;
-          transform: unset;
-          font-size: 1.25rem;
-          height: unset;
-          color: map.get(variables.$color-map, 'facet-header-icons');
-        }
-
-        &:not(.collapsed)::after {
-          content: '\f078'; // fa-solid fa-chevron-down
-        }
-
-        &:focus {
-          box-shadow: none;
-          // border-color: rgba(0,0,0,.125);
-        }
-
-        .toggle-icon {
-          &.fa-chevron-right {
-            margin-right: 3.4px;
-            margin-left: 4px;
-          }
-
-          &.fa-chevron-down {
-            margin-right: 3px;
-          }
-        }
-
-        .facet-header-icon {
-          position: absolute;
-          // right: 5px;
-          right: 22px;
-
-          .facet-spinner {
-            color: map.get(variables.$color-map, 'spinner-alt');
-            // NOTE: we should not customize the width/height since it causes wobbling effect
-            border-width: .2em;
-          }
-        }
-      }
-
       .accordion-body {
         padding: 10px;
       }
@@ -122,55 +55,86 @@
   }
 
   .facet-groups {
-    .facet-group-item {
-      .facet-group-item-header .accordion-button {
-        height: 40px;
-        padding: 10px;
-        box-shadow: none;
-        border-radius: 0;
-        border: 0;
-        color: map.get(variables.$color-map, 'black');
-        background-color: map.get(variables.$color-map, 'accordion-outer-header-background');
-
-        &:after {
-          background-image: none;
-          content: '\f077'; // fa-solid fa-chevron-up
-          font-family: "Font Awesome 6 Free";
-          font-weight: 900;
-          transform: unset;
-          font-size: 1.25rem;
-          height: unset;
-          position: absolute;
-          right: 5px;
-          color: map.get(variables.$color-map, 'facet-header-icons');
-        }
-
-        &:not(.collapsed):after {
-          content: '\f078'; // fa-solid fa-chevron-down
-        }
+    // When a group header is sticky, push down nested facet headers
+    .facet-group-item-container.has-sticky-parent {
+      .facet-group-item-body .facet-item-container .accordion-header {
+        top: 40px !important; // Height of the parent group header
       }
+    }
 
+    .facet-group-item {
       .facet-group-item-body {
-        padding: 0;
-        .facet-item-container .accordion-button {
-          background-color: map.get(variables.$color-map, 'accordion-inner-header-background');
+        padding: 5px;
+        // for padding between items inside a group:
+        // .facet-item-container {
+        //   // the better to do this would be just removing that rule but added here so I can easily switch
+        //   & + .facet-group-item,  & + .facet-item-container {
+        //     margin-top: 0px !important;
+        //     border-top: 1px solid map.get(variables.$color-map, 'border');
+        //   }
+        // }
+        // .facet-item-container:not(:last-of-type) {
+        //   margin-bottom: 5px;
+        // }
+
+        // Ensure the inner accordion doesn't break sticky positioning
+        .accordion {
+          overflow: visible !important;
+        }
+
+        .facet-item-container {
+          .accordion-button {
+            background-color: map.get(variables.$color-map, 'accordion-inner-header-background');
+          }
+
+          // TODO sticky header
+          // Nested facet headers inside groups - must be sticky too
+          // .accordion-header {
+          //   // position: sticky !important; // Force sticky positioning
+          //   top: 0 !important;
+          //   z-index: 10; // Lower z-index than parent group headers
+          //   transition: box-shadow 0.2s ease;
+
+          //   // Add shadow when header is stuck
+          //   &.is-stuck {
+          //     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          //   }
+          // }
         }
       }
     }
   }
 
-  .facet-item-container, .facet-group-item {
+  .facet-item-container, .facet-group-item-container {
     border-radius: 0;
-    border: 1px solid map.get(variables.$color-map, 'border');
+    border: 1px solid map.get(variables.$color-map, 'facet-border');
     position: relative;
+
+    // TODO sticky header
+    // .accordion-header {
+    //   position: sticky;
+    //   top: 0;
+    //   z-index: 20;
+    //   transition: box-shadow 0.2s ease;
+
+    //   // Add shadow when header is stuck
+    //   &.is-stuck {
+    //     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    //   }
+    // }
+
+    // override bootstrap default (ensures no double borders between items)
+    & + .facet-group-item-container,  & + .facet-item-container {
+      margin-top: -1px;
+    }
 
     // active style
     &.active,
     &:hover {
-      border-color: rgb(51, 122, 183) !important;
+      border-color: map.get(variables.$color-map, 'facet-border-active') !important;
       animation-duration: 4s;
 
-      & + .facet-group-item,  & + .facet-item-container {
+      & + .facet-group-item-container,  & + .facet-item-container {
         margin-top: 0;
         border-top: 0;
       }
@@ -180,17 +144,70 @@
       outline: none;
     }
 
-    // override bootstrap default
-    & + .facet-group-item,  & + .facet-item-container {
-      margin-top: -1px;
-    }
-
     .accordion-item {
       border-radius: 0;
       border: 0;
 
       :focus {
         outline: none;
+      }
+    }
+
+    .accordion-button {
+      // override bootstrap default
+      height: 40px;
+      border: 0;
+      border-radius: 0;
+      padding: 10px 5px;
+      // reserve enough space for the spinner and drag icons:
+      padding-right: 40px;
+      text-transform: none;
+      position: relative;
+      flex-direction: row;
+
+      background-color: map.get(variables.$color-map, 'table-header-background');
+      color: map.get(variables.$color-map, 'black');
+
+      // overriding the default border-radius that bootstrap is adding.
+      &.collapsed {
+        border-radius: 0 !important;
+      }
+
+      // Overriding accordian-button css to align right angle bracket icon to left
+      &::after {
+        display: none;
+      }
+
+      &::before {
+        margin: 0px 8px;
+        background-image: none;
+        content: '\f054'; // fa-solid fa-chevron-right
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        transform: unset;
+        font-size: 1.25rem;
+        height: unset;
+        color: map.get(variables.$color-map, 'facet-header-icons');
+      }
+
+      &:not(.collapsed)::before {
+        transform: rotate(90deg);
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      .facet-header-icon {
+        position: absolute;
+        // right: 5px;
+        right: 22px;
+
+        .facet-spinner {
+          color: map.get(variables.$color-map, 'spinner-alt');
+          // NOTE: we should not customize the width/height since it causes wobbling effect
+          border-width: .2em;
+        }
       }
     }
   }

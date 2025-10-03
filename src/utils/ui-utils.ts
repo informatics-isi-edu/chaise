@@ -8,13 +8,12 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { CLASS_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import Tooltip from 'bootstrap/js/dist/tooltip';
 
-
 export type ContainerHeightSensorDimensions = {
   /**
    * stores 'top' of the container calculated by height of top panel
    */
   top: number;
-}
+};
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
@@ -63,10 +62,10 @@ export function attachContainerHeightSensors(
     // if the size of content is way too small, make the whole app-content-container scrollable
     const resetHeight = function () {
       appContent.style.overflowY = 'auto';
-      appContent.style.height = ((parentUsableHeight / windowRef.innerHeight) * 100) + 'vh';
+      appContent.style.height = (parentUsableHeight / windowRef.innerHeight) * 100 + 'vh';
       container.style.height = 'unset';
       appContent.classList.add(CLASS_NAMES.SCROLLABLE_APP_CONTENT_CONTAINER);
-    }
+    };
 
     let tm: any;
     // used to ensure we're not calling the setContainerHeightFn multiple times
@@ -76,7 +75,7 @@ export function attachContainerHeightSensors(
       tm = setTimeout(function () {
         setContainerHeightFn();
       }, 200);
-    }
+    };
 
     // the actual function that will change the container height.
     const setContainerHeightFn = function () {
@@ -109,8 +108,7 @@ export function attachContainerHeightSensors(
           resetHeight();
         }
       }
-    }
-
+    };
 
     // used to capture the old values of height
     let cache: any;
@@ -120,7 +118,7 @@ export function attachContainerHeightSensors(
     cache = {
       appContentHeight: appContent.offsetHeight,
       parentContainerStickyHeight: parentContainerSticky.offsetHeight,
-      containerStickyHeight: containerSticky.offsetHeight
+      containerStickyHeight: containerSticky.offsetHeight,
     };
 
     //watch for the parent container height (this act as resize event)
@@ -132,7 +130,9 @@ export function attachContainerHeightSensors(
     });
 
     // watch for size of the parent sticky section
-    const parentContaienrStickySensor = new ResizeSensor(parentContainerSticky, function (dimension) {
+    const parentContaienrStickySensor = new ResizeSensor(parentContainerSticky, function (
+      dimension
+    ) {
       if (parentContainerSticky.offsetHeight != cache.parentContainerStickyHeight) {
         cache.parentContainerStickyHeight = parentContainerSticky.offsetHeight;
         setContainerHeight();
@@ -148,7 +148,6 @@ export function attachContainerHeightSensors(
     });
 
     return [appContentSensor, parentContaienrStickySensor, containerStickySensor];
-
   } catch (err) {
     $log.warn(err);
     return [];
@@ -163,7 +162,9 @@ export function attachContainerHeightSensors(
  * They can be missaligned if the scrollbar is visible and takes space.
  */
 export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) {
-  const container = parentContainer ? parentContainer : document.querySelector(`#${ID_NAMES.APP_ROOT}`) as HTMLElement;
+  const container = parentContainer
+    ? parentContainer
+    : (document.querySelector(`#${ID_NAMES.APP_ROOT}`) as HTMLElement);
   const mainContainer = container.querySelector('.main-container') as HTMLElement;
   const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
   let mainContainerPaddingTimeout: any;
@@ -175,9 +176,9 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
       try {
         const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
         mainContainer.style.paddingRight = padding + 'px';
-      } catch (exp) { }
+      } catch (exp) {}
     }, 10);
-  }
+  };
 
   // watch the size of mainContainer
   // (if width of topRightPanel changes, the mainContainer changes too, so just watching mainContainer is enough)
@@ -191,10 +192,16 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
  * @param {boolean?} fixedPos - whether the scrollbar is fixed position or not (if so, we will attach extra rules)
  * @param {HTMLElement?} extraSensorTarget - if we want to trigger the logic based on changes to another element
  */
-export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, extraSensorTarget?: HTMLElement) {
+export function addTopHorizontalScroll(
+  parent: HTMLElement,
+  fixedPos = false,
+  extraSensorTarget?: HTMLElement
+) {
   if (!parent) return;
 
-  const topScrollElementWrapper = parent.querySelector<HTMLElement>('.chaise-table-top-scroll-wrapper'),
+  const topScrollElementWrapper = parent.querySelector<HTMLElement>(
+      '.chaise-table-top-scroll-wrapper'
+    ),
     topScrollElement = parent.querySelector<HTMLElement>('.chaise-table-top-scroll'),
     scrollableContent = parent.querySelector<HTMLElement>('.chaise-hr-scrollable');
 
@@ -231,12 +238,11 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
     if (scrollableContent!.scrollWidth === scrollableContent!.clientWidth) {
       topScrollElement!.style.width = '0';
       topScrollElementWrapper!.style.height = '0';
-    }
-    else {
+    } else {
       topScrollElementWrapper!.style.height = '15px';
       topScrollElement!.style.width = scrollableContent!.scrollWidth + 'px';
     }
-  }
+  };
 
   const sensors = [];
 
@@ -263,13 +269,15 @@ export function addTopHorizontalScroll(parent: HTMLElement, fixedPos = false, ex
  */
 export function copyToClipboard(text: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    navigator.clipboard.writeText(text).then(() => {
-      resolve();
-    }).catch((err) => {
-      reject(err);
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
-
 }
 
 /**
@@ -282,14 +290,13 @@ export function debounce(callback: Function, timeout: number) {
   let timer: any = null;
 
   return function (...args: any[]) {
-
     clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;
       // @ts-ignore:
       callback.apply(this, args);
     }, timeout);
-  }
+  };
 }
 
 /**
@@ -297,7 +304,7 @@ export function debounce(callback: Function, timeout: number) {
  * @param ms how long we should wait
  */
 export function asyncTimeout(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -310,8 +317,12 @@ export function asyncTimeout(ms: number) {
  * @param {boolean} composed - whether the event will propagate across the shadow DOM boundary into the standard DOM
  */
 export function fireCustomEvent<T>(
-  eventName = 'myEvent', targetElement: string | Element = 'body', detail : T,
-  bubbles = true, cancelable = true, composed = false
+  eventName = 'myEvent',
+  targetElement: string | Element = 'body',
+  detail: T,
+  bubbles = true,
+  cancelable = true,
+  composed = false
 ) {
   const customEvent = new CustomEvent<T>(eventName, { detail, bubbles, cancelable, composed });
 
@@ -322,7 +333,6 @@ export function fireCustomEvent<T>(
   } else {
     targetElement.dispatchEvent(customEvent);
   }
-
 }
 
 /**
@@ -366,7 +376,7 @@ export function clickHref(href: string, isDownload?: boolean) {
  * @param selector the selector of the element
  */
 export function waitForElementToLoad(selector: string) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (document.querySelector(selector)) {
       return resolve(document.querySelector(selector));
     }
@@ -380,7 +390,7 @@ export function waitForElementToLoad(selector: string) {
 
     observer.observe(document.body ? document.body : document, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
   });
 }
@@ -408,9 +418,11 @@ export function createChaiseTooltips(container: Element) {
       }
       new Tooltip(el, {
         title,
-        // @ts-ignore ts doesn't understand that we're actually sanitizing the value.
-        placement: ['auto', 'top', 'bottom', 'left', 'right'].indexOf(placement) !== -1 ? placement : 'bottom'
-      })
+        placement:
+          ['auto', 'top', 'bottom', 'left', 'right'].indexOf(placement) !== -1
+            ? (placement as Tooltip.PopoverPlacement)
+            : 'bottom',
+      });
     });
   }
 }
@@ -444,5 +456,5 @@ export function saveObjectAsJSONFile(obj: any, filename: string) {
   });
 
   link.dispatchEvent(evt);
-  link.remove()
+  link.remove();
 }
