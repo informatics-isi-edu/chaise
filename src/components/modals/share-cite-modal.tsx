@@ -19,7 +19,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utils
 import { hasTrailingPeriod } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { resolvePermalink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { getVersionDate, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
+import { displayTimestamp, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 export type ShareCiteModalProps = {
@@ -137,10 +137,13 @@ const ShareCiteModal = ({
 
   let versionLink = '', versionDateRelative = '', versionDate = '';
   if (reference.table.supportHistory) {
-    const versionString = '@' + (reference.location.version || refTable.schema.catalog.snaptime);
-    versionLink = resolvePermalink(tuple, reference, versionString);
-    versionDateRelative = humanizeTimestamp(ConfigService.ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-    versionDate = getVersionDate(ConfigService.ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+    const version = reference.location.version || refTable.schema.catalog.snaptime;
+    const isoString = ConfigService.ERMrest.HistoryService.snapshotToDatetimeISO(version, true);
+    if (isoString) {
+      versionLink = resolvePermalink(tuple, reference, `@${version}`);
+      versionDateRelative = humanizeTimestamp(isoString);
+      versionDate = displayTimestamp(isoString);
+    }
   }
 
   const downloadFilename = `${refTable.name}_${tuple.uniqueId}`;
