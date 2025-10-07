@@ -912,7 +912,7 @@ const RecordsetInner = ({
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />
-                  {versionInfo &&
+                  {versionInfo && versionInfo.humanized &&
                     <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
                       <small className='h3-class'>({versionInfo.humanized})</small>
                     </ChaiseTooltip>
