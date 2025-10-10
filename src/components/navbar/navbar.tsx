@@ -3,6 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState, type JSX, } from 'react';
 
 // components
+import Dropdown from 'react-bootstrap/Dropdown';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -19,7 +20,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { CustomError, NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -52,6 +53,8 @@ const ChaiseNavbar = (): JSX.Element => {
   const [showRidSpinner, setShowRidSpinner] = useState(false);
   const [topBanners, setTopBanners] = useState<NavbarBanner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<NavbarBanner[]>([]);
+  const [searchMode, setSearchMode] = useState<'rid' | 'snapshot'>('rid');
+  const [showSearchModeTooltip, setShowSearchModeTooltip] = useState(false);
   /**
    * Keeps track of most recently opened dropdown
    * We track this to make sure only one dropdown is open at a time.
@@ -207,7 +210,44 @@ const ChaiseNavbar = (): JSX.Element => {
 
 
   const handleRidSearchEnter = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') handleRidSearch();
+    if (e.key === 'Enter') {
+      if (searchMode === 'rid') {
+        handleRidSearch();
+      } else {
+        handleSnapshotSearch();
+      }
+    }
+  };
+
+  const handleModeToggle = (mode: 'rid' | 'snapshot') => {
+    setSearchMode(mode);
+    // Clear the input when switching modes
+    setFormModel({ ridSearchTerm: '' });
+  };
+
+  const handleSnapshotSearch = () => {
+    if (!isStringAndNotEmpty(formModel.ridSearchTerm)) return;
+
+    console.log('Snapshot search input:', formModel.ridSearchTerm);
+
+    let snap = '';
+    try {
+      snap = ConfigService.ERMrest.HistoryService.datetimeISOToSnapshot(new Date(formModel.ridSearchTerm).toISOString());
+    } catch (e) {
+      //
+    }
+    if (!isStringAndNotEmpty(snap)) {
+      dispatchError({ 
+        error: new CustomError('Snapshot', 'Unable to resolve the snapshot. Please try again later.', undefined, undefined, true), 
+        isDismissible: true,
+      });
+      return;
+    }
+
+    const url = window.location.href.replace(catalogId, catalogId.split('@')[0] + '@' + snap);
+
+    windowRef.open(url, '_blank');
+
   };
 
   const handleRidSearch = () => {
@@ -311,18 +351,61 @@ const ChaiseNavbar = (): JSX.Element => {
     return (
       <span className='nav navbar-nav navbar-right rid-search'>
         <div className='chaise-search-box chaise-input-group'>
+          <div className='chaise-input-group-prepend'>
+            <Dropdown 
+              className='chaise-search-mode-dropdown chaise-dropdown'
+              onToggle={(nextShow) => setShowSearchModeTooltip(!nextShow)}
+              onClick={() => setShowSearchModeTooltip(false)}
+            >
+              <ChaiseTooltip
+                placement='bottom'
+                show={showSearchModeTooltip} onToggle={(show) => setShowSearchModeTooltip(show)}
+                tooltip={
+                  searchMode === 'snapshot'
+                    ? 'Switch to RID search'
+                    : 'Switch to snapshot search'
+                }
+              >
+                <Dropdown.Toggle
+                  variant='secondary'
+                  className='chaise-btn chaise-btn-sm chaise-btn-secondary'
+                  id='search-mode-dropdown'
+                >
+                  {searchMode === 'rid' ? 'RID' : 'Snapshot'}
+                </Dropdown.Toggle>
+              </ChaiseTooltip>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => handleModeToggle('rid')}>RID</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleModeToggle('snapshot')}>Snapshot</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
           <input
             id='rid-search-input'
             className='chaise-input-control chaise-input-control-sm has-feedback'
             type='text'
-            placeholder='Go to RID'
+            placeholder={searchMode === 'rid' ? 'Go to RID' : 'YYYY-MM-DD'}
+            value={formModel.ridSearchTerm}
             onChange={handleRidSearchChange}
             onKeyDown={handleRidSearchEnter}
           />
           <div className='chaise-input-group-append'>
-            <button className='chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary' onClick={handleRidSearch} role='button'>
-              {renderRidSearchIcon()}
-            </button>
+            <ChaiseTooltip
+              placement='bottom-start'
+              tooltip={
+                searchMode === 'rid'
+                  ? 'Enter a record identifier (RID) to go to that record'
+                  : 'Enter a date in YYYY-MM-DD format to search for the latest snapshot on that date'
+              }
+            >
+              <button
+                className='chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary'
+                onClick={searchMode === 'rid' ? handleRidSearch : handleSnapshotSearch}
+                role='button'
+              >
+                {renderRidSearchIcon()}
+              </button>
+            </ChaiseTooltip>
           </div>
         </div>
       </span>

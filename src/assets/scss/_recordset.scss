@@ -200,4 +200,20 @@
       top: calc(50% - variables.$main-spinner-height);
     }
   }
+
+  .permalink-dropdown {
+    .dropdown-menu {
+      padding: 5px;
+    }
+
+    // override bootstrap style 
+    .dropdown-item:active {
+      color: map.get(variables.$color-map, 'black');
+      background-color: var(--bs-dropdown-link-hover-bg);
+    }
+  }
+
+  .permalink-form-input .input-switch-datetime .chaise-btn-group  {
+    float: unset;
+  }
 }

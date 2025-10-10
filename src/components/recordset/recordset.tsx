@@ -6,6 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
@@ -17,6 +18,8 @@ import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
+import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
+import PermalinkForm from '@isrd-isi-edu/chaise/src/components/recordset/permalink-form';
 
 // hooks
 import React, { useEffect, useRef, useState, type JSX } from 'react';
@@ -597,6 +600,7 @@ const RecordsetInner = ({
     })
   }
 
+
   /**
    * change the state of facet panel
    * @param value if given, it will force the state
@@ -667,18 +671,6 @@ const RecordsetInner = ({
 
   const recordsetUIContextTitles = uiContextTitles ? [...uiContextTitles] : [{ reference: initialReference }];
   const recordsetFacetDepthLevel = config.facetDepthLevel !== undefined ? config.facetDepthLevel : 1;
-
-  /**
-   * version info
-   */
-  let versionInfo: { [key: string]: string } | null = null;
-  if (reference && reference.location.version) {
-    versionInfo = {
-      date: getVersionDate(reference.location),
-      humanized: getHumanizeVersionDate(reference.location)
-    }
-  }
-
 
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
@@ -894,17 +886,30 @@ const RecordsetInner = ({
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
                   />
-                  <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
-                    <a
-                      id='permalink'
+                  <Dropdown autoClose='outside' className='chaise-dropdown permalink-dropdown'>
+                    <Dropdown.Toggle
+                      variant='primary'
                       className='chaise-btn chaise-btn-primary'
-                      href={recordsetLink}
-                      onClick={copyPermalink}
                     >
                       <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
-                    </a>
-                  </ChaiseTooltip>
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      <ChaiseTooltip tooltip={permalinkTooltip} placement='left'>
+                        <Dropdown.Item
+                          href={recordsetLink} onClick={copyPermalink} style={{justifyContent: 'flex-start', padding: '5px'}}
+                          className='chaise-btn chaise-btn-tertiary'
+                        >
+                          <span className='chaise-btn-icon fa-solid fa-bookmark' />
+                          <span>Copy Permalink</span>
+                        </Dropdown.Item>
+                      </ChaiseTooltip>
+                      <Dropdown.Item as='div' style={{padding: '5px'}}>
+                          <PermalinkForm />
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
                   {savedQueryConfig?.showUI && savedQueryReference &&
                     <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
                   }
@@ -912,11 +917,7 @@ const RecordsetInner = ({
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />
-                  {versionInfo && versionInfo.humanized &&
-                    <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
-                      <small className='h3-class'>({versionInfo.humanized})</small>
-                    </ChaiseTooltip>
-                  }
+                  <span className='version-info'><TitleVersion reference={initialReference} addParanthesis /></span>
                   {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
                     <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
                   }

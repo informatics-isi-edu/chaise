@@ -6,11 +6,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 // models
 import { CommentDisplayModes, CommentType, Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
 
-
-
 import type { JSX } from 'react';
-
-
 
 export type TitleProps = {
   /**

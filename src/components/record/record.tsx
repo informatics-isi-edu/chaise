@@ -16,6 +16,7 @@ import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-butt
 import Spinner from 'react-bootstrap/Spinner';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
@@ -826,6 +827,9 @@ const RecordInner = ({
                 <Export reference={reference} tuple={page.tuples[0]} disabled={false} csvOptionName={'This record (CSV)'} />
                 <ShareCiteButton reference={reference} tuple={page.tuples[0]} citation={citation} />
               </div>
+              <div className='float-left'>
+                <TitleVersion reference={reference} />
+              </div>
             </div>
             <div className='title'>
               <div className='entity-display-header'>
@@ -839,6 +843,7 @@ const RecordInner = ({
                     />
                     <span>: </span>
                     <DisplayValue className='entity-title' value={page.tuples[0].displayname} />
+                    <TitleVersion reference={reference} addParanthesis />
                     {(canCreate || canEdit || canDelete) &&
                       <div className='title-buttons record-action-btns-container'>
                         {/* create */}

@@ -1,5 +1,7 @@
 @use 'sass:map';
 @use 'variables';
+@use 'helpers';
+
 
 body>.container {
   min-height: 100%;
@@ -102,8 +104,14 @@ body>.container {
     padding: 13px 15px;
   }
 
+  .chaise-search-mode-dropdown .dropdown-toggle {
+    @include helpers.border-radius(variables.$btn-border-radius);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
   .chaise-input-control-sm {
-    width: 100px;
+    width: 120px;
     border-color: map.get(variables.$color-map, 'black');
     border-radius: 4px 0px 0px 4px;
   }
