@@ -15,11 +15,24 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { LogActions, LogAppModes, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordeditColumnModel, RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
-  RecordsetConfig, RecordsetDisplayMode,
-  RecordsetProps, RecordsetSelectMode
+  LogActions,
+  LogAppModes,
+  LogStackPaths,
+  LogStackTypes,
+} from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  RecordeditColumnModel,
+  RecordeditDisplayMode,
+  RecordeditProps,
+  appModes,
+} from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  type FacetCheckBoxRow,
+  type RecordsetConfig,
+  RecordsetDisplayMode,
+  type RecordsetProps,
+  RecordsetSelectMode,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
@@ -37,25 +50,18 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import SparkMD5 from 'spark-md5';
 
 type SavedQueryFacetModel = {
-  appliedFilters: any[],
-  displayname: string,
-  preferredMode: string
-}
-
-type SavedQueryDropdownProps = {
-  appliedFiltersCallback: Function
+  appliedFilters: any[];
+  displayname: string;
+  preferredMode: string;
 };
 
-const SavedQueryDropdown = ({
-  appliedFiltersCallback
-}: SavedQueryDropdownProps): JSX.Element => {
+type SavedQueryDropdownProps = {
+  appliedFiltersCallback: () => FacetCheckBoxRow[][];
+};
 
+const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps): JSX.Element => {
   const facetTxt = '*::facets::';
-  const {
-    reference,
-    savedQueryConfig,
-    savedQueryReference,
-  } = useRecordset();
+  const { reference, savedQueryConfig, savedQueryReference } = useRecordset();
 
   const { session } = useAuthn();
   const { addAlert } = useAlert();
@@ -68,10 +74,10 @@ const SavedQueryDropdown = ({
 
   const [disableDropdown, setDisableDropdown] = useState<boolean>(true);
 
-  const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null)
+  const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null);
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   // set after checking if the existing search criteria exists to open the duplcate saved query modal
-  const [tupleForDuplicateSavedQuery, setTupleForDuplicateSavedQuery] = useState<any | null>(null)
+  const [tupleForDuplicateSavedQuery, setTupleForDuplicateSavedQuery] = useState<any | null>(null);
 
   useEffect(() => {
     if (!savedQueryReference) return;
@@ -79,50 +85,50 @@ const SavedQueryDropdown = ({
     // TODO: should this be checking for insert !== true ?
     const shouldDisableDropdown = !savedQueryReference.table.rights.insert;
     setDisableDropdown(shouldDisableDropdown);
-  }, [savedQueryReference])
+  }, [savedQueryReference]);
 
   /**
-    * Transform facets to a more stable version that can be saved.
-    * The overal returned format is like the following:
-    * {
-    *  "and": [
-    *    {
-    *      "sourcekey": "key",
-    *      "choices": [v1, v2, ..],
-    *      "source_domain": {
-    *        "schema":
-    *        "table":
-    *        "column":
-    *      }
-    *    }
-    *  ]
-    * }
-    * NOTE: will return null if there aren't any facets
-    *
-    * @param facetModels: array of appliedFilter arrays
-    */
-  function _getStableFacets(facetModels: any[][]) {
+   * Transform facets to a more stable version that can be saved.
+   * The overal returned format is like the following:
+   * {
+   *  "and": [
+   *    {
+   *      "sourcekey": "key",
+   *      "choices": [v1, v2, ..],
+   *      "source_domain": {
+   *        "schema":
+   *        "table":
+   *        "column":
+   *      }
+   *    }
+   *  ]
+   * }
+   * NOTE: will return null if there aren't any facets
+   *
+   * @param appliedFilters: array of appliedFilter arrays
+   */
+  function _getStableFacets(appliedFilters: FacetCheckBoxRow[][]) {
     const filters = [];
     if (reference.location.searchTerm) {
       // TODO this is a bit hacky
-      filters.push({ 'sourcekey': 'search-box', 'search': [reference.location.searchTerm] });
+      filters.push({ sourcekey: 'search-box', search: [reference.location.searchTerm] });
     }
 
     // NOTE: there are no facets on location when no filters are applied
     //    return 'and' of search term or nothing at all
     if (!reference.location.facets || !reference.location.facets.hasNonSearchBoxVisibleFilters) {
       if (filters.length > 0) {
-        return { 'and': filters };
+        return { and: filters };
       } else {
         return null;
       }
     }
 
-    for (let i = 0; i < facetModels.length; i++) {
-      const fm = facetModels[i],
-        fc = reference.facetColumns[i];
+    for (let i = 0; i < appliedFilters.length; i++) {
+      const appliedFilter = appliedFilters[i];
+      const fc = reference.facetColumns[i];
 
-      if (fm.length === 0) {
+      if (appliedFilter.length === 0) {
         continue;
       }
 
@@ -160,9 +166,8 @@ const SavedQueryDropdown = ({
           filter.source_domain.column = stableKeyColName;
           filter.choices = [];
 
-
-          for (let j = 0; j < fm.length; j++) {
-            const af = fm[j];
+          for (let j = 0; j < appliedFilter.length; j++) {
+            const af = appliedFilter[j];
             // ignore the not-null choice (it's already encoded and we don't need to map it)
             if (af.isNotNull) {
               continue;
@@ -185,7 +190,7 @@ const SavedQueryDropdown = ({
       filters.push(filter);
     }
 
-    return { 'and': filters };
+    return { and: filters };
   }
 
   const saveQuery = () => {
@@ -202,9 +207,10 @@ const SavedQueryDropdown = ({
 
     // should be only one description column
     const descriptionInputType = columnModels.filter((model: RecordeditColumnModel) => {
-      return model.column.name === 'description'
+      return model.column.name === 'description';
     })[0].inputType;
-    const isDescriptionMarkdown = descriptionInputType === 'longtext' || descriptionInputType === 'markdown';
+    const isDescriptionMarkdown =
+      descriptionInputType === 'longtext' || descriptionInputType === 'markdown';
 
     /**
      * Checks each option.displayname.value and formats it properly for display
@@ -220,17 +226,17 @@ const SavedQueryDropdown = ({
         if (name === null) {
           str += ' _No value_';
         } else if (name === '<i>All records with value </i>') {
-          str += ' _All records with value_'
+          str += ' _All records with value_';
         } else if (name === '') {
-          str += ' _Empty_'
+          str += ' _Empty_';
         } else {
           str += ' ' + name;
         }
-        if (idx + 1 !== options.length) str += ','
+        if (idx + 1 !== options.length) str += ',';
       });
 
       return str;
-    }
+    };
 
     /**
      * Appends each facet name to the name string to be returned until the length of
@@ -255,7 +261,7 @@ const SavedQueryDropdown = ({
       }
 
       return name;
-    }
+    };
 
     /**
      * Creates the description for a single facet to append with other facet descriptions to use as
@@ -267,10 +273,10 @@ const SavedQueryDropdown = ({
      */
     const facetDescription = (facet: string, optionsString: string) => {
       // no need for preText in non markdown
-      const preText = (isDescriptionMarkdown ? '  -' : '');
+      const preText = isDescriptionMarkdown ? '  -' : '';
       const value = preText + facet + ':' + optionsString + ';';
       return value;
-    }
+    };
 
     /**
      *
@@ -291,8 +297,10 @@ const SavedQueryDropdown = ({
        */
       const shouldReturnDescription = (stringArray: string[]): string | false => {
         const description = initialValue + stringArray.join(separator);
-        return description.length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit ? description : false;
-      }
+        return description.length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit
+          ? description
+          : false;
+      };
 
       // call function to check if we can return the default decription value and stay under the length
       let descriptionOrFalse = shouldReturnDescription(descriptions);
@@ -301,9 +309,10 @@ const SavedQueryDropdown = ({
 
       // Truncate each individual facet description and perform length limit check again
       const tempDescriptions = [...descriptions];
-      const singleLimit = savedQueryConfig.defaultDescriptionLimits.facetTextLimit
+      const singleLimit = savedQueryConfig.defaultDescriptionLimits.facetTextLimit;
       descriptions.forEach((description: string, idx: number) => {
-        if (description.length > singleLimit) tempDescriptions[idx] = description.substring(0, singleLimit) + '...';
+        if (description.length > singleLimit)
+          tempDescriptions[idx] = description.substring(0, singleLimit) + '...';
       });
 
       // call function again after truncated the length of individual facet descriptions
@@ -315,7 +324,10 @@ const SavedQueryDropdown = ({
       let description = initialValue;
       for (let i = 0; i < tempDescriptions.length; i++) {
         const fd = tempDescriptions[i];
-        if ((description + fd + separator).length <= savedQueryConfig.defaultDescriptionLimits.totalTextLimit) {
+        if (
+          (description + fd + separator).length <=
+          savedQueryConfig.defaultDescriptionLimits.totalTextLimit
+        ) {
           description += fd;
           if (i !== tempDescriptions.length - 1) description += separator;
         } else {
@@ -325,7 +337,7 @@ const SavedQueryDropdown = ({
       }
 
       return description;
-    }
+    };
 
     /*
      * The following code is for creating the default name and description
@@ -356,7 +368,7 @@ const SavedQueryDropdown = ({
     const facetNames: string[] = [];
     const facetDescriptions: string[] = [];
 
-    let name = nameDescriptionPrefix
+    let name = nameDescriptionPrefix;
     const initialDescription = nameDescriptionPrefix + ':' + (isDescriptionMarkdown ? '\n' : '');
 
     const allFilters = appliedFiltersCallback();
@@ -368,7 +380,7 @@ const SavedQueryDropdown = ({
       const tempObj: SavedQueryFacetModel = {
         appliedFilters: facetFilter,
         displayname: reference.facetColumns[idx].displayname.value,
-        preferredMode: reference.facetColumns[idx].preferredMode
+        preferredMode: reference.facetColumns[idx].preferredMode,
       };
 
       modelsWFilters.push(tempObj);
@@ -388,7 +400,8 @@ const SavedQueryDropdown = ({
       facetNames.push(fm.displayname);
 
       const numChoices = fm.appliedFilters.length;
-      const facetDetails = ' ' + fm.displayname + ' (' + numChoices + ' choice' + (numChoices > 1 ? 's' : '') + ')';
+      const facetDetails =
+        ' ' + fm.displayname + ' (' + numChoices + ' choice' + (numChoices > 1 ? 's' : '') + ')';
       // set to default value to use if the threshold are broken
       let facetInfo = facetDetails;
 
@@ -399,18 +412,21 @@ const SavedQueryDropdown = ({
       if (fm.preferredMode === 'ranges') facetOptionsString += ')';
 
       // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
-      const underChoiceLimit = fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit;
-      const underTextLimit = facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit;
+      const underChoiceLimit =
+        fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit;
+      const underTextLimit =
+        facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit;
       if (underChoiceLimit && underTextLimit) facetInfo = facetOptionsString;
       name += facetInfo;
-      if (modelIdx + 1 !== modelsWFilters.length) name += ';'
+      if (modelIdx + 1 !== modelsWFilters.length) name += ';';
 
       // ===== setting default description =====
-      facetDescriptions.push(facetDescription(facetDetails, facetOptionsString))
+      facetDescriptions.push(facetDescription(facetDetails, facetOptionsString));
     });
 
     // if name is longer than the set string length threshold, show the compact version with facet names only
-    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = iterativeDefaultName(facetNames);
+    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit)
+      name = iterativeDefaultName(facetNames);
     // set the default description based on length limit heuristics defined in `iterativeDefaultDescription()` function
     const description = iterativeDefaultDescription(facetDescriptions, initialDescription);
 
@@ -441,117 +457,148 @@ const SavedQueryDropdown = ({
     rows.push(row);
 
     // check to see if the saved query exists for the given user, table, schema, and selected facets
-    let queryUri = savedQueryReference.uri + '/' + colMap.userId + '=' + fixedEncodeURIComponent(row[colMap.userId]);
+    let queryUri =
+      savedQueryReference.uri +
+      '/' +
+      colMap.userId +
+      '=' +
+      fixedEncodeURIComponent(row[colMap.userId]);
     queryUri += '&' + colMap.schemaName + '=' + fixedEncodeURIComponent(row[colMap.schemaName]);
     queryUri += '&' + colMap.tableName + '=' + fixedEncodeURIComponent(row[colMap.tableName]);
     queryUri += '&' + colMap.queryId + '=' + row[colMap.queryId];
 
-    windowRef.ERMrest.resolve(queryUri, ConfigService.contextHeaderParams).then((response: any) => {
-      const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
-      const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, savedQueryReference.table);
+    windowRef.ERMrest.resolve(queryUri, ConfigService.contextHeaderParams)
+      .then((response: any) => {
+        const stackPath = LogService.getStackPath(
+          LogStackPaths.SET,
+          LogStackPaths.SAVED_QUERY_CREATE_POPUP
+        );
+        const currStackNode = LogService.getStackNode(
+          LogStackTypes.SAVED_QUERY,
+          savedQueryReference.table
+        );
 
-      const logObj = {
-        action: LogService.getActionString(LogActions.PRELOAD, stackPath, LogAppModes.CREATE),
-        stack: LogService.getStackObject(currStackNode)
-      };
-
-      return response.read(1, logObj);
-    }).then((page: any) => {
-      // if a row is returned, a query with this set of facets exists already
-      if (page.tuples.length > 0) {
-        setTupleForDuplicateSavedQuery(page.tuples[0]);
-      } else {
-        const stackPath = LogService.getStackPath(LogStackPaths.SET, LogStackPaths.SAVED_QUERY_CREATE_POPUP);
-        const currStackNode = LogService.getStackNode(LogStackTypes.SAVED_QUERY, tempSavedQueryReference.table);
         const logObj = {
-          action: LogService.getActionString(LogActions.CREATE, stackPath, LogAppModes.CREATE),
-          stack: LogService.addExtraInfoToStack(LogService.getStackObject(currStackNode), { 'num_created': 1 })
+          action: LogService.getActionString(LogActions.PRELOAD, stackPath, LogAppModes.CREATE),
+          stack: LogService.getStackObject(currStackNode),
         };
 
-        setRecordeditModalProps({
-          appMode: appModes.CREATE,
-          config: { displayMode: RecordeditDisplayMode.POPUP },
-          modalOptions: {
-            parentReference: reference,
-            onClose: hideRecordeditModal
-          },
-          onSubmitSuccess: onCreateSavedQuerySuccess,
-          // TODO: parentContainer?
-          prefillRowData: rows,
-          queryParams: {},
-          reference: tempSavedQueryReference,
-          /* The log related APIs */
-          logInfo: {
-            logAppMode: LogAppModes.CREATE,
-            logObject: logObj,
-            logStack: logObj.stack,
-            logStackPath: stackPath
-          }
-        })
-      }
-    }).catch((err: any) => {
-      $log.debug(err);
-    });
-  }
+        return response.read(1, logObj);
+      })
+      .then((page: any) => {
+        // if a row is returned, a query with this set of facets exists already
+        if (page.tuples.length > 0) {
+          setTupleForDuplicateSavedQuery(page.tuples[0]);
+        } else {
+          const stackPath = LogService.getStackPath(
+            LogStackPaths.SET,
+            LogStackPaths.SAVED_QUERY_CREATE_POPUP
+          );
+          const currStackNode = LogService.getStackNode(
+            LogStackTypes.SAVED_QUERY,
+            tempSavedQueryReference.table
+          );
+          const logStack = LogService.addExtraInfoToStack(
+            LogService.getStackObject(currStackNode),
+            { num_created: 1 }
+          );
+          setRecordeditModalProps({
+            appMode: appModes.CREATE,
+            config: { displayMode: RecordeditDisplayMode.POPUP },
+            modalOptions: {
+              parentReference: reference,
+              onClose: hideRecordeditModal,
+            },
+            onSubmitSuccess: onCreateSavedQuerySuccess,
+            // TODO: parentContainer?
+            prefillRowData: rows,
+            queryParams: {},
+            reference: tempSavedQueryReference,
+            /* The log related APIs */
+            logInfo: {
+              logAppMode: LogAppModes.CREATE,
+              logStack: logStack,
+              logStackPath: stackPath,
+            },
+          });
+        }
+      })
+      .catch((err: any) => {
+        $log.debug(err);
+      });
+  };
 
   const showSavedQueries = () => {
     // tableName and userId are required, the dropdown isn't created unless the required columns are present for saved queries
     const facetBlob = {
-      and: [{
-        choices: [reference.table.name],
-        // name of column storing table name in saved_query table
-        source: savedQueryConfig?.mapping.columnNameMapping?.tableName
-      }, {
-        choices: [session?.client.id],
-        // name of column storing user id in saved_query table
-        source: savedQueryConfig?.mapping.columnNameMapping?.userId
-      }]
-    }
+      and: [
+        {
+          choices: [reference.table.name],
+          // name of column storing table name in saved_query table
+          source: savedQueryConfig?.mapping.columnNameMapping?.tableName,
+        },
+        {
+          choices: [session?.client.id],
+          // name of column storing user id in saved_query table
+          source: savedQueryConfig?.mapping.columnNameMapping?.userId,
+        },
+      ],
+    };
 
-    const lastExecutedColumnName = savedQueryConfig?.mapping.columnNameMapping?.lastExecutionTime || 'last_Execution_time';
-    const uri = savedQueryReference.uri + '/' + facetTxt + windowRef.ERMrest.encodeFacet(facetBlob) + '@sort(' + lastExecutedColumnName + '::desc::)';
-    windowRef.ERMrest.resolve(uri, ConfigService.contextHeaderParams).then((ref: any) => {
-      // we don't want to allow faceting in the popup
-      const tempSavedQueryReference = ref.contextualize.compactSelectSavedQueries.hideFacets();
+    const lastExecutedColumnName =
+      savedQueryConfig?.mapping.columnNameMapping?.lastExecutionTime || 'last_Execution_time';
+    const uri =
+      savedQueryReference.uri +
+      '/' +
+      facetTxt +
+      windowRef.ERMrest.encodeFacet(facetBlob) +
+      '@sort(' +
+      lastExecutedColumnName +
+      '::desc::)';
+    windowRef.ERMrest.resolve(uri, ConfigService.contextHeaderParams)
+      .then((ref: any) => {
+        // we don't want to allow faceting in the popup
+        const tempSavedQueryReference = ref.contextualize.compactSelectSavedQueries.hideFacets();
 
-      const recordsetConfig: RecordsetConfig = {
-        viewable: false,
-        editable: true,
-        deletable: true,
-        sortable: true,
-        selectMode: RecordsetSelectMode.NO_SELECT,
-        // NOTE: when supporting faceting in saved_queries popup
-        //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
-        disableFaceting: true,
-        // used popup/savedquery so that we can configure which button to show and change the modal title
-        displayMode: RecordsetDisplayMode.SAVED_QUERY_POPUP
-      };
+        const recordsetConfig: RecordsetConfig = {
+          viewable: false,
+          editable: true,
+          deletable: true,
+          sortable: true,
+          selectMode: RecordsetSelectMode.NO_SELECT,
+          // NOTE: when supporting faceting in saved_queries popup
+          //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
+          disableFaceting: true,
+          // used popup/savedquery so that we can configure which button to show and change the modal title
+          displayMode: RecordsetDisplayMode.SAVED_QUERY_POPUP,
+        };
 
-      const stackElement = LogService.getStackNode(
-        LogStackTypes.SET,
-        tempSavedQueryReference.table,
-        { source: savedQueryReference.compressedDataSource, entity: true }
-      );
+        const stackElement = LogService.getStackNode(
+          LogStackTypes.SET,
+          tempSavedQueryReference.table,
+          { source: savedQueryReference.compressedDataSource, entity: true }
+        );
 
-      const logStack = LogService.getStackObject(stackElement),
-        logStackPath = LogService.getStackPath('', LogStackPaths.SAVED_QUERY_SELECT_POPUP);
+        const logStack = LogService.getStackObject(stackElement),
+          logStackPath = LogService.getStackPath('', LogStackPaths.SAVED_QUERY_SELECT_POPUP);
 
-      setRecordsetModalProps({
-        parentReference: reference,
-        initialReference: tempSavedQueryReference,
-        initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
-        config: recordsetConfig,
-        logInfo: {
-          logStack: logStack,
-          logStackPath: logStackPath
-        }
+        setRecordsetModalProps({
+          parentReference: reference,
+          initialReference: tempSavedQueryReference,
+          initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
+          config: recordsetConfig,
+          logInfo: {
+            logStack: logStack,
+            logStackPath: logStackPath,
+          },
+        });
+      })
+      .catch((error: any) => {
+        $log.warn(error);
+
+        dispatchError({ error: error });
       });
-    }).catch((error: any) => {
-      $log.warn(error);
-
-      dispatchError({ error: error });
-    });
-  }
+  };
 
   const hideDuplicateSavedQueryModal = () => setTupleForDuplicateSavedQuery(null);
   const hideRecordsetModal = () => setRecordsetModalProps(null);
@@ -560,7 +607,7 @@ const SavedQueryDropdown = ({
   const onCreateSavedQuerySuccess = () => {
     hideRecordeditModal();
     addAlert('Search criteria saved.', ChaiseAlertType.SUCCESS);
-  }
+  };
 
   // isOpen is true when the dropdown is open
   const onDropdownToggle = (isOpen: boolean) => {
@@ -570,10 +617,13 @@ const SavedQueryDropdown = ({
 
     // log the action
     if (isOpen) {
-      LogService.logClientAction({
-        action: LogService.getActionString(LogActions.EXPORT_OPEN),
-        stack: LogService.getStackObject()
-      }, savedQueryReference.defaultLogInfo)
+      LogService.logClientAction(
+        {
+          action: LogService.getActionString(LogActions.EXPORT_OPEN),
+          stack: LogService.getStackObject(),
+        },
+        savedQueryReference.defaultLogInfo
+      );
     }
   };
 
@@ -584,14 +634,22 @@ const SavedQueryDropdown = ({
       return (
         <ChaiseTooltip
           placement='bottom-end'
-          tooltip={<span>Please login to be able to save searches for <code><DisplayValue value={reference.displayname} /></code>.</span>}
+          tooltip={
+            <span>
+              Please login to be able to save searches for{' '}
+              <code>
+                <DisplayValue value={reference.displayname} />
+              </code>
+              .
+            </span>
+          }
         >
           <div className='chaise-btn chaise-btn-primary disabled dropdown-toggle'>
             <span className='chaise-btn-icon fa-solid fa-floppy-disk' />
             <span>Saved searches</span>
           </div>
         </ChaiseTooltip>
-      )
+      );
     }
 
     return (
@@ -608,36 +666,40 @@ const SavedQueryDropdown = ({
           </Dropdown.Toggle>
         </ChaiseTooltip>
         <Dropdown.Menu>
-          <Dropdown.Item className='saved-query-menu-item' onClick={saveQuery}>Save current search criteria</Dropdown.Item>
-          <Dropdown.Item className='saved-query-menu-item' onClick={showSavedQueries}>Show saved search criteria</Dropdown.Item>
+          <Dropdown.Item className='saved-query-menu-item' onClick={saveQuery}>
+            Save current search criteria
+          </Dropdown.Item>
+          <Dropdown.Item className='saved-query-menu-item' onClick={showSavedQueries}>
+            Show saved search criteria
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-    )
-  }
+    );
+  };
 
   // TODO: tooltip stays showing after closing either modal
   return (
     <>
       {renderDropdown()}
-      {tupleForDuplicateSavedQuery &&
+      {tupleForDuplicateSavedQuery && (
         <DuplicateSavedQueryModal
           tuple={tupleForDuplicateSavedQuery}
           onClose={hideDuplicateSavedQueryModal}
         />
-      }
-      {recordeditModalProps &&
-        <Recordedit {...recordeditModalProps} ></Recordedit>
-      }
-      {recordsetModalProps &&
+      )}
+      {recordeditModalProps && <Recordedit {...recordeditModalProps}></Recordedit>}
+      {recordsetModalProps && (
         <RecordsetModal
           modalClassName='saved-query-popup'
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
           // NOTE: needs to be defined for RecordsetModal but isn't used in this case
           // TODO: do we want to update reference instead of reloading the page?
-          onSubmit={() => { return }}
+          onSubmit={() => {
+            return;
+          }}
         />
-      }
+      )}
     </>
   );
 };

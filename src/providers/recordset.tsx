@@ -33,6 +33,7 @@ import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-uti
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import type { Reference } from '@isrd-isi-edu/ermrestjs/src/models/reference';
 
 /**
  * types related to the update function
@@ -87,7 +88,7 @@ export const RecordsetContext = createContext<{
   /**
    * The displayed reference
    */
-  reference: any,
+  reference: Reference,
   /**
    * Whether the main data is loading or not (and therefore we need spinner or not)
    */

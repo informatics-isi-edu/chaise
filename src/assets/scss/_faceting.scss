@@ -54,53 +54,51 @@
 
   }
 
-  .facet-groups {
-    // When a group header is sticky, push down nested facet headers
-    .facet-group-item-container.has-sticky-parent {
-      .facet-group-item-body .facet-item-container .accordion-header {
-        top: 40px !important; // Height of the parent group header
-      }
+  // When a group header is sticky, push down nested facet headers
+  .facet-group-item-container.has-sticky-parent {
+    .facet-group-item-body .facet-item-container .accordion-header {
+      top: 40px !important; // Height of the parent group header
     }
+  }
 
-    .facet-group-item {
-      .facet-group-item-body {
-        padding: 5px;
-        // for padding between items inside a group:
-        // .facet-item-container {
-        //   // the better to do this would be just removing that rule but added here so I can easily switch
-        //   & + .facet-group-item,  & + .facet-item-container {
-        //     margin-top: 0px !important;
-        //     border-top: 1px solid map.get(variables.$color-map, 'border');
+  .facet-group-item {
+    .facet-group-item-body {
+      padding: 5px;
+      // for padding between items inside a group:
+      .facet-item-container {
+        // the better to do this would be just removing that rule but added here so I can easily switch
+        & + .facet-group-item,  & + .facet-item-container {
+          margin-top: 0px !important;
+          border-top: 1px solid map.get(variables.$color-map, 'border');
+        }
+      }
+      .facet-item-container:not(:last-of-type) {
+        margin-bottom: 5px;
+      }
+
+      // Ensure the inner accordion doesn't break sticky positioning
+      .accordion {
+        overflow: visible !important;
+      }
+
+      .facet-item-container {
+        .accordion-button {
+          background-color: map.get(variables.$color-map, 'accordion-inner-header-background');
+        }
+
+        // TODO sticky header
+        // Nested facet headers inside groups - must be sticky too
+        // .accordion-header {
+        //   // position: sticky !important; // Force sticky positioning
+        //   top: 0 !important;
+        //   z-index: 10; // Lower z-index than parent group headers
+        //   transition: box-shadow 0.2s ease;
+
+        //   // Add shadow when header is stuck
+        //   &.is-stuck {
+        //     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         //   }
         // }
-        // .facet-item-container:not(:last-of-type) {
-        //   margin-bottom: 5px;
-        // }
-
-        // Ensure the inner accordion doesn't break sticky positioning
-        .accordion {
-          overflow: visible !important;
-        }
-
-        .facet-item-container {
-          .accordion-button {
-            background-color: map.get(variables.$color-map, 'accordion-inner-header-background');
-          }
-
-          // TODO sticky header
-          // Nested facet headers inside groups - must be sticky too
-          // .accordion-header {
-          //   // position: sticky !important; // Force sticky positioning
-          //   top: 0 !important;
-          //   z-index: 10; // Lower z-index than parent group headers
-          //   transition: box-shadow 0.2s ease;
-
-          //   // Add shadow when header is stuck
-          //   &.is-stuck {
-          //     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          //   }
-          // }
-        }
       }
     }
   }
