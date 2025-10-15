@@ -10,8 +10,9 @@
 }
 
 .faceting-columns-container {
-  // disable the animation from the accordion
-  .accordion-collapse.collapsing {
+  // disable the animation from all accordions (including nested ones at any level)
+  .accordion-collapse.collapsing,
+  .accordion .accordion-collapse.collapsing {
     transition: none !important;
   }
 

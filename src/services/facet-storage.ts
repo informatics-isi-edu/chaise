@@ -383,6 +383,8 @@ export class FacetStorageService {
             addedChildren[facetInfo.facetIndex] = true;
 
             if (isOpen) atLeastOneIsOpen = true;
+
+            delete annotOrder[child.name];
           });
         }
         // if the group is not added yet, we need to create it
@@ -415,6 +417,8 @@ export class FacetStorageService {
             addedChildren[facetInfo.facetIndex] = true;
 
             if (isOpen) atLeastOneIsOpen = true;
+
+            delete annotOrder[child.name];
           });
 
           res.push({
@@ -453,7 +457,7 @@ export class FacetStorageService {
       } else {
         const groupIndex = structure.structureIndex;
         // If this group was not added from stored order
-        if (structure.displayname.unformatted! in annotGroupNames) return;
+        if (!(structure.displayname.unformatted! in annotGroupNames)) return;
 
         const children: FacetOrder[] = [];
         let groupIsOpen = structure.isOpen;
