@@ -40,9 +40,10 @@ body>.container {
   background-color: map.get(variables.$color-map, 'navbar-dropdown-submenu-icon');
 }
 
-.navbar-inverse .navbar-nav.navbar-right>div>a {
-  color: map.get(variables.$color-map, 'navbar-inverse-link');
-}
+// TODO what was the point of this rule?
+// .navbar-inverse .navbar-nav.navbar-right>div>a {
+//   color: map.get(variables.$color-map, 'navbar-inverse-link');
+// }
 
 .navbar-inverse .navbar-brand {
   color: map.get(variables.$color-map, 'navbar-inverse-link');
@@ -125,6 +126,45 @@ body>.container {
 #mainnav {
   border-radius: 0;
 }
+
+// positioning of history control in navbar
+.history-control {
+  margin-right: 0px; // offset marging-right: -15px from navbar-right
+  .history-btn {
+    padding: 26px 10px 24px 10px;
+    border-radius: 0;
+
+    // similar to the login button
+    color: map.get(variables.$color-map, 'navbar-inverse-menu-link');
+    
+    &:focus, &.show {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    
+    // Hide the dropdown arrow
+    &::after {
+      display: none !important;
+    }
+    
+    .chaise-btn-icon {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+  .history-dropdown {
+    .dropdown-menu {
+      padding: 5px;
+    }
+
+    // override bootstrap style 
+    .dropdown-item:active, .dropdown-item:hover {
+      color: map.get(variables.$color-map, 'black');
+      background-color: unset;
+    }
+  }
 
 @media (max-width: 992px) {
   .navbar-collapse {

@@ -14,6 +14,7 @@ import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
+import HistoryDropdown from '@isrd-isi-edu/chaise/src/components/history-dropdown';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -412,6 +413,14 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
+  const renderHistoryControl = () => {
+    return (
+      <span className='nav navbar-nav navbar-right history-control'>
+        <HistoryDropdown />
+      </span>
+    );
+  }
+
   const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{ isHTML: true, value: renderName(item) }} />);
 
   const renderNavbarMenuDropdowns = () => {
@@ -477,6 +486,7 @@ const ChaiseNavbar = (): JSX.Element => {
               </Nav>
               {/* Since we are using float: right for divs, position for chaise login comes first */}
               <ChaiseLogin />
+              {renderHistoryControl()}
               {renderRidSearch()}
               {renderLiveButton()}
             </Navbar.Collapse>

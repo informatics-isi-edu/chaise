@@ -862,6 +862,7 @@ const RecordsetInner = ({
         <Alerts />
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
+            {facetPanelOpen && <TitleVersion reference={initialReference} addParanthesis />}
             <div className='panel-header'>
               <div className='pull-left'>
                 <h3 className='side-panel-heading'>Refine search</h3>
@@ -910,14 +911,14 @@ const RecordsetInner = ({
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
-                  {savedQueryConfig?.showUI && savedQueryReference &&
+                {savedQueryConfig?.showUI && savedQueryReference &&
                     <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
                   }
 
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />
-                  <span className='version-info'><TitleVersion reference={initialReference} addParanthesis /></span>
+                  {!facetPanelOpen && <span className='version-info'><TitleVersion reference={initialReference} addParanthesis /></span>}
                   {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
                     <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
                   }
