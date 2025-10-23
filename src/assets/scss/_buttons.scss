@@ -97,7 +97,7 @@
     padding: 0;
   }
 
-  // this is currently designed mostly for 
+  // adds a small indicator at the top-right corner of the button
   &.chaise-btn-with-indicator:before {
     content: '';
     background-color: map.get(variables.$color-map, 'primary');

@@ -83,6 +83,8 @@ export class ConfigService {
 
   private static _catalogID: string;
 
+  private static _catalogIDVersion: string | null = null;
+
   /**
    * Should be called in useEffect of the main app, to ensure all the
    * configurations are done before any other components are running.
@@ -151,6 +153,7 @@ export class ConfigService {
     const catalogId = getCatalogId(settings.skipParsingURLForCatalogID, settings.defaultCatalog);
 
     ConfigService._catalogID = catalogId;
+    ConfigService._catalogIDVersion = catalogId.split('@')[1] || null;
 
     if (catalogId) {
       // the server object that can be used in other places
@@ -218,6 +221,10 @@ export class ConfigService {
 
   static get catalogID() {
     return ConfigService._catalogID;
+  }
+
+  static get CatalogIDVersion() {
+    return ConfigService._catalogIDVersion;
   }
 
   // -------------------------- private functions: --------------------------- //

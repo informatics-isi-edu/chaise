@@ -4,6 +4,9 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-
 // hooks
 import { FormProvider, useForm } from 'react-hook-form';
 
+// models
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -12,9 +15,9 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-// models
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 type PermalinkFormData = {
   [key: string]: string;
@@ -22,21 +25,31 @@ type PermalinkFormData = {
 
 const PermalinkForm = () => {
   const catalogId = ConfigService.catalogID;
-  const fieldName = 'permalink-date';
+  const catalogIdVersion = ConfigService.CatalogIDVersion;
+  const fieldName = 'version-timestamp';
+
+  const currVersionValue = catalogIdVersion ? formatDatetime(
+    ConfigService.ERMrest.HistoryService.snapshotToDatetimeISO(catalogIdVersion, true),
+    { outputMomentFormat: dataFormats.datetime.return }
+  ) : null;
 
   const methods = useForm<PermalinkFormData>({
     mode: 'onChange',
     defaultValues: {
-      [fieldName]: ''
+      [fieldName]: currVersionValue?.datetime || '',
+      [fieldName + '-date']: currVersionValue?.date || '',
+      [fieldName + '-time']: currVersionValue?.time || '',
     }
   });
+
+  // -------------------  UI callbacks:   --------------------//
 
   /**
    * the callback for when custom permalink button is clicked
    */
   const handleCustomPermalinkClick = (data: PermalinkFormData) => {
     const dateValue = data[fieldName];
-    
+
     if (!isStringAndNotEmpty(dateValue)) return;
 
     let snap = '';
@@ -64,6 +77,8 @@ const PermalinkForm = () => {
     windowRef.open(url, '_blank');
   };
 
+  // -------------------  render logic:   --------------------//
+
   const disableSubmit = () => {
     const hasError = Boolean(fieldName in methods.formState.errors);
     const isEmpty = !methods.watch(fieldName);
@@ -77,7 +92,7 @@ const PermalinkForm = () => {
         void methods.handleSubmit(handleCustomPermalinkClick)(event);
       }}>
         <div className='permalink-form-input'>
-          <label>Browse History:
+          <label>View snapshotted data:
             <InputSwitch
               displayExtraDateTimeButtons
               displayErrors={false}

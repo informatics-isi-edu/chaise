@@ -792,7 +792,6 @@ const RecordInner = ({
             className={`top-left-panel small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
               }`}
           >
-            {showPanel && <TitleVersion reference={reference} />}
             <div className='panel-header'>
               <div className='pull-left'>
                 <h3 className='side-panel-heading'>Sections</h3>
@@ -829,7 +828,7 @@ const RecordInner = ({
                 <ShareCiteButton reference={reference} tuple={page.tuples[0]} citation={citation} />
               </div>
               <div className='float-left'>
-                {!showPanel && <TitleVersion reference={reference} />}
+                <TitleVersion reference={reference} />
               </div>
             </div>
             <div className='title'>

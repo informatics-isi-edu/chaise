@@ -672,6 +672,20 @@ const RecordsetInner = ({
   const recordsetUIContextTitles = uiContextTitles ? [...uiContextTitles] : [{ reference: initialReference }];
   const recordsetFacetDepthLevel = config.facetDepthLevel !== undefined ? config.facetDepthLevel : 1;
 
+  const titleVersion = config.displayMode === RecordsetDisplayMode.FULLSCREEN && initialReference.location.version ? (
+    <TitleVersion reference={initialReference} />
+  ) : null;
+
+  const pageTitle = (config.displayMode === RecordsetDisplayMode.FULLSCREEN) ? (
+    <h1 id='page-title'>
+      <Title addLink={false} reference={initialReference} />
+      {/* {!facetPanelOpen && <span className='version-info'>{titleVersion}</span>} */}
+      {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
+        <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
+      }
+    </h1>
+  ) : null;
+
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
       return;
@@ -862,7 +876,6 @@ const RecordsetInner = ({
         <Alerts />
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
-            {facetPanelOpen && <TitleVersion reference={initialReference} addParanthesis />}
             <div className='panel-header'>
               <div className='pull-left'>
                 <h3 className='side-panel-heading'>Refine search</h3>
@@ -881,49 +894,36 @@ const RecordsetInner = ({
 
           <div className='top-right-panel' ref={topRightContainer}>
             {config.displayMode === RecordsetDisplayMode.FULLSCREEN &&
-              <div className='recordset-title-container title-container'>
-                <div className='recordset-title-buttons title-buttons'>
-                  <Export
-                    reference={reference}
-                    disabled={isLoading || !page || page.length === 0}
-                  />
-                  <Dropdown autoClose='outside' className='chaise-dropdown permalink-dropdown'>
-                    <Dropdown.Toggle
-                      variant='primary'
-                      className='chaise-btn chaise-btn-primary'
-                    >
-                      <span className='chaise-btn-icon fa-solid fa-bookmark' />
-                      <span>Permalink</span>
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu>
-                      <ChaiseTooltip tooltip={permalinkTooltip} placement='left'>
-                        <Dropdown.Item
-                          href={recordsetLink} onClick={copyPermalink} style={{justifyContent: 'flex-start', padding: '5px'}}
-                          className='chaise-btn chaise-btn-tertiary'
-                        >
-                          <span className='chaise-btn-icon fa-solid fa-bookmark' />
-                          <span>Copy Permalink</span>
-                        </Dropdown.Item>
-                      </ChaiseTooltip>
-                      <Dropdown.Item as='div' style={{padding: '5px'}}>
-                          <PermalinkForm />
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                {savedQueryConfig?.showUI && savedQueryReference &&
-                    <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
-                  }
-
+              <>
+                <div className='recordset-title-container title-container'>
+                  <div className='recordset-title-buttons title-buttons'>
+                    <Export
+                      reference={reference}
+                      disabled={isLoading || !page || page.length === 0}
+                    />
+                     <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
+                      <a
+                        id='permalink'
+                        className='chaise-btn chaise-btn-primary'
+                        href={recordsetLink}
+                        onClick={copyPermalink}
+                      >
+                        <span className='chaise-btn-icon fa-solid fa-bookmark' />
+                        <span>Permalink</span>
+                      </a>
+                    </ChaiseTooltip>
+                    {savedQueryConfig?.showUI && savedQueryReference &&
+                      <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
+                    }
+                  </div>
+                  {titleVersion !== null ?  titleVersion : pageTitle}
                 </div>
-                <h1 id='page-title'>
-                  <Title addLink={false} reference={initialReference} />
-                  {!facetPanelOpen && <span className='version-info'><TitleVersion reference={initialReference} addParanthesis /></span>}
-                  {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
-                  }
-                </h1>
-              </div>
+                {titleVersion !== null &&
+                  <div style={{paddingBottom: '20px'}}>
+                    {pageTitle}
+                  </div>
+                }
+              </>
             }
             {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 &&
               <div className='recordset-controls-container'>

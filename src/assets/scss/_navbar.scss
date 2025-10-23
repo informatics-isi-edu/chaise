@@ -40,10 +40,10 @@ body>.container {
   background-color: map.get(variables.$color-map, 'navbar-dropdown-submenu-icon');
 }
 
-// TODO what was the point of this rule?
-// .navbar-inverse .navbar-nav.navbar-right>div>a {
-//   color: map.get(variables.$color-map, 'navbar-inverse-link');
-// }
+//  This is for the profile dropdown
+.navbar-inverse .navbar-nav.navbar-right>div>a {
+  color: map.get(variables.$color-map, 'navbar-inverse-link');
+}
 
 .navbar-inverse .navbar-brand {
   color: map.get(variables.$color-map, 'navbar-inverse-link');
@@ -53,16 +53,6 @@ body>.container {
   font-size: 18px;
   line-height: 20px;
   margin-right: 0px;
-}
-
-#live-btn {
-  margin-right: 0px; // offset marging-right: -15px from navbar-right
-  color: map.get(variables.$color-map, 'navbar-inverse-link');
-  padding: 15px;
-  text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 #login-link {
@@ -135,19 +125,23 @@ body>.container {
     border-radius: 0;
 
     // similar to the login button
-    color: map.get(variables.$color-map, 'navbar-inverse-menu-link');
-    
+    color: map.get(variables.$color-map, 'navbar-inverse-menu-link') !important;
+
+    &:hover {
+      color: map.get(variables.$color-map, 'white') !important;
+    }
+
     &:focus, &.show {
       background: none !important;
       border: none !important;
       box-shadow: none !important;
     }
-    
+
     // Hide the dropdown arrow
-    &::after {
-      display: none !important;
-    }
-    
+    // &::after {
+    //   display: none !important;
+    // }
+
     .chaise-btn-icon {
       font-size: 1.5rem;
     }
@@ -156,13 +150,17 @@ body>.container {
 
   .history-dropdown {
     .dropdown-menu {
-      padding: 5px;
+      padding: 10px !important;
     }
 
-    // override bootstrap style 
-    .dropdown-item:active, .dropdown-item:hover {
+    // override bootstrap style
+    .dropdown-item:not(.live-button):active, .dropdown-item:not(.live-button):hover {
       color: map.get(variables.$color-map, 'black');
       background-color: unset;
+    }
+
+    .input-switch-datetime .input-switch-time {
+      margin: 5px 0;
     }
   }
 
@@ -198,6 +196,9 @@ body>.container {
   padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
   line-height: 20px;
   color: map.get(variables.$color-map, 'navbar-inverse-menu-link');
+  &:hover {
+    color: map.get(variables.$color-map, 'white');
+  }
 }
 
 .chaise-navbar-banner-container {

@@ -21,7 +21,7 @@ type TitleVersionProps = {
   addParanthesis?: boolean;
 };
 
-const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Element => {
+const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Element | null => {
   /**
    * version info
    */
@@ -33,24 +33,22 @@ const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Ele
     };
   }
 
+  if (!versionInfo || !versionInfo.humanized) return null;
+
   return (
-    <>
-      {versionInfo && versionInfo.humanized && (
-        <div className='chaise-title-version-info'>
-          <ChaiseTooltip
-            placement='bottom-start'
-            tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
-          >
-            <small className='h3-class'>
-              {addParanthesis && <span className='parenthesis-left'>(</span>}
-              <i className='fa-solid fa-clock-rotate-left'></i>
-              {versionInfo.humanized}
-              {addParanthesis && <span className='parenthesis-right'>)</span>}
-            </small>
-          </ChaiseTooltip>
-        </div>
-      )}
-    </>
+    <div className='chaise-title-version-info'>
+      <ChaiseTooltip
+        placement='bottom-start'
+        tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
+      >
+        <small className='h3-class'>
+          {addParanthesis && <span className='parenthesis-left'>(</span>}
+          <i className='fa-solid fa-clock-rotate-left'></i>
+          {versionInfo.humanized}
+          {addParanthesis && <span className='parenthesis-right'>)</span>}
+        </small>
+      </ChaiseTooltip>
+    </div>
   );
 };
 
