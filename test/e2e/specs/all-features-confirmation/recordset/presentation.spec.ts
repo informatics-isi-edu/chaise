@@ -44,7 +44,7 @@ const testParams = {
       { title: 'no_of_beds', comment: 'test all-outbound + waitfor for normal columns' },
       { title: 'no_of_baths', comment: 'wait_for normal columns on multiple aggregates' },
       { title: 'Category', comment: 'Type of accommodation (Resort, Hotel, or Motel)' },
-      { title: 'Type of Facilities', comment: 'Type of facilities (Luxury/Upscale/Basic)' },
+      { title: 'Type of Facilities' }, // the model has comment, but source-def is hiding it.
       { title: 'Image Count', comment: 'Image Count' },
       { title: 'Image Distinct Count', comment: 'Image Distinct Count' },
       { title: 'Min Image ID', comment: 'Min Image ID' },
