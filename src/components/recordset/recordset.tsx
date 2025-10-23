@@ -46,7 +46,6 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';

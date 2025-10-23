@@ -42,82 +42,6 @@
             padding-right: 250px;
           }
 
-          .filter-chiclet {
-            max-width: 350px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-
-            /**
-             * override the default behavior of button and button group
-             * without these the buttons would become misaligned and ellipsis logic won't work
-             */
-            align-items: unset;
-            .chaise-btn {
-              display: inline-block;
-            }
-
-            .chaise-btn:focus {
-              background-color: map.get(variables.$color-map, 'white');
-            }
-
-            .chaise-btn.chaise-btn-secondary {
-              border-color: map.get(variables.$color-map, 'border');
-              height: 25px;
-              min-width: 25px;
-              // we can't use flex here because of the ellipsis requirement,
-              // so we're manually centering with padding
-              padding: 3px 5px;
-            }
-
-            .chaise-btn.filter-chiclet-remove {
-              display: flex;
-              align-items: center;
-              padding: unset;
-            }
-
-            .chaise-btn.filter-chiclet-title {
-              border-right: 0;
-              max-width: 150px;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              padding-right: 1px;
-              text-align: left;
-              white-space: nowrap;
-
-              // only add the colon if the title exists
-              & ~ .chaise-btn.filter-chiclet-value {
-                border-left: 0;
-
-                position: relative;
-
-                &:before {
-                  content: ':';
-                  position: absolute;
-                  left: 0;
-                }
-              }
-            }
-
-            .chaise-btn.filter-chiclet-value {
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              max-width: 200px;
-              padding-left: 7px;
-              padding-right: 4px;
-            }
-
-            span {
-              color: map.get(variables.$color-map, 'black');
-              cursor: default;
-            }
-
-            button span {
-              color: map.get(variables.$color-map, 'primary');
-              cursor: pointer;
-            }
-          }
-
           .clear-all-filters {
             padding: 0;
             height: unset;
@@ -210,7 +134,7 @@
       padding: 5px;
     }
 
-    // override bootstrap style 
+    // override bootstrap style
     .dropdown-item:active {
       color: map.get(variables.$color-map, 'black');
       background-color: var(--bs-dropdown-link-hover-bg);

@@ -1,3 +1,5 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_filter-chiclet.scss';
+
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -26,9 +28,9 @@ type FilterChicletProps = {
    */
   value: JSX.Element | JSX.Element[] | string | Displayname,
   /**
-   * the tooltip for the value (is missing, the value itself will be used)
+   * the tooltip for the value (if missing, the value itself will be used)
    */
-  valueTooltip?: JSX.Element | JSX.Element[],
+  valueTooltip?: JSX.Element | JSX.Element[] | string,
   /**
    * the remove callback
    */
@@ -40,7 +42,11 @@ type FilterChicletProps = {
   /**
    * class that will be added to the remove button
    */
-  removeClass?: string
+  removeClass?: string,
+  /**
+   * the icon displayed on the remove button
+   */
+  removeIcon?: JSX.Element,
   /**
    * on click of the title will be called
    */
@@ -55,8 +61,9 @@ const FilterChiclet = ({
   onRemove,
   iconTooltip,
   removeClass = '',
+  removeIcon,
   onTitleClick,
-  valueTooltip
+  valueTooltip,
 }: FilterChicletProps): JSX.Element => {
 
   // if callbacks are defined, we have to use button
@@ -85,7 +92,7 @@ const FilterChiclet = ({
           className={`filter-chiclet-remove chaise-btn chaise-btn-secondary ${removeClass}`}
           {...(onRemove && { onClick: () => onRemove(identifier) })}
         >
-          <i className={onRemove ? 'fa-solid fa-xmark' : 'fa-solid fa-filter'}></i>
+          {removeIcon ? removeIcon : <i className={onRemove ? 'fa-solid fa-xmark' : 'fa-solid fa-filter'}></i>}
         </IconTag>
       </ChaiseTooltip>
       {/* title */}

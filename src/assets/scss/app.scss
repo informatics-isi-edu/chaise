@@ -238,18 +238,32 @@ html {
 
   .chaise-title-version-info {
     display: inline-block;
-    color: map.get(variables.$color-map, 'header-small');
+    font-size: variables.$h3-font-size;
 
-    .parenthesis-left {
-      margin-right: 3px;
+    // override chiclet styles
+    .filter-chiclet {
+      .chaise-btn.filter-chiclet-value,
+      .chaise-btn.filter-chiclet-remove {
+        padding: 15px 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      span {
+        color: map.get(variables.$color-map, 'header-small');
+      }
     }
-    .parenthesis-right {
-      margin-left: 2px;
-    }
-    i {
-      margin-right: 7px;
-      font-size: 1.25rem;
-    }
+
+    // .parenthesis-left {
+    //   margin-right: 3px;
+    // }
+    // .parenthesis-right {
+    //   margin-left: 2px;
+    // }
+    // i.fa-clock-rotate-left {
+    //   margin-right: 7px;
+    //   font-size: 1.25rem;
+    // }
 
   }
 

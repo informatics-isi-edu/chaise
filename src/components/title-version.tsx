@@ -1,7 +1,11 @@
 import type { JSX } from 'react';
 
 // components
+import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import {
@@ -9,6 +13,8 @@ import {
   getVersionDate,
 } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 type TitleVersionProps = {
   /**
@@ -33,11 +39,19 @@ const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Ele
     };
   }
 
+    const goToLive = () => {
+      const catalogId = ConfigService.catalogID;
+      const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
+      windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
+      windowRef.location.reload();
+    };
+
+
   if (!versionInfo || !versionInfo.humanized) return null;
 
   return (
     <div className='chaise-title-version-info'>
-      <ChaiseTooltip
+      {/* <ChaiseTooltip
         placement='bottom-start'
         tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
       >
@@ -47,7 +61,15 @@ const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Ele
           {versionInfo.humanized}
           {addParanthesis && <span className='parenthesis-right'>)</span>}
         </small>
-      </ChaiseTooltip>
+      </ChaiseTooltip> */}
+      <FilterChiclet
+        identifier={0}
+        value={versionInfo.humanized}
+        valueTooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
+        iconTooltip={'Refresh the page and display the live data.'}
+        onRemove={goToLive}
+        removeIcon={<i className='fa-solid fa-arrow-left'></i>}
+      />
     </div>
   );
 };
