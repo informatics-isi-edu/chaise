@@ -64,11 +64,15 @@
               border-color: map.get(variables.$color-map, 'border');
               height: 25px;
               min-width: 25px;
-              padding: 2px 5px;
+              // we can't use flex here because of the ellipsis requirement,
+              // so we're manually centering with padding
+              padding: 3px 5px;
             }
 
             .chaise-btn.filter-chiclet-remove {
-              padding: 3px;
+              display: flex;
+              align-items: center;
+              padding: unset;
             }
 
             .chaise-btn.filter-chiclet-title {
