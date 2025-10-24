@@ -480,8 +480,8 @@ const RecordsetTable = ({
   };
 
   // handles tooltip class and spacing
-  const renderDisplayValue = (column: any) => {
-    const headerClassName = `table-column-displayname${column.comment ? ' chaise-icon-for-tooltip' : ''}`;
+  const renderDisplayValue = (column: any, hasTooltip: boolean) => {
+    const headerClassName = `table-column-displayname${hasTooltip ? ' chaise-icon-for-tooltip' : ''}`;
     return (
       <span className={headerClassName} >
         <DisplayValue value={column.displayname} />
@@ -493,6 +493,7 @@ const RecordsetTable = ({
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
       const canSort = config.sortable && col.column.sortable && !col.hasError && !col.isLoading;
+      const hasTooltip = !!col.column.comment && !!col.column.comment.value;
 
       return (
         <th
@@ -500,16 +501,16 @@ const RecordsetTable = ({
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          {col.column.comment && col.column.comment.value ?
+          {hasTooltip ?
             // if comment, show tooltip
             <ChaiseTooltip
               placement='top'
               tooltip={<DisplayCommentValue comment={col.column.comment} />}
             >
-              {renderDisplayValue(col.column)}
+              {renderDisplayValue(col.column, hasTooltip)}
             </ChaiseTooltip> :
             // no comment, no tooltip
-            renderDisplayValue(col.column)
+            renderDisplayValue(col.column, hasTooltip)
           }
           <span className='table-heading-icons'>
             {col.hasError &&
