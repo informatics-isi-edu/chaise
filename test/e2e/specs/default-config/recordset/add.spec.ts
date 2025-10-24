@@ -35,6 +35,8 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
 
   await test.step('show an inline comment instead of tooltip', async () => {
     await expect.soft(RecordsetLocators.getPageTitleInlineComment(page)).toHaveText('Recordset inline comment');
+
+    await expect.soft(RecordsetLocators.getPageTitleTooltip(page)).toHaveCount(0);
   });
 
   await test.step('the facet panel should be displayed by default if maxFacetDepth is missing from chaise-config', async () => {

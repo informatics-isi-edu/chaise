@@ -51,7 +51,6 @@ const Title = ({
   className
 }: TitleProps): JSX.Element => {
 
-  let showTooltip = comment ? true : false;
 
   if (typeof link === 'string') {
     addLink = true;
@@ -65,15 +64,16 @@ const Title = ({
       displayname = reference.displayname;
     }
 
-    if (comment !== false && !comment && reference.comment) {
+    const useRefComment = reference.comment && reference.comment.displayMode === CommentDisplayModes.TOOLTIP
+
+    if (comment !== false && !comment && useRefComment) {
       comment = reference.comment;
     }
 
-    showTooltip = comment || (reference.comment && reference.comment.displayMode === CommentDisplayModes.TOOLTIP);
   }
 
   // make sure the comment has a valid value
-  showTooltip = showTooltip && !!comment && !!comment.value;
+  const showTooltip = !!comment && !!comment.value;
 
   const renderDisplayname = <DisplayValue value={displayname} />;
 
