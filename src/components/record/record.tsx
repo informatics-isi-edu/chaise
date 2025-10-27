@@ -714,74 +714,35 @@ const RecordInner = ({
     </div>
   );
 
-  const renderRelatedTableAccordion = (rm: RecordRelatedModel) => {
-    return (
-      <Accordion.Item
-        key={`record-related-${rm.index}`}
-        eventKey={rm.index + ''}
-        className={`chaise-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
-        id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
-        as='div'
-      >
-        <Accordion.Button as='div' onClick={toggleRelatedSection(rm)} className='panel-heading'>
-          <RelatedTableHeader relatedModel={rm} />
-        </Accordion.Button>
-        <Accordion.Body>
-          <RelatedTable
-            relatedModel={rm}
-            displaynameForID={rm.initialReference.displayname.value}
-            showSingleScrollbar={true}
-          />
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }
-
-  const renderMainContainer = () => {
-    const group1: RecordRelatedModel[] = [], group2: RecordRelatedModel[] = [], group3: RecordRelatedModel[] = [];
-    relatedModels.forEach((rm, index) => {
-      if (index < 4) {
-        group1.push(rm);
-      } else if (index >= 4 && index < 9) {
-        group2.push(rm);
-      } else {
-        group3.push(rm);
-      }
-    });
-
-    return <div className='main-container dynamic-padding' ref={mainContainer}>
+  const renderMainContainer = () => (
+    <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
         <RecordMainSection />
         {/* related section */}
         {relatedModels.length > 0 &&
           <div className='related-section-container chaise-accordions'>
-            <Accordion className='chaise-accordion-groups' defaultActiveKey={['project', 'donor', 'sample']} alwaysOpen>
-              <Accordion.Item eventKey='project' className='chaise-accordion-group-item'>
-                <Accordion.Header className='chaise-accordion-group-item-header'>Project</Accordion.Header>
-                <Accordion.Body className='chaise-accordion-group-item-body'>
-                  <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
-                    {group1.map((rm: RecordRelatedModel) => (renderRelatedTableAccordion(rm)))}
-                  </Accordion>
-                </Accordion.Body>
-              </Accordion.Item>
-              <Accordion.Item eventKey='donor' className='chaise-accordion-group-item'>
-                <Accordion.Header className='chaise-accordion-group-item-header'>Donor</Accordion.Header>
-                <Accordion.Body className='chaise-accordion-group-item-body'>
-                  <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
-                    {group2.map((rm: RecordRelatedModel) => (renderRelatedTableAccordion(rm)))}
-                  </Accordion>
-                </Accordion.Body>
-              </Accordion.Item>
-              <Accordion.Item eventKey='sample' className='chaise-accordion-group-item'>
-                <Accordion.Header className='chaise-accordion-group-item-header'>Sample</Accordion.Header>
-                <Accordion.Body className='chaise-accordion-group-item-body'>
-                  <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
-                    {group3.map((rm: RecordRelatedModel) => (renderRelatedTableAccordion(rm)))}
-                  </Accordion>
-                </Accordion.Body>
-              </Accordion.Item>
+            <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
+              {relatedModels.map((rm: RecordRelatedModel) => (
+                <Accordion.Item
+                  key={`record-related-${rm.index}`}
+                  eventKey={rm.index + ''}
+                  className={`chaise-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
+                  id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
+                  as='div'
+                >
+                  <Accordion.Button as='div' onClick={toggleRelatedSection(rm)} className='panel-heading'>
+                    <RelatedTableHeader relatedModel={rm} />
+                  </Accordion.Button>
+                  <Accordion.Body>
+                    <RelatedTable
+                      relatedModel={rm}
+                      displaynameForID={rm.initialReference.displayname.value}
+                      showSingleScrollbar={true}
+                    />
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))}
             </Accordion>
-
           </div>
         }
         {/* the related-section-spinner must be inside the main-body to ensure proper positioning */}
@@ -802,7 +763,7 @@ const RecordInner = ({
       </div>
       {initialized && relatedSectionInitialized && <Footer />}
     </div>
-  };
+  );
 
   /**
    * The left panels that should be resized together

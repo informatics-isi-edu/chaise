@@ -293,7 +293,7 @@ export class FacetStorageService {
               addedGroups[facetInfo.groupIndex].resultIndex
             ] as FacetGroupOrder;
 
-            let isOpen = fo.open;
+            let isOpen = typeof fo.open === 'boolean' ? fo.open : facetInfo.isOpen;
             // if it has filters, we have to open the group and the facet
             if (facetInfo.hasFilters) {
               addedGroup.isOpen = true;
@@ -312,14 +312,13 @@ export class FacetStorageService {
             // find the group for open status
             const group = facetColumnsStructure[facetInfo.groupIndex] as FacetGroup;
             let groupIsOpen = group.isOpen;
-            let isOpen = fo.open;
+            let isOpen = typeof fo.open === 'boolean' ? fo.open : facetInfo.isOpen;
             // if it has filters, we have to open the group and the facet
             if (facetInfo.hasFilters) {
               groupIsOpen = true;
               isOpen = true;
             }
 
-            if (isOpen) atLeastOneIsOpen = true;
             res.push({
               index: facetInfo.groupIndex,
               isOpen: groupIsOpen,
@@ -330,6 +329,9 @@ export class FacetStorageService {
                 },
               ],
             });
+
+            if (isOpen) atLeastOneIsOpen = true;
+
             addedGroups[facetInfo.groupIndex] = {
               resultIndex: res.length - 1,
               addedChildren: { [facetInfo.facetIndex]: true },
@@ -338,7 +340,7 @@ export class FacetStorageService {
         }
         // if it's not part of a group, just add it as a level-0 facet
         else {
-          let isOpen = fo.open;
+          let isOpen = typeof fo.open === 'boolean' ? fo.open : facetInfo.isOpen;
           // if it has filters, we have to open the facet
           if (facetInfo.hasFilters) {
             isOpen = true;
@@ -355,7 +357,7 @@ export class FacetStorageService {
       // for groups
       else if ('markdown_name' in fo && Array.isArray(fo.children)) {
         const groupIndex = annotGroupNames[fo.markdown_name];
-        if (groupIndex === undefined) return;
+        if (groupIndex === undefined) return; // the group is not in annotation
 
         // if the group is already added, add the remaining children to that group
         if (groupIndex in addedGroups) {
@@ -363,13 +365,13 @@ export class FacetStorageService {
           const addedChildren = addedGroups[groupIndex].addedChildren;
 
           fo.children.forEach((child) => {
-            if (!isObjectAndNotNull(child) || !('name' in child) || child.name in addedChildren)
+            if (!isObjectAndNotNull(child) || !('name' in child) || child.name in addedChildren) {
               return;
+            }
             const facetInfo = annotOrder[child.name];
-            if (!facetInfo) return;
-            if (facetInfo.groupIndex === undefined || facetInfo.groupIndex !== groupIndex) return;
+            if (!facetInfo || facetInfo.groupIndex === undefined || facetInfo.groupIndex !== groupIndex) return;
 
-            let isOpen = child.open;
+            let isOpen = typeof child.open === 'boolean' ? child.open : facetInfo.isOpen;
             // if it has filters, we have to open the group and the facet
             if (facetInfo.hasFilters) {
               addedGroup.isOpen = true;
@@ -390,20 +392,17 @@ export class FacetStorageService {
         // if the group is not added yet, we need to create it
         else {
           const group = facetColumnsStructure[groupIndex] as FacetGroup;
-          let groupIsOpen = fo.open;
-          if (group.isOpen) {
-            groupIsOpen = true;
-          }
+          let groupIsOpen = typeof fo.open === 'boolean' ? fo.open : group.isOpen;
 
           const children: FacetOrder[] = [];
           const addedChildren: { [childIndex: number]: boolean } = {};
           fo.children.forEach((child) => {
             if (!isObjectAndNotNull(child) || !('name' in child)) return;
-            const facetInfo = annotOrder[child.name];
-            if (!facetInfo) return;
-            if (facetInfo.groupIndex === undefined || facetInfo.groupIndex !== groupIndex) return;
 
-            let isOpen = child.open;
+            const facetInfo = annotOrder[child.name];
+            if (!facetInfo || facetInfo.groupIndex === undefined || facetInfo.groupIndex !== groupIndex) return;
+
+            let isOpen = typeof child.open === 'boolean' ? child.open : facetInfo.isOpen;
             // if it has filters, we have to open the group and the facet
             if (facetInfo.hasFilters) {
               groupIsOpen = true;
@@ -426,16 +425,16 @@ export class FacetStorageService {
             isOpen: groupIsOpen,
             children,
           });
+
           addedGroups[groupIndex] = {
             resultIndex: res.length - 1,
             addedChildren,
           };
 
-          if (groupIsOpen) atLeastOneIsOpen = true;
         }
 
         // remove it so we know which groups were not in the stored order
-        delete annotGroupNames[fo.markdown_name];
+        // delete annotGroupNames[fo.markdown_name];
       }
     });
 
@@ -444,7 +443,7 @@ export class FacetStorageService {
       if (typeof structure === 'number') {
         const facetIndex = structure;
         const fc = facetColumns[facetIndex];
-        // If this facet was not added from stored order
+        // if the facet was already added from stored order, skip it
         if (!(fc.sourceObjectWrapper.name in annotOrder)) return;
 
         let isOpen = annotOrder[fc.sourceObjectWrapper.name].isOpen;
@@ -456,8 +455,8 @@ export class FacetStorageService {
         if (isOpen) atLeastOneIsOpen = true;
       } else {
         const groupIndex = structure.structureIndex;
-        // If this group was not added from stored order
-        if (!(structure.displayname.unformatted! in annotGroupNames)) return;
+        // If this group was already added from stored order, skip it
+        if (!(groupIndex in addedGroups)) return;
 
         const children: FacetOrder[] = [];
         let groupIsOpen = structure.isOpen;
@@ -479,18 +478,17 @@ export class FacetStorageService {
           isOpen: groupIsOpen,
           children,
         });
-        if (groupIsOpen) atLeastOneIsOpen = true;
-      }
-
-      // If all facets are closed, open the first one
-      if (!atLeastOneIsOpen && res.length > 0) {
-        const first = res[0];
-        first.isOpen = true;
-        if ('children' in first && first.children.length > 0) {
-          first.children[0].isOpen = true;
-        }
       }
     });
+
+    // If all facets are closed, open the first one
+    if (!atLeastOneIsOpen && res.length > 0) {
+      const first = res[0];
+      first.isOpen = true;
+      if ('children' in first) {
+        first.children[0].isOpen = true;
+      }
+    }
 
     if (ignoreStorage) {
       FacetStorageService.facetOrderPerAnnotation = res;
