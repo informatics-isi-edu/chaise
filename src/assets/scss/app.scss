@@ -238,13 +238,16 @@ html {
 
   .chaise-title-version-info {
     display: inline-block;
-    font-size: variables.$h3-font-size;
+    // font-size: variables.$h3-font-size;
+    font-size: 1.25rem;
 
     // override chiclet styles
     .filter-chiclet {
+      margin: unset;
+
       .chaise-btn.filter-chiclet-value,
       .chaise-btn.filter-chiclet-remove {
-        padding: 15px 10px;
+        padding: 14px 10px;
         display: flex;
         align-items: center;
       }

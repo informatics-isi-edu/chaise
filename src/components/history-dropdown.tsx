@@ -72,7 +72,7 @@ const HistoryDropdown = (): JSX.Element => {
       <Dropdown.Menu align='end'>
         {catalogIdVersion && (
           <>
-            <ChaiseTooltip tooltip={'Refresh the page and display the live data.'} placement='left'>
+            <ChaiseTooltip tooltip={'Reload the page and display the live data.'} placement='left'>
               <Dropdown.Item
                 as='button'
                 onClick={goToLive}

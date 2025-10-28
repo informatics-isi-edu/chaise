@@ -1,5 +1,6 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { FormProvider, useForm } from 'react-hook-form';
@@ -108,13 +109,15 @@ const PermalinkForm = () => {
           </label>
         </div>
         <div style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-          <button
-            type='submit'
-            className='chaise-btn chaise-btn-primary'
-            disabled={disableSubmit()}
-          >
-            Go
-          </button>
+          {/* <ChaiseTooltip tooltipText={!disableSubmit() ? '': } > */}
+            <button
+              type='submit'
+              className='chaise-btn chaise-btn-primary'
+              disabled={disableSubmit()}
+            >
+              Go
+            </button>
+          {/* </ChaiseTooltip> */}
         </div>
       </form>
     </FormProvider>

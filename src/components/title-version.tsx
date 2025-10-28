@@ -66,7 +66,7 @@ const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Ele
         identifier={0}
         value={versionInfo.humanized}
         valueTooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
-        iconTooltip={'Refresh the page and display the live data.'}
+        iconTooltip={'Reload the page and display the live data.'}
         onRemove={goToLive}
         removeIcon={<i className='fa-solid fa-arrow-left'></i>}
       />
