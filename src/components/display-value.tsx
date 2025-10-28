@@ -1,5 +1,5 @@
 // hooks
-import { useEffect, useRef, type JSX } from 'react';
+import { memo, useEffect, useRef, type JSX } from 'react';
 
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -98,4 +98,15 @@ const DisplayValue = ({
   return <Wrapper style={styles} className={usedClassNames.join(' ')} {...props}>{value?.value}</Wrapper>
 }
 
-export default DisplayValue;
+export default memo(DisplayValue, (prevProps, nextProps) => {
+  return (
+    prevProps.value?.isHTML === nextProps.value?.isHTML &&
+    prevProps.value?.value === nextProps.value?.value &&
+    prevProps.addClass === nextProps.addClass &&
+    prevProps.className === nextProps.className &&
+    prevProps.specialNullEmpty === nextProps.specialNullEmpty &&
+    prevProps.as === nextProps.as &&
+    prevProps.styles === nextProps.styles &&
+    prevProps.props === nextProps.props
+  );
+});
