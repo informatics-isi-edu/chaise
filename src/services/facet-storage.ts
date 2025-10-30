@@ -1,7 +1,10 @@
-import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 
+// ermrestjs
 import type { Reference } from '@isrd-isi-edu/ermrestjs/src/models/reference';
 import type { FacetGroup } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+
+// utils
+import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 import { isObjectAndNotNull } from '@isrd-isi-edu/ermrestjs/src/utils/type-utils';
 
 export type FacetOrder = {
@@ -37,10 +40,10 @@ export type StoredFacetOrder = Array<
 
 export class FacetStorageService {
   // so we don't have to recompute the facet order every time
-  private static facetOrderPerAnnotation: Array<FacetOrder | FacetGroupOrder> | null = null;
-  private static facetOrderPerStorage: Array<FacetOrder | FacetGroupOrder> | null = null;
-  private static openStatusPerStorage: { [structureKey: string]: boolean } | null = null;
-  private static openStatusPerAnnotation: { [structureKey: string]: boolean } | null = null;
+  private static facetOrderPerAnnotation: { [storageKey: string]: Array<FacetOrder | FacetGroupOrder> } = {};
+  private static facetOrderPerStorage: { [storageKey: string]: Array<FacetOrder | FacetGroupOrder> } = {};
+  private static openStatusPerStorage: { [storageKey: string]: { [structureKey: string]: boolean } } = {};
+  private static openStatusPerAnnotation: { [storageKey: string]: { [structureKey: string]: boolean } } = {};
 
   /**
    * returns the key that should be used for local storage name.
@@ -58,8 +61,8 @@ export class FacetStorageService {
    * @param reference the reference object
    */
   static hasStoredFacetOrder = (reference: Reference): boolean => {
-    const facetListKey = FacetStorageService.getFacetOrderStorageKey(reference);
-    const facetOrder = LocalStorage.getStorage(facetListKey);
+    const storageKey = FacetStorageService.getFacetOrderStorageKey(reference);
+    const facetOrder = LocalStorage.getStorage(storageKey);
     return facetOrder && Array.isArray(facetOrder) && facetOrder.length > 0;
   };
 
@@ -71,9 +74,13 @@ export class FacetStorageService {
    * @param newOrder
    */
   static changeStoredFacetOrder = (reference: Reference, newOrder: StoredFacetOrder) => {
-    LocalStorage.setStorage(FacetStorageService.getFacetOrderStorageKey(reference), newOrder);
-    FacetStorageService.facetOrderPerStorage = null;
-    FacetStorageService.facetOrderPerAnnotation = null;
+    const storageKey = FacetStorageService.getFacetOrderStorageKey(reference);
+    LocalStorage.setStorage(storageKey, newOrder);
+    // TODO are these needed?
+    delete FacetStorageService.facetOrderPerStorage[storageKey];
+    delete FacetStorageService.facetOrderPerAnnotation[storageKey];
+    delete FacetStorageService.openStatusPerStorage[storageKey];
+    delete FacetStorageService.openStatusPerAnnotation[storageKey];
   };
 
   /**
@@ -123,9 +130,11 @@ export class FacetStorageService {
     facetIndex?: number,
     ignoreStorage?: boolean
   ): boolean {
+    const storageKey = FacetStorageService.getFacetOrderStorageKey(reference);
+
     if (
-      (ignoreStorage && FacetStorageService.openStatusPerAnnotation === null) ||
-      (!ignoreStorage && FacetStorageService.openStatusPerStorage === null)
+      (ignoreStorage && !(storageKey in FacetStorageService.openStatusPerAnnotation)) ||
+      (!ignoreStorage && !(storageKey in FacetStorageService.openStatusPerStorage))
     ) {
       const order = FacetStorageService.getFacetOrder(reference, ignoreStorage);
 
@@ -135,9 +144,8 @@ export class FacetStorageService {
           booleanRes[FacetStorageService.getFacetStructureKey(item.index)] = item.isOpen;
 
           item.children.forEach((child) => {
-            const facetIndex = child.index;
-            booleanRes[FacetStorageService.getFacetStructureKey(item.index, facetIndex)] =
-              child.isOpen;
+            const structureKey = FacetStorageService.getFacetStructureKey(item.index, child.index);
+            booleanRes[structureKey] = child.isOpen;
           });
         } else {
           booleanRes[FacetStorageService.getFacetStructureKey(undefined, item.index)] = item.isOpen;
@@ -145,17 +153,17 @@ export class FacetStorageService {
       });
 
       if (ignoreStorage) {
-        FacetStorageService.openStatusPerAnnotation = booleanRes;
+        FacetStorageService.openStatusPerAnnotation[storageKey] = booleanRes;
       } else {
-        FacetStorageService.openStatusPerStorage = booleanRes;
+        FacetStorageService.openStatusPerStorage[storageKey] = booleanRes;
       }
     }
 
     const structureKey = FacetStorageService.getFacetStructureKey(groupIndex, facetIndex);
     if (ignoreStorage) {
-      return FacetStorageService.openStatusPerAnnotation![structureKey];
+      return FacetStorageService.openStatusPerAnnotation[storageKey][structureKey];
     } else {
-      return FacetStorageService.openStatusPerStorage![structureKey];
+      return FacetStorageService.openStatusPerStorage[storageKey][structureKey];
     }
   }
 
@@ -173,21 +181,21 @@ export class FacetStorageService {
     const res: Array<FacetOrder | FacetGroupOrder> = [];
     const facetColumns = reference.facetColumns;
     const facetColumnsStructure = reference.facetColumnsStructure;
-    const facetListKey = FacetStorageService.getFacetOrderStorageKey(reference);
+    const storageKey = FacetStorageService.getFacetOrderStorageKey(reference);
     let facetOrder: StoredFacetOrder | undefined;
     let atLeastOneIsOpen = false;
 
     // use the already computed value if available
-    if (ignoreStorage && FacetStorageService.facetOrderPerAnnotation !== null) {
-      return FacetStorageService.facetOrderPerAnnotation;
-    } else if (!ignoreStorage && FacetStorageService.facetOrderPerStorage !== null) {
-      return FacetStorageService.facetOrderPerStorage;
+    if (ignoreStorage && (storageKey in FacetStorageService.facetOrderPerAnnotation)) {
+      return FacetStorageService.facetOrderPerAnnotation[storageKey];
+    } else if (!ignoreStorage && (storageKey in FacetStorageService.facetOrderPerStorage)) {
+      return FacetStorageService.facetOrderPerStorage[storageKey];
     }
 
     if (ignoreStorage) {
       facetOrder = [];
     } else {
-      facetOrder = LocalStorage.getStorage(facetListKey);
+      facetOrder = LocalStorage.getStorage(storageKey);
     }
 
     // no valid stored value was found in storage, so return the annotaion value.
@@ -223,9 +231,9 @@ export class FacetStorageService {
       }
 
       if (ignoreStorage) {
-        FacetStorageService.facetOrderPerAnnotation = res;
+        FacetStorageService.facetOrderPerAnnotation[storageKey] = res;
       } else {
-        FacetStorageService.facetOrderPerStorage = res;
+        FacetStorageService.facetOrderPerStorage[storageKey] = res;
       }
 
       return res;
@@ -491,9 +499,9 @@ export class FacetStorageService {
     }
 
     if (ignoreStorage) {
-      FacetStorageService.facetOrderPerAnnotation = res;
+      FacetStorageService.facetOrderPerAnnotation[storageKey] = res;
     } else {
-      FacetStorageService.facetOrderPerStorage = res;
+      FacetStorageService.facetOrderPerStorage[storageKey] = res;
     }
 
     return res;
