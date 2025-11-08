@@ -151,18 +151,19 @@ const Faceting = ({
     const res: FacetModel[] = [];
     reference.facetColumns.forEach((fc) => {
       // if the parent is closed, we don't want to load the facet
-      // let hasParentAndIsClosed = false;
-      // if (typeof fc.groupIndex === 'number') {
-      //   hasParentAndIsClosed = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex) === false;
-      // }
+      let hasParentAndIsClosed = false;
+      if (typeof fc.groupIndex === 'number') {
+        hasParentAndIsClosed =
+          FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex) === false;
+      }
 
       const isOpen = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex, fc.index);
 
       res.push({
         initialized: false,
         isOpen: isOpen,
-        // isLoading: hasParentAndIsClosed ? false : isOpen,
-        isLoading: isOpen,
+        isLoading: hasParentAndIsClosed ? false : isOpen,
+        // isLoading: isOpen,
         noConstraints: false,
         facetHasTimeoutError: false,
         // TODO
@@ -182,7 +183,9 @@ const Faceting = ({
   /**
    * whether the current order is based on teh stored facet order or not.
    */
-  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(FacetStorageService.hasStoredFacetOrder(reference));
+  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(
+    FacetStorageService.hasStoredFacetOrder(reference)
+  );
 
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
     setFacetModels((prevFacetModels: FacetModel[]) => {
@@ -232,18 +235,26 @@ const Faceting = ({
       });
 
       // the initial open status is based on annotation and also the local storage
-      const isOpen = FacetStorageService.getFacetOpenStatus(reference, facetColumn.groupIndex, facetColumn.index);
+      const isOpen = FacetStorageService.getFacetOpenStatus(
+        reference,
+        facetColumn.groupIndex,
+        facetColumn.index
+      );
 
-      // TODO for now we're making sure the groups are open if any of their children are open
-      ///     but if that changes, we have to update this logic
-      if (isOpen) {
+      const groupIsOpen = typeof facetColumn.groupIndex !== 'number' || FacetStorageService.getFacetOpenStatus(reference, facetColumn.groupIndex);
+
+      // if the parent is closed, we don't want to preprocess the facet
+      // if any of the children have preselected filters, we're opening the facet too. so we don't need to worry about that here.
+      const shouldBePreProcessed = groupIsOpen && isOpen;
+
+      if (shouldBePreProcessed) {
         facetsToPreProcess.current.push(index);
       }
 
       facetRequestModels.current.push({
         // some facets require extra step to process preselected filters
-        preProcessed: !isOpen,
-        processed: !isOpen,
+        preProcessed: !shouldBePreProcessed,
+        processed: !shouldBePreProcessed,
         // TODO why??
         // appliedFilters: [],
         registered: false,
@@ -287,6 +298,7 @@ const Faceting = ({
   useLayoutEffect(() => {
     if (!displayFacets) return;
     let firstOpen: number | null = null;
+    // TODO this should be based on the facet orders (REVIEW THIS)
     reference.facetColumns.some((fc, index) => {
       // the initial open status is based on annotation and also the local storage
       const isOpen = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex, fc.index);
@@ -340,15 +352,16 @@ const Faceting = ({
 
     const updateState = (index: number) => {
       const frm = facetRequestModels.current[index];
+      const fc = reference.facetColumns[index];
       const facetModel = facetModels[index];
 
       if (flowControl.current.lastActiveFacet === index) {
         return;
       }
 
-      // TODO what about the group open/close state?
-      // if it's open, we need to process it
-      if (facetModel.isOpen) {
+      // we should process the facet is if it's opened, and if it's part of a group, the group should be opened too
+      const shouldProcess = facetModel.isOpen && ((typeof fc.groupIndex !== 'number') || (openedFacetGroups[fc.groupIndex]));
+      if (shouldProcess) {
         if (!Number.isInteger(frm.reloadStartTime) || frm.reloadStartTime === -1) {
           frm.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
         }
@@ -375,7 +388,7 @@ const Faceting = ({
       if (typeof fo === 'number') {
         updateState(fo);
       } else {
-        fo.children.forEach((childIndex: number) => {
+        fo.children.forEach((childIndex) => {
           updateState(childIndex);
         });
       }
@@ -752,6 +765,9 @@ const Faceting = ({
   };
 
   const toggleFacetGroup = (groupIndex: number, dontLog?: boolean) => {
+    const groupIsOpen = !openedFacetGroupsRef.current[`${groupIndex}`];
+
+    // change the open status of the group
     setOpenedFacetGroups((prev) => {
       const isOpen = !prev[`${groupIndex}`];
 
@@ -769,7 +785,43 @@ const Faceting = ({
         //   reference.defaultLogInfo
         // );
       }
+
+      $log.debug(`toggling facet group index=${groupIndex} to ${isOpen ? 'open' : 'closed'}`);
       return { ...prev, [`${groupIndex}`]: isOpen };
+    });
+
+    // update the facets inside the group (stop or start loading them)
+    setFacetModels((prevFacetModels) => {
+      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+        const fc = reference.facetColumns[fmIndex];
+        if (fc.groupIndex !== groupIndex) return fm;
+
+        // if we're closing the group, we should stop loading facets inside it
+        if (!groupIsOpen) {
+          $log.debug(`stopping loading facet index=${fmIndex} as its group is closed`);
+          return {
+            ...fm,
+            isLoading: false,
+            // if we were waiting for data, make sure to fetch it later
+            initialized: !fm.isLoading,
+          };
+        }
+
+        // if we're opening the group and the facet is open but not initialized, then get the data
+        if (fm.isOpen && !fm.initialized) {
+          $log.debug(`loading facet index=${fmIndex} as its group is opened`);
+          // send a request
+          // TODO should have priority
+          dispatchFacetUpdate(fmIndex, false);
+
+          return {
+            ...fm,
+            isLoading: true,
+          };
+        }
+
+        return fm;
+      });
     });
 
     // make sure we're saving the new state
@@ -847,9 +899,9 @@ const Faceting = ({
 
       const groupItem = items.find((it) => {
         return typeof it !== 'number' && it.index === groupIndex;
-      }) as { index: number; children: number[] } | undefined;
+      });
 
-      if (!groupItem) {
+      if (!groupItem || typeof groupItem === 'number') {
         $log.error('cannot find the group item for reordering inside a group. groupIndex:', groupIndex, 'items:', items);
         return;
       }
@@ -918,6 +970,7 @@ const Faceting = ({
       return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
         const fc = reference.facetColumns[fmIndex];
         const isOpen = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex, fc.index, useDefault);
+        // TODO should also check for group open status?
 
         // if open status has not changed, just return it
         if (fm.isOpen === isOpen) return fm;
@@ -1008,7 +1061,7 @@ const Faceting = ({
   };
 
   const renderFacetList = () => {
-    return facetOrders.map((order, draggableIndex: number) => {
+    return facetOrders.map((order, draggableIndex) => {
       if (typeof order === 'number') {
         return renderFacetAccordionItem(FacetStorageService.getFacetStructureKey(undefined, order), order, draggableIndex);
       } else {

@@ -464,7 +464,7 @@ export class FacetStorageService {
       } else {
         const groupIndex = structure.structureIndex;
         // If this group was already added from stored order, skip it
-        if (!(groupIndex in addedGroups)) return;
+        if (groupIndex in addedGroups) return;
 
         const children: FacetOrder[] = [];
         let groupIsOpen = structure.isOpen;
