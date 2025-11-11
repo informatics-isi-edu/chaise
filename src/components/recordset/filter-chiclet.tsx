@@ -51,6 +51,10 @@ type FilterChicletProps = {
    * on click of the title will be called
    */
   onTitleClick?: (identifier: FilterChicletIdentifier) => void,
+
+  afterTitle?: JSX.Element,
+
+  hideRemove?: boolean,
 };
 
 const FilterChiclet = ({
@@ -64,6 +68,8 @@ const FilterChiclet = ({
   removeIcon,
   onTitleClick,
   valueTooltip,
+  afterTitle,
+  hideRemove = false,
 }: FilterChicletProps): JSX.Element => {
 
   // if callbacks are defined, we have to use button
@@ -84,6 +90,7 @@ const FilterChiclet = ({
   return (
     <div className='filter-chiclet chaise-btn-group'>
       {/* icon */}
+      {!hideRemove &&
       <ChaiseTooltip
         placement='bottom-start'
         tooltip={iconTooltip}
@@ -95,6 +102,7 @@ const FilterChiclet = ({
           {removeIcon ? removeIcon : <i className={onRemove ? 'fa-solid fa-xmark' : 'fa-solid fa-filter'}></i>}
         </IconTag>
       </ChaiseTooltip>
+      }
       {/* title */}
       {title &&
         <ConditionalWrapper
@@ -120,6 +128,7 @@ const FilterChiclet = ({
       >
         <span className='filter-chiclet-value chaise-btn chaise-btn-secondary'>{usedValue}</span>
       </ChaiseTooltip>
+      {afterTitle}
     </div>
   )
 }

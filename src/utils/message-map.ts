@@ -57,7 +57,7 @@ export const MESSAGE_MAP = {
   showErrDetails: 'Show Error Details',
   hideErrDetails: 'Hide Error Details',
   tooltip: {
-    versionTime: 'You are looking at data that was snapshotted on ',
+    versionTime: 'Displaying snapshot from',
     downloadCSV: 'Click to download all matched results',
     permalink: 'Click to copy the current URL to clipboard.',
     actionCol: 'Click on the action buttons to view, edit, or delete each record',

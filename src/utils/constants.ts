@@ -27,7 +27,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'allowErrorDismissal', 'footerMarkdown', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
-  'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
+  'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'hideGoToSnapshot', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
   'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
 ];
@@ -62,6 +62,7 @@ export const DEFAULT_CHAISE_CONFIG = {
   disableExternalLinkModal: false,
   logClientActions: true,
   hideGoToRID: false,
+  hideGoToSnapshot: false,
   showWriterEmptyRelatedOnLoad: null,
   savedQueryConfig: null,
   loggedInMenu: {},

@@ -39,37 +39,53 @@ const TitleVersion = ({ reference, addParanthesis }: TitleVersionProps): JSX.Ele
     };
   }
 
-    const goToLive = () => {
-      const catalogId = ConfigService.catalogID;
-      const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
-      windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
-      windowRef.location.reload();
-    };
 
+  const goToLive = () => {
+    const catalogId = ConfigService.catalogID;
+    const liveLink = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
+    windowRef.location = addLogParams(liveLink, ConfigService.contextHeaderParams);
+    windowRef.location.reload();
+  };
 
   if (!versionInfo || !versionInfo.humanized) return null;
 
   return (
-    <div className='chaise-title-version-info'>
-      {/* <ChaiseTooltip
-        placement='bottom-start'
-        tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
-      >
-        <small className='h3-class'>
-          {addParanthesis && <span className='parenthesis-left'>(</span>}
-          <i className='fa-solid fa-clock-rotate-left'></i>
-          {versionInfo.humanized}
-          {addParanthesis && <span className='parenthesis-right'>)</span>}
-        </small>
-      </ChaiseTooltip> */}
-      <FilterChiclet
+    <div className='chaise-title-version-info chaise-btn-group'>
+      {/* version 1 and 2 */}
+      {/* <FilterChiclet
         identifier={0}
-        value={versionInfo.humanized}
+        value={<><span className='chaise-btn-icon fa-solid fa-clock-rotate-left'></span><span>{versionInfo.humanized}</span></>}
         valueTooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
         iconTooltip={'Reload the page and display the live data.'}
         onRemove={goToLive}
         removeIcon={<i className='fa-solid fa-arrow-left'></i>}
-      />
+
+        // version 2
+        afterTitle={
+          <ChaiseTooltip placement='bottom' tooltip={'Reload the page and display the live data.'}>
+            <button className='chaise-btn chaise-btn-secondary filter-chiclet-value' onClick={goToLive}>View live data</button>
+          </ChaiseTooltip>
+        }
+        hideRemove
+      /> */}
+
+      {/* version 3 */}
+      {/* <div className='chaise-btn-group'> */}
+        <ChaiseTooltip
+          placement='bottom-start'
+          tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}
+        >
+          <div className='chaise-btn chaise-btn-tertiary version-text'>
+            <i className='chaise-btn-icon fa-solid fa-clock-rotate-left'></i>
+            <span>Snapshot from {versionInfo.humanized}</span>
+          </div>
+        </ChaiseTooltip>
+        <ChaiseTooltip placement='bottom' tooltip={'Reload the page and display the live data.'}>
+          <div className='chaise-btn chaise-btn-secondary show-live-btn' onClick={goToLive} aria-label='show live data'>
+            Show live data
+          </div>
+        </ChaiseTooltip>
+      {/* </div> */}
     </div>
   );
 };

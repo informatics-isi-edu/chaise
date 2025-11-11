@@ -19,7 +19,7 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
-import PermalinkForm from '@isrd-isi-edu/chaise/src/components/recordset/permalink-form';
+import SnapshotForm from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-form';
 
 // hooks
 import React, { useEffect, useRef, useState, type JSX } from 'react';
