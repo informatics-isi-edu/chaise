@@ -272,3 +272,14 @@ export class LimitedBrowserSupport extends ChaiseError {
     super(errorNames.limitedBrowserSupport, message, subMessage, clickOkToDismiss)
   }
 }
+
+export class SnapshotError extends ChaiseError {
+  constructor(message: string, subMessage?: string) {
+    super(
+      errorNames.snapshotError,
+      message,
+      subMessage,
+      true
+    );
+  }
+}

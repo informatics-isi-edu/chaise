@@ -122,7 +122,7 @@ body>.container {
   margin-right: 0px; // offset marging-right: -15px from navbar-right
 
   .chaise-snapshot-dropdown {
-    .dropdown-menu {
+    > .dropdown-menu {
       padding: 10px;
       // override bootstrap style
       .permalink-form-dropdown-item.dropdown-item:active,
@@ -134,7 +134,7 @@ body>.container {
     }
 
     .chaise-snapshot-dropdown-toggle {
-      padding: 26px 10px 24px 10px;
+      padding: 26px 10px 24px 15px;
       border-radius: 0;
 
       // similar to the login button
@@ -175,8 +175,16 @@ body>.container {
         }
 
         .toggle-snapshot-live-btn {
-          margin-left: 5px;
-          margin-right: 3px;
+          // margin-left: 5px;
+          // margin-right: 3px;
+        }
+
+        .dropdown-item {
+          align-items: center;
+          width: 140px;
+          gap: 10px;
+          padding: 5px 10px;
+          margin: 0;
         }
       }
 
@@ -184,29 +192,19 @@ body>.container {
         align-self: flex-end;
       }
 
+      // make sure the apply button stays in the same position
       .input-switch-datetime .chaise-btn-group  {
         float: left;
         height: 0;
       }
+
+      // increase spacing between date and time inputs
+      .input-switch-datetime .input-switch-time {
+        margin: 5px 0;
+      }
     }
   }
 }
-
-  .history-dropdown {
-    .dropdown-menu {
-      padding: 10px !important;
-    }
-
-    // override bootstrap style
-    .dropdown-item:not(.live-button):active, .dropdown-item:not(.live-button):hover {
-      color: map.get(variables.$color-map, 'black');
-      background-color: unset;
-    }
-
-    .input-switch-datetime .input-switch-time {
-      margin: 5px 0;
-    }
-  }
 
 @media (max-width: 992px) {
   .navbar-collapse {

@@ -11,7 +11,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   ChaiseError, CustomError, DifferentUserConflictError, ForbiddenAssetAccess,
   InvalidHelpPage,
-  NoRecordError, NoRecordRidError, UnauthorizedAssetAccess
+  NoRecordError, NoRecordRidError, SnapshotError, UnauthorizedAssetAccess
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -67,11 +67,13 @@ const ErrorModal = (): JSX.Element | null => {
 
   const showLogin = !session && !(
     exception instanceof DifferentUserConflictError ||
-    exception instanceof InvalidHelpPage
+    exception instanceof InvalidHelpPage ||
+    exception instanceof SnapshotError
   );
 
   const skipMaybeNeedLoginMessage = (
-    exception instanceof InvalidHelpPage
+    exception instanceof InvalidHelpPage ||
+    exception instanceof SnapshotError
   );
 
   // ---------------- message, submessage, and pageName ---------------//

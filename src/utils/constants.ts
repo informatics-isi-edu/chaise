@@ -125,7 +125,8 @@ export const errorNames = {
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
   invalidHelpPage: 'Help Page Not Found',
-  limitedBrowserSupport: 'Limited Browser Support'
+  limitedBrowserSupport: 'Limited Browser Support',
+  snapshotError: 'Invalid Snapshot',
 };
 
 export const errorMessages = {
@@ -155,6 +156,10 @@ export const errorMessages = {
     forbidden: 'You do not have permission to view this file.',
     unknownError: 'An error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.',
     notFound: 'This file could not be found.'
+  },
+  goToSnapshot: {
+    terminal: 'Unable to convert datetime to snapshot. <br> If you continue to face this issue, please contact the system administrator.',
+    future: 'The snapshot date/time cannot be in the future.',
   }
 };
 

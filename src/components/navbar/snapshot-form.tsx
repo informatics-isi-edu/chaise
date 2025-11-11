@@ -1,25 +1,30 @@
+import moment from 'moment-timezone';
+
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { FormProvider, useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { SnapshotError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { dataFormats, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 type SnapshotFormData = {
@@ -27,6 +32,8 @@ type SnapshotFormData = {
 };
 
 const SnapshotForm = () => {
+  const { dispatchError, logTerminalError } = useError();
+
   const [snapshotOption, setSnapshotOption] = useState('snapshot');
 
   const catalogId = ConfigService.catalogID;
@@ -56,6 +63,10 @@ const SnapshotForm = () => {
     setSnapshotOption(value);
   };
 
+  const showError = (message: string, subMessage?: string) => {
+    dispatchError({ error: new SnapshotError(message, subMessage) });
+  };
+
   /**
    * the callback for when custom snapshot button is clicked
    */
@@ -65,21 +76,23 @@ const SnapshotForm = () => {
       url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
     } else {
       const dateValue = data[fieldName];
+      const m = moment(dateValue);
 
-      if (!isStringAndNotEmpty(dateValue)) return;
+      if (m.isAfter(moment())) {
+        showError(errorMessages.goToSnapshot.future);
+        return;
+      }
 
-      let snap = '';
+      let snap = '', errorDetails;
       try {
-        snap = ConfigService.ERMrest.HistoryService.datetimeISOToSnapshot(
-          new Date(dateValue).toISOString()
-        );
+        snap = ConfigService.ERMrest.HistoryService.datetimeISOToSnapshot(m.toISOString());
       } catch (e) {
-        console.error('Unable to resolve the snapshot', e);
+        logTerminalError(e);
+        errorDetails = e instanceof Error ? e.message : '';
       }
 
       if (!isStringAndNotEmpty(snap)) {
-        // TODO: show error to user
-        console.error('Unable to resolve the snapshot');
+        showError(errorMessages.goToSnapshot.terminal, errorDetails);
         return;
       }
 
@@ -111,37 +124,29 @@ const SnapshotForm = () => {
         }}
       >
         <div className={`snapshot-form-label${currVersionValue ? ' w-current-version' : ''}`}>
-          <span>Show </span>
           {currVersionValue ? (
-            <Dropdown onSelect={handleDropdownChange}>
-              <Dropdown.Toggle className='chaise-btn chaise-btn-secondary toggle-snapshot-live-btn'>
-                {formEnabled ? 'snapshot from' : 'live data'}
-              </Dropdown.Toggle>
-              <Dropdown.Menu as='ul'>
-                <Dropdown.Item as='li' eventKey='snapshot'>
-                  <span>snapshot from</span>
-                </Dropdown.Item>
-                <Dropdown.Item as='li' eventKey='live'>
-                  <span>live data</span>
-                </Dropdown.Item>
-                {/* <Dropdown.Item as='li' eventKey='snapshot'>
-                  <span>snapshot from</span>
-                  {formEnabled && (
-                    <span className='fa-solid fa-check' style={{ float: 'right' }}></span>
-                  )}
-                </Dropdown.Item>
-                <Dropdown.Item as='li' eventKey='live'>
-                  <span>live data</span>
-                  {snapshotOption === 'live' && (
-                    <span className='fa-solid fa-check' style={{ float: 'right' }}></span>
-                  )}
-                </Dropdown.Item> */}
-              </Dropdown.Menu>
-            </Dropdown>
+            <>
+              <span style={{ marginRight: '5px' }}>Show</span>
+              <Dropdown onSelect={handleDropdownChange}>
+                <Dropdown.Toggle className='chaise-btn chaise-btn-secondary toggle-snapshot-live-btn'>
+                  {formEnabled ? 'snapshot from' : 'live data'}
+                </Dropdown.Toggle>
+                <Dropdown.Menu align='start'>
+                  <Dropdown.Item eventKey='snapshot'>
+                    <span>snapshot from</span>
+                    {formEnabled && <span className='fa-solid fa-check'></span>}
+                  </Dropdown.Item>
+                  <Dropdown.Item eventKey='live'>
+                    <span>live data</span>
+                    {!formEnabled && <span className='fa-solid fa-check'></span>}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+              <span style={{ marginLeft: '2px' }}>: </span>
+            </>
           ) : (
-            <span>snapshot from</span>
+            <span>Show snapshot from:</span>
           )}
-          <span>: </span>
         </div>
         <InputSwitch
           displayExtraDateTimeButtons
