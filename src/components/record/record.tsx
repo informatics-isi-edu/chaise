@@ -17,6 +17,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
+import ScrollToTopButton from '@isrd-isi-edu/chaise/src/components/record/scroll-to-top-button';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
@@ -152,8 +153,6 @@ const RecordInner = ({
 
   const [openRelatedSections, setOpenRelatedSections] = useState<string[]>([]);
 
-  const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
-
   /**
    * used to see if there are any pending create requests
    */
@@ -219,16 +218,8 @@ const RecordInner = ({
     if (!initialized) return;
     const resizeSensors = attachContainerHeightSensors(parentContainer);
 
-    const toggleScrollToTopBtn = () => {
-      if (!mainContainer.current) return;
-      setShowScrollToTopBtn(mainContainer.current.scrollTop > 300);
-    }
-    mainContainer.current?.addEventListener('scroll', toggleScrollToTopBtn);
-
     return () => {
       resizeSensors?.forEach((rs) => !!rs && rs.detach());
-
-      mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
   }, [initialized]);
 
@@ -754,13 +745,10 @@ const RecordInner = ({
             message={relatedSectionInitialized ? 'Updating...' : 'Loading...'}
           />
         }
-        {showScrollToTopBtn &&
-          <ChaiseTooltip placement='left' tooltip='Scroll to top of the page.'>
-            <div className='chaise-btn chaise-btn-primary back-to-top-btn' onClick={() => scrollMainContainerToTop(LogActions.SCROLL_TOP)}>
-              <i className='fa-solid fa-caret-up'></i>
-            </div>
-          </ChaiseTooltip>
-        }
+        <ScrollToTopButton
+          onClick={() => scrollMainContainerToTop(LogActions.SCROLL_TOP)}
+          scrollContainer={mainContainer.current}
+        />
       </div>
       {initialized && relatedSectionInitialized && <Footer />}
     </div>
