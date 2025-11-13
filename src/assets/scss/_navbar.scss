@@ -118,7 +118,7 @@ body>.container {
 }
 
 // positioning of history control in navbar
-.snapshot-control {
+.chaise-snapshot-control {
   margin-right: 0px; // offset marging-right: -15px from navbar-right
 
   .chaise-snapshot-dropdown {
@@ -134,7 +134,7 @@ body>.container {
     }
 
     .chaise-snapshot-dropdown-toggle {
-      padding: 26px 10px 24px 15px;
+      padding: 25px 10px 25px 15px;
       border-radius: 0;
 
       // similar to the login button

@@ -3,7 +3,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState, type JSX, } from 'react';
 
 // components
-import Dropdown from 'react-bootstrap/Dropdown';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -11,7 +10,6 @@ import Spinner from 'react-bootstrap/Spinner';
 
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 import SnapshotDropdown from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-dropdown';
@@ -21,7 +19,7 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { CustomError, NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -32,13 +30,12 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 // utilities
 import { splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
-  MenuOption, NavbarBanner, addLogParams,
-  canEnable, canShow, createMenuList, menuItemClasses,
+  MenuOption, NavbarBanner, canEnable, canShow, createMenuList, menuItemClasses,
   onDropdownToggle, onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = ConfigService.catalogID;
@@ -54,7 +51,7 @@ const ChaiseNavbar = (): JSX.Element => {
   const [showRidSpinner, setShowRidSpinner] = useState(false);
   const [topBanners, setTopBanners] = useState<NavbarBanner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<NavbarBanner[]>([]);
-  const [searchMode, setSearchMode] = useState<'rid' | 'snapshot'>('rid');
+
   /**
    * Keeps track of most recently opened dropdown
    * We track this to make sure only one dropdown is open at a time.
@@ -186,12 +183,6 @@ const ChaiseNavbar = (): JSX.Element => {
     }
   }
 
-  const handleToLiveClick = () => {
-    const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
-    windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
-    windowRef.location.reload();
-  };
-
   // TODO: onToggle event type
   const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
     /**
@@ -210,44 +201,7 @@ const ChaiseNavbar = (): JSX.Element => {
 
 
   const handleRidSearchEnter = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (searchMode === 'rid') {
-        handleRidSearch();
-      } else {
-        handleSnapshotSearch();
-      }
-    }
-  };
-
-  const handleModeToggle = (mode: 'rid' | 'snapshot') => {
-    setSearchMode(mode);
-    // Clear the input when switching modes
-    setFormModel({ ridSearchTerm: '' });
-  };
-
-  const handleSnapshotSearch = () => {
-    if (!isStringAndNotEmpty(formModel.ridSearchTerm)) return;
-
-    console.log('Snapshot search input:', formModel.ridSearchTerm);
-
-    let snap = '';
-    try {
-      snap = ConfigService.ERMrest.HistoryService.datetimeISOToSnapshot(new Date(formModel.ridSearchTerm).toISOString());
-    } catch (e) {
-      //
-    }
-    if (!isStringAndNotEmpty(snap)) {
-      dispatchError({
-        error: new CustomError('Snapshot', 'Unable to resolve the snapshot. Please try again later.', undefined, undefined, true),
-        isDismissible: true,
-      });
-      return;
-    }
-
-    const url = window.location.href.replace(catalogId, catalogId.split('@')[0] + '@' + snap);
-
-    windowRef.open(url, '_blank');
-
+    if (e.key === 'Enter') handleRidSearch();
   };
 
   const handleRidSearch = () => {
@@ -359,9 +313,11 @@ const ChaiseNavbar = (): JSX.Element => {
 
   const renderSnapshotControl = () => {
     if (cc.hideGoToSnapshot === true) return;
+    // only available on record and recordset apps
+    if ([APP_NAMES.RECORD as string, APP_NAMES.RECORDSET as string].indexOf(ConfigService.appSettings.appName) === -1) return;
 
     return (
-      <span className='nav navbar-nav navbar-right snapshot-control'>
+      <span className='nav navbar-nav navbar-right chaise-snapshot-control'>
         <SnapshotDropdown />
       </span>
     );

@@ -83,7 +83,14 @@ export class ConfigService {
 
   private static _catalogID: string;
 
-  private static _catalogIDVersion: string | null = null;
+  private static _catalogIDVersion?: string;
+
+  /**
+   * If the catalog version was corrected, this will hold the previous version info.
+   */
+  public static versionCorrected?: {
+    prevVersion: string,
+  }
 
   /**
    * Should be called in useEffect of the main app, to ensure all the
@@ -153,16 +160,32 @@ export class ConfigService {
     const catalogId = getCatalogId(settings.skipParsingURLForCatalogID, settings.defaultCatalog);
 
     ConfigService._catalogID = catalogId;
-    ConfigService._catalogIDVersion = catalogId.split('@')[1] || null;
+    ConfigService._catalogIDVersion = catalogId.split('@')[1] || undefined;
 
     if (catalogId) {
       // the server object that can be used in other places
       ConfigService._server = ERMrest.ermrestFactory.getServer(service, ConfigService._contextHeaderParams);
 
-      const response = await ConfigService._server.catalogs.get(catalogId, true);
+      const catalog = await ConfigService._server.catalogs.get(catalogId, true);
+
+      // ermrestjs might change the version to what ermrest reports
+      if (catalog.versionCorrected) {
+
+        ConfigService.versionCorrected = {
+          prevVersion: ConfigService._catalogIDVersion || '',
+        };
+
+        const newURL = window.location.href.replace(catalogId, catalog.id);
+        $log.info(`Version corrected from ${ConfigService._catalogIDVersion} to ${catalog.version}.`);
+        windowRef.history.replaceState({}, '', newURL);
+      }
+
+      ConfigService._catalogID = catalog.id;
+      ConfigService._catalogIDVersion = catalog.version;
+
       // we already setup the defaults and the configuration based on chaise-config.js
-      if (response && response.chaiseConfig) {
-        ConfigService._setChaiseConfig(response.chaiseConfig);
+      if (catalog.chaiseConfig) {
+        ConfigService._setChaiseConfig(catalog.chaiseConfig);
       }
     }
 
@@ -223,7 +246,7 @@ export class ConfigService {
     return ConfigService._catalogID;
   }
 
-  static get CatalogIDVersion() {
+  static get catalogIDVersion() {
     return ConfigService._catalogIDVersion;
   }
 

@@ -1,16 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 // locators
+import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
-import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import PageLocators from '@isrd-isi-edu/chaise/test/e2e/locators/page';
+
 
 // utils
 import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
+  test.describe.configure({ mode: 'parallel' });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
     await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'product-navbar', 'accommodation', testInfo, baseURL));
@@ -158,6 +162,49 @@ test.describe('Navbar', () => {
       // 7 menu options defined in chaise-config
       // accounts for 2 broken menu options that are set as invalid
       await expect.soft(loginMenu.locator('a')).toHaveCount(5);
+    });
+  });
+
+  test('go to snapshot', async ({ page }) => {
+    const navbar = NavbarLocators.getContainer(page);
+    const navbarBtn = NavbarLocators.getGoToSnapshotNavbarButton(page);
+    const formElements = NavbarLocators.goTOSnapshotFormElements(page);
+    const labelElements = NavbarLocators.getGoToSnapshotOrLiveToggleElements(page);
+    const versionInfo = PageLocators.getVersionInfoElements(page);
+
+    await test.step('snapshot dropdown should be present', async () => {
+      await expect.soft(navbar).toBeVisible();
+      await expect.soft(navbarBtn).toBeVisible();
+    });
+
+    await test.step('clicking on snapshot dropdown should open the snapshot form', async () => {
+      await navbarBtn.click();
+      await expect.soft(formElements.form).toBeVisible();
+
+      await expect.soft(labelElements.label).toHaveText('Show snapshot from:');
+      // await expect.soft(labelElements.toggle).not.toBeAttached();
+    });
+
+    await test.step('clicking on now and apply should go to a versioned link.', async () => {
+      await formElements.nowBtn.click();
+      await formElements.applyBtn.click();
+
+      const alert = AlertLocators.getWarningAlert(page);
+
+      await page.waitForURL('**/recordset/**');
+      await expect.soft(alert).toBeVisible();
+      await expect.soft(alert).toContainText('Displaying the nearest available snapshot');
+      await expect.soft(alert).toContainText('to the requested time of ');
+    });
+
+    await test.step('version info should be visible and should be able to go back to live version', async () => {
+      await expect.soft(versionInfo.container).toBeVisible();
+      await expect.soft(versionInfo.liveBtn).toBeVisible();
+      await versionInfo.liveBtn.click();
+
+      await page.waitForURL('**/recordset/**');
+      await expect.soft(versionInfo.container).not.toBeVisible();
+
     });
   });
 });

@@ -69,7 +69,15 @@ export const MESSAGE_MAP = {
     showDetails: 'Click to show more details about the filters',
     saveQuery: 'Click to save the current search criteria',
     export: 'Click to choose an export format.',
-    liveData: 'You are viewing snapshotted data. Click here to return to the live data catalog.',
+    liveData: {
+      record: 'Go to live content of the same record.',
+      recordset: 'Go to live content for the same search criteria.',
+    },
+    snapshotDropdown: {
+      liveAndSnapshot: 'Go to live or historical data.',
+      snapshotOnly: 'Go to historical data.',
+      liveOnly: 'Go to live data.',
+    },
     // tooltips for disabled rows in recordset single select modal for foreignkey-field and foreignkey-dropdown-field
     selectedDisabledRow: 'This row is selected in another input in the form',
     associatedDisabledRow: 'This row is already associated'

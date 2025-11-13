@@ -9,8 +9,7 @@ import SnapshotForm from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-fo
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const SnapshotDropdown = (): JSX.Element => {
   /**
@@ -22,23 +21,19 @@ const SnapshotDropdown = (): JSX.Element => {
    */
   const [showTooltip, setShowTooltip] = useState(false);
 
-
   //-------------------  UI callbacks:   --------------------//
 
   /**
    * called when users want to toggle the main dropdown
    * used for conditionally hiding the tooltip when the dropdown is open.
-  */
- const onDropdownToggle = (nextShow: boolean) => {
-   // toggle the tooltip based on dropdown's inverse state
-   setUseTooltip(!nextShow);
-   if (nextShow === true) setShowTooltip(false);
+   */
+  const onDropdownToggle = (nextShow: boolean) => {
+    // toggle the tooltip based on dropdown's inverse state
+    setUseTooltip(!nextShow);
+    if (nextShow === true) setShowTooltip(false);
   };
 
   //-------------------  render logic:   --------------------//
-  const catalogIdVersion = ConfigService.CatalogIDVersion;
-  // TODO
-  const dropdDownButtonTooltip =  catalogIdVersion ? 'Navigate to live or snapshotted data.' : 'Navigate to live data.';
 
   return (
     <Dropdown
@@ -48,13 +43,17 @@ const SnapshotDropdown = (): JSX.Element => {
     >
       <ChaiseTooltip
         placement='bottom'
-        tooltip={dropdDownButtonTooltip}
+        tooltip={
+          ConfigService.catalogIDVersion
+            ? MESSAGE_MAP.tooltip.snapshotDropdown.liveAndSnapshot
+            : MESSAGE_MAP.tooltip.snapshotDropdown.snapshotOnly
+        }
         show={showTooltip}
         onToggle={(show) => setShowTooltip(useTooltip && show)}
       >
         <Dropdown.Toggle
           as='a'
-          aria-label='History Dropdown'
+          aria-label='Snapshot Dropdown'
           className='chaise-btn chaise-btn-tertiary chaise-snapshot-dropdown-toggle'
         >
           <span className='chaise-btn-icon fa-solid fa-clock-rotate-left' />
@@ -62,10 +61,7 @@ const SnapshotDropdown = (): JSX.Element => {
       </ChaiseTooltip>
 
       <Dropdown.Menu align='end'>
-        <Dropdown.Item
-          as='div'
-          className='permalink-form-dropdown-item'
-        >
+        <Dropdown.Item as='div' className='permalink-form-dropdown-item'>
           <SnapshotForm />
         </Dropdown.Item>
       </Dropdown.Menu>

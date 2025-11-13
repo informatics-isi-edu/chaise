@@ -11,13 +11,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { SnapshotError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -26,6 +23,7 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type SnapshotFormData = {
   [key: string]: string;
@@ -37,7 +35,7 @@ const SnapshotForm = () => {
   const [snapshotOption, setSnapshotOption] = useState('snapshot');
 
   const catalogId = ConfigService.catalogID;
-  const catalogIdVersion = ConfigService.CatalogIDVersion;
+  const catalogIdVersion = ConfigService.catalogIDVersion;
   const fieldName = 'version-timestamp';
 
   const currVersionValue = catalogIdVersion
@@ -77,11 +75,6 @@ const SnapshotForm = () => {
     } else {
       const dateValue = data[fieldName];
       const m = moment(dateValue);
-
-      if (m.isAfter(moment())) {
-        showError(errorMessages.goToSnapshot.future);
-        return;
-      }
 
       let snap = '', errorDetails;
       try {
@@ -132,11 +125,11 @@ const SnapshotForm = () => {
                   {formEnabled ? 'snapshot from' : 'live data'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu align='start'>
-                  <Dropdown.Item eventKey='snapshot'>
+                  <Dropdown.Item eventKey='snapshot' className='snapshot-item'>
                     <span>snapshot from</span>
                     {formEnabled && <span className='fa-solid fa-check'></span>}
                   </Dropdown.Item>
-                  <Dropdown.Item eventKey='live'>
+                  <Dropdown.Item eventKey='live' className='live-item'>
                     <span>live data</span>
                     {!formEnabled && <span className='fa-solid fa-check'></span>}
                   </Dropdown.Item>
@@ -160,13 +153,18 @@ const SnapshotForm = () => {
           clearClasses='snapshot-date-clear'
           clearTimeClasses='snapshot-time-clear'
         />
-        <button
-          type='submit'
-          className='chaise-btn chaise-btn-primary snapshot-form-apply-btn'
-          disabled={disableSubmit()}
+        <ChaiseTooltip
+          placement='bottom'
+          tooltip={formEnabled ? MESSAGE_MAP.tooltip.snapshotDropdown.snapshotOnly : MESSAGE_MAP.tooltip.snapshotDropdown.liveOnly}
         >
-          Apply
-        </button>
+          <button
+            type='submit'
+            className='chaise-btn chaise-btn-primary snapshot-form-apply-btn'
+            disabled={disableSubmit()}
+          >
+            Apply
+          </button>
+        </ChaiseTooltip>
       </form>
     </FormProvider>
   );

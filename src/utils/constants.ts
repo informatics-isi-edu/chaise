@@ -158,8 +158,7 @@ export const errorMessages = {
     notFound: 'This file could not be found.'
   },
   goToSnapshot: {
-    terminal: 'Unable to convert datetime to snapshot. <br> If you continue to face this issue, please contact the system administrator.',
-    future: 'The snapshot date/time cannot be in the future.',
+    terminal: 'Unable to convert the given datetime to snapshot. <br> If you continue to face this issue, please contact the system administrator.',
   }
 };
 
