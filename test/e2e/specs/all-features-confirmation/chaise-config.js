@@ -120,5 +120,6 @@ var chaiseConfig = {
                ]
            }
        ]
-   }
+   },
+   hideGoToSnapshot: true,
 };

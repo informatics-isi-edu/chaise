@@ -120,5 +120,4 @@ var chaiseConfig = {
         ]
     },
     asciiTextValidation: true,
-    hideGoToSnapshot: true
 };
