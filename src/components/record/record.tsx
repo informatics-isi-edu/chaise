@@ -16,6 +16,7 @@ import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-butt
 import Spinner from 'react-bootstrap/Spinner';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
 import ScrollToTopButton from '@isrd-isi-edu/chaise/src/components/record/scroll-to-top-button';
 
 // hooks
@@ -813,6 +814,9 @@ const RecordInner = ({
                 </ChaiseTooltip>
                 <Export reference={reference} tuple={page.tuples[0]} disabled={false} csvOptionName={'This record (CSV)'} />
                 <ShareCiteButton reference={reference} tuple={page.tuples[0]} citation={citation} />
+              </div>
+              <div className='float-left'>
+                <TitleVersion reference={reference} />
               </div>
             </div>
             <div className='title'>

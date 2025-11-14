@@ -27,7 +27,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'allowErrorDismissal', 'footerMarkdown', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
-  'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
+  'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'hideGoToSnapshot', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
   'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
 ];
@@ -62,6 +62,7 @@ export const DEFAULT_CHAISE_CONFIG = {
   disableExternalLinkModal: false,
   logClientActions: true,
   hideGoToRID: false,
+  hideGoToSnapshot: false,
   showWriterEmptyRelatedOnLoad: null,
   savedQueryConfig: null,
   loggedInMenu: {},
@@ -124,7 +125,8 @@ export const errorNames = {
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
   invalidHelpPage: 'Help Page Not Found',
-  limitedBrowserSupport: 'Limited Browser Support'
+  limitedBrowserSupport: 'Limited Browser Support',
+  snapshotError: 'Invalid Snapshot',
 };
 
 export const errorMessages = {
@@ -154,6 +156,9 @@ export const errorMessages = {
     forbidden: 'You do not have permission to view this file.',
     unknownError: 'An error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.',
     notFound: 'This file could not be found.'
+  },
+  goToSnapshot: {
+    terminal: 'Unable to convert the given datetime to snapshot. <br> If you continue to face this issue, please contact the system administrator.',
   }
 };
 

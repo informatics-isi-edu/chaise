@@ -6,6 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
@@ -17,6 +18,8 @@ import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
+import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
+import SnapshotForm from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-form';
 
 // hooks
 import React, { useEffect, useRef, useState, type JSX } from 'react';
@@ -43,7 +46,6 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -597,6 +599,7 @@ const RecordsetInner = ({
     })
   }
 
+
   /**
    * change the state of facet panel
    * @param value if given, it will force the state
@@ -668,17 +671,19 @@ const RecordsetInner = ({
   const recordsetUIContextTitles = uiContextTitles ? [...uiContextTitles] : [{ reference: initialReference }];
   const recordsetFacetDepthLevel = config.facetDepthLevel !== undefined ? config.facetDepthLevel : 1;
 
-  /**
-   * version info
-   */
-  let versionInfo: { [key: string]: string } | null = null;
-  if (reference && reference.location.version) {
-    versionInfo = {
-      date: getVersionDate(reference.location),
-      humanized: getHumanizeVersionDate(reference.location)
-    }
-  }
+  const titleVersion = config.displayMode === RecordsetDisplayMode.FULLSCREEN && initialReference.location.version ? (
+    <TitleVersion reference={initialReference} />
+  ) : null;
 
+  const pageTitle = (config.displayMode === RecordsetDisplayMode.FULLSCREEN) ? (
+    <h1 id='page-title'>
+      <Title addLink={false} reference={initialReference} />
+      {/* {!facetPanelOpen && <span className='version-info'>{titleVersion}</span>} */}
+      {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
+        <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
+      }
+    </h1>
+  ) : null;
 
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
@@ -888,40 +893,36 @@ const RecordsetInner = ({
 
           <div className='top-right-panel' ref={topRightContainer}>
             {config.displayMode === RecordsetDisplayMode.FULLSCREEN &&
-              <div className='recordset-title-container title-container'>
-                <div className='recordset-title-buttons title-buttons'>
-                  <Export
-                    reference={reference}
-                    disabled={isLoading || !page || page.length === 0}
-                  />
-                  <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
-                    <a
-                      id='permalink'
-                      className='chaise-btn chaise-btn-primary'
-                      href={recordsetLink}
-                      onClick={copyPermalink}
-                    >
-                      <span className='chaise-btn-icon fa-solid fa-bookmark' />
-                      <span>Permalink</span>
-                    </a>
-                  </ChaiseTooltip>
-                  {savedQueryConfig?.showUI && savedQueryReference &&
-                    <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
-                  }
-
-                </div>
-                <h1 id='page-title'>
-                  <Title addLink={false} reference={initialReference} />
-                  {versionInfo && versionInfo.humanized &&
-                    <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
-                      <small className='h3-class'>({versionInfo.humanized})</small>
+              <>
+                <div className='recordset-title-container title-container'>
+                  <div className='recordset-title-buttons title-buttons'>
+                    <Export
+                      reference={reference}
+                      disabled={isLoading || !page || page.length === 0}
+                    />
+                     <ChaiseTooltip placement='bottom' tooltip={permalinkTooltip} dynamicTooltipString>
+                      <a
+                        id='permalink'
+                        className='chaise-btn chaise-btn-primary'
+                        href={recordsetLink}
+                        onClick={copyPermalink}
+                      >
+                        <span className='chaise-btn-icon fa-solid fa-bookmark' />
+                        <span>Permalink</span>
+                      </a>
                     </ChaiseTooltip>
-                  }
-                  {reference.comment && reference.comment.value  && reference.comment.displayMode === CommentDisplayModes.INLINE &&
-                    <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span>
-                  }
-                </h1>
-              </div>
+                    {savedQueryConfig?.showUI && savedQueryReference &&
+                      <SavedQueryDropdown appliedFiltersCallback={getRecordsetAppliedFilters}></SavedQueryDropdown>
+                    }
+                  </div>
+                  {titleVersion !== null ?  titleVersion : pageTitle}
+                </div>
+                {titleVersion !== null &&
+                  <div style={{paddingBottom: '20px'}}>
+                    {pageTitle}
+                  </div>
+                }
+              </>
             }
             {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 &&
               <div className='recordset-controls-container'>

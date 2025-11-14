@@ -1,5 +1,8 @@
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { dataFormats, APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const moment = windowRef.moment;
 
@@ -48,4 +51,40 @@ export function getVersionDate(location: any) {
  */
 export function getHumanizeVersionDate(location: any) {
   return humanizeTimestamp(location.versionAsISOString);
+}
+
+export function getLiveButtonTooltip() {
+  const appName = ConfigService.appSettings.appName;
+  if (appName === APP_NAMES.RECORD) {
+    return MESSAGE_MAP.tooltip.liveData.record;
+  } else if (appName === APP_NAMES.RECORDSET) {
+    return MESSAGE_MAP.tooltip.liveData.recordset;
+  }
+  return '';
+}
+
+
+/**
+ * returns null if there is no version correction, otherwise returns the appropriate alert message
+ */
+export function getVersionCorrectedAlertMessage(): string | null {
+  if (!ConfigService.versionCorrected) return null;
+
+  const prevVersion = ConfigService.versionCorrected.prevVersion;
+  if (!prevVersion) return null;
+
+  const prevDatetimeISO = ConfigService.ERMrest.HistoryService.snapshotToDatetimeISO(prevVersion, true);
+  if (!prevDatetimeISO) return null;
+
+  const currDateTimeISO = ConfigService.ERMrest.HistoryService.snapshotToDatetimeISO(ConfigService.catalogIDVersion, true);
+  if (!currDateTimeISO) return null;
+
+  const formattedDatetime = moment(prevDatetimeISO).format(dataFormats.datetime.display);
+
+  const prev = moment(prevDatetimeISO);
+  const curr = moment(currDateTimeISO);
+  const duration = moment.duration(prev.diff(curr));
+  const diff = duration.humanize() + (curr.isBefore(prev) ? ' prior' : ' later');
+
+  return `Displaying the nearest available snapshot (${diff}) to the requested time of ${formattedDatetime}.`
 }

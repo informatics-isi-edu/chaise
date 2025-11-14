@@ -11,7 +11,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   ChaiseError, CustomError, DifferentUserConflictError, ForbiddenAssetAccess,
   InvalidHelpPage,
-  NoRecordError, NoRecordRidError, UnauthorizedAssetAccess
+  NoRecordError, NoRecordRidError, SnapshotError, UnauthorizedAssetAccess
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -67,11 +67,15 @@ const ErrorModal = (): JSX.Element | null => {
 
   const showLogin = !session && !(
     exception instanceof DifferentUserConflictError ||
-    exception instanceof InvalidHelpPage
+    exception instanceof InvalidHelpPage ||
+    exception instanceof SnapshotError ||
+    exception instanceof windowRef.ERMrest.SnapshotNotFoundError
   );
 
   const skipMaybeNeedLoginMessage = (
-    exception instanceof InvalidHelpPage
+    exception instanceof InvalidHelpPage ||
+    exception instanceof SnapshotError ||
+    exception instanceof windowRef.ERMrest.SnapshotNotFoundError
   );
 
   // ---------------- message, submessage, and pageName ---------------//
@@ -81,9 +85,13 @@ const ErrorModal = (): JSX.Element | null => {
     subMessage = (exception.subMessage ? exception.subMessage : undefined),
     message = exception.message || ''; // initialize message to empty string if not defined
 
-
+  if (exception instanceof windowRef.ERMrest.SnapshotNotFoundError) {
+    pageName = 'live data';
+    // remove the @snapshot part
+    redirectLink = windowRef.location.href.replace(`@${ConfigService.catalogIDVersion}`, '');
+  }
   // invalid server response should be treated the same as terminal
-  if (exception instanceof windowRef.ERMrest.InvalidServerResponse) {
+  else if (exception instanceof windowRef.ERMrest.InvalidServerResponse) {
     message = errorMessages.systemAdminMessage;
     subMessage = exception.message;
   }

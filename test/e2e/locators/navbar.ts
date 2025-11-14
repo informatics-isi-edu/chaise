@@ -66,4 +66,34 @@ export default class NavbarLocators {
   static getGoToRIDButton(page: Page): Locator {
     return page.locator('.rid-search .chaise-search-btn');
   }
+
+  static getGoToSnapshotNavbarButton(page: Page): Locator {
+    return page.locator('.chaise-snapshot-control');
+  }
+
+  static getGoToSnapshotOrLiveToggleElements(page: Page) {
+    const form = page.locator('.chaise-snapshot-form');
+    const label = page.locator('.snapshot-form-label');
+
+    return {
+      label,
+      toggle: form.locator('.toggle-snapshot-live-btn'),
+      snapshotItem: label.locator('.snapshot-item.dropdown-item'),
+      liveItem: label.locator('.live-item.dropdown-item'),
+    };
+  }
+
+  static goTOSnapshotFormElements(page: Page) {
+    const form = page.locator('.chaise-snapshot-form');
+    return {
+      form,
+      dateInput: form.locator('.snapshot-date-input'),
+      timeInput: form.locator('.snapshot-time-input'),
+      clearDateBtn: form.locator('.snapshot-date-clear'),
+      clearTimeBtn: form.locator('.snapshot-time-clear'),
+      nowBtn: form.locator('.date-time-now-btn'),
+      applyBtn: form.locator('.snapshot-form-apply-btn'),
+    }
+  }
+
 }

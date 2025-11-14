@@ -57,7 +57,7 @@ export const MESSAGE_MAP = {
   showErrDetails: 'Show Error Details',
   hideErrDetails: 'Hide Error Details',
   tooltip: {
-    versionTime: 'You are looking at data that was snapshotted on ',
+    versionTime: 'Displaying snapshot from',
     downloadCSV: 'Click to download all matched results',
     permalink: 'Click to copy the current URL to clipboard.',
     actionCol: 'Click on the action buttons to view, edit, or delete each record',
@@ -69,7 +69,15 @@ export const MESSAGE_MAP = {
     showDetails: 'Click to show more details about the filters',
     saveQuery: 'Click to save the current search criteria',
     export: 'Click to choose an export format.',
-    liveData: 'You are viewing snapshotted data. Click here to return to the live data catalog.',
+    liveData: {
+      record: 'Go to live content of the same record.',
+      recordset: 'Go to live content for the same search criteria.',
+    },
+    snapshotDropdown: {
+      liveAndSnapshot: 'Go to live or historical data.',
+      snapshotOnly: 'Go to historical data.',
+      liveOnly: 'Go to live data.',
+    },
     // tooltips for disabled rows in recordset single select modal for foreignkey-field and foreignkey-dropdown-field
     selectedDisabledRow: 'This row is selected in another input in the form',
     associatedDisabledRow: 'This row is already associated'

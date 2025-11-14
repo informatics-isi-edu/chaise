@@ -1,5 +1,7 @@
 @use 'sass:map';
 @use 'variables';
+@use 'helpers';
+
 
 body>.container {
   min-height: 100%;
@@ -38,6 +40,7 @@ body>.container {
   background-color: map.get(variables.$color-map, 'navbar-dropdown-submenu-icon');
 }
 
+//  This is for the profile dropdown
 .navbar-inverse .navbar-nav.navbar-right>div>a {
   color: map.get(variables.$color-map, 'navbar-inverse-link');
 }
@@ -50,16 +53,6 @@ body>.container {
   font-size: 18px;
   line-height: 20px;
   margin-right: 0px;
-}
-
-#live-btn {
-  margin-right: 0px; // offset marging-right: -15px from navbar-right
-  color: map.get(variables.$color-map, 'navbar-inverse-link');
-  padding: 15px;
-  text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 #login-link {
@@ -102,8 +95,14 @@ body>.container {
     padding: 13px 15px;
   }
 
+  .chaise-search-mode-dropdown .dropdown-toggle {
+    @include helpers.border-radius(variables.$btn-border-radius);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
   .chaise-input-control-sm {
-    width: 100px;
+    width: 120px;
     border-color: map.get(variables.$color-map, 'black');
     border-radius: 4px 0px 0px 4px;
   }
@@ -116,6 +115,95 @@ body>.container {
 
 #mainnav {
   border-radius: 0;
+}
+
+// positioning of history control in navbar
+.chaise-snapshot-control {
+  margin-right: 0px; // offset marging-right: -15px from navbar-right
+
+  .chaise-snapshot-dropdown {
+    > .dropdown-menu {
+      padding: 10px;
+      // override bootstrap style
+      .permalink-form-dropdown-item.dropdown-item:active,
+      .permalink-form-dropdown-item.dropdown-item:focus,
+      .permalink-form-dropdown-item.dropdown-item:hover {
+        color: map.get(variables.$color-map, 'black');
+        background-color: transparent;
+      }
+    }
+
+    .chaise-snapshot-dropdown-toggle {
+      padding: 25px 10px 25px 15px;
+      border-radius: 0;
+
+      // similar to the login button
+      color: map.get(variables.$color-map, 'navbar-inverse-menu-link') !important;
+
+      &:hover {
+        color: map.get(variables.$color-map, 'white') !important;
+      }
+
+      // &:focus,
+      // &.show {
+        // background: none !important;
+        // border: none !important;
+        // box-shadow: none !important;
+      // }
+
+      // Hide the dropdown arrow
+      // &::after {
+      //   display: none !important;
+      // }
+
+      .chaise-btn-icon {
+        font-size: 1.5rem;
+      }
+    }
+
+    .chaise-snapshot-form {
+      display: flex;
+      flex-direction: column;
+
+      .snapshot-form-label {
+        display: flex;
+        align-items: center;
+        height: 30px;
+
+        &.w-current-version {
+          margin-bottom: 5px;
+        }
+
+        .toggle-snapshot-live-btn {
+          // margin-left: 5px;
+          // margin-right: 3px;
+        }
+
+        .dropdown-item {
+          align-items: center;
+          width: 140px;
+          gap: 10px;
+          padding: 5px 10px;
+          margin: 0;
+        }
+      }
+
+      .snapshot-form-apply-btn {
+        align-self: flex-end;
+      }
+
+      // make sure the apply button stays in the same position
+      .input-switch-datetime .chaise-btn-group  {
+        float: left;
+        height: 0;
+      }
+
+      // increase spacing between date and time inputs
+      .input-switch-datetime .input-switch-time {
+        margin: 5px 0;
+      }
+    }
+  }
 }
 
 @media (max-width: 992px) {
@@ -150,6 +238,9 @@ body>.container {
   padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
   line-height: 20px;
   color: map.get(variables.$color-map, 'navbar-inverse-menu-link');
+  &:hover {
+    color: map.get(variables.$color-map, 'white');
+  }
 }
 
 .chaise-navbar-banner-container {

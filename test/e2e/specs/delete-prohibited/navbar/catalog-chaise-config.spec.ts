@@ -220,6 +220,13 @@ const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?:
     await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('override test123');
   });
 
+  if (isStatic) {
+    await test.step('snapshot dropdown should not be visible on static pages', async () => {
+      const snapshotDropdown = NavbarLocators.getGoToSnapshotNavbarButton(page);
+      await expect.soft(snapshotDropdown).not.toBeAttached();
+    });
+  }
+
   await test.step('should use the brand image of catalog annotation', async () => {
     const brandImage = NavbarLocators.getBrandImage(page)
     await expect.soft(brandImage).toHaveAttribute('src', '../images/logo.png');
