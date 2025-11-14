@@ -51,6 +51,8 @@ module.exports = (env) => {
       {
         appName: 'help',
         appTitle: 'Wiki Pages',
+        // help uses navbar
+        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'navbar',
@@ -60,7 +62,7 @@ module.exports = (env) => {
         /**
          * navbar -> snapshot-dropdown -> input-switch -> recordset (fk) -> plotly
          */
-        externalFiles: [...recordsetExtFiles]
+        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'login',
