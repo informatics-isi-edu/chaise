@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 
@@ -56,6 +57,10 @@ test.describe('View existing record,', function () {
     await test.step('should load the page properly', async () => {
       await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'product-max-RT', 'accommodation', testInfo, baseURL) + '/id=2002');
       await RecordLocators.waitForRecordPageReady(page);
+    });
+
+    await test.step('go to snapshot should not be visible based on chaiseConfig', async () => {
+      await expect.soft(NavbarLocators.getGoToSnapshotNavbarButton(page)).not.toBeAttached();
     });
 
     await test.step('should have only "This record (CSV)" option in export menu because of `disableDefaultExport` chaise-config.', async () => {

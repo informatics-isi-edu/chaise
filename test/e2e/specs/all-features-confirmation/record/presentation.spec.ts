@@ -5,7 +5,6 @@ import moment from 'moment';
 // locators
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
-import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
@@ -199,10 +198,6 @@ test.describe('View existing record', () => {
     await test.step('should load record page', async () => {
       await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, testParams.table_name, testInfo, baseURL) + `/${testParams.key}`);
       await RecordLocators.waitForRecordPageReady(page);
-    });
-
-    await test.step('go to snapshot should not be visible based on chaiseConfig', async () => {
-      await expect.soft(NavbarLocators.getGoToSnapshotNavbarButton(page)).not.toBeAttached();
     });
 
     await test.step('presentation of the record page', async () => {

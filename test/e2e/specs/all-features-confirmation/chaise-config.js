@@ -121,5 +121,4 @@ var chaiseConfig = {
            }
        ]
    },
-   hideGoToSnapshot: true,
 };

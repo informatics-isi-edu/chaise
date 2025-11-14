@@ -3,7 +3,6 @@ import { test, expect, TestInfo, Page } from '@playwright/test';
 // locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
-import PageLocators from '@isrd-isi-edu/chaise/test/e2e/locators/page';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';

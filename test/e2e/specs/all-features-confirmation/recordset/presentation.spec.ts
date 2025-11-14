@@ -4,7 +4,6 @@ import { expect, test } from '@playwright/test';
 // locators
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
-import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -334,10 +333,6 @@ test.describe('View recordset', () => {
       await page.goto(`${PAGE_URL}/${params.key}@sort(${params.sortby})`);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await RecordsetLocators.waitForRecordsetAggregates(page);
-    });
-
-    await test.step('go to snapshot should not be visible based on chaiseConfig', async () => {
-      await expect.soft(NavbarLocators.getGoToSnapshotNavbarButton(page)).not.toBeAttached();
     });
 
     await test.step('should not display facets if maxFacetDepth is 0 in the chaise-config', async () => {
