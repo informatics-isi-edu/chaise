@@ -40,6 +40,10 @@ test.describe('Navbar', () => {
        */
       expect.soft(title).toContain('this one should be ignored in favor of navbarBrandText');
     });
+
+    await test.step('go to snapshot should not be visible based on chaiseConfig', async () => {
+      await expect.soft(NavbarLocators.getGoToSnapshotNavbarButton(page)).not.toBeAttached();
+    });
   });
 
   test('menu support', async ({ page }) => {

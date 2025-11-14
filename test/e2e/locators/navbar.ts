@@ -77,9 +77,9 @@ export default class NavbarLocators {
 
     return {
       label,
-      snapshotOrLiveToggle: form.locator('.toggle-snapshot-live-btn'),
-      toggleSnapshotItem: label.locator('.snapshot-item.dropdown-item'),
-      toggleLiveItem: label.locator('.live-item.dropdown-item'),
+      toggle: form.locator('.toggle-snapshot-live-btn'),
+      snapshotItem: label.locator('.snapshot-item.dropdown-item'),
+      liveItem: label.locator('.live-item.dropdown-item'),
     };
   }
 

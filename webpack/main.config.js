@@ -56,7 +56,11 @@ module.exports = (env) => {
         appName: 'navbar',
         bundleName: 'navbar-lib',
         appTitle: 'Navbar standalone library',
-        isLib: true
+        isLib: true,
+        /**
+         * navbar -> snapshot-dropdown -> input-switch -> recordset (fk) -> plotly
+         */
+        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'login',
