@@ -10,7 +10,7 @@ import {
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
-const testParams: any = {
+const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
@@ -76,8 +76,8 @@ test('Testing four facet selections in quick sequence and verifying data after a
       await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(testParams.totalNumFacets - j);
     }
 
-    // make sure facets are loaded first then select facet optins 1 by 1
-    for (let k = 0; k < testParams.multipleFacets; k++) {
+    // make sure facets are loaded first then select facet options 1 by 1
+    for (let k = 0; k < testParams.multipleFacets.length; k++) {
       facetParams = testParams.multipleFacets[k];
       facet = RecordsetLocators.getFacetById(page, facetParams.facetIdx);
       await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, k + 1);

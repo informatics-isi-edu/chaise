@@ -56,6 +56,18 @@ export async function testDisplayedFacets (container: Page | Locator, facetNames
   }
 }
 
+export async function testDisplayedFacetItemsAndGroups (container: Page | Locator, facetAndGroupNames: string[], openFacetAndGroupNames?: string[]) {
+  const titles = RecordsetLocators.getFacetItemAndGroupTitles(container);
+  await expect.soft(titles).toHaveCount(facetAndGroupNames.length);
+  await expect.soft(titles).toHaveText(facetAndGroupNames);
+
+  if (openFacetAndGroupNames) {
+    const openedFacets = RecordsetLocators.getOpenFacetItemAndGroupTitles(container);
+    await expect.soft(openedFacets).toHaveCount(openFacetAndGroupNames.length);
+    await expect.soft(openedFacets).toHaveText(openFacetAndGroupNames);
+  }
+}
+
 /**
  *
  * @param container Page or recordset container (if recordset is showing in a modal or we are testing a related section)

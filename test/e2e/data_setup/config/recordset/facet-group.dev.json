@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordset/facet-group.config.json"
+        ],
+        "schema": "facet-group"
+    },
+    "cleanup" : true
+}

@@ -1024,7 +1024,7 @@ const Faceting = ({
       <Draggable key={key} draggableId={key} index={draggableIndex}>
         {(draggableArgs: DraggableProvided) => (
           <div
-            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
+            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' facet-item-open' : ''}`}
             ref={draggableArgs.innerRef}
             {...draggableArgs.draggableProps}
           >
@@ -1041,7 +1041,7 @@ const Faceting = ({
             </ChaiseTooltip>
             <Accordion.Item eventKey={key} key={key} className='facet-panel'>
               <Accordion.Header
-                className={`fc-heading-${facetIndex}`}
+                className={`facet-item-header fc-heading-${facetIndex}`}
                 onClick={() => toggleFacet(facetIndex)}
               >
                 <FacetHeader
@@ -1068,12 +1068,13 @@ const Faceting = ({
         const groupIndex = order.index;
         const group = reference.facetColumnsStructure[groupIndex] as FacetGroup;
         const groupStructureKey = FacetStorageService.getFacetStructureKey(groupIndex);
+        const groupIsOpen = !!openedFacetGroups[`${groupIndex}`];
 
         return (
           <Draggable key={groupStructureKey} draggableId={groupStructureKey} index={draggableIndex}>
             {(draggableArgs: DraggableProvided) => (
               <div
-                className='facet-group-item-container'
+                className={`facet-group-item-container${groupIsOpen ? ' facet-group-item-open' : ''}`}
                 ref={draggableArgs.innerRef}
                 {...draggableArgs.draggableProps}
               >
@@ -1093,7 +1094,7 @@ const Faceting = ({
                   className='facet-group-item'
                 >
                   <Accordion.Header
-                    className='facet-group-item-header'
+                    className={`facet-group-item-header fc-group-heading-${groupIndex}`}
                     onClick={() => toggleFacetGroup(groupIndex)}
                   >
                     <FacetHeader

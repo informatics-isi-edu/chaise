@@ -9,6 +9,6 @@ export default getConfig({
     'individual-facet.spec.ts',
     'four-facet-selections.spec.ts',
     'misc-facet.spec.ts',
-    // 'reorder-facet.spec.ts'
+    'reorder-facet.spec.ts',
   ]
 });

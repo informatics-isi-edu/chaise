@@ -1,0 +1,428 @@
+{
+  "schema_name": "facet-group",
+  "tables": {
+    "main": {
+      "kind": "table",
+      "table_name": "main",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["id"] }],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col1",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col2",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col3",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col4",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col5",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col6",
+          "type": { "typename": "text" }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["facet-group", "main_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "main",
+              "column_name": "id"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "outbound1",
+              "column_name": "outbound1_id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "columns": true,
+          "fkeys": false,
+          "sources": {
+            "path_to_outbound1": {
+              "source": [{ "outbound": ["facet-group", "main_fk1"] }, "outbound1_id"]
+            },
+            "path_to_assoc_related_1": {
+              "source": [
+                { "inbound": ["facet-group", "assoc_1_fk1"] },
+                { "outbound": ["facet-group", "assoc_1_fk2"] },
+                "assoc_related1_id"
+              ]
+            },
+            "path_to_assoc_related1_outbound1": {
+              "source": [
+                { "sourcekey": "path_to_assoc_related_1" },
+                { "outbound": ["facet-group", "assoc_related1_outbound1_fk1"] },
+                "assoc_related1_outbound1_id"
+              ]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "filter": {
+            "and": [
+              { "source": "id" },
+              {
+                "markdown_name": "Group 1",
+                "and": [{ "sourcekey": "path_to_outbound1" }]
+              },
+              { "source": "col1" },
+              {
+                "markdown_name": "**Group 2**",
+                "comment": "comment for **group 2**!",
+                "open": false,
+                "and": [
+                  {
+                    "sourcekey": "path_to_assoc_related_1",
+                    "open": true,
+                    "comment": "group closed but child open"
+                  },
+                  { "sourcekey": "path_to_assoc_related1_outbound1" },
+                  { "source": "col4" }
+                ]
+              },
+              {
+                "markdown_name": "Group 3",
+                "comment": false,
+                "and": [{ "source": "col5" }, { "source": "col6" }]
+              },
+              { "source": "col2" },
+              { "source": "col3" },
+              {
+                "markdown_name": "Group 1",
+                "comment": "duplicate group name which should be ignored",
+                "and": [{ "source": "col1" }]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "main_preselected_facets": {
+      "kind": "table",
+      "table_name": "main_preselected_facets",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["id"] }],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "fk_to_outbound1",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "col1",
+          "type": { "typename": "text" }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["facet-group", "main_preselected_facets_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "main_preselected_facets",
+              "column_name": "fk_to_outbound1"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "outbound1",
+              "column_name": "outbound1_id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
+          "columns": true,
+          "fkeys": false,
+          "sources": {
+            "path_to_outbound1": {
+              "source": [
+                { "outbound": ["facet-group", "main_preselected_facets_fk1"] },
+                "outbound1_id"
+              ]
+            }
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "filter": {
+            "and": [
+              {
+                "markdown_name": "Group 1",
+                "and": [
+                  {
+                    "sourcekey": "path_to_outbound1",
+                    "choices": ["1", "3"],
+                    "open": false
+                  },
+                  { "source": "id" }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "outbound1": {
+      "kind": "table",
+      "table_name": "outbound1",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["outbound1_id"] }],
+      "column_definitions": [
+        {
+          "name": "outbound1_id",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "name",
+          "type": { "typename": "text" }
+        }
+      ]
+    },
+    "inbound1": {
+      "kind": "table",
+      "table_name": "inbound1",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["inbound1_id"] }],
+      "column_definitions": [
+        {
+          "name": "inbound1_id",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_to_main",
+          "type": { "typename": "text" }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["facet-group", "inbound1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "inbound1",
+              "column_name": "fk_to_main"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "main",
+              "column_name": "id"
+            }
+          ]
+        }
+      ]
+    },
+    "assoc_1": {
+      "kind": "table",
+      "table_name": "assoc_1",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["fk_to_main", "fk_to_assoc_related1"] }],
+      "column_definitions": [
+        {
+          "name": "fk_to_main",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "fk_to_assoc_related1",
+          "type": { "typename": "text" }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["facet-group", "assoc_1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "assoc_1",
+              "column_name": "fk_to_main"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "main",
+              "column_name": "id"
+            }
+          ]
+        },
+        {
+          "names": [["facet-group", "assoc_1_fk2"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "assoc_1",
+              "column_name": "fk_to_assoc_related1"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "assoc_related1",
+              "column_name": "assoc_related1_id"
+            }
+          ]
+        }
+      ]
+    },
+    "assoc_related1": {
+      "kind": "table",
+      "table_name": "assoc_related1",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["assoc_related1_id"] }],
+      "column_definitions": [
+        {
+          "name": "assoc_related1_id",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "name",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "fk_to_assoc_related1_outbound1",
+          "type": { "typename": "text" }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["facet-group", "assoc_related1_outbound1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "assoc_related1",
+              "column_name": "fk_to_assoc_related1_outbound1"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "facet-group",
+              "table_name": "assoc_related1_outbound1",
+              "column_name": "assoc_related1_outbound1_id"
+            }
+          ]
+        }
+      ]
+    },
+    "assoc_related1_outbound1": {
+      "kind": "table",
+      "table_name": "assoc_related1_outbound1",
+      "schema_name": "facet-group",
+      "keys": [{ "unique_columns": ["assoc_related1_outbound1_id"] }],
+      "column_definitions": [
+        {
+          "name": "assoc_related1_outbound1_id",
+          "type": { "typename": "text" }
+        }
+      ]
+    },
+
+    "main_reorder": {
+      "kind": "table",
+      "table_name": "main_reorder",
+      "schema_name": "facet-group",
+      "comment": "used for reorder tests",
+      "keys": [{ "unique_columns": ["id"] }],
+      "foreign_keys": [],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "int"
+          }
+        },
+        {
+          "name": "col_1",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "col_2",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "col_3",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "col_4",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "col_5",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "col_6",
+          "type": {
+            "typename": "text"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "filter": {
+            "and": [
+              { "source": "col_1" },
+              {
+                "markdown_name": "Group 1",
+                "and": [
+                  { "source": "col_6" },
+                  { "source": "col_2" },
+                  { "source": "col_3" },
+                  { "source": "col_5" }
+                ]
+              },
+              { "source": "col_4" },
+              {
+                "markdown_name": "Group 2",
+                "and": [{ "source": "id" }]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

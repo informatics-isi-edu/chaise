@@ -322,7 +322,7 @@ export default class RecordsetLocators {
   }
 
   static getOpenFacets(container: Page | Locator): Locator {
-    return container.locator('.panel-open');
+    return container.locator('.facet-item-open');
   }
 
   static getClosedFacets(container: Page | Locator): Locator {
@@ -330,11 +330,23 @@ export default class RecordsetLocators {
   }
 
   static getFacetTitles(container: Page | Locator): Locator {
-    return container.locator('.accordion-header .facet-header-text');
+    return container.locator('.facet-item-header .facet-header-text');
   }
 
   static getOpenFacetTitles(container: Page | Locator): Locator {
-    return container.locator('.panel-open .facet-header-text');
+    return container.locator('.facet-item-open .facet-header-text');
+  }
+
+  static getOpenFacetGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-open .facet-group-item-header .facet-header-text');
+  }
+
+  static getFacetItemAndGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.accordion-header .facet-header-text');
+  }
+
+  static getOpenFacetItemAndGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.facet-item-open .facet-header-text, .facet-group-item-open .facet-group-item-header .facet-header-text');
   }
 
   static getFacetMoveIcon(container: Page | Locator, idx: number): Locator {

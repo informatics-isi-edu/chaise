@@ -379,7 +379,7 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
 
       const tempObj: SavedQueryFacetModel = {
         appliedFilters: facetFilter,
-        displayname: reference.facetColumns[idx].displayname.value,
+        displayname: reference.facetColumns[idx].displayname.value!,
         preferredMode: reference.facetColumns[idx].preferredMode,
       };
 

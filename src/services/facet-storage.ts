@@ -372,6 +372,11 @@ export class FacetStorageService {
           const addedGroup = res[addedGroups[groupIndex].resultIndex] as FacetGroupOrder;
           const addedChildren = addedGroups[groupIndex].addedChildren;
 
+          // set the open status
+          if (typeof fo.open === 'boolean') {
+            addedGroup.isOpen = fo.open;
+          }
+
           fo.children.forEach((child) => {
             if (!isObjectAndNotNull(child) || !('name' in child) || child.name in addedChildren) {
               return;
@@ -417,10 +422,7 @@ export class FacetStorageService {
               isOpen = true;
             }
 
-            children.push({
-              index: facetInfo.facetIndex,
-              isOpen,
-            });
+            children.push({ index: facetInfo.facetIndex, isOpen });
             addedChildren[facetInfo.facetIndex] = true;
 
             if (isOpen) atLeastOneIsOpen = true;
@@ -460,32 +462,89 @@ export class FacetStorageService {
           isOpen = true;
         }
         res.push({ index: facetIndex, isOpen });
+
         if (isOpen) atLeastOneIsOpen = true;
+
+        delete annotOrder[fc.sourceObjectWrapper.name];
       } else {
         const groupIndex = structure.structureIndex;
-        // If this group was already added from stored order, skip it
-        if (groupIndex in addedGroups) return;
 
-        const children: FacetOrder[] = [];
-        let groupIsOpen = structure.isOpen;
-        structure.children.forEach((facetIndex: number) => {
-          const fc = facetColumns[facetIndex];
-          if (fc.sourceObjectWrapper.name in annotOrder) {
-            let isOpen = annotOrder[fc.sourceObjectWrapper.name].isOpen;
-            if (annotOrder[fc.sourceObjectWrapper.name].hasFilters) {
+        // if the group is already added, make sure all the children are added
+        if (groupIndex in addedGroups) {
+          const addedGroup = res[addedGroups[groupIndex].resultIndex] as FacetGroupOrder;
+          const { addedChildren } = addedGroups[groupIndex];
+
+          structure.children.forEach((facetIndex: number) => {
+            if (facetIndex in addedChildren) return;
+            const fc = facetColumns[facetIndex];
+            if (!(fc.sourceObjectWrapper.name in annotOrder)) return;
+            const facetName = fc.sourceObjectWrapper.name;
+
+            const facetInfo = annotOrder[facetName];
+            if (
+              !facetInfo ||
+              facetInfo.groupIndex === undefined ||
+              facetInfo.groupIndex !== groupIndex
+            )
+              return;
+
+            let isOpen = facetInfo.isOpen;
+            // if it has filters, we have to open the group and the facet
+            if (facetInfo.hasFilters) {
+              addedGroup.isOpen = true;
+              isOpen = true;
+            }
+
+            addedGroup.children.push({
+              index: facetInfo.facetIndex,
+              isOpen,
+            });
+            addedChildren[facetInfo.facetIndex] = true;
+
+            if (isOpen) atLeastOneIsOpen = true;
+
+            delete annotOrder[facetName];
+          });
+        }
+        // if the group is not already added, add it
+        else {
+          /**
+           * the fact that the group is missing, it means that the
+           * children were also not in the stored order, so we can add all of them
+           */
+          const children: FacetOrder[] = [];
+          const addedChildren: { [childIndex: number]: boolean } = {};
+          let groupIsOpen = structure.isOpen;
+          structure.children.forEach((facetIndex: number) => {
+            const fc = facetColumns[facetIndex];
+            const facetName = fc.sourceObjectWrapper.name;
+            if (!(facetName in annotOrder)) return;
+            const facetInfo = annotOrder[facetName];
+
+            let isOpen = facetInfo.isOpen;
+            if (facetInfo.hasFilters) {
               groupIsOpen = true;
               isOpen = true;
             }
             children.push({ index: facetIndex, isOpen });
-            if (isOpen) atLeastOneIsOpen = true;
-          }
-        });
+            addedChildren[facetIndex] = true;
 
-        res.push({
-          index: groupIndex,
-          isOpen: groupIsOpen,
-          children,
-        });
+            if (isOpen) atLeastOneIsOpen = true;
+
+            delete annotOrder[facetName];
+          });
+
+          res.push({
+            index: groupIndex,
+            isOpen: groupIsOpen,
+            children,
+          });
+
+          addedGroups[groupIndex] = {
+            resultIndex: res.length - 1,
+            addedChildren,
+          };
+        }
       }
     });
 
