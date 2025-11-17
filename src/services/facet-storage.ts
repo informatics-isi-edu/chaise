@@ -5,7 +5,7 @@ import type { FacetGroup } from '@isrd-isi-edu/ermrestjs/src/models/reference-co
 
 // utils
 import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
-import { isObjectAndNotNull } from '@isrd-isi-edu/ermrestjs/src/utils/type-utils';
+import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 export type FacetOrder = {
   /**

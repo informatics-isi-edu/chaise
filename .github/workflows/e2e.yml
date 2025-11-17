@@ -119,14 +119,12 @@ jobs:
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
           git checkout hierarchical-facets
-          npm link
           sudo make root-install
       - name: Install chaise
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
           make deps-test
-          npm link @isrd-isi-edu/ermrestjs
           make dist-wo-deps
           make lint
           sudo make deploy
