@@ -1,3 +1,4 @@
+<!-- omit in toc -->
 # Configuration File: chaise-config.js
 
 **Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL.
@@ -15,61 +16,62 @@ Notes: as the `configRules` are checked, properties set in step 2 will be overri
 
 If a property appears in the same configuration twice, the property defined later will be used.
 
+<!-- omit in toc -->
 ## Table of Contents:
- * [General Configuration:](#general-configuration)
-   * [ermrestLocation](#ermrestlocation)
-   * [defaultCatalog](#defaultcatalog)
-   * [defaultTable](#defaulttable)
- * [Navbar Configuration:](#navbar-configuration)
-   * [headTitle](#headtitle)
-   * [navbarBanner](#navbarbanner)
-   * [navbarBrand](#navbarbrand)
-   * [navbarBrandText](#navbarbrandtext)
-   * [navbarBrandImage](#navbarbrandimage)
-   * [navbarMenu](#navbarmenu)
- * [Login Configuration:](#login-configuration)
-   * [logoutURL](#logouturl)
-   * [dataBrowser](#databrowser)
-   * [signUpURL](#signupurl)
-   * [termsAndConditionsConfig](#termsandconditionsconfig)
-   * [loggedInMenu](#loggedinmenu)
- * [Display Configuration:](#display-configuration)
-   * [customCSS](#customcss)
-   * [maxRecordsetRowHeight](#maxrecordsetrowheight)
-   * [confirmDelete](#confirmdelete)
-   * [editRecord](#editRecord)
-   * [deleteRecord](#deleteRecord)
-   * [allowErrorDismissal](#allowerrordismissal)
-   * [showWriterEmptyRelatedOnLoad](#showwriteremptyrelatedonload)
-   * [showFaceting](#showfaceting)
-   * [hideTableOfContents](#hidetableofcontents)
-   * [disableExternalLinkModal](#disableexternallinkmodal)
-   * [hideGoToRID](#hidegotorid)
-   * [facetPanelDisplay](#facetpaneldisplay)
-   * [templating](#templating)
-   * [hideRecordeditLeaveAlert](#hiderecordeditleavealert)
- * [Data Entry Configuration:](#data-entry-configuration)
-   * [asciiTextValidation](#asciitextvalidation)
- * [Export Configuration:](#export-configuration)
-   * [disableDefaultExport](#disabledefaultexport)
-   * [exportServicePath](#exportservicepath)
-   * [exportConfigsSubmenu](#exportconfigssubmenu)
- * [Share and Cite Configuration:](#share-and-cite-configuration)
-   * [resolverImplicitCatalog](#resolverimplicitcatalog)
-   * [shareCite](#sharecite)
- * [System Columns Configuration:](#system-columns-configuration)
-   * [systemColumnsDisplayCompact](#systemcolumnsdisplaycompact)
-   * [systemColumnsDisplayDetailed](#systemcolumnsdisplaydetailed)
-   * [systemColumnsDisplayEntry](#systemcolumnsdisplayentry)
- * [System Configuration:](#system-configuration)
-   * [internalHosts](#internalhosts)
-   * [includeCanonicalTag](#includecanonicaltag)
-   * [logClientActions](#logclientactions)
-   * [configRules](#configrules)
-   * [savedQueryConfig](#savedqueryconfig)
- * [Other Configuration:](#other-configuration)
-   * [footerMarkdown](#footermarkdown)
-   * [assetDownloadPolicyURL](#assetdownloadpolicyurl)
+- [General Configuration:](#general-configuration)
+  - [ermrestLocation](#ermrestlocation)
+  - [defaultCatalog](#defaultcatalog)
+  - [defaultTable](#defaulttable)
+- [Navbar Configuration:](#navbar-configuration)
+  - [headTitle](#headtitle)
+  - [navbarBanner](#navbarbanner)
+  - [navbarBrand](#navbarbrand)
+  - [navbarBrandText](#navbarbrandtext)
+  - [navbarBrandImage](#navbarbrandimage)
+  - [navbarMenu](#navbarmenu)
+- [Login Configuration:](#login-configuration)
+  - [logoutURL](#logouturl)
+  - [dataBrowser](#databrowser)
+  - [signUpURL](#signupurl)
+  - [termsAndConditionsConfig](#termsandconditionsconfig)
+  - [loggedInMenu](#loggedinmenu)
+- [Display Configuration:](#display-configuration)
+  - [customCSS](#customcss)
+  - [maxRecordsetRowHeight](#maxrecordsetrowheight)
+  - [confirmDelete](#confirmdelete)
+  - [editRecord](#editrecord)
+  - [deleteRecord](#deleterecord)
+  - [allowErrorDismissal](#allowerrordismissal)
+  - [showWriterEmptyRelatedOnLoad](#showwriteremptyrelatedonload)
+  - [hideTableOfContents](#hidetableofcontents)
+  - [disableExternalLinkModal](#disableexternallinkmodal)
+  - [hideGoToRID](#hidegotorid)
+  - [hideGoToSnapshot](#hidegotosnapshot)
+  - [facetPanelDisplay](#facetpaneldisplay)
+  - [templating](#templating)
+  - [hideRecordeditLeaveAlert](#hiderecordeditleavealert)
+- [Data Entry Configuration:](#data-entry-configuration)
+  - [asciiTextValidation](#asciitextvalidation)
+- [Export Configuration:](#export-configuration)
+  - [disableDefaultExport](#disabledefaultexport)
+  - [exportServicePath](#exportservicepath)
+  - [exportConfigsSubmenu](#exportconfigssubmenu)
+- [Share and Cite Configuration:](#share-and-cite-configuration)
+  - [resolverImplicitCatalog](#resolverimplicitcatalog)
+  - [shareCite](#sharecite)
+- [System Columns Configuration:](#system-columns-configuration)
+  - [systemColumnsDisplayCompact](#systemcolumnsdisplaycompact)
+  - [systemColumnsDisplayDetailed](#systemcolumnsdisplaydetailed)
+  - [systemColumnsDisplayEntry](#systemcolumnsdisplayentry)
+- [System Configuration:](#system-configuration)
+  - [internalHosts](#internalhosts)
+  - [includeCanonicalTag](#includecanonicaltag)
+  - [logClientActions](#logclientactions)
+  - [configRules](#configrules)
+  - [savedQueryConfig](#savedqueryconfig)
+- [Other Configuration:](#other-configuration)
+  - [footerMarkdown](#footermarkdown)
+  - [assetDownloadPolicyURL](#assetdownloadpolicyurl)
 
 ## General Configuration:
  ### ermrestLocation
@@ -472,6 +474,15 @@ If present and equal to `false`, the chaise pages will hide all the edit and cre
    - Sample syntax:
      ```
      hideGoToRID: true
+     ```
+
+### hideGoToSnapshot
+Use this property to hide the snapshot dropdown control displayed as part of the navbar.
+   - Type: Boolean
+   - Default behavior: The snapshot dropdown button is displayed as part of the navbar.
+   - Sample syntax:
+     ```
+     hideGoToSnapshot: true
      ```
 
  ### facetPanelDisplay

@@ -28,6 +28,7 @@ import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/sr
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { APP_NAMES, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getVersionCorrectedAlertMessage } from '@isrd-isi-edu/chaise/src/utils/snapshot-utils';
 
 const recordSettings : ConfigServiceSettings = {
   appName: APP_NAMES.RECORD,
@@ -81,6 +82,11 @@ const RecordApp = (): JSX.Element => {
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
+      }
+
+      const versionCorrected = getVersionCorrectedAlertMessage();
+      if (versionCorrected) {
+        addAlert(versionCorrected, ChaiseAlertType.WARNING);
       }
 
       const logStack = [

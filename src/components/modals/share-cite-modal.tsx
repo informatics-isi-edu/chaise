@@ -19,7 +19,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utils
 import { hasTrailingPeriod } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { resolvePermalink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { displayTimestamp, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
+import { displayTimestamp, humanizeTimestamp } from '@isrd-isi-edu/chaise/src/utils/snapshot-utils';
 import { copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 export type ShareCiteModalProps = {
@@ -211,7 +211,7 @@ const ShareCiteModal = ({
               <>
                 <h3 className='share-item-header'>
                   <span>Versioned Link </span>
-                  <ChaiseTooltip placement='bottom' tooltip={`Data snapshotted at ${versionDate}`}>
+                  <ChaiseTooltip placement='bottom' tooltip={`Snapshot from ${versionDate}`}>
                     <small>({versionDateRelative}) </small>
                   </ChaiseTooltip>
                   <ChaiseTooltip placement='bottom' tooltip={versionLinkCopyTooltip} dynamicTooltipString>

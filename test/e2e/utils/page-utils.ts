@@ -2,8 +2,10 @@ import { expect, Locator, Page, test, TestInfo } from '@playwright/test';
 import fs from 'fs';
 
 // Locators
+import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ExportLocators from '@isrd-isi-edu/chaise/test/e2e/locators/export';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
+import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
 import PageLocators from '@isrd-isi-edu/chaise/test/e2e/locators/page';
 import RecordLocators from '@isrd-isi-edu/chaise/test/e2e/locators/record';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -18,18 +20,22 @@ export async function getClipboardContent(page: Page): Promise<string> {
 }
 
 export async function getPageURLOrigin(page: Page): Promise<string> {
-  return await page.evaluate(() => { return document.location.origin });
+  return await page.evaluate(() => {
+    return document.location.origin;
+  });
 }
 
 export async function getWindowName(page: Page): Promise<string> {
-  return await page.evaluate(() => { return window.name });
+  return await page.evaluate(() => {
+    return window.name;
+  });
 }
 
 export async function getPageId(page: Page): Promise<string> {
   return await page.evaluate(() => {
     // cast to 'any' typed variable so we can avoid typescript errors
     const windowRef: any = window;
-    return windowRef.dcctx.contextHeaderParams.pid
+    return windowRef.dcctx.contextHeaderParams.pid;
   });
 }
 
@@ -40,7 +46,13 @@ export async function getPageId(page: Page): Promise<string> {
  *   - The URL doesn't have any trailing `/`. if you need to append filter or facets, make sure to start with a `/`.
  *   - if you don't want to specify the schemaName just pass empty string for it.
  */
-export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableName: string, testInfo: TestInfo, baseURL?: string): string {
+export function generateChaiseURL(
+  appName: APP_NAMES,
+  schemaName: string,
+  tableName: string,
+  testInfo: TestInfo,
+  baseURL?: string
+): string {
   const schema_table = schemaName.length > 0 ? `${schemaName}:${tableName}` : tableName;
   return `${baseURL ? baseURL : ''}/${appName}/#${getCatalogID(testInfo.project.name)}/${schema_table}`;
 }
@@ -60,7 +72,7 @@ export function generateChaiseURL(appName: APP_NAMES, schemaName: string, tableN
  */
 export async function clickNewTabLink(locator: Locator, forceNewTab?: boolean) {
   const pagePromise = locator.page().context().waitForEvent('page');
-  await locator.click(forceNewTab ? { 'button': 'middle' } : undefined);
+  await locator.click(forceNewTab ? { button: 'middle' } : undefined);
   const newPage = await pagePromise;
   await newPage.bringToFront();
   await newPage.waitForLoadState();
@@ -73,7 +85,11 @@ export async function clickNewTabLink(locator: Locator, forceNewTab?: boolean) {
  * @param expectedFileName pass undefined if you don't want to test the actual file path and just test that something was downloaded.
  * @param waitCond if the page takes some time to trigger the download, add the proper wait condition.
  */
-export async function clickAndVerifyDownload(locator: Locator, expectedFileName: string | undefined, waitCond?: () => Promise<void>) {
+export async function clickAndVerifyDownload(
+  locator: Locator,
+  expectedFileName: string | undefined,
+  waitCond?: () => Promise<void>
+) {
   const downloadPromise = locator.page().waitForEvent('download');
   await locator.click();
 
@@ -105,7 +121,13 @@ export async function clickAndVerifyDownload(locator: Locator, expectedFileName:
  * @param appName the name of the app. Used for figuring out the default "hover element".
  * @param hoverEl the element that we should hover over so the tooltip disapears. if undefined, we will pick a default element based on the app.
  */
-export async function testTooltip(locator: Locator, expectedTooltip: string | RegExp, appName: APP_NAMES, isSoft?: boolean, hoverEl?: Locator) {
+export async function testTooltip(
+  locator: Locator,
+  expectedTooltip: string | RegExp,
+  appName: APP_NAMES,
+  isSoft?: boolean,
+  hoverEl?: Locator
+) {
   await locator.hover();
 
   const el = PageLocators.getTooltipContainer(locator.page());
@@ -135,7 +157,6 @@ export async function testTooltip(locator: Locator, expectedTooltip: string | Re
   }
   await hoverEl.hover();
   await expectFn(el).not.toBeAttached();
-
 }
 
 /**
@@ -144,13 +165,16 @@ export async function testTooltip(locator: Locator, expectedTooltip: string | Re
  * so we have to manually call focus on the page.
  */
 export async function manuallyTriggerFocus(page: Page) {
-  await page.evaluate(() =>
-    document.dispatchEvent(new Event('focus', { bubbles: true })),
-  );
+  await page.evaluate(() => document.dispatchEvent(new Event('focus', { bubbles: true })));
 }
 
-
-export async function testButtonState(button: Locator, useSoftExpect: boolean, isVisible: boolean, isDisabled?: boolean, label?: string) {
+export async function testButtonState(
+  button: Locator,
+  useSoftExpect: boolean,
+  isVisible: boolean,
+  isDisabled?: boolean,
+  label?: string
+) {
   const expectFn = useSoftExpect ? expect.soft : expect;
 
   if (!isVisible) {
@@ -181,7 +205,7 @@ export async function deleteDownloadedFiles(filePaths: string[]) {
       console.log(`file: ${path} has been removed`);
     }
   });
-};
+}
 
 /**
  * function to test the export dropdown on record and recordset pages. If filenames has 3 values in it, then the
@@ -190,7 +214,7 @@ export async function deleteDownloadedFiles(filePaths: string[]) {
  * @param fileNames string names for files to verify have downloaded
  */
 export async function testExportDropdown(page: Page, fileNames: string[], app: APP_NAMES) {
-  const csvText = (app === APP_NAMES.RECORDSET ? 'Search results (CSV)' : 'This record (CSV)')
+  const csvText = app === APP_NAMES.RECORDSET ? 'Search results (CSV)' : 'This record (CSV)';
 
   await test.step(`should have ${fileNames.length} options in the export dropdown menu.`, async () => {
     const exportButton = ExportLocators.getExportDropdown(page);
@@ -217,7 +241,7 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
     await expect.soft(bagOption).toHaveText('BDBag');
 
     await clickAndVerifyDownload(bagOption, fileNames[1], async () => {
-      const modal = ModalLocators.getExportModal(page)
+      const modal = ModalLocators.getExportModal(page);
       await expect.soft(modal).toBeVisible();
       await expect.soft(modal).not.toBeAttached({ timeout: 30_000 });
     });
@@ -283,4 +307,80 @@ export async function dragAndDropWithScroll(page: Page, draggable: Locator, drop
   });
   await page.mouse.up();
   await page.waitForTimeout(100);
+}
+
+
+/**
+ * Test the "go to snapshot" feature on the navbar.
+ * The button is visible on navbar for record and recordset apps, that's why I created the function here.
+ */
+export async function testGoToSnapshotNavbarFeature(page: Page, appName: APP_NAMES) {
+  const navbar = NavbarLocators.getContainer(page);
+  const navbarBtn = NavbarLocators.getGoToSnapshotNavbarButton(page);
+  const formElements = NavbarLocators.goTOSnapshotFormElements(page);
+  const labelElements = NavbarLocators.getGoToSnapshotOrLiveToggleElements(page);
+  const versionInfo = PageLocators.getVersionInfoElements(page);
+  const alert = AlertLocators.getWarningAlert(page);
+
+  await test.step('snapshot dropdown should be present', async () => {
+    await expect.soft(navbar).toBeVisible();
+    await expect.soft(navbarBtn).toBeVisible();
+  });
+
+  await test.step('clicking on snapshot dropdown should open the snapshot form', async () => {
+    await navbarBtn.click();
+    await expect.soft(formElements.form).toBeVisible();
+    await expect.soft(labelElements.label).toHaveText('Show snapshot from:');
+  });
+
+  await test.step('clicking on now and apply should go to a versioned link.', async () => {
+    await formElements.nowBtn.click();
+    await formElements.applyBtn.click();
+
+    await page.waitForURL(`**/${appName}**`);
+    await expect.soft(alert).toBeVisible();
+    await expect.soft(alert).toContainText('Displaying the nearest available snapshot');
+    await expect.soft(alert).toContainText('to the requested time of ');
+  });
+
+  await test.step('version info should be visible and should be able to go back to live version', async () => {
+    await expect.soft(versionInfo.container).toBeVisible();
+    await expect.soft(versionInfo.liveBtn).toBeVisible();
+    await versionInfo.liveBtn.click();
+
+    await page.waitForURL(`**/${appName}**`);
+    await expect.soft(versionInfo.container).not.toBeVisible();
+  });
+
+  await test.step('go to snapshot again and use show live on dropdown', async () => {
+    await navbarBtn.click();
+    await expect.soft(formElements.form).toBeVisible();
+    await formElements.nowBtn.click();
+    await formElements.applyBtn.click();
+
+    await page.waitForURL(`**/${appName}**`);
+    if (appName === APP_NAMES.RECORDSET) {
+      await RecordsetLocators.waitForRecordsetPageReady(page);
+    } else if (appName === APP_NAMES.RECORD) {
+      await RecordLocators.waitForRecordPageReady(page);
+    }
+    await expect.soft(versionInfo.container).toBeVisible();
+
+    await navbarBtn.click();
+    await expect.soft(formElements.form).toBeVisible();
+    await expect.soft(labelElements.label).toBeVisible();
+
+    // open the dropdown
+    await labelElements.toggle.click();
+    await labelElements.liveItem.click();
+    await expect.soft(labelElements.label).toContainText('Showlive data');
+    await expect.soft(formElements.dateInput).toBeDisabled();
+    await expect.soft(formElements.timeInput).toBeDisabled();
+
+    await formElements.applyBtn.click();
+    await page.waitForURL(`**/${appName}**`);
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+
+    await expect.soft(versionInfo.container).not.toBeVisible();
+  });
 }

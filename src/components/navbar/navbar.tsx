@@ -10,9 +10,9 @@ import Spinner from 'react-bootstrap/Spinner';
 
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
+import SnapshotDropdown from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-dropdown';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -30,13 +30,12 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 // utilities
 import { splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
-  MenuOption, NavbarBanner, addLogParams,
-  canEnable, canShow, createMenuList, menuItemClasses,
+  MenuOption, NavbarBanner, canEnable, canShow, createMenuList, menuItemClasses,
   onDropdownToggle, onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = ConfigService.catalogID;
@@ -52,6 +51,7 @@ const ChaiseNavbar = (): JSX.Element => {
   const [showRidSpinner, setShowRidSpinner] = useState(false);
   const [topBanners, setTopBanners] = useState<NavbarBanner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<NavbarBanner[]>([]);
+
   /**
    * Keeps track of most recently opened dropdown
    * We track this to make sure only one dropdown is open at a time.
@@ -183,12 +183,6 @@ const ChaiseNavbar = (): JSX.Element => {
     }
   }
 
-  const handleToLiveClick = () => {
-    const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
-    windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
-    windowRef.location.reload();
-  };
-
   // TODO: onToggle event type
   const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
     /**
@@ -287,18 +281,6 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderLiveButton = () => {
-    if (!isVersioned()) return;
-
-    return (<ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.liveData}>
-      <a
-        id='live-btn'
-        className='nav navbar-nav navbar-right'
-        onClick={handleToLiveClick}
-      >View Live Data</a>
-    </ChaiseTooltip>)
-  }
-
   const renderRidSearchIcon = () => {
     if (showRidSpinner) return <Spinner size='sm' animation='border' />;
 
@@ -328,6 +310,18 @@ const ChaiseNavbar = (): JSX.Element => {
       </span>
     );
   };
+
+  const renderSnapshotControl = () => {
+    if (cc.hideGoToSnapshot === true) return;
+    // only available on record and recordset apps
+    if ([APP_NAMES.RECORD as string, APP_NAMES.RECORDSET as string].indexOf(ConfigService.appSettings.appName) === -1) return;
+
+    return (
+      <span className='nav navbar-nav navbar-right chaise-snapshot-control'>
+        <SnapshotDropdown />
+      </span>
+    );
+  }
 
   const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{ isHTML: true, value: renderName(item) }} />);
 
@@ -395,7 +389,7 @@ const ChaiseNavbar = (): JSX.Element => {
               {/* Since we are using float: right for divs, position for chaise login comes first */}
               <ChaiseLogin />
               {renderRidSearch()}
-              {renderLiveButton()}
+              {renderSnapshotControl()}
             </Navbar.Collapse>
           </Navbar>
           {renderBanners(bottomBanners)}

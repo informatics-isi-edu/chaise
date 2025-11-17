@@ -19,6 +19,8 @@ module.exports = (env) => {
       {
         appName: 'login',
         appTitle: 'Login',
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'recordset',
@@ -51,18 +53,26 @@ module.exports = (env) => {
       {
         appName: 'help',
         appTitle: 'Wiki Pages',
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'navbar',
         bundleName: 'navbar-lib',
         appTitle: 'Navbar standalone library',
-        isLib: true
+        isLib: true,
+        /**
+         * navbar -> snapshot-dropdown -> input-switch -> recordset (fk) -> plotly
+         */
+        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'login',
         bundleName: 'login-lib',
         appTitle: 'Login standalone library',
-        isLib: true
+        isLib: true,
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles]
       }
     ],
     mode,

@@ -2,15 +2,16 @@ import { test, expect } from '@playwright/test';
 
 // locators
 import NavbarLocators from '@isrd-isi-edu/chaise/test/e2e/locators/navbar';
-import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 // utils
 import { getMainUserSessionObject } from '@isrd-isi-edu/chaise/test/e2e/utils/user-utils';
 import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { generateChaiseURL, testGoToSnapshotNavbarFeature } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Navbar', () => {
+  test.describe.configure({ mode: 'parallel' });
 
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
     await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, 'product-navbar', 'accommodation', testInfo, baseURL));
@@ -159,6 +160,10 @@ test.describe('Navbar', () => {
       // accounts for 2 broken menu options that are set as invalid
       await expect.soft(loginMenu.locator('a')).toHaveCount(5);
     });
+  });
+
+  test('go to snapshot', async ({ page }) => {
+    await testGoToSnapshotNavbarFeature(page, APP_NAMES.RECORDSET);
   });
 });
 

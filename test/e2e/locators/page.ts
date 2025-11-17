@@ -21,4 +21,12 @@ export default class PageLocators {
   static getHelpPageMainTable(page: Page): Locator {
     return page.locator('#mainTable')
   }
+
+  static getVersionInfoElements(page: Page) {
+    const container = page.locator('.chaise-title-version-info')
+    return {
+      container,
+      liveBtn: container.locator('.show-live-btn'),
+    };
+  }
 }

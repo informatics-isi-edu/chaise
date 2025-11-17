@@ -30,6 +30,7 @@ import { APP_NAMES, RECORDSET_DEFAULT_PAGE_SIZE, ID_NAMES } from '@isrd-isi-edu/
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { initializeSavingQueries } from '@isrd-isi-edu/chaise/src/utils/config-utils';
+import { getVersionCorrectedAlertMessage } from '@isrd-isi-edu/chaise/src/utils/snapshot-utils';
 
 
 const recordsetSettings : ConfigServiceSettings = {
@@ -76,6 +77,11 @@ const RecordsetApp = (): JSX.Element => {
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
+      }
+
+      const versionCorrected = getVersionCorrectedAlertMessage();
+      if (versionCorrected) {
+        addAlert(versionCorrected, ChaiseAlertType.WARNING);
       }
 
       const logStack = [

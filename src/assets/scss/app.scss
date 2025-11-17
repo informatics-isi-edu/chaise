@@ -236,6 +236,57 @@ html {
     padding-top: 5px;
   }
 
+  .chaise-title-version-info {
+    // display: inline-block;
+    font-size: variables.$h4-font-size;
+    // line-height: 25px; // needed for vertical alignment
+    // font-size: 1.25rem;
+
+    .chaise-btn.version-text {
+      color: map.get(variables.$color-map, 'header-small');
+      padding-left: 0;
+      cursor: default;
+      user-select: auto;
+
+      .chaise-btn-icon {
+        margin-left: 6px;
+      }
+    }
+
+    .show-live-btn {
+      border: 0;
+      border-left: 1px solid map.get(variables.$color-map, 'border');
+    }
+
+    // override chiclet styles
+    // .filter-chiclet {
+    //   margin: unset;
+
+    //   .chaise-btn.filter-chiclet-value,
+    //   .chaise-btn.filter-chiclet-remove {
+    //     padding: 14px 10px;
+    //     display: flex;
+    //     align-items: center;
+    //   }
+
+    //   span {
+    //     color: map.get(variables.$color-map, 'header-small');
+    //   }
+    // }
+
+    // .parenthesis-left {
+    //   margin-right: 3px;
+    // }
+    // .parenthesis-right {
+    //   margin-left: 2px;
+    // }
+    // i.fa-clock-rotate-left {
+    //   margin-right: 7px;
+    //   font-size: 1.25rem;
+    // }
+
+  }
+
   // make sure the tooltips don't go outside the view
   .tooltip {
     // (this is a predefined class in bootstrap)
@@ -399,6 +450,9 @@ html {
 
   .float-right {
     float: right;
+  }
+  .float-left {
+    float: left;
   }
   // bookmark container end
 

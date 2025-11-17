@@ -120,5 +120,5 @@ var chaiseConfig = {
                ]
            }
        ]
-   }
+   },
 };

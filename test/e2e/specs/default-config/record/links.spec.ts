@@ -10,7 +10,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { clickNewTabLink, getPageURLOrigin, testExportDropdown } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, getPageURLOrigin, testExportDropdown, testGoToSnapshotNavbarFeature } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
@@ -60,6 +60,11 @@ test.describe('links on the record page', () => {
     const newPage = await clickNewTabLink(NavbarLocators.getGoToRIDButton(page));
     await newPage.waitForURL(`**/record/#${getCatalogID(testInfo.project.name)}/links:${testParams.table_name}/RID=${RIDVal}**`);
     await newPage.close();
+  });
+
+  test('go to snapshot button should be visible in the navbar', async ({ page, baseURL }, testInfo) => {
+    await goToPage(page, baseURL, testInfo, testParams.table_name);
+    await testGoToSnapshotNavbarFeature(page, APP_NAMES.RECORD);
   });
 
 });
