@@ -1,0 +1,22 @@
+[
+  { "inbound1_id": "01", "fk_to_main": "01" },
+  { "inbound1_id": "02", "fk_to_main": "01" },
+  { "inbound1_id": "03", "fk_to_main": "02" },
+  { "inbound1_id": "04", "fk_to_main": "03" },
+  { "inbound1_id": "05", "fk_to_main": "04" },
+  { "inbound1_id": "06", "fk_to_main": "15" },
+  { "inbound1_id": "07", "fk_to_main": "08" },
+  { "inbound1_id": "08", "fk_to_main": "22" },
+  { "inbound1_id": "09", "fk_to_main": "11" },
+  { "inbound1_id": "10", "fk_to_main": "19" },
+  { "inbound1_id": "11", "fk_to_main": "03" },
+  { "inbound1_id": "12", "fk_to_main": "25" },
+  { "inbound1_id": "13", "fk_to_main": "07" },
+  { "inbound1_id": "14", "fk_to_main": "14" },
+  { "inbound1_id": "15", "fk_to_main": "20" },
+  { "inbound1_id": "16", "fk_to_main": "01" },
+  { "inbound1_id": "17", "fk_to_main": "03" },
+  { "inbound1_id": "18", "fk_to_main": "08" },
+  { "inbound1_id": "19", "fk_to_main": "01" },
+  { "inbound1_id": "20", "fk_to_main": "22" }
+]

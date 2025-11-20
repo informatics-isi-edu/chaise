@@ -4,7 +4,7 @@ import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { changeStoredOrder } from '@isrd-isi-edu/chaise/test/e2e/utils/facet-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState,
@@ -163,7 +163,7 @@ const facetSelectionParams: TestIndividualFacetParams[] = [
   },
 ];
 
-test.describe('Facet reorder feature', () => {
+test.describe('Reorder facets', () => {
   test.describe.configure({ mode: 'parallel' });
 
   test('changing the order of facets', async ({ page, baseURL }, testInfo) => {
@@ -264,7 +264,7 @@ test.describe('Facet reorder feature', () => {
 
     await test.step('facets should be displayed based on the stored order and invalid ones should be ignored.', async () => {
       await page.goto(getURL(testInfo, baseURL));
-      await changeStoredOrder(page, testInfo, currParams.storage);
+      await changeStoredOrder(page, testInfo, testParams.schema_name, testParams.table_name, currParams.storage);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await testDisplayedFacets(page, currParams.facetNames, currParams.openFacets.names);
     });
@@ -286,7 +286,7 @@ test.describe('Facet reorder feature', () => {
 
     await test.step('facets should be displayed based on the stored order and extra visible ones should be added.', async () => {
       await page.goto(getURL(testInfo, baseURL));
-      await changeStoredOrder(page, testInfo, testParams.savedStateWMissing.storage);
+      await changeStoredOrder(page, testInfo, testParams.schema_name, testParams.table_name, testParams.savedStateWMissing.storage);
       await RecordsetLocators.waitForRecordsetPageReady(page);
       await testDisplayedFacets(page, testParams.savedStateWMissing.facetNames, currParams.openFacets.names);
     });
@@ -339,19 +339,6 @@ const testFacetSelection = async (page: Page, openedFacetIndexes: number[]) => {
     });
   }
 
-}
-
-/**
- * change the local storage value for the order of facets for the main table and refresh the page.
- */
-const changeStoredOrder = async (page: Page, testInfo: TestInfo, order: any) => {
-  const keyName = `facet-order-${getCatalogID(testInfo.project.name)}_${testParams.schema_name}_${testParams.table_name}`;
-  const orderStr = JSON.stringify(order);
-  await page.evaluate(({ keyName, orderStr }) => {
-    window.localStorage.setItem(keyName, orderStr);
-  }, { keyName, orderStr });
-
-  await page.reload();
 }
 
 const testMenuBtnDisabled = async (locator: Locator, disabled: boolean) => {

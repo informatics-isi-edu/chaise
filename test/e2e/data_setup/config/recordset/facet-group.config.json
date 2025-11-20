@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "facet-group",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordset/facet-group.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/facet-group"
+    }
+}

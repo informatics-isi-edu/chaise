@@ -1,3 +1,5 @@
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
 export default class LocalStorage {
   static localStorageNotAvailable = false;
 
@@ -66,7 +68,12 @@ export default class LocalStorage {
     if (LocalStorage.localStorageNotAvailable) return null;
 
     const value = localStorage.getItem(storageLocation);
-    return value ? JSON.parse(value) : null;
+    try {
+      return value ? JSON.parse(value) : null;
+    } catch (e) {
+      $log.debug(`Error parsing localStorage item "${storageLocation}"`, e);
+      return null;
+    }
   };
 
   /**

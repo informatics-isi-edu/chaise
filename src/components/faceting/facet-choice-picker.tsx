@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 
+import React from 'react';
+
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
@@ -736,4 +738,7 @@ const FacetChoicePicker = ({
   )
 }
 
-export default FacetChoicePicker;
+/**
+ * avoid unnecessary re-renders: when facets are rearranged or other facets are updated
+ */
+export default React.memo(FacetChoicePicker);

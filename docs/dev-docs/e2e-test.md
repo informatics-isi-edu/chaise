@@ -1,16 +1,20 @@
+<!-- omit from toc -->
 # End to End Testing Documentation
 
 E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
 
+<!-- omit from toc -->
 ## Table of contents
 
 - [Tools used](#tools-used)
 - [Setup](#setup)
 - [How To Run Tests](#how-to-run-tests)
-   * [Prerequistes](#prerequistes)
-   * [Test cases](#test-cases)
+  - [Prerequistes](#prerequistes)
+  - [Test cases](#test-cases)
 - [File structure](#file-structure)
+  - [Config files](#config-files)
 - [Debugging](#debugging)
+  - [Github Actions debugging](#github-actions-debugging)
 - [Writing test](#writing-test)
 - [Screenshot testing](#screenshot-testing)
 
@@ -194,6 +198,8 @@ To debug Playwright tests,
   npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
   npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug --max-failures=1
   ```
+
+More info: https://playwright.dev/docs/test-cli
 
 ### Github Actions debugging
 

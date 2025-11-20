@@ -1,5 +1,8 @@
 import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 
+// ermrestjs
+import type { Reference } from '@isrd-isi-edu/ermrestjs/src/models/reference';
+
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -87,7 +90,7 @@ export const RecordsetContext = createContext<{
   /**
    * The displayed reference
    */
-  reference: any,
+  reference: Reference,
   /**
    * Whether the main data is loading or not (and therefore we need spinner or not)
    */
