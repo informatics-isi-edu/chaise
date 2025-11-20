@@ -34,6 +34,10 @@
         {
           "name": "col6",
           "type": { "typename": "text" }
+        },
+        {
+          "name": "fk1_col",
+          "type": { "typename": "text" }
         }
       ],
       "foreign_keys": [
@@ -43,7 +47,7 @@
             {
               "schema_name": "facet-group",
               "table_name": "main",
-              "column_name": "id"
+              "column_name": "fk1_col"
             }
           ],
           "referenced_columns": [
@@ -61,16 +65,19 @@
           "fkeys": false,
           "sources": {
             "path_to_outbound1": {
+              "markdown_name": "Outbound 1",
               "source": [{ "outbound": ["facet-group", "main_fk1"] }, "outbound1_id"]
             },
             "path_to_assoc_related_1": {
+              "markdown_name": "Assoc Related 1",
               "source": [
-                { "inbound": ["facet-group", "assoc_1_fk1"] },
-                { "outbound": ["facet-group", "assoc_1_fk2"] },
+                { "inbound": ["facet-group", "assoc1_fk1"] },
+                { "outbound": ["facet-group", "assoc1_fk2"] },
                 "assoc_related1_id"
               ]
             },
             "path_to_assoc_related1_outbound1": {
+              "markdown_name": "Assoc Related1 Outbound1",
               "source": [
                 { "sourcekey": "path_to_assoc_related_1" },
                 { "outbound": ["facet-group", "assoc_related1_outbound1_fk1"] },
@@ -91,11 +98,9 @@
               {
                 "markdown_name": "**Group 2**",
                 "comment": "comment for **group 2**!",
-                "open": false,
                 "and": [
                   {
                     "sourcekey": "path_to_assoc_related_1",
-                    "open": true,
                     "comment": "group closed but child open"
                   },
                   { "sourcekey": "path_to_assoc_related1_outbound1" },
@@ -244,9 +249,9 @@
         }
       ]
     },
-    "assoc_1": {
+    "assoc1": {
       "kind": "table",
-      "table_name": "assoc_1",
+      "table_name": "assoc1",
       "schema_name": "facet-group",
       "keys": [{ "unique_columns": ["fk_to_main", "fk_to_assoc_related1"] }],
       "column_definitions": [
@@ -261,11 +266,11 @@
       ],
       "foreign_keys": [
         {
-          "names": [["facet-group", "assoc_1_fk1"]],
+          "names": [["facet-group", "assoc1_fk1"]],
           "foreign_key_columns": [
             {
               "schema_name": "facet-group",
-              "table_name": "assoc_1",
+              "table_name": "assoc1",
               "column_name": "fk_to_main"
             }
           ],
@@ -278,11 +283,11 @@
           ]
         },
         {
-          "names": [["facet-group", "assoc_1_fk2"]],
+          "names": [["facet-group", "assoc1_fk2"]],
           "foreign_key_columns": [
             {
               "schema_name": "facet-group",
-              "table_name": "assoc_1",
+              "table_name": "assoc1",
               "column_name": "fk_to_assoc_related1"
             }
           ],

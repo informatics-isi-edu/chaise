@@ -109,20 +109,39 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
   }
 }
 
+export async function openFacetGroup(page: Page, groupIdx: number, numChildren?: number) {
+  const group = RecordsetLocators.getFacetGroupById(page, groupIdx);
+
+  await expect.soft(group).toBeVisible();
+  await group.click();
+  const children = RecordsetLocators.getFacetGroupChildren(group);
+  await expect.soft(children.first()).toBeVisible();
+  if (typeof numChildren === 'number') {
+    await expect.soft(children).toHaveCount(numChildren);
+  }
+
+  return group;
+}
+
 /**
  * Open the facet and wait for content to be visible
  * @param facetIdx facet index
  * @param numOptions the total number of options visble on load for this facet
  */
-export async function openFacet(page: Page, facet: Locator, facetIdx: number, numOptions: number, numOpenFacets: number) {
+export async function openFacet(page: Page, facet: Locator, facetIdx: number, numOptions?: number, numOpenFacets?: number) {
   await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
 
-  await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(numOpenFacets);
+  if (typeof numOpenFacets === 'number') {
+    await expect.soft(RecordsetLocators.getOpenFacets(page)).toHaveCount(numOpenFacets);
+  }
 
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await expect.soft(RecordsetLocators.getFacetCollapse(facet)).toBeVisible();
   await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
-  await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(numOptions);
+
+  if (typeof numOptions === 'number') {
+    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveCount(numOptions);
+  }
 }
 
 /**
@@ -138,13 +157,24 @@ export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, 
 /**
  * Selects a facet option and verifies the row count and number of recordset filters
  * @param optionIdx facet option index to click
- * @param numRows number of recordset rows after clicking facet option
+ * @param numRows number of recordset rows after clicking facet option (if undefined, will not check number of rows or filter chiclets)
  * @param numFilters number of recordset filters after clicking facet option (default: 1)
  */
-export async function testSelectFacetOption(container: Page | Locator, facet: Locator, optionIdx: number, numRows: number, numFilters?: number) {
+export async function testSelectFacetOption(
+  container: Page | Locator,
+  facet: Locator,
+  optionIdx: number,
+  numRows?: number,
+  numFilters?: number,
+) {
+
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
+
+  if (typeof numRows !== 'number') {
+    return;
+  }
 
   // wait for request to return
   await expect.soft(RecordsetLocators.getClearAllFilters(container)).toBeVisible();
@@ -485,19 +515,35 @@ export async function testTotalCount(
  * @param totalNumFacets how many facets there are
  * @param openedFacets facets that are opened and should be closed
  * @param pageSizeAfterClear the page size after clear is clicked
+ * @param openedGroups facet groups that are opened and should be closed
  */
-export async function resetFacetState(page: Page, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number) {
+export async function resetFacetState(
+  page: Page,
+  totalNumFacets: number,
+  openedFacets: number[],
+  pageSizeAfterClear: number,
+  openedGroups?: number[],
+  skipClearAll?: boolean
+) {
   const closedFacets = RecordsetLocators.getClosedFacets(page);
+  const openGroups = RecordsetLocators.getOpenFacetGroups(page);
   const clearAll = RecordsetLocators.getClearAllFilters(page);
 
-  await test.step('clear all filters', async () => {
-    // wait for the default facets to open first
-    await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
+  if (!skipClearAll) {
+    await test.step('clear all filters', async () => {
+      // wait for the default facets to open first
+      await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length);
 
-    await clearAll.click();
-    await expect.soft(clearAll).not.toBeVisible();
-    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
-  });
+      await clearAll.click();
+      await expect.soft(clearAll).not.toBeVisible();
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
+    });
+  } else {
+    await test.step('should have no filters applied', async () => {
+      await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(0);
+      await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(pageSizeAfterClear);
+    });
+  }
 
   await test.step('close default open facets', async () => {
     for await (const [i, facetIndex] of openedFacets.entries()) {
@@ -506,6 +552,17 @@ export async function resetFacetState(page: Page, totalNumFacets: number, opened
       await expect.soft(closedFacets).toHaveCount(totalNumFacets - openedFacets.length + i + 1);
     }
   });
+
+  if (openedGroups && openedGroups.length > 0) {
+    await test.step('close default open facet groups', async () => {
+      let count = openedGroups.length;
+      for await (const groupIndex of openedGroups) {
+        const group = RecordsetLocators.getFacetGroupById(page, groupIndex);
+        await RecordsetLocators.getFacetGroupHeaderButtonById(group, groupIndex).click();
+        await expect.soft(openGroups).toHaveCount(--count);
+      }
+    });
+  }
 }
 
 /**
@@ -515,16 +572,24 @@ export async function resetFacetState(page: Page, totalNumFacets: number, opened
  * @param totalNumFacets how many facets there are
  * @param openedFacets facets that are opened and should be closed
  * @param pageSizeAfterClear the page size after clear is clicked
+ * @param openedGroups facet groups that are opened and should be closed
+ * @param skipClearAll if we should skip the clear all step
  */
 export async function openRecordsetAndResetFacetState(
-  page: Page, url: string, totalNumFacets: number, openedFacets: number[], pageSizeAfterClear: number
+  page: Page,
+  url: string,
+  totalNumFacets: number,
+  openedFacets: number[],
+  pageSizeAfterClear: number,
+  openedFacetGroups?: number[],
+  skipClearAll?: boolean
 ) {
   await test.step('should load recordset page', async () => {
     await page.goto(url);
     await RecordsetLocators.waitForRecordsetPageReady(page);
   });
 
-  await resetFacetState(page, totalNumFacets, openedFacets, pageSizeAfterClear);
+  await resetFacetState(page, totalNumFacets, openedFacets, pageSizeAfterClear, openedFacetGroups, skipClearAll);
 }
 
 /**
@@ -672,6 +737,8 @@ export type TestIndividualFacetParams = Either<
 
 /**
  * This function can be used for testing an individual facet. This opens the facet, test its features, and then will close it.
+ *
+ * This assumes all facets are closed before this function is called.
  */
 export async function testIndividualFacet(page: Page, pageSize: number, totalNumFacets: number, facetParams: TestIndividualFacetParams) {
   switch (facetParams.type) {

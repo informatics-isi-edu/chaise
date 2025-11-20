@@ -326,7 +326,15 @@ export default class RecordsetLocators {
   }
 
   static getClosedFacets(container: Page | Locator): Locator {
-    return container.locator('.facet-panel button.collapsed');
+    return container.locator('.facet-item-container:not(.facet-item-open)');
+  }
+
+  static getClosedFacetGroups(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-container:not(.facet-group-item-open)');
+  }
+
+  static getOpenFacetGroups(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-container.facet-group-item-open');
   }
 
   static getFacetTitles(container: Page | Locator): Locator {
@@ -353,16 +361,36 @@ export default class RecordsetLocators {
     return container.locator(`.facet-item-container .facet-move-icon-${idx}`);
   }
 
+  static getFacetGroupMoveIcon(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.facet-group-item-container .group-move-icon-${idx}`);
+  }
+
   static getFacetById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-${idx}`);
   }
+
+  static getFacetGroupById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fgc-${idx}`);
+  };
 
   static getFacetHeaderById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-heading-${idx}`).locator('.facet-header-text');
   };
 
+  static getFacetGroupHeaderById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fgc-heading-${idx}`).locator('.facet-header-text');
+  };
+
   static getFacetHeaderButtonById(facet: Locator, idx: number): Locator {
     return facet.locator(`.fc-heading-${idx} button`);
+  }
+
+  static getFacetGroupHeaderButtonById(facet: Locator, idx: number): Locator {
+    return facet.locator(`.fgc-heading-${idx} button`);
+  }
+
+  static getFacetGroupChildren(facetGroup: Locator): Locator {
+    return facetGroup.locator('.facet-group-item-body .facet-panel');
   }
 
   static getFacetSpinner(facet: Locator): Locator {

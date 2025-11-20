@@ -57,7 +57,7 @@ test('Testing four facet selections 1 at a time,', async ({ page, baseURL }, tes
   });
 });
 
-test('Testing four facet selections in quick sequence and verifying data after all selections', async ({ page, baseURL }, testInfo) => {
+test('Testing four facet selections in quick sequence', async ({ page, baseURL }, testInfo) => {
 
   await openRecordsetAndResetFacetState(page,
     generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL) + testParams.sort,
@@ -80,7 +80,15 @@ test('Testing four facet selections in quick sequence and verifying data after a
     for (let k = 0; k < testParams.multipleFacets.length; k++) {
       facetParams = testParams.multipleFacets[k];
       facet = RecordsetLocators.getFacetById(page, facetParams.facetIdx);
-      await testSelectFacetOption(page, facet, facetParams.option, facetParams.numRows, k + 1);
+      // don't check the number of rows and filters until all selections are made
+      await testSelectFacetOption(page, facet, facetParams.option);
     }
+
+    const lastSelected = testParams.multipleFacets[testParams.multipleFacets.length - 1];
+
+    await expect.soft(RecordsetLocators.getClearAllFilters(page)).toBeVisible();
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(lastSelected.numRows);
+    await expect.soft(RecordsetLocators.getFacetFilters(page)).toHaveCount(testParams.multipleFacets.length);
+
   });
 });
