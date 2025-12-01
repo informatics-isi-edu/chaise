@@ -1,11 +1,18 @@
-import { Page, test } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+
+import PageLocators from '@isrd-isi-edu/chaise/test/e2e/locators/page';
 
 /**
  * go to login page and set the page context.
  * set `storagePath` to '' if you want to skip changing storage
  */
-export const performLogin = async (cookie: any, storagePath: string, page: Page) => {
+export const performLogin = async (page: Page, cookie: any, storagePath: string, testAppLoad?: boolean) => {
   await page.goto(`${process.env.CHAISE_BASE_URL}/login/`);
+
+  if (testAppLoad) {
+    // the fact that element is there, it means that the app didn't fail to load
+    await expect(PageLocators.getLoginAppEmptyContainer(page)).toBeAttached();
+  }
 
   // add the localStorage so it doesn't show the warining.
   await page.evaluate(({ usedCookie, isCI }) => {
