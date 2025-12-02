@@ -73,6 +73,7 @@ E2Enavbar=test/e2e/specs/all-features/navbar/playwright.config.ts
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/playwright.config.ts
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/playwright.config.ts
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
+E2EServicesTest=test/e2e/specs/default-config/services.config.ts
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test

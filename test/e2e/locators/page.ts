@@ -22,6 +22,10 @@ export default class PageLocators {
     return page.locator('#mainTable')
   }
 
+  static getLoginAppEmptyContainer(page: Page): Locator {
+    return page.locator('.login-app-empty-container');
+  }
+
   static getVersionInfoElements(page: Page) {
     const container = page.locator('.chaise-title-version-info')
     return {
