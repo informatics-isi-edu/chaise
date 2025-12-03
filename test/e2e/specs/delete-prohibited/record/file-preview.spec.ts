@@ -160,7 +160,7 @@ const testParams = {
       type: 'tsv',
       file: {
         path: 'tsv-01.tsv',
-        content: 'name\tage\nAlice\t30\nBob\t25'
+        content: 'first name\tage, or other info\nAlice\t[30, 25]\nBob\t("25","30")?\nJohn-Doe\tN/A\nJoe\t["10_1", "12 mg"]\nBrian\t["10","20"]',
       },
       inputs: {
         id: '6',
@@ -174,7 +174,7 @@ const testParams = {
         caption: 'tsv-01.tsv',
         url: '/hatrac/js/chaise/filepreview/1/6/',
       },
-      renderedContent: 'name age Alice 30 Bob 25',
+      renderedContent: 'first name age, or other info Alice [30, 25] Bob ("25","30")? John-Doe N/A Joe ["10_1", "12 mg"] Brian ["10","20"]',
     },
     {
       type: 'mvsj',

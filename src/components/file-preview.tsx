@@ -153,8 +153,9 @@ const FilePreview = ({
    * Render CSV as HTML table
    */
   const renderCsvTable = (csvContent: string): JSX.Element => {
-    const rows = parseCsvContent(csvContent);
-    if (!rows || rows.length === 0) return <div>No data to display</div>;
+    const rows = parseCsvContent(csvContent, isTsv);
+    // the following should not happen because we check canShowRendered before calling this function but leaving it just in case
+    if (!rows || rows.length === 0) return <div>Unable to render the {isCsv ? 'CSV' : 'TSV'} content.</div>;
 
     const showHeaders = column && column.filePreview && column.filePreview.showCsvHeader;
     const headers = showHeaders ? rows[0] : [];
