@@ -6,5 +6,7 @@ export default getConfig({
   mainSpecName: 'delete-prohibited',
   testMatch: [
     'facet-group-*.spec.ts',
+    // 'facet-group-presentation.spec.ts',
+    // 'facet-group-reorder.spec.ts',
   ]
 });

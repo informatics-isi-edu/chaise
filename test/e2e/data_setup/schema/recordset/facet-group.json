@@ -9,10 +9,13 @@
       "column_definitions": [
         {
           "name": "id",
-          "type": { "typename": "text" }
+          "comment": "id comment on model",
+          "type": { "typename": "text" },
+          "nullok": false
         },
         {
           "name": "col1",
+          "comment": "column 1 comment on model",
           "type": { "typename": "text" }
         },
         {
@@ -29,11 +32,11 @@
         },
         {
           "name": "col5",
-          "type": { "typename": "text" }
+          "type": { "typename": "boolean" }
         },
         {
           "name": "col6",
-          "type": { "typename": "text" }
+          "type": { "typename": "timestamptz" }
         },
         {
           "name": "fk1_col",
@@ -92,9 +95,11 @@
               { "source": "id" },
               {
                 "markdown_name": "Group 1",
-                "and": [{ "sourcekey": "path_to_outbound1" }]
+                "and": [
+                  { "sourcekey": "path_to_outbound1" }
+                ]
               },
-              { "source": "col1" },
+              { "source": "col1", "comment": false },
               {
                 "markdown_name": "**Group 2**",
                 "comment": "comment for **group 2**!",
@@ -110,7 +115,10 @@
               {
                 "markdown_name": "Group 3",
                 "comment": false,
-                "and": [{ "source": "col5" }, { "source": "col6" }]
+                "and": [
+                  { "source": "col5", "ux_mode": "check_presence" },
+                  { "source": "col6" }
+                ]
               },
               { "source": "col2" },
               { "source": "col3" },
@@ -118,6 +126,15 @@
                 "markdown_name": "Group 1",
                 "comment": "duplicate group name which should be ignored",
                 "and": [{ "source": "col1" }]
+              }
+            ]
+          }
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "id"
               }
             ]
           }
@@ -132,7 +149,8 @@
       "column_definitions": [
         {
           "name": "id",
-          "type": { "typename": "text" }
+          "type": { "typename": "text" },
+          "nullok": false
         },
         {
           "name": "fk_to_outbound1",
@@ -191,6 +209,15 @@
               }
             ]
           }
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "id"
+              }
+            ]
+          }
         }
       }
     },
@@ -204,13 +231,28 @@
           "name": "outbound1_id",
           "type": {
             "typename": "text"
-          }
+          },
+          "nullok": false
         },
         {
           "name": "name",
           "type": { "typename": "text" }
         }
-      ]
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["outbound1_id", "name"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "outbound1_id"
+              }
+            ]
+          }
+        }
+      }
     },
     "inbound1": {
       "kind": "table",
@@ -222,7 +264,8 @@
           "name": "inbound1_id",
           "type": {
             "typename": "text"
-          }
+          },
+          "nullok": false
         },
         {
           "name": "fk_to_main",
@@ -247,7 +290,21 @@
             }
           ]
         }
-      ]
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["inbound1_id", ["facet-group", "inbound1_fk1"]]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "inbound1_id"
+              }
+            ]
+          }
+        }
+      }
     },
     "assoc1": {
       "kind": "table",
@@ -257,11 +314,13 @@
       "column_definitions": [
         {
           "name": "fk_to_main",
-          "type": { "typename": "text" }
+          "type": { "typename": "text" },
+          "nullok": false
         },
         {
           "name": "fk_to_assoc_related1",
-          "type": { "typename": "text" }
+          "type": { "typename": "text" },
+          "nullok": false
         }
       ],
       "foreign_keys": [
@@ -309,7 +368,8 @@
       "column_definitions": [
         {
           "name": "assoc_related1_id",
-          "type": { "typename": "text" }
+          "type": { "typename": "text" },
+          "nullok": false
         },
         {
           "name": "name",
@@ -338,7 +398,21 @@
             }
           ]
         }
-      ]
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["assoc_related1_id", "name"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "assoc_related1_id"
+              }
+            ]
+          }
+        }
+      }
     },
     "assoc_related1_outbound1": {
       "kind": "table",
@@ -348,11 +422,33 @@
       "column_definitions": [
         {
           "name": "assoc_related1_outbound1_id",
+          "type": { "typename": "text" },
+          "nullok": false
+        },
+        {
+          "name": "name",
+          "type": { "typename": "text" }
+        },
+        {
+          "name": "third_col",
           "type": { "typename": "text" }
         }
-      ]
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["assoc_related1_outbound1_id", "name", "third_col"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact": {
+            "row_order": [
+              {
+                "column": "assoc_related1_outbound1_id"
+              }
+            ]
+          }
+        }
+      }
     },
-
     "main_reorder": {
       "kind": "table",
       "table_name": "main_reorder",

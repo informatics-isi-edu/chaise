@@ -276,7 +276,7 @@ export async function testRecordsetDisplayWSortAfterPaging(
 }
 
 /**
- * submit the modal selections and make the recordset
+ * submit the modal selections and test the results
  * @param numRows number of recordset rows after submitting modal selection
  * @param numCheckedFacetOptions number of checked facet options for `facet` after submitting modal selection
  */
@@ -635,6 +635,10 @@ type TestIndividualFacetParamsGeneral = {
    */
   name: string,
   /**
+   * description of the test
+   */
+  description?: string,
+  /**
    * number of rows on the page after selecting the not-null option
    */
   notNullNumRows?: number,
@@ -657,27 +661,98 @@ type TestIndividualFacetParamsCheckPresence = TestIndividualFacetParamsGeneral &
 }
 
 type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
-  type: 'choice',
-  isBoolean?: boolean,
-  isEntityMode?: boolean,
-  searchPlaceholder?: string,
+  type: 'choice';
+  /**
+   * if the choice facet is a boolean facet
+   * (used for search placeholder text test)
+   */
+  isBoolean?: boolean;
+  /**
+   * if the choice facet is in entity mode
+   * (used for search placeholder text test)
+   */
+  isEntityMode?: boolean;
+  /**
+   * search placeholder text
+   * (used for search placeholder text test)
+   */
+  searchPlaceholder?: string;
   /**
    * initially displayed option
    */
-  options: string[],
+  options: string[];
   /**
    * the option that should be selected
    */
-  option: number,
+  option: number;
   /**
    * the filter that will be displayed once the option is selected
    */
-  filter: string,
+  filter: string;
   /**
    * number of rows on the page after selecting the option
    */
-  numRows: number,
-}
+  numRows: number;
+
+  /**
+   *
+   */
+  textSearch?: Array<{
+    term: string;
+    options: string[];
+  }>;
+
+  /**
+   * search the fafcet modal
+   */
+  modal?: {
+    /**
+     * number of rows displayed in the modal on load
+     */
+    numRows: number;
+    /**
+     * number of checked rows in the modal on load
+     */
+    numCheckedRows: number;
+    /**
+     * the column names displayed in the modal
+     */
+    columnNames: string[];
+
+    firstColumn?: {
+      /**
+       * the values in the first column of the modal
+       */
+      values: string[];
+      /**
+       * raw name of the first column in the modal
+       */
+      name: string;
+      /**
+       * if the first column is sortable
+       */
+      sortable: boolean;
+      /**
+       * the values in the first column after sorting
+       */
+      valuesAfterSort?: string[];
+    };
+
+    /**
+     * test the facet popup selection
+     */
+    select?: {
+      /**
+       * the options to be selected in the modal
+       */
+      options: number[];
+      /**
+       * number of rows on the page after submitting the modal selection
+       */
+      numRows: number;
+    };
+  };
+};
 
 type TestIndividualFacetParamsRange = TestIndividualFacetParamsGeneral & {
   type: 'numeric' | 'date' | 'timestamp',
@@ -739,6 +814,9 @@ export type TestIndividualFacetParams = Either<
  * This function can be used for testing an individual facet. This opens the facet, test its features, and then will close it.
  *
  * This assumes all facets are closed before this function is called.
+ *
+ * @param pageSize number of rows when no filter is applied (clear all is clicked)
+ * @param totalNumFacets total number of facets in the facet panel
  */
 export async function testIndividualFacet(page: Page, pageSize: number, totalNumFacets: number, facetParams: TestIndividualFacetParams) {
   switch (facetParams.type) {
@@ -765,7 +843,7 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           }
         });
 
-        await test.step('select a value to filter on and update the search criteria', async () => {
+        await test.step('select an option, check the result and clear the selection', async () => {
           await testSelectFacetOptionThenClear(
             page,
             facetParams.index,
@@ -776,8 +854,78 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           );
 
           // close the facet
-          await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+          if (!facetParams.modal && !facetParams.textSearch) {
+            await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+          }
         });
+
+        if (facetParams.textSearch) {
+          for await (const searchTest of facetParams.textSearch) {
+            await test.step(`searching for term "${searchTest.term}" should show correct options`, async () => {
+              await RecordsetLocators.getFacetSearchBox(facet).fill(searchTest.term);
+              await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(searchTest.options);
+              await RecordsetLocators.getFacetSearchBoxClear(facet).click();
+            });
+          }
+        }
+
+        if (facetParams.modal) {
+          const modalParams = facetParams.modal;
+          const modal = ModalLocators.getRecordsetSearchPopup(page);
+
+          await test.step('facet modal works properly', async () => {
+            await testShowMoreClick(facet, modal, modalParams.numRows, modalParams.numCheckedRows);
+
+            await expect
+              .soft(RecordsetLocators.getColumnNames(modal))
+              .toHaveText(modalParams.columnNames);
+
+            if (modalParams.firstColumn) {
+              const columnValues = RecordsetLocators.getFirstColumn(modal);
+              await expect.soft(columnValues).toHaveCount(modalParams.firstColumn.values.length);
+              await expect.soft(columnValues).toHaveText(modalParams.firstColumn.values);
+
+              // test sorting
+              const sortBtn = RecordsetLocators.getColumnSortButtonContainer(modal, modalParams.firstColumn.name);
+              if (modalParams.firstColumn.sortable) {
+                await expect.soft(sortBtn).toBeVisible();
+              } else {
+                await expect.soft(sortBtn).not.toBeVisible();
+              }
+              if (modalParams.firstColumn.sortable && modalParams.firstColumn.valuesAfterSort) {
+                await sortBtn.click();
+                await RecordsetLocators.waitForRecordsetPageReady(modal);
+
+                const columnValues = RecordsetLocators.getFirstColumn(modal);
+                await expect.soft(columnValues).toHaveCount(modalParams.firstColumn.valuesAfterSort.length);
+                await expect.soft(columnValues).toHaveText(modalParams.firstColumn.valuesAfterSort);
+              }
+            }
+
+            // select options in the modal if any
+            if (modalParams.select && modalParams.select.options.length > 0) {
+              for await (const optionIdx of modalParams.select.options) {
+                await RecordsetLocators.getCheckboxInputs(modal).nth(optionIdx).check();
+              }
+
+              await testSubmitModalSelection(
+                page,
+                facet,
+                modal,
+                modalParams.select.numRows,
+                modalParams.select.options.length
+              );
+
+              // clear all so the page gets back to original state
+              await RecordsetLocators.getClearAllFilters(page).click();
+            } else {
+              await testModalClose(modal);
+            }
+
+            // close the facet
+            await RecordsetLocators.getFacetHeaderButtonById(facet, facetParams.index).click();
+          });
+        }
       });
       break;
     case 'numeric':

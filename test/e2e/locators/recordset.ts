@@ -204,6 +204,10 @@ export default class RecordsetLocators {
   };
 
   /* sort selectors */
+  static getColumnSortButtonContainer(container: Page | Locator, rawColumnName: string): Locator {
+    return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .column-sort-icon`);
+  };
+
   static getColumnSortButton(container: Page | Locator, rawColumnName: string): Locator {
     return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .not-sorted-icon`);
   };
@@ -373,6 +377,10 @@ export default class RecordsetLocators {
     return container.locator(`.fgc-${idx}`);
   };
 
+  static getFacetGroupBody(facetGroup: Locator): Locator {
+    return facetGroup.locator('.facet-group-item-body');
+  }
+
   static getFacetHeaderById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-heading-${idx}`).locator('.facet-header-text');
   };
@@ -385,8 +393,8 @@ export default class RecordsetLocators {
     return facet.locator(`.fc-heading-${idx} button`);
   }
 
-  static getFacetGroupHeaderButtonById(facet: Locator, idx: number): Locator {
-    return facet.locator(`.fgc-heading-${idx} button`);
+  static getFacetGroupHeaderButtonById(group: Locator, idx: number): Locator {
+    return group.locator(`.fgc-heading-${idx} button`);
   }
 
   static getFacetGroupChildren(facetGroup: Locator): Locator {
