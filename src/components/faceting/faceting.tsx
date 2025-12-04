@@ -1042,15 +1042,12 @@ const Faceting = ({
   //-------------------  render logic:   --------------------//
 
   // bootstrap expects an array of strings
-  const activeKeys: string[] = [];
+  const mainAccordionActiveKeys: string[] = [];
   reference.facetColumnsStructure.forEach((structure) => {
     if (typeof structure === 'number') {
-      if (facetModels[structure].isOpen) activeKeys.push(FacetStorageService.getFacetStructureKey(undefined, structure));
+      if (facetModels[structure].isOpen) mainAccordionActiveKeys.push(FacetStorageService.getFacetStructureKey(undefined, structure));
     } else if (openedFacetGroups[`${structure.structureIndex}`]) {
-      activeKeys.push(FacetStorageService.getFacetStructureKey(structure.structureIndex));
-      structure.children.forEach((facetIndex) => {
-        if (facetModels[facetIndex].isOpen) activeKeys.push(FacetStorageService.getFacetStructureKey(structure.structureIndex, facetIndex));
-      });
+      mainAccordionActiveKeys.push(FacetStorageService.getFacetStructureKey(structure.structureIndex));
     }
   });
 
@@ -1105,6 +1102,12 @@ const Faceting = ({
         const groupStructureKey = FacetStorageService.getFacetStructureKey(groupIndex);
         const groupIsOpen = !!openedFacetGroups[`${groupIndex}`];
 
+        const groupActiveKeys: string[] = [];
+        group.children.forEach((facetIndex) => {
+          if (!facetModels[facetIndex].isOpen) return;
+          groupActiveKeys.push(FacetStorageService.getFacetStructureKey(groupIndex, facetIndex));
+        });
+
         return (
           <Draggable key={groupStructureKey} draggableId={groupStructureKey} index={draggableIndex}>
             {(draggableArgs: DraggableProvided) => (
@@ -1144,7 +1147,7 @@ const Faceting = ({
                     >
                       {(droppableArgs: DroppableProvided) => (
                         <Accordion
-                          activeKey={activeKeys}
+                          activeKey={groupActiveKeys}
                           alwaysOpen
                           {...droppableArgs.droppableProps}
                           ref={droppableArgs.innerRef}
@@ -1301,7 +1304,7 @@ const Faceting = ({
             {(droppableArgs: DroppableProvided) => (
               <Accordion
                 className='panel-group'
-                activeKey={activeKeys}
+                activeKey={mainAccordionActiveKeys}
                 alwaysOpen
                 {...droppableArgs.droppableProps}
                 ref={droppableArgs.innerRef}
