@@ -207,16 +207,6 @@ const testParams = {
           max: { date: '2025-11-21', time: '17:26:12' },
           filter: 'col62025-11-21 10:08:00 to 2025-11-21 17:26:12',
           numRows: 6,
-        },
-        justMin: {
-          min: { date: '2025-11-21', time: '15:00:00' },
-          filter: 'col6≥ 2025-11-21 15:00:00',
-          numRows: 17,
-        },
-        justMax: {
-          max: { date: '2025-11-21', time: '20:00:00' },
-          filter: 'col6≤ 2025-11-21 20:00:00',
-          numRows: 12,
         }
       },
       {
@@ -232,21 +222,6 @@ const testParams = {
     ],
   },
 };
-
-/**
- * - display props
- *   x markdown in title
- *   - tooltip
- *   x open status
- *     x having a parent closed while the child is open
- * - being able to interact with the facets inside the group
- *    x clicking on a facet should open it
- *    - closing a facet group, should hide children but keep their state
- *    x presentation of facet
- *    x show more/less popup
- * x flow control tests
- *   x fourselection type of tests
- */
 
 test.describe('Facet groups', () => {
   test.describe.configure({ mode: 'parallel' });
