@@ -272,6 +272,15 @@ export function getCatalogId(dontParseURL?: boolean, forcedDefault?: string): st
 }
 
 /**
+ * Replace the catalog id in the current url with the given value
+ */
+export function getURLWithDifferentCatalog(newCatalogId: string): string {
+  const { hash } = getURLHashFragment(windowRef.location);
+  const hashWithoutCatalog = hash.substring(hash.indexOf('/'));
+  return `${windowRef.location.origin}${windowRef.location.pathname}#${newCatalogId}${hashWithoutCatalog}${windowRef.location.search}`;
+}
+
+/**
  * Takes any string, finds the '?' character, and splits all content after '?' assuming they are in the form of key=value&key2=value&...
  * @param queryString
  * @returns
