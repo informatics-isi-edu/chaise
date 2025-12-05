@@ -9,7 +9,7 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
-const testParams: any = {
+const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
@@ -176,7 +176,6 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
 
     await RecordsetLocators.getClearAllFilters(page).click();
     await page.locator('.recordset-main-spinner').waitFor({ state: 'detached' });
-
     await mainSearch.fill(testParams.searchBox.term);
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.numRows);
 

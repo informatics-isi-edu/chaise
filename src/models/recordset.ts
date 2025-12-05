@@ -153,7 +153,7 @@ export type FacetModel = {
   // TODO: support this for composite stable keys
   enableFavorites: boolean,
   parentLogStackPath: string
-}
+};
 
 export type FacetRequestModel = {
   // some facets require extra step to process preselected filters

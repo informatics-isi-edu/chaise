@@ -444,7 +444,7 @@ While reviewing a PR that Dependabot opened:
 1. Ensure that the GitHub Actions build was successful and had no issues.
 
 3. Grab the branch locally and ensure you can build it using all the Node.js versions that we support:
-  
+
     ```
     nvm use 18.18
     make dist
@@ -452,7 +452,7 @@ While reviewing a PR that Dependabot opened:
     This should not throw any errors and should finish properly.
 
 5. Build and deploy the branch locally with the main Node.js version we support and use on our servers (currently 20.12.2):
-  
+
     ```
     nvm use 20.12.2
     make deps-test
@@ -464,6 +464,25 @@ While reviewing a PR that Dependabot opened:
 
 7. Depending on the automated or manual test, you might have to make more changes to the code. Push them to the same branch so they can be merged together.
 
+## Using a local version of ermrestjs
+
+By default chaise will use the ermrestjs that is released to npm during development. To use a locally cloned ermrestjs, do the following:
+
+1. Go to where ermrestjs is cloned and make sure you've built the package at least once by running `make dist` or `make dist-wo-deps`. And then run
+
+    ```sh
+    # in ermrestjs folder
+    npm link
+    ```
+
+2. Go back to the chaise folder and run
+
+    ```sh
+    # in chaise folder
+    npm link @isrd-isi-edu/ermrestjs
+    ```
+
+Chaise will now start using your local version of ermrestjs.
 
 
 ## Structure of an App

@@ -169,6 +169,7 @@ export enum LogStackTypes{
   COLUMN= 'col',
   PSEUDO_COLUMN= 'pcol',
   FACET= 'facet',
+  FACET_GROUP= 'facet-group',
   SAVED_QUERY= 'saved_query',
 
   // used in viewer app=
@@ -184,6 +185,7 @@ export enum LogStackPaths {
   PSEUDO_COLUMN= 'pcol',
   FOREIGN_KEY= 'fk',
   FACET= 'facet',
+  FACET_GROUP= 'facet-group',
   RELATED= 'related',
   RELATED_INLINE= 'related-inline',
   ADD_PB_POPUP= 'related-link-picker',

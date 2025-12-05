@@ -2,8 +2,15 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 //react-beatiful-dnd
 import {
-  DragDropContext, Draggable, DraggableProvided, DroppableProvided, DropResult
+  DragDropContext,
+  Draggable,
+  DraggableProvided,
+  DroppableProvided,
+  DropResult,
 } from '@hello-pangea/dnd';
+
+// ermrestjs
+import type { FacetGroup } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
@@ -23,29 +30,35 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  LogActions,
+  LogReloadCauses,
+  LogStackPaths,
+  LogStackTypes,
+} from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  FacetCheckBoxRow,
+  FacetModel,
+  FacetRequestModel,
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // servies
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import {
+  FacetStorageService
+} from '@isrd-isi-edu/chaise/src/services/facet-storage';
 
 // utils
 import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import {
-  getFacetOrderStorageKey, getInitialFacetOpenStatus, getInitialFacetOrder,
-  hasStoredFacetOrder
-} from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-import LocalStorage from '@isrd-isi-edu/chaise/src/utils/storage';
 import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-
 
 type FacetingProps = {
   /**
    * Whether the facet panel is currently open or not
    */
-  facetPanelOpen: boolean,
+  facetPanelOpen: boolean;
   /**
    * The functions that recordset is going to use from this component..
    * NOTE we have to make sure this function is called after each update of
@@ -54,21 +67,20 @@ type FacetingProps = {
   registerRecordsetCallbacks: (
     getAppliedFilters: () => FacetCheckBoxRow[][],
     removeAppliedFilters: (index?: number | 'filters' | 'cfacets') => void,
-    focusOnFacet: (index: number, dontUpdate?: boolean) => void,
-  ) => void,
+    focusOnFacet: (index: number, dontUpdate?: boolean) => void
+  ) => void;
   /**
    * the recordset's log stack path
    */
-  recordsetLogStackPath: string,
+  recordsetLogStackPath: string;
   /**
    * callback that should be called when we're ready to initalize the data
    */
-  setReadyToInitialize: () => void,
+  setReadyToInitialize: () => void;
 
-
-  recordsetFacetDepthLevel: number,
-  recordsetUIContextTitles?: TitleProps[]
-}
+  recordsetFacetDepthLevel: number;
+  recordsetUIContextTitles?: TitleProps[];
+};
 
 const Faceting = ({
   facetPanelOpen,
@@ -76,14 +88,18 @@ const Faceting = ({
   recordsetLogStackPath,
   setReadyToInitialize,
   recordsetUIContextTitles,
-  recordsetFacetDepthLevel
+  recordsetFacetDepthLevel,
 }: FacetingProps) => {
-
   const { dispatchError } = useError();
   const {
-    reference, registerFacetCallbacks, update,
-    printDebugMessage, checkReferenceURL,
-    logRecordsetClientAction, getLogAction, getLogStack
+    reference,
+    registerFacetCallbacks,
+    update,
+    printDebugMessage,
+    checkReferenceURL,
+    logRecordsetClientAction,
+    getLogAction,
+    getLogStack,
   } = useRecordset();
 
   /**
@@ -99,35 +115,71 @@ const Faceting = ({
   /**
    * Store the displayed order of facets.
    *
-   * - This is an array of numbers, each number encoding the index of the corresponding facet in facetModels
-   * or reference.facetColumns arrays.
+   * - The order is encoded as array of items. The item can be either:
+   *  - a number: the index of the facet column in reference.facetColumns (or facetModels)
+   *  - an array of numbers: indicating a group of facets (the numbers are the indexes of the facet columns in reference.facetColumns or facetModels)
    * - This will allow us to reorder the facets while keeping the internal facet index the way it was.
    */
-  const [facetOrders, setFacetOrders, facetOrdersRef] = useStateRef<number[]>(() => {
-    return getInitialFacetOrder(reference).map((o) => o.facetIndex);
+
+  // TODO the more I think about it, isOpen should be handled here and should jus get out of facetModels
+  // but ...
+  const [facetOrders, setFacetOrders, facetOrdersRef] = useStateRef<
+    Array<number | { index: number; children: number[] }>
+  >(() => {
+    return FacetStorageService.getFacetOrder(reference).map((order) => {
+      if ('children' in order) {
+        return { index: order.index, children: order.children.map((c) => c.index) };
+      } else {
+        return order.index;
+      }
+    });
   });
 
-  const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
-    const res: FacetModel[] = [];
-    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
-    reference.facetColumns.forEach((fc: any, index: number) => {
-      // the initial open status is based on annotation and also the local storage
-      const isOpen = initialOpenStatus[`${index}`];
+  const [facetAndGroupModels, setFacetAndGroupModels, facetAndGroupModelsRef] = useStateRef<{
+    /**
+     * State for individual facet columns (indexed by column index)
+     */
+    facetModels: FacetModel[];
+    /**
+     * opened facet groups.
+     * The value is not important, only the key matters. The key is the structure index of the group.
+     */
+    openedFacetGroups: { [structureIndex: string]: boolean };
+  }>(() => {
+    const openedFacetGroups: { [structureIndex: string]: boolean } = {};
+    FacetStorageService.getFacetOrder(reference).forEach((order) => {
+      if ('children' in order) {
+        openedFacetGroups[`${order.index}`] = order.isOpen;
+      }
+    });
 
-      res.push({
+    const facetModels: FacetModel[] = [];
+    reference.facetColumns.forEach((fc) => {
+      // if the parent is closed, we don't want to load the facet
+      let hasParentAndIsClosed = false;
+      if (typeof fc.groupIndex === 'number') {
+        hasParentAndIsClosed = openedFacetGroups[`${fc.groupIndex}`] === false;
+      }
+
+      const isOpen = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex, fc.index);
+
+      facetModels.push({
         initialized: false,
         isOpen: isOpen,
-        isLoading: isOpen,
+        isLoading: hasParentAndIsClosed ? false : isOpen,
+        // isLoading: isOpen,
         noConstraints: false,
         facetHasTimeoutError: false,
         // TODO
         // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1,
         enableFavorites: false,
-        parentLogStackPath: recordsetLogStackPath
+        parentLogStackPath: recordsetLogStackPath,
       });
     });
-    return res;
+    return { facetModels, openedFacetGroups };
   });
+
+  const { facetModels, openedFacetGroups } = facetAndGroupModels;
 
   /**
    * this boolean indicates whether users made any changes to the facet list or not.
@@ -137,24 +189,28 @@ const Faceting = ({
   /**
    * whether the current order is based on teh stored facet order or not.
    */
-  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(() => {
-    return hasStoredFacetOrder(reference);
-  });
+  const [isStoredFacetOrderApplied, setIsStoredFacetOrderApplied] = useState(
+    FacetStorageService.hasStoredFacetOrder(reference)
+  );
 
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
-    setFacetModels((prevFacetModels: FacetModel[]) => {
-      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+    setFacetAndGroupModels((prev) => {
+      const newFacetModels = prev.facetModels.map((fm: FacetModel, fmIndex: number) => {
         if (index !== fmIndex) return fm;
         return { ...fm, ...updatedVals };
       });
+      return { ...prev, facetModels: newFacetModels };
     });
   };
-  const setMultipleFacetModelsByIndex = (input: { [index: number]: { [key: string]: boolean } }) => {
-    setFacetModels((prevFacetModels: FacetModel[]) => {
-      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+  const setMultipleFacetModelsByIndex = (input: {
+    [index: number]: { [key: string]: boolean };
+  }) => {
+    setFacetAndGroupModels((prev) => {
+      const newFacetModels = prev.facetModels.map((fm: FacetModel, fmIndex: number) => {
         if (!(fmIndex in input)) return fm;
         return { ...fm, ...input[fmIndex] };
       });
+      return { ...prev, facetModels: newFacetModels };
     });
   };
 
@@ -179,34 +235,52 @@ const Faceting = ({
 
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
-
-    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
-    reference.facetColumns.forEach((facetColumn: any, index: number) => {
+    reference.facetColumns.forEach((facetColumn, index) => {
       const table = facetColumn.column.table;
-      const facetLogStackNode = LogService.getStackNode(
-        LogStackTypes.FACET,
-        table,
-        { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode }
-      );
+      const facetLogStackNode = LogService.getStackNode(LogStackTypes.FACET, table, {
+        source: facetColumn.compressedDataSource,
+        entity: facetColumn.isEntityMode,
+      });
 
       // the initial open status is based on annotation and also the local storage
-      const isOpen = initialOpenStatus[`${index}`];
+      const isOpen = FacetStorageService.getFacetOpenStatus(
+        reference,
+        facetColumn.groupIndex,
+        facetColumn.index
+      );
 
-      if (isOpen) {
+      const groupIsOpen =
+        typeof facetColumn.groupIndex !== 'number' ||
+        FacetStorageService.getFacetOpenStatus(reference, facetColumn.groupIndex);
+
+      // if the parent is closed, we don't want to preprocess the facet
+      // if any of the children have preselected filters, we're opening the facet too. so we don't need to worry about that here.
+      const shouldBePreProcessed = groupIsOpen && isOpen;
+
+      if (shouldBePreProcessed) {
         facetsToPreProcess.current.push(index);
       }
 
       facetRequestModels.current.push({
         // some facets require extra step to process preselected filters
-        preProcessed: !isOpen,
-        processed: !isOpen,
+        preProcessed: !shouldBePreProcessed,
+        processed: !shouldBePreProcessed,
         // TODO why??
         // appliedFilters: [],
         registered: false,
-        processFacet: (reloadCauses: string[], reloadStartTime: number) => { throw new Error('function not registered') },
-        preProcessFacet: () => { throw new Error('function not registered') },
-        getAppliedFilters: () => { throw new Error('function not registered') },
-        removeAppliedFilters: () => { throw new Error('function not registered') },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        processFacet: (reloadCauses: string[], reloadStartTime: number) => {
+          throw new Error('function not registered');
+        },
+        preProcessFacet: () => {
+          throw new Error('function not registered');
+        },
+        getAppliedFilters: () => {
+          throw new Error('function not registered');
+        },
+        removeAppliedFilters: () => {
+          throw new Error('function not registered');
+        },
         reloadCauses: [], // why the reload request is being sent to the server (might be empty)
         reloadStartTime: -1, //when the facet became dirty
         // I could capture the whole logStack,
@@ -234,10 +308,10 @@ const Faceting = ({
   useLayoutEffect(() => {
     if (!displayFacets) return;
     let firstOpen: number | null = null;
-    const { openStatus: initialOpenStatus } = getInitialFacetOpenStatus(reference);
-    reference.facetColumns.some((fc: any, index: number) => {
+    // TODO this should be based on the facet orders (REVIEW THIS)
+    reference.facetColumns.some((fc, index) => {
       // the initial open status is based on annotation and also the local storage
-      const isOpen = initialOpenStatus[`${index}`];
+      const isOpen = FacetStorageService.getFacetOpenStatus(reference, fc.groupIndex, fc.index);
 
       if (isOpen) {
         /**
@@ -256,7 +330,7 @@ const Faceting = ({
     setTimeout(() => {
       scrollToFacet(firstOpen === null ? 0 : firstOpen, true);
     }, 200);
-  }, [displayFacets])
+  }, [displayFacets]);
 
   /**
    * let recordset know that all the facets are registered and it can initialize.
@@ -286,17 +360,20 @@ const Faceting = ({
     // batch all the state changes into one
     const modifiedAttrs: { [index: number]: { [key: string]: boolean } } = {};
 
-    // see which facets need to be updated
-    facetOrdersRef.current.forEach((index: number) => {
+    const updateState = (index: number) => {
       const frm = facetRequestModels.current[index];
+      const fc = reference.facetColumns[index];
       const facetModel = facetModels[index];
 
       if (flowControl.current.lastActiveFacet === index) {
         return;
       }
 
-      // if it's open, we need to process it
-      if (facetModel.isOpen) {
+      // we should process the facet is if it's opened, and if it's part of a group, the group should be opened too
+      const shouldProcess =
+        facetModel.isOpen &&
+        (typeof fc.groupIndex !== 'number' || openedFacetGroups[fc.groupIndex]);
+      if (shouldProcess) {
         if (!Number.isInteger(frm.reloadStartTime) || frm.reloadStartTime === -1) {
           frm.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
         }
@@ -315,6 +392,17 @@ const Faceting = ({
       else {
         frm.processed = true;
         modifiedAttrs[index] = { initialized: false };
+      }
+    };
+
+    // see which facets need to be updated
+    facetOrdersRef.current.forEach((fo) => {
+      if (typeof fo === 'number') {
+        updateState(fo);
+      } else {
+        fo.children.forEach((childIndex) => {
+          updateState(childIndex);
+        });
       }
     });
 
@@ -335,8 +423,10 @@ const Faceting = ({
     // currFm.isLoading = !res;
     setFacetModelByIndex(index, { isLoading: !res, initialized: res });
 
-    printDebugMessage(`after facet (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
-  }
+    printDebugMessage(
+      `after facet (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`
+    );
+  };
 
   const updateFacets = (flowControl: any, updatePage: Function) => {
     if (!flowControl.current.haveFreeSlot(false)) {
@@ -350,24 +440,28 @@ const Faceting = ({
       flowControl.current.queue.occupiedSlots++;
       (function (i: number, currentCounter: number) {
         printDebugMessage(`initializing facet (index=${index})`);
-        facetRequestModels.current[i].preProcessFacet().then(function (res: any) {
-          printDebugMessage(`after facet (index=${i}) initialize: ${res ? 'successful.' : 'unsuccessful.'}`);
-          flowControl.current.queue.occupiedSlots--;
-          facetRequestModels.current[i].preProcessed = true;
-          setFacetModelByIndex(i, { facetHasTimeoutError: false });
-          updatePage();
-        }).catch(function (err: any) {
-          // show alert if 400 Query Timeout Error
-          if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-            setFacetModelByIndex(i, { facetHasTimeoutError: true });
-          } else {
-            dispatchError({ error: err });
-          }
-        });
+        facetRequestModels.current[i]
+          .preProcessFacet()
+          .then(function (res: any) {
+            printDebugMessage(
+              `after facet (index=${i}) initialize: ${res ? 'successful.' : 'unsuccessful.'}`
+            );
+            flowControl.current.queue.occupiedSlots--;
+            facetRequestModels.current[i].preProcessed = true;
+            setFacetModelByIndex(i, { facetHasTimeoutError: false });
+            updatePage();
+          })
+          .catch(function (err: any) {
+            // show alert if 400 Query Timeout Error
+            if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+              setFacetModelByIndex(i, { facetHasTimeoutError: true });
+            } else {
+              dispatchError({ error: err });
+            }
+          });
       })(index, flowControl.current.queue.counter);
-    }
-    else {
-      facetOrdersRef.current.forEach((index: number) => {
+    } else {
+      const updateFacet = (index: number) => {
         const frm = facetRequestModels.current[index];
         if (!frm.preProcessed || frm.processed || !flowControl.current.haveFreeSlot()) {
           return;
@@ -378,21 +472,34 @@ const Faceting = ({
 
         (function (i) {
           printDebugMessage(`updating facet (index=${index})`);
-          facetRequestModels.current[i].processFacet(frm.reloadCauses, frm.reloadStartTime).then(function (res: any) {
-            setFacetModelByIndex(i, { facetHasTimeoutError: false });
-            afterFacetUpdate(i, res, flowControl);
-            updatePage();
-          }).catch(function (err: any) {
-            // show alert if 400 Query Timeout Error
-            if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-              setFacetModelByIndex(i, { facetHasTimeoutError: true });
-            } else {
-              dispatchError({ error: err });
-            }
+          facetRequestModels.current[i]
+            .processFacet(frm.reloadCauses, frm.reloadStartTime)
+            .then(function (res: any) {
+              setFacetModelByIndex(i, { facetHasTimeoutError: false });
+              afterFacetUpdate(i, res, flowControl);
+              updatePage();
+            })
+            .catch(function (err: any) {
+              // show alert if 400 Query Timeout Error
+              if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+                setFacetModelByIndex(i, { facetHasTimeoutError: true });
+              } else {
+                dispatchError({ error: err });
+              }
 
-            afterFacetUpdate(i, true, flowControl);
-          });
+              afterFacetUpdate(i, true, flowControl);
+            });
         })(index);
+      };
+
+      facetOrdersRef.current.forEach((o) => {
+        if (typeof o === 'number') {
+          updateFacet(o);
+        } else {
+          o.children.forEach((childIndex: number) => {
+            updateFacet(childIndex);
+          });
+        }
       });
     }
 
@@ -412,7 +519,6 @@ const Faceting = ({
     getAppliedFilters: () => FacetCheckBoxRow[],
     removeAppliedFilters: () => void
   ) => {
-
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
     facetRequestModels.current[index].getAppliedFilters = getAppliedFilters;
@@ -422,7 +528,7 @@ const Faceting = ({
     if (facetRequestModels.current.every((el) => el.registered)) {
       setAllFacetsRegistered(true);
     }
-  }
+  };
 
   /**
    * ask flow-control to update data displayed for one facet
@@ -430,7 +536,12 @@ const Faceting = ({
    * @param setIsLoading whether we should also change the spinner status
    * @param cause the cause of update
    */
-  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string, noConstraints?: boolean): void => {
+  const dispatchFacetUpdate = (
+    index: number,
+    setIsLoading: boolean,
+    cause?: string,
+    noConstraints?: boolean
+  ): void => {
     const frm = facetRequestModels.current[index];
     frm.processed = false;
     if (setIsLoading) {
@@ -465,7 +576,13 @@ const Faceting = ({
    * @param keepRef if true, we will not change the reference (the function is used for url length check)
    * @returns
    */
-  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, resetAllOpenFacets?: boolean) => {
+  const updateRecordsetReference = (
+    newRef: any,
+    index: number,
+    cause: string,
+    keepRef?: boolean,
+    resetAllOpenFacets?: boolean
+  ) => {
     if (!checkReferenceURL(newRef, !keepRef)) {
       return false;
     }
@@ -483,7 +600,7 @@ const Faceting = ({
         { updateResult: true, updateCount: true, updateFacets: true },
         { reference: newRef },
         { cause, lastActiveFacet, resetAllOpenFacets }
-      )
+      );
     }
     return true;
   };
@@ -511,7 +628,9 @@ const Faceting = ({
    * @param index if number it's a facet index, otherwise it will be cfacets or filters.
    */
   const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
-    let newRef, reason = LogReloadCauses.FACET_CLEAR, action: LogActions | null = null;
+    let newRef,
+      reason = LogReloadCauses.FACET_CLEAR,
+      action: LogActions | null = null;
     if (index === 'filters') {
       newRef = reference.removeAllFacetFilters(false, true, true);
       action = LogActions.BREADCRUMB_CLEAR_CUSTOM;
@@ -529,10 +648,13 @@ const Faceting = ({
 
       // log the action
       const fc = reference.facetColumns[index];
-      LogService.logClientAction({
-        action: getFacetLogAction(index, LogActions.BREADCRUMB_CLEAR),
-        stack: getFacetLogStack(index)
-      }, fc.sourceReference.defaultLogInfo);
+      LogService.logClientAction(
+        {
+          action: getFacetLogAction(index, LogActions.BREADCRUMB_CLEAR),
+          stack: getFacetLogStack(index),
+        },
+        fc.sourceReference.defaultLogInfo
+      );
     } else {
       // // delete all filters and facets
       newRef = reference.removeAllFacetFilters();
@@ -540,9 +662,16 @@ const Faceting = ({
       reason = LogReloadCauses.CLEAR_ALL;
 
       // remove all the checkboxes in the UI
-      facetOrdersRef.current.forEach((index: number) => {
-        const frm = facetRequestModels.current[index];
-        frm.removeAppliedFilters();
+      facetOrdersRef.current.forEach((order) => {
+        if (typeof order === 'number') {
+          const frm = facetRequestModels.current[order];
+          frm.removeAppliedFilters();
+        } else {
+          order.children.forEach((childIndex: number) => {
+            const frm = facetRequestModels.current[childIndex];
+            frm.removeAppliedFilters();
+          });
+        }
       });
     }
 
@@ -554,7 +683,7 @@ const Faceting = ({
     // removing filter should just reduce the url length limit,
     // so we don't need to check for the returned value of this function
     updateRecordsetReference(newRef, -1, reason);
-  }
+  };
 
   /**
    * Focus on the given facet
@@ -563,11 +692,27 @@ const Faceting = ({
    */
   const focusOnFacet = (index: number, dontUpdate?: boolean) => {
     const fm = facetModels[index];
-    if (!fm.isOpen && (dontUpdate !== true)) {
-      toggleFacet(index, true);
+
+    let waitForToggle = 0;
+
+    if (dontUpdate !== true) {
+      // open the group
+      const fc = reference.facetColumns[index];
+      if (typeof fc.groupIndex === 'number' && !openedFacetGroups[`${fc.groupIndex}`]) {
+        toggleFacetGroup(fc.groupIndex, true);
+        // give some time for the group to open
+        waitForToggle += 300;
+      }
+
+      // open the facet
+      if (!fm.isOpen) {
+        toggleFacet(index, true);
+      }
     }
 
-    scrollToFacet(index, dontUpdate);
+    setTimeout(() => {
+      scrollToFacet(index, dontUpdate);
+    }, waitForToggle);
   };
 
   //-------------------  UI related callbacks:   --------------------//
@@ -579,18 +724,21 @@ const Faceting = ({
    * @param dontLog
    */
   const toggleFacet = (index: number, dontLog?: boolean) => {
-    setFacetModels((prevFacetModels) => {
-      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+    setFacetAndGroupModels((prev) => {
+      const newFacetModels = prev.facetModels.map((fm: FacetModel, fmIndex: number) => {
         if (index !== fmIndex) return fm;
         const isOpen = !fm.isOpen;
 
         if (!dontLog) {
           const action = isOpen ? LogActions.OPEN : LogActions.CLOSE;
           // log the action
-          LogService.logClientAction({
-            action: getFacetLogAction(index, action),
-            stack: getFacetLogStack(index)
-          }, reference.facetColumns[fmIndex].sourceReference.defaultLogInfo);
+          LogService.logClientAction(
+            {
+              action: getFacetLogAction(index, action),
+              stack: getFacetLogStack(index),
+            },
+            reference.facetColumns[fmIndex].sourceReference.defaultLogInfo
+          );
         }
 
         // if we're closing it
@@ -601,9 +749,8 @@ const Faceting = ({
             // hide the spinner:
             isLoading: false,
             // if we were waiting for data, make sure to fetch it later
-            initialized: !fm.isLoading
-          }
-
+            initialized: !fm.isLoading,
+          };
         }
         // if it's open and not initialized, then get the data
         else if (!fm.initialized) {
@@ -614,13 +761,87 @@ const Faceting = ({
           return {
             ...fm,
             isOpen,
-            isLoading: true
+            isLoading: true,
           };
         }
 
         // otherwise we should just change the isOpen
         return { ...fm, isOpen };
       });
+      return { ...prev, facetModels: newFacetModels };
+    });
+
+    // make sure we're saving the new state
+    setFacetListModified(true);
+    setIsStoredFacetOrderApplied(false);
+  };
+
+  /**
+   * Toggle the facet group and set the proper states
+   * might modify the state of its children and trigger flow control
+   * @param groupIndex
+   * @param dontLog
+   */
+  const toggleFacetGroup = (groupIndex: number, dontLog?: boolean) => {
+    setFacetAndGroupModels((prev) => {
+      const groupIsOpen = !prev.openedFacetGroups[`${groupIndex}`];
+
+      $log.debug(
+        `toggling facet group index=${groupIndex} to ${groupIsOpen ? 'open' : 'closed'}`
+      );
+
+      if (!dontLog) {
+        const action = groupIsOpen ? LogActions.OPEN : LogActions.CLOSE;
+        LogService.logClientAction(
+          {
+            action: getLogAction(action, LogStackPaths.FACET_GROUP),
+            stack: getLogStack(
+              LogService.getStackNode(LogStackTypes.FACET_GROUP, reference.table)
+            ),
+          },
+          reference.defaultLogInfo
+        );
+      }
+
+      // update the facets inside the group (stop or start loading them)
+      const newFacetModels = prev.facetModels.map((fm: FacetModel, fmIndex: number) => {
+        const fc = reference.facetColumns[fmIndex];
+        if (fc.groupIndex !== groupIndex) return fm;
+
+        // if we're closing the group, we should stop loading facets inside it
+        if (!groupIsOpen) {
+          $log.debug(`stopping loading facet index=${fmIndex} as its group is closed`);
+          return {
+            ...fm,
+            isLoading: false,
+            // if we were waiting for data, make sure to fetch it later
+            initialized: fm.isOpen ? !fm.isLoading : fm.initialized,
+          };
+        }
+
+        // if we're opening the group and the facet is open but not initialized, then get the data
+        if (fm.isOpen && !fm.initialized) {
+          $log.debug(`loading facet index=${fmIndex} as its group is opened`);
+          // send a request
+          // TODO should have priority
+          dispatchFacetUpdate(fmIndex, false);
+
+          return {
+            ...fm,
+            isLoading: true,
+          };
+        }
+
+        return fm;
+      });
+
+      // change the open status of the group
+      const newGroups = {
+        ...prev.openedFacetGroups,
+        [`${groupIndex}`]: groupIsOpen,
+      };
+
+      return { facetModels: newFacetModels, openedFacetGroups: newGroups };
     });
 
     // make sure we're saving the new state
@@ -636,48 +857,82 @@ const Faceting = ({
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     if (!sidePanelContainer.current) return;
 
-    const el = sidePanelContainer.current.querySelector(`.facet-item-container.fc-${index}`) as HTMLElement;
+    const el = sidePanelContainer.current.querySelector(
+      `.facet-item-container.fc-${index}`
+    ) as HTMLElement;
     if (!el) return;
 
     if (!dontLog) {
       const fc = reference.facetColumns[index];
-      LogService.logClientAction({
-        action: getFacetLogAction(index, LogActions.BREADCRUMB_SCROLL_TO),
-        stack: getFacetLogStack(index)
-      }, fc.sourceReference.defaultLogInfo);
+      LogService.logClientAction(
+        {
+          action: getFacetLogAction(index, LogActions.BREADCRUMB_SCROLL_TO),
+          stack: getFacetLogStack(index),
+        },
+        fc.sourceReference.defaultLogInfo
+      );
     }
 
     // TODO delay this event (using debounce from react branch)
-    // scroll
-    sidePanelContainer.current.scrollTo({
-      top: el.offsetTop,
-      behavior: 'smooth'
-    });
+    /**
+     * scroll - use getBoundingClientRect for accurate positioning
+     * we used to use offsetTop but that was not working properly for the inner accordions.
+     * getBoundingClientRect is more accurate for nested accordion structures.
+     */
+    const containerRect = sidePanelContainer.current.getBoundingClientRect();
+    const elementRect = el.getBoundingClientRect();
+    const relativeTop = elementRect.top - containerRect.top + sidePanelContainer.current.scrollTop;
 
-    // flash the activeness
+    sidePanelContainer.current.scrollTo({
+      top: relativeTop,
+      behavior: 'smooth',
+    }); // flash the activeness
     setTimeout(() => {
       el.classList.add('active');
       setTimeout(() => {
         el.classList.remove('active');
       }, 1600);
     }, 100);
-
   };
 
   /**
    * Handle drag and drop events for draggable facets
    */
   const handleOnDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
     const items = Array.from(facetOrders);
 
-    if (result.destination) {
+    // reordering the outer accordion (groups and level-0 facets)
+    if (result.type === 'first-level') {
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, reorderedItem);
     } else {
-      // uncomment the following if we want to allow users to remove facets
-      // const [reorderedItem] = items.splice(result.source.index, 1);
-      // items.splice(facetOrders.length - 1, 0, reorderedItem);
-      return;
+      // reordering inside a group - the type is the groupStructureKey (e.g., "group-0")
+      const groupStructureKey = result.type;
+      const { groupIndex } = FacetStorageService.getFacetInfoFromStructureKey(groupStructureKey);
+
+      if (groupIndex === undefined) {
+        $log.error('cannot parse group index from structure key:', groupStructureKey);
+        return;
+      }
+
+      const groupItem = items.find((it) => {
+        return typeof it !== 'number' && it.index === groupIndex;
+      });
+
+      if (!groupItem || typeof groupItem === 'number') {
+        $log.error(
+          'cannot find the group item for reordering inside a group. groupIndex:',
+          groupIndex,
+          'items:',
+          items
+        );
+        return;
+      }
+
+      const [reorderedItem] = groupItem.children.splice(result.source.index, 1);
+      groupItem.children.splice(result.destination.index, 0, reorderedItem);
     }
 
     setFacetOrders(items);
@@ -686,12 +941,29 @@ const Faceting = ({
   };
 
   const storeFacetOrder = () => {
-    LocalStorage.setStorage(getFacetOrderStorageKey(reference), facetOrders.map((i) => {
-      return {
-        name: reference.facetColumns[i].sourceObjectWrapper.name,
-        open: facetModelsRef.current[i].isOpen
-      };
-    }));
+    const newStoredOrder = facetOrdersRef.current.map((order) => {
+      if (typeof order === 'number') {
+        return {
+          name: reference.facetColumns[order].sourceObjectWrapper.name,
+          open: facetAndGroupModelsRef.current.facetModels[order].isOpen,
+        };
+      } else {
+        const groupChildren: { name: string; open: boolean }[] = [];
+        order.children.forEach((childIndex) => {
+          groupChildren.push({
+            name: reference.facetColumns[childIndex].sourceObjectWrapper.name,
+            open: facetAndGroupModelsRef.current.facetModels[childIndex].isOpen,
+          });
+        });
+        return {
+          markdown_name: (reference.facetColumnsStructure[order.index] as FacetGroup).displayname
+            .unformatted as string,
+          open: facetAndGroupModelsRef.current.openedFacetGroups[`${order.index}`],
+          children: groupChildren,
+        };
+      }
+    });
+    FacetStorageService.changeStoredFacetOrder(reference, newStoredOrder);
     setFacetListModified(false);
     setIsStoredFacetOrderApplied(true);
   };
@@ -699,66 +971,111 @@ const Faceting = ({
   const applyDefaultOrStoredFacetOrder = (useDefault: boolean) => {
     // change their order
     setFacetOrders(() => {
-      return getInitialFacetOrder(reference, useDefault).map((o) => o.facetIndex);
+      return FacetStorageService.getFacetOrder(reference, useDefault).map((order) => {
+        if ('children' in order) {
+          return { index: order.index, children: order.children.map((c) => c.index) };
+        } else {
+          return order.index;
+        }
+      });
     });
 
-    // open or close facets
-    setFacetModels((prevFacetModels) => {
-      const { openStatus: newOpenStatus } = getInitialFacetOpenStatus(reference, useDefault);
-      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
-        const isOpen = newOpenStatus[`${fmIndex}`];
+    setFacetAndGroupModels((prev) => {
+      const order = FacetStorageService.getFacetOrder(reference, useDefault);
+      const newGroups = { ...prev.openedFacetGroups };
+      order.forEach((o) => {
+        if ('children' in o) {
+          newGroups[`${o.index}`] = o.isOpen;
+        }
+      });
+
+      const newFacetModels = prev.facetModels.map((fm: FacetModel, fmIndex: number) => {
+        const fc = reference.facetColumns[fmIndex];
+        const isOpen = FacetStorageService.getFacetOpenStatus(
+          reference,
+          fc.groupIndex,
+          fc.index,
+          useDefault
+        );
+
+        let hasParent = false, parentNewIsOpen = false, parentOldIsOpen = false;
+        if (typeof fc.groupIndex === 'number') {
+          hasParent = true;
+          parentNewIsOpen = newGroups[`${fc.groupIndex}`];
+          parentOldIsOpen = prev.openedFacetGroups[`${fc.groupIndex}`];
+        }
 
         // if open status has not changed, just return it
-        if (fm.isOpen === isOpen) return fm;
+        if (fm.isOpen === isOpen && (hasParent && parentNewIsOpen === parentOldIsOpen)) return fm;
 
-        // if we are closing
-        if (!isOpen) {
-          return { ...fm, isOpen,
+        // if we are closing the facet or its parent
+        if (!isOpen || (hasParent && !parentNewIsOpen)) {
+          return {
+            ...fm,
+            isOpen,
             // hide the spinner:
             isLoading: false,
             // if we were waiting for data, make sure to fetch it later
-            initialized: !fm.isLoading
-          }
+            initialized: fm.isOpen ? !fm.isLoading : fm.initialized,
+          };
         }
 
         // if we're opening and it's not initialized, initiate the request
-        if (!fm.initialized) {
+        if (isOpen && !fm.initialized) {
           // send a request
           dispatchFacetUpdate(fmIndex, false);
           return { ...fm, isOpen, isLoading: true };
         }
 
-        // otherwise just open it
+        // otherwise just change the open status
         return { ...fm, isOpen };
       });
+
+      return { facetModels: newFacetModels, openedFacetGroups: newGroups };
     });
 
     // set the boolean states
     setIsStoredFacetOrderApplied(!useDefault);
     setFacetListModified(false);
-  }
+  };
 
   //-------------------  render logic:   --------------------//
 
-  const renderFacetList = () => {
-    return facetOrders.map((facetIndex: number, draggableIndex: number) => {
-      return <Draggable key={facetIndex} draggableId={`facet-${facetIndex}`} index={draggableIndex}>
+  // bootstrap expects an array of strings
+  const mainAccordionActiveKeys: string[] = [];
+  reference.facetColumnsStructure.forEach((structure) => {
+    if (typeof structure === 'number') {
+      if (facetModels[structure].isOpen) mainAccordionActiveKeys.push(FacetStorageService.getFacetStructureKey(undefined, structure));
+    } else if (openedFacetGroups[`${structure.structureIndex}`]) {
+      mainAccordionActiveKeys.push(FacetStorageService.getFacetStructureKey(structure.structureIndex));
+    }
+  });
+
+  const renderFacetAccordionItem = (key: string, facetIndex: number, draggableIndex: number) => {
+    return (
+      <Draggable key={key} draggableId={key} index={draggableIndex}>
         {(draggableArgs: DraggableProvided) => (
           <div
-            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' panel-open' : ''}`}
+            className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' facet-item-open' : ''}`}
             ref={draggableArgs.innerRef}
             {...draggableArgs.draggableProps}
           >
-            <ChaiseTooltip placement='right' tooltip='Drag and drop this filter to the desired position.'>
-              <div className={`move-icon facet-move-icon-${facetIndex}`} {...draggableArgs.dragHandleProps}>
+            <ChaiseTooltip
+              placement='right'
+              tooltip='Drag and drop this filter to the desired position.'
+            >
+              <div
+                className={`move-icon facet-move-icon-${facetIndex}`}
+                {...draggableArgs.dragHandleProps}
+              >
                 <i className='fa-solid fa-grip-vertical'></i>
               </div>
             </ChaiseTooltip>
-            <Accordion.Item
-              eventKey={facetIndex + ''} key={facetIndex}
-              className='facet-panel'
-            >
-              <Accordion.Header className={`fc-heading-${facetIndex}`} onClick={() => toggleFacet(facetIndex)}>
+            <Accordion.Item eventKey={key} key={key} className='facet-panel'>
+              <Accordion.Header
+                className={`facet-item-header fc-heading-${facetIndex}`}
+                onClick={() => toggleFacet(facetIndex)}
+              >
                 <FacetHeader
                   displayname={reference.facetColumns[facetIndex].displayname}
                   comment={reference.facetColumns[facetIndex].comment}
@@ -767,64 +1084,169 @@ const Faceting = ({
                   noConstraints={facetModels[facetIndex].noConstraints}
                 />
               </Accordion.Header>
-              <Accordion.Body>
-                {renderFacet(facetIndex)}
-              </Accordion.Body>
+              <Accordion.Body>{renderFacet(facetIndex)}</Accordion.Body>
             </Accordion.Item>
           </div>
         )}
       </Draggable>
-    })
-  }
+    );
+  };
+
+  const renderFacetList = () => {
+    return facetOrders.map((order, draggableIndex) => {
+      if (typeof order === 'number') {
+        return renderFacetAccordionItem(FacetStorageService.getFacetStructureKey(undefined, order), order, draggableIndex);
+      } else {
+        const groupIndex = order.index;
+        const group = reference.facetColumnsStructure[groupIndex] as FacetGroup;
+        const groupStructureKey = FacetStorageService.getFacetStructureKey(groupIndex);
+        const groupIsOpen = !!openedFacetGroups[`${groupIndex}`];
+
+        const groupActiveKeys: string[] = [];
+        group.children.forEach((facetIndex) => {
+          if (!facetModels[facetIndex].isOpen) return;
+          groupActiveKeys.push(FacetStorageService.getFacetStructureKey(groupIndex, facetIndex));
+        });
+
+        return (
+          <Draggable key={groupStructureKey} draggableId={groupStructureKey} index={draggableIndex}>
+            {(draggableArgs: DraggableProvided) => (
+              <div
+                className={`facet-group-item-container fgc-${groupIndex} ${groupIsOpen ? ' facet-group-item-open' : ''}`}
+                ref={draggableArgs.innerRef}
+                {...draggableArgs.draggableProps}
+              >
+                <ChaiseTooltip
+                  placement='right'
+                  tooltip='Drag and drop this filter to the desired position.'
+                >
+                  <div
+                    className={`move-icon group-move-icon-${groupIndex}`}
+                    {...draggableArgs.dragHandleProps}
+                  >
+                    <i className='fa-solid fa-grip-vertical'></i>
+                  </div>
+                </ChaiseTooltip>
+                <Accordion.Item eventKey={groupStructureKey} className='facet-group-item'>
+                  <Accordion.Header
+                    className={`facet-group-item-header fgc-heading-${groupIndex}`}
+                    onClick={() => toggleFacetGroup(groupIndex)}
+                  >
+                    <FacetHeader
+                      displayname={group.displayname}
+                      isLoading={false}
+                      facetHasTimeoutError={false}
+                      noConstraints={false}
+                      comment={group.comment}
+                    />
+                  </Accordion.Header>
+                  <Accordion.Body className='facet-group-item-body'>
+                    <ChaiseDroppable
+                      droppableId={`${groupStructureKey}-droppable`}
+                      type={groupStructureKey}
+                    >
+                      {(droppableArgs: DroppableProvided) => (
+                        <Accordion
+                          activeKey={groupActiveKeys}
+                          alwaysOpen
+                          {...droppableArgs.droppableProps}
+                          ref={droppableArgs.innerRef}
+                        >
+                          {order.children.map((facetIndex, childIndex) =>
+                            renderFacetAccordionItem(
+                              FacetStorageService.getFacetStructureKey(
+                                group.structureIndex,
+                                facetIndex
+                              ),
+                              facetIndex,
+                              childIndex
+                            )
+                          )}
+                          {droppableArgs.placeholder}
+                        </Accordion>
+                      )}
+                    </ChaiseDroppable>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </div>
+            )}
+          </Draggable>
+        );
+      }
+    });
+  };
 
   const renderFacet = (index: number) => {
     const fc = reference.facetColumns[index];
     const fm = facetModels[index];
     switch (fc.preferredMode) {
       case 'ranges':
-        return <FacetRangePicker
-          dispatchFacetUpdate={dispatchFacetUpdate}
-          facetColumn={fc} facetIndex={index} facetModel={fm}
-          facetPanelOpen={facetPanelOpen}
-          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
-          getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
-        />
+        return (
+          <FacetRangePicker
+            dispatchFacetUpdate={dispatchFacetUpdate}
+            facetColumn={fc}
+            facetIndex={index}
+            facetModel={fm}
+            facetPanelOpen={facetPanelOpen}
+            register={registerFacet}
+            updateRecordsetReference={updateRecordsetReference}
+            getFacetLogAction={getFacetLogAction}
+            getFacetLogStack={getFacetLogStack}
+          />
+        );
       case 'check_presence':
-        return <FacetCheckPresence
-          facetModel={fm} facetColumn={fc} facetIndex={index}
-          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
-        />
+        return (
+          <FacetCheckPresence
+            facetModel={fm}
+            facetColumn={fc}
+            facetIndex={index}
+            register={registerFacet}
+            updateRecordsetReference={updateRecordsetReference}
+          />
+        );
       default:
-        return <FacetChoicePicker
-          facetModel={fm} facetColumn={fc} facetIndex={index}
-          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
-          dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
-          facetPanelOpen={facetPanelOpen}
-          getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
-          recordsetUIContextTitles={recordsetUIContextTitles}
-          recordsetFacetDepthLevel={recordsetFacetDepthLevel}
-        />
+        return (
+          <FacetChoicePicker
+            facetModel={fm}
+            facetColumn={fc}
+            facetIndex={index}
+            register={registerFacet}
+            updateRecordsetReference={updateRecordsetReference}
+            dispatchFacetUpdate={dispatchFacetUpdate}
+            checkReferenceURL={checkReferenceURL}
+            facetPanelOpen={facetPanelOpen}
+            getFacetLogAction={getFacetLogAction}
+            getFacetLogStack={getFacetLogStack}
+            recordsetUIContextTitles={recordsetUIContextTitles}
+            recordsetFacetDepthLevel={recordsetFacetDepthLevel}
+          />
+        );
     }
   };
 
   const renderFacetDropdownMenu = () => {
-    const storedIsAvailable = hasStoredFacetOrder(reference);
-    const showChangeIndicator = facetListModified || (storedIsAvailable && !isStoredFacetOrderApplied);
+    const storedIsAvailable = FacetStorageService.hasStoredFacetOrder(reference);
+    const showChangeIndicator =
+      facetListModified || (storedIsAvailable && !isStoredFacetOrderApplied);
     const allowSave = showChangeIndicator;
     const allowApplyDefault = facetListModified || isStoredFacetOrderApplied;
     const allowApplySaved = storedIsAvailable && showChangeIndicator;
 
     return (
       <Dropdown className='chaise-dropdown chaise-dropdown-no-icon side-panel-heading-menu'>
-        <ChaiseTooltip
-          placement='right' tooltip='Customize the filter order'
-        >
-          <Dropdown.Toggle className={`chaise-btn chaise-btn-sm chaise-btn-tertiary${showChangeIndicator ? ' chaise-btn-with-indicator' : ''}`}>
+        <ChaiseTooltip placement='right' tooltip='Customize the filter order'>
+          <Dropdown.Toggle
+            className={`chaise-btn chaise-btn-sm chaise-btn-tertiary${showChangeIndicator ? ' chaise-btn-with-indicator' : ''}`}
+          >
             <span className='fa-solid fa-bars'></span>
           </Dropdown.Toggle>
         </ChaiseTooltip>
         <Dropdown.Menu>
-          <Dropdown.Item className='dropdown-item-w-icon save-facet-order-btn' disabled={!allowSave} onClick={() => storeFacetOrder()}>
+          <Dropdown.Item
+            className='dropdown-item-w-icon save-facet-order-btn'
+            disabled={!allowSave}
+            onClick={() => storeFacetOrder()}
+          >
             <span>
               <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
               <span>Save filter order</span>
@@ -832,7 +1254,8 @@ const Faceting = ({
           </Dropdown.Item>
           <Dropdown.Item
             className='dropdown-item-w-icon show-default-facet-order-btn'
-            disabled={!allowApplyDefault} onClick={() => applyDefaultOrStoredFacetOrder(true)}
+            disabled={!allowApplyDefault}
+            onClick={() => applyDefaultOrStoredFacetOrder(true)}
           >
             <span>
               <span className='dropdown-item-icon fa-solid fa-undo'></span>
@@ -841,7 +1264,8 @@ const Faceting = ({
           </Dropdown.Item>
           <Dropdown.Item
             className='dropdown-item-w-icon apply-saved-facet-order-btn'
-            disabled={!allowApplySaved} onClick={() => applyDefaultOrStoredFacetOrder(false)}
+            disabled={!allowApplySaved}
+            onClick={() => applyDefaultOrStoredFacetOrder(false)}
           >
             <span>
               <span className='dropdown-item-icon fa-solid fa-check'></span>
@@ -850,7 +1274,8 @@ const Faceting = ({
           </Dropdown.Item>
           <Dropdown.Item
             className='dropdown-item-w-icon side-panel-heading-menu-help-btn'
-            href={getHelpPageURL(HELP_PAGES.FACET_PANEL)} target='_blank'
+            href={getHelpPageURL(HELP_PAGES.FACET_PANEL)}
+            target='_blank'
           >
             <span>
               <span className='dropdown-item-icon chaise-icon chaise-info'></span>
@@ -859,18 +1284,15 @@ const Faceting = ({
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-    )
-  }
+    );
+  };
 
-  // bootstrap expects an array of strings
-  const activeKeys: string[] = [];
-  facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
 
   if (!displayFacets) {
     if (facetModels.length === 0) {
-      return <span>No Filter Options</span>
+      return <span>No Filter Options</span>;
     }
-    return <></>
+    return <></>;
   }
 
   return (
@@ -878,10 +1300,12 @@ const Faceting = ({
       {renderFacetDropdownMenu()}
       <div className='faceting-columns-container'>
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <ChaiseDroppable droppableId={'facet-droppable'}>
+          <ChaiseDroppable droppableId='first-level-droppable' type='first-level'>
             {(droppableArgs: DroppableProvided) => (
               <Accordion
-                className='panel-group' activeKey={activeKeys} alwaysOpen
+                className='panel-group'
+                activeKey={mainAccordionActiveKeys}
+                alwaysOpen
                 {...droppableArgs.droppableProps}
                 ref={droppableArgs.innerRef}
                 key={'facet-list'}
@@ -894,7 +1318,7 @@ const Faceting = ({
         </DragDropContext>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Faceting;
