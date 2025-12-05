@@ -198,9 +198,10 @@ export const loadImageMetadata = (
   viewerLogStackPath: string,
   imageID: string,
   defaultZIndex?: number,
-): Promise<void> => {
+): Promise<{ hasProcessedImage: boolean, hasChannelUrl: boolean }> => {
   return new Promise((resolve, reject) => {
     let channelURLs: string[] = [];
+    let hasProcessedImage = false, hasChannelUrl = false;
 
     // first read the channel info
     _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath).then(function (res) {
@@ -208,6 +209,7 @@ export const loadImageMetadata = (
 
       // backward compatibility
       channelURLs = res.channelURLs;
+      hasChannelUrl = channelURLs.length > 0;
 
       return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath);
     }).then(function () {
@@ -215,6 +217,8 @@ export const loadImageMetadata = (
       // read the main image (processed data)
       return _readProcessedImageTable(processedImageReference, defaultZIndex);
     }).then(function (mainImageInfo) {
+      hasProcessedImage = mainImageInfo.length > 0;
+
       if (mainImageInfo.length === 0) {
         // backward compatibility
         if (channelURLs.length > 0) {
@@ -254,11 +258,11 @@ export const loadImageMetadata = (
         osdViewerParameters.current.zPlane.maxZIndex = res[2];
       }
 
-      resolve();
+      resolve({ hasProcessedImage, hasChannelUrl });
     }).catch(function (err) {
       // just log the error and resolve with empty array
       $log.error('error while getting channel info: ', err);
-      resolve();
+      resolve({ hasProcessedImage, hasChannelUrl });
     });
   });
 }
@@ -349,8 +353,8 @@ export const readAllAnnotations = (
       resolve(res);
     }).catch((err: any) => {
       // just log the error and resolve with empty array
-      console.error('error while getting annotations:');
-      console.error(err);
+      $log.error('error while getting annotations:');
+      $log.error(err);
       resolve(res);
     });
 

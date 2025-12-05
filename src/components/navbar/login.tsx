@@ -12,11 +12,14 @@ import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chai
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
+// models
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { getUserDisplayName } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import {
   MenuOption, addLogParams, createMenuList,
   isChaise, isOptionValid,
@@ -49,8 +52,7 @@ const ChaiseLogin = (): JSX.Element => {
 
   useEffect(() => {
     if (session) {
-      const userName = session.client.full_name || session.client.display_name || session.client.email || session.client.id
-      setDisplayName(userName);
+      setDisplayName(getUserDisplayName(session));
       if (session.client.full_name) {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
