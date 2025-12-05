@@ -10,7 +10,7 @@ import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-sto
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { getCatalogId, getQueryParam, getURLWithDifferentCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
@@ -175,8 +175,8 @@ export class ConfigService {
           prevVersion: ConfigService._catalogIDVersion || '',
         };
 
-        const newURL = window.location.href.replace(catalogId, catalog.id);
-        $log.info(`Version corrected from ${ConfigService._catalogIDVersion} to ${catalog.version}.`);
+        const newURL = getURLWithDifferentCatalog(catalog.id);
+        $log.info(`Catalog version corrected from ${ConfigService._catalogIDVersion} to ${catalog.version}.`);
         windowRef.history.replaceState({}, '', newURL);
       }
 

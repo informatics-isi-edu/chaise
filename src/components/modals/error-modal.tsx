@@ -1,21 +1,32 @@
 import { useState, type JSX } from 'react';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import Modal from 'react-bootstrap/Modal';
+
+// components
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import Modal from 'react-bootstrap/Modal';
+
+// models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   ChaiseError, CustomError, DifferentUserConflictError, ForbiddenAssetAccess,
   InvalidHelpPage,
   NoRecordError, NoRecordRidError, SnapshotError, UnauthorizedAssetAccess
 } from '@isrd-isi-edu/chaise/src/models/errors';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+
+// utils
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { getURLWithDifferentCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 function isErmrestErrorNeedReplace(error: any) {
   switch (error.constructor) {
@@ -87,8 +98,7 @@ const ErrorModal = (): JSX.Element | null => {
 
   if (exception instanceof windowRef.ERMrest.SnapshotNotFoundError) {
     pageName = 'live data';
-    // remove the @snapshot part
-    redirectLink = windowRef.location.href.replace(`@${ConfigService.catalogIDVersion}`, '');
+    redirectLink = getURLWithDifferentCatalog(ConfigService.catalogID.split('@')[0]);
   }
   // invalid server response should be treated the same as terminal
   else if (exception instanceof windowRef.ERMrest.InvalidServerResponse) {
