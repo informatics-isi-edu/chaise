@@ -127,6 +127,7 @@ export const errorNames = {
   invalidHelpPage: 'Help Page Not Found',
   limitedBrowserSupport: 'Limited Browser Support',
   snapshotError: 'Invalid Snapshot',
+  viewer: 'Viewer Error',
 };
 
 export const errorMessages = {
@@ -144,8 +145,12 @@ export const errorMessages = {
   differentUserConflict2: '. However, you are currently logged in as ',
   anonUserConflict: 'Your session has expired. Continuing on this page requires that you be logged in as ',
   systemAdminMessage: 'An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.',
-  viewerOSDFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
-  viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
+  viewer: {
+    imageInfoMissing: 'Unable to retrieve the image information.',
+    osdFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
+    screenshotFailed: 'Couldn\'t process the screenshot.',
+    forbidden: ' is logged in but not authorized to view this image.',
+  },
   invalidHelpPage: 'The requested help page cannot be found.',
   filePreview: {
     // it doesn't support range.

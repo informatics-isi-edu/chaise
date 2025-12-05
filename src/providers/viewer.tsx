@@ -8,7 +8,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { CustomError, DifferentUserConflictError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { CustomError, DifferentUserConflictError, ForbiddenViewerAccess, LimitedBrowserSupport, MultipleRecordError, ViewerError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -30,7 +30,7 @@ import {
   ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
   hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex
 } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
-import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages, errorNames } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -164,7 +164,7 @@ export default function ViewerProvider({
   logInfo
 }: ViewerProviderProps): JSX.Element {
   const { addAlert, removeAllAlerts } = useAlert();
-  const { validateSessionBeforeMutation, validateSession } = useAuthn();
+  const { validateSessionBeforeMutation, validateSession, session } = useAuthn();
   const { dispatchError } = useError();
 
   /**
@@ -286,6 +286,10 @@ export default function ViewerProvider({
     // if the main image request didnt return any rows
     let noImageData = false;
 
+    let imageDataFromQueryParams = false;
+    let hasProcessedImage = false;
+    let hasChannelUrl = false;
+
     // if there are svgs in query param, we should just use it and shouldn't get it from db.
     let hasAnnotationQueryParam = false
 
@@ -391,6 +395,8 @@ export default function ViewerProvider({
 
       osdViewerParameters.current = res.osdViewerParams;
 
+      imageDataFromQueryParams = !res.loadImageMetadata;
+
       // fetch the missing parameters from database
       let watermark = null;
       if (imageTuple) {
@@ -432,14 +438,19 @@ export default function ViewerProvider({
         osdViewerParameters.current[qParamName] = watermark;
       }
 
-      // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
-      if (noImageData || !res.loadImageMetadata) {
-        return [];
+      // don't fetch image data if: 
+      // - the main image returned no rows
+      // - or we already have the url from query params
+      if (noImageData || imageDataFromQueryParams) {
+        return { hasProcessedImage: false, hasChannelUrl: false };
       }
 
       return loadImageMetadata(osdViewerParameters, logInfo.logStack, logInfo.logStackPath, mainImageID!, defaultZIndex.current);
 
-    }).then(() => {
+    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean }) => {
+      hasProcessedImage = imageMetaDataRes.hasProcessedImage;
+      hasChannelUrl = imageMetaDataRes.hasChannelUrl;
+
       // dont fetch annotation from db if:
       // - we have annotation query params
       // - or main image request didn't return any rows
@@ -479,8 +490,21 @@ export default function ViewerProvider({
       }
 
       if (!isObjectAndNotNull(osdViewerParameters.current) || osdViewerParameters.current.mainImage.info.length === 0) {
-        $log.log('there wasn\'t any parameters that we could send to OSD viewer');
-        throw new ConfigService.ERMrest.MalformedURIError('Image information is missing.');
+        const subMessage = ['There was not any parameters that we could send to the OSD viewer.'];
+        
+        if (noImageData) {
+          subMessage.push('- The main image data could not be found.');
+        }
+        else if (!imageDataFromQueryParams) { 
+          if (!hasProcessedImage) {
+            subMessage.push('- No processed image data found.');
+          }
+          if (!hasChannelUrl) {
+            subMessage.push('- No channel image data found.');
+          }
+        }
+
+        throw new ViewerError(errorMessages.viewer.imageInfoMissing, subMessage.join('\n'));
       }
 
       /**
@@ -538,8 +562,26 @@ export default function ViewerProvider({
         break;
       case 'mainImageLoadFailed':
         // called if the main image didnt properly load
+        if (isObjectAndNotNull(data) && data.status && data.message) {
+          let error = ConfigService.ERMrest.responseToError({
+            status: data.status,
+            data: data.message,
+          });
 
-        addAlert(errorMessages.viewerOSDFailed, ChaiseAlertType.ERROR);
+          if (error instanceof ConfigService.ERMrest.ForbiddenError) {
+            error = new ForbiddenViewerAccess(session!);
+          }
+          // 401 will be handled differently
+          else if (!(error instanceof ConfigService.ERMrest.UnauthorizedError)) {
+            // show some custom error instead
+            error = new ViewerError(undefined, data.message);
+          }
+
+          dispatchError({ error });
+          return;
+        }
+
+        addAlert(errorMessages.viewer.osdFailed, ChaiseAlertType.ERROR);
         break;
       case 'mainImageLoaded':
         mainImageLoaded.current = true;
@@ -685,7 +727,9 @@ export default function ViewerProvider({
               } else {
                 addAlert(error.message, ChaiseAlertType.ERROR);
               }
-
+            }).catch((err) => {
+              // validate session will not reject, added to silence ts warning
+              $log.error(err);
             });
           }).finally(() => {
             // let osd viewer know that the process is done
@@ -721,6 +765,9 @@ export default function ViewerProvider({
               } else {
                 addAlert(error.message, ChaiseAlertType.ERROR);
               }
+            }).catch((err) => {
+              // validate session will not reject, added to silence ts warning
+              $log.error(err);
             });
           });
         });
@@ -969,11 +1016,11 @@ export default function ViewerProvider({
     //  - getTCRS: since we're using this tuple for getting the update/delete permissions and also populating edit form
     resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, false, true).then((page: any) => {
       if (page.length !== 1) {
-        $log.log('the currently added row was not visible.');
+        $log.info('the currently added row was not visible.');
       }
       resultTuple = page.length == 1 ? page.tuples[0] : resultTuple;
     }).catch((err: any) => {
-      $log.log('error while reading after create/update:', err);
+      $log.info('error while reading after create/update:', err);
     }).finally(() => {
 
       // update SVG ID (NEW_SVG) after successfully created

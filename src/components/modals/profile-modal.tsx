@@ -8,6 +8,9 @@ import { useEffect, useState, type JSX } from 'react';
 // models
 import { Client } from '@isrd-isi-edu/chaise/src/models/user';
 
+// utils
+import { getUserDisplayName } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
+
 type ProfileModalProps = {
   showProfile: boolean,
   setShowProfile: Function
@@ -28,8 +31,8 @@ const ProfileModal = ({
   useEffect(() => {
     if (!session || initialized) return;
     const user = session;
-    const userDisplayVar = (user.client.full_name || user.client.display_name || user.client.email || user.client.id)
-    setUserDisplay(userDisplayVar);
+    const userDisplayname = getUserDisplayName(user);
+    setUserDisplay(userDisplayname);
 
     const tempIdentities = [];
     for (let i = 0; i < user.client.identities.length; i++) {
@@ -41,7 +44,7 @@ const ProfileModal = ({
       tempOtherGroups = [];
     for (let i = 0; i < user.attributes.length; i++) {
       const tempUserAttr = JSON.parse(JSON.stringify(user.attributes[i]));
-      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplayVar && tempIdentities.indexOf(tempUserAttr.id) === -1) {
+      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplayname && tempIdentities.indexOf(tempUserAttr.id) === -1) {
         if (tempUserAttr.id.indexOf('https://auth.globus.org/') === 0) {
           tempUserAttr.truncated_id = tempUserAttr.id.substring(24);
           tempGlobusGroupList.push(tempUserAttr);

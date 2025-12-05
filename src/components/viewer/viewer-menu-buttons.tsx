@@ -48,7 +48,7 @@ const ViewerMenuButtons = (): JSX.Element => {
           break;
         case 'downloadViewError':
           setWaitingForScreenshot(false);
-          addAlert(errorMessages.viewerScreenshotFailed, ChaiseAlertType.WARNING);
+          addAlert(errorMessages.viewer.screenshotFailed, ChaiseAlertType.WARNING);
           break;
       }
     };
