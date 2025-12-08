@@ -15,6 +15,7 @@ import {
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
+import { getURLWithDifferentCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 type TitleVersionProps = {
   /**
@@ -29,7 +30,7 @@ const TitleVersion = ({ reference }: TitleVersionProps): JSX.Element => {
 
   const goToLive = () => {
     const catalogId = ConfigService.catalogID;
-    const liveLink = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
+    const liveLink = getURLWithDifferentCatalog(catalogId.split('@')[0]);
     windowRef.location = addLogParams(liveLink, ConfigService.contextHeaderParams);
     windowRef.location.reload();
   };
