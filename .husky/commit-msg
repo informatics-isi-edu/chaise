@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+# Skip commitlint for release commits
+COMMIT_MSG=$(cat "$1")
+if echo "$COMMIT_MSG" | grep -q "chore(release):"; then
+  exit 0
+fi
+
+npx --no -- commitlint --edit $1

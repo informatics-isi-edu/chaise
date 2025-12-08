@@ -17,7 +17,8 @@
     "build": "make dist",
     "deploy": "make deploy",
     "pretest": "make deploy",
-    "test": "make testparallel"
+    "test": "make testparallel",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -28,8 +29,12 @@
     "ui"
   ],
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@isrd-isi-edu/ermrest-data-utils": "^0.0.7",
     "@playwright/test": "latest",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "~7.18.0",
     "@typescript-eslint/parser": "~7.18.0",
     "chance": "x",
@@ -40,10 +45,12 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "eslint-webpack-plugin": "^4.1.0",
     "execSync": "x",
+    "husky": "^9.1.7",
     "jasmine-spec-reporter": "^2.5.0",
     "moment": "2.29.4",
     "moment-timezone": "0.5.48",
     "prettier": "^3.2.5",
+    "semantic-release": "^25.0.2",
     "set-cookie-parser": "x",
     "ts-node": "^10.9.1",
     "webpack-bundle-analyzer": "^4.5.0"
