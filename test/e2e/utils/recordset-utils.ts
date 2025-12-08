@@ -863,6 +863,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           for await (const searchTest of facetParams.textSearch) {
             await test.step(`searching for term "${searchTest.term}" should show correct options`, async () => {
               await RecordsetLocators.getFacetSearchBox(facet).fill(searchTest.term);
+              await RecordsetLocators.getFacetSearchSubmitBtn(facet).click();
+              await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
               await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(searchTest.options);
               await RecordsetLocators.getFacetSearchBoxClear(facet).click();
             });

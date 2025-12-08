@@ -434,6 +434,10 @@ export default class RecordsetLocators {
     return facet.locator('.facet-search-input');
   }
 
+  static getFacetSearchSubmitBtn(facet: Locator): Locator {
+    return facet.locator('.chaise-search-box .chaise-search-btn');
+  }
+
   static getFacetSearchBoxById(facet: Locator): Locator {
     return facet.locator('.chaise-search-box');
   }
