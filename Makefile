@@ -254,7 +254,11 @@ endef
 # using clean-install instead of install to ensure usage of pacakge-lock.json
 .PHONY: npm-install-modules
 npm-install-modules:
+ifeq ($(NODE_ENV),production)
+	@npm clean-install --omit=dev --no-engine-strict --ignore-scripts --loglevel=error
+else
 	@npm clean-install --loglevel=error
+endif
 
 # install packages needed for production and development (including testing)
 # --include=dev makes sure to ignore NODE_ENV and install everything

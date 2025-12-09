@@ -123,6 +123,8 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
+          # just to make sure we can run make commands without issues
+          sudo make root-install
           make deps-test
           make dist-wo-deps
           make lint
