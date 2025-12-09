@@ -115,6 +115,7 @@ export async function clickAndVerifyDownload(
  *
  * Notes:
  *  - To make sure the tooltip goes away after this test, we're hovering over a different element after testing the tooltip.
+ *    The hover element is either passed to the function or we pick a default one based on the appName.
  *
  * @param locator the element with the tooltip
  * @param expectedTooltip the expected value that is used in a `toHaveText`. so if a string is passed, we expect a full match.
