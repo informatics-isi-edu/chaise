@@ -13,21 +13,12 @@ updates:
       - dependency-name: "@playwright/test"
     # https://github.com/dependabot/dependabot-core/issues/1778#issuecomment-1988140219
     target-branch: master
-    open-pull-requests-limit: 0 # TODO should be removed (added temporarily to avoid PR flood)
-    commit-message:
-      prefix: "fix"
-      prefix-development: "chore"
-      include: "scope"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "quarterly"
     versioning-strategy: "increase"
-    open-pull-requests-limit: 0 # TODO should be changed back to 10 (added temporarily to avoid PR flood)
-    commit-message:
-      prefix: "fix"
-      prefix-development: "chore"
-      include: "scope"
+    open-pull-requests-limit: 10
     ignore:
       - dependency-name: "@playwright/test"
       # newer versions of eslint drop support for node 18:
