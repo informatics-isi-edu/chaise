@@ -1,0 +1,27 @@
+[
+  {
+    "assoc_related1_id": "01",
+    "name": "Related One",
+    "fk_to_assoc_related1_outbound1": "01"
+  },
+  {
+    "assoc_related1_id": "02",
+    "name": "Related Two",
+    "fk_to_assoc_related1_outbound1": "02"
+  },
+  {
+    "assoc_related1_id": "03",
+    "name": "Related Three",
+    "fk_to_assoc_related1_outbound1": "03"
+  },
+  {
+    "assoc_related1_id": "04",
+    "name": "Related Four",
+    "fk_to_assoc_related1_outbound1": "01"
+  },
+  {
+    "assoc_related1_id": "05",
+    "name": "Related Five",
+    "fk_to_assoc_related1_outbound1": "02"
+  }
+]

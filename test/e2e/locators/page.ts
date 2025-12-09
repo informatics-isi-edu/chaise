@@ -2,6 +2,10 @@ import { Page, Locator } from '@playwright/test';
 
 export default class PageLocators {
 
+  static getTooltipIcon(container: Page | Locator): Locator {
+    return container.locator('.chaise-icon-for-tooltip');
+  }
+
   static getTooltipContainer(page: Page): Locator {
     return page.locator('.tooltip').first();
   }

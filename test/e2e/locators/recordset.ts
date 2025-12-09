@@ -204,6 +204,10 @@ export default class RecordsetLocators {
   };
 
   /* sort selectors */
+  static getColumnSortButtonContainer(container: Page | Locator, rawColumnName: string): Locator {
+    return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .column-sort-icon`);
+  };
+
   static getColumnSortButton(container: Page | Locator, rawColumnName: string): Locator {
     return RecordsetLocators.getTableHeading(container).locator(`.c_${rawColumnName} .not-sorted-icon`);
   };
@@ -322,35 +326,79 @@ export default class RecordsetLocators {
   }
 
   static getOpenFacets(container: Page | Locator): Locator {
-    return container.locator('.panel-open');
+    return container.locator('.facet-item-open');
   }
 
   static getClosedFacets(container: Page | Locator): Locator {
-    return container.locator('.facet-panel button.collapsed');
+    return container.locator('.facet-item-container:not(.facet-item-open)');
+  }
+
+  static getClosedFacetGroups(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-container:not(.facet-group-item-open)');
+  }
+
+  static getOpenFacetGroups(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-container.facet-group-item-open');
   }
 
   static getFacetTitles(container: Page | Locator): Locator {
-    return container.locator('.accordion-header .facet-header-text');
+    return container.locator('.facet-item-header .facet-header-text');
   }
 
   static getOpenFacetTitles(container: Page | Locator): Locator {
-    return container.locator('.panel-open .facet-header-text');
+    return container.locator('.facet-item-open .facet-header-text');
+  }
+
+  static getOpenFacetGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.facet-group-item-open .facet-group-item-header .facet-header-text');
+  }
+
+  static getFacetItemAndGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.accordion-header .facet-header-text');
+  }
+
+  static getOpenFacetItemAndGroupTitles(container: Page | Locator): Locator {
+    return container.locator('.facet-item-open .facet-header-text, .facet-group-item-open .facet-group-item-header .facet-header-text');
   }
 
   static getFacetMoveIcon(container: Page | Locator, idx: number): Locator {
     return container.locator(`.facet-item-container .facet-move-icon-${idx}`);
   }
 
+  static getFacetGroupMoveIcon(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.facet-group-item-container .group-move-icon-${idx}`);
+  }
+
   static getFacetById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-${idx}`);
+  }
+
+  static getFacetGroupById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fgc-${idx}`);
+  };
+
+  static getFacetGroupBody(facetGroup: Locator): Locator {
+    return facetGroup.locator('.facet-group-item-body');
   }
 
   static getFacetHeaderById(container: Page | Locator, idx: number): Locator {
     return container.locator(`.fc-heading-${idx}`).locator('.facet-header-text');
   };
 
+  static getFacetGroupHeaderById(container: Page | Locator, idx: number): Locator {
+    return container.locator(`.fgc-heading-${idx}`).locator('.facet-header-text');
+  };
+
   static getFacetHeaderButtonById(facet: Locator, idx: number): Locator {
     return facet.locator(`.fc-heading-${idx} button`);
+  }
+
+  static getFacetGroupHeaderButtonById(group: Locator, idx: number): Locator {
+    return group.locator(`.fgc-heading-${idx} button`);
+  }
+
+  static getFacetGroupChildren(facetGroup: Locator): Locator {
+    return facetGroup.locator('.facet-group-item-body .facet-panel');
   }
 
   static getFacetSpinner(facet: Locator): Locator {
@@ -384,6 +432,10 @@ export default class RecordsetLocators {
 
   static getFacetSearchBox(facet: Locator): Locator {
     return facet.locator('.facet-search-input');
+  }
+
+  static getFacetSearchSubmitBtn(facet: Locator): Locator {
+    return facet.locator('.chaise-search-box .chaise-search-btn');
   }
 
   static getFacetSearchBoxById(facet: Locator): Locator {

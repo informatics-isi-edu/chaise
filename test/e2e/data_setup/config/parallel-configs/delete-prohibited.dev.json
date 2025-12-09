@@ -5,7 +5,8 @@
             "record/config.json",
             "recordedit/delete.config.json",
             "recordset/facet.config.json",
-            "recordset/histogram-facet.config.json"
+            "recordset/histogram-facet.config.json",
+            "recordset/facet-group.config.json"
         ]
     },
     "cleanup" : true
