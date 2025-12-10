@@ -334,7 +334,7 @@ export default function ViewerProvider({
         /**
          * page title logic:
          * - if iframe, don't show it.
-         * - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.rowName.
+         * - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.displayname.
          *   if there wasn't any links in the computed value, add a link to the row.
          *
          * head title link:
@@ -354,7 +354,7 @@ export default function ViewerProvider({
           );
           // use the tuple rowName
           if (!isStringAndNotEmpty(pageTitleCaption.value)) {
-            pageTitleCaption = imageTuple.rowName;
+            pageTitleCaption = imageTuple.displayname;
           }
 
           //attach link if it doesn't have any
