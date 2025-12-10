@@ -266,7 +266,7 @@ export class SnapshotError extends ChaiseError {
  */
 export class ViewerError extends ChaiseError {
   constructor(message?: string, subMessage?: string) {
-    super(errorNames.viewer, message || errorMessages.systemAdminMessage, subMessage);
+    super(errorNames.viewer, message || errorMessages.viewer.osdFailed, subMessage);
   }
 }
 
@@ -279,5 +279,13 @@ export class ForbiddenViewerAccess extends ChaiseError {
       MESSAGE_MAP.permissionDenied,
       getUserDisplayName(sessionInfo) + errorMessages.viewer.forbidden
     );
+  }
+}
+/**
+ * When the user tries to acces an asset when they are not authorized
+ */
+export class UnauthorizedViewerAccess extends ChaiseError {
+  constructor() {
+    super(MESSAGE_MAP.loginRequired, errorMessages.viewer.unauthorized);
   }
 }

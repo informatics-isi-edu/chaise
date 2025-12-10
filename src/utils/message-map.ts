@@ -54,8 +54,8 @@ export const MESSAGE_MAP = {
   loginStatusChanged: 'Unexpected Change of Login Status',
   unauthorizedErrorCode: 'Unauthorized Access',
   localStorageDisabled: 'localStorage is disabled by the browser settings. Some features might not work as expected',
-  showErrDetails: 'Show Error Details',
-  hideErrDetails: 'Hide Error Details',
+  showErrDetails: 'Show error details',
+  hideErrDetails: 'Hide error details',
   tooltip: {
     versionTime: 'Displaying snapshot from',
     downloadCSV: 'Click to download all matched results',

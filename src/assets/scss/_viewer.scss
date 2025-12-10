@@ -24,6 +24,7 @@
   .main-body,
   .side-panel-container {
     height: 100%;
+    position: relative;
   }
   iframe#osd-viewer-iframe {
     height: 100%;
@@ -45,6 +46,26 @@
     .chaise-btn {
       margin-right: 5px;
       margin-bottom: 5px;
+    }
+  }
+
+  // viewer error overlay
+  .viewer-error-overlay {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: map.get(variables.$z-index-map, 'viewer-error');
+    max-width: 90%;
+    
+    .toggle-error-details {
+      margin-top: 10px;
+      padding: 0;
+      gap: 5px;
+    }
+  
+    .error-details {
+      margin-bottom: 0;
     }
   }
 

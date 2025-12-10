@@ -149,7 +149,9 @@ export const errorMessages = {
     imageInfoMissing: 'Unable to retrieve the image information.',
     osdFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
     screenshotFailed: 'Couldn\'t process the screenshot.',
-    forbidden: ' is logged in but not authorized to view this image.',
+    forbidden: ' is logged in but not authorized to view this image file.',
+    unauthorized: 'You must be logged in and authorized to view this image file.',
+    notFound: 'The requested image file could not be found.',
   },
   invalidHelpPage: 'The requested help page cannot be found.',
   filePreview: {

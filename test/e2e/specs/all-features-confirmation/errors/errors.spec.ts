@@ -107,7 +107,7 @@ test.describe('error handling', () => {
         await expect.soft(text).toContainText(new RegExp(`(${expectedDeleteMessages.join('|')})`));
         await expect.soft(text).toContainText([
           'All dependent entries must be removed before this item can be deleted.  ',
-          'If you have trouble removing dependencies please contact the site administrator.Show Error Details'
+          'If you have trouble removing dependencies please contact the site administrator.Show error details'
         ].join(''));
       });
 
@@ -219,7 +219,7 @@ test.describe('error handling', () => {
             'An unexpected error has occurred. Try clearing your cache.  ',
             'If you continue to face this issue, please contact the system administrator.',
             'Click OK to go to the Home Page. ',
-            'Show Error Details'
+            'Show error details'
           ].join('')
         );
       });
@@ -228,15 +228,15 @@ test.describe('error handling', () => {
         const toggleBtn = ModalLocators.getToggleErrorDetailsButton(errorModal);
         const details = ModalLocators.getErrorDetails(errorModal);
         await expect.soft(details).not.toBeAttached();
-        await expect.soft(toggleBtn).toHaveText('Show Error Details');
+        await expect.soft(toggleBtn).toHaveText('Show error details');
 
         await toggleBtn.click();
-        await expect.soft(toggleBtn).toHaveText('Hide Error Details');
+        await expect.soft(toggleBtn).toHaveText('Hide error details');
         await expect.soft(details).toContainText('invalid input syntax for type boolean: \"12\"');
 
         await toggleBtn.click();
         await expect.soft(details).not.toBeAttached();
-        await expect.soft(toggleBtn).toHaveText('Show Error Details');
+        await expect.soft(toggleBtn).toHaveText('Show error details');
       });
     });
 

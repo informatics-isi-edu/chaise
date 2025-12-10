@@ -12,6 +12,7 @@ import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confir
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer-menu-buttons';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import ViewerErrorToast from '@isrd-isi-edu/chaise/src/components/viewer/viewer-error-toast';
 
 // hooks
 import { useEffect, useRef, useState, type JSX } from 'react';
@@ -62,7 +63,7 @@ const ViewerInner = ({
   const {
     initialized, pageTitle, hideAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
     submitAnnotationForm, deleteAnnotationConfirmProps, startAnnotationDelete,
-    displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode
+    displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode, viewerError,
   } = useViewer();
 
 
@@ -183,6 +184,7 @@ const ViewerInner = ({
   const renderMainContainer = () => (
     <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
+        {viewerError && <ViewerErrorToast viewerError={viewerError} />}
         <iframe src='about:blank' id='osd-viewer-iframe' className={!displayIframe ? CLASS_NAMES.HIDDEN : ''} ref={iframeElement}>
           &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
         </iframe>

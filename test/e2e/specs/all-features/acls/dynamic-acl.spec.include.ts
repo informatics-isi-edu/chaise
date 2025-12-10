@@ -475,7 +475,7 @@ export const runDynamicACLTests = () => {
 
         const expectedBody = [
           '1 record successfully deleted. 2 records could not be deleted. Check the error details below to see more information.',
-          'Show Error Details'
+          'Show error details'
         ].join('');
         await expect.soft(ModalLocators.getModalText(summaryModal)).toHaveText(expectedBody);
       });

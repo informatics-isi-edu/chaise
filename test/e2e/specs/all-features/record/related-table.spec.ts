@@ -300,7 +300,7 @@ test.describe('Related tables', () => {
       totalCount: 3,
       failedPostDeleteMessage: [
         'None of the 2 chosen records could be unlinked. Check the error details below to see more information.',
-        'Show Error Details'
+        'Show error details'
       ].join(''),
       successPostDeleteMessage: 'The chosen record successfully unlinked.',
       countAfterUnlink: 2,
