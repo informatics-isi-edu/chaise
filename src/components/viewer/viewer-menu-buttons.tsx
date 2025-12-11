@@ -24,7 +24,14 @@ import { getOSDViewerIframe } from '@isrd-isi-edu/chaise/src/utils/viewer-utils'
 const ViewerMenuButtons = (): JSX.Element => {
   const { addAlert } = useAlert();
 
-  const { logViewerClientAction, hideAnnotationSidebar, toggleAnnotationSidebar, annotationFormProps, imageID } = useViewer();
+  const {
+    logViewerClientAction,
+    hideAnnotationSidebar,
+    toggleAnnotationSidebar,
+    annotationFormProps,
+    imageID,
+    mainImageLoaded,
+  } = useViewer();
 
   const [showChannelList, setShowChannelList] = useState(false);
   const [waitingForScreenshot, setWaitingForScreenshot] = useState(false);
@@ -48,7 +55,7 @@ const ViewerMenuButtons = (): JSX.Element => {
           break;
         case 'downloadViewError':
           setWaitingForScreenshot(false);
-          addAlert(errorMessages.viewerScreenshotFailed, ChaiseAlertType.WARNING);
+          addAlert(errorMessages.viewer.screenshotFailed, ChaiseAlertType.WARNING);
           break;
       }
     };
@@ -104,6 +111,7 @@ const ViewerMenuButtons = (): JSX.Element => {
   }
 
   //-------------------  render logics:   --------------------//
+  const disableFeatures = !mainImageLoaded;
 
   let toggleAnnotationSidebarTooltip = hideAnnotationSidebar ? 'Show ' : 'Hide ';
   toggleAnnotationSidebarTooltip += !!annotationFormProps ? 'the annotation entry form' : 'the list of annotations';
@@ -111,50 +119,90 @@ const ViewerMenuButtons = (): JSX.Element => {
   let toggleAnnotationSidebarLabel = hideAnnotationSidebar ? 'Show ' : 'Hide ';
   toggleAnnotationSidebarLabel += !!annotationFormProps ? 'Annotation form' : 'Annotations';
 
+  let screenshotTooltip = 'Take a snapshot of image and save it';
+  if (waitingForScreenshot) {
+    screenshotTooltip = 'Processing the screenshot...';
+  }
+
   return (
     <div className='menu-btn-container'>
       <ChaiseTooltip placement='top' tooltip={toggleAnnotationSidebarTooltip}>
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleAnnotationSidebar}>
-          <span className={`chaise-btn-icon chaise-icon ${hideAnnotationSidebar ? 'chaise-sidebar-open' : 'chaise-sidebar-close'}`}></span>
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={toggleAnnotationSidebar}
+        >
+          <span
+            className={`chaise-btn-icon chaise-icon ${hideAnnotationSidebar ? 'chaise-sidebar-open' : 'chaise-sidebar-close'}`}
+          ></span>
           <span>{toggleAnnotationSidebarLabel}</span>
         </button>
       </ChaiseTooltip>
-      <ChaiseTooltip placement='top' tooltip={(showChannelList ? 'Hide' : 'Show') + ' the list of channels'}>
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={toggleChannelList}>
+      <ChaiseTooltip
+        placement='top'
+        tooltip={(showChannelList ? 'Hide' : 'Show') + ' the list of channels'}
+      >
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={toggleChannelList}
+          disabled={disableFeatures}
+        >
           <span className='chaise-btn-icon fa-solid fa-bars-progress'></span>
           <span>{(showChannelList ? 'Hide' : 'Show') + ' Channel List'}</span>
         </button>
       </ChaiseTooltip>
       <ChaiseTooltip placement='top' tooltip='Zoom in'>
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_IN)}>
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={() => changeZoom(ViewerZoomFunction.ZOOM_IN)}
+          disabled={disableFeatures}
+        >
           <span className='chaise-btn-icon fa-solid fa-magnifying-glass-plus'></span>
           <span>Zoom In</span>
         </button>
       </ChaiseTooltip>
       <ChaiseTooltip placement='top' tooltip='Zoom out'>
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.ZOOM_OUT)}>
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={() => changeZoom(ViewerZoomFunction.ZOOM_OUT)}
+          disabled={disableFeatures}
+        >
           <span className='chaise-btn-icon fa-solid fa-magnifying-glass-minus'></span>
           <span>Zoom Out</span>
         </button>
       </ChaiseTooltip>
       <ChaiseTooltip placement='top' tooltip='Reset Zoom'>
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={() => changeZoom(ViewerZoomFunction.RESET_ZOOM)}>
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={() => changeZoom(ViewerZoomFunction.RESET_ZOOM)}
+          disabled={disableFeatures}
+        >
           <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
           <span>Reset Zoom</span>
         </button>
       </ChaiseTooltip>
-      <ChaiseTooltip
-        placement='top'
-        tooltip={waitingForScreenshot ? 'Processing the screenshot...' : 'Take a snapshot of image and save it'}
-      >
-        <button className='chaise-btn chaise-btn-primary' type='button' onClick={takeScreenshot} disabled={waitingForScreenshot}>
+      <ChaiseTooltip placement='top' tooltip={screenshotTooltip}>
+        <button
+          className='chaise-btn chaise-btn-primary'
+          type='button'
+          onClick={takeScreenshot}
+          disabled={waitingForScreenshot || disableFeatures}
+        >
           {!waitingForScreenshot && <span className='chaise-btn-icon fa-solid fa-camera'></span>}
-          {waitingForScreenshot && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
+          {waitingForScreenshot && (
+            <span className='chaise-btn-icon'>
+              <Spinner animation='border' size='sm' />
+            </span>
+          )}
           <span>Take a Screenshot</span>
         </button>
       </ChaiseTooltip>
     </div>
-  )
+  );
 }
 
 export default ViewerMenuButtons;

@@ -8,7 +8,16 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
-import { CustomError, DifferentUserConflictError, LimitedBrowserSupport, MultipleRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import {
+  ChaiseError,
+  CustomError,
+  DifferentUserConflictError,
+  ForbiddenViewerAccess,
+  LimitedBrowserSupport,
+  MultipleRecordError,
+  UnauthorizedViewerAccess,
+  ViewerError,
+} from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
@@ -56,94 +65,108 @@ export const ViewerContext = createContext<{
   /**
    * if defined, returns the RID value of image record
    */
-  imageID?: string,
+  imageID?: string;
   /**
    * whether the page is initialized and we can start showing the elements
    */
-  initialized: boolean,
+  initialized: boolean;
   /**
    * The title of the page
    */
-  pageTitle: string,
+  pageTitle: string;
+
+  viewerError: ChaiseError | null;
+
+  mainImageLoaded: boolean;
   /**
    * whether to show the annotation sidebar or not
    */
-  hideAnnotationSidebar: boolean,
+  hideAnnotationSidebar: boolean;
   /**
    * call this function to toggle the annotation sidebar
    */
-  toggleAnnotationSidebar: () => void,
+  toggleAnnotationSidebar: () => void;
   /**
    * annotations
    */
-  annotationModels: ViewerAnnotationModal[],
+  annotationModels: ViewerAnnotationModal[];
   /**
    * whether we should show the annotation spinner
    */
-  loadingAnnotations: boolean,
+  loadingAnnotations: boolean;
   /**
    * whether the user can create new annotations
    */
-  canCreateAnnotation: boolean,
+  canCreateAnnotation: boolean;
   /**
    * callback for closing the annotation form
    */
-  closeAnnotationForm: () => void,
+  closeAnnotationForm: () => void;
   /**
    * callback for starting the create mode
    */
-  startAnnotationCreate: (event: any) => void,
+  startAnnotationCreate: (event: any) => void;
   /**
    * callback for starting the edit mode for a given annotation
    */
-  startAnnotationEdit: (index: number, event: any) => void,
+  startAnnotationEdit: (index: number, event: any) => void;
 
-  deleteAnnotationConfirmProps: DeleteAnnotationConfirmProps | null,
+  deleteAnnotationConfirmProps: DeleteAnnotationConfirmProps | null;
   /**
    * -1 in the first parameter means the current annotation form
    */
-  startAnnotationDelete: (index: number, event: any) => void,
+  startAnnotationDelete: (index: number, event: any) => void;
   /**
    * if defined, it has the props that should be passed to recordedit to display a form
    */
-  annotationFormProps: AnnotationFormProps | null,
-  submitAnnotationForm: () => void,
+  annotationFormProps: AnnotationFormProps | null;
+  submitAnnotationForm: () => void;
   /**
    * indicator for showing the spinner on top of the form
    */
-  showAnnotationFormSpinner: boolean,
+  showAnnotationFormSpinner: boolean;
   /**
    * whether we should display the drawing required error or not
    */
-  displayDrawingRequiredError: boolean,
+  displayDrawingRequiredError: boolean;
   /**
    * toggle drawing mode
    */
-  toggleDrawingMode: (event?: any) => void,
+  toggleDrawingMode: (event?: any) => void;
   /**
    * whether we are in drawing mode or not
    */
-  isInDrawingMode: boolean,
+  isInDrawingMode: boolean;
   /**
    * toggle the visibility of an annotation.
    *
    */
-  toggleAnnotationDisplay: (index: number, event?: any) => void,
-  changeAllAnnotationVisibility: (show: boolean) => void,
+  toggleAnnotationDisplay: (index: number, event?: any) => void;
+  changeAllAnnotationVisibility: (show: boolean) => void;
   /**
    * the highlighted annotation.
    * if -1, we should not highlight any annotations.
    */
-  highlightedAnnotationIndex: number,
+  highlightedAnnotationIndex: number;
   /**
    * toggle the highlight status of an annotation.
    * (we highlight only one annotation at a time)
    */
-  toggleHighlightAnnotation: (index: number, event?: any, fromOSD?: boolean, forceHighlight?: boolean) => void,
+  toggleHighlightAnnotation: (
+    index: number,
+    event?: any,
+    fromOSD?: boolean,
+    forceHighlight?: boolean
+  ) => void;
   /**
    * log the client action
    */
-  logViewerClientAction: (action: LogActions, isAnnotation: boolean, item?: ViewerAnnotationModal, extraInfo?: any) => void,
+  logViewerClientAction: (
+    action: LogActions,
+    isAnnotation: boolean,
+    item?: ViewerAnnotationModal,
+    extraInfo?: any
+  ) => void;
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -164,7 +187,7 @@ export default function ViewerProvider({
   logInfo
 }: ViewerProviderProps): JSX.Element {
   const { addAlert, removeAllAlerts } = useAlert();
-  const { validateSessionBeforeMutation, validateSession } = useAuthn();
+  const { validateSessionBeforeMutation, validateSession, session } = useAuthn();
   const { dispatchError } = useError();
 
   /**
@@ -176,6 +199,11 @@ export default function ViewerProvider({
    * the title. if empty we shouldn't show any title
    */
   const [pageTitle, setPageTitle] = useState('');
+
+  /**
+   * any error that happened while loading the main image
+   */
+  const [viewerError, setViewerError] = useState<ChaiseError | null>(null);
 
   /**
    * whether we're waiting for annotations or not
@@ -252,11 +280,13 @@ export default function ViewerProvider({
   const osdViewerParameters = useRef<any>({});
 
   /**
-   * whether the main image is loaded or not.
-   * when users switch from one image to another (in z-plane), we need to show the new image and fetch the annotations.
+   * Whether the main image is loaded or not.
+   *
+   * - When users switch from one image to another (in z-plane), we need to show the new image and fetch the annotations.
    * this boolean and ViewerAnnotationService.annotationsRecieved are used so we can coordinate these two events.
+   * - When this is false, we should disable any button/feature that requires the main image to be loaded.
    */
-  const mainImageLoaded = useRef(false);
+  const [mainImageLoaded, setMainImageLoaded, mainImageLoadedRef] = useStateRef(false);
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -285,6 +315,10 @@ export default function ViewerProvider({
 
     // if the main image request didnt return any rows
     let noImageData = false;
+
+    let imageDataFromQueryParams = false;
+    let hasProcessedImage = false;
+    let hasChannelUrl = false;
 
     // if there are svgs in query param, we should just use it and shouldn't get it from db.
     let hasAnnotationQueryParam = false
@@ -391,6 +425,8 @@ export default function ViewerProvider({
 
       osdViewerParameters.current = res.osdViewerParams;
 
+      imageDataFromQueryParams = !res.loadImageMetadata;
+
       // fetch the missing parameters from database
       let watermark = null;
       if (imageTuple) {
@@ -432,14 +468,19 @@ export default function ViewerProvider({
         osdViewerParameters.current[qParamName] = watermark;
       }
 
-      // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
-      if (noImageData || !res.loadImageMetadata) {
-        return [];
+      // don't fetch image data if:
+      // - the main image returned no rows
+      // - or we already have the url from query params
+      if (noImageData || imageDataFromQueryParams) {
+        return { hasProcessedImage: false, hasChannelUrl: false };
       }
 
       return loadImageMetadata(osdViewerParameters, logInfo.logStack, logInfo.logStackPath, mainImageID!, defaultZIndex.current);
 
-    }).then(() => {
+    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean }) => {
+      hasProcessedImage = imageMetaDataRes.hasProcessedImage;
+      hasChannelUrl = imageMetaDataRes.hasChannelUrl;
+
       // dont fetch annotation from db if:
       // - we have annotation query params
       // - or main image request didn't return any rows
@@ -479,8 +520,26 @@ export default function ViewerProvider({
       }
 
       if (!isObjectAndNotNull(osdViewerParameters.current) || osdViewerParameters.current.mainImage.info.length === 0) {
-        $log.log('there wasn\'t any parameters that we could send to OSD viewer');
-        throw new ConfigService.ERMrest.MalformedURIError('Image information is missing.');
+        const subMessage: string[] = [];
+
+        if (noImageData) {
+          subMessage.push('The main image data could not be found.');
+        }
+        else if (imageDataFromQueryParams) {
+          subMessage.push('No image data found in the URL query parameters.');
+        }
+        else {
+          subMessage.push('- The main image data was found.')
+          if (!hasProcessedImage) {
+            subMessage.push('- No processed image data found.');
+          }
+          if (!hasChannelUrl) {
+            subMessage.push('- No channel image data found.');
+          }
+        }
+
+        // the whole app must fail, so we throw the error instead of just setting viewer error
+        throw new ViewerError(errorMessages.viewer.imageInfoMissing, subMessage.join('\n'));
       }
 
       /**
@@ -496,6 +555,7 @@ export default function ViewerProvider({
           '<br/><br/>',
           'The following features related to the annotation tool might not work as expected:',
           '<ul><br/>',
+          // eslint-disable-next-line max-len
           '<li style=\'list - style - type: inherit\'><strong>Arrow line</strong>: The arrowheads might not be visible on high-resolution images.</li>',
           '<li style=\'list - style - type: inherit\'><strong>Text</strong>: The text box cannot be resized during drawing.</li>',
           '<br/></ul>',
@@ -515,13 +575,13 @@ export default function ViewerProvider({
       // show the page while the image info will be loaded by osd viewer
       setInitialized(true);
 
-    }).catch((error: any) => {
+    }).catch((error: unknown) => {
       dispatchError({ error })
     });
   };
 
-  const recieveIframeMessage = (event: any) => {
-    if (event.origin !== windowRef.location.origin) return;
+  const recieveIframeMessage = (event: MessageEvent) => {
+    if ((event as MessageEvent).origin !== windowRef.location.origin) return;
 
     const data = event.data.content;
     const messageType = event.data.messageType;
@@ -533,16 +593,51 @@ export default function ViewerProvider({
 
         // initialize viewer
         if (isObjectAndNotNull(osdViewerParameters.current)) {
-          iframe.postMessage({ messageType: 'initializeViewer', content: osdViewerParameters.current }, origin);
+          iframe.postMessage(
+            { messageType: 'initializeViewer', content: osdViewerParameters.current },
+            origin
+          );
         }
         break;
       case 'mainImageLoadFailed':
         // called if the main image didnt properly load
 
-        addAlert(errorMessages.viewerOSDFailed, ChaiseAlertType.ERROR);
+        // map to a proper error object
+        let error;
+        if (isObjectAndNotNull(data) && data.message) {
+          error = ConfigService.ERMrest.responseToError({
+            status: data.status,
+            data: data.message,
+          });
+
+          if (error instanceof ConfigService.ERMrest.UnauthorizedError) {
+            // dispatch so the login modal shows up
+            dispatchError({ error });
+
+            error = new UnauthorizedViewerAccess();
+          } else if (error instanceof ConfigService.ERMrest.ForbiddenError) {
+            error = new ForbiddenViewerAccess(session!);
+          } else {
+            // show better error messages for known errors
+            let message: string | undefined;
+            let subMessage: string | undefined = data.message;
+            if (error instanceof ConfigService.ERMrest.NotFoundError) {
+              message = errorMessages.viewer.notFound;
+              subMessage = undefined;
+            }
+            error = new ViewerError(message, subMessage);
+          }
+        } else {
+          error = new ViewerError();
+        }
+
+        setViewerError(error);
+        setMainImageLoaded(false);
+        setLoadingAnnotations(false);
         break;
       case 'mainImageLoaded':
-        mainImageLoaded.current = true;
+        setViewerError(null);
+        setMainImageLoaded(true);
 
         /**
          * called when the main images is loaded. we should now ask osd to load annotations if we already have
@@ -557,7 +652,8 @@ export default function ViewerProvider({
          * called when the main image has changed in the multi-z support.
          * we need to update the information associated with the image.
          */
-        mainImageLoaded.current = false;
+        setViewerError(null);
+        setMainImageLoaded(false);
 
         // change the default z-index
         defaultZIndex.current = data.zIndex;
@@ -577,37 +673,38 @@ export default function ViewerProvider({
 
         // read the annotations
         (function (currZIndex) {
-          readAllAnnotations(false, imageIDRef.current!, currZIndex).then((res) => {
-            // if main image changed while fetching annotations, ignore it
-            if (currZIndex !== defaultZIndex.current) return;
+          readAllAnnotations(false, imageIDRef.current!, currZIndex)
+            .then((res) => {
+              // if main image changed while fetching annotations, ignore it
+              if (currZIndex !== defaultZIndex.current) return;
 
-            ViewerAnnotationService.setAnnotations(
-              res.annotationTuples,
-              res.annotationURLs,
-              res.annotationEditReference,
-              res.annotationCreateReference
-            );
+              ViewerAnnotationService.setAnnotations(
+                res.annotationTuples,
+                res.annotationURLs,
+                res.annotationEditReference,
+                res.annotationCreateReference
+              );
 
-            if (res.annotationTuples.length > 0) {
-              // ask osd to load the annotation
-              if (mainImageLoaded.current) {
-                ViewerAnnotationService.loadAnnotations();
+              if (res.annotationTuples.length > 0) {
+                // ask osd to load the annotation
+                if (mainImageLoadedRef.current) {
+                  ViewerAnnotationService.loadAnnotations();
+                }
+              } else {
+                setLoadingAnnotations(false);
               }
-            } else {
+            })
+            .catch((err) => {
+              // if main image changed while fetching annotations, ignore it
+              if (currZIndex !== defaultZIndex.current) return;
+
               setLoadingAnnotations(false);
-            }
 
-          }).catch((err) => {
-            // if main image changed while fetching annotations, ignore it
-            if (currZIndex !== defaultZIndex.current) return;
-
-            setLoadingAnnotations(false);
-
-            // fail silently
-            $log.error('error while updating annotations');
-            $log.error(err);
-          });
-        })(data.zIndex)
+              // fail silently
+              $log.error('error while updating annotations');
+              $log.error(err);
+            });
+        })(data.zIndex);
 
         break;
       case 'annotationsLoaded':
@@ -617,7 +714,7 @@ export default function ViewerProvider({
         setLoadingAnnotations(false);
         break;
       case 'errorAnnotation':
-        addAlert('Couldn\'t parse the given annotation.', ChaiseAlertType.WARNING);
+        addAlert('Could not parse the given annotation.', ChaiseAlertType.WARNING);
         if (data) $log.warn(data);
         break;
       case 'updateAnnotationList':
@@ -625,7 +722,9 @@ export default function ViewerProvider({
         updateAnnotaionList(data);
         break;
       case 'onClickChangeSelectingAnnotation':
-        const index = annotationModelsRef.current.findIndex((item) => item.svgID === data.svgID && item.groupID === data.groupID);
+        const index = annotationModelsRef.current.findIndex(
+          (item) => item.svgID === data.svgID && item.groupID === data.groupID
+        );
 
         // if user highlights while drawing
         if (index === -1) return;
@@ -642,94 +741,136 @@ export default function ViewerProvider({
         const hasValidSVG = data.length > 0 && data[0].svg !== '' && data[0].numOfAnnotations > 0;
         if (!hasValidSVG) {
           setDisplayDrawingRequiredError(true);
-          const invalidMessage = 'Sorry, the data could not be submitted without any drawings. Please draw annotation on the image.';
+          const invalidMessage =
+            'Sorry, the data could not be submitted without any drawings. Please draw annotation on the image.';
           addAlert(invalidMessage, ChaiseAlertType.ERROR);
           return;
         }
         currentAnnotationFormState.current.svgAnnotationData = data;
 
         // submit the form
-        manuallyTriggerFormSubmit(document.querySelector(`#${ID_NAMES.VIEWER_ANNOTATION_FORM}`) as HTMLFormElement);
+        manuallyTriggerFormSubmit(
+          document.querySelector(`#${ID_NAMES.VIEWER_ANNOTATION_FORM}`) as HTMLFormElement
+        );
         break;
       case 'fetchZPlaneList':
-        fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then((res) => {
-          iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
-        }).catch((error: any) => {
-          dispatchError({ error });
-        })
+        fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses)
+          .then((res) => {
+            iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
+          })
+          .catch((error: any) => {
+            dispatchError({ error });
+          });
         break;
       case 'fetchZPlaneListByZIndex':
-        fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source).then((res) => {
-          iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
-        }).catch((error: any) => {
-          dispatchError({ error });
-        })
+        fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source)
+          .then((res) => {
+            iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
+          })
+          .catch((error: any) => {
+            dispatchError({ error });
+          });
         break;
       case 'updateDefaultZIndex':
         validateSessionBeforeMutation(() => {
-          updateDefaultZIndex(reference, imageIDRef.current!, defaultZIndex.current).then(() => {
-            addAlert('Default Z index value has been updated.', ChaiseAlertType.SUCCESS);
-          }).catch((error: any) => {
-            validateSession().then((session) => {
-              if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
-                // login in a modal should show (Session timed out)
-                dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
-                return;
-              }
+          updateDefaultZIndex(reference, imageIDRef.current!, defaultZIndex.current)
+            .then(() => {
+              addAlert('Default Z index value has been updated.', ChaiseAlertType.SUCCESS);
+            })
+            .catch((error: any) => {
+              validateSession()
+                .then((session) => {
+                  if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
+                    // login in a modal should show (Session timed out)
+                    dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
+                    return;
+                  }
 
-              if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
-                // TODO should we show a warning or something?
-                // do nothing
-              } else if (error instanceof DifferentUserConflictError) {
-                dispatchError({ error, isDismissible: true });
-              } else {
-                addAlert(error.message, ChaiseAlertType.ERROR);
-              }
-
+                  if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
+                    // TODO should we show a warning or something?
+                    // do nothing
+                  } else if (error instanceof DifferentUserConflictError) {
+                    dispatchError({ error, isDismissible: true });
+                  } else {
+                    addAlert(error.message, ChaiseAlertType.ERROR);
+                  }
+                })
+                .catch((err) => {
+                  // validate session will not reject, added to silence ts warning
+                  $log.error(err);
+                });
+            })
+            .finally(() => {
+              // let osd viewer know that the process is done
+              iframe.postMessage(
+                { messageType: 'updateDefaultZIndexDone', content: { zIndex: data.zIndex } },
+                origin
+              );
             });
-          }).finally(() => {
-            // let osd viewer know that the process is done
-            iframe.postMessage({ messageType: 'updateDefaultZIndexDone', content: { 'zIndex': data.zIndex } }, origin);
-          })
-        })
+        });
         break;
       case 'openDrawingHelpPage':
         windowRef.open(getHelpPageURL(HELP_PAGES.VIEWER_ANNOTATION), '_blank');
-        break
+        break;
       case 'updateChannelConfig':
         validateSessionBeforeMutation(() => {
-          updateChannelConfig(data, imageIDRef.current!).then((res) => {
-            addAlert('Channel settings have been updated.', ChaiseAlertType.SUCCESS);
-            // let osd viewer know that the process is done
-            iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: res } }, origin);
-          }).catch((error) => {
-            // let osd viewer know that the process is done
-            iframe.postMessage({ messageType: 'updateChannelConfigDone', content: { channels: data, success: false } }, origin);
+          updateChannelConfig(data, imageIDRef.current!)
+            .then((res) => {
+              addAlert('Channel settings have been updated.', ChaiseAlertType.SUCCESS);
+              // let osd viewer know that the process is done
+              iframe.postMessage(
+                {
+                  messageType: 'updateChannelConfigDone',
+                  content: { channels: data, success: res },
+                },
+                origin
+              );
+            })
+            .catch((error) => {
+              // let osd viewer know that the process is done
+              iframe.postMessage(
+                {
+                  messageType: 'updateChannelConfigDone',
+                  content: { channels: data, success: false },
+                },
+                origin
+              );
 
-            validateSession().then((session) => {
-              if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
-                // login in a modal should show (Session timed out)
-                dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
-                return;
-              }
+              validateSession()
+                .then((session) => {
+                  if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
+                    // login in a modal should show (Session timed out)
+                    dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
+                    return;
+                  }
 
-              if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
-                // TODO should we show a warning or something?
-                // do nothing
-              } else if (error instanceof DifferentUserConflictError) {
-                dispatchError({ error, isDismissible: true });
-              } else {
-                addAlert(error.message, ChaiseAlertType.ERROR);
-              }
+                  if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
+                    // TODO should we show a warning or something?
+                    // do nothing
+                  } else if (error instanceof DifferentUserConflictError) {
+                    dispatchError({ error, isDismissible: true });
+                  } else {
+                    addAlert(error.message, ChaiseAlertType.ERROR);
+                  }
+                })
+                .catch((err) => {
+                  // validate session will not reject, added to silence ts warning
+                  $log.error(err);
+                });
             });
-          });
         });
         break;
       case 'showAlert':
         addAlert(data.message, data.type);
         break;
       case 'showPopupError':
-        const err = new CustomError(data.header, data.message, undefined, data.clickActionMessage, data.isDismissible);
+        const err = new CustomError(
+          data.header,
+          data.message,
+          undefined,
+          data.clickActionMessage,
+          data.isDismissible
+        );
         dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
     }
@@ -969,11 +1110,11 @@ export default function ViewerProvider({
     //  - getTCRS: since we're using this tuple for getting the update/delete permissions and also populating edit form
     resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, false, true).then((page: any) => {
       if (page.length !== 1) {
-        $log.log('the currently added row was not visible.');
+        $log.info('the currently added row was not visible.');
       }
       resultTuple = page.length == 1 ? page.tuples[0] : resultTuple;
     }).catch((err: any) => {
-      $log.log('error while reading after create/update:', err);
+      $log.info('error while reading after create/update:', err);
     }).finally(() => {
 
       // update SVG ID (NEW_SVG) after successfully created
@@ -1537,8 +1678,10 @@ export default function ViewerProvider({
       changeAllAnnotationVisibility,
       highlightedAnnotationIndex,
       toggleHighlightAnnotation,
-      logViewerClientAction
-    }
+      logViewerClientAction,
+      viewerError,
+      mainImageLoaded,
+    };
   }, [
     imageID,
     initialized,
@@ -1553,6 +1696,8 @@ export default function ViewerProvider({
     displayDrawingRequiredError,
     isInDrawingMode,
     highlightedAnnotationIndex,
+    viewerError,
+    mainImageLoaded,
   ]);
 
   return (

@@ -264,7 +264,7 @@ const testParams = {
       'Discarded facets: Facet 1, from_name ',
       'Facets with some discarded choices: F1',
       'Click OK to continue with the subset of filter criteria which are supported at this time.',
-      'Show Error Details'
+      'Show error details'
     ].join(''),
     errorDetails: [
       'Discarded facets:\n\n- Facet 1 (2 choices):\n  - 1\n  - 2\n- from_name (2 choices):\n  - 3\n  - 4\n\n\n',
@@ -690,14 +690,14 @@ test.describe('Other facet features', () => {
       await expect.soft(ModalLocators.getModalText(modal)).toHaveText(params.errorMessage);
     });
 
-    await test.step('Error modal should Show Error Details', async () => {
+    await test.step('Error modal should Show error details', async () => {
       const showDetails = ModalLocators.getToggleErrorDetailsButton(modal);
       const errorDetails = ModalLocators.getErrorDetails(modal);
 
       await showDetails.click()
       await expect.soft(errorDetails).toBeVisible();
 
-      await expect.soft(showDetails).toHaveText('Hide Error Details');
+      await expect.soft(showDetails).toHaveText('Hide error details');
       await expect.soft(errorDetails).toHaveText(params.errorDetails);
     });
 

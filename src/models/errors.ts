@@ -1,8 +1,11 @@
 /* eslint max-classes-per-file: 0 */
 
+import { Session } from '@isrd-isi-edu/chaise/src/models/user';
+
 import { errorNames, errorMessages, HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { getUserDisplayName } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 
 // TODO eventually we might want to use this type instead of any
 interface ChaiseERMrestJSError {
@@ -25,14 +28,14 @@ interface ChaiseERMrestJSError {
 
     redirectUrl?: string;
     gotoTableDisplayname?: string;
-  }
+  };
 }
-export class ChaiseError {
+export class ChaiseError implements ChaiseERMrestJSError {
   constructor(
     public status: string,
     public message: string,
-    public subMessage: string = '',
-    public clickOkToDismiss: boolean = false,
+    public subMessage = '',
+    public clickOkToDismiss = false,
 
     // NOTE this should eventually be refactored
     // I didn't refactor it since it require ermrestjs change as well
@@ -40,23 +43,22 @@ export class ChaiseError {
       /**
        * ُاThe redirect URL
        */
-      redirectUrl?: string,
-      gotoTableDisplayname?: string,
+      redirectUrl?: string;
+      gotoTableDisplayname?: string;
 
       /**
        * The message for the button
        */
-      clickActionMessage?: string,
+      clickActionMessage?: string;
 
       /**
        * the text that will be displayed for the continue button
        */
-      continueBtnText?: string,
-      continueCB?: Function
+      continueBtnText?: string;
+      continueCB?: Function;
     }
-  ) { }
+  ) {}
 }
-
 
 /**
  * Custom errors thrown in any react apps that uses chaise
@@ -71,17 +73,18 @@ export class CustomError extends ChaiseError {
    * @param  {string} clickActionMessage  Message to display for the OK button. Can include HTML tags.
    * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
    */
-  constructor(header: string, message: string, redirectUrl?: string, clickActionMessage?: string, clickOkToDismiss?: boolean, subMessage?: string) {
-    super(
-      header,
-      message,
-      subMessage,
-      clickOkToDismiss,
-      {
-        redirectUrl,
-        clickActionMessage,
-      }
-    )
+  constructor(
+    header: string,
+    message: string,
+    redirectUrl?: string,
+    clickActionMessage?: string,
+    clickOkToDismiss?: boolean,
+    subMessage?: string
+  ) {
+    super(header, message, subMessage, clickOkToDismiss, {
+      redirectUrl,
+      clickActionMessage,
+    });
   }
 }
 
@@ -98,13 +101,13 @@ export class MultipleRecordError extends ChaiseError {
   constructor(tableDisplayName: string, redirectUrl: string, message?: string) {
     super(
       errorNames.multipleRecords,
-      (message === undefined ? errorMessages.multipleDataMessage : message),
+      message === undefined ? errorMessages.multipleDataMessage : message,
       undefined,
       false,
       {
         redirectUrl,
         gotoTableDisplayname: tableDisplayName,
-        clickActionMessage: MESSAGE_MAP.clickActionMessage.multipleRecords
+        clickActionMessage: MESSAGE_MAP.clickActionMessage.multipleRecords,
       }
     );
   }
@@ -121,7 +124,7 @@ export class NoRecordError extends ChaiseError {
    * @param  {string} message Error message
    */
   constructor(filters: any, tableDisplayName: string, redirectUrl: string, message?: string) {
-    let noDataMessage = (message === undefined) ? errorMessages.noDataMessage : message;
+    let noDataMessage = message === undefined ? errorMessages.noDataMessage : message;
     if (filters) {
       for (let k = 0; k < filters.length; k++) {
         noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
@@ -131,17 +134,11 @@ export class NoRecordError extends ChaiseError {
       }
     }
 
-    super(
-      errorNames.notFound,
-      noDataMessage,
-      undefined,
-      false,
-      {
-        redirectUrl,
-        gotoTableDisplayname: tableDisplayName,
-        clickActionMessage: MESSAGE_MAP.clickActionMessage.noRecordsFound
-      }
-    );
+    super(errorNames.notFound, noDataMessage, undefined, false, {
+      redirectUrl,
+      gotoTableDisplayname: tableDisplayName,
+      clickActionMessage: MESSAGE_MAP.clickActionMessage.noRecordsFound,
+    });
   }
 }
 
@@ -155,12 +152,7 @@ export class NoRecordRidError extends ChaiseError {
    * @param  {string} message Error message
    */
   constructor(message?: string) {
-    super(
-      errorNames.notFound,
-      message || errorMessages.noDataMessage,
-      undefined,
-      true
-    )
+    super(errorNames.notFound, message || errorMessages.noDataMessage, undefined, true);
   }
 }
 
@@ -169,12 +161,7 @@ export class NoRecordRidError extends ChaiseError {
  */
 export class UnauthorizedAssetAccess extends ChaiseError {
   constructor() {
-    super(
-      MESSAGE_MAP.loginRequired,
-      errorMessages.unauthorizedAssetRetrieval,
-      undefined,
-      true
-    )
+    super(MESSAGE_MAP.loginRequired, errorMessages.unauthorizedAssetRetrieval, undefined, true);
   }
 }
 
@@ -182,17 +169,13 @@ export class UnauthorizedAssetAccess extends ChaiseError {
  * When the user tries to acces an asset when they are forbidden
  */
 export class ForbiddenAssetAccess extends ChaiseError {
-
-  constructor(sessionInfo: any) {
-    const authnRes = sessionInfo;
-    const userName = authnRes?.client.full_name || authnRes?.client.display_name || authnRes?.client.email || authnRes?.client.id;
-
+  constructor(sessionInfo: Session) {
     super(
       MESSAGE_MAP.permissionDenied,
-      userName + errorMessages.forbiddenAssetRetrieval,
+      getUserDisplayName(sessionInfo) + errorMessages.forbiddenAssetRetrieval,
       undefined,
       true
-    )
+    );
   }
 }
 
@@ -218,7 +201,12 @@ export class DifferentUserConflictError extends ChaiseError {
         currUser = sessionInfo.client.display_name;
       }
 
-      message = errorMessages.differentUserConflict1 + prevUser + errorMessages.differentUserConflict2 + currUser + '.';
+      message =
+        errorMessages.differentUserConflict1 +
+        prevUser +
+        errorMessages.differentUserConflict2 +
+        currUser +
+        '.';
 
       // TODO can we improve this?
       const link = `
@@ -227,59 +215,77 @@ export class DifferentUserConflictError extends ChaiseError {
         </a>
       `;
       clickActionMessage = MESSAGE_MAP.clickActionMessage.continueMessageReload + currUser + '; or';
-      clickActionMessage += '<br/>' + MESSAGE_MAP.clickActionMessage.continueMessage1 + prevUser + MESSAGE_MAP.clickActionMessage.continueMessage2;
-      clickActionMessage += ` Instructions on how to restore login is in the ${link}.`
+      clickActionMessage +=
+        '<br/>' +
+        MESSAGE_MAP.clickActionMessage.continueMessage1 +
+        prevUser +
+        MESSAGE_MAP.clickActionMessage.continueMessage2;
+      clickActionMessage += ` Instructions on how to restore login is in the ${link}.`;
 
       continueBtnText = 'Continue';
     } else {
       message = errorMessages.anonUserConflict + prevUser + '.';
 
       clickActionMessage = MESSAGE_MAP.clickActionMessage.anonContinueMessageReload;
-      clickActionMessage += '<br/>' + MESSAGE_MAP.clickActionMessage.anonContinueMessage + prevUser + '.';
+      clickActionMessage +=
+        '<br/>' + MESSAGE_MAP.clickActionMessage.anonContinueMessage + prevUser + '.';
 
       continueBtnText = 'Login';
     }
 
     // NOTE: showReloadBtn and showContinueBtn are not needed as we can jsut
     //       determine that based on the error type
-    super(
-      MESSAGE_MAP.loginStatusChanged,
-      message,
-      undefined,
-      false,
-      {
-        clickActionMessage,
-        continueBtnText,
-        continueCB
-      }
-    )
+    super(MESSAGE_MAP.loginStatusChanged, message, undefined, false, {
+      clickActionMessage,
+      continueBtnText,
+      continueCB,
+    });
   }
 }
 
-
 export class InvalidHelpPage extends ChaiseError {
   constructor(message?: string, subMessage?: string) {
-    super(
-      errorNames.invalidHelpPage,
-      message || errorMessages.invalidHelpPage,
-      subMessage
-    );
+    super(errorNames.invalidHelpPage, message || errorMessages.invalidHelpPage, subMessage);
   }
 }
 
 export class LimitedBrowserSupport extends ChaiseError {
   constructor(message: string, subMessage?: string, clickOkToDismiss?: boolean) {
-    super(errorNames.limitedBrowserSupport, message, subMessage, clickOkToDismiss)
+    super(errorNames.limitedBrowserSupport, message, subMessage, clickOkToDismiss);
   }
 }
 
 export class SnapshotError extends ChaiseError {
   constructor(message: string, subMessage?: string) {
+    super(errorNames.snapshotError, message, subMessage, true);
+  }
+}
+
+/**
+ * Generic error for viewer app
+ */
+export class ViewerError extends ChaiseError {
+  constructor(message?: string, subMessage?: string) {
+    super(errorNames.viewer, message || errorMessages.viewer.osdFailed, subMessage);
+  }
+}
+
+/**
+ * When the user tries to acces an image that they don't have access to
+ */
+export class ForbiddenViewerAccess extends ChaiseError {
+  constructor(sessionInfo: Session) {
     super(
-      errorNames.snapshotError,
-      message,
-      subMessage,
-      true
+      MESSAGE_MAP.permissionDenied,
+      getUserDisplayName(sessionInfo) + errorMessages.viewer.forbidden
     );
+  }
+}
+/**
+ * When the user tries to acces an asset when they are not authorized
+ */
+export class UnauthorizedViewerAccess extends ChaiseError {
+  constructor() {
+    super(MESSAGE_MAP.loginRequired, errorMessages.viewer.unauthorized);
   }
 }

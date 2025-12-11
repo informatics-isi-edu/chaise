@@ -21,9 +21,18 @@ import { VIEWER_CONSTANT } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const ViewerAnnotationList = (): JSX.Element => {
   const {
-    annotationModels, loadingAnnotations, toggleAnnotationDisplay, changeAllAnnotationVisibility,
-    toggleHighlightAnnotation, highlightedAnnotationIndex, logViewerClientAction,
-    canCreateAnnotation, startAnnotationEdit, startAnnotationCreate, startAnnotationDelete
+    annotationModels,
+    loadingAnnotations,
+    toggleAnnotationDisplay,
+    changeAllAnnotationVisibility,
+    toggleHighlightAnnotation,
+    highlightedAnnotationIndex,
+    logViewerClientAction,
+    canCreateAnnotation,
+    startAnnotationEdit,
+    startAnnotationCreate,
+    startAnnotationDelete,
+    mainImageLoaded,
   } = useViewer();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -57,6 +66,7 @@ const ViewerAnnotationList = (): JSX.Element => {
   }
 
   // ----------------------- render functions --------------------- //
+  const disableFeatures = loadingAnnotations || !mainImageLoaded;
 
   const renderAnnotation = (annot: ViewerAnnotationModal, index: number) => {
     const isDisplayed = annot.isDisplayed;
@@ -149,12 +159,12 @@ const ViewerAnnotationList = (): JSX.Element => {
           <span>Found {renderedAnnots.length} of {annotationModels.length} ({displayedCount} Displayed)</span>
           <div className='chaise-btn-group'>
             <ChaiseTooltip tooltip='Show all the annotations' placement='bottom'>
-              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(true)}>
+              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(true)} disabled={disableFeatures}>
                 <i className='fa-solid fa-eye'></i>
               </button>
             </ChaiseTooltip>
             <ChaiseTooltip tooltip='Hide all the annotations' placement='bottom'>
-              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(false)}>
+              <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(false)} disabled={disableFeatures}>
                 <i className='fa-solid fa-eye-slash'></i>
               </button>
             </ChaiseTooltip>
@@ -171,28 +181,51 @@ const ViewerAnnotationList = (): JSX.Element => {
     <div className='annotation-list-container'>
       {/* not using SearchInput here because this button and that comp are very different */}
       <div className='search-box-row'>
-        <div className={`chaise-search-box chaise-input-group${loadingAnnotations ? ' disabled-element' : ''}`}>
-          <div className={`chaise-input-control has-feedback${loadingAnnotations ? ' input-disabled' : ''}`}>
-            <input type='text' placeholder='Search in the list' value={searchTerm} onChange={onSearchTermChange} disabled={loadingAnnotations} />
-            <ClearInputBtn btnClassName='remove-search-btn' clickCallback={clearSearchTerm} show={!!searchTerm} />
+        <div
+          className={`chaise-search-box chaise-input-group${disableFeatures ? ' disabled-element' : ''}`}
+        >
+          <div
+            className={`chaise-input-control has-feedback${disableFeatures ? ' input-disabled' : ''}`}
+          >
+            <input
+              type='text'
+              placeholder='Search in the list'
+              value={searchTerm}
+              onChange={onSearchTermChange}
+              disabled={disableFeatures}
+            />
+            <ClearInputBtn
+              btnClassName='remove-search-btn'
+              clickCallback={clearSearchTerm}
+              show={!!searchTerm}
+            />
           </div>
           <div className='chaise-input-group-append'>
             <ChaiseTooltip placement='bottom-start' tooltip='Search any keyword to filter anatomy'>
-              <button className='chaise-search-btn chaise-btn chaise-btn-primary' disabled={loadingAnnotations}>
+              <button
+                className='chaise-search-btn chaise-btn chaise-btn-primary'
+                disabled={disableFeatures}
+              >
                 <span className='chaise-btn-icon fa-solid fa-magnifying-glass' />
               </button>
             </ChaiseTooltip>
           </div>
         </div>
-        {canCreateAnnotation &&
+        {canCreateAnnotation && (
           <ChaiseTooltip placement='bottom' tooltip='Create new annotation'>
-            <button className='btn chaise-btn chaise-btn-primary' onClick={startAnnotationCreate} disabled={loadingAnnotations}>New</button>
+            <button
+              className='btn chaise-btn chaise-btn-primary'
+              onClick={startAnnotationCreate}
+              disabled={disableFeatures}
+            >
+              New
+            </button>
           </ChaiseTooltip>
-        }
+        )}
       </div>
-      {!loadingAnnotations && renderAnnotations()}
+      {!disableFeatures && renderAnnotations()}
     </div>
-  )
+  );
 }
 
 
