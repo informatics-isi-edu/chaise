@@ -344,9 +344,11 @@ export async function fillRangeInput(input: Locator, value: string) {
 /**
  * clear the input and make sure the value is gone
  */
-export async function clearRangeInput(input: Locator) {
+export async function clearRangeInput(input: Locator, isTime?: boolean) {
   await input.clear();
-  await expect.soft(input).toHaveValue('');
+  // because of the input-mask, clearing the input might leave 00:00:00 in time inputs
+  const expectedValue = isTime ? /^(?:|00:00:00)$/ : '';
+  await expect.soft(input).toHaveValue(expectedValue);
 }
 
 /**
@@ -1086,8 +1088,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
 
           // clear the inputs first so we can then change their values
           await clearRangeInput(rangeInputs.maxDateInput);
-          await clearRangeInput(rangeInputs.minTimeInput);
-          await clearRangeInput(rangeInputs.maxTimeInput);
+          await clearRangeInput(rangeInputs.minTimeInput, true);
+          await clearRangeInput(rangeInputs.maxTimeInput, true);
 
           // test min and max being set
           if (typeof facetParams.range.min === 'object' && typeof facetParams.range.max === 'object') {
@@ -1115,8 +1117,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           // clear the inputs
           await clearRangeInput(rangeInputs.minDateInput);
           await clearRangeInput(rangeInputs.maxDateInput);
-          await clearRangeInput(rangeInputs.minTimeInput);
-          await clearRangeInput(rangeInputs.maxTimeInput);
+          await clearRangeInput(rangeInputs.minTimeInput, true);
+          await clearRangeInput(rangeInputs.maxTimeInput, true);
         });
 
         if (typeof facetParams.notNullNumRows === 'number') {
@@ -1132,8 +1134,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
             // clear the inputs
             await clearRangeInput(rangeInputs.minDateInput);
             await clearRangeInput(rangeInputs.maxDateInput);
-            await clearRangeInput(rangeInputs.minTimeInput);
-            await clearRangeInput(rangeInputs.maxTimeInput);
+            await clearRangeInput(rangeInputs.minTimeInput, true);
+            await clearRangeInput(rangeInputs.maxTimeInput, true);
           });
         }
 
@@ -1147,8 +1149,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
             // clear the inputs
             await clearRangeInput(rangeInputs.minDateInput);
             await clearRangeInput(rangeInputs.maxDateInput);
-            await clearRangeInput(rangeInputs.minTimeInput);
-            await clearRangeInput(rangeInputs.maxTimeInput);
+            await clearRangeInput(rangeInputs.minTimeInput, true);
+            await clearRangeInput(rangeInputs.maxTimeInput, true);
           });
         }
 
@@ -1175,8 +1177,8 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           // clear the inputs
           await clearRangeInput(rangeInputs.minDateInput);
           await clearRangeInput(rangeInputs.maxDateInput);
-          await clearRangeInput(rangeInputs.minTimeInput);
-          await clearRangeInput(rangeInputs.maxTimeInput);
+          await clearRangeInput(rangeInputs.minTimeInput, true);
+          await clearRangeInput(rangeInputs.maxTimeInput, true);
         });
 
         await test.step('should filter on just a max value and update the search criteria.', async () => {

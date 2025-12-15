@@ -709,9 +709,9 @@ const testFacetWithinFacet = (
                 for await (const item of secondLevelProps.selectDateTime!) {
                   const rangeInputs = RecordsetLocators.getFacetRangeTimestampInputs(popupFacetEl);
                   await clearRangeInput(rangeInputs.minDateInput);
-                  await clearRangeInput(rangeInputs.minTimeInput);
+                  await clearRangeInput(rangeInputs.minTimeInput, true);
                   await clearRangeInput(rangeInputs.maxDateInput);
-                  await clearRangeInput(rangeInputs.maxTimeInput);
+                  await clearRangeInput(rangeInputs.maxTimeInput, true);
 
                   if (item.min) {
                     await fillRangeInput(rangeInputs.minDateInput, item.min.date);

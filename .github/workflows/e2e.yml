@@ -21,11 +21,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: chaise
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Setup the system
@@ -46,12 +46,12 @@ jobs:
           echo "pip3 version:"
           sudo pip3 --version
         env:
-            APT_PACKAGES: >
-              libcurl4-openssl-dev libjson-c-dev
-              python3-psycopg2 python3-pip python3-setuptools python3-ply
-              apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3 ca-certificates
-              python3-cryptography python3-openssl python3-oauth2client
-              python3-flask python3-requests
+          APT_PACKAGES: >
+            libcurl4-openssl-dev libjson-c-dev
+            python3-psycopg2 python3-pip python3-setuptools python3-ply
+            apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3 ca-certificates
+            python3-cryptography python3-openssl python3-oauth2client
+            python3-flask python3-requests
       - name: Install webauthn
         run: |
           git clone https://github.com/informatics-isi-edu/webauthn.git
@@ -167,7 +167,7 @@ jobs:
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report-${{ matrix.node-version }}
