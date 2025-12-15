@@ -21,7 +21,7 @@ const testParams: {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
-  totalNumFacets: 23,
+  totalNumFacets: 24,
   defaults: {
     numRows: 1,
     pageSize: 25
@@ -317,6 +317,15 @@ const testParams: {
       filter: 'col_w_column_order_false01',
       numRows: 9,
       options: ['All records with value', '01', '02', '03', '04', '05', '06', '07']
+    },
+    {
+      index: 23,
+      name: 'text_array_col',
+      type: 'check_presence',
+      notNullNumRows: 3,
+      notNullFilter: 'text_array_colAll records with value',
+      nullNumRows: 25,
+      nullFilter: 'text_array_colNo value'
     }
   ]
 }

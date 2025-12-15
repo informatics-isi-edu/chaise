@@ -30,14 +30,15 @@ const testParams = {
   table_name: 'main',
   sort: '@sort(id)',
   pageSize: 25,
-  totalNumFacets: 23,
+  totalNumFacets: 24,
   initialState: {
     facetNames: [
       'id', 'int_col', 'float_col', 'date_col', 'timestamp_col', 'text_col',
       'longtext_col', 'markdown_col', 'boolean_col', 'jsonb_col', 'F1',
       'to_name', 'f3 (term)', 'from_name', 'F1 with Term', 'Check Presence Text',
       'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
-      'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values'
+      'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
+      'text_array_col',
     ],
     openFacetIndexes: [0, 1, 11],
     /**
@@ -49,6 +50,7 @@ const testParams = {
       'f3 (term)', 'from_name', 'to_name', 'F1 with Term', 'Check Presence Text',
       'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
       'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
+      'text_array_col',
     ],
     facetsToOpenAfterReorder: [4, 10]
   },
@@ -65,7 +67,7 @@ const testParams = {
       { 'name': facetMapping['F1 with Term'], 'open': false }, { 'name': 'text_col_2', 'open': true },
       { 'name': facetMapping['F3 Entity'], 'open': false }, { 'name': facetMapping['F5'], 'open': false },
       { 'name': facetMapping['F5 with filter'], 'open': false }, { 'name': facetMapping['Outbound1 (using F1)'], 'open': true },
-      { 'name': 'col_w_long_values', 'open': false },
+      { 'name': 'col_w_long_values', 'open': false }, { 'name': 'text_array_col', 'open': false },
       { 'name': 'col_w_column_order_false', 'open': false }, { 'name': 'col_w_column_order', 'open': false },
       { 'name': 'RCT', 'open': true }, // this is a valid column but it's not part of the annotation
     ],
@@ -74,7 +76,7 @@ const testParams = {
       'id', 'int_col', 'float_col', 'date_col', 'boolean_col', 'jsonb_col', 'F1',
       'to_name', 'f3 (term)', 'from_name', 'F1 with Term', 'Check Presence Text',
       'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
-      'col_w_long_values', 'col_w_column_order_false', 'col_w_column_order'
+      'col_w_long_values', 'text_array_col', 'col_w_column_order_false', 'col_w_column_order'
     ],
     openFacets: {
       // id and int_col have preselected filters an will be opened regardless of storage
@@ -92,7 +94,7 @@ const testParams = {
       'int_col', 'float_col', 'date_col', 'timestamp_col', 'text_col',
       'longtext_col', 'markdown_col', 'boolean_col', 'jsonb_col', 'F1',
       'to_name', 'f3 (term)', 'from_name', 'Check Presence Text',
-      'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
+      'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)', 'text_array_col'
     ],
     openFacets: {
       // id and int_col have preselected filters an will be opened regardless of storage

@@ -194,6 +194,16 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "text_array_col",
+                    "type": {
+                        "is_array": true,
+                        "typename": "text[]",
+                        "base_type": {
+                            "typename": "text"
+                        }
+                    }
                 }
             ],
             "annotations": {
@@ -243,7 +253,8 @@
                             },
                             {"source": "col_w_column_order_false", "order": [{"column": "col_w_column_order_false_facet_order", "descending": true}], "hide_null_choice": true},
                             {"source": "col_w_column_order", "hide_num_occurrences": true, "hide_null_choice": true},
-                            {"source": "col_w_long_values", "hide_null_choice": true}
+                            {"source": "col_w_long_values", "hide_null_choice": true},
+                            {"source": "text_array_col"}
                         ]
                     }
                 },

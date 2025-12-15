@@ -13,13 +13,14 @@ const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
-  totalNumFacets: 23,
+  totalNumFacets: 24,
   facetNames: [
     'id', 'int_col', 'float_col', 'date_col', 'timestamp_col', 'text_col',
     'longtext_col', 'markdown_col', 'boolean_col', 'jsonb_col', 'F1',
     'to_name', 'f3 (term)', 'from_name', 'F1 with Term', 'Check Presence Text',
     'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
-    'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values'
+    'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
+    'text_array_col',
   ],
   defaults: {
     openFacetNames: ['id', 'int_col', 'to_name'],

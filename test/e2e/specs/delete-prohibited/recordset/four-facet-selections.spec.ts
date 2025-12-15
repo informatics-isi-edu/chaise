@@ -14,7 +14,7 @@ const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
-  totalNumFacets: 23,
+  totalNumFacets: 24,
   defaults: {
     numRows: 1,
     pageSize: 25
