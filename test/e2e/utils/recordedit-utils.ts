@@ -742,7 +742,7 @@ const _testInputValidationAndExtraFeatures = async (
         await timestampProps.date.fill('2016-01-01');
         await expect.soft(cellError).not.toBeAttached();
 
-        // Good date + clear time = no error
+        // Good date + clear time = no error because it will be treated as 00:00:00
         await timestampProps.time.clear();
         await expect.soft(cellError).not.toBeAttached();
 
