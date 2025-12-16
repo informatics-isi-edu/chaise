@@ -12,6 +12,7 @@ import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils
 const NAVBAR_TEST_W_DYNAMIC_DEPS = 'navbar-test-w-dynamic-deps.html';
 const NAVBAR_TEST_W_STATIC_DEPS = 'navbar-test-w-static-deps.html';
 const NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR = 'navbar-test-w-default-catalog.html';
+const NAVBAR_TEST_W_INVALID_CATALOG_ATTR = 'navbar-test-w-invalid-catalog.html';
 
 /**
  * NOTES:
@@ -97,6 +98,12 @@ test.describe('Navbar with chaise-config annotation', () => {
     await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}?example-of-a-query-fragment=1`, true);
   });
 
+  test('on a static page with using catalog id that does not exist', async ({ page, baseURL }, testInfo) => {
+    const res = allowNavbarStaticTest(testInfo);
+    test.skip(!res.condition, res.reason);
+    await testNavbarFunctionalities(page, `${baseURL}/${NAVBAR_TEST_W_INVALID_CATALOG_ATTR}`, true, true);
+  });
+
 
   // remove the html files needed for testing
   test.afterAll(({ }, testInfo) => {
@@ -150,6 +157,9 @@ const prepareNavbarFiles = (testInfo: TestInfo, baseURL?: string) => {
 
     const defCatalog = `data-default-catalog="${getCatalogID(testInfo.project.name, true)}"`;
     createNavbarFile(navbarTemplateStr, NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR, staticDependencies, defCatalog);
+
+    const invalidCatalog = 'data-default-catalog="invalid-catalog-id"';
+    createNavbarFile(navbarTemplateStr, NAVBAR_TEST_W_INVALID_CATALOG_ATTR, staticDependencies, invalidCatalog);
   } catch (err) {
     console.log('something went wrong while creating the navbar test files');
     throw err;
@@ -190,6 +200,7 @@ const removeExtraNavbarFiles = () => {
     unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_STATIC_DEPS}`));
     unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_DYNAMIC_DEPS}`));
     unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_DEFAULT_CATALOG_ATTR}`));
+    unlinkSync(resolve(TEST_UTILS_FOLDER, `./${NAVBAR_TEST_W_INVALID_CATALOG_ATTR}`));
   } catch (exp) {
     console.log('something went wrong while removing the navbar test files')
     console.log(exp);
@@ -203,8 +214,9 @@ const removeExtraNavbarFiles = () => {
  * NOTE: on static sites the .../images/logo.png location doesn't work, so the brandImage will not be visible.
  *
  * @param {boolean?} isStatic whether this is a static page
+ * @param {boolean?} useStaticConfig whether the navbar is created using chaise-config.js (there was an issue with the catalog)
  */
-const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?: boolean) => {
+const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?: boolean, useStaticConfig?: boolean) => {
   const navbar = NavbarLocators.getContainer(page);
   const loginMenuOption = NavbarLocators.getLoginMenuContainer(page);
 
@@ -216,8 +228,8 @@ const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?:
     });
   });
 
-  await test.step('should display the right title from catalog annotation.', async () => {
-    await expect.soft(NavbarLocators.getBrandText(page)).toHaveText('override test123');
+  await test.step(`should display the right title from ${useStaticConfig ? 'chaise-config.js' : 'catalog annotation'}.`, async () => {
+    await expect.soft(NavbarLocators.getBrandText(page)).toHaveText(useStaticConfig ? 'test123' : 'override test123');
   });
 
   if (isStatic) {
@@ -227,9 +239,9 @@ const testNavbarFunctionalities = async (page: Page, pageURL: string, isStatic?:
     });
   }
 
-  await test.step('should use the brand image of catalog annotation', async () => {
+  await test.step(`should use the brand image of ${useStaticConfig ? 'chaise-config.js' : 'catalog annotation'}`, async () => {
     const brandImage = NavbarLocators.getBrandImage(page)
-    await expect.soft(brandImage).toHaveAttribute('src', '../images/logo.png');
+    await expect.soft(brandImage).toHaveAttribute('src', useStaticConfig ? '../images/genetic-data.png' : '../images/logo.png');
     if (!isStatic) {
       await expect.soft(brandImage).toBeVisible();
     }
