@@ -14,7 +14,7 @@ import { getCatalogId, getQueryParam, getURLWithDifferentCatalog } from '@isrd-i
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
-  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
+  APP_CONTEXT_MAPPING, APP_NAMES, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES,
   CHAISE_CONFIG_STATIC_PROPERTIES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
 } from '@isrd-isi-edu/chaise/src/utils/constants';
 
@@ -102,6 +102,8 @@ export class ConfigService {
 
     // trick to verify if this config app is running inside of an iframe as part of another app
     const inIframe = windowRef.self !== windowRef.parent;
+    // in static pages, we dont have to be strict about the catalog request
+    const catalogCanFail = settings.appName === APP_NAMES.NAVBAR || settings.appName === APP_NAMES.LOGIN;
 
     let hideNavbarParam;
 
@@ -166,26 +168,37 @@ export class ConfigService {
       // the server object that can be used in other places
       ConfigService._server = ERMrest.ermrestFactory.getServer(service, ConfigService._contextHeaderParams);
 
-      const catalog = await ConfigService._server.catalogs.get(catalogId, true);
+      try {
+        const catalog = await ConfigService._server.catalogs.get(catalogId, true);
 
-      // ermrestjs might change the version to what ermrest reports
-      if (catalog.versionCorrected) {
+        // ermrestjs might change the version to what ermrest reports
+        if (catalog.versionCorrected) {
 
-        ConfigService.versionCorrected = {
-          prevVersion: ConfigService._catalogIDVersion || '',
-        };
+          ConfigService.versionCorrected = {
+            prevVersion: ConfigService._catalogIDVersion || '',
+          };
 
-        const newURL = getURLWithDifferentCatalog(catalog.id);
-        $log.info(`Catalog version corrected from ${ConfigService._catalogIDVersion} to ${catalog.version}.`);
-        windowRef.history.replaceState({}, '', newURL);
-      }
+          const newURL = getURLWithDifferentCatalog(catalog.id);
+          $log.info(`Catalog version corrected from ${ConfigService._catalogIDVersion} to ${catalog.version}.`);
+          windowRef.history.replaceState({}, '', newURL);
+        }
 
-      ConfigService._catalogID = catalog.id;
-      ConfigService._catalogIDVersion = catalog.version;
+        ConfigService._catalogID = catalog.id;
+        ConfigService._catalogIDVersion = catalog.version;
 
-      // we already setup the defaults and the configuration based on chaise-config.js
-      if (catalog.chaiseConfig) {
-        ConfigService._setChaiseConfig(catalog.chaiseConfig);
+        // we already setup the defaults and the configuration based on chaise-config.js
+        if (catalog.chaiseConfig) {
+          ConfigService._setChaiseConfig(catalog.chaiseConfig);
+        }
+
+      } catch(error) {
+        if (!catalogCanFail) {
+          throw error;
+        } else {
+          $log.warn(`Unable to retrieve catalog '${catalogId}'. Continuing without catalog-specific configuration.`);
+        }
+        ConfigService._catalogID = '';
+        ConfigService._catalogIDVersion = undefined;
       }
     }
 

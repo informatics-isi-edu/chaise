@@ -346,6 +346,7 @@ export async function fillRangeInput(input: Locator, value: string) {
  */
 export async function clearRangeInput(input: Locator, isTime?: boolean) {
   await input.clear();
+  await input.fill('');
   // because of the input-mask, clearing the input might leave 00:00:00 in time inputs
   const expectedValue = isTime ? /^(?:|00:00:00)$/ : '';
   await expect.soft(input).toHaveValue(expectedValue);
