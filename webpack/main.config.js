@@ -19,6 +19,8 @@ module.exports = (env) => {
       {
         appName: 'login',
         appTitle: 'Login',
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'recordset',
@@ -51,7 +53,7 @@ module.exports = (env) => {
       {
         appName: 'help',
         appTitle: 'Wiki Pages',
-        // help uses navbar
+        // app-wrapper uses navbar
         externalFiles: [...recordsetExtFiles],
       },
       {
@@ -68,7 +70,9 @@ module.exports = (env) => {
         appName: 'login',
         bundleName: 'login-lib',
         appTitle: 'Login standalone library',
-        isLib: true
+        isLib: true,
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles]
       }
     ],
     mode,

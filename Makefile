@@ -65,6 +65,7 @@ E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.config.ts
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/facet.config.ts
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.config.ts
 E2EDrecordsetFacetWithinFacet=test/e2e/specs/default-config/recordset/facet-within-facet.config.ts
+E2EDrecordsetFacetGroup=test/e2e/specs/delete-prohibited/recordset/facet-group.config.ts
 E2ErecordsetSavedQuery=test/e2e/specs/all-features/recordset/saved-query.config.ts
 
 # misc tests
@@ -72,6 +73,7 @@ E2Enavbar=test/e2e/specs/all-features/navbar/playwright.config.ts
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/playwright.config.ts
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/playwright.config.ts
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.config.ts
+E2EServicesTest=test/e2e/specs/default-config/services.config.ts
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test

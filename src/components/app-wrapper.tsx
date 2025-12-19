@@ -195,7 +195,7 @@ const AppWrapperInner = ({
           if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
             ermrestError = new UnauthorizedAssetAccess();
           } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-            ermrestError = new ForbiddenAssetAccess(session);
+            ermrestError = new ForbiddenAssetAccess(session!);
           }
 
           // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog

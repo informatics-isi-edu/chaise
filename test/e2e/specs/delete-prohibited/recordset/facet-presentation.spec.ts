@@ -9,17 +9,18 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
-const testParams: any = {
+const testParams = {
   schema_name: 'faceting',
   table_name: 'main',
   sort: '@sort(id)',
-  totalNumFacets: 23,
+  totalNumFacets: 24,
   facetNames: [
     'id', 'int_col', 'float_col', 'date_col', 'timestamp_col', 'text_col',
     'longtext_col', 'markdown_col', 'boolean_col', 'jsonb_col', 'F1',
     'to_name', 'f3 (term)', 'from_name', 'F1 with Term', 'Check Presence Text',
     'F3 Entity', 'F5', 'F5 with filter', 'Outbound1 (using F1)',
-    'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values'
+    'col_w_column_order_false', 'col_w_column_order', 'col_w_long_values',
+    'text_array_col',
   ],
   defaults: {
     openFacetNames: ['id', 'int_col', 'to_name'],
@@ -176,7 +177,6 @@ test('Viewing Recordset with Faceting, default presentation based on facets anno
 
     await RecordsetLocators.getClearAllFilters(page).click();
     await page.locator('.recordset-main-spinner').waitFor({ state: 'detached' });
-
     await mainSearch.fill(testParams.searchBox.term);
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.searchBox.numRows);
 

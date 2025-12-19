@@ -136,7 +136,7 @@ const LoginPopupApp = (): JSX.Element => {
   }
 
   const renderInstructions = () => {
-    if (!showInstructions) return;
+    if (!showInstructions) return <div className='login-app-empty-container'></div>;
 
     const groupName = '"' + cc.termsAndConditionsConfig.groupName + '"';
     return (

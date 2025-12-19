@@ -24,6 +24,7 @@ import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { addLogParams } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { getURLWithDifferentCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 type SnapshotFormData = {
   [key: string]: string;
@@ -71,7 +72,7 @@ const SnapshotForm = () => {
   const gotToSnapshot = (data: SnapshotFormData) => {
     let url;
     if (snapshotOption === 'live') {
-      url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
+      url = getURLWithDifferentCatalog(catalogId.split('@')[0]);
     } else {
       const dateValue = data[fieldName];
       const m = moment(dateValue);
@@ -89,7 +90,7 @@ const SnapshotForm = () => {
         return;
       }
 
-      url = window.location.href.replace(catalogId, catalogId.split('@')[0] + '@' + snap);
+      url = getURLWithDifferentCatalog(catalogId.split('@')[0] + '@' + snap);
     }
 
     if (!url) return;

@@ -59,7 +59,7 @@ export const runStaticACLTests = () => {
       });
 
       test('should be disabled for the restricted user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
-        await performLogin(process.env.RESTRICTED_AUTH_COOKIE, '', page);
+        await performLogin(page, process.env.RESTRICTED_AUTH_COOKIE, '');
 
         // should be disabled for restricted user
         await gotToRecordPageAndCheckShareBtn(page, baseURL, testInfo, true, false);
@@ -120,7 +120,7 @@ export const runStaticACLTests = () => {
       });
 
       test('should be disabled for the restricted user based on the chaise-config property', async ({ page, baseURL }, testInfo) => {
-        await performLogin(process.env.RESTRICTED_AUTH_COOKIE, '', page);
+        await performLogin(page, process.env.RESTRICTED_AUTH_COOKIE, '');
 
         // should be disabled for restricted user
         await goToRecordPageAndCheckExportConfigsBtn(page, baseURL, testInfo, true, false);

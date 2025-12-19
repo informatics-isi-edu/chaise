@@ -5,10 +5,10 @@ on: [push]
 
 jobs:
   install-and-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        node-version: ["20.0.0", "22.11.0"]
+        node-version: ["20.x", "22.x", "24.x"]
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -21,11 +21,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: chaise
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Setup the system
@@ -33,37 +33,30 @@ jobs:
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
-          sudo apt-get -y update
-          sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends $APT_PACKAGES
           sudo service postgresql stop || true
-          sudo service postgresql start 12
-          sudo apt-get install apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3
+          sudo service postgresql start
           sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
           sudo a2enmod ssl
           sudo a2ensite default-ssl
           sudo groupadd -o -g $(id -g www-data) apache
-          sudo apt-get install -y python3-setuptools python3-ply
+          echo "python3 version:"
           sudo python3 --version
+          echo "pip3 version:"
           sudo pip3 --version
-          sudo su -c 'echo /usr/lib/python3.10/site-packages > /usr/local/lib/python3.10/dist-packages/sys-site-packages.pth'
-          sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
-          sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
-          : # the line below will make sure pyopenssl and cryptography have compatible versions
-          sudo pip3 install -U pyopenssl cryptography
-          sudo pip3 install flask
-          sudo pip3 install requests
-          sudo pip3 install globus_sdk
-          sudo pip3 install psycopg2-binary
-          sudo pip3 install oauth2client
-          sudo pip3 uninstall crypto
-          sudo pip3 uninstall pycrypto
-          sudo pip3 install pycryptodome
+        env:
+          APT_PACKAGES: >
+            libcurl4-openssl-dev libjson-c-dev
+            python3-psycopg2 python3-pip python3-setuptools python3-ply
+            apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3 ca-certificates
+            python3-cryptography python3-openssl python3-oauth2client
+            python3-flask python3-requests
       - name: Install webauthn
         run: |
-          sudo useradd -m -r webauthn
-          sudo su -c '/usr/bin/python3 -c "import sys;import pprint;pprint.pprint(sys.path)"' - webauthn
           git clone https://github.com/informatics-isi-edu/webauthn.git
           cd webauthn
+          sudo useradd -m -r webauthn
           sudo make testvars
           sudo make install
           sudo make deploy
@@ -174,7 +167,7 @@ jobs:
       - name: Check on all features test spec
         if: always() && steps.test-all-features.outcome != 'success'
         run: exit 1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report-${{ matrix.node-version }}
