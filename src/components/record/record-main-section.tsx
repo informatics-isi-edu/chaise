@@ -101,11 +101,14 @@ const RecordMainSection = (): JSX.Element => {
       );
 
       let isFilePreview = cm.column.isAsset && cm.column.filePreview !== null;
-      let fileURL;
+      let fileURL, filename;
       if (isFilePreview && page.length > 0 && page.tuples[0].data[cm.column.name]) {
         fileURL = page.tuples[0].data[cm.column.name];
       }
       isFilePreview = isFilePreview && fileURL && fileURL.length > 0;
+      if (isFilePreview && cm.column.filenameColumn && page.length > 0 && page.tuples[0].data[cm.column.filenameColumn.name]) {
+        filename = page.tuples[0].data[cm.column.filenameColumn.name];
+      }
 
       return (
         <tr key={`col-${index}`} id={`row-${makeSafeIdAttr(cm.column.name)}`} className={rowClassName.join(' ')}>
@@ -129,7 +132,7 @@ const RecordMainSection = (): JSX.Element => {
               <DisplayValue addClass value={recordValues[cm.index]} />
             }
             {!cm.relatedModel && !hasError && isFilePreview &&
-              <FilePreview column={cm.column} url={fileURL} value={recordValues[cm.index]} />
+              <FilePreview column={cm.column} url={fileURL} filename={filename} value={recordValues[cm.index]} />
             }
             {cm.relatedModel &&
               <span id={`entity-${cm.index}-table`}>

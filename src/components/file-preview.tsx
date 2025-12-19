@@ -30,10 +30,15 @@ interface FilePreviewProps {
    */
   url: string;
   /**
+   * the stored filename of the asset
+   * (might not be defined)
+   */
+  filename?: string;
+  /**
    * the underlying asset column
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any;
+  column?: any;
   /**
    * Additional CSS class name for the container
    */
@@ -44,6 +49,7 @@ const FilePreview = ({
   url,
   className,
   value,
+  filename,
   column,
 }: FilePreviewProps): JSX.Element => {
   /**
@@ -91,7 +97,7 @@ const FilePreview = ({
     isInitialized.current = true;
 
     const initializeFile = async () => {
-      const info = await getFileInfo(url);
+      const info = await getFileInfo(url, filename, column ? column.filePreview : undefined);
       setIsMarkdown(info.isMarkdown);
       setIsCsv(info.isCsv);
       setIsTsv(info.isTsv);
@@ -102,8 +108,8 @@ const FilePreview = ({
         try {
           setIsLoading(true);
           const headers: Record<string, string> = {};
-          if (info.canHandleRange && info.size && info.size > FILE_PREVIEW.TRUNCATED_SIZE) {
-            headers.Range = `bytes=${0}-${FILE_PREVIEW.TRUNCATED_SIZE}`;
+          if (info.canHandleRange && info.prefetchBytes && info.size && info.size > info.prefetchBytes) {
+            headers.Range = `bytes=${0}-${info.prefetchBytes}`;
             setIsTruncated(true);
           }
 

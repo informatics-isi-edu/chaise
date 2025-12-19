@@ -13,10 +13,27 @@ import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
  */
 
 /**
- * Return the file extension from a URL
+ * Return the file extension from a URL or stored filename
+ * 1. If storedFilename is provided, use that to get the extension
+ * 2. If contentDisposition header is provided, extract filename from it and get the extension
+ * 3. Otherwise, extract from the URL (handles hatrac format as well)
+ * Returns empty string if no extension found
  */
-const getFileExtention = (url: string): string => {
+const getFileExtention = (url: string, storedFilename?: string, contentDisposition?: string): string => {
   let extension;
+  if (storedFilename) {
+    extension = storedFilename.split('.').pop()?.toLowerCase();
+    if (extension) return extension;
+  }
+
+  if (contentDisposition) {
+    const prefix = 'filename*=UTF-8\'\''; 
+    const filenameIndex = contentDisposition.indexOf(prefix) + prefix.length;
+    const filename = contentDisposition.substring(filenameIndex, contentDisposition.length);
+    if (filename) extension = filename.split('.').pop()?.toLowerCase();
+    if (extension) return extension;
+  }
+
   // hatrac files have a different format
   const parts = url.match(/^\/hatrac\/([^\/]+\/)*([^\/:]+)(:[^:]+)?$/);
   if (parts && parts.length === 4) {
@@ -30,13 +47,13 @@ const getFileExtention = (url: string): string => {
 /**
  * Determine if file type is previewable based on extension or content type
  */
-export const isPreviewableFile = (contentType?: string, extension?: string): boolean => {
+const isPreviewableFile = (contentType?: string, extension?: string, filePreviewProps?: any): boolean => {
   // files that are explicitly previewable
   if (
-    checkIsMarkdownFile(contentType, extension) ||
-    checkIsCsvFile(contentType, extension) ||
+    checkIsMarkdownFile(contentType, extension, filePreviewProps) ||
+    checkIsCsvFile(contentType, extension, filePreviewProps) ||
     checkIsTsvFile(contentType, extension) ||
-    checkIsJSONFile(contentType, extension)
+    checkIsJSONFile(contentType, extension, filePreviewProps)
   ) {
     return true;
   }
@@ -58,18 +75,27 @@ export const isPreviewableFile = (contentType?: string, extension?: string): boo
     return ['txt', 'js', 'log', 'cif', 'pdb'].includes(extension);
   }
 
+  // check the annotation for any additional previewable types
+  if (filePreviewProps && filePreviewProps.checkFileType('text', contentType, extension)) {
+    return true;
+  }
+
   return false;
 };
 
 /**
  * Check if file is markdown based on content type or extension
  */
-export const checkIsMarkdownFile = (contentType?: string, extension?: string): boolean => {
+const checkIsMarkdownFile = (contentType?: string, extension?: string, filePreviewProps?: any): boolean => {
   if (contentType && (contentType.includes('markdown') || contentType.includes('md'))) {
     return true;
   }
 
   if (extension && ['md', 'markdown'].includes(extension)) {
+    return true;
+  }
+
+  if (filePreviewProps && filePreviewProps.checkFileType('markdown', contentType, extension)) {
     return true;
   }
 
@@ -79,12 +105,16 @@ export const checkIsMarkdownFile = (contentType?: string, extension?: string): b
 /**
  * Check if file is CSV based on content type or extension
  */
-export const checkIsCsvFile = (contentType?: string, extension?: string): boolean => {
+const checkIsCsvFile = (contentType?: string, extension?: string, filePreviewProps?: any): boolean => {
   if (contentType && (contentType.includes('csv') || contentType.includes('comma-separated-values'))) {
     return true;
   }
 
   if (extension && extension === 'csv') {
+    return true;
+  }
+
+  if (filePreviewProps && filePreviewProps.checkFileType('csv', contentType, extension)) {
     return true;
   }
 
@@ -94,7 +124,7 @@ export const checkIsCsvFile = (contentType?: string, extension?: string): boolea
 /**
  * Check if file is TSV based on content type or extension
  */
-export const checkIsTsvFile = (contentType?: string, extension?: string): boolean => {
+const checkIsTsvFile = (contentType?: string, extension?: string): boolean => {
   if (contentType && contentType.includes('tab-separated-values')) {
     return true;
   }
@@ -109,13 +139,17 @@ export const checkIsTsvFile = (contentType?: string, extension?: string): boolea
 /**
  * Check if file is JSON based on content type or extension
  */
-export const checkIsJSONFile = (contentType?: string, extension?: string): boolean => {
+const checkIsJSONFile = (contentType?: string, extension?: string, filePreviewProps?: any): boolean => {
   if (contentType && contentType.includes('application/json')) {
     return true;
   }
 
   // mvsj: MolViewSpec JSON (mol* viewer)
   if (extension && ['json', 'mvsj'].includes(extension)) {
+    return true;
+  }
+
+  if (filePreviewProps && filePreviewProps.checkFileType('json', contentType, extension)) {
     return true;
   }
 
@@ -180,35 +214,67 @@ export interface FileInfo {
    * whether we can use HTTP range request to fetch the first part of the file
    */
   canHandleRange?: boolean;
+  /**
+   * if set, number of bytes to prefetch for previewing the file
+   * (only set if canHandleRange is true)
+   */
+  prefetchBytes?: number;
 }
 
 /**
  * send a HEAD request to get the file information.
  */
-export const getFileInfo = async (url: string): Promise<FileInfo> => {
+export const getFileInfo = async (url: string, storedFilename?: string, filePreviewProps?: any): Promise<FileInfo> => {
   let errorMessage = '';
 
   try {
     const response = await ConfigService.http.head(url, { skipHTTP401Handling: true, skipRetryBrowserError: true });
+    const contentDisposition = response.headers['content-disposition'] || '';
     const contentType = response.headers['content-type'] || '';
     const contentLength = response.headers['content-length'];
     const canHandleRange = response.headers['accept-ranges'] !== 'none';
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
-    const extension = getFileExtention(url);
+    const extension = getFileExtention(url, storedFilename, contentDisposition);
 
-    if (!canHandleRange && size && size > FILE_PREVIEW.MAX_SIZE) {
-      errorMessage = errorMessages.filePreview.largeFile;
+    const isPreviewable = isPreviewableFile(contentType, extension, filePreviewProps);
+    const isMarkdown = checkIsMarkdownFile(contentType, extension, filePreviewProps);
+    const isCsv = checkIsCsvFile(contentType, extension, filePreviewProps);
+    const isTsv = checkIsTsvFile(contentType, extension);
+    const isJSON = checkIsJSONFile(contentType, extension, filePreviewProps);
+
+    let prefetchBytes;
+    if (canHandleRange) {
+      if (filePreviewProps) {
+        prefetchBytes = filePreviewProps.getPrefetchBytes(isMarkdown, isCsv, isJSON);
+      }
+      if (typeof prefetchBytes !== 'number' || prefetchBytes < 0) {
+        prefetchBytes = FILE_PREVIEW.TRUNCATED_SIZE;
+      }
+    }
+    else {
+      let maxFileSize;
+      if (filePreviewProps) {
+        maxFileSize = filePreviewProps.getPrefetchMaxFileSize(isMarkdown, isCsv, isJSON);
+      }
+      if (typeof maxFileSize !== 'number' || maxFileSize < 0) {
+        maxFileSize = FILE_PREVIEW.MAX_SIZE;
+      }
+
+      if (size && size > maxFileSize) {
+        errorMessage = errorMessages.filePreview.largeFile;
+      }
     }
 
     return {
       size,
       contentType,
-      isPreviewable: isPreviewableFile(contentType, extension),
-      isMarkdown: checkIsMarkdownFile(contentType, extension),
-      isCsv: checkIsCsvFile(contentType, extension),
-      isTsv: checkIsTsvFile(contentType, extension),
-      isJSON: checkIsJSONFile(contentType, extension),
+      isPreviewable,
+      isMarkdown,
+      isCsv,
+      isTsv,
+      isJSON,
       canHandleRange,
+      prefetchBytes,
       errorMessage
     };
   } catch (exception) {
