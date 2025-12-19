@@ -56,7 +56,7 @@ type SavedQueryFacetModel = {
 };
 
 type SavedQueryDropdownProps = {
-  appliedFiltersCallback: () => FacetCheckBoxRow[][];
+  appliedFiltersCallback: () => FacetCheckBoxRow[][] | undefined;
 };
 
 const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps): JSX.Element => {
@@ -107,7 +107,7 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
    *
    * @param appliedFilters: array of appliedFilter arrays
    */
-  function _getStableFacets(appliedFilters: FacetCheckBoxRow[][]) {
+  function _getStableFacets(appliedFilters: FacetCheckBoxRow[][] | undefined) {
     const filters = [];
     if (reference.location.searchTerm) {
       // TODO this is a bit hacky
@@ -124,7 +124,7 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
       }
     }
 
-    for (let i = 0; i < appliedFilters.length; i++) {
+    for (let i = 0; appliedFilters && i < appliedFilters.length; i++) {
       const appliedFilter = appliedFilters[i];
       const fc = reference.facetColumns[i];
 
@@ -374,7 +374,7 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
     const allFilters = appliedFiltersCallback();
     const modelsWFilters: SavedQueryFacetModel[] = [];
 
-    allFilters.forEach((facetFilter: any, idx: number) => {
+    allFilters?.forEach((facetFilter: any, idx: number) => {
       if (facetFilter.length === 0) return;
 
       const tempObj: SavedQueryFacetModel = {

@@ -458,3 +458,47 @@ export function saveObjectAsJSONFile(obj: any, filename: string) {
   link.dispatchEvent(evt);
   link.remove();
 }
+
+/**
+* force all links within the given wrapper to open in a new tab
+* @param {HTMLElement} wrapper the element within which we should force links to open in new tab
+*
+* NOTE: if wrapper is not provided, document.body will be used
+*/
+export function openLinksInTab(wrapper?: HTMLElement) {
+  const wrapperEl = wrapper ?? document.querySelector('body');
+  if (!wrapperEl) return;
+  const listener = addClickListener(wrapperEl, 'a[href]', (e: Event, element: any) => {
+    element.target = '_blank';
+  });
+
+  return {
+    remove: () => {
+      wrapperEl.removeEventListener('click', listener);
+    }
+  }
+}
+
+/**
+* Will call the handler function upon clicking on the elements represented by selector
+* @param {HTMLElement} wrapper the element within which we should listen for clicks (e.g. document.body)
+* @param {string} selector the selector string
+* @param {function} handler  the handler callback function.
+* handler parameters are:
+*  - Event object that is returned.
+*  - The target (element that is described by the selector)
+* NOTE since we're checking the closest element to the target, the e.target might
+* be different from the actual target that we want. That's why we have to send the target too.
+* We observed this behavior in Firefox where clicking on an image wrapped by a link (a tag), returned
+* the image as the value of e.target and not the link
+*/
+export function addClickListener(wrapper: HTMLElement, selector: string, handler: (e: Event, target: any) => void) {
+  const listener = (e: Event) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(selector)) {
+      handler(e, target.closest(selector));
+    }
+  };
+  wrapper.addEventListener('click', listener);
+  return listener;
+}

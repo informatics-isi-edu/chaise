@@ -399,18 +399,21 @@ const RecordsetTable = ({
   };
 
   //-------------------  render logics:   --------------------//
-
-  // whether we should show the action buttons or not (used in multiple places)
-  const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
+  // whether any of the action buttons should be shown
+  const isActionable = config.viewable || config.editable || config.deletable;
+  // whether we should show the first column for action buttons
+  const showActionButtons = isActionable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
+  // in select mode, we should show the action buttons in a different column
+  const showSecondColumnActions = config.selectMode !== RecordsetSelectMode.NO_SELECT && isActionable;
   const numHiddenRecords = config.maxDisplayedRows && page && page.length > 0 ? page.length - config.maxDisplayedRows : 0;
 
   /**
    * render the header for the action(s) column
    */
-  const renderActionsHeader = () => {
+  const renderActionsHeader = (selectMode?: RecordsetSelectMode) => {
     let inner, headerClassName;
 
-    switch (config.selectMode) {
+    switch (selectMode) {
       case RecordsetSelectMode.SINGLE_SELECT:
         headerClassName = 'single-select-header';
         inner = (<span>Select </span>);
@@ -447,7 +450,7 @@ const RecordsetTable = ({
       default:
         let innerTooltip, innerText;
         // TODO this seems wrong, what about unlink? (it's the same as master)
-        if (reference.canUpdate || reference.canDelete) {
+        if ((config.editable && reference.canUpdate) || (config.deletable && reference.canDelete)) {
           innerText = 'Actions ';
           innerTooltip = MESSAGE_MAP.tooltip.actionCol;
         } else {
@@ -536,7 +539,8 @@ const RecordsetTable = ({
   const renderHeader = () => {
     return (
       <tr>
-        {showActionButtons && renderActionsHeader()}
+        {showActionButtons && renderActionsHeader(config.selectMode)}
+        {showSecondColumnActions && renderActionsHeader()}
         {renderColumnHeaders()}
       </tr>
     );
@@ -595,6 +599,7 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
+          showSecondColumnActions={showSecondColumnActions}
           selected={rowDetails[index].isSelected}
           onSelectChange={onSelectChange}
           disabled={rowDetails[index].isDisabled}

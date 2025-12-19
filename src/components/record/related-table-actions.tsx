@@ -311,9 +311,9 @@ const RelatedTableActions = ({
       .contextualize.compactSelectAssociationLink;
 
     const recordsetConfig: RecordsetConfig = {
-      viewable: false,
-      editable: false,
-      deletable: false,
+      viewable: true,
+      editable: true,
+      deletable: true,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       disableFaceting: false,
@@ -467,7 +467,7 @@ const RelatedTableActions = ({
     const modalReference = domainRef.hideFacets().contextualize.compactSelectAssociationUnlink;
 
     const recordsetConfig: RecordsetConfig = {
-      viewable: false,
+      viewable: true,
       editable: false,
       deletable: false,
       sortable: true,
