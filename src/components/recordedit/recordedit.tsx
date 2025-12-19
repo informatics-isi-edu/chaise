@@ -505,9 +505,9 @@ const RecordeditInner = ({
     const modalReference = domainRef.addFacets(andFilters).contextualize.compactSelectBulkForeignKey;
 
     const recordsetConfig: RecordsetConfig = {
-      viewable: false,
-      editable: false,
-      deletable: false,
+      viewable: true,
+      editable: true,
+      deletable: true,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       disableFaceting: false,
