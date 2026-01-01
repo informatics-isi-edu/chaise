@@ -46,7 +46,7 @@
     "prettier": "^3.2.5",
     "set-cookie-parser": "x",
     "ts-node": "^10.9.1",
-    "webpack-bundle-analyzer": "^4.5.0"
+    "webpack-bundle-analyzer": "^5.1.0"
   },
   "dependencies": {
     "@babel/core": "^7.26.10",
