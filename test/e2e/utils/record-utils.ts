@@ -7,7 +7,7 @@ import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/te
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { EntityRowColumnValues, getCatalogID, getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { EntityRowColumnValues, getCatalogID, getEntityRow, getEntityRowURL } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
@@ -196,52 +196,52 @@ export const testShareCiteModal = async (page: Page, testInfo: TestInfo, params:
 }
 
 type RelatedTableTestParams = {
-  tableName: string,
-  schemaName: string,
+  tableName: string;
+  schemaName: string;
   /**
    * the displayname that users see on the page
    */
-  displayname: string,
+  displayname: string;
   /**
    * the name of the table that this record app belongs to
    */
-  baseTableName: string,
+  baseTableName: string;
 
-  isAssociation?: boolean,
-  associationLeafTableName?: string,
+  isAssociation?: boolean;
+  associationLeafTableName?: string;
   /**
    * used for testing the tooltip of unlink btn
    */
-  entityMarkdownName?: string,
+  entityMarkdownName?: string;
 
-  inlineComment?: string,
+  inlineComment?: string;
 
-  count: number,
+  count: number;
 
-  canEdit?: boolean,
-  bulkEditLink?: string,
+  canEdit?: boolean;
+  bulkEditLink?: string;
 
-  canCreate?: boolean,
+  canCreate?: boolean;
 
   /**
    * if true and isAssociation=false, this function will remove the first displayed row.
    */
-  canDelete?: boolean,
+  canDelete?: boolean;
 
-  isMarkdown?: boolean
-  isInline?: boolean,
-  isTableMode?: boolean
+  isMarkdown?: boolean;
+  isInline?: boolean;
+  isTableMode?: boolean;
   viewMore?: {
-    displayname: string,
-    filter: string,
-  },
-  rowValues?: RecordsetRowValue[],
-  rowViewPaths?: { column: string, value: string }[][],
-  markdownValue?: string,
+    displayname: string;
+    filter: string;
+  };
+  rowValues?: RecordsetRowValue[];
+  rowViewPaths?: EntityRowColumnValues[];
+  markdownValue?: string;
   /**
    * default 25
    */
-  pageSize?: number
+  pageSize?: number;
 };
 
 export const testRelatedTablePresentation = async (page: Page, testInfo: TestInfo, params: RelatedTableTestParams) => {
@@ -254,9 +254,8 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
   // if it was markdown, we are changing the view, change it back. these booleans are used for that
   let hasNoRows = false, displayIsToggled = false;
 
-  const getURL = (appName: string, tName: string, rowVal: EntityRowColumnValues) => {
-    const savedData = getEntityRow(testInfo, params.schemaName, tableName, rowVal);
-    return `/${appName}/#${getCatalogID(testInfo.project.name)}/${params.schemaName}:${tName}/RID=${savedData.RID}`;
+  const getURL = (appName: APP_NAMES, tName: string, rowVal: EntityRowColumnValues) => {
+    return getEntityRowURL(testInfo, appName, params.schemaName, tName, rowVal);
   }
 
   if (!params.isInline) {
@@ -422,7 +421,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
         let index = 0;
         for (const row of params.rowViewPaths) {
           const btn = RecordsetLocators.getRowViewButton(currentEl, index);
-          expect.soft(await btn.getAttribute('href')).toContain(getURL('record', tableName, row));
+          expect.soft(await btn.getAttribute('href')).toContain(getURL(APP_NAMES.RECORD, tableName, row));
           index++;
         }
       });
@@ -449,7 +448,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           if (!params.rowViewPaths) return;
 
           const newPage = await clickNewTabLink(btn);
-          await newPage.waitForURL(`**${getURL('recordedit', tableName, params.rowViewPaths[0])}**`);
+          await newPage.waitForURL(`**${getURL(APP_NAMES.RECORDEDIT, tableName, params.rowViewPaths[0])}**`);
           await newPage.close();
         });
       }
@@ -465,7 +464,7 @@ export const testRelatedTablePresentation = async (page: Page, testInfo: TestInf
           });
 
           await test.step('should have the proper tooltip', async () => {
-            let expected = 'Delete';
+            let expected = 'Delete this record.';
             if (params.isAssociation) {
               expected = `Disconnect ${params.displayname}:${params.entityMarkdownName} from this ${params.baseTableName}.`;
             }

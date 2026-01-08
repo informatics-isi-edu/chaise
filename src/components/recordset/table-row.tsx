@@ -346,7 +346,7 @@ const TableRow = ({
 
   // view link
   let viewLink: string;
-  if (config.viewable) {
+  if (config.viewable && tupleReference) {
     viewLink = addQueryParamsToURL(tupleReference.contextualize.detailed.appLink, {
       paction: LogParentActions.VIEW,
     });
@@ -661,7 +661,7 @@ const TableRow = ({
     // rowValues is an array of values for each column. Does not include action column
     return rowValues.map((value, colIndex) => {
       return (
-        <td key={rowIndex + '-' + colIndex} className={rowDisabled ? 'disabled-cell' : ''}>
+        <td key={rowIndex + '-' + colIndex} className={'table-value-cell' + (rowDisabled ? ' disabled-cell' : '')}>
           <div
             className={
               'display-value ' +

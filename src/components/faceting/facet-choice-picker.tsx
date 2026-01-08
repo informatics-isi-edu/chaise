@@ -450,7 +450,7 @@ const FacetChoicePicker = ({
     const uiContextTitles = recordsetUIContextTitles ? [...recordsetUIContextTitles] : [];
 
     const recordsetConfig: RecordsetConfig = {
-      viewable: true,
+      viewable: facetColumn.isEntityMode,
       editable: false,
       deletable: false,
       sortable: true,

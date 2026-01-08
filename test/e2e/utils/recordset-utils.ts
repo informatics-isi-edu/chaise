@@ -1,43 +1,50 @@
-import { expect, Locator, Page, test } from '@playwright/test'
+import { expect, Locator, Page, test, TestInfo } from '@playwright/test';
+
+// chaise
+import { Either } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 // locators
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators, {
   DefaultRangeInputLocators,
-  TimestampRangeInputLocators
+  TimestampRangeInputLocators,
 } from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { Either } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import {
+  EntityRowColumnValues,
+  getEntityRowURL,
+} from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 type RecordsetColStringValue = {
-  value: string,
+  value: string;
   /**
    * this will allow us to specify which element we should get the value from.
    * @param value the cell that the value is displayed in
    */
-  valueLocator?: (value: Locator) => Locator
-}
+  valueLocator?: (value: Locator) => Locator;
+};
 
 type RecordsetColURLValue = {
-  url: string,
-  caption: string,
+  url: string;
+  caption: string;
   /**
    * this will allow us to specify which element we should get the value from.
    * @param value the cell that the value is displayed in
    */
-  valueLocator?: (value: Locator) => Locator
+  valueLocator?: (value: Locator) => Locator;
 };
 
 export type RecordsetColValue = Either<RecordsetColStringValue, RecordsetColURLValue> | string;
-export type RecordsetRowValue = RecordsetColValue[]
+export type RecordsetRowValue = RecordsetColValue[];
 
 export type TotalCountParts = {
-  displayingText: string,
-  dropdownButtonText: string,
-  totalText: string
-}
+  displayingText: string;
+  dropdownButtonText: string;
+  totalText: string;
+};
 
 /**
  * make sure the list of facets is correct.
@@ -45,7 +52,11 @@ export type TotalCountParts = {
  * @param facetNames list of facet names
  * @param openFacetNames the open facet names (optional)
  */
-export async function testDisplayedFacets (container: Page | Locator, facetNames: string[], openFacetNames?: string[]) {
+export async function testDisplayedFacets(
+  container: Page | Locator,
+  facetNames: string[],
+  openFacetNames?: string[]
+) {
   await expect.soft(RecordsetLocators.getAllFacets(container)).toHaveCount(facetNames.length);
   await expect.soft(RecordsetLocators.getFacetTitles(container)).toHaveText(facetNames);
 
@@ -56,7 +67,11 @@ export async function testDisplayedFacets (container: Page | Locator, facetNames
   }
 }
 
-export async function testDisplayedFacetItemsAndGroups (container: Page | Locator, facetAndGroupNames: string[], openFacetAndGroupNames?: string[]) {
+export async function testDisplayedFacetItemsAndGroups(
+  container: Page | Locator,
+  facetAndGroupNames: string[],
+  openFacetAndGroupNames?: string[]
+) {
   const titles = RecordsetLocators.getFacetItemAndGroupTitles(container);
   await expect.soft(titles).toHaveCount(facetAndGroupNames.length);
   await expect.soft(titles).toHaveText(facetAndGroupNames);
@@ -74,7 +89,11 @@ export async function testDisplayedFacetItemsAndGroups (container: Page | Locato
  * @param expectedRowValues array of `RecordsetRowValue` types for testing each cell
  * @param isSoft if this test should run in sequence with other tests and not force the tests to end if it fails
  */
-export async function testRecordsetTableRowValues(container: Page | Locator, expectedRowValues: RecordsetRowValue[], isSoft?: boolean) {
+export async function testRecordsetTableRowValues(
+  container: Page | Locator,
+  expectedRowValues: RecordsetRowValue[],
+  isSoft?: boolean
+) {
   const expectFn = isSoft ? expect.soft : expect;
 
   const rows = RecordsetLocators.getRows(container);
@@ -97,7 +116,9 @@ export async function testRecordsetTableRowValues(container: Page | Locator, exp
       }
 
       if (typeof expectedCell === 'string' || expectedCell.value) {
-        await expectFn(cell).toHaveText(typeof expectedCell === 'string' ? expectedCell : expectedCell.value);
+        await expectFn(cell).toHaveText(
+          typeof expectedCell === 'string' ? expectedCell : expectedCell.value
+        );
       } else if (expectedCell.url && expectedCell.caption) {
         const link = cell.locator('a');
         expectFn(await link.getAttribute('href')).toContain(expectedCell.url);
@@ -128,7 +149,13 @@ export async function openFacetGroup(page: Page, groupIdx: number, numChildren?:
  * @param facetIdx facet index
  * @param numOptions the total number of options visble on load for this facet
  */
-export async function openFacet(page: Page, facet: Locator, facetIdx: number, numOptions?: number, numOpenFacets?: number) {
+export async function openFacet(
+  page: Page,
+  facet: Locator,
+  facetIdx: number,
+  numOptions?: number,
+  numOpenFacets?: number
+) {
   await RecordsetLocators.getFacetHeaderButtonById(facet, facetIdx).click();
 
   if (typeof numOpenFacets === 'number') {
@@ -149,7 +176,13 @@ export async function openFacet(page: Page, facet: Locator, facetIdx: number, nu
  * @param facetIdx facet index
  * @param filterOptions array of filter option labels
  */
-export async function openFacetAndTestFilterOptions(page: Page, facet: Locator, facetIdx: number, filterOptions: string[], numOpenFacets: number) {
+export async function openFacetAndTestFilterOptions(
+  page: Page,
+  facet: Locator,
+  facetIdx: number,
+  filterOptions: string[],
+  numOpenFacets: number
+) {
   await openFacet(page, facet, facetIdx, filterOptions.length, numOpenFacets);
   await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions);
 }
@@ -165,9 +198,8 @@ export async function testSelectFacetOption(
   facet: Locator,
   optionIdx: number,
   numRows?: number,
-  numFilters?: number,
+  numFilters?: number
 ) {
-
   // open facets show a spinner in the header when the rows are being fetched and is hidden when code execution is finished
   await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
   await RecordsetLocators.getFacetOption(facet, optionIdx).check();
@@ -191,13 +223,19 @@ export async function testSelectFacetOption(
  * @param optionIdx facet option index to check is unchecked
  * @param pageSize the recordset page size for comparing with after clear
  */
-export async function testClearAllFilters(container: Page | Locator, pageSize: number, facet?: Locator, optionIdx?: number) {
+export async function testClearAllFilters(
+  container: Page | Locator,
+  pageSize: number,
+  facet?: Locator,
+  optionIdx?: number
+) {
   const clearAll = RecordsetLocators.getClearAllFilters(container);
   await clearAll.click();
   await expect.soft(clearAll).not.toBeVisible();
   await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(pageSize);
 
-  if (facet && optionIdx) await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
+  if (facet && optionIdx)
+    await expect.soft(RecordsetLocators.getFacetOption(facet, optionIdx)).not.toBeChecked();
 }
 
 /**
@@ -205,7 +243,12 @@ export async function testClearAllFilters(container: Page | Locator, pageSize: n
  * @param numRows number of recordset rows in modal on load
  * @param numCheckedRows number of checked rows in modal on load
  */
-export async function testShowMoreClick(facet: Locator, modal: Locator, numRows: number, numCheckedRows: number) {
+export async function testShowMoreClick(
+  facet: Locator,
+  modal: Locator,
+  numRows: number,
+  numCheckedRows: number
+) {
   await RecordsetLocators.getShowMore(facet).click();
   await RecordsetLocators.waitForRecordsetPageReady(modal);
 
@@ -226,7 +269,11 @@ export async function testModalClose(modal: Locator) {
  * @param rawColumnName raw name of column we are sorting by
  * @param expectedColumnValues all of the values for the first column in the table after sorted
  */
-export async function testColumnSort(modal: Locator, rawColumnName: string, expectedColumnValues: string[]) {
+export async function testColumnSort(
+  modal: Locator,
+  rawColumnName: string,
+  expectedColumnValues: string[]
+) {
   const sortBtn = RecordsetLocators.getColumnSortButton(modal, rawColumnName);
   await expect.soft(sortBtn).toBeVisible();
 
@@ -257,20 +304,23 @@ export async function testRecordsetDisplayWSortAfterPaging(
   totalNumRecords: number,
   viewedPage: 'first' | 'last',
   sortModifier?: '::desc::' | '::asc::' | '',
-  rsContainer?: Locator,
+  rsContainer?: Locator
 ) {
   const container: Page | Locator = rsContainer || page;
   if (!sortModifier) sortModifier = '';
 
   await RecordsetLocators.waitForRecordsetPageReady(container);
   await expect.soft(RecordsetLocators.getRows(container)).toHaveCount(numRows);
-  await testTotalCount(container, `Displaying ${viewedPage}${numRows}of ${totalNumRecords} records`);
+  await testTotalCount(
+    container,
+    `Displaying ${viewedPage}${numRows}of ${totalNumRecords} records`
+  );
 
   // Check the presence of asc/desc sort button
   await expect.soft(button).toBeVisible();
 
   // Check if the url has @sort by column name
-  await expect.soft(page).toHaveURL(url => {
+  await expect.soft(page).toHaveURL((url) => {
     return url.href.includes(`@sort(${rawColumnName}${sortModifier},RID)`);
   });
 }
@@ -280,12 +330,20 @@ export async function testRecordsetDisplayWSortAfterPaging(
  * @param numRows number of recordset rows after submitting modal selection
  * @param numCheckedFacetOptions number of checked facet options for `facet` after submitting modal selection
  */
-export async function testSubmitModalSelection(page: Page, facet: Locator, modal: Locator, numRows: number, numCheckedFacetOptions: number) {
+export async function testSubmitModalSelection(
+  page: Page,
+  facet: Locator,
+  modal: Locator,
+  numRows: number,
+  numCheckedFacetOptions: number
+) {
   await ModalLocators.getSubmitButton(modal).click();
   await expect.soft(modal).not.toBeAttached();
 
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(numRows);
-  await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(numCheckedFacetOptions);
+  await expect
+    .soft(RecordsetLocators.getCheckedFacetOptions(facet))
+    .toHaveCount(numCheckedFacetOptions);
 }
 
 /**
@@ -300,21 +358,31 @@ export async function testSubmitModalSelection(page: Page, facet: Locator, modal
  * @param pageSize the recordset page size for comparing with after clear
  */
 // eslint-disable-next-line max-len
-export async function testSelectFacetOptionThenClear(container: Page | Locator, facetIdx: number, filterIdx: number, filterName: string, numRowsAfter: number, pageSize: number) {
+export async function testSelectFacetOptionThenClear(
+  container: Page | Locator,
+  facetIdx: number,
+  filterIdx: number,
+  filterName: string,
+  numRowsAfter: number,
+  pageSize: number
+) {
   const facet = RecordsetLocators.getFacetById(container, facetIdx);
   await testSelectFacetOption(container, facet, filterIdx, numRowsAfter, 1);
 
   await expect.soft(RecordsetLocators.getFacetFilters(container).nth(0)).toHaveText(filterName);
 
   await testClearAllFilters(container, pageSize, facet, filterIdx);
-};
+}
 
 /**
  * verify the initial values of default range inputs
  * @param rangeInputs rangeInputs object for int, float, and date facets
  * @param facetParams the test params object for this facet
  */
-export async function testDefaultRangePickerInitialValues(rangeInputs: DefaultRangeInputLocators, facetParams: any) {
+export async function testDefaultRangePickerInitialValues(
+  rangeInputs: DefaultRangeInputLocators,
+  facetParams: any
+) {
   await expect.soft(rangeInputs.minInput).toHaveValue(facetParams.initialMin);
   await expect.soft(rangeInputs.maxInput).toHaveValue(facetParams.initialMax);
 }
@@ -324,7 +392,10 @@ export async function testDefaultRangePickerInitialValues(rangeInputs: DefaultRa
  * @param rangeInputs rangeInputs object for timestamp facets
  * @param facetParams the test params object for this facet
  */
-export async function testTimestampRangePickerInitialValues(rangeInputs: TimestampRangeInputLocators, facetParams: any) {
+export async function testTimestampRangePickerInitialValues(
+  rangeInputs: TimestampRangeInputLocators,
+  facetParams: any
+) {
   await expect.soft(rangeInputs.minDateInput).toHaveValue(facetParams.initialMin.date);
   await expect.soft(rangeInputs.maxDateInput).toHaveValue(facetParams.initialMax.date);
 
@@ -358,7 +429,12 @@ export async function clearRangeInput(input: Locator, isTime?: boolean) {
  * @param filter the value of the recordset facet filter
  * @param numRows the number of recordset rows
  */
-export async function testRangeInputSubmit(page: Page, submit: Locator, filter: string, numRows: number) {
+export async function testRangeInputSubmit(
+  page: Page,
+  submit: Locator,
+  filter: string,
+  numRows: number
+) {
   const clearAll = RecordsetLocators.getClearAllFilters(page);
   await submit.click();
 
@@ -380,7 +456,14 @@ export async function testRangeInputSubmit(page: Page, submit: Locator, filter: 
  * @param numRows the number of recordset rows
  * @param pageSize the recordset page size for comparing with after clear
  */
-export async function testRangeInputSubmitThenClear(page: Page, facet: Locator, submit: Locator, filter: string, numRows: number, pageSize: number) {
+export async function testRangeInputSubmitThenClear(
+  page: Page,
+  facet: Locator,
+  submit: Locator,
+  filter: string,
+  numRows: number,
+  pageSize: number
+) {
   await testRangeInputSubmit(page, submit, filter, numRows);
 
   const optionsCount = await RecordsetLocators.getFacetOptions(facet).count();
@@ -412,7 +495,12 @@ const testInputValue = async (isFloat: boolean, input: Locator, expectedVal: str
  * @param min min input expected value
  * @param max max input expected value
  */
-export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeInputLocators, isFloat: boolean, min: string, max: string) {
+export async function testRangePickerInputsAfterZoom(
+  rangeInputs: DefaultRangeInputLocators,
+  isFloat: boolean,
+  min: string,
+  max: string
+) {
   await testInputValue(isFloat, rangeInputs.minInput, min);
   await testInputValue(isFloat, rangeInputs.maxInput, max);
 }
@@ -425,8 +513,8 @@ export async function testRangePickerInputsAfterZoom(rangeInputs: DefaultRangeIn
  */
 export async function testTimestampRangePickerInputsAfterZoom(
   rangeInputs: TimestampRangeInputLocators,
-  min: { date: string, time: string },
-  max: { date: string, time: string }
+  min: { date: string; time: string },
+  max: { date: string; time: string }
 ) {
   await testInputValue(false, rangeInputs.minDateInput, min.date);
   await testInputValue(false, rangeInputs.maxDateInput, max.date);
@@ -450,8 +538,8 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
   const totalCountTextObjAfterSearch = {
     displayingText: 'Displaying all',
     dropdownButtonText: `${count}`,
-    totalText: `of ${count} matching results`
-  }
+    totalText: `of ${count} matching results`,
+  };
 
   if (count === 0) {
     // `Displaying ${count} matching results`
@@ -465,7 +553,8 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
 
   await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(count);
   await testTotalCount(page, totalCountTextObjAfterSearch, count !== 0);
-  if (count === 0) await expect.soft(RecordsetLocators.getNoResultsRow(page)).toHaveText('No Results Found');
+  if (count === 0)
+    await expect.soft(RecordsetLocators.getNoResultsRow(page)).toHaveText('No Results Found');
 
   // clearing the search resets the page for the next test case
   await clearSearchButton.click();
@@ -476,8 +565,8 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
   const totalCountTextObj = {
     displayingText: 'Displaying all',
     dropdownButtonText: '4',
-    totalText: 'of 4 matching results'
-  }
+    totalText: 'of 4 matching results',
+  };
   await testTotalCount(page, totalCountTextObj, true);
 }
 
@@ -492,8 +581,8 @@ export async function testMainSearch(page: Page, searchPhrase: string, count: nu
 export async function testTotalCount(
   container: Page | Locator,
   totalCountText: string | TotalCountParts,
-  someRows?: boolean)
-{
+  someRows?: boolean
+) {
   if (typeof totalCountText === 'string') {
     await expect.soft(RecordsetLocators.getTotalCount(container)).toHaveText(totalCountText);
   } else {
@@ -503,9 +592,16 @@ export async function testTotalCount(
      *
      * Fetch each value and test them separately
      */
-    await expect.soft(RecordsetLocators.getDisplayText(container)).toHaveText(totalCountText.displayingText);
-    if (someRows) await expect.soft(RecordsetLocators.getPageLimitDropdown(container)).toHaveText(totalCountText.dropdownButtonText);
-    await expect.soft(RecordsetLocators.getTotalText(container)).toHaveText(totalCountText.totalText);
+    await expect
+      .soft(RecordsetLocators.getDisplayText(container))
+      .toHaveText(totalCountText.displayingText);
+    if (someRows)
+      await expect
+        .soft(RecordsetLocators.getPageLimitDropdown(container))
+        .toHaveText(totalCountText.dropdownButtonText);
+    await expect
+      .soft(RecordsetLocators.getTotalText(container))
+      .toHaveText(totalCountText.totalText);
   }
 }
 
@@ -592,7 +688,14 @@ export async function openRecordsetAndResetFacetState(
     await RecordsetLocators.waitForRecordsetPageReady(page);
   });
 
-  await resetFacetState(page, totalNumFacets, openedFacets, pageSizeAfterClear, openedFacetGroups, skipClearAll);
+  await resetFacetState(
+    page,
+    totalNumFacets,
+    openedFacets,
+    pageSizeAfterClear,
+    openedFacetGroups,
+    skipClearAll
+  );
 }
 
 /**
@@ -601,7 +704,12 @@ export async function openRecordsetAndResetFacetState(
  * @param filterOptions all of the values of facet options in facet
  * @param modalOptions all of the values for the first column in the modal table
  */
-export async function testFacetOptionsAndModalRows(page: Page, facetIdx: number, filterOptions: string[], modalOptions: string[]) {
+export async function testFacetOptionsAndModalRows(
+  page: Page,
+  facetIdx: number,
+  filterOptions: string[],
+  modalOptions: string[]
+) {
   const facet = RecordsetLocators.getFacetById(page, facetIdx);
 
   await test.step('the facet options should be correct', async () => {
@@ -610,7 +718,7 @@ export async function testFacetOptionsAndModalRows(page: Page, facetIdx: number,
     // wait for list to be fully visible
     await expect.soft(RecordsetLocators.getList(facet)).toBeVisible();
     // wait for facet checkboxes to load
-    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions)
+    await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(filterOptions);
   });
 
   await test.step('opening the facet modal should show the correct rows.', async () => {
@@ -632,36 +740,46 @@ type TestIndividualFacetParamsGeneral = {
   /**
    * the index of facet in the reference.facetColumns list
    */
-  index: number,
+  index: number;
   /**
    * the name of the facet
    */
-  name: string,
+  name: string;
   /**
    * description of the test
    */
-  description?: string,
+  description?: string;
   /**
    * number of rows on the page after selecting the not-null option
    */
-  notNullNumRows?: number,
+  notNullNumRows?: number;
   /**
    * number of rows on the page after selecting the null option
    */
-  nullNumRows?: number,
+  nullNumRows?: number;
+  /**
+   * the name of the table the facet belongs to
+   * (used for rowViewPaths test in modal of choice facets)
+   */
+  tableName?: string;
+  /**
+   * the schema name the facet belongs to
+   * (used for rowViewPaths test in modal of choice facets)
+   */
+  schemaName?: string;
 };
 
 type TestIndividualFacetParamsCheckPresence = TestIndividualFacetParamsGeneral & {
-  type: 'check_presence',
+  type: 'check_presence';
   /**
    * the filter that will be displayed once the not-null option is selected
    */
-  notNullFilter: string,
+  notNullFilter: string;
   /**
    * the filter that will be displayed once the null option is selected
    */
-  nullFilter: string
-}
+  nullFilter: string;
+};
 
 type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
   type: 'choice';
@@ -721,7 +839,13 @@ type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
      * the column names displayed in the modal
      */
     columnNames: string[];
-
+    /**
+     * test the view button link in the modal
+     */
+    rowViewPaths?: EntityRowColumnValues[];
+    /**
+     * test the value and sorting of the first column in the modal
+     */
     firstColumn?: {
       /**
        * the values in the first column of the modal
@@ -740,7 +864,6 @@ type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
        */
       valuesAfterSort?: string[];
     };
-
     /**
      * test the facet popup selection
      */
@@ -758,55 +881,54 @@ type TestIndividualFacetParamsChoice = TestIndividualFacetParamsGeneral & {
 };
 
 type TestIndividualFacetParamsRange = TestIndividualFacetParamsGeneral & {
-  type: 'numeric' | 'date' | 'timestamp',
+  type: 'numeric' | 'date' | 'timestamp';
 
   /**
    * number of already existing options.
    */
-  listElems: number,
+  listElems: number;
   /**
    * initial value in the min input
    */
-  initialMin: string | { date: string, time: string },
+  initialMin: string | { date: string; time: string };
   /**
    * initial value in the max input
    */
-  initialMax: string | { date: string, time: string },
+  initialMax: string | { date: string; time: string };
   /**
    * an invalid value to test the error handling.
    */
-  invalid?: string,
+  invalid?: string;
   /**
    * The error that will be displayed if the input is invalid
    */
-  error: string,
+  error: string;
 
   range: {
-    min: string | { date: string, time: string },
-    max: string | { date: string, time: string },
+    min: string | { date: string; time: string };
+    max: string | { date: string; time: string };
     /**
      * the filter that will be displayed after submitting this range
      */
-    filter: string,
+    filter: string;
     /**
      * number of rows that will be displayed after submitting this range.
      */
-    numRows: number
-  },
+    numRows: number;
+  };
 
   justMin: {
-    min: string | { date: string, time: string },
-    filter: string,
-    numRows: number
-  },
+    min: string | { date: string; time: string };
+    filter: string;
+    numRows: number;
+  };
 
   justMax: {
-    max: string | { date: string, time: string },
-    filter: string,
-    numRows: number
-  },
-
-}
+    max: string | { date: string; time: string };
+    filter: string;
+    numRows: number;
+  };
+};
 
 export type TestIndividualFacetParams = Either<
   TestIndividualFacetParamsChoice,
@@ -821,7 +943,13 @@ export type TestIndividualFacetParams = Either<
  * @param pageSize number of rows when no filter is applied (clear all is clicked)
  * @param totalNumFacets total number of facets in the facet panel
  */
-export async function testIndividualFacet(page: Page, pageSize: number, totalNumFacets: number, facetParams: TestIndividualFacetParams) {
+export async function testIndividualFacet(
+  page: Page,
+  testInfo: TestInfo,
+  pageSize: number,
+  totalNumFacets: number,
+  facetParams: TestIndividualFacetParams
+) {
   switch (facetParams.type) {
     case 'choice':
       await test.step('for choice facet,', async () => {
@@ -829,7 +957,13 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
         await test.step('open the facet and check the available options.', async () => {
           await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
           // open facet
-          await openFacetAndTestFilterOptions(page, facet, facetParams.index, facetParams.options, 1);
+          await openFacetAndTestFilterOptions(
+            page,
+            facet,
+            facetParams.index,
+            facetParams.options,
+            1
+          );
 
           await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
 
@@ -842,7 +976,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
               placeholder += ' all columns';
             }
 
-            await expect.soft(RecordsetLocators.getFacetSearchPlaceholderById(facet)).toHaveText(placeholder);
+            await expect
+              .soft(RecordsetLocators.getFacetSearchPlaceholderById(facet))
+              .toHaveText(placeholder);
           }
         });
 
@@ -868,7 +1004,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
               await RecordsetLocators.getFacetSearchBox(facet).fill(searchTest.term);
               await RecordsetLocators.getFacetSearchSubmitBtn(facet).click();
               await expect.soft(RecordsetLocators.getFacetSpinner(facet)).not.toBeVisible();
-              await expect.soft(RecordsetLocators.getFacetOptions(facet)).toHaveText(searchTest.options);
+              await expect
+                .soft(RecordsetLocators.getFacetOptions(facet))
+                .toHaveText(searchTest.options);
               await RecordsetLocators.getFacetSearchBoxClear(facet).click();
             });
           }
@@ -881,17 +1019,54 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await test.step('facet modal works properly', async () => {
             await testShowMoreClick(facet, modal, modalParams.numRows, modalParams.numCheckedRows);
 
+            // create new button should not be visible
+            await expect.soft(RecordsetLocators.getAddRecordsLink(modal)).toHaveCount(0);
+
+            // column names
             await expect
               .soft(RecordsetLocators.getColumnNames(modal))
               .toHaveText(modalParams.columnNames);
 
+            // action buttons
+            await expect.soft(RecordsetLocators.getEditActionButtons(modal)).toHaveCount(0);
+            await expect.soft(RecordsetLocators.getDeleteActionButtons(modal)).toHaveCount(0);
+            if (!facetParams.isEntityMode) {
+              await expect.soft(RecordsetLocators.getViewActionButtons(modal)).toHaveCount(0);
+            } else {
+              await expect
+                .soft(RecordsetLocators.getViewActionButtons(modal))
+                .toHaveCount(modalParams.numRows);
+
+              // test view button URLs
+              if (facetParams.schemaName && facetParams.tableName && modalParams.rowViewPaths) {
+                await page.pause();
+                let index = 0;
+                for (const row of modalParams.rowViewPaths) {
+                  const btn = RecordsetLocators.getRowViewButton(modal, index);
+                  const url = getEntityRowURL(
+                    testInfo,
+                    APP_NAMES.RECORD,
+                    facetParams.schemaName,
+                    facetParams.tableName,
+                    row
+                  );
+                  expect.soft(await btn.getAttribute('href')).toContain(url);
+                  index++;
+                }
+              }
+            }
+
+            // first column values and sorting
             if (modalParams.firstColumn) {
               const columnValues = RecordsetLocators.getFirstColumn(modal);
               await expect.soft(columnValues).toHaveCount(modalParams.firstColumn.values.length);
               await expect.soft(columnValues).toHaveText(modalParams.firstColumn.values);
 
               // test sorting
-              const sortBtn = RecordsetLocators.getColumnSortButtonContainer(modal, modalParams.firstColumn.name);
+              const sortBtn = RecordsetLocators.getColumnSortButtonContainer(
+                modal,
+                modalParams.firstColumn.name
+              );
               if (modalParams.firstColumn.sortable) {
                 await expect.soft(sortBtn).toBeVisible();
               } else {
@@ -902,7 +1077,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
                 await RecordsetLocators.waitForRecordsetPageReady(modal);
 
                 const columnValues = RecordsetLocators.getFirstColumn(modal);
-                await expect.soft(columnValues).toHaveCount(modalParams.firstColumn.valuesAfterSort.length);
+                await expect
+                  .soft(columnValues)
+                  .toHaveCount(modalParams.firstColumn.valuesAfterSort.length);
                 await expect.soft(columnValues).toHaveText(modalParams.firstColumn.valuesAfterSort);
               }
             }
@@ -941,7 +1118,13 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
         await test.step('should open the facet, test validators, filter on a range, and update the search criteria.', async () => {
           await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
           // +2 is for null and not-null.
-          await openFacet(page, facet, facetParams.index, (facetParams.listElems ? facetParams.listElems : 0) + 2, 1);
+          await openFacet(
+            page,
+            facet,
+            facetParams.index,
+            (facetParams.listElems ? facetParams.listElems : 0) + 2,
+            1
+          );
 
           // wait for facet to open
           await expect.soft(rangeInputs.submit).toBeVisible();
@@ -966,7 +1149,10 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
 
           // test min and max being set
           // define test params values
-          if (typeof facetParams.range.min === 'string' && typeof facetParams.range.max === 'string') {
+          if (
+            typeof facetParams.range.min === 'string' &&
+            typeof facetParams.range.max === 'string'
+          ) {
             await fillRangeInput(rangeInputs.minInput, facetParams.range.min);
             await fillRangeInput(rangeInputs.maxInput, facetParams.range.max);
 
@@ -1024,7 +1210,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await fillRangeInput(rangeInputs.minInput, facetParams.justMin.min);
 
           // let validation message disappear
-          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await expect
+            .soft(RecordsetLocators.getRangeInputValidationError(facet))
+            .not.toBeVisible();
           await testRangeInputSubmitThenClear(
             page,
             facet,
@@ -1047,7 +1235,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await fillRangeInput(rangeInputs.maxInput, facetParams.justMax.max);
 
           // let validation message disappear
-          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await expect
+            .soft(RecordsetLocators.getRangeInputValidationError(facet))
+            .not.toBeVisible();
           await testRangeInputSubmitThenClear(
             page,
             facet,
@@ -1093,7 +1283,10 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await clearRangeInput(rangeInputs.maxTimeInput, true);
 
           // test min and max being set
-          if (typeof facetParams.range.min === 'object' && typeof facetParams.range.max === 'object') {
+          if (
+            typeof facetParams.range.min === 'object' &&
+            typeof facetParams.range.max === 'object'
+          ) {
             // define test params values
             await fillRangeInput(rangeInputs.minDateInput, facetParams.range.min.date);
             await fillRangeInput(rangeInputs.maxDateInput, facetParams.range.max.date);
@@ -1102,7 +1295,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
             await fillRangeInput(rangeInputs.maxTimeInput, facetParams.range.max.time);
 
             // let validation message disappear
-            await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+            await expect
+              .soft(RecordsetLocators.getRangeInputValidationError(facet))
+              .not.toBeVisible();
             await testRangeInputSubmitThenClear(
               page,
               facet,
@@ -1163,7 +1358,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await fillRangeInput(rangeInputs.minTimeInput, facetParams.justMin.min.time);
 
           // let validation message disappear
-          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await expect
+            .soft(RecordsetLocators.getRangeInputValidationError(facet))
+            .not.toBeVisible();
           await testRangeInputSubmitThenClear(
             page,
             facet,
@@ -1190,7 +1387,9 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
           await fillRangeInput(rangeInputs.maxTimeInput, facetParams.justMax.max.time);
 
           // let validation message disappear
-          await expect.soft(RecordsetLocators.getRangeInputValidationError(facet)).not.toBeVisible();
+          await expect
+            .soft(RecordsetLocators.getRangeInputValidationError(facet))
+            .not.toBeVisible();
           await testRangeInputSubmitThenClear(
             page,
             facet,
@@ -1214,7 +1413,13 @@ export async function testIndividualFacet(page: Page, pageSize: number, totalNum
         await test.step('should open the facet and the two options should be available.', async () => {
           await expect.soft(RecordsetLocators.getClosedFacets(page)).toHaveCount(totalNumFacets);
 
-          await openFacetAndTestFilterOptions(page, facet, facetParams.index, ['All records with value', 'No value'], 1);
+          await openFacetAndTestFilterOptions(
+            page,
+            facet,
+            facetParams.index,
+            ['All records with value', 'No value'],
+            1
+          );
 
           await expect.soft(RecordsetLocators.getCheckedFacetOptions(facet)).toHaveCount(0);
         });

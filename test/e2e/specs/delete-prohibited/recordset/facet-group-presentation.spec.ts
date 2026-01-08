@@ -135,6 +135,8 @@ const testParams = {
         description: 'entity choice',
         type: 'choice',
         name: 'Outbound 1',
+        tableName: 'outbound1',
+        schemaName: 'facet-group',
         index: 1,
         isEntityMode: true,
         options: ['All records with value', 'No value', 'Outbound 1 one', 'Outbound 1 two', 'Outbound 1 three', 'Outbound 1 four', 'Outbound 1 five'],
@@ -149,6 +151,13 @@ const testParams = {
           numRows: 5,
           numCheckedRows: 0,
           columnNames: ['outbound1_id', 'name'],
+          rowViewPaths: [
+            [{ column: 'outbound1_id', value: '01' }],
+            [{ column: 'outbound1_id', value: '02' }],
+            [{ column: 'outbound1_id', value: '03' }],
+            [{ column: 'outbound1_id', value: '04' }],
+            [{ column: 'outbound1_id', value: '05' }],
+          ],
           firstColumn: {
             name: 'outbound1_id',
             values: ['01', '02', '03', '04', '05'],
@@ -410,7 +419,7 @@ test.describe('Facet groups', () => {
           undefined, // keep the groups opened
           true
         );
-        await testIndividualFacet(page, params.numRows, params.numFacets, facetParams);
+        await testIndividualFacet(page, testInfo, params.numRows, params.numFacets, facetParams);
       });
     }
   });
