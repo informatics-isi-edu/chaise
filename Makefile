@@ -49,9 +49,9 @@ E2EDIrecordMultiFormInput=test/e2e/specs/default-config/multi-form-input/multi-f
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.config.ts
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.config.ts
 E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.config.ts
+E2ErecordEditFKModal=test/e2e/specs/default-config/recordedit/foreign-key-modal.config.ts
 E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.config.ts
 E2ErecordEditASCIIValidation=test/e2e/specs/all-features/recordedit/ascii-text-validation.config.ts
-E2ErecordEditFKModal=test/e2e/specs/default-config/recordedit/foreign-key-modal.config.ts
 # Record tests
 E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.config.ts
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.config.ts

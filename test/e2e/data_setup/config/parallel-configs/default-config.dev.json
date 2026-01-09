@@ -8,6 +8,7 @@
             "recordedit/composite-key.config.json",
             "recordedit/domain-filter.config.json",
             "recordedit/foreign-key-dropdown.config.json",
+            "recordedit/foreign-key-modal.config.json",
             "recordedit/null-values.config.json",
 
             "recordset/add.config.json",
