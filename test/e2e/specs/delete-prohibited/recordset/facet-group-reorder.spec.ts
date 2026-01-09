@@ -1,4 +1,4 @@
-import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
+import { test, expect, TestInfo, Page } from '@playwright/test';
 
 // locators
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -7,18 +7,12 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { changeStoredOrder, moveFacet, testMenuBtnDisabled, testMenuBtnIndicator } from '@isrd-isi-edu/chaise/test/e2e/utils/facet-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
-  openRecordsetAndResetFacetState,
   TestIndividualFacetParams,
   testIndividualFacet,
-  resetFacetState,
-  testDisplayedFacets,
-  testDisplayedFacetItemsAndGroups,
-  openFacet,
+  resetFacetState, testDisplayedFacetItemsAndGroups
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import {
-  clickNewTabLink,
-  dragAndDropWithScroll,
-  generateChaiseURL,
+  generateChaiseURL
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 /**

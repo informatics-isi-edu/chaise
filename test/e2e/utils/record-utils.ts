@@ -7,7 +7,7 @@ import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/te
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 // utils
-import { EntityRowColumnValues, getCatalogID, getEntityRow, getEntityRowURL } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { EntityRowColumnValues, getEntityRowURL } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { APP_NAMES, PW_PROJECT_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
   clickAndVerifyDownload, clickNewTabLink, getClipboardContent,
@@ -55,6 +55,7 @@ export const testRecordMainSectionValues = async (page: Page, expectedColumnName
 /**
  * similar to testRecordMainSectionValues but instead of making sure all values have the expected values, it will
  * only test the given columns
+ * @param numCols the total number of columns expected on the page
  */
 export const testRecordMainSectionPartialValues = async (page: Page, numCols: number, expectedValues: { [colName: string]: RecordsetColValue }) => {
   await RecordLocators.waitForRecordPageReady(page);
@@ -618,7 +619,11 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
     const rsModal = ModalLocators.getAddPureBinaryPopup(page);
 
     await test.step('clicking on `Link` button should open up a modal.', async () => {
-      const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
+      const addBtn = RecordLocators.getRelatedTableAddButton(
+        page,
+        params.displayname,
+        params.isInline
+      );
       await addBtn.click();
 
       await expect.soft(rsModal).toBeVisible();
@@ -630,6 +635,12 @@ export const testAddAssociationTable = async (page: Page, params: AddAssociation
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
+
+      // test action buttons
+      await expect.soft(RecordsetLocators.getActionsHeader(rsModal).nth(1)).toHaveText('Actions');
+      await expect.soft(RecordsetLocators.getViewActionButtons(rsModal)).toHaveCount(params.totalCount);
+      await expect.soft(RecordsetLocators.getEditActionButtons(rsModal)).toHaveCount(params.totalCount);
+      await expect.soft(RecordsetLocators.getDeleteActionButtons(rsModal)).toHaveCount(params.totalCount);
     });
 
     await test.step('current values must be disabled.', async () => {
@@ -719,6 +730,12 @@ export const testBatchUnlinkAssociationTable = async (page: Page, params: BatchU
 
       // check the state of the facet panel
       await expect.soft(RecordsetLocators.getSidePanel(rsModal)).toBeVisible();
+
+      // test action buttons
+      await expect.soft(RecordsetLocators.getActionsHeader(rsModal).nth(1)).toHaveText('View');
+      await expect.soft(RecordsetLocators.getViewActionButtons(rsModal)).toHaveCount(params.totalCount);
+      await expect.soft(RecordsetLocators.getEditActionButtons(rsModal)).toHaveCount(0);
+      await expect.soft(RecordsetLocators.getDeleteActionButtons(rsModal)).toHaveCount(0);
     });
 
     await test.step('user should be able to select values to unlink and submit.', async () => {
@@ -774,7 +791,8 @@ type AddRecordsForeignKeyMultiParams = {
   column_names: string[],
   resultset_values: RecordsetRowValue[],
   related_table_values: RecordsetRowValue[],
-  bulk_modal_title: string
+  bulk_modal_title: string,
+  num_rows_in_bulk_modal: number,
 }
 
 /**
@@ -806,11 +824,17 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
 
   await test.step('modal should have 1 row selected and disabled', async () => {
     const rows = RecordsetLocators.getRows(bulkFKModal);
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(1);
 
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(1);
     await expect.soft(rows.nth(1)).toContainClass('disabled-row');
+
+    // test action buttons
+    await expect.soft(RecordsetLocators.getActionsHeader(bulkFKModal).nth(1)).toHaveText('Actions');
+    await expect.soft(RecordsetLocators.getViewActionButtons(bulkFKModal)).toHaveCount(params.num_rows_in_bulk_modal);
+    await expect.soft(RecordsetLocators.getEditActionButtons(bulkFKModal)).toHaveCount(params.num_rows_in_bulk_modal);
+    await expect.soft(RecordsetLocators.getDeleteActionButtons(bulkFKModal)).toHaveCount(params.num_rows_in_bulk_modal);
   });
 
   await test.step('select 2 rows and submit the selection', async () => {
@@ -852,7 +876,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
       rows = RecordeditLocators.getFKDropdownOptions(newPage);
     }
 
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     // this is called for both row and dropdown, in dropdown the disabled class is called "disabled" while in
     // the modal it is "disabled-row". so we're checking the regex to match both
     await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
@@ -905,7 +929,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await expect.soft(bulkFKModal).toBeAttached();
 
     const rows = RecordsetLocators.getRows(bulkFKModal);
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
 
@@ -952,7 +976,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
       rows = RecordeditLocators.getFKDropdownOptions(newPage);
     }
 
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     // this is called for both row and dropdown, in dropdown the disabled class is called "disabled" while in
     // the modal it is "disabled-row". so we're checking the regex to match both
     await expect.soft(rows.nth(1)).toHaveClass(/disabled/);
@@ -977,7 +1001,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await expect.soft(bulkFKModal).toBeAttached();
 
     const rows = RecordsetLocators.getRows(bulkFKModal);
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(4);
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(4);
 
@@ -993,7 +1017,7 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await expect.soft(bulkFKModal).toBeAttached();
 
     const rows = RecordsetLocators.getRows(bulkFKModal);
-    await expect.soft(rows).toHaveCount(10);
+    await expect.soft(rows).toHaveCount(params.num_rows_in_bulk_modal);
     await expect.soft(RecordsetLocators.getCheckedCheckboxInputs(bulkFKModal)).toHaveCount(3);
     await expect.soft(RecordsetLocators.getDisabledRows(bulkFKModal)).toHaveCount(3);
 
