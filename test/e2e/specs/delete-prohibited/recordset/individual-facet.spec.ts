@@ -343,7 +343,7 @@ test.describe('Testing individual facet types', () => {
         testParams.defaults.pageSize
       );
 
-      await testIndividualFacet(page, testParams.defaults.pageSize, testParams.totalNumFacets, facetParams);
+      await testIndividualFacet(page, testInfo, testParams.defaults.pageSize, testParams.totalNumFacets, facetParams);
     });
   }
 });

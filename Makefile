@@ -49,6 +49,7 @@ E2EDIrecordMultiFormInput=test/e2e/specs/default-config/multi-form-input/multi-f
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.config.ts
 E2EDrecordEditDomainFilter=test/e2e/specs/default-config/recordedit/domain-filter.config.ts
 E2ErecordEditForeignKeyDropdown=test/e2e/specs/default-config/recordedit/foreign-key-dropdown.config.ts
+E2ErecordEditFKModal=test/e2e/specs/default-config/recordedit/foreign-key-modal.config.ts
 E2ErecordEditInputIframe=test/e2e/specs/all-features/recordedit/input-iframe.config.ts
 E2ErecordEditASCIIValidation=test/e2e/specs/all-features/recordedit/ascii-text-validation.config.ts
 # Record tests
@@ -91,7 +92,7 @@ NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2ErecordFilePreview) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2EDrecordsetFacetWithinFacet)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordImmutable) $(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
-RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter) $(E2ErecordEditASCIIValidation)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter) $(E2ErecordEditASCIIValidation) $(E2ErecordEditFKModal)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)

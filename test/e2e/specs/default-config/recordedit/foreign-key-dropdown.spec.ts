@@ -19,7 +19,7 @@ const testParams = {
   column_values: [['two', 'five', 'six']]
 };
 
-test('Presentation and functionality of foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
+test('foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
   await test.step('should load recordedit page', async () => {
     await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, testParams.schema_name, testParams.table_name, testInfo, baseURL));
     await RecordeditLocators.waitForRecordeditPageReady(page);

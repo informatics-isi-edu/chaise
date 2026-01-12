@@ -4,8 +4,9 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { getURLHashFragment, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { openLinksInTab } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 /**
 * Will return a promise that is resolved when the setup is done
@@ -151,36 +152,4 @@ function addCanonicalTag() {
     canonicalTag.setAttribute('href', canonicalURL);
     document.getElementsByTagName('head')[0].appendChild(canonicalTag);
   }
-}
-
-/**
-* make sure links open in new tab
-*/
-export function openLinksInTab() {
-  addClickListener('a[href]', (e: Event, element: any) => {
-    element.target = '_blank';
-  });
-}
-
-/**
-* Will call the handler function upon clicking on the elements represented by selector
-* @param {string} selector the selector string
-* @param {function} handler  the handler callback function.
-* handler parameters are:
-*  - Event object that is returned.
-*  - The target (element that is described by the selector)
-* NOTE since we're checking the closest element to the target, the e.target might
-* be different from the actual target that we want. That's why we have to send the target too.
-* We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
-* the image as the value of e.target and not the link
-*/
-export function addClickListener(selector: string, handler: Function) {
-  const body = document.querySelector('body');
-  if (!body) return;
-  body.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (target.closest(selector)) {
-      handler(e, target.closest(selector));
-    }
-  });
 }

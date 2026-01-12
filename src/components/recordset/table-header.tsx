@@ -191,8 +191,17 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
    * whether to display create button
    */
   const shouldShowCreateButton = () => {
-    const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0
-      && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
+    const notAllowed = [
+      // showing create new in the facet popup could be confusing
+      RecordsetDisplayMode.FACET_POPUP,
+      // use is deleting, so allowing to create more doesn't make sense
+      RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK,
+    ];
+
+    const isAddableDisplayMode =
+      notAllowed.indexOf(config.displayMode) === -1 &&
+      // related entities  have their own create button
+      config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0;
 
     return isAddableDisplayMode && reference && reference.canCreate;
   }

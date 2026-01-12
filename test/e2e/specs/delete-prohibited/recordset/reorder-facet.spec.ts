@@ -1,4 +1,4 @@
-import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
+import { test, TestInfo, Page } from '@playwright/test';
 
 // locators
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -10,7 +10,7 @@ import {
   openRecordsetAndResetFacetState, TestIndividualFacetParams, testIndividualFacet, resetFacetState,
   testDisplayedFacets
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
-import { clickNewTabLink, dragAndDropWithScroll, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 
 const facetMapping = {
@@ -194,7 +194,7 @@ test.describe('Reorder facets', () => {
 
     await test.step('interacting with the reordered facets', async () => {
       // test facet selection
-      await testFacetSelection(page, []);
+      await testFacetSelection(page, testInfo, []);
 
       // open some of the facets
       for await (const facetId of testParams.initialState.facetsToOpenAfterReorder) {
@@ -272,7 +272,7 @@ test.describe('Reorder facets', () => {
     });
 
     await test.step('interacting with the reordered facets', async () => {
-      await testFacetSelection(page, currParams.openFacets.indexes);
+      await testFacetSelection(page, testInfo, currParams.openFacets.indexes);
     });
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
@@ -294,7 +294,7 @@ test.describe('Reorder facets', () => {
     });
 
     await test.step('interacting with the reordered facets', async () => {
-      await testFacetSelection(page, currParams.openFacets.indexes);
+      await testFacetSelection(page, testInfo, currParams.openFacets.indexes);
     });
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
@@ -314,14 +314,14 @@ const getURL = (testInfo: TestInfo, baseURL?: string) => {
 /**
  * go through the facetSelectionParams and test facet features.
  */
-const testFacetSelection = async (page: Page, openedFacetIndexes: number[]) => {
+const testFacetSelection = async (page: Page, testInfo: TestInfo, openedFacetIndexes: number[]) => {
   if (openedFacetIndexes.length > 0) {
     await resetFacetState(page, testParams.totalNumFacets, openedFacetIndexes, testParams.pageSize);
   }
 
   for await (const [index, params] of facetSelectionParams.entries()) {
     await test.step(`facet: ${params.name},`, async () => {
-      await testIndividualFacet(page, testParams.pageSize, testParams.totalNumFacets, params);
+      await testIndividualFacet(page, testInfo, testParams.pageSize, testParams.totalNumFacets, params);
     });
   }
 

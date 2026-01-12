@@ -1,4 +1,4 @@
-import { test, expect, TestInfo, Page } from '@playwright/test';
+import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
 
 import RecordeditLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -8,6 +8,7 @@ import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 test.describe('Viewing Recordedit app with permission related annotations', () => {
+  test.describe.configure({ mode: 'parallel' });
 
   test('for a create-only table, the app should not load the form and displays error modal instead', async ({ page, baseURL }, testInfo) => {
     await openThePage('main_create_table', page, baseURL, testInfo);
@@ -38,19 +39,19 @@ test.describe('Viewing Recordedit app with permission related annotations', () =
 
     await test.step('foreignkey popups', async () => {
       await test.step('should not show the create button for a read-only fk table', async () => {
-        await openFKPopupAndTestCreateButton(page, 'col_out_read', false);
+        await openFKPopupAndTestButtons(page, 'col_out_read', false, false, false);
       });
 
       await test.step('should show the create button for a fk table that allows create', async () => {
-        await openFKPopupAndTestCreateButton(page, 'col_out_create', true);
+        await openFKPopupAndTestButtons(page, 'col_out_create', true, false, false);
       });
 
       await test.step('should not show the create button for a fk table that allows update and create', async () => {
-        await openFKPopupAndTestCreateButton(page, 'col_out_update', true);
+        await openFKPopupAndTestButtons(page, 'col_out_update', true, true, false);
       });
 
       await test.step('should not show the create button for a fk table that only allows delete', async () => {
-        await openFKPopupAndTestCreateButton(page, 'col_out_delete', false);
+        await openFKPopupAndTestButtons(page, 'col_out_delete', false, false, true);
       });
     });
   });
@@ -71,17 +72,30 @@ const testUnauthorizedAccess = async (page: Page) => {
   await expect.soft(ModalLocators.getModalText(modal)).toContainText('You are not authorized to perform this action.');
 }
 
-const openFKPopupAndTestCreateButton = async (page: Page, displayname: string, isDisplayed: boolean) => {
+const openFKPopupAndTestButtons = async (page: Page, displayname: string, canCreate: boolean, canEdit: boolean, canDelete: boolean) => {
   // open the popup
   await RecordeditLocators.getForeignKeyInputButton(page, displayname, 1).click();
   const rsModal = ModalLocators.getRecordsetSearchPopup(page);
   await expect.soft(rsModal).toBeVisible();
-  const btn = RecordsetLocators.getAddRecordsLink(rsModal);
-  if (isDisplayed) {
+
+
+  const headerText = canEdit || canDelete ? 'Actions' : 'View';
+  // the first one is the select column
+  await expect.soft(RecordsetLocators.getActionsHeader(rsModal).nth(1)).toHaveText(headerText);
+
+  await testButton(RecordsetLocators.getAddRecordsLink(rsModal), canCreate);
+  await testButton(RecordsetLocators.getRowViewButton(rsModal, 0), true);
+  await testButton(RecordsetLocators.getRowEditButton(rsModal, 0), canEdit);
+  await testButton(RecordsetLocators.getRowDeleteButton(rsModal, 0), canDelete);
+
+  await ModalLocators.getCloseBtn(rsModal).click();
+  await expect.soft(rsModal).not.toBeAttached();
+}
+
+const testButton = async (btn: Locator, isVisible: boolean) => {
+  if (isVisible) {
     await expect.soft(btn).toBeVisible();
   } else {
     await expect.soft(btn).not.toBeAttached();
   }
-  await ModalLocators.getCloseBtn(rsModal).click();
-  await expect.soft(rsModal).not.toBeAttached();
 }

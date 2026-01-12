@@ -1,4 +1,4 @@
-import { test, expect, TestInfo, Page, Locator } from '@playwright/test';
+import { test, expect, TestInfo, Page } from '@playwright/test';
 
 // locators
 import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
@@ -7,18 +7,12 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 import { changeStoredOrder, moveFacet, testMenuBtnDisabled, testMenuBtnIndicator } from '@isrd-isi-edu/chaise/test/e2e/utils/facet-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import {
-  openRecordsetAndResetFacetState,
   TestIndividualFacetParams,
   testIndividualFacet,
-  resetFacetState,
-  testDisplayedFacets,
-  testDisplayedFacetItemsAndGroups,
-  openFacet,
+  resetFacetState, testDisplayedFacetItemsAndGroups
 } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import {
-  clickNewTabLink,
-  dragAndDropWithScroll,
-  generateChaiseURL,
+  generateChaiseURL
 } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 /**
@@ -196,7 +190,7 @@ test.describe('Reorder facet groups', () => {
 
     // calling this here so the open state is not saved
     await test.step('interacting with facets', async () => {
-      await testFacetSelection(page, [0]);
+      await testFacetSelection(page, testInfo, [0]);
     });
 
     await test.step('clicking on "Reset to default" should display the default order.', async () => {
@@ -285,7 +279,7 @@ const testStoredOrder = async (
   }
 
   await test.step('interacting with facets', async () => {
-    await testFacetSelection(page, openFacetIndexes);
+    await testFacetSelection(page, testInfo, openFacetIndexes);
   });
 
   await test.step('refreshing the page should show initial state.', async () => {
@@ -295,14 +289,14 @@ const testStoredOrder = async (
   });
 };
 
-const testFacetSelection = async (page: Page, openFacetIndexes: number[]) => {
+const testFacetSelection = async (page: Page, testInfo: TestInfo, openFacetIndexes: number[]) => {
   if (openFacetIndexes.length > 0) {
     await resetFacetState(page, testParams.numFacets, openFacetIndexes, testParams.numRows, undefined, true);
   }
 
   for await (const facetParams of facetSelectionParams) {
     await test.step(`${facetParams.description}`, async () => {
-      await testIndividualFacet(page, testParams.numRows, testParams.numFacets, facetParams);
+      await testIndividualFacet(page, testInfo, testParams.numRows, testParams.numFacets, facetParams);
     });
   }
 };

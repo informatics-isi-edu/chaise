@@ -187,11 +187,11 @@ export default class RecordsetLocators {
   };
 
   static getFirstColumn(container: Page | Locator): Locator {
-    return container.locator('.chaise-table-row td:nth-child(2)');
+    return container.locator('.chaise-table-row td:nth-child(1 of .table-value-cell)');
   }
 
   static getColumnCells(container: Page | Locator, index: number): Locator {
-    return container.locator(`.chaise-table-row td:nth-child(${index+1})`)
+    return container.locator(`.chaise-table-row td:nth-child(${index} of .table-value-cell)`)
   }
 
   static getColumnsWithTooltipIcon(container: Page | Locator): Locator {
@@ -267,19 +267,19 @@ export default class RecordsetLocators {
   }
 
   static getRowViewButton(container: Page | Locator, rowIndex: number): Locator {
-    return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.view-action-button');
+    return RecordsetLocators.getRows(container).nth(rowIndex).locator('.view-action-button');
   }
 
   static getRowEditButton(container: Page | Locator, rowIndex: number): Locator {
-    return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.edit-action-button');
+    return RecordsetLocators.getRows(container).nth(rowIndex).locator('.edit-action-button');
   }
 
   static getRowDeleteButton(container: Page | Locator, rowIndex: number): Locator {
-    return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.delete-action-button');
+    return RecordsetLocators.getRows(container).nth(rowIndex).locator('.delete-action-button');
   }
 
   static getRowSelectButton(container: Page | Locator, rowIndex: number): Locator {
-    return RecordsetLocators.getRows(container).nth(rowIndex).locator('td').nth(0).locator('.select-action-button');
+    return RecordsetLocators.getRows(container).nth(rowIndex).locator('.select-action-button');
   }
 
   static getReadMore(container: Page | Locator): Locator {
