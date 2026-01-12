@@ -1,3 +1,4 @@
+import type { Reference, Tuple } from '@isrd-isi-edu/ermrestjs/src/models/reference';;
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -17,8 +18,8 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 type ShareCiteButtonProps = {
-  reference: any,
-  tuple: any,
+  reference: Reference,
+  tuple: Tuple,
   logStack?: any,
   logStackPath?: string,
   citation: CitationModel,

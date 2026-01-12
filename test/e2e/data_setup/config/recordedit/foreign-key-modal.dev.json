@@ -1,0 +1,9 @@
+{
+  "setup": {
+      "schemaConfigurations": [
+          "recordedit/foreign-key-modal.config.json"
+      ],
+      "schema": "foriegn-key-modal"
+  },
+  "cleanup" : true
+}

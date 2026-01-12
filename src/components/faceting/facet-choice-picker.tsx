@@ -1,6 +1,8 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 
 import React from 'react';
+import type { FacetColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+import type { Reference, Tuple } from '@isrd-isi-edu/ermrestjs/src/models/reference';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -37,7 +39,7 @@ type FacetChoicePickerProps = {
   /**
    * The facet column
    */
-  facetColumn: any,
+  facetColumn: FacetColumn,
   /**
    * The facet model that has the UI state variables
    */
@@ -124,7 +126,7 @@ const FacetChoicePicker = ({
   const listContainer = useRef<HTMLDivElement>(null);
 
   // populate facetReference and baseColumn that are used throughout the component
-  let facetReference: any, baseColumn: any;
+  let facetReference: Reference, baseColumn: any;
   if (facetColumn.isEntityMode) {
     facetReference = facetColumn.sourceReference.contextualize.compactSelect;
     baseColumn = facetColumn.column;
@@ -170,6 +172,7 @@ const FacetChoicePicker = ({
    */
   useEffect(() => {
     callRegister();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facetModel, checkboxRows]);
 
   // when searchTerm changed, ask flow-control to update it
@@ -183,6 +186,7 @@ const FacetChoicePicker = ({
     // ask the parent to update the facet column
     dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_SEARCH_BOX);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   /**
@@ -203,9 +207,8 @@ const FacetChoicePicker = ({
    * we should attach the action.
    */
   const getDefaultLogInfo = () => {
-    let res = facetColumnRef.current.sourceReference.defaultLogInfo;
-    res.stack = getFacetLogStack(facetIndex);
-    return res;
+    const res = facetColumnRef.current.sourceReference.defaultLogInfo;
+    return { ...res, stack: getFacetLogStack(facetIndex) };
   }
 
   //-------------------  flow-control related functions:   --------------------//
@@ -239,10 +242,9 @@ const FacetChoicePicker = ({
           res.push(getNullFacetCheckBoxRow(true));
         }
 
-        const facetLog = getDefaultLogInfo();
-        facetLog.action = getFacetLogAction(facetIndex, LogActions.PRESELECTED_FACETS_LOAD);
-        facetColumnRef.current.getChoiceDisplaynames(facetLog).then((filters: any) => {
-          filters.forEach((f: any) => {
+        const facetLog = { ...getDefaultLogInfo(), action: getFacetLogAction(facetIndex, LogActions.PRESELECTED_FACETS_LOAD) };
+        facetColumnRef.current.getChoiceDisplaynames(facetLog).then((filters) => {
+          filters.forEach((f) => {
             res.push({
               uniqueId: f.uniqueId,
               displayname: f.displayname,
@@ -258,7 +260,7 @@ const FacetChoicePicker = ({
           setTimeout(() => {
             resolve(true);
           }, 10);
-        }).catch(function (error: any) {
+        }).catch(function (error) {
           reject(error);
         });
       }
@@ -314,21 +316,18 @@ const FacetChoicePicker = ({
 
       (function (uri) {
         // the reload causes and stuff should be handled by the parent not here
-        const facetLog = getDefaultLogInfo();
+        const action = (reloadCauses.length > 0) ? LogActions.FACET_CHOICE_RELOAD : LogActions.FACET_CHOICE_LOAD;
+        const facetLog = { ...getDefaultLogInfo(), action: getFacetLogAction(facetIndex, action) };
 
-        // // create the action
-        let action = LogActions.FACET_CHOICE_LOAD;
         if (reloadCauses.length > 0) {
-          action = LogActions.FACET_CHOICE_RELOAD;
           // add causes
           facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
         }
-        facetLog.action = getFacetLogAction(facetIndex, action);
 
         // update the filter log info to stack
         LogService.updateStackFilterInfo(facetLog.stack, facetReferenceRef.current.filterLogInfo);
 
-        facetReferenceRef.current.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page: any) => {
+        facetReferenceRef.current.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page) => {
           // if this is not the result of latest facet change
           if (facetReferenceRef.current.uri !== uri) {
             resolve(false);
@@ -337,7 +336,7 @@ const FacetChoicePicker = ({
 
           setHasMore(page.hasNext);
 
-          page.tuples.forEach(function (tuple: any) {
+          page.tuples.forEach((tuple) => {
             // if we're showing enough rows
             if (updatedRows.length === maxCheckboxLen) {
               return;
@@ -366,7 +365,7 @@ const FacetChoicePicker = ({
           });
 
           return processFavorites(updatedRows);
-        }).then((result: boolean) => {
+        }).then((result) => {
           // if this is not the result of latest facet change
           if (facetReferenceRef.current.uri !== uri) {
             resolve(false);
@@ -376,8 +375,8 @@ const FacetChoicePicker = ({
           $log.debug(`facet index=${facetIndex}: processing done`);
           setCheckboxRows(updatedRows);
 
-          resolve(result);
-        }).catch((err: any) => {
+          resolve(!!result);
+        }).catch((err: unknown) => {
           reject(err);
         });
       })(facetReferenceRef.current.uri);
@@ -403,12 +402,10 @@ const FacetChoicePicker = ({
   }
 
   /**
-   * Given the tuple object, return the filter's uniqueId
+   * Given the selected row object, return the filter's uniqueId
    * the filter's uniqueId (in case of entityPicker, it might be different from the tuple's uniqueId)
-   * @param  {Object} tuple      the tuple object
-   * @return {string}            filter's uniqueId
    */
-  const getFilterUniqueId = (tuple: any) => {
+  const getFilterUniqueId = (tuple: SelectedRow | Tuple) => {
     if (tuple.data && baseColumn.name in tuple.data) {
       // if the column is JSON, we need to stringify it otherwise it will print [object Object]
       // NOTE this is the exact same logic as ermrestjs
@@ -417,6 +414,7 @@ const FacetChoicePicker = ({
     return tuple.uniqueId;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const processFavorites = (rows: FacetCheckBoxRow[]): Promise<boolean> => {
     return new Promise((resolve) => {
       // TODO favorites
@@ -452,7 +450,7 @@ const FacetChoicePicker = ({
     const uiContextTitles = recordsetUIContextTitles ? [...recordsetUIContextTitles] : [];
 
     const recordsetConfig: RecordsetConfig = {
-      viewable: false,
+      viewable: facetColumn.isEntityMode,
       editable: false,
       deletable: false,
       sortable: true,
@@ -514,7 +512,7 @@ const FacetChoicePicker = ({
     return (selectedRows: SelectedRow[]) => {
       // create the list of choice filters
       let hasNull = false;
-      const filters = selectedRows.map(function (t: any) {
+      const filters = selectedRows.map((t) => {
         const val = getFilterUniqueId(t);
         hasNull = hasNull || (val === null);
         return val;
@@ -540,7 +538,7 @@ const FacetChoicePicker = ({
           updatedRows.push(getNullFacetCheckBoxRow(hasNull));
         }
 
-        selectedRows.forEach((row: any) => {
+        selectedRows.forEach((row) => {
           // filter and tuple uniqueId might be different
           const value = getFilterUniqueId(row);
 

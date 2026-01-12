@@ -381,7 +381,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('facet modal rows and columns', async ({ page, baseURL }, testInfo) => {
+  test('scalar facet modal rows and columns', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page and clear all filters', async () => {
       await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
@@ -403,6 +403,14 @@ test.describe('Other facet features', () => {
         await expect.soft(columnValues).toHaveCount(params.modalOptions.length);
 
         await expect.soft(columnValues).toHaveText(params.modalOptions);
+      });
+
+      await test.step('action columns should not be present.', async () => {
+        await expect.soft(RecordsetLocators.getViewActionButtons(modal)).toHaveCount(0);
+        await expect.soft(RecordsetLocators.getEditActionButtons(modal)).toHaveCount(0);
+        await expect.soft(RecordsetLocators.getDeleteActionButtons(modal)).toHaveCount(0);
+        // only the select header should be present
+        await expect.soft(RecordsetLocators.getActionsHeader(modal)).toHaveCount(1);
       });
 
       if (!params.sortable) {
@@ -576,7 +584,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('regarding the logic to show only certain number of selected items', async ({ page, baseURL }, testInfo) => {
+  test('the logic to show only certain number of selected items', async ({ page, baseURL }, testInfo) => {
     const params = testParams.hide_selected_items;
     const facet1 = RecordsetLocators.getFacetById(page, params.firstFacet.index);
     const facet2 = RecordsetLocators.getFacetById(page, params.secondFacet.index);
@@ -642,7 +650,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('regarding facets with shared path', async ({ page, baseURL }, testInfo) => {
+  test('facets with shared path', async ({ page, baseURL }, testInfo) => {
     const params = testParams.shared_path_prefix;
 
     await test.step('should load recordset page', async () => {
@@ -672,7 +680,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('regarding UnsupportedFilters handling', async ({ page, baseURL }, testInfo) => {
+  test('UnsupportedFilters handling', async ({ page, baseURL }, testInfo) => {
     const params = testParams.unsupported_filters_error;
     const pageURL = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
     const modal = ModalLocators.getErrorModal(page);
@@ -715,7 +723,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('regarding hide_row_count support in entity facet popups', async ({ page, baseURL }, testInfo) => {
+  test('hide_row_count support in entity facet popups', async ({ page, baseURL }, testInfo) => {
     await test.step('should load recordset page and clear all filters', async () => {
       await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
       await RecordsetLocators.waitForRecordsetPageReady(page);
@@ -807,7 +815,7 @@ test.describe('Other facet features', () => {
     });
   });
 
-  test('regarding URL limitation check', async ({ page, baseURL }, testInfo) => {
+  test('URL limitation check', async ({ page, baseURL }, testInfo) => {
     const params = testParams.maximumLength;
     const alert = AlertLocators.getWarningAlert(page);
     const facet1 = RecordsetLocators.getFacetById(page, params.facetIdx);

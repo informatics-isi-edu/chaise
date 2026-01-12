@@ -1,10 +1,13 @@
+import { ResizeSensor } from 'css-element-queries';
+import type { Tuple } from '@isrd-isi-edu/ermrestjs/src/models/reference';
+
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
-import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
-
-import { ResizeSensor } from 'css-element-queries';
+import DeleteConfirmationModal, {
+  DeleteConfirmationModalTypes,
+} from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -13,8 +16,19 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 
 // models
-import { DisabledRowType, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogParentActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  DisabledRowType,
+  RecordsetConfig,
+  RecordsetDisplayMode,
+  RecordsetSelectMode,
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  LogActions,
+  LogParentActions,
+  LogReloadCauses,
+  LogStackPaths,
+  LogStackTypes,
+} from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -30,25 +44,31 @@ import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type TableRowProps = {
-  config: RecordsetConfig,
-  rowIndex: number,
-  rowValues: any[],
-  tuple: any,
+  config: RecordsetConfig;
+  rowIndex: number;
+  rowValues: any[];
+  tuple: Tuple;
   /**
-   * Added to make sure the parent and this comp are using the same boolean
+   * Whether the action buttons column should be shown.
+   * Note: Added to make sure the parent and this comp are using the same boolean
    */
-  showActionButtons: boolean,
-  selected: boolean,
-  onSelectChange: (tuple: any) => void,
-  disabled: boolean,
-  disabledType?: DisabledRowType
-}
+  showActionButtons: boolean;
+  /**
+   * whether the view/edit/delete button should be shown in a separate column
+   * Note: Added to make sure the parent and this comp are using the same boolean
+   */
+  showSecondColumnActions: boolean;
+  selected: boolean;
+  onSelectChange: (tuple: Tuple) => void;
+  disabled: boolean;
+  disabledType?: DisabledRowType;
+};
 
 type ReadMoreStateProps = {
-  hideContent: boolean,
-  linkText: string,
-  maxHeightStyle: { maxHeight?: string }
-}
+  hideContent: boolean;
+  linkText: string;
+  maxHeightStyle: { maxHeight?: string };
+};
 
 const TableRow = ({
   config,
@@ -56,12 +76,12 @@ const TableRow = ({
   rowValues,
   tuple,
   showActionButtons,
+  showSecondColumnActions,
   selected,
   onSelectChange,
   disabled,
-  disabledType
+  disabledType,
 }: TableRowProps): JSX.Element => {
-
   /**
    * TODO this seems wrong, each row is not going to update on each recordset change..
    * while it should be only through recordset-table
@@ -69,8 +89,13 @@ const TableRow = ({
    * it wouldn't make any difference in terms of number of renders
    */
   const {
-    reference, setForceShowSpinner, update, getLogStack, getLogAction,
-    parentPageTuple, parentPageReference
+    reference,
+    setForceShowSpinner,
+    update,
+    getLogStack,
+    getLogAction,
+    parentPageTuple,
+    parentPageReference,
   } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
@@ -85,7 +110,7 @@ const TableRow = ({
   const tdPadding = 10;
   const moreButtonHeight = 20;
   const maxHeight = typeof CONFIG_MAX_ROW_HEIGHT === 'number' ? CONFIG_MAX_ROW_HEIGHT : 160;
-  const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
+  const defaultMaxHeightStyle = { maxHeight: maxHeight - moreButtonHeight + 'px' };
 
   const numImages = useRef<number>(0);
   const numImagesLoaded = useRef<number>(0);
@@ -95,7 +120,7 @@ const TableRow = ({
   const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
     hideContent: true,
     linkText: 'more',
-    maxHeightStyle: defaultMaxHeightStyle
+    maxHeightStyle: defaultMaxHeightStyle,
   });
   const [applySavedQuery, setApplySavedQuery] = useState<string | boolean>(false);
 
@@ -103,11 +128,11 @@ const TableRow = ({
    * state variable to open and close delete confirmation modal window
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
-    onConfirm: () => void,
-    onCancel: () => void,
-    buttonLabel: string,
-    message: JSX.Element,
-    reference?: any
+    onConfirm: () => void;
+    onCancel: () => void;
+    buttonLabel: string;
+    message: JSX.Element;
+    reference?: any;
   } | null>(null);
   /**
    * used to show loading indicator in the delete button
@@ -133,7 +158,6 @@ const TableRow = ({
 
   // TODO: logging
   const initializeOverflows = () => {
-
     setOverflow((prev) => {
       // Iterate over each <td> in the <tr>
       const newOverflow: boolean[] = [];
@@ -162,11 +186,12 @@ const TableRow = ({
       // NOTE: this is intended to fix the case when there is only 1 column in the table and the resize sensor causes an extra cell to show
       // if all overflows are false, detach the sensor
       const justOverflows = newOverflow.filter((overflow: boolean) => {
-        return overflow === true
+        return overflow === true;
       });
 
       // add length check so this only triggers for the reason from the above comment
-      if (sensor.current && rowValues.length === 1 && justOverflows.length === 0) sensor.current.detach();
+      if (sensor.current && rowValues.length === 1 && justOverflows.length === 0)
+        sensor.current.detach();
 
       /**
        * the following makes sure we're not rerendering the component if nothing has changed
@@ -195,24 +220,23 @@ const TableRow = ({
   // onload will update a state variable to communicate when all images have loaded to trigger overflow logic once more
   useLayoutEffect(() => {
     if (!rowContainer.current || disableMaxRowHeightFeature) return;
-    const tempSensor = new ResizeSensor(
-      rowContainer.current,
-      () => initializeOverflows()
-    )
+    const tempSensor = new ResizeSensor(rowContainer.current, () => initializeOverflows());
 
     sensor.current = tempSensor;
 
     // fetch all <img> tags with -chaise-post-load class and keep count of the total
     // attach an onload function that updates how many have loaded
-    const imgTags = Array.from<HTMLImageElement>(rowContainer.current.querySelectorAll(
-      `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
-    )).filter(img => !img.complete);
-    if (imgTags.length > numImages.current) numImages.current = imgTags.length
+    const imgTags = Array.from<HTMLImageElement>(
+      rowContainer.current.querySelectorAll(
+        `img.${CLASS_NAMES.CONTENT_LOADED}, .${CLASS_NAMES.CONTENT_LOADED} img`
+      )
+    ).filter((img) => !img.complete);
+    if (imgTags.length > numImages.current) numImages.current = imgTags.length;
 
     const onImageLoad = () => {
       numImagesLoaded.current++;
       if (numImagesLoaded.current === numImages.current) initializeOverflows();
-    }
+    };
 
     imgTags.forEach((image: HTMLImageElement) => {
       image.addEventListener('load', onImageLoad);
@@ -225,7 +249,7 @@ const TableRow = ({
         image.removeEventListener('load', onImageLoad);
         image.removeEventListener('error', onImageLoad);
       });
-    }
+    };
   }, [rowValues]);
 
   /**
@@ -239,7 +263,7 @@ const TableRow = ({
 
   const getRowLogAction = (action: LogActions) => {
     return getLogAction(action, LogStackPaths.ENTITY);
-  }
+  };
 
   const tupleReference = tuple.reference,
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
@@ -255,16 +279,36 @@ const TableRow = ({
    */
   let parentTable: JSX.Element, currentTable: JSX.Element, currentTuple: JSX.Element;
   try {
-    parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
-    currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
-    currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
+    parentTable = parentPageReference ? (
+      <code>
+        <DisplayValue value={parentPageReference.displayname}></DisplayValue>
+      </code>
+    ) : (
+      <></>
+    );
+    currentTable = (
+      <code>
+        <DisplayValue value={reference.displayname}></DisplayValue>
+      </code>
+    );
+    currentTuple = (
+      <code>
+        <DisplayValue value={tuple.displayname}></DisplayValue>
+      </code>
+    );
   } catch (exp) {
     parentTable = currentTable = currentTuple = <></>;
   }
 
   let logStack: any;
   if (tupleReference) {
-    logStack = getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo));
+    logStack = getLogStack(
+      LogService.getStackNode(
+        LogStackTypes.ENTITY,
+        tupleReference.table,
+        tupleReference.filterLogInfo
+      )
+    );
   }
 
   // apply saved query link
@@ -276,25 +320,36 @@ const TableRow = ({
 
     const facetString = tuple.data.encoded_facets ? `/*::facets::${tuple.data.encoded_facets}` : '';
     const ermrestPath = parentPageReference.unfilteredReference.uri + facetString;
-    ConfigService.ERMrest.resolve(ermrestPath).then((savedQueryRef: any) => {
-      const savedQueryLink = savedQueryRef.contextualize.compact.appLink;
-      const qCharacter = savedQueryLink.indexOf('?') !== -1 ? '&' : '?';
-      // TODO: change from HTML link to refresh page to:
-      //    "updateFacets on main entity and add to browser history stack"
-      // after update, put last_execution_time as "now"
-      setApplySavedQuery(savedQueryLink + qCharacter + 'savedQueryRid=' + tuple.data.RID + '&paction=' + LogParentActions.APPLY_SAVED_QUERY);
-    }).catch((error: any) => {
-      $log.warn(error);
-      // fail silently and degrade the UX (hide the apply button)
-      // show the disabled apply button
-      setApplySavedQuery(false);
-    });
+    ConfigService.ERMrest.resolve(ermrestPath)
+      .then((savedQueryRef: any) => {
+        const savedQueryLink = savedQueryRef.contextualize.compact.appLink;
+        const qCharacter = savedQueryLink.indexOf('?') !== -1 ? '&' : '?';
+        // TODO: change from HTML link to refresh page to:
+        //    "updateFacets on main entity and add to browser history stack"
+        // after update, put last_execution_time as "now"
+        setApplySavedQuery(
+          savedQueryLink +
+            qCharacter +
+            'savedQueryRid=' +
+            tuple.data.RID +
+            '&paction=' +
+            LogParentActions.APPLY_SAVED_QUERY
+        );
+      })
+      .catch((error: any) => {
+        $log.warn(error);
+        // fail silently and degrade the UX (hide the apply button)
+        // show the disabled apply button
+        setApplySavedQuery(false);
+      });
   }
 
   // view link
   let viewLink: string;
-  if (config.viewable) {
-    viewLink = addQueryParamsToURL(tupleReference.contextualize.detailed.appLink, { paction: LogParentActions.VIEW });
+  if (config.viewable && tupleReference) {
+    viewLink = addQueryParamsToURL(tupleReference.contextualize.detailed.appLink, {
+      paction: LogParentActions.VIEW,
+    });
   }
 
   // edit button
@@ -306,17 +361,23 @@ const TableRow = ({
 
       if (newRef) {
         const editLink = addQueryParamsToURL(newRef.appLink, {
-          invalidate: requestID
+          invalidate: requestID,
         });
 
-        fireCustomEvent(CUSTOM_EVENTS.ROW_EDIT_INTEND, rowContainer.current, { ...eventDetails, id: requestID });
+        fireCustomEvent(CUSTOM_EVENTS.ROW_EDIT_INTEND, rowContainer.current, {
+          ...eventDetails,
+          id: requestID,
+        });
 
         windowRef.open(editLink, '_blank');
 
-        LogService.logClientAction({
-          action: getRowLogAction(LogActions.EDIT_INTEND),
-          stack: logStack
-        }, tupleReference.defaultLogInfo);
+        LogService.logClientAction(
+          {
+            action: getRowLogAction(LogActions.EDIT_INTEND),
+            stack: logStack,
+          },
+          tupleReference.defaultLogInfo
+        );
       } else {
         $log.debug('Error: reference is undefined or null');
       }
@@ -340,8 +401,7 @@ const TableRow = ({
           deleteOrUnlink(associationRef, isRelated, true);
         };
       }
-    }
-    else if (tuple.canDelete) {
+    } else if (tuple.canDelete) {
       // define delete function
       deleteCallback = function () {
         deleteOrUnlink(tupleReference, isRelated);
@@ -351,41 +411,58 @@ const TableRow = ({
 
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     validateSessionBeforeMutation(() => {
-      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-        LogService.logClientAction({
-          action: getRowLogAction(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
-          stack: logStack
-        }, reference.defaultLogInfo);
+      if (
+        ConfigService.chaiseConfig.confirmDelete === undefined ||
+        ConfigService.chaiseConfig.confirmDelete
+      ) {
+        LogService.logClientAction(
+          {
+            action: getRowLogAction(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
+            stack: logStack,
+          },
+          reference.defaultLogInfo
+        );
 
         const confirmMessage: JSX.Element = (
           <>
-            {!isUnlink && <>Are you sure you want to delete {currentTable}:{currentTuple}?</>}
-            {isUnlink && <>Are you sure you want to disconnect {currentTable}:{currentTuple} from this {parentTable}?</>}
+            {!isUnlink && (
+              <>
+                Are you sure you want to delete {currentTable}:{currentTuple}?
+              </>
+            )}
+            {isUnlink && (
+              <>
+                Are you sure you want to disconnect {currentTable}:{currentTuple} from this{' '}
+                {parentTable}?
+              </>
+            )}
           </>
         );
 
         setShowDeleteConfirmationModal({
           buttonLabel: isUnlink ? 'Unlink' : 'Delete',
-          onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+          onConfirm: () => {
+            onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
+          },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
-            const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
-            LogService.logClientAction({
-              action: getRowLogAction(actionVerb),
-              stack: logStack
-            }, reference.defaultLogInfo);
+            const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL;
+            LogService.logClientAction(
+              {
+                action: getRowLogAction(actionVerb),
+                stack: logStack,
+              },
+              reference.defaultLogInfo
+            );
           },
           message: confirmMessage,
-          reference: !isUnlink ? reference : undefined
+          reference: !isUnlink ? reference : undefined,
         });
-
       } else {
         onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
       }
-    })
+    });
     $log.debug('deleting tuple!');
-
-
 
     return;
   };
@@ -401,61 +478,68 @@ const TableRow = ({
     const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
     const logObj = {
       action: getRowLogAction(actionVerb),
-      stack: logStack
+      stack: logStack,
     };
-    reference.delete(null, logObj).then(() => {
-      if (!isRelated) {
-        // ask flow-control to update the page
-        // this will also make sure to remove the "disabled" row
-        update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
-      }
-      fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
-    }).catch((error: any) => {
-      setWaitingForDelete(false);
-      dispatchError({ error: error, isDismissible: true });
-    }).finally(() => {
-      // hide the spinner
-      setForceShowSpinner(false);
-    });
-  }
+    reference
+      .delete(null, logObj)
+      .then(() => {
+        if (!isRelated) {
+          // ask flow-control to update the page
+          // this will also make sure to remove the "disabled" row
+          update({ updateResult: true, updateCount: true, updateFacets: true }, null, {
+            cause: LogReloadCauses.ENTITY_DELETE,
+          });
+        }
+        fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
+      })
+      .catch((error: any) => {
+        setWaitingForDelete(false);
+        dispatchError({ error: error, isDismissible: true });
+      })
+      .finally(() => {
+        // hide the spinner
+        setForceShowSpinner(false);
+      });
+  };
 
   const readMore = () => {
     if (readMoreObj.hideContent) {
       setReadMoreObj({
         hideContent: false,
         linkText: 'less',
-        maxHeightStyle: {}
+        maxHeightStyle: {},
       });
     } else {
       setReadMoreObj({
         hideContent: true,
         linkText: 'more',
-        maxHeightStyle: defaultMaxHeightStyle
+        maxHeightStyle: defaultMaxHeightStyle,
       });
     }
-  }
+  };
 
-  const renderActionButtons = () => {
-    switch (config.selectMode) {
+  const renderActionButtons = (selectMode?: RecordsetSelectMode, newTab?: boolean) => {
+    switch (selectMode) {
       case RecordsetSelectMode.SINGLE_SELECT:
-        return (<ChaiseTooltip
-          placement='bottom-start'
-          tooltip={singleSelectIconTooltip}
-        >
-          <button
-            className={'select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn'}
-            type='button'
-            disabled={rowDisabled}
-            onClick={() => onSelectChange(tuple)}
-          >
-            {selected && <span className={'chaise-btn-icon fa-solid fa-circle'}></span>}
-          </button>
-        </ChaiseTooltip>);
+        return (
+          <ChaiseTooltip placement='bottom-start' tooltip={singleSelectIconTooltip}>
+            <button
+              className={
+                'select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn'
+              }
+              type='button'
+              disabled={rowDisabled}
+              onClick={() => onSelectChange(tuple)}
+            >
+              {selected && <span className={'chaise-btn-icon fa-solid fa-circle'}></span>}
+            </button>
+          </ChaiseTooltip>
+        );
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
             <input
-              className={(selected || rowDisabled) ? 'checked' : ''}
+              className={selected || rowDisabled ? 'checked' : ''}
               type='checkbox'
               checked={selected || rowDisabled}
               disabled={rowDisabled}
@@ -473,129 +557,163 @@ const TableRow = ({
           </div>
         );
       default:
-        const ApplySavedQueryTag = (applySavedQuery === false || rowDisabled) ? 'span' : 'a';
-        let applySavedQueryBtnClass = 'apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
+        const ApplySavedQueryTag = applySavedQuery === false || rowDisabled ? 'span' : 'a';
+        let applySavedQueryBtnClass =
+          'apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn';
         if (applySavedQuery === false || rowDisabled) {
           applySavedQueryBtnClass += ' disabled';
         }
 
         return (
           <div className='chaise-btn-group chaise-btn-group-no-border'>
-            {isSavedQueryPopup && (applySavedQuery || applySavedQuery === false) &&
+            {isSavedQueryPopup && (applySavedQuery || applySavedQuery === false) && (
               <ChaiseTooltip
-                tooltip={applySavedQuery ? 'Apply search criteria' : 'Search criteria cannot be applied'}
+                tooltip={
+                  applySavedQuery ? 'Apply search criteria' : 'Search criteria cannot be applied'
+                }
                 placement='bottom'
               >
                 <a className={applySavedQueryBtnClass} href={applySavedQuery as string}>
                   <span className='chaise-btn-icon fa-regular fa-square-check'></span>
                 </a>
               </ChaiseTooltip>
-            }
-            {viewLink &&
+            )}
+            {viewLink && (
               <ChaiseTooltip
-                tooltip='View Details'
+                tooltip={`View details${newTab ? ' in a new tab' : ''}`}
                 placement='bottom'
               >
                 <a
                   type='button'
                   className={`view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn ${rowDisabled ? ' disabled' : ''}`}
                   href={!rowDisabled ? viewLink : undefined}
+                  {...(newTab && { target: '_blank' })}
                 >
                   <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
                 </a>
               </ChaiseTooltip>
-            }
-            {editCallback &&
-              <ChaiseTooltip
-                tooltip='Edit'
-                placement='bottom'
-              >
+            )}
+            {editCallback && (
+              <ChaiseTooltip tooltip='Edit this record in a new tab.' placement='bottom'>
                 <button
-                  type='button' className='edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  disabled={rowDisabled} onClick={editCallback}
+                  type='button'
+                  className='edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
+                  disabled={rowDisabled}
+                  onClick={editCallback}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pencil'></span>
                 </button>
               </ChaiseTooltip>
-            }
-            {deleteCallback &&
-              <ChaiseTooltip
-                tooltip={'Delete'}
-                placement='bottom'
-              >
+            )}
+            {deleteCallback && (
+              <ChaiseTooltip tooltip={'Delete this record.'} placement='bottom'>
                 <button
-                  type='button' className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  disabled={rowDisabled} onClick={deleteCallback}
+                  type='button'
+                  className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
+                  disabled={rowDisabled}
+                  onClick={deleteCallback}
                 >
-                  {waitingForDelete && <Spinner size='sm' animation='border' className='delete-loader' />}
-                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-trash-can'></span>}
+                  {waitingForDelete && (
+                    <Spinner size='sm' animation='border' className='delete-loader' />
+                  )}
+                  {!waitingForDelete && (
+                    <span className='chaise-btn-icon fa-regular fa-trash-can'></span>
+                  )}
                 </button>
               </ChaiseTooltip>
-            }
-            {unlinkCallback &&
+            )}
+            {unlinkCallback && (
               <ChaiseTooltip
-                tooltip={<>Disconnect {currentTable}:{currentTuple} from this {parentTable}.</>}
+                tooltip={
+                  <>
+                    Disconnect {currentTable}:{currentTuple} from this {parentTable}.
+                  </>
+                }
                 placement='bottom'
               >
                 <button
-                  type='button' className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  disabled={rowDisabled} onClick={unlinkCallback}
+                  type='button'
+                  className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
+                  disabled={rowDisabled}
+                  onClick={unlinkCallback}
                 >
-                  {waitingForDelete && <Spinner size='sm' animation='border' className='delete-loader' />}
+                  {waitingForDelete && (
+                    <Spinner size='sm' animation='border' className='delete-loader' />
+                  )}
                   {/* TODO record the icon must be reviewed*/}
-                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>}
+                  {!waitingForDelete && (
+                    <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
+                  )}
                 </button>
               </ChaiseTooltip>
-            }
-
+            )}
           </div>
-        )
+        );
     }
-
   };
 
   const renderCells = () => {
+    // the overflow index should be shifted only if we're showing the action buttons
+    let shift = 0;
+    if (showActionButtons) shift += 1;
+    if (showSecondColumnActions) shift += 1;
+
     // rowValues is an array of values for each column. Does not include action column
-    return rowValues.map((value: any, colIndex: number) => {
+    return rowValues.map((value, colIndex) => {
       return (
-        <td key={rowIndex + '-' + colIndex} className={rowDisabled ? 'disabled-cell' : ''}>
+        <td key={rowIndex + '-' + colIndex} className={'table-value-cell' + (rowDisabled ? ' disabled-cell' : '')}>
           <div
-            className={'display-value ' + (!disableMaxRowHeightFeature && readMoreObj.hideContent === true ? 'hideContent' : 'showContent')}
+            className={
+              'display-value ' +
+              (!disableMaxRowHeightFeature && readMoreObj.hideContent === true
+                ? 'hideContent'
+                : 'showContent')
+            }
             style={!disableMaxRowHeightFeature ? readMoreObj.maxHeightStyle : {}}
           >
             <DisplayValue addClass={true} value={value} />
           </div>
-          {/* the overflow index should be shifted only if we're showing the action buttons */}
-          {(!disableMaxRowHeightFeature && overflow[colIndex + (showActionButtons ? 1 : 0)]) && <div style={{ 'display': 'inline' }}>
-            {' ... '}
-            <span
-              className='text-primary readmore'
-              style={{ 'display': 'inline-block', 'textDecoration': 'underline', 'cursor': 'pointer' }}
-              onClick={readMore}
-            >
-              {readMoreObj.linkText}
-            </span>
-          </div>}
+          {!disableMaxRowHeightFeature && overflow[colIndex + shift] && (
+            <div style={{ display: 'inline' }}>
+              {' ... '}
+              <span
+                className='text-primary readmore'
+                style={{ display: 'inline-block', textDecoration: 'underline', cursor: 'pointer' }}
+                onClick={readMore}
+              >
+                {readMoreObj.linkText}
+              </span>
+            </div>
+          )}
         </td>
-      )
+      );
     });
-  }
+  };
 
   return (
     <>
       <tr
         className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
         ref={rowContainer}
-        style={{ 'position': 'relative' }}
+        style={{ position: 'relative' }}
       >
-        {showActionButtons && <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
-          <div className='action-btns-inner-container'>
-            {renderActionButtons()}
-          </div>
-        </td>}
+        {showActionButtons && (
+          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
+            <div className='action-btns-inner-container'>
+              {renderActionButtons(config.selectMode)}
+            </div>
+          </td>
+        )}
+        {showSecondColumnActions && (
+          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
+            <div className='action-btns-inner-container'>
+              {renderActionButtons(undefined, true)}
+            </div>
+          </td>
+        )}
         {renderCells()}
       </tr>
-      {showDeleteConfirmationModal &&
+      {showDeleteConfirmationModal && (
         <DeleteConfirmationModal
           show={!!showDeleteConfirmationModal}
           message={showDeleteConfirmationModal.message}
@@ -605,9 +723,9 @@ const TableRow = ({
           reference={showDeleteConfirmationModal.reference}
           context={DeleteConfirmationModalTypes.SINGLE}
         />
-      }
+      )}
     </>
-  )
-}
+  );
+};
 
 export default TableRow;

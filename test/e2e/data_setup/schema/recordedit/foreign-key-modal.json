@@ -1,0 +1,84 @@
+{
+  "schema_name": "foreign-key-modal",
+  "tables": {
+    "parent_table": {
+      "kind": "table",
+      "table_name": "parent_table",
+      "schema_name": "foreign-key-modal",
+      "keys": [{ "unique_columns": ["id"] }],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": { "typename": "text" },
+          "nullok": false
+        },
+        {
+          "name": "fk1_col",
+          "type": { "typename": "text" },
+          "nullok": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["foreign-key-modal", "parent_table_fk1"]],
+          "foreign_key_columns": [
+            {
+              "schema_name": "foreign-key-modal",
+              "table_name": "parent_table",
+              "column_name": "fk1_col"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "schema_name": "foreign-key-modal",
+              "table_name": "fk1_table",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id",
+            {
+              "source": [
+                {"outbound": ["foreign-key-modal", "parent_table_fk1"]},
+                "RID"
+              ],
+              "markdown_name": "fk1"
+            }
+          ]
+        }
+      }
+    },
+    "fk1_table": {
+      "kind": "table",
+      "table_name": "fk1_table",
+      "schema_name": "foreign-key-modal",
+      "keys": [{ "unique_columns": ["id"] }],
+      "column_definitions": [
+        {
+          "name": "id",
+          "type": { "typename": "text" },
+          "nullok": false
+        },
+        {
+          "name": "name",
+          "type": { "typename": "text" },
+          "nullok": false
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "name"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "*": {
+            "row_order": [{ "column": "id" }]
+          }
+        }
+      }
+    }
+  }
+}

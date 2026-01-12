@@ -29,7 +29,7 @@ import ErrorProvider from '@isrd-isi-edu/chaise/src/providers/error';
 import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
-import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -162,7 +162,7 @@ const AppWrapperInner = ({
    * show a modal if users click on an external link
    */
   const overrideExternalLinkBehavior = () => {
-    addClickListener('a.external-link', (e: Event, element: HTMLAnchorElement) => {
+    addClickListener(document.body, 'a.external-link', (e: Event, element: HTMLAnchorElement) => {
       e.preventDefault();
       setExternalLink(element.href);
     });
@@ -172,7 +172,7 @@ const AppWrapperInner = ({
    * send a header request if we have to check download links
    */
   const overrideDownloadClickBehavior = () => {
-    addClickListener('a.asset-permission', function (e: Event, element: HTMLAnchorElement) {
+    addClickListener(document.body, 'a.asset-permission', (e: Event, element: HTMLAnchorElement) => {
       e.preventDefault();
 
       const spinnerHTML = `
@@ -212,7 +212,7 @@ const AppWrapperInner = ({
    * add the listener for the chaise-image-preview to zoom in/out
    */
   const overrideImagePreviewBehavior = () => {
-    addClickListener('.chaise-image-preview', function (e: Event, element: HTMLAnchorElement) {
+    addClickListener(document.body, '.chaise-image-preview', function (e: Event, element: HTMLAnchorElement) {
       e.preventDefault();
       e.stopPropagation();
 

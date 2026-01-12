@@ -131,13 +131,16 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
 
   const populateRecordsetModalProps = (domainFilterFormNumber?: number) => {
     const recordsetConfig: RecordsetConfig = {
-      viewable: false,
-      editable: false,
-      deletable: false,
+      viewable: true,
+      editable: true,
+      deletable: true,
       sortable: true,
       selectMode: RecordsetSelectMode.SINGLE_SELECT,
       disableFaceting: false,
-      displayMode: (props.appMode === appModes.EDIT) ? RecordsetDisplayMode.FK_POPUP_EDIT : RecordsetDisplayMode.FK_POPUP_CREATE,
+      displayMode:
+        props.appMode === appModes.EDIT
+          ? RecordsetDisplayMode.FK_POPUP_EDIT
+          : RecordsetDisplayMode.FK_POPUP_CREATE,
     };
 
     const ref = createForeignKeyReference(

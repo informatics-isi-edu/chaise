@@ -4,7 +4,7 @@ import { TestInfo } from '@playwright/test';
 import axios from 'axios';
 
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { ENTITIES_PATH, ERMREST_URL } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, ENTITIES_PATH, ERMREST_URL } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
@@ -129,6 +129,11 @@ export const getEntityRow = (testInfo: TestInfo, schema: string, table: string, 
   }
   return match;
 }
+
+export const getEntityRowURL = (testInfo: TestInfo, appName: APP_NAMES, schemaName: string, tableName: string, rowVal: EntityRowColumnValues) => {
+  const savedData = getEntityRow(testInfo, schemaName, tableName, rowVal);
+  return `/${appName}/#${getCatalogID(testInfo.project.name)}/${schemaName}:${tableName}/RID=${savedData.RID}`;
+};
 
 /**
  * remove a given catalog

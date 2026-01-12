@@ -192,11 +192,11 @@ To debug Playwright tests,
 
 1. Add `await page.pause();` wherever you want the execution to stop.
 
-2. Use the `--debug` CLI argument. You can also use `--max-failures=1` and `project=chrome` to limit the run:
+2. Use the `--debug` CLI argument. You can also use `-x` (stop after first failure) and `project=chrome` to limit the run:
 
   ```
   npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug
-  npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug --max-failures=1
+  npx playwright test --config CONFIG_LOC --project=NAME_OF_PROEJECT --debug -x
   ```
 
 More info: https://playwright.dev/docs/test-cli

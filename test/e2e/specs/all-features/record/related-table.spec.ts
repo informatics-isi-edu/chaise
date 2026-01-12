@@ -852,7 +852,8 @@ test.describe('Related tables', () => {
       column_names: ['static1', 'main_fk_col', 'leaf_fk_col'],
       resultset_values: [['', '2004', '10'], ['', '2004', '7']],
       related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']],
-      bulk_modal_title: 'Select a set of leaf_fk_col for association_table_w_static_column'
+      bulk_modal_title: 'Select a set of leaf_fk_col for association_table_w_static_column',
+      num_rows_in_bulk_modal: 10
     }
 
     test('with fk inputs as modals', async ({ page }) => {

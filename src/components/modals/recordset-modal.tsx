@@ -21,6 +21,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { openLinksInTab } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 export type RecordestModalProps = {
   /**
@@ -107,6 +108,8 @@ const RecordsetModal = ({
   // these attributes are used for handling the scrollbar in recordset:
   const modalContainer = useRef<any>(null);
   const modalHeader = useRef<HTMLDivElement>(null);
+  const openLinksInTabRef = useRef<any>(false);
+
   const [showRecordset, setShowRecordset] = useState(false);
 
   /**
@@ -147,6 +150,12 @@ const RecordsetModal = ({
    * so we can properly create the scrollable area.
    */
   useLayoutEffect(() => {
+    if (displayMode.indexOf(RecordsetDisplayMode.FK_POPUP) === 0) {
+      const wrapper = modalContainer.current
+        ? (modalContainer.current.dialog.querySelector('.modal-content') as HTMLDivElement)
+        : undefined;
+      openLinksInTabRef.current = openLinksInTab(wrapper);
+    }
     setShowRecordset(true);
   }, []);
 
@@ -175,6 +184,13 @@ const RecordsetModal = ({
   }, [submittedRows]);
 
   //-------------------  UI related callbacks:   --------------------//
+  const onHide = () => {
+    if (openLinksInTabRef.current) {
+      openLinksInTabRef.current.remove();
+    }
+    onClose();
+  }
+
   const onSelectedRowsChangedWrapper = (selectedRows: SelectedRow[]) => {
     setSubmittedRows(selectedRows);
     if (onSelectedRowsChanged) {
@@ -196,7 +212,7 @@ const RecordsetModal = ({
       },
       recordsetProps.initialReference
     );
-    onClose();
+    onHide();
   };
 
   //-------------------  render logic:   --------------------//
@@ -366,7 +382,7 @@ const RecordsetModal = ({
       className={`search-popup ${modalClassName ? modalClassName : ''}`}
       size={modalSize}
       show={true}
-      onHide={onClose}
+      onHide={onHide}
       ref={modalContainer}
     >
       {showSubmitSpinner &&
