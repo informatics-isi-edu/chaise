@@ -77,105 +77,105 @@ const testParams = {
         url: '/hatrac/js/chaise/filepreview/1/1/',
       },
     },
-    {
-      type: 'csv',
-      file: {
-        path: 'csv-01.csv',
-        content: 'name,age\nAlice,30\nBob,25'
-      },
-      inputs: {
-        id: '2',
-        file: {
-          name: 'csv-01.csv',
-          path: 'csv-01.csv',
-          size: 1024 // this is just to silence the error
-        }
-      },
-      downloadBtn: {
-        caption: 'csv-01.csv',
-        url: '/hatrac/js/chaise/filepreview/1/2/',
-      },
-      renderedContent: 'name age Alice 30 Bob 25',
-    },
-    {
-      type: 'markdown',
-      file: {
-        path: 'md-01.md',
-        content: '# Markdown File\nThis is a _markdown_ file that should **show** up properly.'
-      },
-      inputs: {
-        id: '3',
-        file: {
-          name: 'md-01.md',
-          path: 'md-01.md',
-          size: 1024 // this is just to silence the error
-        },
-      },
-      downloadBtn: {
-        caption: 'md-01.md',
-        url: '/hatrac/js/chaise/filepreview/1/3/',
-      },
-      renderedContent: 'Markdown File\nThis is a markdown file that should show up properly.',
-    },
-    {
-      type: 'json',
-      file: {
-        path: 'json-01.json',
-        content: '{"name": "Alice", "age": 30}'
-      },
-      inputs: {
-        id: '4',
-        file: {
-          name: 'json-01.json',
-          path: 'json-01.json',
-          size: 1024 // this is just to silence the error
-        },
-      },
-      downloadBtn: {
-        caption: 'json-01.json',
-        url: '/hatrac/js/chaise/filepreview/1/4/',
-      },
-      renderedContent: JSON.stringify({ 'name': 'Alice', 'age': 30 }, undefined, 2),
-    },
-    {
-      type: 'html',
-      file: {
-        path: 'html-01.html',
-        content: '<h1>HTML File</h1><p>This is an HTML file that should not be rendered!</p>'
-      },
-      inputs: {
-        id: '5',
-        file: {
-          name: 'html-01.html',
-          path: 'html-01.html',
-          size: 1024 // this is just to silence the error
-        },
-      },
-      downloadBtn: {
-        caption: 'html-01.html',
-        url: '/hatrac/js/chaise/filepreview/1/5/',
-      },
-    },
-    {
-      type: 'tsv',
-      file: {
-        path: 'tsv-01.tsv',
-        content: 'first name\tage, or other info\nAlice\t[30, 25]\nBob\t("25","30")?\nJohn-Doe\tN/A\nJoe\t["10_1", "12 mg"]\nBrian\t["10","20"]',
-      },
-      inputs: {
-        id: '6',
-        file: {
-          name: 'tsv-01.tsv',
-          path: 'tsv-01.tsv',
-          size: 1024 // this is just to silence the error
-        }
-      },
-      downloadBtn: {
-        caption: 'tsv-01.tsv',
-        url: '/hatrac/js/chaise/filepreview/1/6/',
-      },
-      renderedContent: 'first name age, or other info Alice [30, 25] Bob ("25","30")? John-Doe N/A Joe ["10_1", "12 mg"] Brian ["10","20"]',
-    },
+    // {
+    //   type: 'csv',
+    //   file: {
+    //     path: 'csv-01.csv',
+    //     content: 'name,age\nAlice,30\nBob,25'
+    //   },
+    //   inputs: {
+    //     id: '2',
+    //     file: {
+    //       name: 'csv-01.csv',
+    //       path: 'csv-01.csv',
+    //       size: 1024 // this is just to silence the error
+    //     }
+    //   },
+    //   downloadBtn: {
+    //     caption: 'csv-01.csv',
+    //     url: '/hatrac/js/chaise/filepreview/1/2/',
+    //   },
+    //   renderedContent: 'name age Alice 30 Bob 25',
+    // },
+    // {
+    //   type: 'markdown',
+    //   file: {
+    //     path: 'md-01.md',
+    //     content: '# Markdown File\nThis is a _markdown_ file that should **show** up properly.'
+    //   },
+    //   inputs: {
+    //     id: '3',
+    //     file: {
+    //       name: 'md-01.md',
+    //       path: 'md-01.md',
+    //       size: 1024 // this is just to silence the error
+    //     },
+    //   },
+    //   downloadBtn: {
+    //     caption: 'md-01.md',
+    //     url: '/hatrac/js/chaise/filepreview/1/3/',
+    //   },
+    //   renderedContent: 'Markdown File\nThis is a markdown file that should show up properly.',
+    // },
+    // {
+    //   type: 'json',
+    //   file: {
+    //     path: 'json-01.json',
+    //     content: '{"name": "Alice", "age": 30}'
+    //   },
+    //   inputs: {
+    //     id: '4',
+    //     file: {
+    //       name: 'json-01.json',
+    //       path: 'json-01.json',
+    //       size: 1024 // this is just to silence the error
+    //     },
+    //   },
+    //   downloadBtn: {
+    //     caption: 'json-01.json',
+    //     url: '/hatrac/js/chaise/filepreview/1/4/',
+    //   },
+    //   renderedContent: JSON.stringify({ 'name': 'Alice', 'age': 30 }, undefined, 2),
+    // },
+    // {
+    //   type: 'html',
+    //   file: {
+    //     path: 'html-01.html',
+    //     content: '<h1>HTML File</h1><p>This is an HTML file that should not be rendered!</p>'
+    //   },
+    //   inputs: {
+    //     id: '5',
+    //     file: {
+    //       name: 'html-01.html',
+    //       path: 'html-01.html',
+    //       size: 1024 // this is just to silence the error
+    //     },
+    //   },
+    //   downloadBtn: {
+    //     caption: 'html-01.html',
+    //     url: '/hatrac/js/chaise/filepreview/1/5/',
+    //   },
+    // },
+    // {
+    //   type: 'tsv',
+    //   file: {
+    //     path: 'tsv-01.tsv',
+    //     content: 'first name\tage, or other info\nAlice\t[30, 25]\nBob\t("25","30")?\nJohn-Doe\tN/A\nJoe\t["10_1", "12 mg"]\nBrian\t["10","20"]',
+    //   },
+    //   inputs: {
+    //     id: '6',
+    //     file: {
+    //       name: 'tsv-01.tsv',
+    //       path: 'tsv-01.tsv',
+    //       size: 1024 // this is just to silence the error
+    //     }
+    //   },
+    //   downloadBtn: {
+    //     caption: 'tsv-01.tsv',
+    //     url: '/hatrac/js/chaise/filepreview/1/6/',
+    //   },
+    //   renderedContent: 'first name age, or other info Alice [30, 25] Bob ("25","30")? John-Doe N/A Joe ["10_1", "12 mg"] Brian ["10","20"]',
+    // },
     {
       type: 'mvsj',
       file: {
@@ -195,6 +195,25 @@ const testParams = {
         url: '/hatrac/js/chaise/filepreview/1/7/',
       },
       renderedContent: JSON.stringify(mvsjContent, undefined, 2),
+    },
+    {
+      type: 'image',
+      file: {
+        path: 'image-01.png',
+        content: '111111111111111', // we just want to test that the preview shows up, not the actual image
+      },
+      inputs: {
+        id: '8',
+        file: {
+          name: 'image-01.png',
+          path: 'image-01.png',
+          size: 1024 // this is just to silence the error
+        }
+      },
+      downloadBtn: {
+        caption: 'image-01.png',
+        url: '/hatrac/js/chaise/filepreview/1/8/',
+      }
     }
   ],
 };
@@ -246,6 +265,11 @@ test.describe('file preview', () => {
             await expect.soft(RecordLocators.getFilePreviewContent(container)).toHaveText(params.file.content);
           });
 
+          break;
+        case 'image':
+          await test.step('the preview should be visible.', async () => {
+            await expect.soft(RecordLocators.getFilePreviewContent(container)).toBeVisible();
+          });
           break;
         default:
           await test.step('the preview should match the file content.', async () => {

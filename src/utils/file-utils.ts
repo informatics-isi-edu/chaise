@@ -1,7 +1,8 @@
 import Papa from 'papaparse';
 
 // ermrestjs
-import type { AssetPseudoColumn, FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+import type { FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/services/file-preview';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -9,7 +10,6 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * Format file content for display - attempts to format JSON, otherwise returns as-is
@@ -72,40 +72,35 @@ export interface FileInfo {
 /**
  * send a HEAD request to get the file information.
  */
-export const getFileInfo = async (url: string, storedFilename?: string, column?: AssetPseudoColumn): Promise<FileInfo> => {
+export const getFileInfo = async (
+  url: string,
+  storedFilename?: string,
+  column?: AssetPseudoColumn
+): Promise<FileInfo> => {
   let errorMessage = '';
 
   try {
-    const response = await ConfigService.http.head(url, { skipHTTP401Handling: true, skipRetryBrowserError: true });
+    const response = await ConfigService.http.head(url, {
+      skipHTTP401Handling: true,
+      skipRetryBrowserError: true,
+    });
     const contentDisposition = response.headers['content-disposition'] || '';
     const contentType = response.headers['content-type'] || '';
     const contentLength = response.headers['content-length'];
-    const canHandleRange = response.headers['accept-ranges'] !== 'none';
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
-    const previewType = ConfigService.ERMrest.FilePreviewConfig.getPreviewType(url, column, storedFilename, contentDisposition, contentType);
-    const filePreviewProps = column ? column.filePreview : undefined;
+    const res = ConfigService.ERMrest.FilePreviewService.getFilePreviewInfo(
+      url,
+      column,
+      storedFilename,
+      contentDisposition,
+      contentType
+    );
 
-    let prefetchBytes;
-    if (canHandleRange) {
-      if (filePreviewProps) {
-        prefetchBytes = filePreviewProps.getPrefetchBytes(previewType);
-      }
-      if (typeof prefetchBytes !== 'number' || prefetchBytes < 0) {
-        prefetchBytes = FILE_PREVIEW.TRUNCATED_SIZE;
-      }
-    }
-    else {
-      let maxFileSize;
-      if (filePreviewProps) {
-        maxFileSize = filePreviewProps.getPrefetchMaxFileSize(previewType);
-      }
-      if (typeof maxFileSize !== 'number' || maxFileSize < 0) {
-        maxFileSize = FILE_PREVIEW.MAX_SIZE;
-      }
+    const { previewType, prefetchBytes, prefetchMaxFileSize } = res;
+    const canHandleRange = response.headers['accept-ranges'] !== 'none' && previewType !== 'image';
 
-      if (size && size > maxFileSize) {
-        errorMessage = errorMessages.filePreview.largeFile;
-      }
+    if (size && size > prefetchMaxFileSize) {
+      errorMessage = errorMessages.filePreview.largeFile;
     }
 
     return {
@@ -114,10 +109,9 @@ export const getFileInfo = async (url: string, storedFilename?: string, column?:
       previewType,
       canHandleRange,
       prefetchBytes,
-      errorMessage
+      errorMessage,
     };
   } catch (exception) {
-
     $log.warn('Unable to fetch the file info for showing the preview.');
     $log.warn(exception);
     const ermrestError = ConfigService.ERMrest.responseToError(exception);
@@ -133,7 +127,7 @@ export const getFileInfo = async (url: string, storedFilename?: string, column?:
 
     return {
       previewType: null,
-      errorMessage
+      errorMessage,
     };
   }
 };
