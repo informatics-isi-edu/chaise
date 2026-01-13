@@ -8,6 +8,9 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Alert, Spinner } from 'react-bootstrap';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
+// ermrestjs
+import type { AssetPseudoColumn, FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
@@ -17,7 +20,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { formatJSONContent, getFileInfo, parseCsvContent } from '@isrd-isi-edu/chaise/src/utils/file-utils';
-import { errorMessages, FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 interface FilePreviewProps {
@@ -38,7 +41,7 @@ interface FilePreviewProps {
    * the underlying asset column
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column?: any;
+  column?: AssetPseudoColumn;
   /**
    * Additional CSS class name for the container
    */
@@ -65,10 +68,7 @@ const FilePreview = ({
    * error that should be displayed to the users
    */
   const [error, setError] = useState<string>('');
-  const [isMarkdown, setIsMarkdown] = useState(false);
-  const [isCsv, setIsCsv] = useState<boolean>(false);
-  const [isTsv, setIsTsv] = useState<boolean>(false);
-  const [isJSON, setIsJSON] = useState(false);
+  const [previewType, setPreviewType] = useState<FilePreviewTypes | null>(null);
 
   /**
    * If the fileContent value is truncated or not
@@ -97,14 +97,11 @@ const FilePreview = ({
     isInitialized.current = true;
 
     const initializeFile = async () => {
-      const info = await getFileInfo(url, filename, column ? column.filePreview : undefined);
-      setIsMarkdown(info.isMarkdown);
-      setIsCsv(info.isCsv);
-      setIsTsv(info.isTsv);
-      setIsJSON(info.isJSON);
+      const info = await getFileInfo(url, filename, column);
+      setPreviewType(info.previewType);
       setError(info.errorMessage || '');
 
-      if (info.isPreviewable && !info.errorMessage) {
+      if (info.previewType !== null && !info.errorMessage) {
         try {
           setIsLoading(true);
           const headers: Record<string, string> = {};
@@ -123,7 +120,7 @@ const FilePreview = ({
           const content = response.data;
 
           // if parsing the markdown or CSV throws an error, don't show the rendered content
-          if (info.isMarkdown) {
+          if (info.previewType === 'markdown') {
             try {
               void ConfigService.ERMrest.renderMarkdown(content, false, true);
               setCanShowRendered(true);
@@ -132,8 +129,8 @@ const FilePreview = ({
             }
           }
 
-          if (info.isCsv || info.isTsv) {
-            const csvData = parseCsvContent(content, info.isTsv);
+          if (info.previewType === 'csv' || info.previewType === 'tsv') {
+            const csvData = parseCsvContent(content, info.previewType === 'tsv');
             if (csvData !== null && csvData.length > 0) {
               setCanShowRendered(true);
             }
@@ -154,6 +151,11 @@ const FilePreview = ({
 
   // show the content if there's no error and we got it
   const shouldShowContent = fileContent && !error;
+  const isCsv = previewType === 'csv';
+  const isTsv = previewType === 'tsv';
+  const isMarkdown = previewType === 'markdown';
+  const isJSON = previewType === 'json';
+  const isImage = previewType === 'image';
 
   /**
    * Render CSV as HTML table
@@ -215,41 +217,55 @@ const FilePreview = ({
         <DisplayValue addClass value={value} />
       </div>
 
-      {(error) && renderAlert(error)}
+      {error && renderAlert(error)}
 
       {(shouldShowContent || isLoading) && (
-        <div className={`file-preview-card-wrapper${canShowRendered && !isTruncated ? ' reduce-space' : ''}`}>
+        <div
+          className={`file-preview-card-wrapper${canShowRendered && !isTruncated ? ' reduce-space' : ''}`}
+        >
           {shouldShowContent && (
             <div className='file-preview-header-row'>
-              <div className='file-preview-message'>{(isTruncated && renderAlert(errorMessages.filePreview.truncatedFile))}</div>
+              <div className='file-preview-message'>
+                {isTruncated && renderAlert(errorMessages.filePreview.truncatedFile)}
+              </div>
               <div className='file-preview-controls'>
-                {(canShowRendered && isMarkdown) && (
+                {canShowRendered && isMarkdown && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={showMarkdownRendered ? 'Click to show the raw content of the file.' : 'Click to show rendered markdown content.'}
+                    tooltip={
+                      showMarkdownRendered
+                        ? 'Click to show the raw content of the file.'
+                        : 'Click to show rendered markdown content.'
+                    }
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowMarkdownRendered(!showMarkdownRendered)}
                     >
-                      <span className={`chaise-btn-icon fas ${showMarkdownRendered ? 'fa-code' : 'fa-eye'} file-preview-btn-icon`}></span>
+                      <span
+                        className={`chaise-btn-icon fas ${showMarkdownRendered ? 'fa-code' : 'fa-eye'} file-preview-btn-icon`}
+                      ></span>
                       <span>{showMarkdownRendered ? 'Show raw' : 'Show rendered'}</span>
                     </button>
                   </ChaiseTooltip>
                 )}
 
-                {(canShowRendered && (isCsv || isTsv)) && (
+                {canShowRendered && (isCsv || isTsv) && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={(
-                      showCsvRendered ? 'Click to show the raw content of the file.' : `Click to show rendered ${isCsv ? 'CSV' : 'TSV'} content.`
-                    )}
+                    tooltip={
+                      showCsvRendered
+                        ? 'Click to show the raw content of the file.'
+                        : `Click to show rendered ${isCsv ? 'CSV' : 'TSV'} content.`
+                    }
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowCsvRendered(!showCsvRendered)}
                     >
-                      <span className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}></span>
+                      <span
+                        className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}
+                      ></span>
                       <span>{showCsvRendered ? 'Show raw' : 'Show table'}</span>
                     </button>
                   </ChaiseTooltip>
@@ -268,13 +284,23 @@ const FilePreview = ({
 
               {shouldShowContent && (
                 <>
-                  {(canShowRendered && isMarkdown && showMarkdownRendered) ? (
+                  {canShowRendered && isMarkdown && showMarkdownRendered ? (
                     <div className='file-preview-content file-preview-markdown'>
-                      <DisplayValue addClass value={{ value: ConfigService.ERMrest.renderMarkdown(fileContent, false), isHTML: true }} />
+                      <DisplayValue
+                        addClass
+                        value={{
+                          value: ConfigService.ERMrest.renderMarkdown(fileContent, false),
+                          isHTML: true,
+                        }}
+                      />
                     </div>
-                  ) : (canShowRendered && (isCsv || isTsv) && showCsvRendered) ? (
+                  ) : canShowRendered && (isCsv || isTsv) && showCsvRendered ? (
                     <div className='file-preview-content file-preview-csv'>
                       {renderCsvTable(fileContent)}
+                    </div>
+                  ) : isImage ? (
+                    <div className='file-preview-content file-preview-image chaise-image-preview'>
+                      <img src={url} alt={filename || 'Image preview'} />
                     </div>
                   ) : (
                     <pre className='file-preview-content file-preview-text'>
