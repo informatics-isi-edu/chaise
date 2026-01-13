@@ -111,6 +111,18 @@
         }
       }
     }
+
+    &.file-preview-image {
+      // override the max-height that we're adding to all chaise-image-previews
+      &.chaise-image-preview{
+        &.zoomed-in {
+          max-height: none;
+        }
+        &:not(.zoomed-in) img {
+          max-height: 100%;
+        }
+      }
+    }
   }
 
   .file-preview-error {

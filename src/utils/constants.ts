@@ -182,11 +182,6 @@ export const QUERY_PARAMS = {
   SCROLL_TO: 'scrollTo',
 };
 
-export const FILE_PREVIEW = {
-  TRUNCATED_SIZE: 0.5 * 1024 * 1024,
-  MAX_SIZE: 1 * 1024 * 1024
-};
-
 // these are the captured as `cid` value in logs
 export enum APP_NAMES {
   HELP = 'help',

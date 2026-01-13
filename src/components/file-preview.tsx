@@ -9,7 +9,8 @@ import { Alert, Spinner } from 'react-bootstrap';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // ermrestjs
-import type { AssetPseudoColumn, FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+import type { FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/services/file-preview';
 
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
