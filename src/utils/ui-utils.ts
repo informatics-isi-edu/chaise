@@ -428,6 +428,39 @@ export function createChaiseTooltips(container: Element) {
 }
 
 /**
+ * see if there's a data-chaise-file-preview in the children of the given element,
+ * and render FilePreview React components into those placeholders.
+ *
+ * NOTE: This function uses ReactDOM to mount React components into DOM elements that were
+ * created by the markdown renderer. Each placeholder div gets its own React root.
+ */
+export async function createChaiseFilePreviews(container: Element) {
+  const placeholders = container.querySelectorAll('[data-chaise-file-preview]');
+  if (placeholders && placeholders.length > 0) {
+    // dynamic import to avoid circular dependencies and load React
+    Promise.all([
+      import('react'),
+      import('react-dom/client'),
+      import('@isrd-isi-edu/chaise/src/components/file-preview')
+    ]).then(([React, ReactDOM, FilePreviewModule]) => {
+      const FilePreview = FilePreviewModule.default;
+
+      placeholders.forEach((el) => {
+        const url = el.getAttribute('data-file-url');
+        // TODO pass other props (filename, value?) if needed
+        if (!url) return;
+
+        // Create a React root and render the FilePreview component using React.createElement
+        const root = ReactDOM.createRoot(el);
+        root.render(React.createElement(FilePreview, { url, column: undefined }));
+      });
+    }).catch((error) => {
+      $log.error('Error loading FilePreview component:', error);
+    });
+  }
+}
+
+/**
  * trigger form submission. should only be used when we don't have access to the handleSubmit function.
  * for example in viewer annotation form, we're calling this from viewer provider which is outside of recordedit component.
  * borrowed from here: https://github.com/react-hook-form/react-hook-form/issues/566#issuecomment-730077495
