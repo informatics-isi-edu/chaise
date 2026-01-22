@@ -7,7 +7,7 @@ import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { createChaiseTooltips } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { createChaiseTooltips, createChaiseFilePreviews } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type DisplayValueProps = {
   /**
@@ -58,11 +58,12 @@ const DisplayValue = ({
 
   const Wrapper = as;
 
-  // handle tooltips that might be in the value
+  // handle tooltips and file previews that might be in the value
   const spanRef = useRef<HTMLSpanElement | null>(null);
   useEffect(() => {
     if (!spanRef.current) return;
     createChaiseTooltips(spanRef.current);
+    createChaiseFilePreviews(spanRef.current);
   }, []);
 
   if (specialNullEmpty) {
