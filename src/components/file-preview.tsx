@@ -10,7 +10,6 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // ermrestjs
 import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
-import type { FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/services/file-preview';
 
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -20,9 +19,13 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
-import { formatJSONContent, getFileInfo, parseCsvContent } from '@isrd-isi-edu/chaise/src/utils/file-utils';
+import {
+  getFileInfo,
+  FilePreviewTypes,
+  formatJSONContent,
+  parseCsvContent,
+} from '@isrd-isi-edu/chaise/src/utils/file-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-
 
 interface FilePreviewProps {
   /**
@@ -35,13 +38,13 @@ interface FilePreviewProps {
   url: string;
   /**
    * the stored filename of the asset
-   * (might not be defined)
+   *
+   * (used for determining the file extension)
    */
   filename?: string;
   /**
    * the underlying asset column
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   column?: AssetPseudoColumn;
   /**
    * Additional CSS class name for the container
@@ -102,48 +105,58 @@ const FilePreview = ({
       setPreviewType(info.previewType);
       setError(info.errorMessage || '');
 
-      if (info.previewType !== null && !info.errorMessage) {
-        try {
-          setIsLoading(true);
-          const headers: Record<string, string> = {};
-          if (info.canHandleRange && info.prefetchBytes && info.size && info.size > info.prefetchBytes) {
-            headers.Range = `bytes=${0}-${info.prefetchBytes}`;
-            setIsTruncated(true);
-          }
+      if (info.previewType === null || info.errorMessage) return;
 
-          const response = await ConfigService.http.get(url, {
-            responseType: 'text',
-            skipHTTP401Handling: true,
-            skipRetryBrowserError: true,
-            headers
-          });
-
-          const content = response.data;
-
-          // if parsing the markdown or CSV throws an error, don't show the rendered content
-          if (info.previewType === 'markdown') {
-            try {
-              void ConfigService.ERMrest.renderMarkdown(content, false, true);
-              setCanShowRendered(true);
-            } catch (exp) {
-              $log.warn('Unable to parse markdown content', exp);
-            }
-          }
-
-          if (info.previewType === 'csv' || info.previewType === 'tsv') {
-            const csvData = parseCsvContent(content, info.previewType === 'tsv');
-            if (csvData !== null && csvData.length > 0) {
-              setCanShowRendered(true);
-            }
-          }
-
-          setFileContent(content);
-        } catch (err: unknown) {
-          const errorMessage = (err as Error).message ? (err as Error).message : 'Failed to load file content';
-          setError(errorMessage);
-        } finally {
-          setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const headers: Record<string, string> = {};
+        if (
+          info.canHandleRange &&
+          info.prefetchBytes &&
+          info.size &&
+          info.size > info.prefetchBytes
+        ) {
+          headers.Range = `bytes=${0}-${info.prefetchBytes}`;
+          setIsTruncated(true);
         }
+
+        const response = await ConfigService.http.get(url, {
+          responseType: 'text',
+          skipHTTP401Handling: true,
+          skipRetryBrowserError: true,
+          headers,
+        });
+
+        const content = response.data;
+
+        // if parsing the markdown or CSV throws an error, don't show the rendered content
+        if (info.previewType === FilePreviewTypes.MARKDOWN) {
+          try {
+            void ConfigService.ERMrest.renderMarkdown(content, false, true);
+            setCanShowRendered(true);
+          } catch (exp) {
+            $log.warn('Unable to parse markdown content', exp);
+          }
+        }
+
+        if (
+          info.previewType === FilePreviewTypes.CSV ||
+          info.previewType === FilePreviewTypes.TSV
+        ) {
+          const csvData = parseCsvContent(content, info.previewType === FilePreviewTypes.TSV);
+          if (csvData !== null && csvData.length > 0) {
+            setCanShowRendered(true);
+          }
+        }
+
+        setFileContent(content);
+      } catch (err: unknown) {
+        const errorMessage = (err as Error).message
+          ? (err as Error).message
+          : 'Failed to load file content';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -152,11 +165,11 @@ const FilePreview = ({
 
   // show the content if there's no error and we got it
   const shouldShowContent = fileContent && !error;
-  const isCsv = previewType === 'csv';
-  const isTsv = previewType === 'tsv';
-  const isMarkdown = previewType === 'markdown';
-  const isJSON = previewType === 'json';
-  const isImage = previewType === 'image';
+  const isCsv = previewType === FilePreviewTypes.CSV;
+  const isTsv = previewType === FilePreviewTypes.TSV;
+  const isMarkdown = previewType === FilePreviewTypes.MARKDOWN;
+  const isJSON = previewType === FilePreviewTypes.JSON;
+  const isImage = previewType === FilePreviewTypes.IMAGE;
 
   /**
    * Render CSV as HTML table
@@ -164,7 +177,8 @@ const FilePreview = ({
   const renderCsvTable = (csvContent: string): JSX.Element => {
     const rows = parseCsvContent(csvContent, isTsv);
     // the following should not happen because we check canShowRendered before calling this function but leaving it just in case
-    if (!rows || rows.length === 0) return <div>Unable to render the {isCsv ? 'CSV' : 'TSV'} content.</div>;
+    if (!rows || rows.length === 0)
+      return <div>Unable to render the {isCsv ? 'CSV' : 'TSV'} content.</div>;
 
     const showHeaders = column && column.filePreview && column.filePreview.showCsvHeader;
     const headers = showHeaders ? rows[0] : [];
@@ -182,9 +196,9 @@ const FilePreview = ({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, rowIndex) => (
+            {rows.map((row, rowIndex) =>
               // if we're showing headers, skip the first row
-              (rowIndex === 0 && showHeaders) ? null : (
+              rowIndex === 0 && showHeaders ? null : (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
                     <td key={cellIndex}>
@@ -193,7 +207,7 @@ const FilePreview = ({
                   ))}
                 </tr>
               )
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -208,15 +222,17 @@ const FilePreview = ({
         <span>{message}</span>
       </Alert>
     );
-  }
+  };
 
   const containerClass = `chaise-file-preview-container${className ? ` ${className}` : ''}`;
 
   return (
     <div className={containerClass}>
-      <div className='file-preview-download-btn'>
-        <DisplayValue addClass value={value} />
-      </div>
+      {value && (
+        <div className='file-preview-download-btn'>
+          <DisplayValue addClass value={value} />
+        </div>
+      )}
 
       {error && renderAlert(error)}
 

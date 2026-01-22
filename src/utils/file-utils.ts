@@ -2,7 +2,6 @@ import Papa from 'papaparse';
 
 // ermrestjs
 import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
-import type { FilePreviewTypes } from '@isrd-isi-edu/ermrestjs/src/services/file-preview';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -34,7 +33,7 @@ export const parseCsvContent = (csvContent: string, isTSV?: boolean): string[][]
     const parseResult = Papa.parse(csvContent, {
       skipEmptyLines: true,
       header: false,
-      delimiter: isTSV ? '\t' : undefined
+      delimiter: isTSV ? '\t' : undefined,
     });
 
     if (parseResult.errors && parseResult.errors.length > 0) {
@@ -49,6 +48,15 @@ export const parseCsvContent = (csvContent: string, isTSV?: boolean): string[][]
   }
 };
 
+// TODO once we properly include ermrestjs in chaise, we should import FilePreviewTypes from there
+export enum FilePreviewTypes {
+  IMAGE = 'image',
+  MARKDOWN = 'markdown',
+  CSV = 'csv',
+  TSV = 'tsv',
+  JSON = 'json',
+  TEXT = 'text',
+};
 
 export interface FileInfo {
   size?: number;
@@ -88,6 +96,15 @@ export const getFileInfo = async (
     const contentType = response.headers['content-type'] || '';
     const contentLength = response.headers['content-length'];
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
+    const infoStr = [
+      `url: ${url}`,
+      `Content-Type: ${contentType}`,
+      `Content-Length: ${contentLength}`,
+      `Content-Disposition: ${contentDisposition}`,
+      `accept-ranges: ${response.headers['accept-ranges']}`,
+    ].join('\n');
+    $log.debug(`Fetched file HEAD info:\n${infoStr}`);
+
     const res = ConfigService.ERMrest.FilePreviewService.getFilePreviewInfo(
       url,
       column,
@@ -95,14 +112,11 @@ export const getFileInfo = async (
       contentDisposition,
       contentType
     );
-
     const { previewType, prefetchBytes, prefetchMaxFileSize } = res;
     const canHandleRange = response.headers['accept-ranges'] !== 'none' && previewType !== 'image';
-
-    if (size && size > prefetchMaxFileSize) {
+    if (previewType && size && size > prefetchMaxFileSize) {
       errorMessage = errorMessages.filePreview.largeFile;
     }
-
     return {
       size,
       contentType,
