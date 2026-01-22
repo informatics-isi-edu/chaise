@@ -1,7 +1,10 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_file-preview.scss';
+import 'yet-another-react-lightbox/styles.css';
 
 import { useState, useEffect, useRef, type JSX } from 'react';
 import Card from 'react-bootstrap/Card';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -93,7 +96,13 @@ const FilePreview = ({
    */
   const [showCsvRendered, setShowCsvRendered] = useState(true);
 
+  /**
+   * whether the image preview modal is open or not
+   */
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   const isInitialized = useRef(false);
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
 
   // Initialize on component mount - always call HEAD request
   useEffect(() => {
@@ -106,6 +115,12 @@ const FilePreview = ({
       setError(info.errorMessage || '');
 
       if (info.previewType === null || info.errorMessage) return;
+
+      // For images, just set loading state and return (no content fetch needed)
+      if (info.previewType === FilePreviewTypes.IMAGE) {
+        setIsLoading(true);
+        return;
+      }
 
       try {
         setIsLoading(true);
@@ -162,6 +177,19 @@ const FilePreview = ({
 
     void initializeFile();
   }, [url, isInitialized]);
+
+  /**
+   * Handle image load event and set initial wrapper height (max 300px)
+   */
+  const handleImageLoad = () => {
+    if (imageWrapperRef.current) {
+      const img = imageWrapperRef.current.querySelector('img');
+      if (!img) return;
+      const displayHeight = Math.min(img.naturalHeight, 300);
+      imageWrapperRef.current.style.height = `${displayHeight}px`;
+    }
+    setIsLoading(false);
+  };
 
   // show the content if there's no error and we got it
   const shouldShowContent = fileContent && !error;
@@ -236,7 +264,29 @@ const FilePreview = ({
 
       {error && renderAlert(error)}
 
-      {(shouldShowContent || isLoading) && (
+      {!error && isImage && (
+        <div
+          className='file-preview-image-wrapper'
+          ref={imageWrapperRef}
+          // style={{ height: wrapperHeight ? `${wrapperHeight}px` : undefined }}
+        >
+          {isLoading && (
+            <div className='file-preview-spinner manual-position-spinner'>
+              <Spinner animation='border' size='sm' />
+            </div>
+          )}
+          <img
+            src={url}
+            alt={filename || 'Image preview'}
+            className={!isLoading ? 'loaded' : ''}
+            style={{ visibility: isLoading ? 'hidden' : 'visible' }}
+            onLoad={handleImageLoad}
+            onClick={() => setLightboxOpen(true)}
+          />
+        </div>
+      )}
+
+      {(shouldShowContent || isLoading) && !isImage && (
         <div
           className={`file-preview-card-wrapper${canShowRendered && !isTruncated ? ' reduce-space' : ''}`}
         >
@@ -315,10 +365,6 @@ const FilePreview = ({
                     <div className='file-preview-content file-preview-csv'>
                       {renderCsvTable(fileContent)}
                     </div>
-                  ) : isImage ? (
-                    <div className='file-preview-content file-preview-image chaise-image-preview'>
-                      <img src={url} alt={filename || 'Image preview'} />
-                    </div>
                   ) : (
                     <pre className='file-preview-content file-preview-text'>
                       {isJSON ? formatJSONContent(fileContent) : fileContent}
@@ -330,6 +376,31 @@ const FilePreview = ({
           </Card>
         </div>
       )}
+
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={[{ src: url, alt: filename || 'Image preview' }]}
+        plugins={[Zoom]}
+        // prevent infinite looping since we only have one image
+        carousel={{ finite: true }}
+        // hide the next/prev buttons since we only have one image
+        render={{
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        }}
+        zoom={{
+          maxZoomPixelRatio: 5,
+          zoomInMultiplier: 2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          doubleClickMaxStops: 2,
+          keyboardMoveDistance: 50,
+          wheelZoomDistanceFactor: 100,
+          pinchZoomDistanceFactor: 100,
+          scrollToZoom: true,
+        }}
+      />
     </div>
   );
 };
