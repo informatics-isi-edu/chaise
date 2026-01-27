@@ -1,12 +1,18 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_file-preview.scss';
+import 'yet-another-react-lightbox/styles.css';
 
 import { useState, useEffect, useRef, type JSX } from 'react';
 import Card from 'react-bootstrap/Card';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Alert, Spinner } from 'react-bootstrap';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// ermrestjs
+import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
 
 // models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
@@ -16,9 +22,13 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
-import { formatJSONContent, getFileInfo, parseCsvContent } from '@isrd-isi-edu/chaise/src/utils/file-utils';
-import { errorMessages, FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
-
+import {
+  getFileInfo,
+  FilePreviewTypes,
+  formatJSONContent,
+  parseCsvContent,
+} from '@isrd-isi-edu/chaise/src/utils/file-utils';
+import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 interface FilePreviewProps {
   /**
@@ -30,10 +40,15 @@ interface FilePreviewProps {
    */
   url: string;
   /**
+   * the stored filename of the asset
+   *
+   * (used for determining the file extension)
+   */
+  filename?: string;
+  /**
    * the underlying asset column
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  column: any;
+  column?: AssetPseudoColumn;
   /**
    * Additional CSS class name for the container
    */
@@ -44,6 +59,7 @@ const FilePreview = ({
   url,
   className,
   value,
+  filename,
   column,
 }: FilePreviewProps): JSX.Element => {
   /**
@@ -59,10 +75,7 @@ const FilePreview = ({
    * error that should be displayed to the users
    */
   const [error, setError] = useState<string>('');
-  const [isMarkdown, setIsMarkdown] = useState(false);
-  const [isCsv, setIsCsv] = useState<boolean>(false);
-  const [isTsv, setIsTsv] = useState<boolean>(false);
-  const [isJSON, setIsJSON] = useState(false);
+  const [previewType, setPreviewType] = useState<FilePreviewTypes | null>(null);
 
   /**
    * If the fileContent value is truncated or not
@@ -83,7 +96,18 @@ const FilePreview = ({
    */
   const [showCsvRendered, setShowCsvRendered] = useState(true);
 
+  /**
+   * whether the image preview modal is open or not
+   */
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   const isInitialized = useRef(false);
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
+
+  const DEFAULT_HEIGHT =
+    column && column.filePreview && column.filePreview.defaultHeight
+      ? column.filePreview.defaultHeight
+      : 300;
 
   // Initialize on component mount - always call HEAD request
   useEffect(() => {
@@ -91,63 +115,94 @@ const FilePreview = ({
     isInitialized.current = true;
 
     const initializeFile = async () => {
-      const info = await getFileInfo(url);
-      setIsMarkdown(info.isMarkdown);
-      setIsCsv(info.isCsv);
-      setIsTsv(info.isTsv);
-      setIsJSON(info.isJSON);
+      const info = await getFileInfo(url, filename, column);
+      setPreviewType(info.previewType);
       setError(info.errorMessage || '');
 
-      if (info.isPreviewable && !info.errorMessage) {
-        try {
-          setIsLoading(true);
-          const headers: Record<string, string> = {};
-          if (info.canHandleRange && info.size && info.size > FILE_PREVIEW.TRUNCATED_SIZE) {
-            headers.Range = `bytes=${0}-${FILE_PREVIEW.TRUNCATED_SIZE}`;
-            setIsTruncated(true);
-          }
+      if (info.previewType === null || info.errorMessage) return;
 
-          const response = await ConfigService.http.get(url, {
-            responseType: 'text',
-            skipHTTP401Handling: true,
-            skipRetryBrowserError: true,
-            headers
-          });
+      // For images, just set loading state and return (no content fetch needed)
+      if (info.previewType === FilePreviewTypes.IMAGE) {
+        setIsLoading(true);
+        return;
+      }
 
-          const content = response.data;
-
-          // if parsing the markdown or CSV throws an error, don't show the rendered content
-          if (info.isMarkdown) {
-            try {
-              void ConfigService.ERMrest.renderMarkdown(content, false, true);
-              setCanShowRendered(true);
-            } catch (exp) {
-              $log.warn('Unable to parse markdown content', exp);
-            }
-          }
-
-          if (info.isCsv || info.isTsv) {
-            const csvData = parseCsvContent(content, info.isTsv);
-            if (csvData !== null && csvData.length > 0) {
-              setCanShowRendered(true);
-            }
-          }
-
-          setFileContent(content);
-        } catch (err: unknown) {
-          const errorMessage = (err as Error).message ? (err as Error).message : 'Failed to load file content';
-          setError(errorMessage);
-        } finally {
-          setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const headers: Record<string, string> = {};
+        if (
+          info.canHandleRange &&
+          info.prefetchBytes &&
+          info.size &&
+          info.size > info.prefetchBytes
+        ) {
+          headers.Range = `bytes=${0}-${info.prefetchBytes}`;
+          setIsTruncated(true);
         }
+
+        const response = await ConfigService.http.get(url, {
+          responseType: 'text',
+          skipHTTP401Handling: true,
+          skipRetryBrowserError: true,
+          headers,
+        });
+
+        const content = response.data;
+
+        // if parsing the markdown or CSV throws an error, don't show the rendered content
+        if (info.previewType === FilePreviewTypes.MARKDOWN) {
+          try {
+            void ConfigService.ERMrest.renderMarkdown(content, false, true);
+            setCanShowRendered(true);
+          } catch (exp) {
+            $log.warn('Unable to parse markdown content', exp);
+          }
+        }
+
+        if (
+          info.previewType === FilePreviewTypes.CSV ||
+          info.previewType === FilePreviewTypes.TSV
+        ) {
+          const csvData = parseCsvContent(content, info.previewType === FilePreviewTypes.TSV);
+          if (csvData !== null && csvData.length > 0) {
+            setCanShowRendered(true);
+          }
+        }
+
+        setFileContent(content);
+      } catch (err: unknown) {
+        const errorMessage = (err as Error).message
+          ? (err as Error).message
+          : 'Failed to load file content';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     void initializeFile();
   }, [url, isInitialized]);
 
+  /**
+   * Handle image load event and set initial wrapper height
+   */
+  const handleImageLoad = () => {
+    if (imageWrapperRef.current) {
+      const img = imageWrapperRef.current.querySelector('img');
+      if (!img) return;
+      const displayHeight = Math.min(img.naturalHeight, DEFAULT_HEIGHT);
+      imageWrapperRef.current.style.height = `${displayHeight}px`;
+    }
+    setIsLoading(false);
+  };
+
   // show the content if there's no error and we got it
   const shouldShowContent = fileContent && !error;
+  const isCsv = previewType === FilePreviewTypes.CSV;
+  const isTsv = previewType === FilePreviewTypes.TSV;
+  const isMarkdown = previewType === FilePreviewTypes.MARKDOWN;
+  const isJSON = previewType === FilePreviewTypes.JSON;
+  const isImage = previewType === FilePreviewTypes.IMAGE;
 
   /**
    * Render CSV as HTML table
@@ -155,7 +210,8 @@ const FilePreview = ({
   const renderCsvTable = (csvContent: string): JSX.Element => {
     const rows = parseCsvContent(csvContent, isTsv);
     // the following should not happen because we check canShowRendered before calling this function but leaving it just in case
-    if (!rows || rows.length === 0) return <div>Unable to render the {isCsv ? 'CSV' : 'TSV'} content.</div>;
+    if (!rows || rows.length === 0)
+      return <div>Unable to render the {isCsv ? 'CSV' : 'TSV'} content.</div>;
 
     const showHeaders = column && column.filePreview && column.filePreview.showCsvHeader;
     const headers = showHeaders ? rows[0] : [];
@@ -173,9 +229,9 @@ const FilePreview = ({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, rowIndex) => (
+            {rows.map((row, rowIndex) =>
               // if we're showing headers, skip the first row
-              (rowIndex === 0 && showHeaders) ? null : (
+              rowIndex === 0 && showHeaders ? null : (
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
                     <td key={cellIndex}>
@@ -184,7 +240,7 @@ const FilePreview = ({
                   ))}
                 </tr>
               )
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -199,51 +255,86 @@ const FilePreview = ({
         <span>{message}</span>
       </Alert>
     );
-  }
+  };
 
   const containerClass = `chaise-file-preview-container${className ? ` ${className}` : ''}`;
 
   return (
     <div className={containerClass}>
-      <div className='file-preview-download-btn'>
-        <DisplayValue addClass value={value} />
-      </div>
+      {value && (
+        <div className='file-preview-download-btn'>
+          <DisplayValue addClass value={value} />
+        </div>
+      )}
 
-      {(error) && renderAlert(error)}
+      {error && renderAlert(error)}
 
-      {(shouldShowContent || isLoading) && (
-        <div className={`file-preview-card-wrapper${canShowRendered && !isTruncated ? ' reduce-space' : ''}`}>
+      {!error && isImage && (
+        <div className='file-preview-image-wrapper' ref={imageWrapperRef}>
+          {isLoading && (
+            <div className='file-preview-spinner manual-position-spinner'>
+              <Spinner animation='border' size='sm' />
+            </div>
+          )}
+          <img
+            src={url}
+            alt={filename || 'Image preview'}
+            className={!isLoading ? 'loaded' : ''}
+            style={{ visibility: isLoading ? 'hidden' : 'visible' }}
+            onLoad={handleImageLoad}
+            onError={handleImageLoad}
+            onClick={() => setLightboxOpen(true)}
+          />
+        </div>
+      )}
+
+      {(shouldShowContent || isLoading) && !isImage && (
+        <div
+          className={`file-preview-card-wrapper${canShowRendered && !isTruncated ? ' reduce-space' : ''}`}
+        >
           {shouldShowContent && (
             <div className='file-preview-header-row'>
-              <div className='file-preview-message'>{(isTruncated && renderAlert(errorMessages.filePreview.truncatedFile))}</div>
+              <div className='file-preview-message'>
+                {isTruncated && renderAlert(errorMessages.filePreview.truncatedFile)}
+              </div>
               <div className='file-preview-controls'>
-                {(canShowRendered && isMarkdown) && (
+                {canShowRendered && isMarkdown && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={showMarkdownRendered ? 'Click to show the raw content of the file.' : 'Click to show rendered markdown content.'}
+                    tooltip={
+                      showMarkdownRendered
+                        ? 'Click to show the raw content of the file.'
+                        : 'Click to show rendered markdown content.'
+                    }
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowMarkdownRendered(!showMarkdownRendered)}
                     >
-                      <span className={`chaise-btn-icon fas ${showMarkdownRendered ? 'fa-code' : 'fa-eye'} file-preview-btn-icon`}></span>
+                      <span
+                        className={`chaise-btn-icon fas ${showMarkdownRendered ? 'fa-code' : 'fa-eye'} file-preview-btn-icon`}
+                      ></span>
                       <span>{showMarkdownRendered ? 'Show raw' : 'Show rendered'}</span>
                     </button>
                   </ChaiseTooltip>
                 )}
 
-                {(canShowRendered && (isCsv || isTsv)) && (
+                {canShowRendered && (isCsv || isTsv) && (
                   <ChaiseTooltip
                     placement='top'
-                    tooltip={(
-                      showCsvRendered ? 'Click to show the raw content of the file.' : `Click to show rendered ${isCsv ? 'CSV' : 'TSV'} content.`
-                    )}
+                    tooltip={
+                      showCsvRendered
+                        ? 'Click to show the raw content of the file.'
+                        : `Click to show rendered ${isCsv ? 'CSV' : 'TSV'} content.`
+                    }
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary file-preview-toggle-btn'
                       onClick={() => setShowCsvRendered(!showCsvRendered)}
                     >
-                      <span className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}></span>
+                      <span
+                        className={`chaise-btn-icon fas ${showCsvRendered ? 'fa-code' : 'fa-table'} file-preview-btn-icon`}
+                      ></span>
                       <span>{showCsvRendered ? 'Show raw' : 'Show table'}</span>
                     </button>
                   </ChaiseTooltip>
@@ -252,7 +343,7 @@ const FilePreview = ({
             </div>
           )}
 
-          <Card className='file-preview-container-inner'>
+          <Card className='file-preview-container-inner' style={{ height: DEFAULT_HEIGHT }}>
             <Card.Body>
               {isLoading && (
                 <div className='file-preview-spinner manual-position-spinner'>
@@ -262,11 +353,17 @@ const FilePreview = ({
 
               {shouldShowContent && (
                 <>
-                  {(canShowRendered && isMarkdown && showMarkdownRendered) ? (
+                  {canShowRendered && isMarkdown && showMarkdownRendered ? (
                     <div className='file-preview-content file-preview-markdown'>
-                      <DisplayValue addClass value={{ value: ConfigService.ERMrest.renderMarkdown(fileContent, false), isHTML: true }} />
+                      <DisplayValue
+                        addClass
+                        value={{
+                          value: ConfigService.ERMrest.renderMarkdown(fileContent, false),
+                          isHTML: true,
+                        }}
+                      />
                     </div>
-                  ) : (canShowRendered && (isCsv || isTsv) && showCsvRendered) ? (
+                  ) : canShowRendered && (isCsv || isTsv) && showCsvRendered ? (
                     <div className='file-preview-content file-preview-csv'>
                       {renderCsvTable(fileContent)}
                     </div>
@@ -281,6 +378,32 @@ const FilePreview = ({
           </Card>
         </div>
       )}
+
+      <Lightbox
+        className='chaise-file-preview-lightbox'
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={[{ src: url, alt: filename || 'Image preview' }]}
+        plugins={[Zoom]}
+        // prevent infinite looping since we only have one image
+        carousel={{ finite: true }}
+        // hide the next/prev buttons since we only have one image
+        render={{
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        }}
+        zoom={{
+          maxZoomPixelRatio: 5,
+          zoomInMultiplier: 2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          doubleClickMaxStops: 2,
+          keyboardMoveDistance: 50,
+          wheelZoomDistanceFactor: 100,
+          pinchZoomDistanceFactor: 100,
+          scrollToZoom: true,
+        }}
+      />
     </div>
   );
 };

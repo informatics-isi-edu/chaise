@@ -5,8 +5,11 @@ export default class RecordLocators {
   static async waitForRecordPageReady(page: Page, timeout?: number) {
     await RecordLocators.getEntityTitleElement(page).waitFor({ state: 'visible', timeout });
     await RecordLocators.getMainSectionTable(page).waitFor({ state: 'visible', timeout });
-    await RecordLocators.getRelatedSectionSpinner(page).waitFor({ state: 'detached', timeout })
-    await RecordLocators.getTableOfContentsRelatedSpinner(page).waitFor({ state: 'detached', timeout })
+    await RecordLocators.getRelatedSectionSpinner(page).waitFor({ state: 'detached', timeout });
+    await RecordLocators.getTableOfContentsRelatedSpinner(page).waitFor({
+      state: 'detached',
+      timeout,
+    });
   }
 
   // ----------------- general selectors -------------------- //
@@ -72,7 +75,6 @@ export default class RecordLocators {
     return container.locator(`#recordSidePan-heading-${idx}`);
   }
 
-
   // ----------------- main section selectors ------------------------ //
 
   static getMainSectionTable(container: Locator | Page): Locator {
@@ -89,7 +91,9 @@ export default class RecordLocators {
   }
 
   static getAllColumnNames(container: Locator | Page): Locator {
-    return container.locator('tr:not(.forced-hidden) td.entity-key > span.column-displayname > span');
+    return container.locator(
+      'tr:not(.forced-hidden) td.entity-key > span.column-displayname > span'
+    );
   }
 
   static getColumnNameElement(container: Locator | Page, columnDisplayName: string): Locator {
@@ -111,7 +115,7 @@ export default class RecordLocators {
 
   static getValueMarkdownContainer(el: Locator) {
     return el.locator('.markdown-container:not(.chaise-comment)');
-  };
+  }
 
   // --------------------- file preview ----------------- //
 
@@ -121,6 +125,18 @@ export default class RecordLocators {
 
   static getFilePreviewContent(filePreviewContainer: Locator): Locator {
     return filePreviewContainer.locator('.file-preview-content');
+  }
+
+  static getFilePreviewImage(filePreviewContainer: Locator): Locator {
+    return filePreviewContainer.locator('.file-preview-image-wrapper img');
+  }
+
+  static getFilePreviewImageLightbox(page: Page): Locator {
+    return page.locator('.chaise-file-preview-lightbox');
+  }
+
+  static getFilePreviewImageLightboxCloseBtn(page: Page): Locator {
+    return page.locator('.chaise-file-preview-lightbox').getByTitle('Close');
   }
 
   static getFilePreviewToggleBtn(filePreviewContainer: Locator): Locator {
@@ -137,7 +153,11 @@ export default class RecordLocators {
 
   // --------------------- related table selectors ----------------- //
 
-  static getRelatedTableContainer(container: Locator | Page, displayname: string, isInline?: boolean): Locator {
+  static getRelatedTableContainer(
+    container: Locator | Page,
+    displayname: string,
+    isInline?: boolean
+  ): Locator {
     if (isInline) return RecordLocators.getEntityRelatedTable(container, displayname);
     return RecordLocators.getRelatedTableAccordion(container, displayname);
   }
@@ -158,10 +178,12 @@ export default class RecordLocators {
 
   static getRelatedTables(page: Page): Locator {
     return page.locator('.chaise-accordion:not(.forced-hidden)');
-  };
+  }
 
   static getDisplayedRelatedTableTitles(page: Page): Locator {
-    return page.locator('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')
+    return page.locator(
+      '.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname'
+    );
   }
 
   static getRelatedMarkdownContainer(page: Page, displayname: string, isInline?: boolean): Locator {
@@ -174,11 +196,15 @@ export default class RecordLocators {
   }
 
   static getRelatedTableSectionHeader(page: Page, displayname: string): Locator {
-    return RecordLocators.getRelatedTableHeading(page, displayname).locator('.chaise-accordion-header');
+    return RecordLocators.getRelatedTableHeading(page, displayname).locator(
+      '.chaise-accordion-header'
+    );
   }
 
   static getRelatedTableSectionHeaderDisplayname(page: Page, displayname: string): Locator {
-    return RecordLocators.getRelatedTableHeading(page, displayname).locator('.chaise-accordion-header .chaise-accordion-displayname');
+    return RecordLocators.getRelatedTableHeading(page, displayname).locator(
+      '.chaise-accordion-header .chaise-accordion-displayname'
+    );
   }
 
   static getRelatedTableInlineComment(page: Page, displayname: string): Locator {
@@ -210,10 +236,14 @@ export default class RecordLocators {
     return loc.locator('.unlink-records-link');
   }
 
-  static getRelatedTableToggleDisplay(page: Page, displayname: string, isInline?: boolean): Locator {
-    const loc = isInline ? RecordLocators.getEntityRelatedTable(page, displayname) : RecordLocators.getRelatedTableAccordion(page, displayname);
+  static getRelatedTableToggleDisplay(
+    page: Page,
+    displayname: string,
+    isInline?: boolean
+  ): Locator {
+    const loc = isInline
+      ? RecordLocators.getEntityRelatedTable(page, displayname)
+      : RecordLocators.getRelatedTableAccordion(page, displayname);
     return loc.locator('.toggle-display-link');
   }
-
-
 }
