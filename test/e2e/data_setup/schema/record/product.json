@@ -2645,7 +2645,19 @@
               "annotations": {
                 "tag:isrd.isi.edu,2017:asset": {
                   "url_pattern":"/hatrac/js/chaise/filepreview/1/{{{_id}}}/{{{_uri.filename}}}",
-                  "filename_column" : "filename"
+                  "filename_column" : "filename",
+                  "display": {
+                    "*": {
+                        "file_preview": {
+                            "filename_ext_mapping": {
+                                ".customjson": "json",
+                                ".custommarkdown": "markdown"
+                            },
+                            "prefetch_max_file_size": 32000,
+                            "prefetch_bytes": 20000
+                        }
+                    }
+                  }
                 }
               }
             },

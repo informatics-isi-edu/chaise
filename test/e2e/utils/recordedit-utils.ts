@@ -58,7 +58,7 @@ export type RecordeditFile = {
  * That means the given path should be a path that is valid in uploaded_files folder.
  *
  */
-export const createFiles = async (files: RecordeditFile[] | Array<{ path: string, content: string }>) => {
+export const createFiles = async (files: Array<RecordeditFile | { path: string, content: string }>) => {
 
   for (const f of files) {
     const path = resolve(UPLOAD_FOLDER, f.path);
@@ -77,7 +77,7 @@ export const createFiles = async (files: RecordeditFile[] | Array<{ path: string
 * removes the given files. read the createFiles documentation for more info about files and path
 * @param  {RecordeditFile[]} files array of objects with at least path, and size as attributes.
 */
-export const deleteFiles = async (files: RecordeditFile[] | Array<{ path: string, skipDeletion?: boolean }>) => {
+export const deleteFiles = async (files: Array<RecordeditFile | { path: string, skipDeletion?: boolean }>) => {
   files.forEach((f) => {
     if (f.skipDeletion) return;
     const path = resolve(UPLOAD_FOLDER, f.path);
