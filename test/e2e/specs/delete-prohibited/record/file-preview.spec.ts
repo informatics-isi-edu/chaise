@@ -282,7 +282,7 @@ const testParams: {
       type: 'disabled',
       file: {
         name: 'file_larger_than_32kb.txt',
-        size: 34000,
+        size: 64000,
         path: 'file_larger_than_32kb.txt',
       },
       inputs: {
@@ -303,7 +303,7 @@ const testParams: {
       type: 'truncated',
       file: {
         name: 'file_larger_than_20kb.txt',
-        size: 24000,
+        size: 29000,
         path: 'file_larger_than_20kb.txt',
       },
       inputs: {
@@ -428,6 +428,14 @@ test.describe('file preview', () => {
               await expect.soft(RecordLocators.getFilePreviewContent(container)).toHaveText(expectedContent);
             }
           });
+
+          if (params.errorMessage) {
+            await test.step('the preview should show a warning message.', async () => {
+              const error = RecordLocators.getFilePreviewError(container);
+              await expect.soft(error).toBeVisible();
+              await expect.soft(error).toHaveText(params.errorMessage!);
+            });
+          }
           break;
       }
 
