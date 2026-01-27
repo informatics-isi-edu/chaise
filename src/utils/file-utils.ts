@@ -75,6 +75,7 @@ export interface FileInfo {
    * (only set if canHandleRange is true)
    */
   prefetchBytes?: number;
+  prefetchMaxFileSize?: number;
 }
 
 /**
@@ -123,6 +124,7 @@ export const getFileInfo = async (
       previewType,
       canHandleRange,
       prefetchBytes,
+      prefetchMaxFileSize,
       errorMessage,
     };
   } catch (exception) {

@@ -101,6 +101,8 @@ const FilePreview = ({
    */
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  const [sizeInfo, setSizeInfo] = useState<string>('');
+
   const isInitialized = useRef(false);
   const imageWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +120,13 @@ const FilePreview = ({
       const info = await getFileInfo(url, filename, column);
       setPreviewType(info.previewType);
       setError(info.errorMessage || '');
+
+      setSizeInfo([
+        `size: ${info.size !== undefined ? info.size : 'unknown'}`,
+        `prefetchBytes: ${info.prefetchBytes}`,
+        `prefetchMaxFileSize: ${info.prefetchMaxFileSize}`,
+        `${info.canHandleRange ? 'Supports' : 'Does not support'} range requests`,
+      ].join(', '))
 
       if (info.previewType === null || info.errorMessage) return;
 
@@ -266,6 +275,8 @@ const FilePreview = ({
           <DisplayValue addClass value={value} />
         </div>
       )}
+
+      {sizeInfo && (<div className='file-preview-size-info'>{sizeInfo}</div>)}
 
       {error && renderAlert(error)}
 
