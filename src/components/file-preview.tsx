@@ -104,6 +104,11 @@ const FilePreview = ({
   const isInitialized = useRef(false);
   const imageWrapperRef = useRef<HTMLDivElement>(null);
 
+  const DEFAULT_HEIGHT =
+    column && column.filePreview && column.filePreview.defaultHeight
+      ? column.filePreview.defaultHeight
+      : 300;
+
   // Initialize on component mount - always call HEAD request
   useEffect(() => {
     if (isInitialized.current) return;
@@ -179,13 +184,13 @@ const FilePreview = ({
   }, [url, isInitialized]);
 
   /**
-   * Handle image load event and set initial wrapper height (max 300px)
+   * Handle image load event and set initial wrapper height
    */
   const handleImageLoad = () => {
     if (imageWrapperRef.current) {
       const img = imageWrapperRef.current.querySelector('img');
       if (!img) return;
-      const displayHeight = Math.min(img.naturalHeight, 300);
+      const displayHeight = Math.min(img.naturalHeight, DEFAULT_HEIGHT);
       imageWrapperRef.current.style.height = `${displayHeight}px`;
     }
     setIsLoading(false);
@@ -265,11 +270,7 @@ const FilePreview = ({
       {error && renderAlert(error)}
 
       {!error && isImage && (
-        <div
-          className='file-preview-image-wrapper'
-          ref={imageWrapperRef}
-          // style={{ height: wrapperHeight ? `${wrapperHeight}px` : undefined }}
-        >
+        <div className='file-preview-image-wrapper' ref={imageWrapperRef}>
           {isLoading && (
             <div className='file-preview-spinner manual-position-spinner'>
               <Spinner animation='border' size='sm' />
@@ -281,6 +282,7 @@ const FilePreview = ({
             className={!isLoading ? 'loaded' : ''}
             style={{ visibility: isLoading ? 'hidden' : 'visible' }}
             onLoad={handleImageLoad}
+            onError={handleImageLoad}
             onClick={() => setLightboxOpen(true)}
           />
         </div>
@@ -341,7 +343,7 @@ const FilePreview = ({
             </div>
           )}
 
-          <Card className='file-preview-container-inner'>
+          <Card className='file-preview-container-inner' style={{ height: DEFAULT_HEIGHT }}>
             <Card.Body>
               {isLoading && (
                 <div className='file-preview-spinner manual-position-spinner'>
@@ -378,6 +380,7 @@ const FilePreview = ({
       )}
 
       <Lightbox
+        className='chaise-file-preview-lightbox'
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         slides={[{ src: url, alt: filename || 'Image preview' }]}
