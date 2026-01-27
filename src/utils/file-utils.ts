@@ -1,126 +1,14 @@
 import Papa from 'papaparse';
 
+// ermrestjs
+import type { AssetPseudoColumn } from '@isrd-isi-edu/ermrestjs/src/models/reference-column';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { FILE_PREVIEW } from '@isrd-isi-edu/chaise/src/utils/constants';
-
-/**
- * Utility functions for file operations and content processing
- */
-
-/**
- * Return the file extension from a URL
- */
-const getFileExtention = (url: string): string => {
-  let extension;
-  // hatrac files have a different format
-  const parts = url.match(/^\/hatrac\/([^\/]+\/)*([^\/:]+)(:[^:]+)?$/);
-  if (parts && parts.length === 4) {
-    extension = parts[2].split('.').pop()?.toLowerCase();
-  } else {
-    extension = url.split('.').pop()?.toLowerCase();
-  }
-  return extension || '';
-};
-
-/**
- * Determine if file type is previewable based on extension or content type
- */
-export const isPreviewableFile = (contentType?: string, extension?: string): boolean => {
-  // files that are explicitly previewable
-  if (
-    checkIsMarkdownFile(contentType, extension) ||
-    checkIsCsvFile(contentType, extension) ||
-    checkIsTsvFile(contentType, extension) ||
-    checkIsJSONFile(contentType, extension)
-  ) {
-    return true;
-  }
-
-  // text-like files using content-type
-  if (
-    contentType &&
-    (
-      contentType.startsWith('text/') ||
-      // cif files
-      (contentType === 'chemical/x-mmcif' || contentType === 'chemical/x-cif')
-    )
-  ) {
-    return true;
-  }
-
-  // text-like files using extension
-  if (extension) {
-    return ['txt', 'js', 'log', 'cif', 'pdb'].includes(extension);
-  }
-
-  return false;
-};
-
-/**
- * Check if file is markdown based on content type or extension
- */
-export const checkIsMarkdownFile = (contentType?: string, extension?: string): boolean => {
-  if (contentType && (contentType.includes('markdown') || contentType.includes('md'))) {
-    return true;
-  }
-
-  if (extension && ['md', 'markdown'].includes(extension)) {
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Check if file is CSV based on content type or extension
- */
-export const checkIsCsvFile = (contentType?: string, extension?: string): boolean => {
-  if (contentType && (contentType.includes('csv') || contentType.includes('comma-separated-values'))) {
-    return true;
-  }
-
-  if (extension && extension === 'csv') {
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Check if file is TSV based on content type or extension
- */
-export const checkIsTsvFile = (contentType?: string, extension?: string): boolean => {
-  if (contentType && contentType.includes('tab-separated-values')) {
-    return true;
-  }
-
-  if (extension && extension === 'tsv') {
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Check if file is JSON based on content type or extension
- */
-export const checkIsJSONFile = (contentType?: string, extension?: string): boolean => {
-  if (contentType && contentType.includes('application/json')) {
-    return true;
-  }
-
-  // mvsj: MolViewSpec JSON (mol* viewer)
-  if (extension && ['json', 'mvsj'].includes(extension)) {
-    return true;
-  }
-
-  return false;
-};
 
 /**
  * Format file content for display - attempts to format JSON, otherwise returns as-is
@@ -145,7 +33,7 @@ export const parseCsvContent = (csvContent: string, isTSV?: boolean): string[][]
     const parseResult = Papa.parse(csvContent, {
       skipEmptyLines: true,
       header: false,
-      delimiter: isTSV ? '\t' : undefined
+      delimiter: isTSV ? '\t' : undefined,
     });
 
     if (parseResult.errors && parseResult.errors.length > 0) {
@@ -160,18 +48,20 @@ export const parseCsvContent = (csvContent: string, isTSV?: boolean): string[][]
   }
 };
 
+// TODO once we properly include ermrestjs in chaise, we should import FilePreviewTypes from there
+export enum FilePreviewTypes {
+  IMAGE = 'image',
+  MARKDOWN = 'markdown',
+  CSV = 'csv',
+  TSV = 'tsv',
+  JSON = 'json',
+  TEXT = 'text',
+}
 
 export interface FileInfo {
   size?: number;
   contentType?: string;
-  /**
-   * whether its type is previewable
-   */
-  isPreviewable: boolean;
-  isMarkdown: boolean;
-  isCsv: boolean;
-  isTsv: boolean;
-  isJSON: boolean;
+  previewType: FilePreviewTypes | null;
   /**
    * if non-empty, we should not show the file preview and show the error message instead
    */
@@ -180,40 +70,67 @@ export interface FileInfo {
    * whether we can use HTTP range request to fetch the first part of the file
    */
   canHandleRange?: boolean;
+  /**
+   * if set, number of bytes to prefetch for previewing the file
+   * (only set if canHandleRange is true)
+   */
+  prefetchBytes?: number;
+
+  prefetchMaxFileSize?: number;
 }
 
 /**
  * send a HEAD request to get the file information.
  */
-export const getFileInfo = async (url: string): Promise<FileInfo> => {
+export const getFileInfo = async (
+  url: string,
+  storedFilename?: string,
+  column?: AssetPseudoColumn
+): Promise<FileInfo> => {
   let errorMessage = '';
 
   try {
-    const response = await ConfigService.http.head(url, { skipHTTP401Handling: true, skipRetryBrowserError: true });
+    const response = await ConfigService.http.head(url, {
+      skipHTTP401Handling: true,
+      skipRetryBrowserError: true,
+    });
+    const contentDisposition = response.headers['content-disposition'] || '';
     const contentType = response.headers['content-type'] || '';
     const contentLength = response.headers['content-length'];
-    const canHandleRange = response.headers['accept-ranges'] !== 'none';
     const size = contentLength ? parseInt(contentLength, 10) : undefined;
-    const extension = getFileExtention(url);
+    const infoStr = [
+      `url: ${url}`,
+      `Content-Type: ${contentType}`,
+      `Content-Length: ${contentLength}`,
+      `Content-Disposition: ${contentDisposition}`,
+      `accept-ranges: ${response.headers['accept-ranges']}`,
+    ].join('\n');
+    $log.debug(`Fetched file HEAD info:\n${infoStr}`);
 
-    if (!canHandleRange && size && size > FILE_PREVIEW.MAX_SIZE) {
+    const res = ConfigService.ERMrest.FilePreviewService.getFilePreviewInfo(
+      url,
+      column,
+      storedFilename,
+      contentDisposition,
+      contentType
+    );
+    const { previewType, prefetchBytes, prefetchMaxFileSize } = res;
+    const canHandleRange = response.headers['accept-ranges'] !== 'none' && previewType !== 'image';
+    if (previewType && size && size > prefetchMaxFileSize) {
       errorMessage = errorMessages.filePreview.largeFile;
     }
-
     return {
       size,
       contentType,
-      isPreviewable: isPreviewableFile(contentType, extension),
-      isMarkdown: checkIsMarkdownFile(contentType, extension),
-      isCsv: checkIsCsvFile(contentType, extension),
-      isTsv: checkIsTsvFile(contentType, extension),
-      isJSON: checkIsJSONFile(contentType, extension),
+      previewType,
       canHandleRange,
-      errorMessage
+      prefetchBytes,
+      prefetchMaxFileSize,
+      errorMessage,
     };
   } catch (exception) {
-
     $log.warn('Unable to fetch the file info for showing the preview.');
+    $log.warn(exception);
     const ermrestError = ConfigService.ERMrest.responseToError(exception);
     if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
       errorMessage = errorMessages.filePreview.unauthorized;
@@ -226,12 +143,8 @@ export const getFileInfo = async (url: string): Promise<FileInfo> => {
     }
 
     return {
-      isPreviewable: false,
-      isMarkdown: false,
-      isCsv: false,
-      isTsv: false,
-      isJSON: false,
-      errorMessage
+      previewType: null,
+      errorMessage,
     };
   }
 };
