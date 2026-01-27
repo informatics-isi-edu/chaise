@@ -75,6 +75,7 @@ export interface FileInfo {
    * (only set if canHandleRange is true)
    */
   prefetchBytes?: number;
+
   prefetchMaxFileSize?: number;
 }
 
