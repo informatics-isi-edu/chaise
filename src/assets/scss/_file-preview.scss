@@ -84,6 +84,8 @@
         height: 100%;
 
         .table {
+          // override the markdown-container styles
+          display: table !important;
           margin-bottom: 0;
           font-size: 0.875rem;
           border: 0;

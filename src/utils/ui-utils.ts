@@ -3,10 +3,12 @@
  */
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import Tooltip from 'bootstrap/js/dist/tooltip';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { CLASS_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import Tooltip from 'bootstrap/js/dist/tooltip';
+import { unescapeHTML } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 export type ContainerHeightSensorDimensions = {
   /**
@@ -441,22 +443,32 @@ export async function createChaiseFilePreviews(container: Element) {
     Promise.all([
       import('react'),
       import('react-dom/client'),
-      import('@isrd-isi-edu/chaise/src/components/file-preview')
-    ]).then(([React, ReactDOM, FilePreviewModule]) => {
-      const FilePreview = FilePreviewModule.default;
+      import('@isrd-isi-edu/chaise/src/components/file-preview'),
+    ])
+      .then(([React, ReactDOM, FilePreviewModule]) => {
+        const FilePreview = FilePreviewModule.default;
 
-      placeholders.forEach((el) => {
-        const url = el.getAttribute('data-file-url');
-        // TODO pass other props (filename, value?) if needed
-        if (!url) return;
+        placeholders.forEach((el) => {
+          const url = el.getAttribute('data-file-url');
+          const downloadBtnStr = el.getAttribute('data-download-btn');
 
-        // Create a React root and render the FilePreview component using React.createElement
-        const root = ReactDOM.createRoot(el);
-        root.render(React.createElement(FilePreview, { url, column: undefined }));
+          // TODO pass other props (filename, value?) if needed
+          if (!url) return;
+          const value = downloadBtnStr
+            ? {
+                isHTML: true,
+                value: ConfigService.ERMrest.renderMarkdown(downloadBtnStr),
+              }
+            : undefined;
+
+          // Create a React root and render the FilePreview component using React.createElement
+          const root = ReactDOM.createRoot(el);
+          root.render(React.createElement(FilePreview, { url, value, column: undefined }));
+        });
+      })
+      .catch((error) => {
+        $log.error('Error loading FilePreview component:', error);
       });
-    }).catch((error) => {
-      $log.error('Error loading FilePreview component:', error);
-    });
   }
 }
 
