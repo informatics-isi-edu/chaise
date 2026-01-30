@@ -29,6 +29,7 @@ import {
   parseCsvContent,
 } from '@isrd-isi-edu/chaise/src/utils/file-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { set } from 'react-hook-form';
 
 interface FilePreviewProps {
   /**
@@ -53,6 +54,27 @@ interface FilePreviewProps {
    * Additional CSS class name for the container
    */
   className?: string;
+  /**
+   * whether to add a download button
+   */
+  addDownloadBtn?: boolean;
+  /**
+   * if adding a download button, the class name for it
+   */
+  downloadBtnClassName?: string;
+  /**
+   * force a specific preview type
+   * (used by the markdown renderer to set the preview type)
+   */
+  forcedPreviewType?: FilePreviewTypes;
+  /**
+   * force prefetch bytes for the file preview
+   */
+  forcedPrefetchBytes?: number;
+  /**
+   * force prefetch max file size for the file preview
+   */
+  forcedPrefetchMaxFileSize?: number;
 }
 
 const FilePreview = ({
@@ -61,6 +83,11 @@ const FilePreview = ({
   value,
   filename,
   column,
+  addDownloadBtn = false,
+  downloadBtnClassName = '',
+  forcedPreviewType,
+  forcedPrefetchBytes,
+  forcedPrefetchMaxFileSize,
 }: FilePreviewProps): JSX.Element => {
   /**
    * whether we're waiting for the file content to load
@@ -81,6 +108,7 @@ const FilePreview = ({
    * If the fileContent value is truncated or not
    */
   const [isTruncated, setIsTruncated] = useState(false);
+  const [downloadBtnCaption, setDownloadBtnCaption] = useState<string>('');
 
   /**
    * if the file is CSV or markdown, and the parser didn't throw an error, we can show the rendered content
@@ -115,7 +143,18 @@ const FilePreview = ({
     isInitialized.current = true;
 
     const initializeFile = async () => {
-      const info = await getFileInfo(url, filename, column);
+      const info = await getFileInfo(
+        url,
+        filename,
+        column,
+        forcedPreviewType,
+        forcedPrefetchBytes,
+        forcedPrefetchMaxFileSize
+      );
+
+      if (addDownloadBtn) {
+        setDownloadBtnCaption(info.filename ? info.filename : 'Download');
+      }
       setPreviewType(info.previewType);
       setError(info.errorMessage || '');
 
@@ -257,13 +296,16 @@ const FilePreview = ({
     );
   };
 
-  const containerClass = `chaise-file-preview-container${className ? ` ${className}` : ''}`;
-
   return (
-    <div className={containerClass}>
-      {value && (
+    <div className={`chaise-file-preview-container${className ? ` ${className}` : ''}`}>
+      {(value || addDownloadBtn) && (
         <div className='file-preview-download-btn'>
-          <DisplayValue addClass value={value} />
+          {value && <DisplayValue addClass value={value} />}
+          {addDownloadBtn && downloadBtnCaption && (
+            <a href={url} download className={downloadBtnClassName}>
+              {downloadBtnCaption}
+            </a>
+          )}
         </div>
       )}
 

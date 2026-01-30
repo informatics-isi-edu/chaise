@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+// import type ( Catalog } from '@isrd-isi-edu/ermrestjs/js/core';)
+
 // models
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 
@@ -84,6 +86,8 @@ export class ConfigService {
   private static _catalogID: string;
 
   private static _catalogIDVersion?: string;
+
+  static catalog: any;
 
   /**
    * If the catalog version was corrected, this will hold the previous version info.
@@ -170,6 +174,8 @@ export class ConfigService {
 
       try {
         const catalog = await ConfigService._server.catalogs.get(catalogId, true);
+
+        ConfigService.catalog = catalog;
 
         // ermrestjs might change the version to what ermrest reports
         if (catalog.versionCorrected) {

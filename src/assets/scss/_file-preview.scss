@@ -53,6 +53,9 @@
       cursor: zoom-in;
       transition: opacity 0.2s ease;
 
+      // override the markdown-container styles
+      margin: 0 !important;
+
       &:not(.loaded) {
         opacity: 0.3;
       }
@@ -145,6 +148,8 @@
         height: 100%;
 
         .table {
+          // override the markdown-container styles
+          display: table !important;
           margin-bottom: 0;
           font-size: 0.875rem;
           border: 0;
