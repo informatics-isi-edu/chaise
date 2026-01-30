@@ -7,8 +7,9 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { CLASS_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { unescapeHTML } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { isFilePreviewType } from '@isrd-isi-edu/chaise/src/utils/file-utils';
+import { stringToNumber } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 export type ContainerHeightSensorDimensions = {
   /**
@@ -450,20 +451,31 @@ export async function createChaiseFilePreviews(container: Element) {
 
         placeholders.forEach((el) => {
           const url = el.getAttribute('data-file-url');
-          const downloadBtnStr = el.getAttribute('data-download-btn');
-
-          // TODO pass other props (filename, value?) if needed
           if (!url) return;
-          const value = downloadBtnStr
-            ? {
-                isHTML: true,
-                value: ConfigService.ERMrest.renderMarkdown(downloadBtnStr),
-              }
-            : undefined;
+          
+          const filename = el.getAttribute('data-filename');
+          const previewType = el.getAttribute('data-preview-type');
+          const prefetchBytesStr = el.getAttribute('data-prefetch-bytes');
+          const prefetchMaxFileSizeStr = el.getAttribute('data-prefetch-max-file-size');
+          const hideDownloadBtnStr = el.getAttribute('data-hide-download-btn') === 'true';
+          const downloadBtnClass = el.getAttribute('data-download-btn-class');
+
+          const prefetchBytes = stringToNumber(prefetchBytesStr || '');
+          const maxSize = stringToNumber(prefetchMaxFileSizeStr || '');
 
           // Create a React root and render the FilePreview component using React.createElement
           const root = ReactDOM.createRoot(el);
-          root.render(React.createElement(FilePreview, { url, value, column: undefined }));
+          root.render(
+            React.createElement(FilePreview, {
+              url,
+              filename: filename ? filename : undefined,
+              addDownloadBtn: !hideDownloadBtnStr,
+              downloadBtnClassName: downloadBtnClass ? downloadBtnClass : undefined,
+              forcedPreviewType: isFilePreviewType(previewType) ? previewType : undefined,
+              forcedPrefetchBytes: prefetchBytes !== null ? prefetchBytes : undefined,
+              forcedPrefetchMaxFileSize: maxSize !== null ? maxSize : undefined,
+            })
+          );
         });
       })
       .catch((error) => {
@@ -505,11 +517,11 @@ export function saveObjectAsJSONFile(obj: any, filename: string) {
 }
 
 /**
-* force all links within the given wrapper to open in a new tab
-* @param {HTMLElement} wrapper the element within which we should force links to open in new tab
-*
-* NOTE: if wrapper is not provided, document.body will be used
-*/
+ * force all links within the given wrapper to open in a new tab
+ * @param {HTMLElement} wrapper the element within which we should force links to open in new tab
+ *
+ * NOTE: if wrapper is not provided, document.body will be used
+ */
 export function openLinksInTab(wrapper?: HTMLElement) {
   const wrapperEl = wrapper ?? document.querySelector('body');
   if (!wrapperEl) return;
@@ -520,24 +532,28 @@ export function openLinksInTab(wrapper?: HTMLElement) {
   return {
     remove: () => {
       wrapperEl.removeEventListener('click', listener);
-    }
-  }
+    },
+  };
 }
 
 /**
-* Will call the handler function upon clicking on the elements represented by selector
-* @param {HTMLElement} wrapper the element within which we should listen for clicks (e.g. document.body)
-* @param {string} selector the selector string
-* @param {function} handler  the handler callback function.
-* handler parameters are:
-*  - Event object that is returned.
-*  - The target (element that is described by the selector)
-* NOTE since we're checking the closest element to the target, the e.target might
-* be different from the actual target that we want. That's why we have to send the target too.
-* We observed this behavior in Firefox where clicking on an image wrapped by a link (a tag), returned
-* the image as the value of e.target and not the link
-*/
-export function addClickListener(wrapper: HTMLElement, selector: string, handler: (e: Event, target: any) => void) {
+ * Will call the handler function upon clicking on the elements represented by selector
+ * @param {HTMLElement} wrapper the element within which we should listen for clicks (e.g. document.body)
+ * @param {string} selector the selector string
+ * @param {function} handler  the handler callback function.
+ * handler parameters are:
+ *  - Event object that is returned.
+ *  - The target (element that is described by the selector)
+ * NOTE since we're checking the closest element to the target, the e.target might
+ * be different from the actual target that we want. That's why we have to send the target too.
+ * We observed this behavior in Firefox where clicking on an image wrapped by a link (a tag), returned
+ * the image as the value of e.target and not the link
+ */
+export function addClickListener(
+  wrapper: HTMLElement,
+  selector: string,
+  handler: (e: Event, target: any) => void
+) {
   const listener = (e: Event) => {
     const target = e.target as HTMLElement;
     if (target.closest(selector)) {

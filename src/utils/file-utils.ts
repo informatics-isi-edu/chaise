@@ -57,6 +57,13 @@ export enum FilePreviewTypes {
   JSON = 'json',
   TEXT = 'text',
 }
+/**
+ * Type guard to check if a value is a FilePreviewTypes
+ */
+export const isFilePreviewType = (value: unknown): value is FilePreviewTypes => {
+  if (typeof value !== 'string') return false;
+  return Object.values(FilePreviewTypes).includes(value as FilePreviewTypes);
+};
 
 export interface FileInfo {
   size?: number;
@@ -75,17 +82,47 @@ export interface FileInfo {
    * (only set if canHandleRange is true)
    */
   prefetchBytes?: number;
-
+  /**
+   * if set, maximum file size allowed for prefetching
+   */
   prefetchMaxFileSize?: number;
+  /**
+   * the filename associated with the file
+   */
+  filename?: string;
 }
 
 /**
  * send a HEAD request to get the file information.
  */
 export const getFileInfo = async (
+  /**
+   * the file url
+   */
   url: string,
+  /**
+   * the filename (used for extension mapping)
+   */
   storedFilename?: string,
-  column?: AssetPseudoColumn
+  /**
+   * the asset column that this file belongs to
+   */
+  column?: AssetPseudoColumn,
+  /**
+   * force a specific preview type
+   * (used by the markdown renderer to set the preview type)
+   */
+  forcedPreviewType?: FilePreviewTypes,
+  /**
+   * force a specific prefetch bytes value
+   * (used by the markdown renderer to set the prefetch bytes)
+   */
+  forcedPrefetchBytes?: number,
+  /**
+   * force a specific prefetch max file size value
+   * (used by the markdown renderer to set the prefetch max file size)
+   */
+  forcedPrefetchMaxFileSize?: number
 ): Promise<FileInfo> => {
   let errorMessage = '';
 
@@ -104,6 +141,10 @@ export const getFileInfo = async (
       `Content-Length: ${contentLength}`,
       `Content-Disposition: ${contentDisposition}`,
       `accept-ranges: ${response.headers['accept-ranges']}`,
+      `storedFilename: ${storedFilename}`,
+      `forcedPreviewType: ${forcedPreviewType}`,
+      `forcedPrefetchBytes: ${forcedPrefetchBytes}`,
+      `forcedPrefetchMaxFileSize: ${forcedPrefetchMaxFileSize}`,
     ].join('\n');
     $log.debug(`Fetched file HEAD info:\n${infoStr}`);
 
@@ -112,9 +153,12 @@ export const getFileInfo = async (
       column,
       storedFilename,
       contentDisposition,
-      contentType
+      contentType,
+      forcedPreviewType,
+      forcedPrefetchBytes,
+      forcedPrefetchMaxFileSize
     );
-    const { previewType, prefetchBytes, prefetchMaxFileSize } = res;
+    const { previewType, prefetchBytes, prefetchMaxFileSize, filename } = res;
     const canHandleRange = response.headers['accept-ranges'] !== 'none' && previewType !== 'image';
     if (previewType && size && size > prefetchMaxFileSize) {
       errorMessage = errorMessages.filePreview.largeFile;
@@ -127,6 +171,7 @@ export const getFileInfo = async (
       prefetchBytes,
       prefetchMaxFileSize,
       errorMessage,
+      filename,
     };
   } catch (exception) {
     $log.warn('Unable to fetch the file info for showing the preview.');

@@ -29,3 +29,12 @@ export function makeSafeIdAttr(string: string) {
 export function hasTrailingPeriod(str: string) {
   return str[str.length-1] === '.';
 }
+
+export function stringToNumber(val: string): number | null {
+  let result: number | null = null;
+  const parsed = parseInt(val, 10);
+  if (!isNaN(parsed)) {
+    result = parsed;
+  }
+  return result;
+}

@@ -53,6 +53,9 @@
       cursor: zoom-in;
       transition: opacity 0.2s ease;
 
+      // override the markdown-container styles
+      margin: 0 !important;
+
       &:not(.loaded) {
         opacity: 0.3;
       }
