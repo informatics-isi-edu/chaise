@@ -30,6 +30,9 @@ export function hasTrailingPeriod(str: string) {
   return str[str.length-1] === '.';
 }
 
+/**
+ * Convert a string to a number. If conversion fails, return null.
+ */
 export function stringToNumber(val: string): number | null {
   let result: number | null = null;
   const parsed = parseInt(val, 10);
@@ -37,4 +40,25 @@ export function stringToNumber(val: string): number | null {
     result = parsed;
   }
   return result;
+}
+
+/**
+ * Make sure the text is not rendered as HTML (by replacing speciall characters).
+ * @returns HTML-escaped text
+ */
+export function escapeHTML(str: string): string {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Unescape HTML special characters in a string.
+ */
+export function unescapeHTML(str: string) {
+  const doc = new DOMParser().parseFromString(str, 'text/html');
+  return doc.documentElement.textContent;
 }

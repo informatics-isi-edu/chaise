@@ -63,6 +63,10 @@ interface FilePreviewProps {
    */
   downloadBtnClassName?: string;
   /**
+   * if adding a download button, force a specific caption for it
+   */
+  forcedDownloadBtnCaption?: string;
+  /**
    * force a specific preview type
    * (used by the markdown renderer to set the preview type)
    */
@@ -88,6 +92,7 @@ const FilePreview = ({
   forcedPreviewType,
   forcedPrefetchBytes,
   forcedPrefetchMaxFileSize,
+  forcedDownloadBtnCaption,
 }: FilePreviewProps): JSX.Element => {
   /**
    * whether we're waiting for the file content to load
@@ -153,7 +158,13 @@ const FilePreview = ({
       );
 
       if (addDownloadBtn) {
-        setDownloadBtnCaption(info.filename ? info.filename : 'Download');
+        setDownloadBtnCaption(
+          forcedDownloadBtnCaption
+            ? forcedDownloadBtnCaption
+            : info.filename
+              ? info.filename
+              : 'Download'
+        );
       }
       setPreviewType(info.previewType);
       setError(info.errorMessage || '');

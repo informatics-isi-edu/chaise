@@ -2666,11 +2666,31 @@
               "type": {
                 "typename": "text"
               }
+            },
+            {
+              "name": "markdown_block_preview",
+              "type": {
+                "typename": "text"
+              },
+              "annotations": {
+                "tag:isrd.isi.edu,2016:column-display": {
+                    "detailed": {
+                        "markdown_pattern": "{{#if markdown_block_preview}} ::: filePreview [{{{markdown_block_preview_caption}}}]({{{_uri}}}){ {{{markdown_block_preview}}} } \n:::{{/if}}",
+                        "template_engine": "handlebars"
+                    }
+                }
+              }
+            },
+            {
+                "name": "markdown_block_preview_caption",
+                "type": {
+                  "typename": "text"
+                }
             }
           ],
           "annotations": {
             "tag:isrd.isi.edu,2016:visible-columns": {
-              "*": ["id", "uri"]
+              "*": ["id", "uri", "markdown_block_preview", "markdown_block_preview_caption" ]
             },
             "tag:isrd.isi.edu,2016:visible-foreign-keys": {
               "detailed": []

@@ -459,6 +459,7 @@ export async function createChaiseFilePreviews(container: Element) {
           const prefetchMaxFileSizeStr = el.getAttribute('data-prefetch-max-file-size');
           const hideDownloadBtnStr = el.getAttribute('data-hide-download-btn') === 'true';
           const downloadBtnClass = el.getAttribute('data-download-btn-class');
+          const downloadBtnCaption = el.getAttribute('data-download-btn-caption');
 
           const prefetchBytes = stringToNumber(prefetchBytesStr || '');
           const maxSize = stringToNumber(prefetchMaxFileSizeStr || '');
@@ -471,6 +472,7 @@ export async function createChaiseFilePreviews(container: Element) {
               filename: filename ? filename : undefined,
               addDownloadBtn: !hideDownloadBtnStr,
               downloadBtnClassName: downloadBtnClass ? downloadBtnClass : undefined,
+              forcedDownloadBtnCaption: downloadBtnCaption ? downloadBtnCaption : undefined,
               forcedPreviewType: isFilePreviewType(previewType) ? previewType : undefined,
               forcedPrefetchBytes: prefetchBytes !== null ? prefetchBytes : undefined,
               forcedPrefetchMaxFileSize: maxSize !== null ? maxSize : undefined,
