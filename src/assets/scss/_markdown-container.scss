@@ -2,7 +2,7 @@
 @use 'helpers';
 @use 'variables';
 
-.markdown-container :not(.chaise-file-preview-container):not(.chaise-file-preview-container *) {
+.markdown-container {
   // NOTE related PR: https://github.com/informatics-isi-edu/chaise/pull/882
   // might not be needed anymore
   .recordset-table td & img {
