@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 
 import AlertLocators from '@isrd-isi-edu/chaise/test/e2e/locators/alert';
 import ModalLocators from '@isrd-isi-edu/chaise/test/e2e/locators/modal';
@@ -59,24 +59,32 @@ const mvsjContent = {
   },
 };
 
+type IndividualTypeProps = {
+  skipInCI?: boolean;
+  type: string;
+  file: RecordeditFile | { content: string; path: string };
+  downloadBtn?: {
+    caption: string;
+    url: string;
+  };
+  renderedContent?: string;
+  errorMessage?: string;
+};
+
 const testParams: {
   schemaName: string;
   tableName: string;
-  types: Array<{
-    skipInCI?: boolean;
-    type: string;
-    file: RecordeditFile | { content: string; path: string };
-    inputs: {
-      id: string;
-      file: RecordeditFile;
-    };
-    downloadBtn: {
-      caption: string;
-      url: string;
-    };
-    renderedContent?: string;
-    errorMessage?: string;
-  }>;
+  types: Array<
+    IndividualTypeProps & {
+      inputs: {
+        id: string;
+        file: RecordeditFile;
+        markdown_block_preview?: string;
+        markdown_block_preview_caption?: string;
+      };
+      markdownBlockPreview?: IndividualTypeProps;
+    }
+  >;
 } = {
   schemaName: 'product-record',
   tableName: 'file_preview_table',
@@ -94,10 +102,23 @@ const testParams: {
           path: 'text-01.txt',
           size: 1024, // this is just to silence the error
         },
+        markdown_block_preview: '.show',
+        markdown_block_preview_caption: 'New caption',
       },
       downloadBtn: {
         caption: 'text-01.txt',
         url: '/hatrac/js/chaise/filepreview/1/1/',
+      },
+      markdownBlockPreview: {
+        type: 'text',
+        file: {
+          path: 'text-01.txt',
+          content: 'This is a text file that should show up properly.',
+        },
+        downloadBtn: {
+          caption: 'New caption',
+          url: '/hatrac/js/chaise/filepreview/1/1/',
+        },
       },
     },
     {
@@ -113,12 +134,23 @@ const testParams: {
           path: 'csv-01.csv',
           size: 1024, // this is just to silence the error
         },
+        markdown_block_preview: '.show hide-download-btn',
       },
       downloadBtn: {
         caption: 'csv-01.csv',
         url: '/hatrac/js/chaise/filepreview/1/2/',
       },
       renderedContent: 'name age Alice 30 Bob 25',
+      markdownBlockPreview: {
+        type: 'csv',
+        file: {
+          name: 'csv-01.csv',
+          path: 'csv-01.csv',
+          size: 1024, // this is just to silence the error
+        },
+        renderedContent: 'name age Alice 30 Bob 25',
+        // no download button
+      },
     },
     {
       type: 'markdown',
@@ -153,12 +185,24 @@ const testParams: {
           path: 'json-01.json',
           size: 1024, // this is just to silence the error
         },
+        markdown_block_preview: 'preview-type="text" hide-download-btn',
       },
       downloadBtn: {
         caption: 'json-01.json',
         url: '/hatrac/js/chaise/filepreview/1/4/',
       },
       renderedContent: JSON.stringify({ name: 'Alice', age: 30 }, undefined, 2),
+      markdownBlockPreview: {
+        type: 'text',
+        file: {
+          name: 'json-01.json',
+          path: 'json-01.json',
+          size: 1024, // this is just to silence the error
+        },
+        // testing the forced text preview type instead of json
+        renderedContent: '{"name": "Alice", "age": 30}',
+        // no download button
+      },
     },
     {
       type: 'html',
@@ -239,10 +283,23 @@ const testParams: {
           path: 'image-01.svg',
           size: 1024, // this is just to silence the error
         },
+        markdown_block_preview: '.show'
       },
       downloadBtn: {
         caption: 'image-01.svg',
         url: '/hatrac/js/chaise/filepreview/1/8/',
+      },
+      markdownBlockPreview: {
+        type: 'image',
+        file: {
+          name: 'image-01.svg',
+          path: 'image-01.svg',
+          size: 1024, // this is just to silence the error
+        },
+        downloadBtn: {
+          caption: 'image-01.svg',
+          url: '/hatrac/js/chaise/filepreview/1/8/', 
+        }
       },
     },
     {
@@ -338,8 +395,10 @@ test.describe('file preview', () => {
 
   for (const params of testParams.types) {
     test(params.type, async ({ page, baseURL }, testInfo) => {
-      test.skip(!!(process.env.CI && params.skipInCI), 'skipped in CI environment (file size not properly reported)');
-
+      test.skip(
+        !!(process.env.CI && params.skipInCI),
+        'skipped in CI environment (file size not properly reported)'
+      );
 
       await test.step('create the file', async () => {
         await createFiles([params.file]);
@@ -355,114 +414,20 @@ test.describe('file preview', () => {
           baseURL
         ),
         params.inputs.id,
-        params.inputs.file
+        params.inputs.file,
+        params.inputs.markdown_block_preview,
+        params.inputs.markdown_block_preview_caption
       );
 
       const container = RecordLocators.getFilePreviewContainer(page, 'uri');
-      await test.step('the preview should be available.', async () => {
-        await expect.soft(container).toBeVisible();
-      });
+      await testFilePreviewContainer(container, params);
 
-      await test.step('the download button should be displayed.', async () => {
-        const downloadBtn = RecordLocators.getFilePreviewDownloadBtn(container);
-        await expect.soft(downloadBtn).toBeVisible();
-        const link = downloadBtn.locator('a');
-        expect.soft(await link.getAttribute('href')).toContain(params.downloadBtn.url);
-        await expect.soft(link).toHaveText(params.downloadBtn.caption);
-      });
-
-      switch (params.type) {
-        case 'tsv':
-        case 'csv':
-        case 'markdown':
-          await test.step('the preview should show the rendered value.', async () => {
-            await expect
-              .soft(RecordLocators.getFilePreviewContent(container))
-              .toHaveText(params.renderedContent!);
-          });
-
-          await test.step('toggle should show the raw content', async () => {
-            const btn = RecordLocators.getFilePreviewToggleBtn(container);
-            await expect.soft(btn).toBeVisible();
-            await expect.soft(btn).toHaveText('Show raw');
-            await btn.click();
-            await expect
-              .soft(btn)
-              .toHaveText(params.type === 'markdown' ? 'Show rendered' : 'Show table');
-            if ('content' in params.file) {
-              await expect
-                .soft(RecordLocators.getFilePreviewContent(container))
-                .toHaveText(params.file.content);
-            }
-          });
-
-          break;
-        case 'image':
-          const image = RecordLocators.getFilePreviewImage(container);
-          await test.step('the image should be visible.', async () => {
-            await expect.soft(image).toBeVisible();
-          });
-
-          await test.step('clicking the image should open the lightbox.', async () => {
-            await image.click();
-
-            const lightbox = RecordLocators.getFilePreviewImageLightbox(page);
-            await expect.soft(lightbox).toBeVisible();
-
-            // close the lightbox
-            const btn = RecordLocators.getFilePreviewImageLightboxCloseBtn(page);
-            await expect.soft(btn).toBeVisible();
-            await btn.click();
-            await expect.soft(lightbox).not.toBeVisible();
-          });
-          break;
-        case 'disabled':
-          await test.step('the preview should show an error message.', async () => {
-            await expect.soft(RecordLocators.getFilePreviewContent(container)).not.toBeVisible();
-
-            const error = RecordLocators.getFilePreviewError(container);
-            await expect.soft(error).toBeVisible();
-            if (params.errorMessage) {
-              await expect.soft(error).toHaveText(params.errorMessage);
-            }
-          });
-          break;
-        // cases that by default we're not supporting
-        case 'html':
-          await test.step('the preview should not be visible.', async () => {
-            await expect.soft(RecordLocators.getFilePreviewContent(container)).not.toBeVisible();
-
-            const error = RecordLocators.getFilePreviewError(container);
-            await expect.soft(error).not.toBeVisible();
-          });
-          break;
-        // simple text based previews
-        default:
-          await test.step('the preview should be displayed.', async () => {
-            await expect.soft(RecordLocators.getFilePreviewContent(container)).toBeVisible();
-
-            if (params.renderedContent || 'content' in params.file) {
-              let expectedContent = '';
-              if (params.renderedContent) {
-                expectedContent = params.renderedContent;
-              } else if ('content' in params.file) {
-                expectedContent = params.file.content;
-              }
-
-              await expect
-                .soft(RecordLocators.getFilePreviewContent(container))
-                .toHaveText(expectedContent);
-            }
-          });
-
-          if (params.errorMessage) {
-            await test.step('the preview should show a warning message.', async () => {
-              const error = RecordLocators.getFilePreviewError(container);
-              await expect.soft(error).toBeVisible();
-              await expect.soft(error).toHaveText(params.errorMessage!);
-            });
-          }
-          break;
+      if (params.markdownBlockPreview) {
+        await test.step(':::filePreview markdown block', async () => {
+          const markdownColContainer = RecordLocators.getFilePreviewContainer(page, 'markdown_block_preview');
+          await page.pause();
+          await testFilePreviewContainer(markdownColContainer, params.markdownBlockPreview!);
+        });
       }
 
       await test.step('delete the file', async () => {
@@ -472,14 +437,154 @@ test.describe('file preview', () => {
   }
 });
 
-const createRecord = async (page: Page, pageURL: string, fileid: string, file: RecordeditFile) => {
+const testFilePreviewContainer = async (container: Locator, params: IndividualTypeProps) => {
+  await test.step('the preview should be available.', async () => {
+    await expect.soft(container).toBeVisible();
+  });
+
+  if (params.downloadBtn) {
+    await test.step('the download button should be displayed.', async () => {
+      const downloadBtn = RecordLocators.getFilePreviewDownloadBtn(container);
+      await expect.soft(downloadBtn).toBeVisible();
+      const link = downloadBtn.locator('a');
+      expect.soft(await link.getAttribute('href')).toContain(params.downloadBtn!.url);
+      await expect.soft(link).toHaveText(params.downloadBtn!.caption);
+    });
+  } else {
+    await test.step('the download button should not be displayed.', async () => {
+      const downloadBtn = RecordLocators.getFilePreviewDownloadBtn(container);
+      await expect.soft(downloadBtn).not.toBeVisible();
+    });
+  }
+
+  switch (params.type) {
+    case 'tsv':
+    case 'csv':
+    case 'markdown':
+      await test.step('the preview should show the rendered value.', async () => {
+        await expect
+          .soft(RecordLocators.getFilePreviewContent(container))
+          .toHaveText(params.renderedContent!);
+      });
+
+      await test.step('toggle should show the raw content', async () => {
+        const btn = RecordLocators.getFilePreviewToggleBtn(container);
+        await expect.soft(btn).toBeVisible();
+        await expect.soft(btn).toHaveText('Show raw');
+        await btn.click();
+        await expect
+          .soft(btn)
+          .toHaveText(params.type === 'markdown' ? 'Show rendered' : 'Show table');
+        if ('content' in params.file) {
+          await expect
+            .soft(RecordLocators.getFilePreviewContent(container))
+            .toHaveText(params.file.content);
+        }
+      });
+
+      break;
+    case 'image':
+      const image = RecordLocators.getFilePreviewImage(container);
+      await test.step('the image should be visible.', async () => {
+        await expect.soft(image).toBeVisible();
+      });
+
+      await test.step('clicking the image should open the lightbox.', async () => {
+        await image.click();
+
+        const lightbox = RecordLocators.getFilePreviewImageLightbox(container.page());
+        await expect.soft(lightbox).toBeVisible();
+
+        // close the lightbox
+        const btn = RecordLocators.getFilePreviewImageLightboxCloseBtn(container.page());
+        await expect.soft(btn).toBeVisible();
+        await btn.click();
+        await expect.soft(lightbox).not.toBeVisible();
+      });
+      break;
+    case 'disabled':
+      await test.step('the preview should show an error message.', async () => {
+        await expect.soft(RecordLocators.getFilePreviewContent(container)).not.toBeVisible();
+
+        const error = RecordLocators.getFilePreviewError(container);
+        await expect.soft(error).toBeVisible();
+        if (params.errorMessage) {
+          await expect.soft(error).toHaveText(params.errorMessage);
+        }
+      });
+      break;
+    // cases that by default we're not supporting
+    case 'html':
+      await test.step('the preview should not be visible.', async () => {
+        await expect.soft(RecordLocators.getFilePreviewContent(container)).not.toBeVisible();
+
+        const error = RecordLocators.getFilePreviewError(container);
+        await expect.soft(error).not.toBeVisible();
+      });
+      break;
+    // simple text based previews
+    default:
+      await test.step('the preview should be displayed.', async () => {
+        await expect.soft(RecordLocators.getFilePreviewContent(container)).toBeVisible();
+
+        if (params.renderedContent || 'content' in params.file) {
+          let expectedContent = '';
+          if (params.renderedContent) {
+            expectedContent = params.renderedContent;
+          } else if ('content' in params.file) {
+            expectedContent = params.file.content;
+          }
+
+          await expect
+            .soft(RecordLocators.getFilePreviewContent(container))
+            .toHaveText(expectedContent);
+        }
+      });
+
+      if (params.errorMessage) {
+        await test.step('the preview should show a warning message.', async () => {
+          const error = RecordLocators.getFilePreviewError(container);
+          await expect.soft(error).toBeVisible();
+          await expect.soft(error).toHaveText(params.errorMessage!);
+        });
+      }
+      break;
+  }
+};
+
+const createRecord = async (
+  page: Page,
+  pageURL: string,
+  fileid: string,
+  file: RecordeditFile,
+  markdownBlockPreviewContent?: string,
+  markdownBlockPreviewCaption?: string
+) => {
   await test.step('open recordedit and upload the file.', async () => {
     await page.goto(pageURL);
     await RecordeditLocators.waitForRecordeditPageReady(page);
 
     await setInputValue(page, 1, 'id', 'id', RecordeditInputType.TEXT, fileid);
     await setInputValue(page, 1, 'uri', 'uri', RecordeditInputType.FILE, file);
+    await setInputValue(
+      page,
+      1,
+      'markdown_block_preview',
+      'markdown_block_preview',
+      RecordeditInputType.TEXT,
+      markdownBlockPreviewContent || ''
+    );
 
+    await setInputValue(
+      page,
+      1,
+      'markdown_block_preview_caption',
+      'markdown_block_preview_caption',
+      RecordeditInputType.TEXT,
+      markdownBlockPreviewCaption || ''
+    );
+
+    await page.pause();
     await RecordeditLocators.getSubmitRecordButton(page).click();
     try {
       await expect(AlertLocators.getErrorAlert(page)).not.toBeAttached();

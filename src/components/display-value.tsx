@@ -7,7 +7,7 @@ import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // utils
 import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { createChaiseTooltips } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { createChaiseTooltips, createChaiseFilePreviews } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type DisplayValueProps = {
   /**
@@ -55,23 +55,42 @@ const DisplayValue = ({
   as = 'span',
   props
 }: DisplayValueProps): JSX.Element => {
-
   const Wrapper = as;
 
-  // handle tooltips that might be in the value
   const spanRef = useRef<HTMLSpanElement | null>(null);
+  // to make sure we only setup once
+  const setupDone = useRef<boolean>(false);
+
+  /**
+   * handle tooltips and file previews that might be in the value
+   */
   useEffect(() => {
     if (!spanRef.current) return;
+    if (setupDone.current) return;
+    setupDone.current = true;
     createChaiseTooltips(spanRef.current);
+    createChaiseFilePreviews(spanRef.current);
   }, []);
 
   if (specialNullEmpty) {
     if (value?.value === '') {
-      return <Wrapper dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }} style={styles} {...props}></Wrapper>;
+      return (
+        <Wrapper
+          dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }}
+          style={styles}
+          {...props}
+        ></Wrapper>
+      );
     }
 
     if (value?.value == null) {
-      return <Wrapper dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }} style={styles} {...props}></Wrapper>;
+      return (
+        <Wrapper
+          dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }}
+          style={styles}
+          {...props}
+        ></Wrapper>
+      );
     }
   }
 
@@ -91,11 +110,14 @@ const DisplayValue = ({
         // for foreign-key inputs display value
         contentEditable={false}
         {...props}
-      >
-      </Wrapper>
-    )
+      ></Wrapper>
+    );
   }
-  return <Wrapper style={styles} className={usedClassNames.join(' ')} {...props}>{value?.value}</Wrapper>
+  return (
+    <Wrapper style={styles} className={usedClassNames.join(' ')} {...props}>
+      {value?.value}
+    </Wrapper>
+  );
 }
 
 export default memo(DisplayValue, (prevProps, nextProps) => {
