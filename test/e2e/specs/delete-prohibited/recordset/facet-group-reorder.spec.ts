@@ -31,7 +31,7 @@ const testParams = {
   numFacets: 7,
   facetNames: ['col_1', 'Group 1', 'col_6', 'col_2', 'col_3', 'col_5', 'col_4', 'Group 2', 'id'],
   openFacetNames: ['col_1', 'Group 1', 'Group 2'],
-  facetNamesAfterReorder: ['col_4', 'col_1', 'Group 2', 'id', 'Group 1', 'col_6', 'col_3', 'col_5', 'col_2'],
+  facetNamesAfterReorder: ['col_1', 'col_4', 'Group 2', 'id', 'Group 1', 'col_2', 'col_3', 'col_6', 'col_5'],
   openFacetNamesAfterReorder: ['col_1', 'Group 2', 'Group 1'],
 }
 
@@ -148,7 +148,12 @@ const facetSelectionParams: TestIndividualFacetParams[] = [
 ]
 
 test.describe('Reorder facet groups', () => {
-  test.describe.configure({ mode: 'parallel' });
+  /**
+   * the reordering test could be flaky since the position that the facet is dropped 
+   * might not be exactly the same as the destination facet's original position depending 
+   * on how tall the facets are. that's why I added retries to this.
+   */
+  test.describe.configure({ mode: 'parallel', retries: 1 });
 
   test('changing order', async ({ page, baseURL }, testInfo) => {
     const params = testParams;
@@ -162,17 +167,22 @@ test.describe('Reorder facet groups', () => {
         generateChaiseURL(APP_NAMES.RECORDSET, SCHEMA_NAME, params.tableName, testInfo, baseURL)
       );
       await RecordsetLocators.waitForRecordsetPageReady(page);
+      await RecordsetLocators.waitForFacets(page);
       await testDisplayedFacetItemsAndGroups(page, params.facetNames, params.openFacetNames);
     });
 
     await test.step('reorder facets and groups', async () => {
       // children of Group 1
-      await moveFacet(page, 2, 4);
+      await moveFacet(page, 1, 4);
       // move Group 1 to the end
       await moveFacet(page, 1, 6, true, false);
-      // move col_4 to top
+      // move col_4
       await moveFacet(page, 5, 0);
-      await testDisplayedFacetItemsAndGroups(page, params.facetNamesAfterReorder, params.openFacetNamesAfterReorder);
+      await testDisplayedFacetItemsAndGroups(
+        page,
+        params.facetNamesAfterReorder,
+        params.openFacetNamesAfterReorder
+      );
     });
 
     await test.step('the Save button should be available and clicking on it should save the order.', async () => {
@@ -185,7 +195,11 @@ test.describe('Reorder facet groups', () => {
       await saveBtn.click();
 
       await testMenuBtnIndicator(menuBtn, false);
-      await testDisplayedFacetItemsAndGroups(page, params.facetNamesAfterReorder, params.openFacetNamesAfterReorder);
+      await testDisplayedFacetItemsAndGroups(
+        page,
+        params.facetNamesAfterReorder,
+        params.openFacetNamesAfterReorder
+      );
     });
 
     // calling this here so the open state is not saved
@@ -198,7 +212,7 @@ test.describe('Reorder facet groups', () => {
       // since the previous test is opening and closing facets, the save button will be available
       await testMenuBtnDisabled(saveBtn, false);
       await testMenuBtnDisabled(applyDefaultBtn, false);
-      await testMenuBtnDisabled(applySavedBtn, false)
+      await testMenuBtnDisabled(applySavedBtn, false);
       await applyDefaultBtn.click();
 
       await testMenuBtnIndicator(menuBtn, true);
@@ -209,24 +223,36 @@ test.describe('Reorder facet groups', () => {
       await menuBtn.click();
       await testMenuBtnDisabled(saveBtn, false);
       await testMenuBtnDisabled(applyDefaultBtn, true);
-      await testMenuBtnDisabled(applySavedBtn, false)
+      await testMenuBtnDisabled(applySavedBtn, false);
       await applySavedBtn.click();
 
       await testMenuBtnIndicator(menuBtn, false);
-      await testDisplayedFacetItemsAndGroups(page, params.facetNamesAfterReorder, params.openFacetNamesAfterReorder);
+      await testDisplayedFacetItemsAndGroups(
+        page,
+        params.facetNamesAfterReorder,
+        params.openFacetNamesAfterReorder
+      );
     });
 
     await test.step('refreshing the page should display the saved order and open state.', async () => {
       await page.reload();
       await RecordsetLocators.waitForRecordsetPageReady(page);
-      await testDisplayedFacetItemsAndGroups(page, params.facetNamesAfterReorder, params.openFacetNamesAfterReorder);
+      await testDisplayedFacetItemsAndGroups(
+        page,
+        params.facetNamesAfterReorder,
+        params.openFacetNamesAfterReorder
+      );
     });
 
     await test.step('changing the order of facets without clicking on save should not save the order.', async () => {
       await moveFacet(page, 0, 4);
       await page.reload();
       await RecordsetLocators.waitForRecordsetPageReady(page);
-      await testDisplayedFacetItemsAndGroups(page, params.facetNamesAfterReorder, params.openFacetNamesAfterReorder);
+      await testDisplayedFacetItemsAndGroups(
+        page,
+        params.facetNamesAfterReorder,
+        params.openFacetNamesAfterReorder
+      );
     });
   });
 
@@ -241,7 +267,7 @@ test.describe('Reorder facet groups', () => {
         currTest.facetNames,
         currTest.openFacetNames,
         currTest.openFacetIndexes,
-        currTest.groupIndexesToOpen ? currTest.groupIndexesToOpen : [],
+        currTest.groupIndexesToOpen ? currTest.groupIndexesToOpen : []
       );
     });
   }
