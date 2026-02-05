@@ -177,7 +177,7 @@ test.describe('Reorder facet groups', () => {
       // move Group 1 to the end
       await moveFacet(page, 1, 6, true, false);
       // move col_4
-      await moveFacet(page, 5, 0);
+      await moveFacet(page, 5, 1);
       await testDisplayedFacetItemsAndGroups(
         page,
         params.facetNamesAfterReorder,
