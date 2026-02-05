@@ -113,7 +113,6 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
-          git checkout issue-1064
           sudo make root-install
       - name: Install chaise
         run: |
