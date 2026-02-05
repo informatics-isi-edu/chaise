@@ -297,6 +297,7 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
  * @param droppable
  */
 export async function dragAndDropWithScroll(page: Page, draggable: Locator, droppable: Locator) {
+  await draggable.scrollIntoViewIfNeeded();
   const box = (await droppable.boundingBox())!;
   await draggable.hover();
 

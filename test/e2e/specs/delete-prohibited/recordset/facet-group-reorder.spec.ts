@@ -32,7 +32,7 @@ const testParams = {
   facetNames: ['col_1', 'Group 1', 'col_6', 'col_2', 'col_3', 'col_5', 'col_4', 'Group 2', 'id'],
   openFacetNames: ['col_1', 'Group 1', 'Group 2'],
   facetNamesAfterReorder: ['col_1', 'col_4', 'Group 2', 'id', 'Group 1', 'col_2', 'col_3', 'col_6', 'col_5'],
-  facetNamesAfterReorderCI: ['col_4', 'col_1', 'Group 2', 'id', 'Group 1', 'col_2', 'col_3', 'col_6', 'col_5'],
+  // facetNamesAfterReorderCI: ['col_4', 'col_1', 'Group 2', 'id', 'Group 1', 'col_2', 'col_3', 'col_6', 'col_5'],
   openFacetNamesAfterReorder: ['col_1', 'Group 2', 'Group 1'],
 }
 
@@ -162,12 +162,7 @@ test.describe('Reorder facet groups', () => {
     const saveBtn = RecordsetLocators.getSaveFacetOrderBtn(page);
     const applyDefaultBtn = RecordsetLocators.getShowDefaultFacetOrderBtn(page);
     const applySavedBtn = RecordsetLocators.getApplySavedFacetOrderBtn(page);
-
-    /**
-     * NOTE the order in CI is different than local. but if the expected order in CI
-     * changed again, we should most probably just run this test locally.
-     */
-    const expectedOrder = process.env.CI ? params.facetNamesAfterReorderCI : params.facetNamesAfterReorder;
+    const expectedOrder = params.facetNamesAfterReorder;
 
     await test.step('open recordset and check order', async () => {
       await page.goto(
