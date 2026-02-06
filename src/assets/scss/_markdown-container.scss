@@ -92,6 +92,63 @@
     border: 1px solid map.get(variables.$color-map, 'black');
   }
 
+  // record status
+  .chaise-record-status-default,
+  .chaise-record-status-success,
+  .chaise-record-status-warning,
+  .chaise-record-status-danger {
+    padding: 5px;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 2px;
+    background-color: map.get(variables.$color-map, 'record-status-default');
+  }
+  .chaise-record-status-success {
+    background-color: map.get(variables.$color-map, 'record-status-success');
+  }
+  .chaise-record-status-warning {
+    background-color: map.get(variables.$color-map, 'record-status-warning');
+  }
+  .chaise-record-status-danger {
+    background-color: map.get(variables.$color-map, 'record-status-danger');
+  }
+  // links for record status
+  a .chaise-record-status-default,
+  a .chaise-record-status-success,
+  a .chaise-record-status-warning,
+  a .chaise-record-status-danger {
+    color: map.get(variables.$color-map, 'record-status-link-color');
+  }
+
+  // record status compact
+  .chaise-record-status-compact-default,
+  .chaise-record-status-compact-success,
+  .chaise-record-status-compact-warning,
+  .chaise-record-status-compact-danger {
+    padding-left: 17px;
+    position: relative;
+
+    &::before {
+      content: "";
+      left: 0px;
+      top: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      position: absolute;
+      background-color: map.get(variables.$color-map, 'record-status-default');
+    }
+  }
+  .chaise-record-status-compact-success::before {
+    background-color: map.get(variables.$color-map, 'record-status-success');
+  }
+  .chaise-record-status-compact-warning::before {
+    background-color: map.get(variables.$color-map, 'record-status-warning');
+  }
+  .chaise-record-status-compact-danger::before {
+    background-color: map.get(variables.$color-map, 'record-status-danger');
+  }
+
   .vocab {
     color: map.get(variables.$color-map, 'vocab');
     background-color: map.get(variables.$color-map, 'vocab-background');

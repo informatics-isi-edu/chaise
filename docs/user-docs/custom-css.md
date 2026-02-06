@@ -1,3 +1,4 @@
+<!-- omit in toc -->
 # Custom CSS Styling Tips
 
 The default styling for specific elements can be altered by adding a custom css file to the deployment folder. This folder path then must be added as the value for the `customCSS` in config option for [chaise-config.js](chaise-config.md). For example:
@@ -11,6 +12,7 @@ The default styling for specific elements can be altered by adding a custom css 
 
 Custom style classes with modified styling attributes can be added in `chaise.css`. Make sure to use same class names and hierarchy as described below to avoid any discrepancy.
 
+<!-- omit in toc -->
 ## Table of Contents
 
 - [Changing chaise styles](#changing-chaise-styles)
@@ -246,10 +248,33 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
     ```
     As you can see, we have to manually set the width to ensure the name is broken in the specific character we see fit. While this works in this particular scenario, we might want to develop a more general solution that doesn't require handcrafting. We could potentially implement this as a built-in feature that data-modelers can turn on.
 
+7. While this is highly discouraged, you may use CSS styles to change the label of buttons. For example, the following rules change the label of the "Copy" button on the record page of the `isa:dataset` table:
 
+    ```css
+    /* make sure there are enough space for the new label */
+    .r_s_isa.r_t_data_access_request .title-buttons {
+        width: 450px !important;
+    }
+    /* hide the chaise's default label for copy button */
+    .r_s_isa.r_t_data_access_request .title-buttons .copy-record-btn span:last-child {
+        font-size: 0;
+    }
+    /* Display the customized label for copy button */
+    .r_s_isa.r_t_data_access_request .title-buttons .copy-record-btn span:last-child::after {
+        content: "Create Renewal";
+        font-size: 1rem;
+    }
+    ```
 
+    You could also follow a similar pattern for completely removing the buttons (we **strongly advise against** doing this):
+    ```css
+    .r_s_isa.r_t_data_access_request .title-buttons .create-record-btn {
+      display: none;
+    }
+    ```
 
-### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen))
+<!-- omit in toc -->
+### More specific examples (using ATLAS-D2K [Gene_Expression:Specimen](https://dev.derivacloud.org/chaise/recordset/#2/Gene_Expression:Specimen))
 ```css
 #recordset .s_Gene_Expression.t_Specimen .c_Images {
   min-width: 210px;
@@ -297,7 +322,7 @@ By relaxing the selector, we can make the rule more general:
 For pseudocolumns, it's not immediately obvious what they name will be. We use a hashing function in `ermrestJS` that is based on the full path of the column. So `this/path/id=value` will become something like `hsoinel`.
 
 ## Custom Markdown Styles
-Markdown component applies [github](https://github.com/sindresorhus/github-markdown-css/blob/gh-pages/github-markdown.css) css for all general purpose preview and content rendering. Here are some of the examples:
+Markdown component applies special styles for all general purpose preview and content rendering. Here are some of the examples:
 
 ```css
 /* Sample chaise.css */
