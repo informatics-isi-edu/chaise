@@ -18,7 +18,7 @@
     "deploy": "make deploy",
     "pretest": "make deploy",
     "test": "make testparallel",
-    "prepare": "husky"
+    "prepare": "node .husky/install.mjs"
   },
   "repository": {
     "type": "git",
