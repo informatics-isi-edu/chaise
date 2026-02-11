@@ -403,7 +403,7 @@ const FormRow = ({
       {hasInlineComment &&
         <div className='inline-comment-row'>
           <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={columnModel.column.comment} /></div>
-          <hr />
+          {forms.length > 1 && <hr />}
         </div>
       }
       <div className='inputs-row' ref={formsRef}>

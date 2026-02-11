@@ -64,6 +64,7 @@ const RecordMainSection = (): JSX.Element => {
     return columnModels.map((cm: RecordColumnModel, index: number) => {
       const hideHeader = hideAllHeaders || cm.column.hideColumnHeader;
       const hasTooltip = !!cm.column.comment && !!cm.column.comment.value && cm.column.comment.displayMode === CommentDisplayModes.TOOLTIP;
+      const hasInlineComment = !!cm.column.comment && !!cm.column.comment.value && cm.column.comment.displayMode === CommentDisplayModes.INLINE;
       const hasError = showError(cm);
       const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
         cm.relatedModel.recordsetState.isInitialized;
@@ -128,6 +129,11 @@ const RecordMainSection = (): JSX.Element => {
             className={entityValueClassName.join(' ')} colSpan={hideHeader ? 2 : 1}
             id={`entity-${idSafeDisplayname}`}
           >
+            {hasInlineComment && !cm.relatedModel &&
+              <div className='inline-comment-row'>
+                  <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={cm.column.comment} /></div>
+              </div>
+            }
             {!cm.relatedModel && !hasError && !isFilePreview &&
               <DisplayValue addClass value={recordValues[cm.index]} />
             }
@@ -138,7 +144,7 @@ const RecordMainSection = (): JSX.Element => {
               <span id={`entity-${cm.index}-table`}>
                 {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
                 <div className={`inline-table-display ${hasError || !hasInitialized ? CLASS_NAMES.HIDDEN : ''}`}>
-                  {cm.column.comment && cm.column.comment.value && cm.column.comment.displayMode === CommentDisplayModes.INLINE &&
+                  {hasInlineComment &&
                     <div className='inline-tooltip inline-tooltip-sm'><DisplayCommentValue comment={cm.column.comment} /></div>
                   }
                   <RelatedTable

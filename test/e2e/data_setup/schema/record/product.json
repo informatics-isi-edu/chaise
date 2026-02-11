@@ -139,22 +139,18 @@
                         "typename": "text"
                     },
                     "annotations": {
-                        "comment": [
-                            "url"
-                        ],
-                        "description": {
-                            "display": "Website"
-                        },
-                        "tag:misd.isi.edu,2015:url": {
-                            "url": "{cname}"
-                        },
                         "tag:isrd.isi.edu,2016:column-display": {
                             "*": {
                                 "markdown_pattern": "[Link to Website]({{website}})"
                             }
                         },
                         "tag:misd.isi.edu,2015:display": {
-                            "name": "Website"
+                            "name": "Website",
+                            "comment_display": {
+                                "detailed": {
+                                    "column_comment_display": "inline"
+                                }
+                            }
                         }
                     }
                 },
@@ -466,6 +462,7 @@
                         {
                             "sourcekey": "min_title_accommodation_collection_cover",
                             "comment": "Minimum of title",
+                            "comment_display": "inline",
                             "markdown_name": "agg column with waitfor entityset and all-outbound",
                             "display": {
                                 "template_engine": "handlebars",

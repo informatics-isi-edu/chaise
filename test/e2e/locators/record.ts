@@ -106,7 +106,12 @@ export default class RecordLocators {
   }
 
   static getColumnValue(container: Locator | Page, columnName: string): Locator {
-    return container.locator(`#row-${columnName} .entity-value span`);
+    return container.locator(`#row-${columnName} .entity-value span:not(.chaise-comment)`);
+  }
+
+  static getColumnInlineComment(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .entity-value .inline-comment-row .inline-tooltip`);
   }
 
   static getInlineRelatedTableInlineComment(container: Locator | Page, displayname: string) {
