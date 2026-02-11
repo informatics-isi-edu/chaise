@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "engines": {
     "node": ">= 20.0.0",
-    "npm": ">=6.0.0"
+    "npm": ">= 7.0.0"
   },
   "files": [
     "src",
@@ -18,7 +18,7 @@
     "deploy": "make deploy",
     "pretest": "make deploy",
     "test": "make testparallel",
-    "prepare": "husky"
+    "prepare": "node .husky/install.mjs"
   },
   "repository": {
     "type": "git",

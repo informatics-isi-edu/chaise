@@ -116,12 +116,10 @@ jobs:
           sudo make root-install
       - name: Install chaise
         run: |
-          sudo mkdir -p /var/www/html/chaise
           cd chaise
+          sudo make root-install
           make deps-test
-          make dist-wo-deps
           make lint
-          sudo make deploy
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1

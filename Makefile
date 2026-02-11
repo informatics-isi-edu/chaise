@@ -9,6 +9,9 @@ ifneq ($(NODE_ENV),development)
 NODE_ENV:=production
 endif
 
+# so npm scripts can also use it (without this, npm ci will install dev dependencies too by default)
+export NODE_ENV
+
 # env variables needed for installation
 WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
@@ -258,11 +261,11 @@ npm-install-modules:
 	@npm clean-install --loglevel=error
 
 # install packages needed for production and development (including testing)
-# --include=dev makes sure to ignore NODE_ENV and install everything
+# NODE_ENV=development is needed so husky is properly installed
 # --no-shell: https://github.com/microsoft/playwright/issues/33566
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
-	@npm clean-install --include=dev
+	@NODE_ENV=development npm clean-install --include=dev
 	@npx playwright install --with-deps --no-shell
 
 # for test cases we have to make sure we're installing dev dependencies and playwright is installed
