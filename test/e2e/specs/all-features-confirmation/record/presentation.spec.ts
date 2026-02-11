@@ -192,7 +192,7 @@ const testParams: any = {
 test.describe('View existing record', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test.only(`For table ${testParams.table_name}`, async ({ page, baseURL }, testInfo) => {
+  test(`For table ${testParams.table_name}`, async ({ page, baseURL }, testInfo) => {
     const catalogID = getCatalogID(testInfo.project.name);
 
     await test.step('should load record page', async () => {
