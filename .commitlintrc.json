@@ -1,0 +1,20 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "helpUrl": "https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/dev-guide.md#commit-message-conventions",
+  "rules": {
+    "type-enum": [
+      2,
+      "always",
+      [
+        "feat",
+        "fix",
+        "perf",
+        "refactor",
+        "ci",
+        "chore",
+        "docs",
+        "test"
+      ]
+    ]
+  }
+}

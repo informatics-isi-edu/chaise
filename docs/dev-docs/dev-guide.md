@@ -1,32 +1,141 @@
+<!-- omit in toc -->
 # Developer Guide
 This is a guide for people who develop Chaise.
 
+<!-- omit in toc -->
 ## Table of contents
 
 - [Reading Material](#reading-material)
+  - [General](#general)
+  - [React/TypeScript](#reacttypescript)
+  - [CSS/SCSS](#cssscss)
 - [Idioms](#idioms)
-  * [Naming conventions](#naming-conventions)
-  * [General](#general-1)
-  * [React/TypeScript](#reacttypescript-1)
-  * [Lint](#lint)
-  * [CSS/SCSS](#cssscss-1)
-  * [Font Awesome](#font-awesome)
-  * [Handling time](#handling-time)
+  - [Naming conventions](#naming-conventions)
+  - [General](#general-1)
+  - [React/TypeScript](#reacttypescript-1)
+  - [Lint](#lint)
+  - [CSS/SCSS](#cssscss-1)
+    - [Supporting styles and classes in configuration](#supporting-styles-and-classes-in-configuration)
+  - [Font Awesome](#font-awesome)
+  - [Handling time](#handling-time)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
-  * [Make targets](#make-targets)
-  * [NPM](#npm)
-  * [Dependabot](#dependabot)
+    - [Make targets](#make-targets)
+    - [NPM](#npm)
+  - [Dependabot](#dependabot)
+- [Using a local version of ermrestjs](#using-a-local-version-of-ermrestjs)
 - [Structure of an App](#structure-of-an-app)
+  - [Main HTML](#main-html)
+  - [App Wrapper](#app-wrapper)
+  - [Context](#context)
+  - [Error Provider](#error-provider)
+  - [Alerts Provider](#alerts-provider)
+  - [Authn Provider](#authn-provider)
+  - [Chaise Navbar](#chaise-navbar)
+  - [Buttons vs Links](#buttons-vs-links)
 - [Using Chaise through npm](#using-chaise-through-npm)
+  - [1. Install Chaise and dev dependencies](#1-install-chaise-and-dev-dependencies)
+  - [2. Use AppWrapper for your app](#2-use-appwrapper-for-your-app)
+  - [3. Configure webpack and build](#3-configure-webpack-and-build)
 - [Error handling](#error-handling)
-  * [How it works](#how-it-works)
-  * [Guidelines](#guidelines)
-  * [Guidelines for promise chains](#guidelines-for-promise-chains)
+  - [How it works](#how-it-works)
+    - [Error provider](#error-provider-1)
+    - [Global handler (catch-all)](#global-handler-catch-all)
+    - [Local handler](#local-handler)
+      - [Multiple errors on the page](#multiple-errors-on-the-page)
+  - [Guidelines](#guidelines)
+    - [Development vs. Production](#development-vs-production)
+    - [Error boundary](#error-boundary)
+  - [Guidelines for promise chains](#guidelines-for-promise-chains)
+    - [Promise with success, reject, and catch handlers](#promise-with-success-reject-and-catch-handlers)
+    - [Promise with success and catch handlers](#promise-with-success-and-catch-handlers)
+    - [Promise chaining with single catch](#promise-chaining-with-single-catch)
+    - [Promise chaining with interleaved catches](#promise-chaining-with-interleaved-catches)
 - [Context and provider pattern](#context-and-provider-pattern)
+  - [How to implement](#how-to-implement)
+    - [1. Create context and Provider component](#1-create-context-and-provider-component)
+    - [2. Add custom hook](#2-add-custom-hook)
+    - [3. Use provider in the parent](#3-use-provider-in-the-parent)
+    - [4. Use custom hook to acces the context](#4-use-custom-hook-to-acces-the-context)
 - [Performance](#performance)
-  * [Debugging](#debugging)
-  * [Memoization](#memoization)
+  - [Debugging](#debugging)
+  - [Memoization](#memoization)
+
+## Commit message conventions
+
+We're using [semantic-release](https://github.com/semantic-release/semantic-release) for managing releases. So you must ensure your commit messages follow [the conventional commits' message format](https://www.conventionalcommits.org/en/v1.0.0/#summary):
+
+1. Complete form:
+
+```
+<type>(<optional scope>): <subject>
+
+<optional body>
+
+<optional footer(s)>
+```
+
+
+2. Minimal:
+
+```
+<type>: <subject>
+```
+
+The Valid `type`s are:
+
+- The ones that bump the version:
+  - `feat`: new feature (minor version bump)
+  - `fix`: bug fix, depedency update, or improvement to a process (patch version bump)
+  - `perf`: performance improvements (patch version bump)
+  - `refactor`: code refactoring (patch version bump)
+
+- Other types that will not be associated with a release:
+
+  - `docs`: documentation changes
+  - `chore`: maintenance tasks
+  - `test`: adding tests
+  - `ci`: CI/CD changes
+
+And for `scope` (this list is subject to change):
+
+  - `deps` and `deps-dev`: dependencies
+  - `build`: Build configiration (e.g., vite, tsconfig)
+  - `types`: Typescript definitions
+  - `hatrac`
+  - `export`
+  - `facet`
+  - Any feature name (e.g. `filepreview`).
+  - `record`, `recordset`, `recordedit`, `viewer`
+
+
+Examples of commit messages:
+
+  ```
+  docs: update installation guide
+  ```
+  ```
+  test: change how user authentication work
+  ```
+  ```
+  feat(facet): add support for grouped facets
+  ```
+  ```
+  fix(hatrac): ensure filename is properly used
+
+  Fixes #124
+  ```
+  ```
+  fit(hatrac): support pausing and resuming upload
+
+  This commit will introduce APIs to pause and resume the upload.
+
+  BREAKING CHANGE: Upload.start arguments have been rearranged.
+  It used to be
+      start(startChunkIdx, onProgress)
+  But now is
+      start(startChunkIdx, onResume, onProgress)
+  ```
 
 ## Reading Material
 In this section, we've included all the guides and tools that we think are useful
