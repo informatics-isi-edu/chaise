@@ -61,7 +61,7 @@
     "@types/q": "^1.5.5",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "axios": "^1.12.2",
+    "axios": "^1.13.5",
     "babel-loader": "9.2.1",
     "bootstrap": "^5.3.3",
     "compression-webpack-plugin": "^11.1.0",
