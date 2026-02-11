@@ -118,8 +118,8 @@ jobs:
         run: |
           cd chaise
           sudo make root-install
-          make lint
           make deps-test
+          make lint
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
