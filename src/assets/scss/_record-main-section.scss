@@ -87,7 +87,13 @@
       }
     }
 
-    .inline-tooltip {
+    .inline-comment-row {
+      width: 100%;
+      color: map.get(variables.$color-map, 'column-inline-tooltip');
+      margin-bottom: 5px;
+    }
+
+    .inline-table-display .inline-tooltip {
       color: map.get(variables.$color-map, 'column-inline-tooltip');
       padding-bottom: 5px;
     }

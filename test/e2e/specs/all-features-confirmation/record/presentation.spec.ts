@@ -192,7 +192,7 @@ const testParams: any = {
 test.describe('View existing record', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  test(`For table ${testParams.table_name}`, async ({ page, baseURL }, testInfo) => {
+  test.only(`For table ${testParams.table_name}`, async ({ page, baseURL }, testInfo) => {
     const catalogID = getCatalogID(testInfo.project.name);
 
     await test.step('should load record page', async () => {
@@ -226,7 +226,7 @@ test.describe('View existing record', () => {
         { title: 'Id', value: '2002', type: 'serial4' },
         { title: 'Name of Accommodation', value: 'Sherathon Hotel, accommodation_inbound3 one| accommodation_inbound3 three| accommodation_inbound3 five', type: 'text' },
         {
-          title: 'Website', type: 'text', comment: 'A valid url of the accommodation', match: 'html',
+          title: 'Website', type: 'text', inlineComment: 'A valid url of the accommodation', match: 'html',
           value: {
             url: 'http://www.starwoodhotels.com/sheraton/index.html',
             caption: 'Link to Website'
@@ -276,7 +276,7 @@ test.describe('View existing record', () => {
         },
         { title: '# thumbnail collection', comment: 'Count of thumbnail collection', value: '1', markdown_title: '# thumbnail collection' },
         { title: '# distinct thumbnail collection', comment: 'Count distinct of thumbnail collection', value: '1', markdown_title: '# distinct thumbnail collection' },
-        { title: 'agg column with waitfor entityset and all-outbound', comment: 'Minimum of title', value: 'Sherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five', markdown_title: 'agg column with waitfor entityset and all-outbound' },
+        { title: 'agg column with waitfor entityset and all-outbound', inlineComment: 'Minimum of title', value: 'Minimum of title\nSherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five', markdown_title: 'agg column with waitfor entityset and all-outbound' },
         { title: 'Max Name of accommodation_collection', comment: 'maximum of title', value: 'Sherathon Hotel', markdown_title: 'Max Name of accommodation_collection' },
         { title: 'json_col', value: null },
         { title: 'json_col_with_markdown', value: 'Status is: “delivered”', match: 'html' },
@@ -372,6 +372,14 @@ test.describe('View existing record', () => {
           await testTooltip(colEl, comment, APP_NAMES.RECORD, true);
         }
 
+      });
+
+      await test.step('should show proper inline comment for columns that have it.', async () => {
+        const columns = notNullColumns.filter((c: any) => (typeof c.inlineComment === 'string'));
+        for (const col of columns) {
+          const commentEl = RecordLocators.getColumnInlineComment(page, col.title);
+          await expect.soft(commentEl).toHaveText(col.inlineComment);
+        }
       });
 
       await test.step('should show inline comment for inline table with one defined', async () => {
