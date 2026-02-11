@@ -33,6 +33,7 @@
     "@commitlint/config-conventional": "^20.4.1",
     "@isrd-isi-edu/ermrest-data-utils": "^0.0.7",
     "@playwright/test": "latest",
+    "@semantic-release/git": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "~7.18.0",
     "@typescript-eslint/parser": "~7.18.0",
     "chance": "x",
