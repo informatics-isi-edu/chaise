@@ -11,7 +11,6 @@ export default class LocalStorage {
     // (in some cases localStorage might be null)
     try {
       const test = 'test';
-      localStorage = window.localStorage;
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
     } catch (e: unknown) {

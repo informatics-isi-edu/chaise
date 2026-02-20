@@ -32,6 +32,7 @@ const ProfileModal = ({
     if (!session || initialized) return;
     const user = session;
     const userDisplayname = getUserDisplayName(user);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUserDisplay(userDisplayname);
 
     const tempIdentities = [];

@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+// this is defined in webpack, so it's going to be defined.
+// eslint-disable-next-line no-undef
 export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 
 export const APP_TAG_MAPPING = {
@@ -103,8 +105,8 @@ export const dataFormats = {
     submission: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
   },
   regexp: {
-    integer: /^\-?\d+$/,
-    float: /^\-?(\d+)?((\.)?\d+)?$/
+    integer: /^-?\d+$/,
+    float: /^-?(\d+)?((\.)?\d+)?$/
   }
 }
 

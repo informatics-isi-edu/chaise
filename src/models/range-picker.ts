@@ -1,7 +1,9 @@
+/* eslint-disable no-redeclare */
 import { PlotData, PlotlyDataLayoutConfig, PlotlyLayout, HTMLPlotElement } from 'plotly.js-basic-dist-min'
 import { FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset'
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
+// TODO why are we doing this?
 // export plotly types by getting the typeof the interfaces
 export type PlotData = typeof PlotData;
 type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;

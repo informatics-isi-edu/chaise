@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_split-view.scss';
 
+import type { RefObject, MouseEvent as ReactMouseEvent } from 'react';
+
 // hooks
 import { useEffect, useRef, useState, type JSX } from 'react';
 import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
@@ -11,7 +13,7 @@ type LeftPaneProps = {
   /**
    * The elements displayed on the left side of the page
    */
-  children: (ref: React.RefObject<HTMLDivElement | null>) => JSX.Element,
+  children: (ref: RefObject<HTMLDivElement | null>) => JSX.Element,
   /**
    * default width of the left panel
    */
@@ -49,6 +51,7 @@ const LeftPane = ({ children, leftWidth, leftPartners }: LeftPaneProps): JSX.Ele
 
   }, [leftRef, leftWidth]);
 
+  // eslint-disable-next-line react-hooks/refs
   return children(leftRef);
 };
 
@@ -59,7 +62,7 @@ type SplitViewProps = {
    * a function that returns the left-pane component in the resizable layout
    * pass the leftRef as a ref to the outermost element of your left-pane component
    */
-  left: ((ref: React.RefObject<HTMLDivElement | null>) => JSX.Element),
+  left: ((ref: RefObject<HTMLDivElement | null>) => JSX.Element),
 
   /**
    * the other elements that we should change their width alongside left
@@ -170,7 +173,7 @@ const SplitView = ({
 
   const [leftState, setLeftState] = useState<StateDef>({ leftWidth: convertedInitialWidth, xPos: undefined, dragging: false });
 
-  const onMouseDown = (e: React.MouseEvent) => setLeftState({ ...leftState, xPos: e.clientX, dragging: true });
+  const onMouseDown = (e: MouseEvent | ReactMouseEvent<HTMLDivElement>) => setLeftState({ ...leftState, xPos: e.clientX, dragging: true });
 
   /**
    * This function is called on the parent for any mouse up event,
@@ -187,7 +190,7 @@ const SplitView = ({
    * This function is called on the parent for any mouse movement,
    * so the first thing that we're doing is to make sure we're only doing this when user has already started the drag event.
    */
-  const onMouseMove = (e: MouseEvent) => {
+  const onMouseMove = (e: MouseEvent | ReactMouseEvent<HTMLDivElement>) => {
     const clientX = e.clientX;
 
     if (leftState.dragging && leftState.leftWidth && leftState.xPos) {

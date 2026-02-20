@@ -72,8 +72,8 @@ const ChaiseNavbar = (): JSX.Element => {
     const forceNewTab = settings.openLinksInTab === true;
 
     // use newTab property if defined and forceNewTab is false
-    const parentNewTab = (root.hasOwnProperty('newTab') && !forceNewTab) ? root.newTab : true;
-    const parentAcls = root.hasOwnProperty('acls') ? root.acls : { 'show': ['*'], 'enable': ['*'] };
+    const parentNewTab = (Object.prototype.hasOwnProperty.call(root, 'newTab') && !forceNewTab) ? root.newTab : true;
+    const parentAcls = Object.prototype.hasOwnProperty.call(root, 'acls') ? root.acls : { 'show': ['*'], 'enable': ['*'] };
 
     let menuOptions: MenuOption[] = [];
     if (Array.isArray(root.children)) {

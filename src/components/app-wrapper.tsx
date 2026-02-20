@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
@@ -39,7 +40,7 @@ type AppWrapperProps = {
   /**
    * The app content
    */
-  children: React.ReactNode,
+  children: ReactNode,
   /**
    * app-specific settings
    */
@@ -82,13 +83,109 @@ const AppWrapperInner = ({
   displaySpinner,
   ignoreHashChange,
   dontFetchSession,
-  smallSpinnerContainer
+  smallSpinnerContainer,
 }: AppWrapperProps): JSX.Element => {
   const { dispatchError, logTerminalError, errors } = useError();
   const [configDone, setConfigDone] = useState(false);
   const [externalLink, setExternalLink] = useState<string>('');
 
   const { getSession, session } = useAuthn();
+
+  /**
+   * show a modal if users click on an external link
+   */
+  const overrideExternalLinkBehavior = () => {
+    addClickListener(document.body, 'a.external-link', (e: Event, element: HTMLAnchorElement) => {
+      e.preventDefault();
+      setExternalLink(element.href);
+    });
+  };
+
+  /**
+   * send a header request if we have to check download links
+   */
+  const overrideDownloadClickBehavior = () => {
+    addClickListener(
+      document.body,
+      'a.asset-permission',
+      (e: Event, element: HTMLAnchorElement) => {
+        e.preventDefault();
+
+        const spinnerHTML = `
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      `;
+        //show spinner
+        element.innerHTML += spinnerHTML;
+
+        // if same origin, verify authorization
+        if (isSameOrigin(element.href)) {
+          const config = { skipRetryBrowserError: true, skipHTTP401Handling: true };
+
+          // make a HEAD request to check if the user can fetch the file
+          ConfigService.http
+            .head(element.href, config)
+            .then(function () {
+              clickHref(element.href, true);
+            })
+            .catch(function (exception: any) {
+              let ermrestError = ConfigService.ERMrest.responseToError(exception);
+              if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
+                ermrestError = new UnauthorizedAssetAccess();
+              } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
+                ermrestError = new ForbiddenAssetAccess(session!);
+              }
+
+              // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
+              dispatchError({ error: ermrestError, isDismissible: true });
+            })
+            .finally(function () {
+              // remove the spinner
+              element.innerHTML = element.innerHTML.slice(
+                0,
+                element.innerHTML.indexOf(spinnerHTML)
+              );
+            });
+        }
+      }
+    );
+  };
+
+  /**
+   * add the listener for the chaise-image-preview to zoom in/out
+   */
+  const overrideImagePreviewBehavior = () => {
+    addClickListener(
+      document.body,
+      '.chaise-image-preview',
+      function (e: Event, element: HTMLAnchorElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const img = element.querySelector('img');
+
+        /**
+         * TODO this feels hacky
+         */
+        const maxHeight = img ? img.getAttribute('image-preview-max-height') : null;
+
+        if (element.classList.contains(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN)) {
+          element.classList.remove(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
+          if (maxHeight && img) {
+            element.style.maxHeight = 'unset';
+            img.style.maxHeight = maxHeight;
+          }
+        } else {
+          element.classList.add(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
+          if (maxHeight && img) {
+            element.style.maxHeight = maxHeight;
+            img.style.maxHeight = 'unset';
+          }
+        }
+      }
+    );
+  };
 
   useEffect(() => {
     const onError = (event: any) => {
@@ -117,22 +214,26 @@ const AppWrapperInner = ({
       if (dontFetchSession) {
         resolve(null);
       } else {
-        getSession('').then((response) => resolve(response)).catch((err) => reject(err));
+        getSession('')
+          .then((response) => resolve(response))
+          .catch((err) => reject(err));
       }
-    }).then((response: any) => {
-      return ConfigService.configure(appSettings, response);
-    }).then(() => {
-      setConfigDone(true);
-    }).catch((err: any) => {
-      dispatchError({ error: err });
-    });
+    })
+      .then((response: any) => {
+        return ConfigService.configure(appSettings, response);
+      })
+      .then(() => {
+        setConfigDone(true);
+      })
+      .catch((err: any) => {
+        dispatchError({ error: err });
+      });
 
     return () => {
       windowRef.removeEventListener('error', onError);
       windowRef.removeEventListener('unhandledrejection', onUnhandledRejection);
       windowRef.removeEventListener('hashchange', onHashChange);
-    }
-
+    };
   }, []); // run it only once on load
 
   /**
@@ -146,8 +247,6 @@ const AppWrapperInner = ({
     if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
     if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
     if (settings.overrideImagePreviewBehavior) overrideImagePreviewBehavior();
-
-
   }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {
@@ -158,87 +257,6 @@ const AppWrapperInner = ({
     return null;
   };
 
-  /**
-   * show a modal if users click on an external link
-   */
-  const overrideExternalLinkBehavior = () => {
-    addClickListener(document.body, 'a.external-link', (e: Event, element: HTMLAnchorElement) => {
-      e.preventDefault();
-      setExternalLink(element.href);
-    });
-  };
-
-  /**
-   * send a header request if we have to check download links
-   */
-  const overrideDownloadClickBehavior = () => {
-    addClickListener(document.body, 'a.asset-permission', (e: Event, element: HTMLAnchorElement) => {
-      e.preventDefault();
-
-      const spinnerHTML = `
-        <div class="spinner-border spinner-border-sm" role="status">
-          <span class="sr-only">Loading...</span>
-        </div>
-      `;
-      //show spinner
-      element.innerHTML += spinnerHTML;
-
-      // if same origin, verify authorization
-      if (isSameOrigin(element.href)) {
-        const config = { skipRetryBrowserError: true, skipHTTP401Handling: true };
-
-        // make a HEAD request to check if the user can fetch the file
-        ConfigService.http.head(element.href, config).then(function () {
-          clickHref(element.href, true);
-        }).catch(function (exception: any) {
-          let ermrestError = ConfigService.ERMrest.responseToError(exception);
-          if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
-            ermrestError = new UnauthorizedAssetAccess();
-          } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-            ermrestError = new ForbiddenAssetAccess(session!);
-          }
-
-          // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-          dispatchError({ error: ermrestError, isDismissible: true });
-        }).finally(function () {
-          // remove the spinner
-          element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
-        });
-      }
-    });
-  }
-
-  /**
-   * add the listener for the chaise-image-preview to zoom in/out
-   */
-  const overrideImagePreviewBehavior = () => {
-    addClickListener(document.body, '.chaise-image-preview', function (e: Event, element: HTMLAnchorElement) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const img = element.querySelector('img');
-
-      /**
-       * TODO this feels hacky
-       */
-      const maxHeight = img ? img.getAttribute('image-preview-max-height') : null;
-
-      if (element.classList.contains(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN)) {
-        element.classList.remove(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
-        if (maxHeight && img) {
-          element.style.maxHeight = 'unset';
-          img.style.maxHeight = maxHeight;
-        }
-      } else {
-        element.classList.add(CLASS_NAMES.IMAGE_PREVIEW_ZOOMED_IN);
-        if (maxHeight && img) {
-          element.style.maxHeight = maxHeight;
-          img.style.maxHeight = 'unset';
-        }
-      }
-    });
-  };
-
   const renderSpinner = () => {
     if (!displaySpinner && !smallSpinnerContainer) return <></>;
 
@@ -246,7 +264,10 @@ const AppWrapperInner = ({
      * in some cases (navbar app), we want to show a small spinner that fits the container
      */
     if (smallSpinnerContainer) {
-      const containerHeight = smallSpinnerContainer && smallSpinnerContainer.offsetHeight !== 0 ? smallSpinnerContainer.offsetHeight : 0;
+      const containerHeight =
+        smallSpinnerContainer && smallSpinnerContainer.offsetHeight !== 0
+          ? smallSpinnerContainer.offsetHeight
+          : 0;
       if (containerHeight === 0) {
         return <></>;
       }
@@ -258,9 +279,13 @@ const AppWrapperInner = ({
        * large spinner.
        * - the border-width is calculated by interpolating based on the min and max values.
        */
-      const minHeight = 15, maxHeight = 40, minBorderWidth = 2, maxBorderWidth = 5;
+      const minHeight = 15,
+        maxHeight = 40,
+        minBorderWidth = 2,
+        maxBorderWidth = 5;
 
-      let height = containerHeight / 2, borderWidth;
+      let height = containerHeight / 2,
+        borderWidth;
 
       // we don't have enough space to show a proper spinner (do we want to try anyways?)
       // realisticly this won't happen. the only way that we fall into this case
@@ -277,52 +302,53 @@ const AppWrapperInner = ({
       }
       // bw = ((max_bw-min_bw)/(max_h - min_h)) * (h - min_h)) + min_bw
       else {
-        borderWidth = ((maxBorderWidth-minBorderWidth)/(maxHeight-minHeight)) * (height-minHeight);
+        borderWidth =
+          ((maxBorderWidth - minBorderWidth) / (maxHeight - minHeight)) * (height - minHeight);
         borderWidth += minBorderWidth;
       }
 
       const spinnerStyles = {
         height: `${height}px`,
         width: `${height}px`,
-        borderWidth: `${borderWidth}px`
-      }
+        borderWidth: `${borderWidth}px`,
+      };
       return (
         <div className='chaise-app-wrapper-sm-spinner'>
           <div className='spinner-border text-light' role='status' style={spinnerStyles}>
             <span className='sr-only'>Loading...</span>
           </div>
         </div>
-      )
+      );
     }
 
     return <ChaiseSpinner />;
-  }
+  };
 
   return (
     <StrictMode>
-      <ErrorBoundary
-        FallbackComponent={errorFallback}
-      >
+      <ErrorBoundary FallbackComponent={errorFallback}>
         {/* show spinner if we're waiting for configuration and there are no error during configuration */}
         {errors.length === 0 && !configDone && renderSpinner()}
-        {configDone &&
+        {configDone && (
           <div className='app-container'>
-            {(includeNavbar || includeAlerts) &&
+            {(includeNavbar || includeAlerts) && (
               <div className='app-header-container'>
                 {includeNavbar && <ChaiseNavbar />}
                 {includeAlerts && <Alerts />}
               </div>
-            }
+            )}
             {children}
-            {externalLink && <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />}
+            {externalLink && (
+              <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />
+            )}
           </div>
-        }
+        )}
       </ErrorBoundary>
       <LoginModal />
       <ErrorModal />
     </StrictMode>
-  )
-}
+  );
+};
 
 /**
  * The app wrapper. it will take care of:

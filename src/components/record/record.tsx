@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
+import { RefObject } from 'react';
+
 // components
 import Accordion from 'react-bootstrap/Accordion';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
@@ -275,7 +277,7 @@ const RecordInner = ({
     setupAfterPageLoadisDone.current = true;
 
     // scroll to section based on query parameter
-    if (!!scrollToDisplayname) {
+    if (scrollToDisplayname) {
       scrollToSection(scrollToDisplayname, true);
     }
   }, [showMainSectionSpinner, relatedSectionInitialized]);
@@ -392,7 +394,7 @@ const RecordInner = ({
           editRecordRequests.current[-1] = { index: -1, isInline: false, completed: true };
         }
         break;
-      case RecordeditNotifyActions.DELETE:
+      case RecordeditNotifyActions.DELETE: {
         const isPartial = event.data.details?.partial;
         if (id && !!editRecordRequests.current[id]) {
           if (isPartial) {
@@ -409,6 +411,7 @@ const RecordInner = ({
           };
         }
         break;
+      }
     }
   }
 
@@ -511,7 +514,7 @@ const RecordInner = ({
       // since we're using the link/unlink popups inside the header,
       // clicking anywhere on the popups will trigger this handler!
       // this will ensure what's clicked is actually a decendent of the accordion-button
-      if (!!event.currentTarget) {
+      if (event.currentTarget) {
         const pEl = event.currentTarget as HTMLElement;
         if (!pEl.contains(event.target as HTMLElement)) {
           return;
@@ -678,7 +681,7 @@ const RecordInner = ({
   }
 
   // Function to render the full table of contents
-  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement | null>) => (
+  const renderTableOfContents = (leftRef: RefObject<HTMLDivElement | null>) => (
     <div
       id='record-side-pan'
       className={`side-panel-resizable record-toc resizable small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'

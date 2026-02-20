@@ -7,7 +7,7 @@ import IframeFieldModal from '@isrd-isi-edu/chaise/src/components/modals/iframe-
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
-import { useState, useRef, type JSX } from 'react';
+import { useState, useRef, type JSX, type RefObject } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
@@ -47,7 +47,7 @@ type IframeFieldProps = InputFieldProps & {
   /**
    * the ref used to capture the foreignkey data
    */
-  foreignKeyData?: React.MutableRefObject<any>,
+  foreignKeyData?: RefObject<any>,
 };
 
 const IframeField = (props: IframeFieldProps): JSX.Element => {
@@ -120,7 +120,7 @@ const IframeField = (props: IframeFieldProps): JSX.Element => {
       {(field, onChange, showClear, clearInput) => (
 
         <div className='input-switch-iframe'>
-          <EllipsisWrapper 
+          <EllipsisWrapper
             elementRef={ellipsisRef}
             tooltip={existingValuePresentation(field)}
           >

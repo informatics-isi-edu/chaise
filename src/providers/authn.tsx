@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 // hooks
 import { createContext, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -49,7 +51,7 @@ export const AuthnContext = createContext<{
   null>(null);
 
 type AuthnProviderProps = {
-  children: React.ReactNode,
+  children: ReactNode,
 }
 
 export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Element {

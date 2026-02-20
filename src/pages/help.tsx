@@ -67,6 +67,7 @@ const HelpApp = (): JSX.Element => {
       if (parts.length > 0) {
         queryParamName = parts[0];
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (!!queryParamName) setPageName(queryParamName);
     }
 

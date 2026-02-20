@@ -447,7 +447,7 @@ const RecordsetTable = ({
           </>
         );
         break;
-      default:
+      default: {
         let innerTooltip, innerText;
         // TODO this seems wrong, what about unlink? (it's the same as master)
         if ((config.editable && reference.canUpdate) || (config.deletable && reference.canDelete)) {
@@ -467,6 +467,7 @@ const RecordsetTable = ({
           </ChaiseTooltip>
         )
         break;
+      }
     }
     return (
       <th className={`actions-header${headerClassName ? ` ${headerClassName}` : ''}`}>{inner}</th>

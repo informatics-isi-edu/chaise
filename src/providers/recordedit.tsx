@@ -34,7 +34,7 @@ import RecordeditWaitForFlowControl from '@isrd-isi-edu/chaise/src/services/reco
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
+import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {
   allForeignKeyColumnsPrefilled, columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateLinkedData, populateSubmissionRow
@@ -495,7 +495,7 @@ export default function RecordeditProvider({
 
     // update the column permission errors when forms are changed removed
     const res: { [columnName: string]: string } = {};
-    forms.forEach(({ }, formIndex) => {
+    forms.forEach((_, formIndex) => {
       columnModels.forEach((cm, i) => {
         // assumption is that isDisabled is not based on per column ACLs
         if (cm.isDisabled) return;
@@ -900,9 +900,9 @@ export default function RecordeditProvider({
     }
 
     // remove the forms based on the given indexes
-    setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
+    setForms((previous: number[]) => previous.filter((_, i: number) => !indexes.includes(i)));
 
-    setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
+    setTuples((previous: any[]) => previous.filter((_, i: number) => !indexes.includes(i)));
 
     // TODO: should this cleanup the form data?
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
