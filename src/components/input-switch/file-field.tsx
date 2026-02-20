@@ -1,5 +1,4 @@
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
@@ -7,7 +6,7 @@ import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrappe
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import { ChangeEvent, useRef, useState, type JSX } from 'react';
+import { ChangeEvent, useRef, type JSX } from 'react';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -30,6 +29,8 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   const { addAlert } = useAlert();
   const fileInputRef = useRef(null);
 
+  // eslint-disable-next-line react-hooks/purity
+  const fileElementId = 'fileInput' + Math.round(Math.random() * 100000);
   const fileExtensionFilter = props.columnModel.column.filenameExtFilter;
   // needs to be a comma separated list, i.e. ".jpg", ".png", ...
   const fileExtensions = fileExtensionFilter.join(',');
@@ -161,7 +162,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
               {renderInput(field.value, showClear, clearInput)}
               {!props.disableInput &&
                 <div className='chaise-input-group-append' tabIndex={0}>
-                  <label className='chaise-btn chaise-btn-secondary' role='button'>
+                  <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
                     <span className='fa-solid fa-folder-open'></span>
                     <span className='button-text'>Select file</span>
                   </label>
@@ -171,6 +172,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           </EllipsisWrapper>
           {renderImagePreview(field.value)}
           <input
+            id={fileElementId}
             className={`${props.inputClasses} chaise-input-hidden ${props.inputClassName}`}
             name={props.name}
             type='file'

@@ -32,6 +32,7 @@ module.exports = [
       globals: {
         ...globals.browser,
         ...globals.es2021,
+        ...globals.node,
         JSX: true,
       },
     },

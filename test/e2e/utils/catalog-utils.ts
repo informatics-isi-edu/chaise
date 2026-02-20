@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { TestInfo } from '@playwright/test';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { APP_NAMES, ENTITIES_PATH, ERMREST_URL } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
@@ -33,13 +33,13 @@ export const setupCatalog = async (setup: { catalog: any, schemas: any }): Promi
 
       if (data.schemas) {
         for (const schemaName in data.schemas) {
-          if (!data.schemas.hasOwnProperty(schemaName)) continue;
+          if (!Object.prototype.hasOwnProperty.call(data.schemas, schemaName)) continue;
 
           const schema = data.schemas[schemaName];
           entities[schema.name] = {};
 
           for (const t in schema.tables) {
-            if (!schema.tables.hasOwnProperty(t)) continue;
+            if (!Object.prototype.hasOwnProperty.call(schema.tables, t)) continue;
 
             entities[schema.name][t] = schema.tables[t].entities;
           }
@@ -139,9 +139,8 @@ export const getEntityRowURL = (testInfo: TestInfo, appName: APP_NAMES, schemaNa
  * remove a given catalog
  */
 export const removeCatalog = async (catalogId: string) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await ermrestUtils.tear({
+  return new Promise((resolve, reject) => {
+      ermrestUtils.tear({
         // NOTE this setup is needed by ermrest-data-utils
         // we should refactor ermrest-data-utils to not need this
         setup: {
@@ -150,12 +149,17 @@ export const removeCatalog = async (catalogId: string) => {
         url: process.env.ERMREST_URL,
         catalogId: catalogId,
         authCookie: process.env.AUTH_COOKIE
-      });
-      resolve(true);
-    } catch (exp) {
-      console.log(`Unable to remove catalog ${catalogId}`);
-      reject(exp);
-    }
+      }).then(() => {
+        resolve(true);
+      }).catch((exp: unknown) => {
+        console.log(`Unable to remove catalog ${catalogId}`);
+        if (isAxiosError(exp)) {
+          console.log(exp.response?.data);
+        } else {
+          console.log('An unexpected error occurred:', exp);
+          reject(exp);
+        }
+    });
   });
 }
 
@@ -203,7 +207,11 @@ export const updateCatalogAnnotation = async (catalogId: string, annotation: any
       resolve();
     }).catch((err: any) => {
       console.log('error while trying to update catalog annotation');
-      console.log(err);
+      if (isAxiosError(err)) {
+        console.log(err.response?.data);
+      } else {
+        console.log('An unexpected error occurred:', err);
+      }
       reject(err);
     });
   });
@@ -218,8 +226,12 @@ export const updateCatalogAlias = async (catalogId: string, alias: string): Prom
     ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, undefined, undefined, alias).then(function () {
       resolve();
     }).catch((err: any) => {
-      console.log('error while trying to update catalog annotation');
-      console.log(err);
+      console.log('error while trying to update catalog alias');
+      if (isAxiosError(err)) {
+        console.log(err.response?.data);
+      } else {
+        console.log('An unexpected error occurred:', err);
+      }
       reject(err);
     });
   });
@@ -262,9 +274,13 @@ export const deleteHatracNamespaces = async (namespaces: string[]) => {
     try {
       await axios(serverLocation + ns, { method: 'DELETE', headers: { Cookie: process.env.AUTH_COOKIE! } });
       console.log(`${ns} hatrac namespace deleted.`);
-    } catch (exp) {
+    } catch (e) {
       console.log(`encountered an error while trying to delete hatrac namespace: ${ns}`);
-      console.error(exp);
+      if (isAxiosError(e)) {
+        console.error(e.response?.data);
+      } else {
+        console.error('An unexpected error occurred:', e);
+      }
     }
   }
 }
