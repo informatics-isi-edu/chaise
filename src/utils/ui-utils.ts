@@ -179,7 +179,9 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
       try {
         const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
         mainContainer.style.paddingRight = padding + 'px';
-      } catch (exp) {}
+      } catch {
+        /* silent failure */
+      }
     }, 10);
   };
 
@@ -452,7 +454,7 @@ export async function createChaiseFilePreviews(container: Element) {
         placeholders.forEach((el) => {
           const url = el.getAttribute('data-file-url');
           if (!url) return;
-          
+
           const filename = el.getAttribute('data-filename');
           const previewType = el.getAttribute('data-preview-type');
           const prefetchBytesStr = el.getAttribute('data-prefetch-bytes');

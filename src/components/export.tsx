@@ -6,7 +6,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 
 // hooks
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -20,6 +20,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -63,7 +64,33 @@ const Export = ({
   /**
    * State variable to export options
    */
-  const [options, setOptions] = useState<any[]>([]);
+  const [options, setOptions] = useState<any[]>(() => {
+    const options: any = [];
+    try {
+      if (reference) {
+        if (reference.csvDownloadLink) {
+          options.push({
+            displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
+            type: ExportType.DIRECT,
+          });
+        }
+
+        const templates = reference.getExportTemplates(
+          !ConfigService.chaiseConfig.disableDefaultExport
+        );
+
+        // Update the list of templates in UI
+        options.push(...templates);
+      }
+    } catch (exp: unknown) {
+      // fail silently
+      // if there's something wrong with the reference, other parts
+      // of the page have already thrown an error.
+      $log.debug('Error while getting export options', exp);
+    }
+
+    return options;
+  });
   /**
    * State Variable to store currently exporting object
    */
@@ -83,33 +110,33 @@ const Export = ({
 
   const dropdownWrapper = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const options: any = [];
-    try {
-      if (reference) {
-        if (reference.csvDownloadLink) {
-          options.push({
-            displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
-            type: ExportType.DIRECT,
-          });
-        }
+  // useEffect(() => {
+  //   const options: any = [];
+  //   try {
+  //     if (reference) {
+  //       if (reference.csvDownloadLink) {
+  //         options.push({
+  //           displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
+  //           type: ExportType.DIRECT,
+  //         });
+  //       }
 
-        const templates = reference.getExportTemplates(
-          !ConfigService.chaiseConfig.disableDefaultExport
-        );
+  //       const templates = reference.getExportTemplates(
+  //         !ConfigService.chaiseConfig.disableDefaultExport
+  //       );
 
-        // Update the list of templates in UI
-        options.push(...templates);
+  //       // Update the list of templates in UI
+  //       options.push(...templates);
 
-        setOptions(options);
-      }
-    } catch (exp) {
-      // fail silently
-      // if there's something wrong with the reference, other parts
-      // of the page have already thrown an error.
-    }
+  //       setOptions(options);
+  //     }
+  //   } catch (exp) {
+  //     // fail silently
+  //     // if there's something wrong with the reference, other parts
+  //     // of the page have already thrown an error.
+  //   }
 
-  }, []);
+  // }, []);
 
 
   //-------------------  callbacks:   --------------------//
@@ -151,11 +178,12 @@ const Export = ({
   const startExporting = (option: any) => {
     const formatType = option.type;
     switch (formatType) {
-      case ExportType.DIRECT:
-        location.href = reference.csvDownloadLink;
+      case ExportType.DIRECT: {
+        window.location.assign(reference.csvDownloadLink);
         break;
+      }
       case ExportType.BAG:
-      case ExportType.FILE:
+      case ExportType.FILE: {
         setSelectedOption(option);
         const res = _getExporterProps(option);
         const exporter = res.exporter;
@@ -180,7 +208,7 @@ const Export = ({
 
           // if it was canceled, just ignore the result
           if (response.canceled) return;
-          location.href = response.data[0];
+          window.location.assign(response.data[0]);
         }).catch((error: any) => {
           setSelectedOption(null);
           setExporterObj(null);
@@ -193,6 +221,7 @@ const Export = ({
           dispatchError({ error, isDismissible: true });
         });
         break;
+      }
       default:
         dispatchError({
           error: new Error(`Unsupported export format: ${formatType}. Please report this problem to your system administrators.`)
@@ -202,7 +231,7 @@ const Export = ({
 
   const cancelExport = () => {
     // Cancel download
-    if (!!exporterObj) {
+    if (exporterObj) {
       exporterObj.cancel();
     }
   };

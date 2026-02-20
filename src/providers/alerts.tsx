@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { createContext, useMemo, useRef, useState, type JSX } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
@@ -7,7 +9,7 @@ export enum ChaiseAlertType {
   SUCCESS = 'success',
   ERROR = 'error',
   WARNING = 'warning',
-  INFO = 'info'
+  INFO = 'info',
 }
 
 /**
@@ -16,18 +18,17 @@ export enum ChaiseAlertType {
  * for example error instead of danger.
  */
 export const CHAISE_ALERT_TYPE_MAPPING: { [key: string]: string } = {
-  'success': 'success',
-  'error': 'danger',
-  'warning': 'warning',
-  'info': 'info'
+  success: 'success',
+  error: 'danger',
+  warning: 'warning',
+  info: 'info',
 };
 
-
 export type ChaiseAlert = {
-  message: string | JSX.Element,
-  type: ChaiseAlertType
-  onRemove?: () => void,
-  isSessionExpiredAlert?: boolean
+  message: string | JSX.Element;
+  type: ChaiseAlertType;
+  onRemove?: () => void;
+  isSessionExpiredAlert?: boolean;
 };
 
 type AddAlertFunction = (
@@ -40,31 +41,30 @@ type AddAlertFunction = (
   message: string | JSX.Element,
   type: ChaiseAlertType,
   onRemove?: () => void,
-  isSessionExpiredAlert?: boolean,
+  isSessionExpiredAlert?: boolean
 ) => ChaiseAlert;
 
-type RemoveAlertFunction = (
-  alert: ChaiseAlert
-) => void;
+type RemoveAlertFunction = (alert: ChaiseAlert) => void;
 
-export const AlertsContext = createContext<{
-  alerts: ChaiseAlert[],
-  addAlert: AddAlertFunction,
-  removeAlert: RemoveAlertFunction,
-  addURLLimitAlert: () => void,
-  removeURLLimitAlert: () => void,
-  addTooManyFormsAlert:(message: string, type: ChaiseAlertType) => void,
-  removeTooManyFormsAlert:() => void,
-  removeAllAlerts: () => void,
-} |
+export const AlertsContext = createContext<
+  | {
+      alerts: ChaiseAlert[];
+      addAlert: AddAlertFunction;
+      removeAlert: RemoveAlertFunction;
+      addURLLimitAlert: () => void;
+      removeURLLimitAlert: () => void;
+      addTooManyFormsAlert: (message: string, type: ChaiseAlertType) => void;
+      removeTooManyFormsAlert: () => void;
+      removeAllAlerts: () => void;
+    }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
-  null>(null);
+  | null
+>(null);
 
 type AlertsProviderProps = {
-  children: React.ReactNode,
-}
-
+  children: ReactNode;
+};
 
 /**
  * The provider that ensures errors are captured.
@@ -75,8 +75,8 @@ type AlertsProviderProps = {
 export default function AlertsProvider({ children }: AlertsProviderProps): JSX.Element {
   const [alerts, setAlerts] = useState<ChaiseAlert[]>([]);
 
-  const urlLimitAlert = useRef<ChaiseAlert|null>(null);
-  const tooManyFormsAlert = useRef<ChaiseAlert|null>(null);
+  const urlLimitAlert = useRef<ChaiseAlert | null>(null);
+  const tooManyFormsAlert = useRef<ChaiseAlert | null>(null);
 
   /**
    * create add an alert
@@ -86,7 +86,10 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * @return the newly created alert
    */
   const addAlert: AddAlertFunction = (
-    message: string | JSX.Element, type: ChaiseAlertType, onRemove?: () => void, isSessionExpiredAlert?: boolean
+    message: string | JSX.Element,
+    type: ChaiseAlertType,
+    onRemove?: () => void,
+    isSessionExpiredAlert?: boolean
   ) => {
     const newAlert = { message, type, onRemove, isSessionExpiredAlert };
     setAlerts((alerts) => [...alerts, newAlert]);
@@ -98,14 +101,12 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * @param alert the alert that should be removed
    */
   const removeAlert: RemoveAlertFunction = (alert: ChaiseAlert) => {
-    setAlerts(
-      (prev: ChaiseAlert[]) => {
-        if (alert.onRemove) alert.onRemove();
-        return prev.filter((al: ChaiseAlert) => {
-          return alert !== al;
-        })
-      }
-    )
+    setAlerts((prev: ChaiseAlert[]) => {
+      if (alert.onRemove) alert.onRemove();
+      return prev.filter((al: ChaiseAlert) => {
+        return alert !== al;
+      });
+    });
   };
 
   const removeAllAlerts = () => {
@@ -119,7 +120,11 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
   const addURLLimitAlert = () => {
     if (urlLimitAlert.current) return;
 
-    urlLimitAlert.current = addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING, () => urlLimitAlert.current = null)
+    urlLimitAlert.current = addAlert(
+      MESSAGE_MAP.URLLimitMessage,
+      ChaiseAlertType.WARNING,
+      () => (urlLimitAlert.current = null)
+    );
   };
 
   /**
@@ -130,7 +135,7 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
 
     removeAlert(urlLimitAlert.current);
     urlLimitAlert.current = null;
-  }
+  };
 
   /**
    * display the too many forms alert
@@ -142,8 +147,8 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
   const addTooManyFormsAlert = (message: string, type: ChaiseAlertType) => {
     if (tooManyFormsAlert.current) return;
 
-    tooManyFormsAlert.current = addAlert(message, type, () => tooManyFormsAlert.current = null)
-  }
+    tooManyFormsAlert.current = addAlert(message, type, () => (tooManyFormsAlert.current = null));
+  };
 
   /**
    * remove too many forms alert
@@ -153,8 +158,7 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
 
     removeAlert(tooManyFormsAlert.current);
     tooManyFormsAlert.current = null;
-  }
-
+  };
 
   const providerValue = useMemo(() => {
     return {
@@ -165,13 +169,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
       addURLLimitAlert,
       removeURLLimitAlert,
       addTooManyFormsAlert,
-      removeTooManyFormsAlert
-    }
+      removeTooManyFormsAlert,
+    };
   }, [alerts]);
 
-  return (
-    <AlertsContext.Provider value={providerValue}>
-      {children}
-    </AlertsContext.Provider>
-  )
+  return <AlertsContext.Provider value={providerValue}>{children}</AlertsContext.Provider>;
 }

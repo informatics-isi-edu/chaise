@@ -17,6 +17,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { getUserDisplayName } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
@@ -52,6 +53,7 @@ const ChaiseLogin = (): JSX.Element => {
 
   useEffect(() => {
     if (session) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayName(getUserDisplayName(session));
       if (session.client.full_name) {
         // - some users could have the same full_name for multiple globus identities
@@ -71,8 +73,8 @@ const ChaiseLogin = (): JSX.Element => {
         const forceNewTab = settings.openLinksInTab === true;
 
         // use newTab property if defined and forceNewTab is false
-        const parentNewTab = (loggedInMenu.hasOwnProperty('newTab') && !forceNewTab) ? loggedInMenu.newTab : true;
-        const parentAcls = loggedInMenu.hasOwnProperty('acls') ? loggedInMenu.acls : { 'show': ['*'], 'enable': ['*'] };
+        const parentNewTab = (Object.prototype.hasOwnProperty.call(loggedInMenu, 'newTab') && !forceNewTab) ? loggedInMenu.newTab : true;
+        const parentAcls = Object.prototype.hasOwnProperty.call(loggedInMenu, 'acls') ? loggedInMenu.acls : { 'show': ['*'], 'enable': ['*'] };
 
         const menuConfig: {menuOptions?: MenuOption[] | MenuOption} = {};
         if (loggedInMenu.menuOptions && Array.isArray(loggedInMenu.menuOptions)) {

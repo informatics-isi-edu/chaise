@@ -479,7 +479,7 @@ function _populateEditInitialValueForAColumn(
       // If input is disabled, there's no need to transform the column value.
       value = isDisabled ? usedValue : formatFloat(usedValue);
       break;
-    default:
+    default: {
       // the structure for asset type columns is an object with a 'url' property
       let metadata;
       if (column.isAsset) {
@@ -518,6 +518,7 @@ function _populateEditInitialValueForAColumn(
       }
 
       break;
+    }
   }
 
   // no need to check for copy here because the case above guards against the negative case for copy

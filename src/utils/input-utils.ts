@@ -203,38 +203,6 @@ export function replaceNullOrUndefined(val: any, alt: any) {
   return (val === null || val === undefined) ? alt : val;
 }
 
-export function arrayFieldPlaceholder(baseType: string) {
-  let placeholder;
-  switch (baseType) {
-    case 'timestamptz':
-      placeholder = ['2001-01-01T01:01:01-08:00', '2002-02-02T02:02:02-08:00']
-    case 'timestamp':
-      placeholder = ['2001-01-01T01:01:01', '2002-02-02T02:02:02']
-      break;
-    case 'date':
-      placeholder = ['2001-01-01', '2001-02-02']
-      break;
-    case 'numeric':
-    case 'float4':
-    case 'float8':
-      placeholder = [1, 2.2]
-      break;
-    case 'int2':
-    case 'int4':
-    case 'int8':
-      placeholder = [1, 2]
-      break;
-    case 'boolean':
-      placeholder = [true, false]
-      break;
-    default:
-      placeholder = ['value1', 'value2']
-      break;
-  }
-
-  return placeholder;
-}
-
 export function humanFileSize(size: number) {
   // Math.log(0) is -Infinity
   const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));

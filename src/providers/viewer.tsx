@@ -599,7 +599,7 @@ export default function ViewerProvider({
           );
         }
         break;
-      case 'mainImageLoadFailed':
+      case 'mainImageLoadFailed': {
         // called if the main image didnt properly load
 
         // map to a proper error object
@@ -635,7 +635,8 @@ export default function ViewerProvider({
         setMainImageLoaded(false);
         setLoadingAnnotations(false);
         break;
-      case 'mainImageLoaded':
+      }
+      case 'mainImageLoaded': {
         setViewerError(null);
         setMainImageLoaded(true);
 
@@ -647,7 +648,8 @@ export default function ViewerProvider({
           ViewerAnnotationService.loadAnnotations();
         }
         break;
-      case 'updateMainImage':
+      }
+      case 'updateMainImage': {
         /**
          * called when the main image has changed in the multi-z support.
          * we need to update the information associated with the image.
@@ -707,21 +709,25 @@ export default function ViewerProvider({
         })(data.zIndex);
 
         break;
-      case 'annotationsLoaded':
+      }
+      case 'annotationsLoaded': {
         // called when osd-viewer read all the annotations.
         // TODO we should technically keep showing the loader until updateAnnotationList is called for all the annotations
         // but that requires changes in osd-viewer as well.
         setLoadingAnnotations(false);
         break;
-      case 'errorAnnotation':
+      }
+      case 'errorAnnotation': {
         addAlert('Could not parse the given annotation.', ChaiseAlertType.WARNING);
         if (data) $log.warn(data);
         break;
-      case 'updateAnnotationList':
+      }
+      case 'updateAnnotationList': {
         // called whens osd-viewer has finished parsing annotaitons files.
         updateAnnotaionList(data);
         break;
-      case 'onClickChangeSelectingAnnotation':
+      }
+      case 'onClickChangeSelectingAnnotation': {
         const index = annotationModelsRef.current.findIndex(
           (item) => item.svgID === data.svgID && item.groupID === data.groupID
         );
@@ -736,7 +742,8 @@ export default function ViewerProvider({
         // scrollIntoView(item.svgID + item.groupID);
         toggleHighlightAnnotation(index, undefined, true);
         break;
-      case 'saveGroupSVGContent':
+      }
+      case 'saveGroupSVGContent': {
         if (!currentAnnotationFormState.current) return;
         const hasValidSVG = data.length > 0 && data[0].svg !== '' && data[0].numOfAnnotations > 0;
         if (!hasValidSVG) {
@@ -753,7 +760,8 @@ export default function ViewerProvider({
           document.querySelector(`#${ID_NAMES.VIEWER_ANNOTATION_FORM}`) as HTMLFormElement
         );
         break;
-      case 'fetchZPlaneList':
+      }
+      case 'fetchZPlaneList': {
         fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses)
           .then((res) => {
             iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
@@ -762,7 +770,8 @@ export default function ViewerProvider({
             dispatchError({ error });
           });
         break;
-      case 'fetchZPlaneListByZIndex':
+      }
+      case 'fetchZPlaneListByZIndex': {
         fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source)
           .then((res) => {
             iframe.postMessage({ messageType: 'updateZPlaneList', content: res });
@@ -771,7 +780,8 @@ export default function ViewerProvider({
             dispatchError({ error });
           });
         break;
-      case 'updateDefaultZIndex':
+      }
+      case 'updateDefaultZIndex': {
         validateSessionBeforeMutation(() => {
           updateDefaultZIndex(reference, imageIDRef.current!, defaultZIndex.current)
             .then(() => {
@@ -809,11 +819,13 @@ export default function ViewerProvider({
             });
         });
         break;
-      case 'openDrawingHelpPage':
+      }
+      case 'openDrawingHelpPage': {
         windowRef.open(getHelpPageURL(HELP_PAGES.VIEWER_ANNOTATION), '_blank');
         break;
-      case 'updateChannelConfig':
-        validateSessionBeforeMutation(() => {
+      }
+      case 'updateChannelConfig': {
+      validateSessionBeforeMutation(() => {
           updateChannelConfig(data, imageIDRef.current!)
             .then((res) => {
               addAlert('Channel settings have been updated.', ChaiseAlertType.SUCCESS);
@@ -860,10 +872,12 @@ export default function ViewerProvider({
             });
         });
         break;
-      case 'showAlert':
+      }
+      case 'showAlert': {
         addAlert(data.message, data.type);
         break;
-      case 'showPopupError':
+      }
+      case 'showPopupError': {
         const err = new CustomError(
           data.header,
           data.message,
@@ -873,6 +887,7 @@ export default function ViewerProvider({
         );
         dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
+      }
     }
   };
 

@@ -1,3 +1,4 @@
+import { type ElementType } from 'react';
 // hooks
 import { memo, useEffect, useRef, type JSX } from 'react';
 
@@ -39,7 +40,7 @@ type DisplayValueProps = {
    * set the wrapper element that should be used.
    * if not defined, we will use a span.
    */
-  as?: React.ElementType,
+  as?: ElementType,
   /**
    * the extra props that we should add to the element
    */

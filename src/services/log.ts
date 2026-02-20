@@ -50,7 +50,7 @@ export class LogService {
     // in the case of static websites, the getHTTPService might return axios http,
     // which doesn't have the contextHeaderParams, so we should add them here just in case
     for (const key in contextHeaderParams) {
-      if (!contextHeaderParams.hasOwnProperty(key) || (key in logObj)) continue;
+      if (!Object.prototype.hasOwnProperty.call(contextHeaderParams, key) || (key in logObj)) continue;
       // @ts-ignore:
       logObj[key] = contextHeaderParams[key];
     }
@@ -101,7 +101,7 @@ export class LogService {
     }
     if (typeof extraInfo === 'object' && extraInfo !== null) {
       for (const k in extraInfo) {
-        if (!extraInfo.hasOwnProperty(k)) continue;
+        if (!Object.prototype.hasOwnProperty.call(extraInfo, k)) continue;
         obj[k] = extraInfo[k];
       }
     }
@@ -125,7 +125,7 @@ export class LogService {
 
     // update the stack to have the latest filter info
     for (const f in filterLogInfo) {
-      if (!filterLogInfo.hasOwnProperty(f)) continue;
+      if (!Object.prototype.hasOwnProperty.call(filterLogInfo, f)) continue;
       lastStackElement[f] = filterLogInfo[f];
     }
 
@@ -167,7 +167,7 @@ export class LogService {
     const lastStackElement = newStack[stack.length - 1];
 
     for (const f in extraInfo) {
-      if (!extraInfo.hasOwnProperty(f)) continue;
+      if (!Object.prototype.hasOwnProperty.call(extraInfo, f)) continue;
       lastStackElement[f] = extraInfo[f];
     }
 

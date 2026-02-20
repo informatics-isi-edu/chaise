@@ -119,6 +119,7 @@ const LoginPopupApp = (): JSX.Element => {
       }
     } else {
       // show the instructions if the user doesn't have the required group
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowInstructions(!hasGroup);
       // if this login process is used for verifying group membership, that group is REQUIRED to have an active login
       // log the user out if they don't have the group

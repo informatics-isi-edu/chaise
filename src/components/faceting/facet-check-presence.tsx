@@ -45,9 +45,8 @@ const FacetCheckPresence = ({
   facetModel,
   facetIndex,
   register,
-  updateRecordsetReference
+  updateRecordsetReference,
 }: FacetCheckPresenceProps): JSX.Element => {
-
   const [checkboxRows, setCheckboxRows, checkboxRowsRef] = useStateRef<FacetCheckBoxRow[]>(() => {
     const res: FacetCheckBoxRow[] = [];
     if (!facetColumn.hideNotNullChoice) {
@@ -66,14 +65,6 @@ const FacetCheckPresence = ({
    */
   const facetColumnRef = useVarRef(facetColumn);
 
-  /**
-   * register the flow-control related functions for the facet
-   * this will ensure the functions are registerd based on the latest facet changes
-   */
-  useEffect(() => {
-    callRegister();
-  }, [facetModel, checkboxRows]);
-
   //-------------------  flow-control related functions:   --------------------//
   /**
    * register the callbacks (this should be called after related state variables changed)
@@ -88,7 +79,7 @@ const FacetCheckPresence = ({
   const preProcessFacet = () => {
     // this function is expected but we don't need any extra logic here.
     return new Promise((resolve) => resolve(true));
-  }
+  };
 
   /**
    * The registered callback to process and update facets
@@ -124,10 +115,18 @@ const FacetCheckPresence = ({
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return { ...curr, selected: false }
+        return { ...curr, selected: false };
       });
     });
-  }
+  };
+
+  /**
+   * register the flow-control related functions for the facet
+   * this will ensure the functions are registerd based on the latest facet changes
+   */
+  useEffect(() => {
+    callRegister();
+  }, [facetModel, checkboxRows]);
 
   //-------------------  UI related callbacks:   --------------------//
   const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
@@ -149,7 +148,9 @@ const FacetCheckPresence = ({
       } else {
         ref = facetColumn.removeChoiceFilters([row.uniqueId]);
       }
-      $log.debug(`faceting: request for facet (index=${facetIndex}) choice ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`);
+      $log.debug(
+        `faceting: request for facet (index=${facetIndex}) choice ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`
+      );
     }
 
     // this function checks the URL length as well and might fails
@@ -162,7 +163,7 @@ const FacetCheckPresence = ({
       return prev.map((curr: FacetCheckBoxRow) => {
         if (curr === row) return { ...curr, selected: checked };
         // if checked, the other one must be unchecked.
-        else if (checked) return { ...curr, selected: false }
+        else if (checked) return { ...curr, selected: false };
         else return curr;
       });
     });
@@ -173,7 +174,7 @@ const FacetCheckPresence = ({
     <div className='check-presence'>
       <FacetCheckList rows={checkboxRows} onRowClick={onRowClick} />
     </div>
-  )
-};
+  );
+};;
 
 export default FacetCheckPresence;

@@ -72,20 +72,10 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
   // when the dropdown is open, we should not use the tooltip
   const [useTooltip, setUseTooltip] = useState(true);
 
-  const [disableDropdown, setDisableDropdown] = useState<boolean>(true);
-
   const [recordeditModalProps, setRecordeditModalProps] = useState<RecordeditProps | null>(null);
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   // set after checking if the existing search criteria exists to open the duplcate saved query modal
   const [tupleForDuplicateSavedQuery, setTupleForDuplicateSavedQuery] = useState<any | null>(null);
-
-  useEffect(() => {
-    if (!savedQueryReference) return;
-    // if insert is false, disable the button
-    // TODO: should this be checking for insert !== true ?
-    const shouldDisableDropdown = !savedQueryReference.table.rights.insert;
-    setDisableDropdown(shouldDisableDropdown);
-  }, [savedQueryReference]);
 
   /**
    * Transform facets to a more stable version that can be saved.
@@ -629,6 +619,7 @@ const SavedQueryDropdown = ({ appliedFiltersCallback }: SavedQueryDropdownProps)
 
   // render a dropdown or a div that looks like a disabled dropdown
   const renderDropdown = () => {
+    const disableDropdown = !savedQueryReference || !savedQueryReference.table.rights.insert;
     if (disableDropdown) {
       // if dropdown is disabled, create a "fake" dropdown element
       return (

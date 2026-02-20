@@ -556,7 +556,7 @@ const TableRow = ({
             */}
           </div>
         );
-      default:
+      default: {
         const ApplySavedQueryTag = applySavedQuery === false || rowDisabled ? 'span' : 'a';
         let applySavedQueryBtnClass =
           'apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn';
@@ -649,6 +649,7 @@ const TableRow = ({
             )}
           </div>
         );
+      }
     }
   };
 
@@ -700,6 +701,7 @@ const TableRow = ({
         {showActionButtons && (
           <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
             <div className='action-btns-inner-container'>
+              {/* eslint-disable-next-line react-hooks/refs */}
               {renderActionButtons(config.selectMode)}
             </div>
           </td>
@@ -707,6 +709,7 @@ const TableRow = ({
         {showSecondColumnActions && (
           <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
             <div className='action-btns-inner-container'>
+              {/* eslint-disable-next-line react-hooks/refs */}
               {renderActionButtons(undefined, true)}
             </div>
           </td>

@@ -293,15 +293,15 @@ distclean: clean
 
 .PHONY: lint
 lint: $(SOURCE)
-	@npx eslint src --ext .ts,.tsx --quiet
+	@npx eslint src --quiet
 
 .PHONY: lint-w-warn
 lint-w-warn: $(SOURCE)
-	@npx eslint src --ext .ts,.tsx
+	@npx eslint src
 
 .PHONY: lint-tests
 lint-tests:
-	npx eslint test/e2e --ext .ts,.tsx --quiet
+	npx eslint test/e2e --quiet
 
 # Rule to create the package.
 .PHONY: dist-wo-deps

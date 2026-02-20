@@ -248,13 +248,14 @@ const RelatedTableActions = ({
     // Generate a unique cookie name and set it to expire after 24hrs.
     const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
     const cookieValue = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
+    // eslint-disable-next-line react-hooks/purity
     CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + 60 * 60 * 24 * 1000));
 
     // Generate a unique id for this request
     // append it to the URL
     const referrer_id = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
 
-    if (!!containerRef.current) {
+    if (containerRef.current) {
       fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, containerRef.current, {
         id: referrer_id,
         containerDetails: {
@@ -515,7 +516,7 @@ const RelatedTableActions = ({
                   isDismissible: true,
                   closeBtnCallback: () => {
                     // ask recordset to update the modal
-                    if (!!containerRef.current) {
+                    if (containerRef.current) {
                       // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
                       fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, containerRef.current, {
                         cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
@@ -762,7 +763,7 @@ const RelatedTableActions = ({
             </a>
           </ChaiseTooltip>
         );
-      case 'Bulk edit':
+      case 'Bulk edit': {
         const page = relatedModel.recordsetState.page;
         const disableBulkEdit = !isBulkEditEnabled(page);
         const editLink = addQueryParamsToURL(usedRef.contextualize.entryEdit.appLink, {
@@ -787,6 +788,7 @@ const RelatedTableActions = ({
             </a>
           </ChaiseTooltip>
         );
+      }
       case 'Link records':
       case 'Add records':
         return (

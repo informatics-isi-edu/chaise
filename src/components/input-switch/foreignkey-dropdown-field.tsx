@@ -1,3 +1,5 @@
+import type { RefObject } from 'react';
+
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -35,44 +37,44 @@ type ForeignkeyDropdownFieldProps = InputFieldProps & {
   /**
    * The column model representing this field in the form.
    */
-  columnModel: RecordeditColumnModel,
+  columnModel: RecordeditColumnModel;
   /**
    * the mode of the app
    */
-  appMode?: string,
+  appMode?: string;
   /**
    * the "formNumber" that this input belongs to
    */
-  formNumber?: number,
+  formNumber?: number;
   /**
    * The reference that is used for the form
    */
-  parentReference?: any,
+  parentReference?: any;
   /**
    * The tuple representing the row.
    * Available only in edit mode.
    */
-  parentTuple?: any,
+  parentTuple?: any;
   /**
    * the log stack of the form
    */
-  parentLogStack?: any,
+  parentLogStack?: any;
   /**
    * the log stack path of the form
    */
-  parentLogStackPath?: string,
+  parentLogStackPath?: string;
   /**
    * the ref used to capture the foreignkey data
    */
-  foreignKeyData?: React.MutableRefObject<any>,
+  foreignKeyData?: RefObject<any>;
   /**
    * whether we're still waiting for foreignkey data
    */
-  waitingForForeignKeyData?: boolean,
+  waitingForForeignKeyData?: boolean;
   /**
    * customize the foreignkey callbacks
    */
-  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks
+  foreignKeyCallbacks?: RecordeditForeignkeyCallbacks;
 };
 
 const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Element => {

@@ -1,5 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_viewer.scss';
 
+import type { RefObject } from 'react';
+
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
@@ -87,6 +89,7 @@ const ViewerInner = ({
      * content is visible and therefore it can set a correct height for the bottom-container.
      * otherwise the iframe will be displayed in a small box first.
      */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayIframe(true);
 
     return () => {
@@ -122,7 +125,7 @@ const ViewerInner = ({
 
   const panelClassName = !hideAnnotationSidebar ? 'open-panel' : 'close-panel';
 
-  const renderAnnotaionsListContainer = (leftRef: React.RefObject<HTMLDivElement | null>) => (
+  const renderAnnotaionsListContainer = (leftRef: RefObject<HTMLDivElement | null>) => (
     <div
       className={`side-panel-resizable resizable ${panelClassName}`}
       ref={leftRef}

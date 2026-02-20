@@ -66,7 +66,7 @@ export const createFiles = async (files: Array<RecordeditFile | { path: string, 
     if ('content' in f) {
       execSync(`echo '${f.content.replace(/'/g, '\'"\'"\'')}' > ${path}`);
     } else if (!f.skipCreation) {
-      execSync(`perl -e 'print \'1\' x ${f.size}' > ${path}`);
+      execSync(`perl -e 'print "1" x ${f.size}' > ${path}`);
     }
     console.log(`${path} created`);
   }
@@ -148,26 +148,30 @@ export const clearInputValue = async (
 ) => {
   switch (inputType) {
     case RecordeditInputType.FK_DROPDOWN:
-    case RecordeditInputType.FK_POPUP:
+    case RecordeditInputType.FK_POPUP: {
       const fkBtn = RecordeditLocators.getForeignKeyInputClear(page, displayname, formNumber);
       await fkBtn.click();
       break;
-    case RecordeditInputType.TIMESTAMP:
+    }
+    case RecordeditInputType.TIMESTAMP: {
       const timestampBtns = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       // we have to remove the date first, otherwise time will keep showing 00:00:00
       await timestampBtns.dateRemoveBtn.click();
       await timestampBtns.timeRemoveBtn.click();
       break;
-    case RecordeditInputType.ARRAY:
+    }
+    case RecordeditInputType.ARRAY: {
       const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber);
       while (await elems.removeItemButtons.count() > 0) {
         await elems.removeItemButtons.nth(0).click();
       }
       break;
-    default:
+    }
+    default: {
       const btn = RecordeditLocators.getInputRemoveButton(page, name, formNumber);
       await btn.click();
       break;
+    }
   }
 }
 
@@ -185,15 +189,15 @@ export const setInputValue = async (
   valueProps: SetInputValueProps | SetInputValueProps[], arrayBaseType?: RecordeditInputType
 ) => {
   switch (inputType) {
-    case RecordeditInputType.BOOLEAN:
+    case RecordeditInputType.BOOLEAN: {
       if (typeof valueProps !== 'string') return;
 
       const dropdown = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
       await selectDropdownValue(dropdown, valueProps);
       await expect.soft(RecordeditLocators.getDropdownText(dropdown)).toHaveText(valueProps);
       break;
-
-    case RecordeditInputType.COLOR:
+    }
+    case RecordeditInputType.COLOR: {
       if (typeof valueProps !== 'string') return;
       const colorInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
       await colorInput.clear();
@@ -205,8 +209,8 @@ export const setInputValue = async (
       // make sure the background color is correct
       expect.soft(await RecordeditLocators.getColorInputBackground(page, name, formNumber)).toEqual(valueProps);
       break;
-
-    case RecordeditInputType.FK_POPUP:
+    }
+    case RecordeditInputType.FK_POPUP: {
       if (typeof valueProps !== 'object' || !(('modal_num_rows' in valueProps) && ('modal_option_index' in valueProps))) {
         return;
       }
@@ -223,8 +227,8 @@ export const setInputValue = async (
       }
 
       break;
-
-    case RecordeditInputType.FK_DROPDOWN:
+    }
+    case RecordeditInputType.FK_DROPDOWN: {
       if (typeof valueProps !== 'object' || !(('modal_num_rows' in valueProps) && ('modal_option_index' in valueProps))) {
         return;
       }
@@ -235,8 +239,8 @@ export const setInputValue = async (
       await dropdownOptions.nth(valueProps.modal_option_index).click();
       await expect.soft(dropdownOptions).not.toBeAttached();
       break;
-
-    case RecordeditInputType.TIMESTAMP:
+    }
+    case RecordeditInputType.TIMESTAMP: {
       if (typeof valueProps !== 'object' || !(('time_value' in valueProps) && ('date_value' in valueProps))) {
         return;
       }
@@ -248,8 +252,8 @@ export const setInputValue = async (
       await inputs.time.clear();
       await inputs.time.fill(valueProps.time_value);
       break;
-
-    case RecordeditInputType.FILE:
+    }
+    case RecordeditInputType.FILE: {
       if (typeof valueProps !== 'object' || !('name' in valueProps)) return;
 
       const fileInputBtn = RecordeditLocators.getFileInputButtonForAColumn(page, name, formNumber);
@@ -262,8 +266,8 @@ export const setInputValue = async (
         await testTooltip(fileInputBtn, valueProps.tooltip, APP_NAMES.RECORDEDIT, true);
       }
       break;
-
-    case RecordeditInputType.ARRAY:
+    }
+    case RecordeditInputType.ARRAY: {
       if (!Array.isArray(valueProps) || arrayBaseType === undefined) return;
       const elems = RecordeditLocators.getArrayFieldElements(page, name, formNumber);
 
@@ -284,8 +288,8 @@ export const setInputValue = async (
         await elems.addItemButton.click();
       }
       break;
-
-    default:
+    }
+    default: {
       if (typeof valueProps !== 'string') return;
 
       const inputEl = RecordeditLocators.getInputForAColumn(page, name, formNumber);
@@ -293,6 +297,7 @@ export const setInputValue = async (
       await inputEl.fill(valueProps);
       await expect.soft(inputEl).toHaveValue(valueProps);
       break;
+    }
   }
 };
 
@@ -306,7 +311,7 @@ export const testInputValue = async (
   let input;
   const inputControl = RecordeditLocators.getInputControlForAColumn(page, name, formNumber);
   switch (inputType) {
-    case RecordeditInputType.BOOLEAN:
+    case RecordeditInputType.BOOLEAN: {
       input = RecordeditLocators.getDropdownElementByName(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
@@ -316,8 +321,8 @@ export const testInputValue = async (
       if (typeof valueProps !== 'string') return;
       await expect.soft(input).toHaveText(valueProps);
       break;
-
-    case RecordeditInputType.COLOR:
+    }
+    case RecordeditInputType.COLOR: {
       input = RecordeditLocators.getColorInputForAColumn(page, name, formNumber);
       await expect.soft(input).toBeVisible();
 
@@ -327,9 +332,9 @@ export const testInputValue = async (
       // make sure the background color is correct
       expect.soft(await RecordeditLocators.getColorInputBackground(page, name, formNumber)).toEqual(valueProps);
       break;
-
+    }
     case RecordeditInputType.FK_POPUP:
-    case RecordeditInputType.FK_DROPDOWN:
+    case RecordeditInputType.FK_DROPDOWN: {
       input = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
@@ -339,8 +344,8 @@ export const testInputValue = async (
       if (typeof valueProps !== 'string') return;
       await expect.soft(input).toHaveText(valueProps);
       break;
-
-    case RecordeditInputType.TIMESTAMP:
+    }
+    case RecordeditInputType.TIMESTAMP: {
       input = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       await expect.soft(input.date).toBeVisible();
       await expect.soft(input.time).toBeVisible();
@@ -353,8 +358,8 @@ export const testInputValue = async (
       await expect.soft(input.date).toHaveValue(valueProps.date_value);
       await expect.soft(input.time).toHaveValue(valueProps.time_value);
       break;
-
-    case RecordeditInputType.FILE:
+    }
+    case RecordeditInputType.FILE: {
       input = RecordeditLocators.getTextFileInputForAColumn(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
@@ -364,8 +369,8 @@ export const testInputValue = async (
       if (typeof valueProps !== 'string') return;
       await expect.soft(input).toHaveText(valueProps);
       break;
-
-    case RecordeditInputType.ARRAY:
+    }
+    case RecordeditInputType.ARRAY: {
       if (!Array.isArray(valueProps) || arrayBaseType === undefined) return;
 
       for (const [index, val] of valueProps.entries()) {
@@ -373,8 +378,8 @@ export const testInputValue = async (
         await testInputValue(page, formNumber, itemName, displayname, arrayBaseType, disabled, val);
       }
       break;
-
-    default:
+    }
+    default: {
       input = RecordeditLocators.getInputForAColumn(page, name, formNumber);
       await expect.soft(input).toBeVisible();
       if (disabled) {
@@ -384,6 +389,7 @@ export const testInputValue = async (
       if (typeof valueProps !== 'string') return;
       await expect.soft(input).toHaveValue(valueProps);
       break;
+    }
   }
 }
 
@@ -476,15 +482,16 @@ const _testInputValidationAndExtraFeatures = async (
   const cellError = RecordeditLocators.getErrorMessageForAColumn(page, name, formNumber);
 
   switch (inputType) {
-    case RecordeditInputType.ARRAY:
+    case RecordeditInputType.ARRAY: {
       const itemName = RecordeditLocators.getArrayInputName(name, -1);
       if (arrayBaseType) {
         await _testInputValidationAndExtraFeatures(page, formNumber, itemName, displayname, arrayBaseType);
       }
       break;
 
+    }
     case RecordeditInputType.JSON:
-    case RecordeditInputType.JSONB:
+    case RecordeditInputType.JSONB: {
       const jsonInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
 
       await test.step('should allow any valid JSON values.', async () => {
@@ -522,8 +529,8 @@ const _testInputValidationAndExtraFeatures = async (
         }
       });
       break;
-
-    case RecordeditInputType.MARKDOWN:
+    }
+    case RecordeditInputType.MARKDOWN: {
       const markdownProps = RecordeditLocators.getMarkdownElements(page, name, formNumber);
 
       await test.step('should render markdown with inline preview and full preview button.', async () => {
@@ -613,8 +620,8 @@ const _testInputValidationAndExtraFeatures = async (
         await newPage.close();
       });
       break;
-
-    case RecordeditInputType.FK_POPUP:
+    }
+    case RecordeditInputType.FK_POPUP: {
       const displayedValue = RecordeditLocators.getForeignKeyInputDisplay(page, displayname, formNumber);
       const rsModal = ModalLocators.getForeignKeyPopup(page);
 
@@ -659,8 +666,8 @@ const _testInputValidationAndExtraFeatures = async (
         });
       });
       break;
-
-    case RecordeditInputType.DATE:
+    }
+    case RecordeditInputType.DATE: {
       const dateInputProps = RecordeditLocators.getDateInputsForAColumn(page, name, formNumber);
       const dateRemoveBtn = RecordeditLocators.getInputRemoveButton(page, name, formNumber);
 
@@ -689,8 +696,8 @@ const _testInputValidationAndExtraFeatures = async (
       });
 
       break;
-
-    case RecordeditInputType.TIMESTAMP:
+    }
+    case RecordeditInputType.TIMESTAMP: {
       const timestampProps = RecordeditLocators.getTimestampInputsForAColumn(page, name, formNumber);
       const timeErrorMessage = 'Please enter a valid time value in 24-hr HH:MM:SS format.';
       const dateErrorMessage = 'Please enter a valid date value in YYYY-MM-DD format.';
@@ -767,10 +774,10 @@ const _testInputValidationAndExtraFeatures = async (
       });
 
       break;
-
+    }
     case RecordeditInputType.INT_2:
     case RecordeditInputType.INT_4:
-    case RecordeditInputType.INT_8:
+    case RecordeditInputType.INT_8: {
       const intInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
 
       await test.step('should complain about invalid values and allow valid ones.', async () => {
@@ -814,8 +821,8 @@ const _testInputValidationAndExtraFeatures = async (
         await intInput.clear();
       });
       break;
-
-    case RecordeditInputType.NUMBER:
+    }
+    case RecordeditInputType.NUMBER: {
       const numInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
 
       await test.step('should complain about invalid values and allow valid ones.', async () => {
@@ -838,8 +845,8 @@ const _testInputValidationAndExtraFeatures = async (
         await expect.soft(cellError).not.toBeAttached();
       });
       break;
-
-    case RecordeditInputType.COLOR:
+    }
+    case RecordeditInputType.COLOR: {
       const colorInput = RecordeditLocators.getInputForAColumn(page, name, formNumber);
 
       await test.step('should now allow invalid values and allow valid ones.', async () => {
@@ -886,6 +893,7 @@ const _testInputValidationAndExtraFeatures = async (
       });
 
       break;
+    }
   }
 }
 

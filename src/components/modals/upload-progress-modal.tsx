@@ -113,7 +113,7 @@ const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSucc
   const [speed, setSpeed] = useState<string>('');
   // used in the speed calculation
   const [lastByteTransferred, setLastByteTransferred, lastByteTransferredRef] = useStateRef<number>(0);
-  let speedIntervalTimer: NodeJS.Timer;
+  let speedIntervalTimer: any;
 
   /*=== Hooks ===*/
 
@@ -732,7 +732,7 @@ const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSucc
         </div>
         <div className='progress-percent'>{Number(checksumProgress).toFixed(2)}%</div>
       </>)
-    } else if (isFileExists && !isUpload) {
+    } else if (isFileExists && !isCreateUploadJob && !isUpload) {
       return (<>
         <div className='col-md-12 pad0-left pad0-right text-right'>
           <strong>Completed: {fileExistsCompleted}/{filesToUploadCt}</strong>
@@ -742,7 +742,7 @@ const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSucc
         </div>
         <div className='progress-percent'>{Number(fileExistsProgress).toFixed(2)}%</div>
       </>)
-    } else if (isCreateUploadJob && isFileExists && !isUpload) {
+    } else if (isCreateUploadJob && !isUpload) {
       return (<>
         <div className='col-md-12 pad0-left pad0-right text-right'>
           <strong>Completed: {createUploadJobCompleted}/{filesToUploadCt}</strong>
