@@ -11,7 +11,7 @@ import { useEffect, useState, useRef, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 // models
-import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -114,7 +114,7 @@ const IframeFieldModal = ({
         case 'iframe-data-ready':
           setShowModalSpinner(false);
           break;
-        case 'iframe-ready':
+        case 'iframe-ready': {
           // generate the existing value object that should be sent to iframe, so it can show the existing value to users
           const currentValues: any = {};
           for (const k in mapping) {
@@ -133,10 +133,12 @@ const IframeFieldModal = ({
             content: currentValues
           });
           break;
-        case 'show-alert':
+        }
+        case 'show-alert': {
           addAlert(content.message, content.type);
           break;
-        case 'submit-data':
+        }
+        case 'submit-data': {
           /**
            * the data that should be stored
            * we're capturing it in case there was an issue in the middle, so we're not saving partial data.
@@ -218,6 +220,7 @@ const IframeFieldModal = ({
           // clear the previous errors on the form
           clearErrors(fieldName);
           break;
+        }
       }
     };
 

@@ -24,6 +24,7 @@ const useStateRef: UseStateRef = <S>(initialState?: S | (() => S)) => {
   /**
    * This will make sure the reference always has the latest used state variable
    */
+  // eslint-disable-next-line react-hooks/refs
   ref.current = state;
 
   return [state, setState, ref];

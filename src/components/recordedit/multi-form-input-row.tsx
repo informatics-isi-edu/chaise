@@ -155,7 +155,7 @@ const MultiFormInputRow = ({
    */
   useEffect(() => {
     // see if the input is empty
-    let temp = !Boolean(selectAllFieldValue);
+    let temp = !selectAllFieldValue;
     if (cm.column.type.name === 'boolean') {
       temp = typeof selectAllFieldValue !== 'boolean';
     }
@@ -265,8 +265,6 @@ const MultiFormInputRow = ({
    * if clearValue is true, it will use emtpy value, otherwise it will copy the multi-form-input input value
    */
   const setValueForAllInputs = (clearValue?: boolean) => {
-    const updateValues = clearValue ? '' : selectAllFieldValue;
-
     activeForms?.forEach((formValue: number) => {
       // ignore the ones that cannot be updated
       if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`c_${formValue}-${cm.column.RID}`]) {

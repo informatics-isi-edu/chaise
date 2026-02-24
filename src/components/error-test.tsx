@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
-import { ErrorBoundary, FallbackProps, useErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
@@ -57,7 +57,7 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
       FallbackComponent={({ error }) => (
         <Alert variant='danger'>
           inner:
-          {error.message}
+          {(error as Error).message}
         </Alert>
       )}
     >
@@ -97,23 +97,11 @@ const ErrorComponentWithManualHandling = () : JSX.Element => {
 };
 
 const ErrorTest = () : JSX.Element => {
-  let catchedErrorComponent;
-  try {
-    catchedErrorComponent = <ErrorComponent />;
-  } catch (exp) {
-    $log.log('caught the error here!');
-    catchedErrorComponent = (<div>wow errored!</div>);
-  }
-
   return (
     <div>
       <div>
         <p>General case:</p>
         <ErrorComponent />
-      </div>
-      <div>
-        <p>wrapping the component in a try-catch:</p>
-        {catchedErrorComponent}
       </div>
       <br />
       <div>
@@ -122,7 +110,7 @@ const ErrorTest = () : JSX.Element => {
           FallbackComponent={({ error }) => (
             <Alert variant='danger'>
               outer:
-              {error.message}
+              {(error as Error).message}
             </Alert>
           )}
         >

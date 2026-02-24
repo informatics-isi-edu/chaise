@@ -529,7 +529,7 @@ const RecordsetInner = ({
     const pageStates = event.detail.pageStates;
     const unlinkResponse = event.detail.response;
     if (!!cause && !!pageStates) {
-      if (!!unlinkResponse) {
+      if (unlinkResponse) {
         if (unlinkResponse.failedTupleData.length > 0) {
           // iterate over the set of successful ids and find them in selected rows, then remove them
           unlinkResponse.successTupleData.forEach((data: any) => {

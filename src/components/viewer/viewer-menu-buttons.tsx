@@ -114,10 +114,10 @@ const ViewerMenuButtons = (): JSX.Element => {
   const disableFeatures = !mainImageLoaded;
 
   let toggleAnnotationSidebarTooltip = hideAnnotationSidebar ? 'Show ' : 'Hide ';
-  toggleAnnotationSidebarTooltip += !!annotationFormProps ? 'the annotation entry form' : 'the list of annotations';
+  toggleAnnotationSidebarTooltip += annotationFormProps ? 'the annotation entry form' : 'the list of annotations';
 
   let toggleAnnotationSidebarLabel = hideAnnotationSidebar ? 'Show ' : 'Hide ';
-  toggleAnnotationSidebarLabel += !!annotationFormProps ? 'Annotation form' : 'Annotations';
+  toggleAnnotationSidebarLabel += annotationFormProps ? 'Annotation form' : 'Annotations';
 
   let screenshotTooltip = 'Take a snapshot of image and save it';
   if (waitingForScreenshot) {

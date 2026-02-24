@@ -95,12 +95,14 @@ const DeleteConfirmationModal = ({
         cascadingInfo = <p>
           Navigate to the individual record detail pages to check the related records that may be affected.
         </p>;
-      case DeleteConfirmationModalTypes.SINGLE:
+        break;
+      case DeleteConfirmationModalTypes.SINGLE: {
         const recordLink = <a target='blank' href={reference.contextualize.detailed.appLink}>this record detailed page</a>;
         cascadingInfo = <p>
           Navigate to {recordLink} to check the related records that may be affected.
         </p>;
         break;
+      }
     }
 
     const itemName = context === DeleteConfirmationModalTypes.RECORD_MAIN ? 'tables/sections' : 'tables';

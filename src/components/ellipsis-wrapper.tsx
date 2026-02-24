@@ -1,14 +1,14 @@
-import { useState, type JSX } from 'react';
+import { useState, type JSX, type RefObject } from 'react';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip'
 import { Placement } from 'react-bootstrap/types';
 
 
 export type EllipsisWrapperProps = {
-  children: JSX.Element
+  children: JSX.Element;
   /**
    * This is a ref to the element we want to watch for text overflow
    */
-  elementRef: React.MutableRefObject<any>
+  elementRef: RefObject<any>;
   /**
    * Tooltip to display.
    *
@@ -23,13 +23,13 @@ export type EllipsisWrapperProps = {
    * ```
    * - Return `null` in the callback if you don't want the tooltip to show up.
    */
-  tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => (string | JSX.Element | null))
+  tooltip: (string | JSX.Element) | ((isOverflowing: boolean) => string | JSX.Element | null);
   /**
    * where the tooltip should be.
    * Default is 'top-start'
    */
-  placement?: Placement,
-}
+  placement?: Placement;
+};
 
 
 /**

@@ -127,7 +127,7 @@ const FormContainer = ({
           ))}
         </div>}
         {/* inputs for each column */}
-        {columnModels.map(({ }, idx) => (
+        {columnModels.map((_, idx) => (
           <FormRow
             isActiveForm={activeMultiForm === idx}
             removeClicked={removeClicked}

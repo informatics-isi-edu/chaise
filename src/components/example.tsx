@@ -29,12 +29,20 @@ const ExampleComponent = ({
   // - Declare state values
   const [showDescription, setShowDescription] = useState(false);
 
+  // callbacks used by useEffect and other hooks
+  const computeValues = () => {
+    // ...
+  }
+
   // - useEffect or other hooks
 
-  // explain why the hook is used
+  /**
+   * explain why the hook is used
+   */
   useEffect(() => {
-    // document.title = app;
-  });
+    const res = computeValues();
+    // ...
+  }, []);
 
   // - any callbacks
 
@@ -52,21 +60,20 @@ const ExampleComponent = ({
   const onSomeChange = (change: string) => {
     $log.debug(`new change: ${change}`);
     return;
-  }
+  };
 
   // - Render any dependent items into temporary variables,
   //    such as conditional components or lists
-  const conditionalDescription = (isStringAndNotEmpty(description))
-    ? (<button className='chaise-btn chaise-btn-primary' onClick={onClick}>Show Description</button>) : null;
+  const conditionalDescription = isStringAndNotEmpty(description) ? (
+    <button className='chaise-btn chaise-btn-primary' onClick={onClick}>
+      Show Description
+    </button>
+  ) : null;
 
   // - Use a single JSX structure filled with content
   return (
     <div>
-      A sample component for
-      {' '}
-      {app}
-      {' '}
-      app.
+      A sample component for {app} app.
       {conditionalDescription}
     </div>
   );

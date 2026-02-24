@@ -19,5 +19,6 @@ export default function useIsFirstRender () {
   useEffect(() => {
     isFirstRender.current = false;
   }, []);
+  // eslint-disable-next-line react-hooks/refs
   return isFirstRender.current;
 }
