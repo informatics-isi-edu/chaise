@@ -11,7 +11,8 @@
     "src",
     "webpack",
     "tsconfig.json",
-    "babel.config.js"
+    "babel.config.js",
+    "eslint.config.js"
   ],
   "scripts": {
     "build": "make dist",
