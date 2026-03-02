@@ -181,7 +181,7 @@ const testParams = {
         numRows: 2,
         filter: 'Assoc Related1 Outbound1Related 1 outbound 1 three',
         textSearch: [{
-          term: '03',
+          term: 'three',
           options: ['All records with value', 'No value', 'Related 1 outbound 1 three']
         }],
         modal: {
