@@ -1029,7 +1029,7 @@ export default function RecordeditProvider({
     }
 
     if (!flowControl.current.prefillProcessed && flowControl.current.prefillObj) {
-      flowControl.current.queue.occupiedSlots++;
+      flowControl.current.slots.occupiedSlots++;
       flowControl.current.prefillProcessed = true;
       processPrefilledForeignKeys(flowControl.current.prefillObj, flowControl.current.setValue);
     }
@@ -1039,7 +1039,7 @@ export default function RecordeditProvider({
         return;
       }
 
-      flowControl.current.queue.occupiedSlots++;
+      flowControl.current.slots.occupiedSlots++;
       fkReq.processed = true;
 
       const cm = columnModels[fkReq.colIndex];
@@ -1152,7 +1152,7 @@ export default function RecordeditProvider({
     }).catch(function (err: any) {
       $log.warn(err);
     }).finally(() => {
-      flowControl.current.queue.occupiedSlots--;
+      flowControl.current.slots.occupiedSlots--;
 
       if (flowControl.current.allRequestsProcessed()) {
         setWaitingForForeignKeyData(false);
@@ -1184,7 +1184,7 @@ export default function RecordeditProvider({
         return;
       }
 
-      assetWaitForFlowControl.current.queue.occupiedSlots++;
+      assetWaitForFlowControl.current.slots.occupiedSlots++;
       req.processed = true;
 
       const logObj = {
@@ -1192,7 +1192,7 @@ export default function RecordeditProvider({
         stack: getRecordeditLogStack(req.logStackNode)
       };
       req.waitForColumn.getFirstOutboundValue(submissionRows, logObj).then((values: any) => {
-        assetWaitForFlowControl.current.queue.occupiedSlots--;
+        assetWaitForFlowControl.current.slots.occupiedSlots--;
         req.isLoading = false;
 
         $log.debug(`got the wait for values for ${req.waitForColumn.displayname.value}`);

@@ -7,6 +7,17 @@ import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import FlowControl from '@isrd-isi-edu/chaise/src/services/flow-control';
 
+// utils
+import { IndexedMinHeap } from '@isrd-isi-edu/chaise/src/utils/priority-queue';
+
+const getRecordRequestKey = (rm: RecordRequestModel): string => {
+  const req = rm.activeListModel;
+  if (req.column) return `pc-${req.column.name}`;
+  if (req.inline) return `inline-${req.index}`;
+  if (req.related) return `related-${req.index}`;
+  return `unknown-${rm.priority}`;
+};
+
 export default class RecordFlowControl extends FlowControl {
   dirtyMain = false;
 
@@ -44,6 +55,10 @@ export default class RecordFlowControl extends FlowControl {
     queue?: FlowControlQueueInfo,
   ) {
     super(logInfo, queue);
+    this.requestQueue = new IndexedMinHeap<RecordRequestModel>(
+      getRecordRequestKey,
+      (rm) => rm.priority,
+    );
   }
 
   addCausesToRequestModel(m: RecordRequestModel, causes: any[]) {

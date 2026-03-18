@@ -89,6 +89,7 @@ export interface RecordRelatedRequestModel {
 export interface RecordRequestModel {
   activeListModel: any,
   processed: boolean,
+  priority: number,
   // TODO maybe we need a sub-type here?
   logStack?: any,
   logStackPath?: string,

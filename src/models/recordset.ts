@@ -199,6 +199,15 @@ export type DisabledRow = {
   tuple: any;
 }
 
+export interface RecordsetRequestModel {
+  activeListModel: any;       // ERMrestJS ActiveListRequest — can't type further without ERMrestJS imports
+  processed: boolean;
+  priority: number;
+  reloadCauses: string[];
+  reloadStartTime: number;
+  logStackNode: any;          // ERMrestJS log stack node — same limitation
+}
+
 export type RecordsetProviderAddUpdateCauses = (
   /**
    * an array of strings that will be logged with the request

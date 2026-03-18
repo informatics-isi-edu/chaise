@@ -260,8 +260,8 @@ export default function RecordProvider({
     printDebugMessage('update called');
 
     if (!isUpdate) {
-      flowControl.current.queue.counter = 0;
-      flowControl.current.queue.occupiedSlots = 0;
+      flowControl.current.slots.counter = 0;
+      flowControl.current.slots.occupiedSlots = 0;
       // the main request is already fetched
       flowControl.current.dirtyMain = false;
     } else {
@@ -270,23 +270,24 @@ export default function RecordProvider({
       flowControl.current.addCauses([cause]);
     }
 
-    flowControl.current.queue.counter++;
+    flowControl.current.slots.counter++;
 
     // request models
     flowControl.current.requestModels.forEach(function (m) {
-      m.processed = false;
       // the cause for related and inline are handled by columnModels and relatedTableModels
       if (m.activeListModel.entityset || m.activeListModel.aggregate) {
         flowControl.current.addCausesToRequestModel(m, [cause]);
       }
+      m.processed = false;
+      flowControl.current.requestQueue.upsert(m);
     });
 
     // inline table
     const inlineRequestModels = Object.values(flowControl.current.inlineRelatedRequestModels);
     inlineRequestModels.forEach(function (m) {
-      // the third parameter is making sure we're using the same queue for the main and inline
+      // the third parameter is making sure we're using the same slots for the main and inline
       // the fourth parameter will make sure we're showing the loading spinner right away
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.slots : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -295,9 +296,9 @@ export default function RecordProvider({
 
     // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
-      // the third parameter is making sure we're using the same queue for the main and related
+      // the third parameter is making sure we're using the same slots for the main and related
       // the fourth parameter will make sure we're showing the loading spinner right away
-      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined, isUpdate);
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.slots : undefined, isUpdate);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -372,7 +373,7 @@ export default function RecordProvider({
 
   // -------------------------- flow control function ---------------------- //
   const printDebugMessage = (message: string, relatedModel?: RecordRelatedModel, counter?: number): void => {
-    counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
+    counter = typeof counter !== 'number' ? flowControl.current.slots.counter : counter;
     let dm = `${Date.now()}, ${counter}: `;
     if (relatedModel) {
       dm += `${relatedModel.isInline ? 'inline' : 'related'}(index=${relatedModel.index}), `;
@@ -404,13 +405,11 @@ export default function RecordProvider({
     }
 
     let i;
-    for (i = 0; i < flowControl.current.requestModels.length; i++) {
-      const reqModel = flowControl.current.requestModels[i];
+    while (flowControl.current.requestQueue.size() > 0 && flowControl.current.haveFreeSlot()) {
+      const reqModel = flowControl.current.requestQueue.dequeue() as RecordRequestModel;
+      if (!reqModel || reqModel.processed) continue;
 
-      if (!flowControl.current.haveFreeSlot()) return;
       const activeListModel = reqModel.activeListModel;
-
-      if (reqModel.processed) continue;
       reqModel.processed = true;
 
       // inline
@@ -427,11 +426,16 @@ export default function RecordProvider({
         continue;
       }
 
-      // entityset or aggregate
-      fetchSecondaryRequest(reqModel, isUpdate, flowControl.current.queue.counter).then((res: boolean) => {
-        flowControl.current.queue.occupiedSlots--;
+      // entityset or aggregate — occupies a slot
+      flowControl.current.slots.occupiedSlots++;
+      fetchSecondaryRequest(reqModel, isUpdate, flowControl.current.slots.counter).then((res: boolean) => {
+        flowControl.current.slots.occupiedSlots--;
         reqModel.processed = res;
-      }).catch((err) => {
+        if (!res) {
+          flowControl.current.requestQueue.upsert(reqModel);
+        }
+        processRequests(isUpdate);
+      }).catch((err: any) => {
         dispatchError({ error: err });
       });
     }
@@ -594,10 +598,11 @@ export default function RecordProvider({
     const activeList = reference.generateActiveList(tuple);
 
     // request models
-    activeList.requests.forEach((req: any) => {
-      let rm = {
+    activeList.requests.forEach((req: any, index: number) => {
+      let rm: RecordRequestModel = {
         activeListModel: req,
         processed: false,
+        priority: index,
       };
 
       if (req.entityset || req.aggregate) {
@@ -625,6 +630,7 @@ export default function RecordProvider({
       }
 
       flowControl.current.requestModels.push(rm);
+      flowControl.current.requestQueue.upsert(rm);
     });
 
     // column models
@@ -862,7 +868,7 @@ export default function RecordProvider({
       const description = `(${activeListModel.entityset ? 'entityset' : 'aggregate'}) for: ${dependentSummary.join(', ')}`;
       printDebugMessage(`fetching 2nd req ${description}`);
       cb.then(function (values: any) {
-        if (flowControl.current.queue.counter !== current) {
+        if (flowControl.current.slots.counter !== current) {
           resolve(false);
           return;
         }
@@ -924,7 +930,7 @@ export default function RecordProvider({
 
         resolve(true);
       }).catch(function (err: any) {
-        if (flowControl.current.queue.counter !== current) {
+        if (flowControl.current.slots.counter !== current) {
           reject(false);
           return;
         }
