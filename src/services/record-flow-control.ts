@@ -1,6 +1,6 @@
 // models
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
-import { RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordConditionModel, RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
@@ -10,7 +10,7 @@ import FlowControl from '@isrd-isi-edu/chaise/src/services/flow-control';
 // utils
 import { IndexedMinHeap } from '@isrd-isi-edu/chaise/src/utils/priority-queue';
 
-const getRecordRequestKey = (rm: RecordRequestModel): string => {
+export const getRecordRequestKey = (rm: RecordRequestModel): string => {
   const req = rm.activeListModel;
   if (req.column) return `pc-${req.column.name}`;
   if (req.inline) return `inline-${req.index}`;
@@ -31,6 +31,16 @@ export default class RecordFlowControl extends FlowControl {
    * we're using this number for the logic of showing the main section spinner
    */
   numColsRequireSecondaryRequests = 0;
+
+  /**
+   * all condition models for conditional visibility
+   */
+  conditionModels: RecordConditionModel[] = [];
+  /**
+   * maps condition source request key to list of condition model indices.
+   * Multiple groups can share the same condition source but have different evaluation logic.
+   */
+  conditionRequestKeyMap: Record<string, number[]> = {};
 
   /**
    * the initial values for the templateVariables

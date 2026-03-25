@@ -19,6 +19,10 @@ export interface RecordRelatedModel {
   isInline: boolean,
   isPureBinary: boolean,
   initialReference: any,
+  /** whether this related entity has a condition controlling its visibility */
+  isConditioned?: boolean,
+  /** whether condition evaluated to hide (true = hidden) */
+  conditionHide?: boolean,
   /**
    * whether we're showing the tabular view or custom view
    */
@@ -63,6 +67,10 @@ export interface RecordColumnModel {
   isLoading: boolean,
   requireSecondaryRequest: boolean,
   relatedModel?: RecordRelatedModel,
+  /** whether this column has a condition controlling its visibility */
+  isConditioned?: boolean,
+  /** whether condition evaluated to hide (true = hidden) */
+  conditionHide?: boolean,
 }
 
 export interface RecordRelatedRequestModel {
@@ -107,6 +115,19 @@ export interface CitationModel {
    * whether the value is ready to be looked at
    */
   isReady: boolean
+}
+
+export interface RecordConditionModel {
+  /** The ActiveListCondition from ERMrestJS (has evaluateCondition method) */
+  condition: any,
+  /** The request model for the condition source itself */
+  conditionRequestModel: RecordRequestModel,
+  /** Request models for items gated behind this condition */
+  dependentRequestModels: RecordRequestModel[],
+  /** Whether condition has been evaluated */
+  evaluated: boolean,
+  /** Whether conditioned content should be shown */
+  shouldShow: boolean,
 }
 
 export interface ChangeContainerDetails {

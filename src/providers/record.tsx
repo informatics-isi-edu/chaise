@@ -9,7 +9,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import {
   ChangeContainerDetails,
-  CitationModel, RecordColumnModel, RecordRelatedModel,
+  CitationModel, RecordColumnModel, RecordConditionModel, RecordRelatedModel,
   RecordRelatedModelRecordsetProps, RecordRequestModel
 } from '@isrd-isi-edu/chaise/src/models/record';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
-import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
+import RecordFlowControl, { getRecordRequestKey } from '@isrd-isi-edu/chaise/src/services/record-flow-control';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -272,8 +272,35 @@ export default function RecordProvider({
 
     flowControl.current.slots.counter++;
 
-    // request models
+    // reset conditions
+    const dependentRequestSet = new Set<RecordRequestModel>();
+    flowControl.current.conditionModels.forEach((cm) => {
+      cm.evaluated = false;
+      cm.shouldShow = false;
+      cm.dependentRequestModels.forEach((rm) => {
+        rm.processed = false;
+        dependentRequestSet.add(rm);
+        // do NOT upsert — wait for condition re-evaluation
+      });
+    });
+
+    // re-set conditionHide = true on all conditioned items
+    setColumnModels((prevModels: RecordColumnModel[]) =>
+      prevModels.map((val) => {
+        if (val.isConditioned) return { ...val, conditionHide: true };
+        return val;
+      }),
+    );
+    setRelatedModels((prevModels: RecordRelatedModel[]) =>
+      prevModels.map((val) => {
+        if (val.isConditioned) return { ...val, conditionHide: true };
+        return val;
+      }),
+    );
+
+    // request models — skip dependents of conditions (they'll be enqueued after condition evaluation)
     flowControl.current.requestModels.forEach(function (m) {
+      if (dependentRequestSet.has(m)) return;
       // the cause for related and inline are handled by columnModels and relatedTableModels
       if (m.activeListModel.entityset || m.activeListModel.aggregate) {
         flowControl.current.addCausesToRequestModel(m, [cause]);
@@ -633,19 +660,111 @@ export default function RecordProvider({
       flowControl.current.requestQueue.upsert(rm);
     });
 
+    // conditional groups — track which columns/related entities are gated behind conditions
+    const conditionedColumnIndices = new Set<number>();
+    const conditionedRelatedIndices = new Set<number>();
+
+    if (activeList.conditionalGroups) {
+      activeList.conditionalGroups.forEach((group: any) => {
+        const condColName = group.condition.column.name;
+
+        // find the condition source's request model (already created from activeList.requests)
+        const condReqModel = flowControl.current.requestModels.find(
+          (m) => m.activeListModel.column?.name === condColName
+        );
+
+        if (!condReqModel) {
+          $log.debug(`condition source ${condColName} not found in request models`);
+          return;
+        }
+
+        // create request models for dependent items but do NOT add to requestQueue
+        const dependentModels: RecordRequestModel[] = [];
+        group.dependentRequests.forEach((req: any) => {
+          const rm: RecordRequestModel = {
+            activeListModel: req,
+            processed: false,
+            priority: condReqModel.priority,
+          };
+
+          if (req.entityset || req.aggregate) {
+            const extra: { source: any, entity: boolean, agg?: string } = {
+              source: req.column.compressedDataSource,
+              entity: req.column.isEntityMode,
+            };
+            if (req.aggregate) {
+              extra.agg = req.column.aggregateFn;
+            }
+            rm.logStack = LogService.getStackObject(
+              LogService.getStackNode(LogStackTypes.PSEUDO_COLUMN, req.column.table, extra)
+            );
+            rm.logStackPath = LogService.getStackPath(null, LogStackPaths.PSEUDO_COLUMN);
+            rm.reloadCauses = [];
+            rm.reloadStartTime = -1;
+            if (req.entityset) {
+              rm.reference = req.column.reference.contextualize.compactBrief;
+            }
+          }
+
+          flowControl.current.requestModels.push(rm); // track but NOT in queue
+          dependentModels.push(rm);
+
+          // track which column/related indices are conditioned
+          if (req.inline !== undefined && Number.isInteger(req.index)) {
+            conditionedColumnIndices.add(req.index);
+          } else if (req.related !== undefined && Number.isInteger(req.index)) {
+            conditionedRelatedIndices.add(req.index);
+          } else if (req.column !== undefined) {
+            // aggregate/entityset waitfor — check objects for column/inline/related indices
+            if (req.objects) {
+              req.objects.forEach((obj: any) => {
+                if (obj.column && Number.isInteger(obj.index)) {
+                  conditionedColumnIndices.add(obj.index);
+                }
+                if (obj.inline && Number.isInteger(obj.index)) {
+                  conditionedColumnIndices.add(obj.index);
+                }
+                if (obj.related && Number.isInteger(obj.index)) {
+                  conditionedRelatedIndices.add(obj.index);
+                }
+              });
+            }
+          }
+        });
+
+        const condModelIndex = flowControl.current.conditionModels.length;
+        flowControl.current.conditionModels.push({
+          condition: group.condition,
+          conditionRequestModel: condReqModel,
+          dependentRequestModels: dependentModels,
+          evaluated: false,
+          shouldShow: false,
+        });
+
+        // map condition source request key → condition model indices
+        const reqKey = getRecordRequestKey(condReqModel);
+        if (!flowControl.current.conditionRequestKeyMap[reqKey]) {
+          flowControl.current.conditionRequestKeyMap[reqKey] = [];
+        }
+        flowControl.current.conditionRequestKeyMap[reqKey].push(condModelIndex);
+      });
+    }
+
     // column models
     const computedColumnModels: RecordColumnModel[] = [];
     reference.columns.forEach((col: any, index: number) => {
-      const requireSecondaryRequest = col.hasWaitFor || !col.isUnique;
+      const requireSecondaryRequest = col.hasWaitFor || col.hasCondition || !col.isUnique;
       if (requireSecondaryRequest) {
         ++flowControl.current.numColsRequireSecondaryRequests;
       }
+      const isConditioned = conditionedColumnIndices.has(index);
       const cm: RecordColumnModel = {
         index,
         column: col,
         hasTimeoutError: false,
         isLoading: false,
         requireSecondaryRequest,
+        ...(isConditioned && { isConditioned: true, conditionHide: true }),
       };
 
       // inline
@@ -700,7 +819,12 @@ export default function RecordProvider({
         registered: false
       });
 
-      computedRelatedModels.push(generateRelatedRecordModel(ref, index, false, tuple, reference));
+      const relModel = generateRelatedRecordModel(ref, index, false, tuple, reference);
+      if (conditionedRelatedIndices.has(index)) {
+        relModel.isConditioned = true;
+        relModel.conditionHide = true;
+      }
+      computedRelatedModels.push(relModel);
     });
     setRelatedModels(computedRelatedModels);
 
@@ -924,6 +1048,15 @@ export default function RecordProvider({
         // attach the value if all has been returned
         attachPseudoColumnValue(activeListModel, isUpdate);
 
+        // check if this was a condition source request and evaluate conditions
+        const reqKey = getRecordRequestKey(reqModel);
+        const condModelIndices = flowControl.current.conditionRequestKeyMap[reqKey];
+        if (condModelIndices) {
+          condModelIndices.forEach((idx) => {
+            evaluateConditionModel(idx, values, isUpdate);
+          });
+        }
+
         // clear the causes
         reqModel.reloadCauses = [];
         reqModel.reloadStartTime = -1;
@@ -1098,6 +1231,95 @@ export default function RecordProvider({
       })
     ))
   }
+
+  /**
+   * Evaluate a condition model after its source data has been fetched.
+   * If the condition evaluates to "show", enqueue the dependent requests.
+   * If "hide", mark dependents as processed (they won't fire).
+   */
+  const evaluateConditionModel = (condModelIndex: number, values: any, isUpdate: boolean) => {
+    const condModel = flowControl.current.conditionModels[condModelIndex];
+    if (!condModel || condModel.evaluated) return;
+
+    // delegate evaluation to ERMrestJS
+    const result = condModel.condition.evaluateCondition(
+      flowControl.current.templateVariables,
+      values,
+      pageRef.current.tuples[0],
+    );
+
+    condModel.evaluated = true;
+    condModel.shouldShow = result.shouldShow;
+
+    printDebugMessage(`condition evaluated: shouldShow=${result.shouldShow}`);
+
+    if (result.shouldShow) {
+      // enqueue dependent requests
+      condModel.dependentRequestModels.forEach((rm) => {
+        rm.processed = false;
+        flowControl.current.requestQueue.upsert(rm);
+      });
+
+      // update UI: set conditionHide = false on affected column/related models
+      updateConditionedVisibility(condModel, false);
+    } else {
+      // mark dependents as done (they won't fire)
+      condModel.dependentRequestModels.forEach((rm) => {
+        rm.processed = true;
+      });
+      // UI already has conditionHide = true from initialization
+    }
+  };
+
+  /**
+   * Update conditionHide on column and related models based on condition evaluation.
+   */
+  const updateConditionedVisibility = (condModel: RecordConditionModel, hide: boolean) => {
+    const affectedColumnIndices = new Set<number>();
+    const affectedRelatedIndices = new Set<number>();
+
+    condModel.dependentRequestModels.forEach((rm) => {
+      const req = rm.activeListModel;
+      if (req.inline !== undefined && Number.isInteger(req.index)) {
+        affectedColumnIndices.add(req.index);
+      } else if (req.related !== undefined && Number.isInteger(req.index)) {
+        affectedRelatedIndices.add(req.index);
+      }
+      // also check objects for column/inline/related
+      if (req.objects) {
+        req.objects.forEach((obj: any) => {
+          if ((obj.column || obj.inline) && Number.isInteger(obj.index)) {
+            affectedColumnIndices.add(obj.index);
+          }
+          if (obj.related && Number.isInteger(obj.index)) {
+            affectedRelatedIndices.add(obj.index);
+          }
+        });
+      }
+    });
+
+    if (affectedColumnIndices.size > 0) {
+      setColumnModels((prevModels: RecordColumnModel[]) =>
+        prevModels.map((val, index) => {
+          if (affectedColumnIndices.has(index)) {
+            return { ...val, conditionHide: hide };
+          }
+          return val;
+        }),
+      );
+    }
+
+    if (affectedRelatedIndices.size > 0) {
+      setRelatedModels((prevModels: RecordRelatedModel[]) =>
+        prevModels.map((val, index) => {
+          if (affectedRelatedIndices.has(index)) {
+            return { ...val, conditionHide: hide };
+          }
+          return val;
+        }),
+      );
+    }
+  };
 
   // ---------------- log related function --------------------------- //
 

@@ -288,8 +288,8 @@ const RecordInner = ({
   useEffect(() => {
     if (showMainSectionSpinner || !relatedSectionInitialized) return;
     setDisablePanel(
-      columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
-      relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
+      columnModels.every((cm) => (cm.conditionHide || !canShowInlineRelated(cm, showEmptySections))) &&
+      relatedModels.every((rm) => rm.conditionHide || !canShowRelated(rm, showEmptySections))
     );
   }, [showMainSectionSpinner, relatedSectionInitialized, showEmptySections, columnModels, relatedModels]);
 
@@ -644,6 +644,10 @@ const RecordInner = ({
   }) as EventListener;
 
   const renderTableOfContentsItem = (isInline: boolean, index: number) => {
+    // hide conditioned items
+    if (isInline && columnModels[index].conditionHide) return;
+    if (!isInline && relatedModels[index].conditionHide) return;
+
     if (isInline && !canShowInlineRelated(columnModels[index], showEmptySections)) {
       return;
     }
@@ -721,7 +725,7 @@ const RecordInner = ({
                 <Accordion.Item
                   key={`record-related-${rm.index}`}
                   eventKey={rm.index + ''}
-                  className={`chaise-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
+                  className={`chaise-accordion panel ${rm.conditionHide || !canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
                   id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                   as='div'
                 >
