@@ -142,28 +142,40 @@ const ViewerAnnotationList = (): JSX.Element => {
 
   const renderAnnotations = () => {
     const keyword = searchTerm.toLocaleLowerCase();
-    let displayedCount = 0;
-    const renderedAnnots: ViewerAnnotationModal[] = [];
-    annotationModels.forEach((annot) => {
+    let filterdDisplayed = 0, displayed = 0;
+    const renderedAnnots: Array<{index: number, obj: ViewerAnnotationModal}> = [];
+    annotationModels.forEach((annot, index) => {
       const id = annot.id ? annot.id.toLocaleLowerCase() : '';
       const name = annot.name ? annot.name.toLocaleLowerCase() : '';
       const isRendered = !keyword || ((id.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0));
 
-      if (isRendered && annot.isDisplayed) displayedCount++;
-      if (isRendered) renderedAnnots.push(annot);
+      if (annot.isDisplayed) displayed++;
+      if (isRendered && annot.isDisplayed) filterdDisplayed++;
+      if (isRendered) renderedAnnots.push({index, obj: annot});
     });
+
+    const displayedTooltip = [
+      `${filterdDisplayed} annotations in the search list `,
+      displayed !== filterdDisplayed ? `(${displayed} total) ` : '',
+      'are displayed in the image.',
+    ].join('');
 
     return (
       <>
         <div className='annotation-summary-row'>
-          <span>Found {renderedAnnots.length} of {annotationModels.length} ({displayedCount} Displayed)</span>
+          <span>
+            <span>Found {renderedAnnots.length} of {annotationModels.length} </span>
+            <ChaiseTooltip placement='right' tooltip={<span>{displayedTooltip}</span>}>
+              <span className='chaise-icon-for-tooltip'>({filterdDisplayed} Displayed)</span>
+            </ChaiseTooltip>
+          </span>
           <div className='chaise-btn-group'>
-            <ChaiseTooltip tooltip='Show all the annotations' placement='bottom'>
+            <ChaiseTooltip tooltip='Show all annotations' placement='bottom'>
               <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(true)} disabled={disableFeatures}>
                 <i className='fa-solid fa-eye'></i>
               </button>
             </ChaiseTooltip>
-            <ChaiseTooltip tooltip='Hide all the annotations' placement='bottom'>
+            <ChaiseTooltip tooltip='Hide all annotations' placement='bottom'>
               <button className='chaise-btn chaise-btn-secondary' onClick={() => changeAllAnnotationVisibility(false)} disabled={disableFeatures}>
                 <i className='fa-solid fa-eye-slash'></i>
               </button>
@@ -171,7 +183,7 @@ const ViewerAnnotationList = (): JSX.Element => {
           </div>
         </div>
         {renderedAnnots.length === 0 && <div className='no-annotation-message'>No annotation found.</div>}
-        {renderedAnnots.length > 0 && <div className='annotation-rows'>{renderedAnnots.map((ann, i) => renderAnnotation(ann, i))}</div>}
+        {renderedAnnots.length > 0 && <div className='annotation-rows'>{renderedAnnots.map((ann) => renderAnnotation(ann.obj, ann.index))}</div>}
       </>
     )
 
@@ -189,7 +201,7 @@ const ViewerAnnotationList = (): JSX.Element => {
           >
             <input
               type='text'
-              placeholder='Search in the list'
+              placeholder='Search annotations'
               value={searchTerm}
               onChange={onSearchTermChange}
               disabled={disableFeatures}
@@ -201,7 +213,7 @@ const ViewerAnnotationList = (): JSX.Element => {
             />
           </div>
           <div className='chaise-input-group-append'>
-            <ChaiseTooltip placement='bottom-start' tooltip='Search any keyword to filter anatomy'>
+            <ChaiseTooltip placement='bottom-start' tooltip='Search any keyword to filter annotations'>
               <button
                 className='chaise-search-btn chaise-btn chaise-btn-primary'
                 disabled={disableFeatures}
