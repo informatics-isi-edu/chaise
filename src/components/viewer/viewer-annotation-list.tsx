@@ -154,10 +154,11 @@ const ViewerAnnotationList = (): JSX.Element => {
       if (isRendered) renderedAnnots.push({index, obj: annot});
     });
 
+    const singular = filterdDisplayed === 1;
     const displayedTooltip = [
-      `${filterdDisplayed} annotations in the search list `,
+      `${filterdDisplayed} annotation${singular ? '' : 's'} in the search list `,
       displayed !== filterdDisplayed ? `(${displayed} total) ` : '',
-      'are displayed in the image.',
+      `${singular ? 'is' : 'are'} displayed in the image.`,
     ].join('');
 
     return (
