@@ -288,16 +288,16 @@ export default function ViewerProvider({
    */
   const [mainImageLoaded, setMainImageLoaded, mainImageLoadedRef] = useStateRef(false);
 
-  // since we're using strict mode, the useEffect is getting called twice in dev mode
-  // this is to guard against it
-  const setupStarted = useRef<boolean>(false);
   useEffect(() => {
-    if (setupStarted.current) return;
-    setupStarted.current = true;
-
+    // eslint-disable-next-line react-hooks/immutability
     initializeViewerApp();
 
+    // eslint-disable-next-line react-hooks/immutability
     windowRef.addEventListener('message', recieveIframeMessage);
+
+    return () => {
+      windowRef.removeEventListener('message', recieveIframeMessage);
+    }
   }, []);
 
   /**
