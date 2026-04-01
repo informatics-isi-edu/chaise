@@ -30,7 +30,7 @@
     "ui"
   ],
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
+    "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.1",
     "@isrd-isi-edu/ermrest-data-utils": "^0.0.7",
     "@playwright/test": "latest",
