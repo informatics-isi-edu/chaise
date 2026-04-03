@@ -94,6 +94,7 @@
 
   // record status
   .chaise-record-status-default,
+  .chaise-record-status-info,
   .chaise-record-status-success,
   .chaise-record-status-warning,
   .chaise-record-status-danger {
@@ -102,6 +103,9 @@
     display: inline-block;
     margin: 2px;
     background-color: map.get(variables.$color-map, 'record-status-default');
+  }
+  .chaise-record-status-info {
+    background-color: map.get(variables.$color-map, 'record-status-info');
   }
   .chaise-record-status-success {
     background-color: map.get(variables.$color-map, 'record-status-success');
@@ -114,6 +118,7 @@
   }
   // links for record status
   a .chaise-record-status-default,
+  a .chaise-record-status-info,
   a .chaise-record-status-success,
   a .chaise-record-status-warning,
   a .chaise-record-status-danger {
@@ -122,6 +127,7 @@
 
   // record status compact
   .chaise-record-status-compact-default,
+  .chaise-record-status-compact-info,
   .chaise-record-status-compact-success,
   .chaise-record-status-compact-warning,
   .chaise-record-status-compact-danger {
@@ -138,6 +144,9 @@
       position: absolute;
       background-color: map.get(variables.$color-map, 'record-status-default');
     }
+  }
+  .chaise-record-status-compact-info::before {
+    background-color: map.get(variables.$color-map, 'record-status-info');
   }
   .chaise-record-status-compact-success::before {
     background-color: map.get(variables.$color-map, 'record-status-success');
