@@ -548,10 +548,12 @@ const RecordsetTable = ({
   }
 
   const renderRows = () => {
+    const numColumns = columnModels.length + (showActionButtons ? 1 : 0) + (showSecondColumnActions ? 1 : 0);
+
     if (hasTimeoutError) {
       return (
         <tr>
-          <td colSpan={columnModels.length + 1} className='full-col-span-row'>
+          <td colSpan={numColumns} className='full-col-span-row'>
             <span>
               Result Retrieval Failed
               <ChaiseTooltip
@@ -572,7 +574,7 @@ const RecordsetTable = ({
     if (page.length === 0) {
       return (
         <tr>
-          <td id='no-results-row' colSpan={columnModels.length + 1} className='full-col-span-row'>
+          <td id='no-results-row' colSpan={numColumns} className='full-col-span-row'>
             <span>No Results Found</span>
           </td>
         </tr>
