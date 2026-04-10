@@ -32,9 +32,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
-import RecordFlowControl, {
-  getRecordRequestKey,
-} from '@isrd-isi-edu/chaise/src/services/record-flow-control';
+import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -810,7 +808,6 @@ export default function RecordProvider({
           }
         });
 
-        const condModelIndex = flowControl.current.conditionModels.length;
         flowControl.current.conditionModels.push({
           condition: group.condition,
           conditionRequestModel: condReqModel,
@@ -818,13 +815,6 @@ export default function RecordProvider({
           evaluated: false,
           shouldShow: false,
         });
-
-        // map condition source request key → condition model indices
-        const reqKey = getRecordRequestKey(condReqModel);
-        if (!flowControl.current.conditionRequestKeyMap[reqKey]) {
-          flowControl.current.conditionRequestKeyMap[reqKey] = [];
-        }
-        flowControl.current.conditionRequestKeyMap[reqKey].push(condModelIndex);
       });
     }
 
@@ -1182,15 +1172,6 @@ export default function RecordProvider({
         // attach the value if all has been returned
         attachPseudoColumnValue(activeListModel, isUpdate);
 
-        // check if this was a condition source request and evaluate conditions
-        const reqKey = getRecordRequestKey(reqModel);
-        const condModelIndices = flowControl.current.conditionRequestKeyMap[reqKey];
-        if (condModelIndices) {
-          condModelIndices.forEach((idx) => {
-            evaluateConditionModel(idx, values, isUpdate);
-          });
-        }
-
         // clear the causes
         reqModel.reloadCauses = [];
         reqModel.reloadStartTime = -1;
@@ -1282,6 +1263,9 @@ export default function RecordProvider({
         );
 
         newRecordVals[obj.index] = displayValue;
+      } else if (obj.condition && Number.isInteger(obj.index)) {
+        evaluateConditionModel(obj.index);
+        return;
       } else if (obj.inline || obj.related) {
         let ref: any, reqModel: any;
         if (obj.related) {
@@ -1393,18 +1377,31 @@ export default function RecordProvider({
   };
 
   /**
-   * Evaluate a condition model after its source data has been fetched.
+   * Evaluate a condition model after its source data and all wait_for data have been fetched.
+   * Uses the same hasColumnData() pattern as column/inline/related wait_for.
    * If the condition evaluates to "show", enqueue the dependent requests.
    * If "hide", mark dependents as processed (they won't fire).
    */
-  const evaluateConditionModel = (condModelIndex: number, values: any, isUpdate: boolean) => {
+  const evaluateConditionModel = (condModelIndex: number) => {
     const condModel = flowControl.current.conditionModels[condModelIndex];
     if (!condModel || condModel.evaluated) return;
 
-    // delegate evaluation to ERMrestJS
+    // check if condition source data is available
+    if (!hasColumnData(condModel.condition.column)) return;
+
+    // check if all wait_for data is available (same pattern as column waitFor check)
+    const hasAllWaitFor = condModel.condition.waitFor.every(hasColumnData);
+    if (!hasAllWaitFor) return;
+
+    // all data available -- get the condition value and evaluate
+    const condColName = condModel.condition.column.name;
+    const conditionValue = flowControl.current.aggregateResults[condColName]
+      ?? flowControl.current.entitySetResults[condColName]
+      ?? null;
+
     const result = condModel.condition.evaluateCondition(
       flowControl.current.templateVariables,
-      values,
+      conditionValue,
       pageRef.current!.tuples[0]
     );
 

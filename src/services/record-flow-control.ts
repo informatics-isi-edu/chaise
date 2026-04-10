@@ -36,11 +36,6 @@ export default class RecordFlowControl extends FlowControl {
    * all condition models for conditional visibility
    */
   conditionModels: RecordConditionModel[] = [];
-  /**
-   * maps condition source request key to list of condition model indices.
-   * Multiple groups can share the same condition source but have different evaluation logic.
-   */
-  conditionRequestKeyMap: Record<string, number[]> = {};
 
   /**
    * the initial values for the templateVariables

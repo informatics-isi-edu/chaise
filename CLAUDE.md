@@ -109,6 +109,7 @@ State is managed via React Context + custom hooks. Each app has a provider with 
 - Functional components only (class components only for special cases)
 - Avoid `any` types
 - Single quotes, semicolons, 2-space indent
+- All functions must have proper JSDoc comments (you can skip the return type if it's self-explanatory)
 
 ## Commit Messages
 
