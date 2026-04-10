@@ -1147,8 +1147,8 @@ export default function RecordProvider({
             });
           }
 
-          // update the entitySetResults (we're just using this to make sure it's done)
-          flowControl.current.entitySetResults[activeListModel.column.name] = true;
+          // store the page result so condition evaluation can access it
+          flowControl.current.entitySetResults[activeListModel.column.name] = values;
         } else {
           // aggregates
           // use the returned value (assumption is that values is an array of 0)
@@ -1424,7 +1424,8 @@ export default function RecordProvider({
       condModel.dependentRequestModels.forEach((rm) => {
         rm.processed = true;
       });
-      // UI already has conditionHide = true from initialization
+      // mark affected models as initialized so they don't block the spinners
+      updateConditionedVisibility(condModel, true);
     }
   };
 
@@ -1458,10 +1459,17 @@ export default function RecordProvider({
     if (affectedColumnIndices.size > 0) {
       setColumnModels((prevModels: RecordColumnModel[]) =>
         prevModels.map((val, index) => {
-          if (affectedColumnIndices.has(index)) {
-            return { ...val, conditionHide: hide };
+          if (!affectedColumnIndices.has(index)) return val;
+          const updated: RecordColumnModel = { ...val, conditionHide: hide };
+          // when hiding, mark inline related models as initialized so they don't block the spinner
+          if (hide && updated.relatedModel) {
+            updated.relatedModel = {
+              ...updated.relatedModel,
+              tableMarkdownContentInitialized: true,
+              recordsetState: { ...updated.relatedModel.recordsetState, isInitialized: true, isLoading: false },
+            };
           }
-          return val;
+          return updated;
         })
       );
     }
@@ -1469,10 +1477,14 @@ export default function RecordProvider({
     if (affectedRelatedIndices.size > 0) {
       setRelatedModels((prevModels: RecordRelatedModel[]) =>
         prevModels.map((val, index) => {
-          if (affectedRelatedIndices.has(index)) {
-            return { ...val, conditionHide: hide };
+          if (!affectedRelatedIndices.has(index)) return val;
+          const updated: RecordRelatedModel = { ...val, conditionHide: hide };
+          // when hiding, mark as initialized so the related section spinner stops
+          if (hide) {
+            updated.tableMarkdownContentInitialized = true;
+            updated.recordsetState = { ...updated.recordsetState, isInitialized: true, isLoading: false };
           }
-          return val;
+          return updated;
         })
       );
     }
