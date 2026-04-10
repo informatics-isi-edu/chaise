@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 import { RefObject } from 'react';
@@ -288,8 +289,8 @@ const RecordInner = ({
   useEffect(() => {
     if (showMainSectionSpinner || !relatedSectionInitialized) return;
     setDisablePanel(
-      columnModels.every((cm) => (cm.conditionHide || !canShowInlineRelated(cm, showEmptySections))) &&
-      relatedModels.every((rm) => rm.conditionHide || !canShowRelated(rm, showEmptySections))
+      columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
+      relatedModels.every((rm) => (!canShowRelated(rm, showEmptySections)))
     );
   }, [showMainSectionSpinner, relatedSectionInitialized, showEmptySections, columnModels, relatedModels]);
 
@@ -487,7 +488,7 @@ const RecordInner = ({
       action: getRecordLogAction(LogActions.DELETE),
       stack: getRecordLogStack()
     };
-    reference.delete(null, logObj).then(function deleteSuccess() {
+    reference.delete(undefined, logObj).then(function deleteSuccess() {
       // Get an appLink from a reference to the table that the existing reference came from
       const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
       // $rootScope.showSpinner = false;
@@ -644,10 +645,6 @@ const RecordInner = ({
   }) as EventListener;
 
   const renderTableOfContentsItem = (isInline: boolean, index: number) => {
-    // hide conditioned items
-    if (isInline && columnModels[index].conditionHide) return;
-    if (!isInline && relatedModels[index].conditionHide) return;
-
     if (isInline && !canShowInlineRelated(columnModels[index], showEmptySections)) {
       return;
     }
@@ -725,7 +722,7 @@ const RecordInner = ({
                 <Accordion.Item
                   key={`record-related-${rm.index}`}
                   eventKey={rm.index + ''}
-                  className={`chaise-accordion panel ${rm.conditionHide || !canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
+                  className={`chaise-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
                   id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                   as='div'
                 >

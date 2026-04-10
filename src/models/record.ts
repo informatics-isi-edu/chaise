@@ -5,6 +5,7 @@ import {
   RecordsetProviderFetchSecondaryRequests,
   RecordsetProviderUpdateMainEntity
 } from '@isrd-isi-edu/chaise/src/models/recordset'
+import type ActiveListCondition from '@isrd-isi-edu/ermrestjs/src/models/active-list-condition'
 
 export interface RecordRelatedModelRecordsetProps {
   page: any,
@@ -119,15 +120,15 @@ export interface CitationModel {
 
 export interface RecordConditionModel {
   /** The ActiveListCondition from ERMrestJS (has evaluateCondition method) */
-  condition: any,
+  condition: ActiveListCondition;
   /** The request model for the condition source itself */
-  conditionRequestModel: RecordRequestModel,
+  conditionRequestModel: RecordRequestModel;
   /** Request models for items gated behind this condition */
-  dependentRequestModels: RecordRequestModel[],
+  dependentRequestModels: RecordRequestModel[];
   /** Whether condition has been evaluated */
-  evaluated: boolean,
+  evaluated: boolean;
   /** Whether conditioned content should be shown */
-  shouldShow: boolean,
+  shouldShow: boolean;
 }
 
 export interface ChangeContainerDetails {
