@@ -21,7 +21,17 @@ import {
 import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { DisabledRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  DisabledRow,
+  RecordsetConfig,
+  RecordsetDisplayMode,
+  RecordsetProps,
+  RecordsetSelectMode,
+  SelectedRow,
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
+// components
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -278,6 +288,12 @@ export default function ViewerProvider({
 
   // passed to osd-viewer
   const osdViewerParameters = useRef<any>({});
+
+  /**
+   * props for the Image_Channel selector modal that is opened from the osd iframe.
+   * Phase 1 of the lazy-channel-loading work — submit currently just logs and closes.
+   */
+  const [channelSelectorModalProps, setChannelSelectorModalProps] = useState<RecordsetProps | null>(null);
 
   /**
    * Whether the main image is loaded or not.
@@ -888,8 +904,58 @@ export default function ViewerProvider({
         dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
       }
+      case 'showChannelSelector': {
+        // Phase 1: open the Image_Channel multi-select picker.
+        // The reference is built the same way as in viewer-utils._readImageChannelTable.
+        const channelConfig = ViewerConfigService.channelConfig;
+        if (!channelConfig || !imageIDRef.current) break;
+
+        const imageChannelURL = [
+          `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
+          `${fixedEncodeURIComponent(channelConfig.schema_name)}:${fixedEncodeURIComponent(channelConfig.table_name)}`,
+          `${fixedEncodeURIComponent(channelConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageIDRef.current)}`
+        ].join('/');
+
+        ConfigService.ERMrest.resolve(imageChannelURL, ConfigService.contextHeaderParams).then((ref: any) => {
+          const contextualizedRef = ref.contextualize.compact;
+          const recordsetConfig: RecordsetConfig = {
+            viewable: false,
+            editable: false,
+            deletable: false,
+            sortable: true,
+            selectMode: RecordsetSelectMode.MULTI_SELECT,
+            disableFaceting: false,
+            displayMode: RecordsetDisplayMode.FACET_POPUP,
+          };
+
+          // build minimal SelectedRow stubs from the ids the iframe sent so the
+          // already-visible channels appear pre-checked in the modal.
+          const incomingIds: string[] = Array.isArray(data?.selectedChannelIds) ? data.selectedChannelIds : [];
+          const initialSelectedRows: SelectedRow[] = incomingIds.map((id) => ({
+            uniqueId: id,
+            displayname: { value: id, isHTML: false },
+          }));
+
+          setChannelSelectorModalProps({
+            initialReference: contextualizedRef,
+            initialPageLimit: 25,
+            config: recordsetConfig,
+            logInfo: {
+              logStack: LogService.getStackObject(),
+              logStackPath: LogService.getStackPath('', LogStackTypes.SET),
+            },
+            initialSelectedRows,
+            uiContextTitles: [{ displayname: { value: 'Channels', isHTML: false } }],
+          });
+        }).catch((err: any) => {
+          $log.warn('failed to open channel selector', err);
+        });
+        break;
+      }
     }
   };
+
+  const hideChannelSelectorModal = () => setChannelSelectorModalProps(null);
 
   const getAnnotURL = (id: string) => {
     const encode = fixedEncodeURIComponent;
@@ -1718,6 +1784,19 @@ export default function ViewerProvider({
   return (
     <ViewerContext.Provider value={providerValue}>
       {children}
+      {channelSelectorModalProps && (
+        <RecordsetModal
+          recordsetProps={channelSelectorModalProps}
+          onClose={hideChannelSelectorModal}
+          onSubmit={(rows: SelectedRow[]) => {
+            // Phase 1: just log and close. Phase 2 will fetch matching Processed_Image
+            // rows and push the channels back to the iframe.
+            $log.debug('phase 1 — selected channels:', rows);
+            hideChannelSelectorModal();
+          }}
+          displayname={{ value: 'Channels', isHTML: false }}
+        />
+      )}
     </ViewerContext.Provider>
   )
 }
