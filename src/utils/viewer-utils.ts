@@ -2,6 +2,7 @@ import React from 'react';
 
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import ViewerConfigService from '@isrd-isi-edu/chaise/src/services/viewer-config';
@@ -196,24 +197,36 @@ export const loadImageMetadata = (
   viewerLogStackPath: string,
   imageID: string,
   defaultZIndex?: number,
-): Promise<{ hasProcessedImage: boolean, hasChannelUrl: boolean }> => {
+): Promise<{ hasProcessedImage: boolean, hasChannelUrl: boolean, channelTuples: any[] }> => {
   return new Promise((resolve, reject) => {
     let channelURLs: string[] = [];
     let hasProcessedImage = false, hasChannelUrl = false;
+    let channelTuples: any[] = [];
 
-    // first read the channel info
-    _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath).then(function (res) {
+    // first read the channel info (up to CHANNEL_THRESHOLD rows, plus total count)
+    _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath, VIEWER_CONSTANT.CHANNEL_THRESHOLD).then(function (res) {
       osdViewerParameters.current.channels = res.channelList;
+      channelTuples = res.channelTuples;
+
+      const hasMore = res.totalCount > VIEWER_CONSTANT.CHANNEL_THRESHOLD;
+      osdViewerParameters.current.hasMore = hasMore;
+      osdViewerParameters.current.totalChannelCount = res.totalCount;
 
       // backward compatibility
       channelURLs = res.channelURLs;
       hasChannelUrl = channelURLs.length > 0;
 
-      return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath);
+      // when there are more channels than the threshold, filter Processed_Image to only the loaded channel numbers
+      const channelNumbers = hasMore
+        ? res.channelList.map((ch: any) => ch[VIEWER_CONSTANT.OSD_VIEWER.CHANNEL_NUMBER_QPARAM])
+        : undefined;
+
+      return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath, channelNumbers);
     }).then(function () {
 
-      // read the main image (processed data)
-      return _readProcessedImageTable(processedImageReference, defaultZIndex);
+      // when hasMore is true we loaded exactly CHANNEL_THRESHOLD channels, so read the same number of processed image rows
+      const processedImageLimit = osdViewerParameters.current.hasMore ? VIEWER_CONSTANT.CHANNEL_THRESHOLD : undefined;
+      return _readProcessedImageTable(processedImageReference, defaultZIndex, processedImageLimit);
     }).then(function (mainImageInfo) {
       hasProcessedImage = mainImageInfo.length > 0;
 
@@ -256,11 +269,11 @@ export const loadImageMetadata = (
         osdViewerParameters.current.zPlane.maxZIndex = res[2];
       }
 
-      resolve({ hasProcessedImage, hasChannelUrl });
+      resolve({ hasProcessedImage, hasChannelUrl, channelTuples });
     }).catch(function (err) {
       // just log the error and resolve with empty array
       $log.error('error while getting channel info: ', err);
-      resolve({ hasProcessedImage, hasChannelUrl });
+      resolve({ hasProcessedImage, hasChannelUrl, channelTuples });
     });
   });
 }
@@ -653,13 +666,20 @@ const _getChannelConfigFormatVersion = () => {
 * }
 *
 */
-const _readImageChannelTable = async (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<{
+const _readImageChannelTable = async (
+  imageID: string,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+  limit?: number,
+): Promise<{
   channelURLs: string[],
   channelList: any[],
+  channelTuples: any[],
+  totalCount: number,
 }> => {
   return new Promise((resolve, reject) => {
-    console.log('reading channel table');
-    const channelList: any[] = [], channelURLs: any[] = [];
+    const channelList: any[] = [], channelURLs: any[] = [], channelTuples: any[] = [];
+    let hasNull = false;
 
     const channelConfig = ViewerConfigService.channelConfig;
     const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
@@ -671,19 +691,15 @@ const _readImageChannelTable = async (imageID: string, viewerLogStack: any, view
       `${fixedEncodeURIComponent(channelConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageID)}`
     ].join('/');
 
-    let hasNull = false;
     ConfigService.ERMrest.resolve(imageChannelURL, ConfigService.contextHeaderParams).then((ref: any) => {
       if (!ref) {
-        return false;
+        resolve({ channelURLs: [], channelList: [], channelTuples: [], totalCount: 0 });
+        return;
       }
 
       channelSetLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.CHANNEL_SET);
       channelSetLogStack = LogService.getStackObject(
-        LogService.getStackNode(
-          LogStackTypes.CHANNEL,
-          ref.table,
-          {}
-        ),
+        LogService.getStackNode(LogStackTypes.CHANNEL, ref.table, {}),
         viewerLogStack
       );
       const logObj = {
@@ -691,83 +707,88 @@ const _readImageChannelTable = async (imageID: string, viewerLogStack: any, view
         stack: channelSetLogStack
       };
 
-      // make sure it's properly sorted
       ref = ref.contextualize.compact.sort(channelConfig.column_order);
 
-      // send request to server
-      // since we want to check the ACL for updating the channel config we have to ask for TCRS
-      // NOTE we cannot ask for entity since we want the TCRS info
-      return _readPageByPage(
-        ref,
-        VIEWER_CONSTANT.DEFAULT_PAGE_SIZE,
-        logObj,
-        false,
-        true,
-        (page: any) => {
-          for (let i = 0; i < page.tuples.length; i++) {
-            const t = page.tuples[i];
+      const countCol = ref.columns.find((col: any) => col.name === channelConfig.channel_number_column_name);
 
-            const pseudoColor = t.data[channelConfig.pseudo_color_column_name],
-              channelName = t.data[channelConfig.channel_name_column_name],
-              channelNumber = t.data[channelConfig.channel_number_column_name];
+      // shared: append one page of tuples to the running lists
+      // NOTE: cannot use entity context; need TCRS to check per-column ACLs
+      const processPage = (page: any): boolean => {
+        for (let i = 0; i < page.tuples.length; i++) {
+          const t = page.tuples[i];
 
-            let channelConfigs = t.data[channelConfig.channel_config_column_name],
-              hasConfig = false
+          const pseudoColor = t.data[channelConfig.pseudo_color_column_name],
+            channelName = t.data[channelConfig.channel_name_column_name],
+            channelNumber = t.data[channelConfig.channel_number_column_name];
 
-            // create the channel info
-            let res: any = {};
+          let channelConfigs = t.data[channelConfig.channel_config_column_name],
+            hasConfig = false;
 
-            res.acls = {
-              canUpdateConfig: t.canUpdate && t.checkPermissions('column_update', channelConfig.channel_config_column_name)
-            };
+          const res: any = {};
 
-            res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
+          res.acls = {
+            canUpdateConfig:
+              t.canUpdate &&
+              t.checkPermissions('column_update', channelConfig.channel_config_column_name),
+          };
 
-            res[osdConstant.CHANNEL_NAME_QPARAM] = isStringAndNotEmpty(channelName) ? channelName : channelList.length;
+          res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber;
+          res[osdConstant.CHANNEL_NAME_QPARAM] = isStringAndNotEmpty(channelName) ? channelName : channelList.length;
+          res[osdConstant.PSEUDO_COLOR_QPARAM] = isStringAndNotEmpty(pseudoColor) ? pseudoColor : null;
 
-            res[osdConstant.PSEUDO_COLOR_QPARAM] = isStringAndNotEmpty(pseudoColor) ? pseudoColor : null;
+          const isRGB = t.data[channelConfig.is_rgb_column_name];
+          res[osdConstant.IS_RGB_QPARAM] = typeof isRGB === 'boolean' ? isRGB : null;
 
-            const isRGB = t.data[channelConfig.is_rgb_column_name];
-            res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === 'boolean') ? isRGB : null;
-
-            // config
-            channelConfigs = isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
-            if (Array.isArray(channelConfigs)) {
-              channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
-              if (channelConfigs.length > 0) {
-                channelConfigs = channelConfigs[0];
-                hasConfig = true;
-              }
-            } else if (_isAppropriateChannelConfig(channelConfigs)) {
+          channelConfigs = isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
+          if (Array.isArray(channelConfigs)) {
+            channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
+            if (channelConfigs.length > 0) {
+              channelConfigs = channelConfigs[0];
               hasConfig = true;
             }
-            if (hasConfig) {
-              res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
-            }
-
-            channelList.push(res);
-
-            // if any of the urls are null, then none of the values are valid
-            if (channelConfig.image_url_column_name) {
-              const channelURL = t.data[channelConfig.image_url_column_name];
-              if (isStringAndNotEmpty(channelURL)) {
-                channelURLs.push({ channelNumber: channelNumber, url: channelURL });
-              } else {
-                hasNull = true;
-              }
-            }
+          } else if (_isAppropriateChannelConfig(channelConfigs)) {
+            hasConfig = true;
+          }
+          if (hasConfig) {
+            res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
           }
 
-          return true;
+          channelList.push(res);
+          channelTuples.push(t);
+
+          if (channelConfig.image_url_column_name) {
+            const channelURL = t.data[channelConfig.image_url_column_name];
+            if (isStringAndNotEmpty(channelURL)) {
+              channelURLs.push({ channelNumber: channelNumber, url: channelURL });
+            } else {
+              hasNull = true;
+            }
+          }
         }
-      );
-    }).then(() => {
-      resolve({
-        // backward compatibility
-        // if any of the urls are null, we shouldn't use any of the urls
-        channelURLs: hasNull ? [] : channelURLs,
-        channelList
-      });
+        return true;
+      };
+
+      const finish = (totalCount: number) =>
+        resolve({ channelURLs: hasNull ? [] : channelURLs, channelList, channelTuples, totalCount });
+
+      if (limit !== undefined) {
+        // fetch the count and the first page in parallel, then process that one page
+        return Promise.all([
+          countCol
+            ? ref.getAggregates([countCol.aggregate.countDistinctAgg], logObj)
+            : Promise.resolve([0]),
+          ref.read(limit, logObj, false, true, false, true),
+        ]).then(([countResult, firstPage]: [any[], any]) => {
+          const totalCount = Array.isArray(countResult) && countResult.length > 0 ? countResult[0] : 0;
+          processPage(firstPage);
+          finish(totalCount);
+        });
+      }
+
+      // no limit: read all pages; total is whatever was actually read
+      return _readPageByPage(ref, VIEWER_CONSTANT.DEFAULT_PAGE_SIZE, logObj, false, true, processPage)
+        .then(() => finish(channelList.length));
+
     }).catch((err: any) => reject(err));
   });
 }
@@ -777,7 +798,7 @@ const _readImageChannelTable = async (imageID: string, viewerLogStack: any, view
          * used for default z
          * returns [{url, channelNumber}]
          */
-function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number): Promise<any[]> {
+function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number, limit?: number): Promise<any[]> {
   return new Promise((resolve, reject) => {
     $log.log('reading processed image table');
     const pImageConfig = ViewerConfigService.processsedImageConfig;
@@ -790,8 +811,27 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
       url += '=' + fixedEncodeURIComponent(defaultZIndex.toString());
     }
 
-
     let hasNull = false;
+
+    // shared: append one page of tuples to mainImageInfo
+    const processPage = (page: any): boolean => {
+      for (let i = 0; i < page.tuples.length && !hasNull; i++) {
+        const t = page.tuples[i];
+        const imageURL = _createImageURL(t.data);
+
+        if (!isStringAndNotEmpty(imageURL)) {
+          hasNull = true;
+          return false;
+        }
+
+        mainImageInfo.push({
+          url: imageURL,
+          channelNumber: t.data[pImageConfig.channel_number_column_name]
+        });
+      }
+      return true;
+    };
+
     ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((ref: any) => {
       if (!ref) {
         return false;
@@ -803,35 +843,14 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
           LogService.addExtraInfoToStack(zPlaneLogStack, { 'z_index': defaultZIndex, 'default_z': true }) : zPlaneLogStack
       };
 
-      // make sure it's properly sorted
       ref = ref.contextualize.compact.sort(pImageConfig.column_order);
 
-      // send request to server
-      return _readPageByPage(
-        ref,
-        VIEWER_CONSTANT.DEFAULT_PAGE_SIZE,
-        logObj,
-        false,
-        false,
-        (page: any) => {
-          for (let i = 0; i < page.tuples.length && !hasNull; i++) {
-            const t = page.tuples[i];
-            const imageURL = _createImageURL(t.data);
+      if (limit !== undefined) {
+        return ref.read(limit, logObj, false, true, false, false)
+          .then((page: any) => { processPage(page); });
+      }
 
-            // if any of the urls are null, then none of the values are valid
-            if (!isStringAndNotEmpty(imageURL)) {
-              hasNull = true;
-              return false;
-            }
-
-            mainImageInfo.push({
-              url: imageURL,
-              channelNumber: t.data[pImageConfig.channel_number_column_name]
-            });
-          }
-          return true;
-        }
-      );
+      return _readPageByPage(ref, VIEWER_CONSTANT.DEFAULT_PAGE_SIZE, logObj, false, false, processPage);
     }).then(function () {
       resolve(hasNull ? [] : mainImageInfo);
     }).catch((err: any) => reject(err));
@@ -841,16 +860,25 @@ function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number):
 /**
  * populate the variables that are used in different places
  */
-const _createProcessedImageReference = (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<void> => {
+const _createProcessedImageReference = (
+  imageID: string,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+  channelNumbers?: (string | number)[],
+): Promise<void> => {
   return new Promise((resolve, reject) => {
 
     const pImageConfig = ViewerConfigService.processsedImageConfig;
 
-    const url = [
+    let url = [
       `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
       `${fixedEncodeURIComponent(pImageConfig.schema_name)}:${fixedEncodeURIComponent(pImageConfig.table_name)}`,
       `${fixedEncodeURIComponent(pImageConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageID)}`
     ].join('/');
+
+    if (channelNumbers && channelNumbers.length > 0) {
+      url += `&${fixedEncodeURIComponent(pImageConfig.channel_number_column_name)}=any(${channelNumbers.join(',')})`;
+    }
 
     ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((res: any) => {
       if (!res) {
@@ -1085,3 +1113,62 @@ const _getActiveZIndex = (images: any[], inputZIndex: number) => {
 
   return res;
 }
+
+/**
+ * Build the channelList format (used in osdViewerParameters.current.channels) from RecordsetModal selected rows.
+ * ACLs default to canUpdateConfig: false since we can't determine edit permissions from modal data alone.
+ */
+export const buildChannelListFromRows = (rows: SelectedRow[]): any[] => {
+  const channelConfig = ViewerConfigService.channelConfig;
+  const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
+
+  return rows.map((row) => {
+    const data = row.data || {};
+    const pseudoColor = data[channelConfig.pseudo_color_column_name];
+    const channelName = data[channelConfig.channel_name_column_name];
+    const channelNumber = data[channelConfig.channel_number_column_name];
+    const isRGB = data[channelConfig.is_rgb_column_name];
+
+    let channelConfigs = data[channelConfig.channel_config_column_name];
+    let hasConfig = false;
+
+    channelConfigs = isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
+    if (Array.isArray(channelConfigs)) {
+      channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
+      if (channelConfigs.length > 0) {
+        channelConfigs = channelConfigs[0];
+        hasConfig = true;
+      }
+    } else if (_isAppropriateChannelConfig(channelConfigs)) {
+      hasConfig = true;
+    }
+
+    const res: any = {
+      acls: { canUpdateConfig: false },
+    };
+    res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber;
+    res[osdConstant.CHANNEL_NAME_QPARAM] = isStringAndNotEmpty(channelName) ? channelName : channelNumber;
+    res[osdConstant.PSEUDO_COLOR_QPARAM] = isStringAndNotEmpty(pseudoColor) ? pseudoColor : null;
+    res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === 'boolean') ? isRGB : null;
+    if (hasConfig) {
+      res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
+    }
+
+    return res;
+  });
+};
+
+/**
+ * Fetch Processed_Image rows for specific channel numbers and return mainImageInfo array.
+ * Used after the channel selector modal submits.
+ */
+export const fetchProcessedImageForChannels = (
+  imageID: string,
+  channelNumbers: (string | number)[],
+  defaultZIndex: number | undefined,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+): Promise<any[]> => {
+  return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath, channelNumbers)
+    .then(() => _readProcessedImageTable(processedImageReference, defaultZIndex));
+};

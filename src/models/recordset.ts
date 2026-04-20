@@ -80,7 +80,8 @@ export enum RecordsetDisplayMode {
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
   PURE_BINARY_POPUP_UNLINK = 'popup/purebinary/unlink',
-  SAVED_QUERY_POPUP = 'popup/savedquery'
+  SAVED_QUERY_POPUP = 'popup/savedquery',
+  VIEWER_CHANNEL_SELECTOR_POPUP = 'popup/viewer-channel'
 }
 
 export type RecordsetConfig = {

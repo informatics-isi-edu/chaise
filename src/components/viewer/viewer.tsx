@@ -11,6 +11,7 @@ import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedi
 import ViewerAnnotationList from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-list';
 import ViewerAnnotationStrokeSlider from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-stroke-slider';
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer-menu-buttons';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
@@ -66,6 +67,7 @@ const ViewerInner = ({
     initialized, pageTitle, hideAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
     submitAnnotationForm, deleteAnnotationConfirmProps, startAnnotationDelete,
     displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode, viewerError,
+    channelSelectorModalProps, hideChannelSelectorModal, onChannelSelectorSubmit,
   } = useViewer();
 
 
@@ -267,6 +269,14 @@ const ViewerInner = ({
           context={DeleteConfirmationModalTypes.SINGLE}
           {...deleteAnnotationConfirmProps}
         />}
+        {channelSelectorModalProps && (
+          <RecordsetModal
+            recordsetProps={channelSelectorModalProps}
+            onClose={hideChannelSelectorModal}
+            onSubmit={onChannelSelectorSubmit}
+            displayname={{ value: 'Channels', isHTML: false }}
+          />
+        )}
       </div>
     </>
   )

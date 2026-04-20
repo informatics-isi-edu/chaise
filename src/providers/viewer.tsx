@@ -30,9 +30,6 @@ import {
   SelectedRow,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
-// components
-import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
-
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
@@ -47,9 +44,10 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
   ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
+  buildChannelListFromRows, fetchProcessedImageForChannels,
   hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex
 } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
-import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { HELP_PAGES, ID_NAMES, RECORDSET_DEFAULT_PAGE_SIZE, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -177,6 +175,12 @@ export const ViewerContext = createContext<{
     item?: ViewerAnnotationModal,
     extraInfo?: any
   ) => void;
+  /**
+   * props for the channel selector modal; null means the modal is closed
+   */
+  channelSelectorModalProps: RecordsetProps | null;
+  hideChannelSelectorModal: () => void;
+  onChannelSelectorSubmit: (rows: SelectedRow[]) => void;
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -289,6 +293,12 @@ export default function ViewerProvider({
   // passed to osd-viewer
   const osdViewerParameters = useRef<any>({});
 
+  // ERMrest Tuple objects from the most recently loaded Image_Channel page; used to build initialSelectedRows for the modal
+  const loadedChannelTuplesRef = useRef<any[]>([]);
+
+  // guard against React StrictMode double-invoking the initialization effect
+  const initializationStartedRef = useRef(false);
+
   /**
    * props for the Image_Channel selector modal that is opened from the osd iframe.
    * Phase 1 of the lazy-channel-loading work — submit currently just logs and closes.
@@ -305,8 +315,11 @@ export default function ViewerProvider({
   const [mainImageLoaded, setMainImageLoaded, mainImageLoadedRef] = useStateRef(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    initializeViewerApp();
+    if (!initializationStartedRef.current) {
+      initializationStartedRef.current = true;
+      // eslint-disable-next-line react-hooks/immutability
+      initializeViewerApp();
+    }
 
     // eslint-disable-next-line react-hooks/immutability
     windowRef.addEventListener('message', recieveIframeMessage);
@@ -493,9 +506,10 @@ export default function ViewerProvider({
 
       return loadImageMetadata(osdViewerParameters, logInfo.logStack, logInfo.logStackPath, mainImageID!, defaultZIndex.current);
 
-    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean }) => {
+    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean, channelTuples: any[] }) => {
       hasProcessedImage = imageMetaDataRes.hasProcessedImage;
       hasChannelUrl = imageMetaDataRes.hasChannelUrl;
+      loadedChannelTuplesRef.current = imageMetaDataRes.channelTuples || [];
 
       // dont fetch annotation from db if:
       // - we have annotation query params
@@ -912,12 +926,17 @@ export default function ViewerProvider({
 
         const imageChannelURL = [
           `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
-          `${fixedEncodeURIComponent(channelConfig.schema_name)}:${fixedEncodeURIComponent(channelConfig.table_name)}`,
-          `${fixedEncodeURIComponent(channelConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageIDRef.current)}`
+          `${fixedEncodeURIComponent(channelConfig.schema_name)}:${fixedEncodeURIComponent(channelConfig.table_name)}`
         ].join('/');
 
         ConfigService.ERMrest.resolve(imageChannelURL, ConfigService.contextHeaderParams).then((ref: any) => {
-          const contextualizedRef = ref.contextualize.compact;
+          // add the image info and make sure it's not visible in the modal
+          const imageFacet = {
+            source: channelConfig.reference_image_column_name,
+            hidden: true,
+            choices: [imageIDRef.current],
+          }
+          const contextualizedRef = ref.addFacets([imageFacet]).contextualize.compact;
           const recordsetConfig: RecordsetConfig = {
             viewable: false,
             editable: false,
@@ -925,21 +944,26 @@ export default function ViewerProvider({
             sortable: true,
             selectMode: RecordsetSelectMode.MULTI_SELECT,
             disableFaceting: false,
-            displayMode: RecordsetDisplayMode.FACET_POPUP,
+            displayMode: RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP,
           };
 
-          // build minimal SelectedRow stubs from the ids the iframe sent so the
-          // already-visible channels appear pre-checked in the modal.
+          // Map OSD item IDs (0-based indices) back to the loaded ERMrest tuples so
+          // already-visible channels appear pre-checked in the modal with real uniqueIds.
           const incomingIds: string[] = Array.isArray(data?.selectedChannelIds) ? data.selectedChannelIds : [];
-          const initialSelectedRows: SelectedRow[] = incomingIds.map((id) => ({
-            uniqueId: id,
-            displayname: { value: id, isHTML: false },
-          }));
+          const initialSelectedRows: SelectedRow[] = incomingIds
+            .map((id) => loadedChannelTuplesRef.current[parseInt(id)])
+            .filter(Boolean)
+            .map((tuple: any) => ({
+              displayname: tuple.displayname,
+              uniqueId: tuple.uniqueId,
+              data: tuple.data,
+            }));
 
           setChannelSelectorModalProps({
             initialReference: contextualizedRef,
-            initialPageLimit: 25,
+            initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
             config: recordsetConfig,
+            // TODO proper log object
             logInfo: {
               logStack: LogService.getStackObject(),
               logStackPath: LogService.getStackPath('', LogStackTypes.SET),
@@ -956,6 +980,44 @@ export default function ViewerProvider({
   };
 
   const hideChannelSelectorModal = () => setChannelSelectorModalProps(null);
+
+  const onChannelSelectorSubmit = (rows: SelectedRow[]) => {
+    const channelConfig = ViewerConfigService.channelConfig;
+    const channelNumbers = rows
+      .map((r) => r.data?.[channelConfig.channel_number_column_name])
+      .filter((n) => n != null);
+    const newChannelList = buildChannelListFromRows(rows);
+
+    fetchProcessedImageForChannels(
+      imageIDRef.current!,
+      channelNumbers,
+      defaultZIndex.current,
+      logInfo.logStack,
+      logInfo.logStackPath,
+    ).then((mainImageInfo) => {
+      const newMainImage = { zIndex: defaultZIndex.current, info: mainImageInfo };
+
+      osdViewerParameters.current.channels = newChannelList;
+      osdViewerParameters.current.mainImage = newMainImage;
+      loadedChannelTuplesRef.current = rows as any[];
+
+      const iframe = getOSDViewerIframe().contentWindow!;
+      iframe.postMessage({
+        messageType: 'replaceChannels',
+        content: {
+          channels: newChannelList,
+          mainImage: newMainImage,
+          hasMore: osdViewerParameters.current.hasMore,
+          totalChannelCount: osdViewerParameters.current.totalChannelCount,
+        },
+      }, windowRef.location.origin);
+
+      hideChannelSelectorModal();
+    }).catch((err: any) => {
+      $log.warn('failed to load selected channels', err);
+      hideChannelSelectorModal();
+    });
+  };
 
   const getAnnotURL = (id: string) => {
     const encode = fixedEncodeURIComponent;
@@ -1762,6 +1824,9 @@ export default function ViewerProvider({
       logViewerClientAction,
       viewerError,
       mainImageLoaded,
+      channelSelectorModalProps,
+      hideChannelSelectorModal,
+      onChannelSelectorSubmit,
     };
   }, [
     imageID,
@@ -1779,24 +1844,12 @@ export default function ViewerProvider({
     highlightedAnnotationIndex,
     viewerError,
     mainImageLoaded,
+    channelSelectorModalProps,
   ]);
 
   return (
     <ViewerContext.Provider value={providerValue}>
       {children}
-      {channelSelectorModalProps && (
-        <RecordsetModal
-          recordsetProps={channelSelectorModalProps}
-          onClose={hideChannelSelectorModal}
-          onSubmit={(rows: SelectedRow[]) => {
-            // Phase 1: just log and close. Phase 2 will fetch matching Processed_Image
-            // rows and push the channels back to the iframe.
-            $log.debug('phase 1 — selected channels:', rows);
-            hideChannelSelectorModal();
-          }}
-          displayname={{ value: 'Channels', isHTML: false }}
-        />
-      )}
     </ViewerContext.Provider>
   )
 }
