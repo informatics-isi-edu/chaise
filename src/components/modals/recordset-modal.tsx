@@ -62,6 +62,10 @@ export type RecordestModalProps = {
    */
   showSubmitSpinner?: boolean,
   /**
+   * The message to show inside the submit spinner (default: 'Saving the changes...')
+   */
+  submitSpinnerMessage?: string,
+  /**
    * The function that will be called when user clicks on "cancel" button
    * Note: the modal won't close by itself and if that's the expected behavior,
    * you should do it in this callback.
@@ -92,6 +96,7 @@ const RecordsetModal = ({
   onSelectedRowsChanged,
   onSubmit,
   showSubmitSpinner,
+  submitSpinnerMessage = 'Saving the changes...',
   onClose,
   closeButtonLabel: closeLabel
 }: RecordestModalProps) => {
@@ -276,6 +281,10 @@ const RecordsetModal = ({
         </>
       )
       break;
+    case RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP:
+      submitText = 'Submit';
+      submitTooltip = 'Add the selected channels to the viewer.';
+      break;
   }
 
   let uiContextTitles: TitleProps[] | undefined, // the ui contexts that should be passed to recordset for the next level
@@ -369,6 +378,15 @@ const RecordsetModal = ({
         </div>
       );
       break;
+    case RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP:
+      titleEl = (
+        <div>
+          <span>Select </span>
+          <Title addLink={false} reference={recordsetProps.initialReference} comment={false} />
+          <span> to add to the viewer</span>
+        </div>
+      );
+      break;
     default:
       titleEl = (
         <div><Title addLink={false} reference={recordsetProps.initialReference} /></div>
@@ -388,7 +406,7 @@ const RecordsetModal = ({
       {showSubmitSpinner &&
         <div className='app-blocking-spinner-container'>
           <div className='app-blocking-spinner-backdrop'></div>
-          <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
+          <ChaiseSpinner className='modal-submit-spinner' message={submitSpinnerMessage} />
         </div>
       }
       <Modal.Header ref={modalHeader} className={showUIContextTitles ? 'modal-header-reduced-top-padding' : ''}>

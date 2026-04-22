@@ -206,6 +206,7 @@ export enum LogStackPaths {
   ANNOTATION_ENTITY= 'annotation-entity',
   ANNOTATION_SET= 'annotation-set',
   CHANNEL_SET= 'channel-set',
+  CHANNEL_SELECTOR_POPUP= 'channel-picker',
   Z_PLANE_ENTITY= 'z-plane-entity',
   Z_PLANE_SET= 'z-plane-set'
 }

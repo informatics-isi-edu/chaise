@@ -18,7 +18,7 @@ import {
   UnauthorizedViewerAccess,
   ViewerError,
 } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogAppModes, LogObjectType, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
@@ -179,6 +179,7 @@ export const ViewerContext = createContext<{
    * props for the channel selector modal; null means the modal is closed
    */
   channelSelectorModalProps: RecordsetProps | null;
+  channelSelectorSubmitting: boolean;
   hideChannelSelectorModal: () => void;
   onChannelSelectorSubmit: (rows: SelectedRow[]) => void;
 } | null>(null);
@@ -304,6 +305,7 @@ export default function ViewerProvider({
    * Phase 1 of the lazy-channel-loading work — submit currently just logs and closes.
    */
   const [channelSelectorModalProps, setChannelSelectorModalProps] = useState<RecordsetProps | null>(null);
+  const [channelSelectorSubmitting, setChannelSelectorSubmitting] = useState(false);
 
   /**
    * Whether the main image is loaded or not.
@@ -953,20 +955,20 @@ export default function ViewerProvider({
           const initialSelectedRows: SelectedRow[] = incomingIds
             .map((id) => loadedChannelTuplesRef.current[parseInt(id)])
             .filter(Boolean)
-            .map((tuple: any) => ({
-              displayname: tuple.displayname,
-              uniqueId: tuple.uniqueId,
-              data: tuple.data,
+            .map((t: any) => ({
+              displayname: t.displayname,
+              uniqueId: t.uniqueId,
+              data: t.data,
+              tuple: t.tuple ?? t,
             }));
 
           setChannelSelectorModalProps({
             initialReference: contextualizedRef,
             initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
             config: recordsetConfig,
-            // TODO proper log object
             logInfo: {
-              logStack: LogService.getStackObject(),
-              logStackPath: LogService.getStackPath('', LogStackTypes.SET),
+              logStack: LogService.getStackObject(LogService.getStackNode(LogStackTypes.CHANNEL, contextualizedRef.table, { picker: 1 })),
+              logStackPath: LogService.getStackPath(null, LogStackPaths.CHANNEL_SELECTOR_POPUP),
             },
             initialSelectedRows,
             uiContextTitles: [{ displayname: { value: 'Channels', isHTML: false } }],
@@ -988,13 +990,7 @@ export default function ViewerProvider({
       .filter((n) => n != null);
     const newChannelList = buildChannelListFromRows(rows);
 
-    fetchProcessedImageForChannels(
-      imageIDRef.current!,
-      channelNumbers,
-      defaultZIndex.current,
-      logInfo.logStack,
-      logInfo.logStackPath,
-    ).then((mainImageInfo) => {
+    const sendReplaceChannels = (mainImageInfo: any[]) => {
       const newMainImage = { zIndex: defaultZIndex.current, info: mainImageInfo };
 
       osdViewerParameters.current.channels = newChannelList;
@@ -1013,9 +1009,28 @@ export default function ViewerProvider({
       }, windowRef.location.origin);
 
       hideChannelSelectorModal();
+    };
+
+    if (channelNumbers.length === 0) {
+      sendReplaceChannels([]);
+      return;
+    }
+
+    setChannelSelectorSubmitting(true);
+    fetchProcessedImageForChannels(
+      imageIDRef.current!,
+      channelNumbers,
+      defaultZIndex.current,
+      logInfo.logStack,
+      logInfo.logStackPath,
+    ).then((mainImageInfo) => {
+      setChannelSelectorSubmitting(false);
+      sendReplaceChannels(mainImageInfo);
     }).catch((err: any) => {
       $log.warn('failed to load selected channels', err);
+      setChannelSelectorSubmitting(false);
       hideChannelSelectorModal();
+      addAlert('Failed to load the selected channels. Please try again.', ChaiseAlertType.ERROR);
     });
   };
 
@@ -1825,6 +1840,7 @@ export default function ViewerProvider({
       viewerError,
       mainImageLoaded,
       channelSelectorModalProps,
+      channelSelectorSubmitting,
       hideChannelSelectorModal,
       onChannelSelectorSubmit,
     };
@@ -1845,6 +1861,7 @@ export default function ViewerProvider({
     viewerError,
     mainImageLoaded,
     channelSelectorModalProps,
+    channelSelectorSubmitting,
   ]);
 
   return (

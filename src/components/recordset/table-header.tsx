@@ -196,6 +196,8 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
       RecordsetDisplayMode.FACET_POPUP,
       // use is deleting, so allowing to create more doesn't make sense
       RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK,
+      // channels are not created manually, and having the option here would be more confusing
+      RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP
     ];
 
     const isAddableDisplayMode =

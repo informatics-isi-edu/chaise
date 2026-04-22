@@ -353,7 +353,8 @@ const RecordsetTable = ({
             displayname: tuple.displayname,
             uniqueId: tuple.uniqueId,
             data: tuple.data,
-            tupleReference: tuple.reference
+            tupleReference: tuple.reference,
+            tuple: tuple,
           });
         }
       });
@@ -390,7 +391,7 @@ const RecordsetTable = ({
       // if it's currently selected, then we should deselect (and vice versa)
       const isSelected = rowIndex !== -1;
       if (!isSelected) {
-        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data, tupleReference: tuple.reference });
+        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data, tupleReference: tuple.reference, tuple: tuple });
       } else {
         res.splice(rowIndex, 1);
       }
