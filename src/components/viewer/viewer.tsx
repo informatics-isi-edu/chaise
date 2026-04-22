@@ -11,6 +11,7 @@ import Recordedit from '@isrd-isi-edu/chaise/src/components/recordedit/recordedi
 import ViewerAnnotationList from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-list';
 import ViewerAnnotationStrokeSlider from '@isrd-isi-edu/chaise/src/components/viewer/viewer-annotation-stroke-slider';
 import ConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/confirmation-modal';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ViewerMenuButtons from '@isrd-isi-edu/chaise/src/components/viewer/viewer-menu-buttons';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
@@ -66,6 +67,7 @@ const ViewerInner = ({
     initialized, pageTitle, hideAnnotationSidebar, annotationFormProps, showAnnotationFormSpinner, loadingAnnotations,
     submitAnnotationForm, deleteAnnotationConfirmProps, startAnnotationDelete,
     displayDrawingRequiredError, closeAnnotationForm, isInDrawingMode, toggleDrawingMode, viewerError,
+    channelSelectorModalProps, channelSelectorSubmitting, hideChannelSelectorModal, onChannelSelectorSubmit,
   } = useViewer();
 
 
@@ -199,7 +201,9 @@ const ViewerInner = ({
   return (
     <>
       {!initialized && <ChaiseSpinner />}
-      <div className={`viewer-container app-content-container ${!initialized ? CLASS_NAMES.HIDDEN : ''}`}>
+      <div
+        className={`viewer-container app-content-container ${!initialized ? CLASS_NAMES.HIDDEN : ''}`}
+      >
         <div className='top-panel-container'>
           <Alerts />
           <div className='top-flex-panel'>
@@ -209,28 +213,29 @@ const ViewerInner = ({
                   <h3 className='side-panel-heading'>{sidePanelTitle}</h3>
                 </div>
                 <div className='pull-right'>
-                  {showAnnotationForm &&
+                  {showAnnotationForm && (
                     <button
-                      className='chaise-btn chaise-btn-tertiary' onClick={() => setShowCloseConfirmationModal(true)}
+                      className='chaise-btn chaise-btn-tertiary'
+                      onClick={() => setShowCloseConfirmationModal(true)}
                       disabled={showAnnotationFormSpinner}
                     >
                       <span className='chaise-btn-icon fas fa-arrow-left'></span>
                       <span>Back</span>
                     </button>
-                  }
+                  )}
                 </div>
               </div>
             </div>
             <div className={`top-right-panel${!pageTitle ? ' no-title' : ''}`}>
-              {pageTitle &&
+              {pageTitle && (
                 <div className='title-container'>
                   <DisplayValue
                     value={{ isHTML: true, value: pageTitle }}
                     as='h1'
-                    props={{ 'id': 'page-title' }}
+                    props={{ id: 'page-title' }}
                   />
                 </div>
-              }
+              )}
               <ViewerMenuButtons />
             </div>
           </div>
@@ -251,25 +256,40 @@ const ViewerInner = ({
           /**
            * the following is needed to make sure the reize works properly when the mouse goes over the iframe.
            */
-          onResizeStart={() => { if (iframeElement.current) iframeElement.current.style.pointerEvents = 'none'; }}
-          onResizeEnd={() => { if (iframeElement.current) iframeElement.current.style.pointerEvents = 'inherit'; }}
+          onResizeStart={() => {
+            if (iframeElement.current) iframeElement.current.style.pointerEvents = 'none';
+          }}
+          onResizeEnd={() => {
+            if (iframeElement.current) iframeElement.current.style.pointerEvents = 'inherit';
+          }}
         />
-        {showCloseConfirmationModal &&
+        {showCloseConfirmationModal && (
           <ConfirmationModal
             show={!!showCloseConfirmationModal}
             message={<>Any unsaved change will be discarded. Do you want to continue?</>}
             onConfirm={() => onConfirmCloseAnnotationForm()}
             onCancel={() => setShowCloseConfirmationModal(false)}
           />
-        }
-        {deleteAnnotationConfirmProps && <DeleteConfirmationModal
-          show={!!deleteAnnotationConfirmProps}
-          context={DeleteConfirmationModalTypes.SINGLE}
-          {...deleteAnnotationConfirmProps}
-        />}
+        )}
+        {deleteAnnotationConfirmProps && (
+          <DeleteConfirmationModal
+            show={!!deleteAnnotationConfirmProps}
+            context={DeleteConfirmationModalTypes.SINGLE}
+            {...deleteAnnotationConfirmProps}
+          />
+        )}
+        {channelSelectorModalProps && (
+          <RecordsetModal
+            recordsetProps={channelSelectorModalProps}
+            onClose={hideChannelSelectorModal}
+            onSubmit={onChannelSelectorSubmit}
+            showSubmitSpinner={channelSelectorSubmitting}
+            submitSpinnerMessage='Loading selected channels...'
+          />
+        )}
       </div>
     </>
-  )
+  );
 
 }
 
