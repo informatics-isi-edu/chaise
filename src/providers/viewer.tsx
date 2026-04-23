@@ -294,7 +294,8 @@ export default function ViewerProvider({
   // passed to osd-viewer
   const osdViewerParameters = useRef<any>({});
 
-  // ERMrest Tuple objects from the most recently loaded Image_Channel page; used to build initialSelectedRows for the modal
+  // ERMrest Tuple objects for all currently-active channels; used to build disabled rows in the Add Channels modal.
+  // Indexed by osdItemId; entries are nulled out when a channel is removed via the toolbar.
   const loadedChannelTuplesRef = useRef<any[]>([]);
 
   // guard against React StrictMode double-invoking the initialization effect
@@ -920,6 +921,22 @@ export default function ViewerProvider({
         dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
       }
+      case 'channelRemoved': {
+        const removedIdx = parseInt(data.osdItemId);
+        if (!isNaN(removedIdx)) {
+          const updated = [...loadedChannelTuplesRef.current];
+          updated[removedIdx] = null;
+          loadedChannelTuplesRef.current = updated;
+        }
+        // Keep osdViewerParameters in sync so that re-adding the same channel doesn't
+        // produce a duplicate entry in the channels array sent with the next addChannels message.
+        if (data.channelNumber != null && Array.isArray(osdViewerParameters.current.channels)) {
+          osdViewerParameters.current.channels = osdViewerParameters.current.channels.filter(
+            (ch: any) => ch.channelNumber != data.channelNumber
+          );
+        }
+        break;
+      }
       case 'showChannelSelector': {
         // Phase 1: open the Image_Channel multi-select picker.
         // The reference is built the same way as in viewer-utils._readImageChannelTable.
@@ -949,19 +966,6 @@ export default function ViewerProvider({
             displayMode: RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP,
           };
 
-          // Map OSD item IDs (0-based indices) back to the loaded ERMrest tuples so
-          // already-visible channels appear pre-checked in the modal with real uniqueIds.
-          const incomingIds: string[] = Array.isArray(data?.selectedChannelIds) ? data.selectedChannelIds : [];
-          const initialSelectedRows: SelectedRow[] = incomingIds
-            .map((id) => loadedChannelTuplesRef.current[parseInt(id)])
-            .filter(Boolean)
-            .map((t: any) => ({
-              displayname: t.displayname,
-              uniqueId: t.uniqueId,
-              data: t.data,
-              tuple: t.tuple ?? t,
-            }));
-
           setChannelSelectorModalProps({
             initialReference: contextualizedRef,
             initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
@@ -970,7 +974,20 @@ export default function ViewerProvider({
               logStack: LogService.getStackObject(LogService.getStackNode(LogStackTypes.CHANNEL, contextualizedRef.table, { picker: 1 })),
               logStackPath: LogService.getStackPath(null, LogStackPaths.CHANNEL_SELECTOR_POPUP),
             },
-            initialSelectedRows,
+            getDisabledTuples: (_page: any, _pageLimit: number, _logStack: any, _logStackPath: string) => {
+              return Promise.resolve({
+                page: _page,
+                disabledRows: loadedChannelTuplesRef.current
+                  .filter(Boolean)
+                  .map((t: any) => ({ tuple: t.tuple ?? t })) as DisabledRow[],
+              });
+            },
+            onSelectedRowsChanged: (rows: SelectedRow[]): boolean | string => {
+              if (rows.length > VIEWER_CONSTANT.MAX_CHANNELS_PER_ADD) {
+                return `The maximum number of channels that can be added at a time is ${VIEWER_CONSTANT.MAX_CHANNELS_PER_ADD}.`;
+              }
+              return true;
+            },
             uiContextTitles: [{ displayname: { value: 'Channels', isHTML: false } }],
           });
         }).catch((err: any) => {
@@ -990,19 +1007,20 @@ export default function ViewerProvider({
       .filter((n) => n != null);
     const newChannelList = buildChannelListFromRows(rows);
 
-    const sendReplaceChannels = (mainImageInfo: any[]) => {
-      const newMainImage = { zIndex: defaultZIndex.current, info: mainImageInfo };
+    const sendAddChannels = (newMainImageInfo: any[]) => {
+      const existingInfo = osdViewerParameters.current.mainImage?.info ?? [];
+      const newMainImage = { zIndex: defaultZIndex.current, info: [...existingInfo, ...newMainImageInfo] };
 
-      osdViewerParameters.current.channels = newChannelList;
+      osdViewerParameters.current.channels = [...(osdViewerParameters.current.channels ?? []), ...newChannelList];
       osdViewerParameters.current.mainImage = newMainImage;
-      loadedChannelTuplesRef.current = rows as any[];
+      loadedChannelTuplesRef.current = [...loadedChannelTuplesRef.current, ...(rows as any[])];
 
       const iframe = getOSDViewerIframe().contentWindow!;
       iframe.postMessage({
-        messageType: 'replaceChannels',
+        messageType: 'addChannels',
         content: {
           channels: newChannelList,
-          mainImage: newMainImage,
+          mainImage: { zIndex: defaultZIndex.current, info: newMainImageInfo },
           hasMore: osdViewerParameters.current.hasMore,
           totalChannelCount: osdViewerParameters.current.totalChannelCount,
         },
@@ -1012,7 +1030,7 @@ export default function ViewerProvider({
     };
 
     if (channelNumbers.length === 0) {
-      sendReplaceChannels([]);
+      sendAddChannels([]);
       return;
     }
 
@@ -1025,7 +1043,7 @@ export default function ViewerProvider({
       logInfo.logStackPath,
     ).then((mainImageInfo) => {
       setChannelSelectorSubmitting(false);
-      sendReplaceChannels(mainImageInfo);
+      sendAddChannels(mainImageInfo);
     }).catch((err: any) => {
       $log.warn('failed to load selected channels', err);
       setChannelSelectorSubmitting(false);

@@ -346,9 +346,12 @@ export default function RecordsetProvider({
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
    *
-   * if case of facet popup, "false" means:
-   *   - show the url length error
-   * in other cases it means stop changing the selected rows
+   * - FACET_POPUP: "false" means show the URL length error alert.
+   * - FK_POPUP_BULK_CREATE: a string return value is used as the "too many forms" alert
+   *   message shown inside the recordset; "false" is treated the same way.
+   * - VIEWER_CHANNEL_SELECTOR_POPUP: same pattern as FK_POPUP_BULK_CREATE — a string return
+   *   value is shown as a "too many channels" alert inside the recordset modal.
+   * - all other modes: "false" reverts the selection; any truthy value accepts it.
    */
   const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
     setStateSelectedRows((prevRows: SelectedRow[]) => {
@@ -361,7 +364,10 @@ export default function RecordsetProvider({
           } else {
             removeURLLimitAlert();
           }
-        } else if (config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE) {
+        } else if (
+          config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE ||
+          config.displayMode === RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP
+        ) {
           if (typeof temp === 'string') {
             addTooManyFormsAlert(temp, ChaiseAlertType.WARNING);
           } else {

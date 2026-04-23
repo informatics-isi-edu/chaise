@@ -173,12 +173,14 @@ const RecordsetModal = ({
     } else {
       let cannotSubmit = false;
       if (onSelectedRowsChanged) {
-        cannotSubmit = onSelectedRowsChanged(submittedRows) === false;
+        const result = onSelectedRowsChanged(submittedRows);
+        // false or a string (used as an alert message) both mean "block submit"
+        cannotSubmit = result === false || typeof result === 'string';
       }
 
       /**
        * Disable the submit button if,
-       * - The onSelectedRowsChanged returned false
+       * - The onSelectedRowsChanged returned false or a string alert message
        * - or we started with 0 selected rows and now we have 0 selected rows
        */
       setDisableSubmit(
