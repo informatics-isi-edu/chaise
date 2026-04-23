@@ -283,6 +283,9 @@ const ViewerInner = ({
             recordsetProps={channelSelectorModalProps}
             onClose={hideChannelSelectorModal}
             onSubmit={onChannelSelectorSubmit}
+            // RecordsetModal uses its own onSelectedRowsChanged prop (not recordsetProps.onSelectedRowsChanged)
+            // to gate the submit button, so we must pass it here directly.
+            onSelectedRowsChanged={channelSelectorModalProps.onSelectedRowsChanged}
             showSubmitSpinner={channelSelectorSubmitting}
             submitSpinnerMessage='Loading selected channels...'
           />
