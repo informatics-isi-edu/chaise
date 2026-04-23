@@ -233,6 +233,16 @@ const RecordsetTable = ({
     }
   }, []);
 
+  /**
+   * When colValues changes, column content has finished loading (spinners replaced by real values).
+   * The ResizeObserver on outerTableRef won't catch this because the container width doesn't change
+   * (only the individual column widths redistribute)
+   * Re-syncing here ensures the sticky header columns match the body columns after data loads.
+   */
+  useLayoutEffect(() => {
+    syncWidths();
+  }, [colValues]);
+
   // when sort column has changed, call the callback
   useEffect(() => {
     // TODO why isInitialized is needed? (removing it triggers two updates on load)
