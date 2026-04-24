@@ -62,6 +62,7 @@ E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.confi
 E2ErecordFilePreview=test/e2e/specs/delete-prohibited/record/file-preview.config.ts
 E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.config.ts
 E2EDrecordLinks=test/e2e/specs/default-config/record/links.config.ts
+E2EDrecordCondition=test/e2e/specs/default-config/record/condition.config.ts
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.config.ts
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.config.ts
@@ -92,7 +93,7 @@ Manualrecordset=test/manual/specs/recordset.config.ts
 
 # playwright tests
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
-RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2ErecordFilePreview) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
+RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2ErecordFilePreview) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks) $(E2EDrecordCondition)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2ErecordsetSavedQuery) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet) $(E2EDrecordsetFacetWithinFacet)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordImmutable) $(E2EDIrecordMultiFormInput) $(E2ErecordEditForeignKeyDropdown) $(E2EDrecordEditCompositeKey)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditInputIframe) $(E2EDrecordEditDomainFilter) $(E2ErecordEditASCIIValidation) $(E2ErecordEditFKModal)

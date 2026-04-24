@@ -314,7 +314,7 @@ test.describe('Related tables', () => {
     test.use({ storageState: RESTRICTED_USER_STORAGE_STATE });
 
     // add acls
-    test.beforeAll(async ({ }, testInfo) => {
+    test.beforeAll(async (_, testInfo) => {
       const restrictedUserId = process.env.RESTRICTED_AUTH_COOKIE_ID;
       const catalogId = getCatalogID(testInfo.project.name);
       await importACLs({
@@ -429,7 +429,7 @@ test.describe('Related tables', () => {
     });
 
     // remove acls
-    test.afterAll((async ({ }, testInfo) => {
+    test.afterAll((async (_, testInfo) => {
       const catalogId = getCatalogID(testInfo.project.name);
       await importACLs({
         'catalog': {
