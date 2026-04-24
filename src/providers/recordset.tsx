@@ -346,9 +346,12 @@ export default function RecordsetProvider({
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
    *
-   * if case of facet popup, "false" means:
-   *   - show the url length error
-   * in other cases it means stop changing the selected rows
+   * - FACET_POPUP: "false" means show the URL length error alert.
+   * - FK_POPUP_BULK_CREATE: a string return value is used as the "too many forms" alert
+   *   message shown inside the recordset; "false" is treated the same way.
+   * - VIEWER_CHANNEL_SELECTOR_POPUP: same pattern as FK_POPUP_BULK_CREATE — a string return
+   *   value is shown as a "too many channels" alert inside the recordset modal.
+   * - all other modes: "false" reverts the selection; any truthy value accepts it.
    */
   const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
     setStateSelectedRows((prevRows: SelectedRow[]) => {
@@ -361,7 +364,10 @@ export default function RecordsetProvider({
           } else {
             removeURLLimitAlert();
           }
-        } else if (config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE) {
+        } else if (
+          config.displayMode === RecordsetDisplayMode.FK_POPUP_BULK_CREATE ||
+          config.displayMode === RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP
+        ) {
           if (typeof temp === 'string') {
             addTooManyFormsAlert(temp, ChaiseAlertType.WARNING);
           } else {
@@ -740,18 +746,33 @@ export default function RecordsetProvider({
     logParams.action = flowControl.current.getLogAction(act);
 
     (function (current, requestCauses, reloadStartTime) {
-      // the places that we want to show edit or delete button, we should also ask for trs
-      // NOTE technically this should be based on passed config options but we're passing editable
-      //      to mean both edit and create, so it's not really useful here
-      const getTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
-        || config.displayMode === RecordsetDisplayMode.FULLSCREEN;
+      /**
+       * the places that we want to show edit or delete button, we should also ask for trs.
+       * technically this should be based on passed config options but we're passing editable
+       * to mean both edit and create, so it's not really useful here.
+       * 
+       * for viewer channel selector popup, we need tcrs so we can disable
+       * the edit button for channels that user shouldn't be able to edit the channel config.
+       */
+      const getTRS =
+        config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0 ||
+        config.displayMode === RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP ||
+        config.displayMode === RecordsetDisplayMode.FULLSCREEN;
 
-      // if it's in related entity section, we should fetch the
-      // unlink trs (acl) of association tables
+      /**
+       * if it's in related entity section, we should fetch the
+       * unlink trs (acl) of association tables
+       */
       const getUnlinkTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
         && referenceRef.current.derivedAssociationReference;
 
-      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
+      /**
+       * for viewer channel selector popup, we need tcrs so we can disable
+       * the edit button for channels that user shouldn't be able to edit the channel config.
+       */
+      const getTCRs = config.displayMode === RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP;
+
+      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, getTCRs, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.slots.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;

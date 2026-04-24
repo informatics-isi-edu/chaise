@@ -80,7 +80,8 @@ export enum RecordsetDisplayMode {
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
   PURE_BINARY_POPUP_UNLINK = 'popup/purebinary/unlink',
-  SAVED_QUERY_POPUP = 'popup/savedquery'
+  SAVED_QUERY_POPUP = 'popup/savedquery',
+  VIEWER_CHANNEL_SELECTOR_POPUP = 'popup/viewer/channel'
 }
 
 export type RecordsetConfig = {
@@ -185,6 +186,14 @@ export type SelectedRow = {
   uniqueId: string | null;
   data?: any; // TODO
   tupleReference?: any; // TODO
+  /**
+   * the tuple object
+   * NOTE: this type was originally added for faceting,
+   * where we don't necessarily have the tuple object.
+   * But I realized that for the viewer channel selector, I need 
+   * to pass the tuple object so I can properly check the permissions for each channel and decide whether to disable them or not.
+   */
+  tuple?: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }

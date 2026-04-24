@@ -18,10 +18,17 @@ import {
   UnauthorizedViewerAccess,
   ViewerError,
 } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions, LogAppModes, LogObjectType, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogAppModes, LogObjectType, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
-import { DisabledRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  DisabledRow,
+  RecordsetConfig,
+  RecordsetDisplayMode,
+  RecordsetProps,
+  RecordsetSelectMode,
+  SelectedRow,
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -37,9 +44,10 @@ import ViewerAnnotationService from '@isrd-isi-edu/chaise/src/services/viewer-an
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
   ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
+  buildChannelListFromRows, fetchProcessedImageForChannels,
   hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex
 } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
-import { HELP_PAGES, ID_NAMES, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { HELP_PAGES, ID_NAMES, RECORDSET_DEFAULT_PAGE_SIZE, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isSafari, windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -167,6 +175,13 @@ export const ViewerContext = createContext<{
     item?: ViewerAnnotationModal,
     extraInfo?: any
   ) => void;
+  /**
+   * props for the channel selector modal; null means the modal is closed
+   */
+  channelSelectorModalProps: RecordsetProps | null;
+  channelSelectorSubmitting: boolean;
+  hideChannelSelectorModal: () => void;
+  onChannelSelectorSubmit: (rows: SelectedRow[]) => void;
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -279,6 +294,20 @@ export default function ViewerProvider({
   // passed to osd-viewer
   const osdViewerParameters = useRef<any>({});
 
+  // ERMrest Tuple objects for all currently-active channels; used to build disabled rows in the Add Channels modal.
+  // Indexed by osdItemId; entries are nulled out when a channel is removed via the toolbar.
+  const loadedChannelTuplesRef = useRef<any[]>([]);
+
+  // guard against React StrictMode double-invoking the initialization effect
+  const initializationStartedRef = useRef(false);
+
+  /**
+   * props for the Image_Channel selector modal that is opened from the osd iframe.
+   * Phase 1 of the lazy-channel-loading work — submit currently just logs and closes.
+   */
+  const [channelSelectorModalProps, setChannelSelectorModalProps] = useState<RecordsetProps | null>(null);
+  const [channelSelectorSubmitting, setChannelSelectorSubmitting] = useState(false);
+
   /**
    * Whether the main image is loaded or not.
    *
@@ -289,8 +318,11 @@ export default function ViewerProvider({
   const [mainImageLoaded, setMainImageLoaded, mainImageLoadedRef] = useStateRef(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    initializeViewerApp();
+    if (!initializationStartedRef.current) {
+      initializationStartedRef.current = true;
+      // eslint-disable-next-line react-hooks/immutability
+      initializeViewerApp();
+    }
 
     // eslint-disable-next-line react-hooks/immutability
     windowRef.addEventListener('message', recieveIframeMessage);
@@ -477,9 +509,10 @@ export default function ViewerProvider({
 
       return loadImageMetadata(osdViewerParameters, logInfo.logStack, logInfo.logStackPath, mainImageID!, defaultZIndex.current);
 
-    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean }) => {
+    }).then((imageMetaDataRes: { hasProcessedImage: boolean, hasChannelUrl: boolean, channelTuples: any[] }) => {
       hasProcessedImage = imageMetaDataRes.hasProcessedImage;
       hasChannelUrl = imageMetaDataRes.hasChannelUrl;
+      loadedChannelTuplesRef.current = imageMetaDataRes.channelTuples || [];
 
       // dont fetch annotation from db if:
       // - we have annotation query params
@@ -888,7 +921,135 @@ export default function ViewerProvider({
         dispatchError({ error: err, isDismissible: data.isDismissible, skipLogging: true });
         break;
       }
+      case 'channelRemoved': {
+        const removedIdx = parseInt(data.osdItemId);
+        if (!isNaN(removedIdx)) {
+          const updated = [...loadedChannelTuplesRef.current];
+          updated[removedIdx] = null;
+          loadedChannelTuplesRef.current = updated;
+        }
+        // Keep osdViewerParameters in sync so that re-adding the same channel doesn't
+        // produce a duplicate entry in the channels array sent with the next addChannels message.
+        if (data.channelNumber != null && Array.isArray(osdViewerParameters.current.channels)) {
+          osdViewerParameters.current.channels = osdViewerParameters.current.channels.filter(
+            (ch: any) => ch.channelNumber != data.channelNumber
+          );
+        }
+        break;
+      }
+      case 'showChannelSelector': {
+        // Phase 1: open the Image_Channel multi-select picker.
+        // The reference is built the same way as in viewer-utils._readImageChannelTable.
+        const channelConfig = ViewerConfigService.channelConfig;
+        if (!channelConfig || !imageIDRef.current) break;
+
+        const imageChannelURL = [
+          `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
+          `${fixedEncodeURIComponent(channelConfig.schema_name)}:${fixedEncodeURIComponent(channelConfig.table_name)}`
+        ].join('/');
+
+        ConfigService.ERMrest.resolve(imageChannelURL, ConfigService.contextHeaderParams).then((ref: any) => {
+          // add the image info and make sure it's not visible in the modal
+          const imageFacet = {
+            source: channelConfig.reference_image_column_name,
+            hidden: true,
+            choices: [imageIDRef.current],
+          }
+          const contextualizedRef = ref.addFacets([imageFacet]).contextualize.compact;
+          const recordsetConfig: RecordsetConfig = {
+            viewable: false,
+            editable: false,
+            deletable: false,
+            sortable: true,
+            selectMode: RecordsetSelectMode.MULTI_SELECT,
+            disableFaceting: false,
+            displayMode: RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP,
+          };
+
+          setChannelSelectorModalProps({
+            initialReference: contextualizedRef,
+            initialPageLimit: RECORDSET_DEFAULT_PAGE_SIZE,
+            config: recordsetConfig,
+            logInfo: {
+              logStack: LogService.getStackObject(LogService.getStackNode(LogStackTypes.CHANNEL, contextualizedRef.table, { picker: 1 })),
+              logStackPath: LogService.getStackPath(null, LogStackPaths.CHANNEL_SELECTOR_POPUP),
+            },
+            getDisabledTuples: (_page: any, _pageLimit: number, _logStack: any, _logStackPath: string) => {
+              return Promise.resolve({
+                page: _page,
+                disabledRows: loadedChannelTuplesRef.current
+                  .filter(Boolean)
+                  .map((t: any) => ({ tuple: t.tuple ?? t })) as DisabledRow[],
+              });
+            },
+            onSelectedRowsChanged: (rows: SelectedRow[]): boolean | string => {
+              if (rows.length > VIEWER_CONSTANT.MAX_CHANNELS_PER_ADD) {
+                return `The maximum number of channels that can be added at a time is ${VIEWER_CONSTANT.MAX_CHANNELS_PER_ADD}.`;
+              }
+              return true;
+            },
+            uiContextTitles: [{ displayname: { value: 'Channels', isHTML: false } }],
+          });
+        }).catch((err: any) => {
+          $log.warn('failed to open channel selector', err);
+        });
+        break;
+      }
     }
+  };
+
+  const hideChannelSelectorModal = () => setChannelSelectorModalProps(null);
+
+  const onChannelSelectorSubmit = (rows: SelectedRow[]) => {
+    const channelConfig = ViewerConfigService.channelConfig;
+    const channelNumbers = rows
+      .map((r) => r.data?.[channelConfig.channel_number_column_name])
+      .filter((n) => n != null);
+    const newChannelList = buildChannelListFromRows(rows);
+
+    const sendAddChannels = (newMainImageInfo: any[]) => {
+      const existingInfo = osdViewerParameters.current.mainImage?.info ?? [];
+      const newMainImage = { zIndex: defaultZIndex.current, info: [...existingInfo, ...newMainImageInfo] };
+
+      osdViewerParameters.current.channels = [...(osdViewerParameters.current.channels ?? []), ...newChannelList];
+      osdViewerParameters.current.mainImage = newMainImage;
+      loadedChannelTuplesRef.current = [...loadedChannelTuplesRef.current, ...(rows as any[])];
+
+      const iframe = getOSDViewerIframe().contentWindow!;
+      iframe.postMessage({
+        messageType: 'addChannels',
+        content: {
+          channels: newChannelList,
+          mainImage: { zIndex: defaultZIndex.current, info: newMainImageInfo },
+          hasMore: osdViewerParameters.current.hasMore,
+          totalChannelCount: osdViewerParameters.current.totalChannelCount,
+        },
+      }, windowRef.location.origin);
+
+      hideChannelSelectorModal();
+    };
+
+    if (channelNumbers.length === 0) {
+      sendAddChannels([]);
+      return;
+    }
+
+    setChannelSelectorSubmitting(true);
+    fetchProcessedImageForChannels(
+      imageIDRef.current!,
+      channelNumbers,
+      defaultZIndex.current,
+      logInfo.logStack,
+      logInfo.logStackPath,
+    ).then((mainImageInfo) => {
+      setChannelSelectorSubmitting(false);
+      sendAddChannels(mainImageInfo);
+    }).catch((err: any) => {
+      $log.warn('failed to load selected channels', err);
+      setChannelSelectorSubmitting(false);
+      hideChannelSelectorModal();
+      addAlert('Failed to load the selected channels. Please try again.', ChaiseAlertType.ERROR);
+    });
   };
 
   const getAnnotURL = (id: string) => {
@@ -1696,6 +1857,10 @@ export default function ViewerProvider({
       logViewerClientAction,
       viewerError,
       mainImageLoaded,
+      channelSelectorModalProps,
+      channelSelectorSubmitting,
+      hideChannelSelectorModal,
+      onChannelSelectorSubmit,
     };
   }, [
     imageID,
@@ -1713,6 +1878,8 @@ export default function ViewerProvider({
     highlightedAnnotationIndex,
     viewerError,
     mainImageLoaded,
+    channelSelectorModalProps,
+    channelSelectorSubmitting,
   ]);
 
   return (

@@ -2,6 +2,7 @@ import React from 'react';
 
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import ViewerConfigService from '@isrd-isi-edu/chaise/src/services/viewer-config';
@@ -196,24 +197,36 @@ export const loadImageMetadata = (
   viewerLogStackPath: string,
   imageID: string,
   defaultZIndex?: number,
-): Promise<{ hasProcessedImage: boolean, hasChannelUrl: boolean }> => {
+): Promise<{ hasProcessedImage: boolean, hasChannelUrl: boolean, channelTuples: any[] }> => {
   return new Promise((resolve, reject) => {
     let channelURLs: string[] = [];
     let hasProcessedImage = false, hasChannelUrl = false;
+    let channelTuples: any[] = [];
 
-    // first read the channel info
-    _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath).then(function (res) {
+    // first read the channel info (up to CHANNEL_THRESHOLD rows, plus total count)
+    _readImageChannelTable(imageID, viewerLogStack, viewerLogStackPath, VIEWER_CONSTANT.CHANNEL_THRESHOLD).then(function (res) {
       osdViewerParameters.current.channels = res.channelList;
+      channelTuples = res.channelTuples;
+
+      const hasMore = res.totalCount > VIEWER_CONSTANT.CHANNEL_THRESHOLD;
+      osdViewerParameters.current.hasMore = hasMore;
+      osdViewerParameters.current.totalChannelCount = res.totalCount;
 
       // backward compatibility
       channelURLs = res.channelURLs;
       hasChannelUrl = channelURLs.length > 0;
 
-      return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath);
-    }).then(function () {
+      // when there are more channels than the threshold, filter Processed_Image to only the loaded channel numbers
+      const channelNumbers = hasMore
+        ? res.channelList.map((ch: any) => ch[VIEWER_CONSTANT.OSD_VIEWER.CHANNEL_NUMBER_QPARAM])
+        : undefined;
 
-      // read the main image (processed data)
-      return _readProcessedImageTable(processedImageReference, defaultZIndex);
+      return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath, channelNumbers);
+    }).then(function (refs) {
+
+      // when hasMore is true we loaded exactly CHANNEL_THRESHOLD channels, so read the same number of processed image rows
+      const processedImageLimit = osdViewerParameters.current.hasMore ? VIEWER_CONSTANT.CHANNEL_THRESHOLD : undefined;
+      return _readProcessedImageTable(refs, defaultZIndex, processedImageLimit);
     }).then(function (mainImageInfo) {
       hasProcessedImage = mainImageInfo.length > 0;
 
@@ -256,11 +269,11 @@ export const loadImageMetadata = (
         osdViewerParameters.current.zPlane.maxZIndex = res[2];
       }
 
-      resolve({ hasProcessedImage, hasChannelUrl });
+      resolve({ hasProcessedImage, hasChannelUrl, channelTuples });
     }).catch(function (err) {
       // just log the error and resolve with empty array
       $log.error('error while getting channel info: ', err);
-      resolve({ hasProcessedImage, hasChannelUrl });
+      resolve({ hasProcessedImage, hasChannelUrl, channelTuples });
     });
   });
 }
@@ -646,20 +659,76 @@ const _getChannelConfigFormatVersion = () => {
 }
 
 /**
+ * Map a single row's data + tuple into the channel entry format used in osdViewerParameters.channels.
+ * channelNameFallback is used when channel_name is absent (processPage passes the running index; buildChannelListFromRows passes channelNumber).
+ */
+const _buildChannelEntry = (data: any, tuple: any, channelNameFallback: any): any => {
+  const channelConfig = ViewerConfigService.channelConfig;
+  const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
+
+  const pseudoColor = data[channelConfig.pseudo_color_column_name];
+  const channelName = data[channelConfig.channel_name_column_name];
+  const channelNumber = data[channelConfig.channel_number_column_name];
+  const isRGB = data[channelConfig.is_rgb_column_name];
+
+  let channelConfigs = data[channelConfig.channel_config_column_name];
+  let hasConfig = false;
+
+  channelConfigs = isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
+  if (Array.isArray(channelConfigs)) {
+    channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
+    if (channelConfigs.length > 0) {
+      channelConfigs = channelConfigs[0];
+      hasConfig = true;
+    }
+  } else if (_isAppropriateChannelConfig(channelConfigs)) {
+    hasConfig = true;
+  }
+
+  const res: any = {
+    acls: {
+      canUpdateConfig: tuple
+        ? tuple.canUpdate && tuple.checkPermissions('column_update', channelConfig.channel_config_column_name)
+        : false,
+    },
+  };
+  res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber;
+  res[osdConstant.CHANNEL_NAME_QPARAM] = isStringAndNotEmpty(channelName) ? channelName : channelNameFallback;
+  res[osdConstant.PSEUDO_COLOR_QPARAM] = isStringAndNotEmpty(pseudoColor) ? pseudoColor : null;
+  res[osdConstant.IS_RGB_QPARAM] = typeof isRGB === 'boolean' ? isRGB : null;
+  if (hasConfig) {
+    res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
+  }
+
+  return res;
+};
+
+/**
 * Send request to image channel table and returns a promise that is resolved
 * returns {
 *   channelURLs: [{url, channelNumber}], // used for backward compatibility
 *   channelList: [{channelNumber, channelName, isRGB, pseudoColor, acls: {canUpdateConfig}}],
 * }
-*
+* 
+* @param imageID the id of the image
+* @param viewerLogStack the log stack of the viewer, used for logging
+* @param viewerLogStackPath the log stack path of the viewer, used for logging
+* @param limit the maximum number of channels to return; if not provided, will return all channels
 */
-const _readImageChannelTable = async (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<{
+const _readImageChannelTable = async (
+  imageID: string,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+  limit?: number,
+): Promise<{
   channelURLs: string[],
   channelList: any[],
+  channelTuples: any[],
+  totalCount: number,
 }> => {
   return new Promise((resolve, reject) => {
-    console.log('reading channel table');
-    const channelList: any[] = [], channelURLs: any[] = [];
+    const channelList: any[] = [], channelURLs: any[] = [], channelTuples: any[] = [];
+    let hasNull = false;
 
     const channelConfig = ViewerConfigService.channelConfig;
     const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
@@ -671,19 +740,15 @@ const _readImageChannelTable = async (imageID: string, viewerLogStack: any, view
       `${fixedEncodeURIComponent(channelConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageID)}`
     ].join('/');
 
-    let hasNull = false;
     ConfigService.ERMrest.resolve(imageChannelURL, ConfigService.contextHeaderParams).then((ref: any) => {
       if (!ref) {
-        return false;
+        resolve({ channelURLs: [], channelList: [], channelTuples: [], totalCount: 0 });
+        return;
       }
 
       channelSetLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.CHANNEL_SET);
       channelSetLogStack = LogService.getStackObject(
-        LogService.getStackNode(
-          LogStackTypes.CHANNEL,
-          ref.table,
-          {}
-        ),
+        LogService.getStackNode(LogStackTypes.CHANNEL, ref.table, {}),
         viewerLogStack
       );
       const logObj = {
@@ -691,173 +756,199 @@ const _readImageChannelTable = async (imageID: string, viewerLogStack: any, view
         stack: channelSetLogStack
       };
 
-      // make sure it's properly sorted
       ref = ref.contextualize.compact.sort(channelConfig.column_order);
 
-      // send request to server
-      // since we want to check the ACL for updating the channel config we have to ask for TCRS
-      // NOTE we cannot ask for entity since we want the TCRS info
-      return _readPageByPage(
-        ref,
-        VIEWER_CONSTANT.DEFAULT_PAGE_SIZE,
-        logObj,
-        false,
-        true,
-        (page: any) => {
-          for (let i = 0; i < page.tuples.length; i++) {
-            const t = page.tuples[i];
+      const countCol = ref.columns.find((col: any) => col.name === channelConfig.channel_number_column_name);
 
-            const pseudoColor = t.data[channelConfig.pseudo_color_column_name],
-              channelName = t.data[channelConfig.channel_name_column_name],
-              channelNumber = t.data[channelConfig.channel_number_column_name];
+      const processPage = (page: any): boolean => {
+        for (let i = 0; i < page.tuples.length; i++) {
+          const t = page.tuples[i];
+          const res = _buildChannelEntry(t.data, t, channelList.length);
 
-            let channelConfigs = t.data[channelConfig.channel_config_column_name],
-              hasConfig = false
+          channelList.push(res);
+          channelTuples.push(t);
 
-            // create the channel info
-            let res: any = {};
-
-            res.acls = {
-              canUpdateConfig: t.canUpdate && t.checkPermissions('column_update', channelConfig.channel_config_column_name)
-            };
-
-            res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
-
-            res[osdConstant.CHANNEL_NAME_QPARAM] = isStringAndNotEmpty(channelName) ? channelName : channelList.length;
-
-            res[osdConstant.PSEUDO_COLOR_QPARAM] = isStringAndNotEmpty(pseudoColor) ? pseudoColor : null;
-
-            const isRGB = t.data[channelConfig.is_rgb_column_name];
-            res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === 'boolean') ? isRGB : null;
-
-            // config
-            channelConfigs = isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
-            if (Array.isArray(channelConfigs)) {
-              channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
-              if (channelConfigs.length > 0) {
-                channelConfigs = channelConfigs[0];
-                hasConfig = true;
-              }
-            } else if (_isAppropriateChannelConfig(channelConfigs)) {
-              hasConfig = true;
-            }
-            if (hasConfig) {
-              res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
-            }
-
-            channelList.push(res);
-
-            // if any of the urls are null, then none of the values are valid
-            if (channelConfig.image_url_column_name) {
-              const channelURL = t.data[channelConfig.image_url_column_name];
-              if (isStringAndNotEmpty(channelURL)) {
-                channelURLs.push({ channelNumber: channelNumber, url: channelURL });
-              } else {
-                hasNull = true;
-              }
+          if (channelConfig.image_url_column_name) {
+            const channelNumber = t.data[channelConfig.channel_number_column_name];
+            const channelURL = t.data[channelConfig.image_url_column_name];
+            if (isStringAndNotEmpty(channelURL)) {
+              channelURLs.push({ channelNumber: channelNumber, url: channelURL });
+            } else {
+              hasNull = true;
             }
           }
-
-          return true;
         }
-      );
-    }).then(() => {
-      resolve({
-        // backward compatibility
-        // if any of the urls are null, we shouldn't use any of the urls
-        channelURLs: hasNull ? [] : channelURLs,
-        channelList
-      });
-    }).catch((err: any) => reject(err));
-  });
-}
-
-/**
-         * Send request to processed image table and returns a promise that is resolved
-         * used for default z
-         * returns [{url, channelNumber}]
-         */
-function _readProcessedImageTable(pImageReference: any, defaultZIndex?: number): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    $log.log('reading processed image table');
-    const pImageConfig = ViewerConfigService.processsedImageConfig;
-    const mainImageInfo: any = [];
-
-    // TODO does this make sense?
-    let url = pImageReference.location.uri;
-    if (defaultZIndex !== null && defaultZIndex !== undefined && pImageConfig.z_index_column_name) {
-      url += '&' + fixedEncodeURIComponent(pImageConfig.z_index_column_name);
-      url += '=' + fixedEncodeURIComponent(defaultZIndex.toString());
-    }
-
-
-    let hasNull = false;
-    ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((ref: any) => {
-      if (!ref) {
-        return false;
-      }
-
-      const logObj = {
-        action: LogService.getActionString(LogActions.LOAD, zPlaneEntityLogStackPath),
-        stack: (defaultZIndex !== null && defaultZIndex !== undefined) ?
-          LogService.addExtraInfoToStack(zPlaneLogStack, { 'z_index': defaultZIndex, 'default_z': true }) : zPlaneLogStack
+        return true;
       };
 
-      // make sure it's properly sorted
-      ref = ref.contextualize.compact.sort(pImageConfig.column_order);
+      const finish = (totalCount: number) => {
+        resolve({ channelURLs: hasNull ? [] : channelURLs, channelList, channelTuples, totalCount });
+      }
 
-      // send request to server
-      return _readPageByPage(
-        ref,
-        VIEWER_CONSTANT.DEFAULT_PAGE_SIZE,
-        logObj,
-        false,
-        false,
-        (page: any) => {
-          for (let i = 0; i < page.tuples.length && !hasNull; i++) {
-            const t = page.tuples[i];
-            const imageURL = _createImageURL(t.data);
-
-            // if any of the urls are null, then none of the values are valid
-            if (!isStringAndNotEmpty(imageURL)) {
-              hasNull = true;
-              return false;
-            }
-
-            mainImageInfo.push({
-              url: imageURL,
-              channelNumber: t.data[pImageConfig.channel_number_column_name]
-            });
-          }
-          return true;
-        }
-      );
-    }).then(function () {
-      resolve(hasNull ? [] : mainImageInfo);
+      if (limit !== undefined) {
+        // fetch the count and the first page in parallel, then process that one page
+        return Promise.all([
+          countCol
+            ? ref.getAggregates([countCol.aggregate.countDistinctAgg], logObj)
+            : Promise.resolve([0]),
+          // NOTE: cannot use entity context; need TCRS to check per-column ACLs
+          ref.read(limit, logObj, false, true, false, true),
+        ]).then(([countResult, firstPage]: [any[], any]) => {
+          const totalCount =
+            Array.isArray(countResult) && countResult.length > 0 ? countResult[0] : 0;
+          processPage(firstPage);
+          finish(totalCount);
+        }).catch((err: any) => reject(err));
+      } else {
+        // no limit: read all pages; total is whatever was actually read
+        return _readPageByPage(ref, VIEWER_CONSTANT.DEFAULT_PAGE_SIZE, logObj, false, true, processPage)
+          .then(() => finish(channelList.length))
+          .catch((err: any) => reject(err));
+      }
     }).catch((err: any) => reject(err));
   });
 }
 
 /**
- * populate the variables that are used in different places
+ * Send request to processed image table and returns a promise that is resolved
+ * used for default z
+ * returns [{url, channelNumber}]
+ * 
+ * @param pImageReference the reference to the processed image table
+ * @param defaultZIndex the default z index to use for fetching the processed images; if not provided, will fetch without filtering by z index
+ * @param limit the maximum number of processed images to return; if not provided, will return all processed images for the given z index
  */
-const _createProcessedImageReference = (imageID: string, viewerLogStack: any, viewerLogStackPath: string): Promise<void> => {
+function _readProcessedImageTable(pImageReferences: any[], defaultZIndex?: number, limit?: number): Promise<any[]> {
+  const pImageConfig = ViewerConfigService.processsedImageConfig;
+
+  const readSingleRef = (pImageReference: any): Promise<any[] | null> => {
+    return new Promise((resolve, reject) => {
+      $log.log('reading processed image table');
+      const mainImageInfo: any[] = [];
+
+      let url = pImageReference.location.uri;
+      if (defaultZIndex !== null && defaultZIndex !== undefined && pImageConfig.z_index_column_name) {
+        url += '&' + fixedEncodeURIComponent(pImageConfig.z_index_column_name);
+        url += '=' + fixedEncodeURIComponent(defaultZIndex.toString());
+      }
+
+      let hasNull = false;
+
+      const processPage = (page: any): boolean => {
+        for (let i = 0; i < page.tuples.length && !hasNull; i++) {
+          const t = page.tuples[i];
+          const imageURL = _createImageURL(t.data);
+
+          if (!isStringAndNotEmpty(imageURL)) {
+            hasNull = true;
+            return false;
+          }
+
+          mainImageInfo.push({
+            url: imageURL,
+            channelNumber: t.data[pImageConfig.channel_number_column_name]
+          });
+        }
+        return true;
+      };
+
+      ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((ref: any) => {
+        if (!ref) {
+          return false;
+        }
+
+        const logObj = {
+          action: LogService.getActionString(LogActions.LOAD, zPlaneEntityLogStackPath),
+          stack: (defaultZIndex !== null && defaultZIndex !== undefined) ?
+            LogService.addExtraInfoToStack(zPlaneLogStack, { 'z_index': defaultZIndex, 'default_z': true }) : zPlaneLogStack
+        };
+
+        ref = ref.contextualize.compact.sort(pImageConfig.column_order);
+
+        if (limit !== undefined) {
+          return ref.read(limit, logObj, false, true, false, false)
+            .then((page: any) => { processPage(page); });
+        } else {
+          return _readPageByPage(ref, VIEWER_CONSTANT.DEFAULT_PAGE_SIZE, logObj, false, false, processPage);
+        }
+      }).then(function () {
+        // null signals a missing URL in the results; callers treat this as a failed read
+        resolve(hasNull ? null : mainImageInfo);
+      }).catch((err: any) => reject(err));
+    });
+  };
+
+  return Promise.all(pImageReferences.map(readSingleRef)).then((results) => {
+    // If any batch returned null (missing image URL), treat the whole read as failed
+    if (results.some((r) => r === null)) return [];
+    return (results as any[][]).flat();
+  });
+}
+
+/**
+ * populate the variables that are used in different places.
+ * Returns an array of resolved references — one per filter batch. There is normally
+ * only one, but generateKeyValueFilters may split a large channel list across multiple
+ * URLs when the list would exceed the URL length limit.
+ */
+const _createProcessedImageReference = (
+  imageID: string,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+  channelNumbers?: (string | number)[],
+): Promise<any[]> => {
   return new Promise((resolve, reject) => {
 
     const pImageConfig = ViewerConfigService.processsedImageConfig;
 
-    const url = [
-      `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/entity`,
+    const baseUrl = [
+      `/catalog/${ConfigService.catalogID}/entity`,
       `${fixedEncodeURIComponent(pImageConfig.schema_name)}:${fixedEncodeURIComponent(pImageConfig.table_name)}`,
       `${fixedEncodeURIComponent(pImageConfig.reference_image_column_name)}=${fixedEncodeURIComponent(imageID)}`
     ].join('/');
 
-    ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams).then((res: any) => {
-      if (!res) {
-        return false;
+    // Build one URL per filter batch (multiple batches only when channel list exceeds URL length limit)
+    let urls: string[];
+
+    if (channelNumbers && channelNumbers.length > 0) {
+      const filterRes = ConfigService.ERMrest.generateKeyValueFilters(
+        [{ name: pImageConfig.channel_number_column_name }],
+        channelNumbers.map((num) => {
+          const res: Record<string, unknown> = {};
+          res[pImageConfig.channel_number_column_name] = num;
+          return res;
+        }),
+        ConfigService.catalog,
+        baseUrl.length + 1,
+        'Image Channel'
+      );
+
+      if (!filterRes.successful) {
+        $log.error('Error generating filters for channel numbers: ', filterRes.error);
+        reject(filterRes.error);
+        return;
       }
 
-      processedImageReference = res.contextualize.compact;
+      urls = filterRes.filters.map((filter: any) => {
+        const suffix = filterRes.usedQuantified ? `&${filter.path}` : `&(${filter.path})`;
+        return ConfigService.chaiseConfig.ermrestLocation + baseUrl + suffix;
+      });
+    } else {
+      urls = [ConfigService.chaiseConfig.ermrestLocation + baseUrl];
+    }
+
+    Promise.all(
+      urls.map((url) => ConfigService.ERMrest.resolve(url, ConfigService.contextHeaderParams))
+    ).then((results: any[]) => {
+      const refs = results.map((res: any) => {
+        if (!res) throw new Error('failed to resolve Processed_Image reference');
+        return res.contextualize.compact;
+      });
+
+      // All refs point to the same table, so any one suffices for schema/metadata usage
+      // (column lookup, aggregate queries, attribute group reference). Only _readProcessedImageTable
+      // needs all refs to read data across every channel batch.
+      processedImageReference = refs[0];
 
       zPlaneSetLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.Z_PLANE_SET);
       zPlaneEntityLogStackPath = LogService.getStackPath(viewerLogStackPath, LogStackPaths.Z_PLANE_ENTITY);
@@ -870,7 +961,7 @@ const _createProcessedImageReference = (imageID: string, viewerLogStack: any, vi
         viewerLogStack
       );
 
-      resolve();
+      resolve(refs);
     }).catch((err: any) => reject(err));
 
   });
@@ -1085,3 +1176,29 @@ const _getActiveZIndex = (images: any[], inputZIndex: number) => {
 
   return res;
 }
+
+/**
+ * Build the channelList format (used in osdViewerParameters.current.channels) from RecordsetModal selected rows.
+ */
+export const buildChannelListFromRows = (rows: SelectedRow[]): any[] => {
+  return rows.map((row) => {
+    const data = row.data || {};
+    const channelNumber = data[ViewerConfigService.channelConfig.channel_number_column_name];
+    return _buildChannelEntry(data, row.tuple, channelNumber);
+  });
+};
+
+/**
+ * Fetch Processed_Image rows for specific channel numbers and return mainImageInfo array.
+ * Used after the channel selector modal submits.
+ */
+export const fetchProcessedImageForChannels = (
+  imageID: string,
+  channelNumbers: (string | number)[],
+  defaultZIndex: number | undefined,
+  viewerLogStack: any,
+  viewerLogStackPath: string,
+): Promise<any[]> => {
+  return _createProcessedImageReference(imageID, viewerLogStack, viewerLogStackPath, channelNumbers)
+    .then((refs) => _readProcessedImageTable(refs, defaultZIndex));
+};
