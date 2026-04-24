@@ -22,7 +22,13 @@ export interface RecordRelatedModel {
   initialReference: any,
   /** whether this related entity has a condition controlling its visibility */
   isConditioned?: boolean,
-  /** whether condition evaluated to hide (true = hidden) */
+  /**
+   * Whether to hide this related entity due to its condition.
+   * Starts as `true` when `isConditioned` is set, meaning the item is hidden
+   * until the condition fully resolves (all wait_for sources fetched and
+   * condition evaluated). Only set to `false` when the condition evaluates
+   * to "show". In all other states (pending, evaluated to hide), remains `true`.
+   */
   conditionHide?: boolean,
   /**
    * whether we're showing the tabular view or custom view
@@ -70,7 +76,13 @@ export interface RecordColumnModel {
   relatedModel?: RecordRelatedModel,
   /** whether this column has a condition controlling its visibility */
   isConditioned?: boolean,
-  /** whether condition evaluated to hide (true = hidden) */
+  /**
+   * Whether to hide this column due to its condition.
+   * Starts as `true` when `isConditioned` is set, meaning the column is hidden
+   * until the condition fully resolves (all wait_for sources fetched and
+   * condition evaluated). Only set to `false` when the condition evaluates
+   * to "show". In all other states (pending, evaluated to hide), remains `true`.
+   */
   conditionHide?: boolean,
 }
 

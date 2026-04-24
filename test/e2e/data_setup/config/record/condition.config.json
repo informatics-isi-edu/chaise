@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "condition-test",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/record/condition.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/condition"
+    }
+}

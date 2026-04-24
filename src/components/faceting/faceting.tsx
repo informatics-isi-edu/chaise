@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/immutability */
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 //react-beatiful-dnd

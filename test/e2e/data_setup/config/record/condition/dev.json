@@ -1,0 +1,8 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "record/condition.config.json"
+        ]
+    },
+    "cleanup": true
+}

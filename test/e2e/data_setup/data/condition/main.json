@@ -1,0 +1,4 @@
+[
+    {"id": 1, "title": "Row 1", "fk_col": 1, "local_col": "local_val_1", "local_col_2": "local_val_2", "local_col_3": "local_val_3", "local_col_4": "local_val_4"},
+    {"id": 2, "title": "Row 2", "fk_col": 2, "local_col": "local_val_1", "local_col_2": "local_val_2", "local_col_3": "local_val_3", "local_col_4": "local_val_4"}
+]

@@ -821,7 +821,7 @@ export default function RecordProvider({
     // column models
     const computedColumnModels: RecordColumnModel[] = [];
     reference.columns.forEach((col: any, index: number) => {
-      const requireSecondaryRequest = col.hasWaitFor || col.hasCondition || !col.isUnique;
+      const requireSecondaryRequest = col.hasWaitFor || !col.isUnique;
       if (requireSecondaryRequest) {
         ++flowControl.current.numColsRequireSecondaryRequests;
       }
@@ -1408,7 +1408,7 @@ export default function RecordProvider({
     condModel.evaluated = true;
     condModel.shouldShow = result.shouldShow;
 
-    printDebugMessage(`condition evaluated: shouldShow=${result.shouldShow}`);
+    printDebugMessage(`condition evaluated for ${condColName}: shouldShow=${result.shouldShow}`);
 
     if (result.shouldShow) {
       // enqueue dependent requests
