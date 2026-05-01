@@ -25,8 +25,8 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { removePrefillData } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 import RecordeditInitialLoadFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-initial-load-flow-control';
 import RecordeditWaitForFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-wait-for-flow-control';
 
@@ -583,9 +583,9 @@ export default function RecordeditProvider({
           // make sure the leave alert is disabled
           canLeaveRecordedit.current = true;
 
-          // cleanup the prefill query parameter
+          // cleanup the prefill localStorage entry
           if (queryParams.prefill) {
-            CookieService.deleteCookie(queryParams.prefill);
+            removePrefillData(queryParams.prefill);
           }
 
           // if there is a parent page, send a message that the edit/create is finished

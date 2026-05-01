@@ -28,6 +28,7 @@ import ErrorProvider from '@isrd-isi-edu/chaise/src/providers/error';
 
 // services
 import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+import { sweepStalePrefillEntries } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 
 // utils
 import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -188,6 +189,9 @@ const AppWrapperInner = ({
   };
 
   useEffect(() => {
+    // sweep stale prefill localStorage entries
+    sweepStalePrefillEntries();
+
     const onError = (event: any) => {
       dispatchError({ error: event.error });
     };
