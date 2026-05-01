@@ -23,8 +23,8 @@ import {
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { setPrefillData } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 
 // utils
 import {
@@ -245,11 +245,10 @@ const RelatedTableActions = ({
       relatedModel.initialReference.defaultLogInfo
     );
 
-    // Generate a unique cookie name and set it to expire after 24hrs.
-    const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
-    const cookieValue = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
+    // Generate a unique id used as the localStorage key for the prefill data.
+    const prefillId = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
     // eslint-disable-next-line react-hooks/purity
-    CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + 60 * 60 * 24 * 1000));
+    setPrefillData(prefillId, getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]));
 
     // Generate a unique id for this request
     // append it to the URL
@@ -270,7 +269,7 @@ const RelatedTableActions = ({
       addQueryParamsToURL(
         relatedModel.initialReference.unfilteredReference.contextualize.entryCreate.appLink,
         {
-          prefill: cookieName,
+          prefill: prefillId,
           invalidate: referrer_id,
         }
       ),

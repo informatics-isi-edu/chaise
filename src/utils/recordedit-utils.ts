@@ -14,9 +14,9 @@ import {
 import { DisabledRow, DisabledRowType, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { getPrefillData } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 
 // utilities
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
@@ -740,30 +740,30 @@ export function populateLinkedData(reference: any, formNumber: number, foreignKe
  */
 export function getPrefillObject(queryParams: any): null | PrefillObject {
   if (!queryParams.prefill) return null;
-  const cookie = CookieService.getCookie(queryParams.prefill, true) as PrefillObject;
-  if (cookie == null || typeof cookie !== 'object') {
+  const stored = getPrefillData(queryParams.prefill);
+  if (stored == null || typeof stored !== 'object') {
     return null;
   }
 
   // make sure all the keys are in the object
   if (!(
-    ('keys' in cookie) && ('columnNameToRID' in cookie) && ('fkColumnNames' in cookie) &&
-    ('origUrl' in cookie) && ('rowname' in cookie)
+    ('keys' in stored) && ('columnNameToRID' in stored) && ('fkColumnNames' in stored) &&
+    ('origUrl' in stored) && ('rowname' in stored)
   )) {
     return null;
   }
 
   // validate the values
-  if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
+  if (!Array.isArray(stored.fkColumnNames) || typeof stored.origUrl !== 'string') {
     return null;
   }
 
   return {
-    keys: cookie.keys,
-    fkColumnNames: cookie.fkColumnNames,
-    columnNameToRID: cookie.columnNameToRID,
-    origUrl: cookie.origUrl,
-    rowname: cookie.rowname
+    keys: stored.keys,
+    fkColumnNames: stored.fkColumnNames,
+    columnNameToRID: stored.columnNameToRID,
+    origUrl: stored.origUrl,
+    rowname: stored.rowname
   }
 }
 

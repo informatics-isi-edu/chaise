@@ -1,67 +1,78 @@
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 export default class LocalStorage {
-  static localStorageNotAvailable = false;
-
-  static localStorage: any = null;
-
-  // TODO: figure out how to initialize this
-  constructor() {
-    // a simple test to ensure localStorage is available
-    // (in some cases localStorage might be null)
+  static localStorageNotAvailable = (() => {
     try {
-      const test = 'test';
+      const test = '__chaise_storage_probe__';
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
-    } catch (e: unknown) {
-      // $log.warn(messageMap.localStorageDisabled);
-      console.log('local storage disabled');
-      LocalStorage.localStorageNotAvailable = true;
+      return false;
+    } catch {
+      $log.warn('localStorage is not available');
+      return true;
     }
-  }
+  })();
+
+  static localStorage: any = null;
 
   /**
    * Deletes all the data in local storage defined under `storageLocation`
    *
-   * @param {String} storageLocation - name of object data is stored under
+   * @param storageLocation - name of object data is stored under
+   * @returns true if the operation succeeded
    */
-  static deleteStorageNamespace = function (storageLocation: string) {
-    if (LocalStorage.localStorageNotAvailable) return;
+  static deleteStorageNamespace = function (storageLocation: string): boolean {
+    if (LocalStorage.localStorageNotAvailable) return false;
 
-    localStorage.removeItem(storageLocation);
+    try {
+      localStorage.removeItem(storageLocation);
+      return true;
+    } catch (e) {
+      $log.warn(`failed to remove localStorage key "${storageLocation}"`, e);
+      return false;
+    }
   };
 
   /**
    * Deletes the data in local storage defined under `storageLocation` with `keyName`
    *
-   * @param {String} storageLocation - name of object data is stored under
-   * @param {String} keyName - key name of the data to be deleted
+   * @param storageLocation - name of object data is stored under
+   * @param keyName - key name of the data to be deleted
+   * @returns true if the operation succeeded
    */
-  static deleteStorageValue = function (storageLocation: string, keyName: string) {
-    if (LocalStorage.localStorageNotAvailable) return;
+  static deleteStorageValue = function (storageLocation: string, keyName: string): boolean {
+    if (LocalStorage.localStorageNotAvailable) return false;
 
     const value = LocalStorage.getStorage(storageLocation);
+    if (!value) return false;
 
     delete value[keyName];
-    LocalStorage.setStorage(storageLocation, value);
+    return LocalStorage.setStorage(storageLocation, value);
   };
 
   /**
    * Stores data in local storage under `storageLocation`
    *
-   * @param {String} storageLocation - name of object data is stored under
-   * @param {Object} data - data to be stored
+   * @param storageLocation - name of object data is stored under
+   * @param data - data to be stored
+   * @returns true if the operation succeeded
    */
-  static setStorage = function (storageLocation: string, data: object) {
-    if (LocalStorage.localStorageNotAvailable) return;
+  static setStorage = function (storageLocation: string, data: object): boolean {
+    if (LocalStorage.localStorageNotAvailable) return false;
 
-    localStorage.setItem(storageLocation, JSON.stringify(data));
+    try {
+      localStorage.setItem(storageLocation, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      $log.warn(`failed to write localStorage key "${storageLocation}"`, e);
+      return false;
+    }
   };
 
   /**
    * Gets the data in local storage defined under `storageLocation`
    *
-   * @param {String} storageLocation - name of object data is stored under
+   * @param storageLocation - name of object data is stored under
    */
   static getStorage = function (storageLocation: string) {
     if (LocalStorage.localStorageNotAvailable) return null;
@@ -78,11 +89,12 @@ export default class LocalStorage {
   /**
    * Updates the data in local storage under `storageLocation`
    *
-   * @param {Object} data - data to be updated
-   * @param {String} storageLocation - name of object data is stored under
+   * @param storageLocation - name of object data is stored under
+   * @param data - data to be merged into the existing entry
+   * @returns true if the operation succeeded
    */
-  static updateStorage = function (storageLocation: string, data: any) {
-    if (LocalStorage.localStorageNotAvailable) return;
+  static updateStorage = function (storageLocation: string, data: any): boolean {
+    if (LocalStorage.localStorageNotAvailable) return false;
 
     const storedData = LocalStorage.getStorage(storageLocation) || {} as any;
 
@@ -90,8 +102,28 @@ export default class LocalStorage {
       storedData[key] = data[key];
     });
 
-    LocalStorage.setStorage(storageLocation, storedData);
+    return LocalStorage.setStorage(storageLocation, storedData);
   };
 
-  static isAvailable = (LocalStorage.localStorageNotAvailable === false);
+  /**
+   * Returns all localStorage keys that start with the given prefix.
+   * Use this instead of touching `window.localStorage` directly so callers
+   * stay isolated from the storage availability check.
+   *
+   * @param prefix - the key prefix to match
+   */
+  static getKeysWithPrefix = function (prefix: string): string[] {
+    if (LocalStorage.localStorageNotAvailable) return [];
+
+    const keys: string[] = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) keys.push(key);
+      }
+    } catch (e) {
+      $log.warn('failed to iterate localStorage keys', e);
+    }
+    return keys;
+  };
 }
