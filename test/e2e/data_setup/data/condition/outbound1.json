@@ -1,4 +1,4 @@
 [
-    {"id": 1, "outbound1_col": "outbound1_row1", "fk_col": 1},
-    {"id": 2, "outbound1_col": "outbound1_row2", "fk_col": 2}
+    {"id": 1, "name": "o1_a", "fk_col": 1},
+    {"id": 2, "name": "o1_b", "fk_col": 2}
 ]

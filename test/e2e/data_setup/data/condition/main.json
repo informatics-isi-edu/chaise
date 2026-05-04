@@ -1,4 +1,4 @@
 [
-    {"id": 1, "title": "Row 1", "fk_col": 1, "local_col": "local_val_1", "local_col_2": "local_val_2", "local_col_3": "local_val_3", "local_col_4": "local_val_4"},
-    {"id": 2, "title": "Row 2", "fk_col": 2, "local_col": "local_val_1", "local_col_2": "local_val_2", "local_col_3": "local_val_3", "local_col_4": "local_val_4"}
+    {"id": 1, "title": "Row 1", "fk_col": 1, "local_col": "present", "null_col": "x", "cond_input": "YES", "pattern_col_1": "p1_a", "pattern_col_2": "p2_a", "gated_col": "g_a"},
+    {"id": 2, "title": "Row 2", "fk_col": 2, "local_col": "present", "null_col": null, "cond_input": "NO", "pattern_col_1": "p1_b", "pattern_col_2": "p2_b", "gated_col": "g_b"}
 ]

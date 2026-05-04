@@ -98,7 +98,8 @@ module.exports = [
       '@typescript-eslint/no-use-before-define': 'off',
 
       // ------------------ testing ------------------
-      '@typescript-eslint/no-floating-promises': 'warn'
+      '@typescript-eslint/no-floating-promises': 'warn',
+      'no-empty-pattern': 'warn',
     },
   },
 
