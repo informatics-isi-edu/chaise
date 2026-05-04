@@ -320,31 +320,44 @@ export default function RecordProvider({
 
     flowControl.current.slots.counter++;
 
-    // reset conditions
+    // collect dependents of conditions so the requestModels.forEach below
+    // doesn't re-enqueue them (they're upserted by evaluateConditionModel
+    // when/if the condition resolves to show).
     const dependentRequestSet = new Set<RecordRequestModel>();
     flowControl.current.conditionModels.forEach((cm) => {
-      cm.evaluated = false;
-      cm.shouldShow = false;
       cm.dependentRequestModels.forEach((rm) => {
-        rm.processed = false;
         dependentRequestSet.add(rm);
-        // do NOT upsert — wait for condition re-evaluation
       });
     });
 
-    // re-set conditionHide = true on all conditioned items
-    setColumnModels((prevModels: RecordColumnModel[]) =>
-      prevModels.map((val) => {
-        if (val.isConditioned) return { ...val, conditionHide: true };
-        return val;
-      })
-    );
-    setRelatedModels((prevModels: RecordRelatedModel[]) =>
-      prevModels.map((val) => {
-        if (val.isConditioned) return { ...val, conditionHide: true };
-        return val;
-      })
-    );
+    // For an actual update (not the initial-load flush), reset every
+    // condition so it re-evaluates against the new tuple. Skip on the
+    // initial load — readMainEntity already evaluated sync conditions and
+    // their state shouldn't be clobbered.
+    if (isUpdate) {
+      flowControl.current.conditionModels.forEach((cm) => {
+        cm.evaluated = false;
+        cm.shouldShow = false;
+        cm.dependentRequestModels.forEach((rm) => {
+          rm.processed = false;
+        });
+      });
+
+      // re-set conditionHide = true on all conditioned items so the UI hides
+      // them while the new evaluation runs.
+      setColumnModels((prevModels: RecordColumnModel[]) =>
+        prevModels.map((val) => {
+          if (val.isConditioned) return { ...val, conditionHide: true };
+          return val;
+        })
+      );
+      setRelatedModels((prevModels: RecordRelatedModel[]) =>
+        prevModels.map((val) => {
+          if (val.isConditioned) return { ...val, conditionHide: true };
+          return val;
+        })
+      );
+    }
 
     // request models — skip dependents of conditions (they'll be enqueued after condition evaluation)
     flowControl.current.requestModels.forEach(function (m) {
@@ -663,6 +676,15 @@ export default function RecordProvider({
             attachGoogleDatasetJsonLd(reference, tuple, flowControl.current.templateVariables);
           }
 
+          // (re-)evaluate every condition now that templateVariables are fresh
+          // and the new main tuple is in hand. Sync conditions (no async source /
+          // wait_for) decide immediately and either upsert their dependents to
+          // the queue (show) or mark them processed (hide). Async conditions
+          // no-op here — the hasColumnData gate returns false until their
+          // source request lands, at which point attachPseudoColumnValue
+          // dispatches evaluateConditionModel for them.
+          flowControl.current.conditionModels.forEach((_, i) => evaluateConditionModel(i, tuple));
+
           resolve(page);
         })
         .catch(function (exception: any) {
@@ -743,15 +765,19 @@ export default function RecordProvider({
       activeList.conditionalGroups.forEach((group) => {
         const condColName = group.condition.column.name;
 
-        // find the condition source's request model (already created from activeList.requests)
+        // for async sources the condition's column is in `activeList.requests`,
+        // so we'll find a request model. For purely sync sources (local /
+        // all-outbound, no async wait_for) the condition has no fetch and no
+        // request model — that's expected; chaise just evaluates it against
+        // the main tuple after the main entity is read.
         const condReqModel = flowControl.current.requestModels.find(
           (m) => m.activeListModel.column?.name === condColName
         );
 
-        if (!condReqModel) {
-          $log.debug(`condition source ${condColName} not found in request models`);
-          return;
-        }
+        // dependents inherit the condition source's priority when async, or get
+        // a synthetic late priority when sync (they're upserted at evaluation
+        // time, so the priority only matters relative to other queued items).
+        const dependentPriority = condReqModel ? condReqModel.priority : flowControl.current.requestModels.length;
 
         // create request models for dependent items but do NOT add to requestQueue
         const dependentModels: RecordRequestModel[] = [];
@@ -760,7 +786,7 @@ export default function RecordProvider({
           const rm: RecordRequestModel = {
             activeListModel: req,
             processed: false,
-            priority: condReqModel.priority,
+            priority: dependentPriority,
           };
 
           if (req.entityset || req.aggregate) {
@@ -784,39 +810,36 @@ export default function RecordProvider({
 
           flowControl.current.requestModels.push(rm); // track but NOT in queue
           dependentModels.push(rm);
+        });
 
-          // track which column/related indices are conditioned
-          if (req.inline !== undefined && Number.isInteger(req.index)) {
-            conditionedColumnIndices.add(req.index);
-          } else if (req.related !== undefined && Number.isInteger(req.index)) {
-            conditionedRelatedIndices.add(req.index);
-          } else if (req.column !== undefined) {
-            // aggregate/entityset waitfor — check objects for column/inline/related indices
-            if (req.objects) {
-              req.objects.forEach((obj: any) => {
-                if (obj.column && Number.isInteger(obj.index)) {
-                  conditionedColumnIndices.add(obj.index);
-                }
-                if (obj.inline && Number.isInteger(obj.index)) {
-                  conditionedColumnIndices.add(obj.index);
-                }
-                if (obj.related && Number.isInteger(obj.index)) {
-                  conditionedRelatedIndices.add(obj.index);
-                }
-              });
-            }
+        // mark every conditioned column/related index from the group's
+        // conditionedItems list (this covers sync scalar columns whose
+        // dependentRequests entry is empty).
+        const items = (group as any).conditionedItems || [];
+        items.forEach((item: any) => {
+          if ((item.column || item.inline) && Number.isInteger(item.index)) {
+            conditionedColumnIndices.add(item.index);
+          } else if (item.related && Number.isInteger(item.index)) {
+            conditionedRelatedIndices.add(item.index);
           }
         });
 
         flowControl.current.conditionModels.push({
           condition: group.condition,
           conditionRequestModel: condReqModel,
+          conditionedItems: items,
           dependentRequestModels: dependentModels,
           evaluated: false,
           shouldShow: false,
         });
       });
     }
+
+    printDebugMessage(
+      `initialized ${flowControl.current.conditionModels.length} condition models — ` +
+      `column-conditioned indices: [${Array.from(conditionedColumnIndices).join(',')}], ` +
+      `related-conditioned indices: [${Array.from(conditionedRelatedIndices).join(',')}]`
+    );
 
     // column models
     const computedColumnModels: RecordColumnModel[] = [];
@@ -1147,7 +1170,9 @@ export default function RecordProvider({
             });
           }
 
-          // store the page result so condition evaluation can access it
+          // store the page result so condition evaluation can access it.
+          // `values` is the Page object (has .length and .templateVariables);
+          // ActiveListCondition's evaluateCondition consumes both fields.
           flowControl.current.entitySetResults[activeListModel.column.name] = values;
         } else {
           // aggregates
@@ -1377,16 +1402,23 @@ export default function RecordProvider({
   };
 
   /**
-   * Evaluate a condition model after its source data and all wait_for data have been fetched.
-   * Uses the same hasColumnData() pattern as column/inline/related wait_for.
+   * Evaluate a condition model when its source + wait_for data are available.
+   * Uses the same hasColumnData() pattern as the column waitFor check, which
+   * means sync conditions (whose source is local / all-outbound) pass the
+   * gate immediately and evaluate against the main tuple.
    * If the condition evaluates to "show", enqueue the dependent requests.
    * If "hide", mark dependents as processed (they won't fire).
+   *
+   * @param mainTuple optional tuple to evaluate against. Pass this when the
+   *   freshly-fetched main entity isn't yet reflected in `pageRef.current`
+   *   (initial load, or just after `setPage(...)` on the update path).
    */
-  const evaluateConditionModel = (condModelIndex: number) => {
+  const evaluateConditionModel = (condModelIndex: number, mainTuple?: Tuple) => {
     const condModel = flowControl.current.conditionModels[condModelIndex];
     if (!condModel || condModel.evaluated) return;
 
-    // check if condition source data is available
+    // check if condition source data is available; for sync sources this is
+    // immediate, for async we wait until the source's secondary fetch lands.
     if (!hasColumnData(condModel.condition.column)) return;
 
     // check if all wait_for data is available (same pattern as column waitFor check)
@@ -1402,13 +1434,16 @@ export default function RecordProvider({
     const result = condModel.condition.evaluateCondition(
       flowControl.current.templateVariables,
       conditionValue,
-      pageRef.current!.tuples[0]
+      mainTuple ?? pageRef.current!.tuples[0]
     );
 
     condModel.evaluated = true;
     condModel.shouldShow = result.shouldShow;
 
-    printDebugMessage(`condition evaluated for ${condColName}: shouldShow=${result.shouldShow}`);
+    printDebugMessage(
+      `condition evaluated, key=${condModel.condition.conditionKey || '<inline>'} ` +
+      `source=${condColName} shouldShow=${result.shouldShow}`
+    );
 
     if (result.shouldShow) {
       // enqueue dependent requests
@@ -1436,26 +1471,19 @@ export default function RecordProvider({
     const affectedColumnIndices = new Set<number>();
     const affectedRelatedIndices = new Set<number>();
 
-    condModel.dependentRequestModels.forEach((rm) => {
-      const req = rm.activeListModel;
-      if (req.inline !== undefined && Number.isInteger(req.index)) {
-        affectedColumnIndices.add(req.index);
-      } else if (req.related !== undefined && Number.isInteger(req.index)) {
-        affectedRelatedIndices.add(req.index);
-      }
-      // also check objects for column/inline/related
-      if (req.objects) {
-        req.objects.forEach((obj: any) => {
-          if ((obj.column || obj.inline) && Number.isInteger(obj.index)) {
-            affectedColumnIndices.add(obj.index);
-          }
-          if (obj.related && Number.isInteger(obj.index)) {
-            affectedRelatedIndices.add(obj.index);
-          }
-        });
+    condModel.conditionedItems.forEach((item) => {
+      if ((item.column || item.inline) && Number.isInteger(item.index)) {
+        affectedColumnIndices.add(item.index);
+      } else if (item.related && Number.isInteger(item.index)) {
+        affectedRelatedIndices.add(item.index);
       }
     });
 
+    printDebugMessage(
+      `updateConditionedVisibility hide=${hide} key=${condModel.condition.conditionKey || '<inline>'} ` +
+      `colIdxs=[${Array.from(affectedColumnIndices).join(',')}] ` +
+      `relIdxs=[${Array.from(affectedRelatedIndices).join(',')}]`
+    );
     if (affectedColumnIndices.size > 0) {
       setColumnModels((prevModels: RecordColumnModel[]) =>
         prevModels.map((val, index) => {

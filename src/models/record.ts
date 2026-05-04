@@ -133,8 +133,18 @@ export interface CitationModel {
 export interface RecordConditionModel {
   /** The ActiveListCondition from ERMrestJS (has evaluateCondition method) */
   condition: ActiveListCondition;
-  /** The request model for the condition source itself */
-  conditionRequestModel: RecordRequestModel;
+  /**
+   * The request model for the condition source. Undefined for purely sync
+   * sources (local column / all-outbound with no async wait-for) — those
+   * have no fetch and no entry in the active list's `requests`.
+   */
+  conditionRequestModel?: RecordRequestModel;
+  /**
+   * Identities of the columns / inline-related / related entities gated by
+   * this condition. Used by `updateConditionedVisibility` to flip the
+   * `conditionHide` flag on the right models when the condition resolves.
+   */
+  conditionedItems: Array<{ column?: boolean; inline?: boolean; related?: boolean; index: number }>;
   /** Request models for items gated behind this condition */
   dependentRequestModels: RecordRequestModel[];
   /** Whether condition has been evaluated */
