@@ -22,6 +22,7 @@ Custom style classes with modified styling attributes can be added in `chaise.cs
   - [Inline comments](#inline-comments)
 - [Character replacement](#character-replacement)
 - [Examples](#examples)
+- [Custom Font](#custom-font)
 - [Custom Markdown Styles](#custom-markdown-styles)
 - [Bootstrap styles](#bootstrap-styles)
 
@@ -320,6 +321,39 @@ By relaxing the selector, we can make the rule more general:
 
 
 For pseudocolumns, it's not immediately obvious what they name will be. We use a hashing function in `ermrestJS` that is based on the full path of the column. So `this/path/id=value` will become something like `hsoinel`.
+
+## Custom Font
+
+Chaise is currently setting the font-family on the `.chaise-body` element. To modify this, you just need to do the same. For example (the link to the file should be modified):
+
+```css
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(<LINK TO THE MONTSERRAT font file>) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+body, .chaise-body {
+  font-family: 'Montserrat', sans-serif !important;
+  line-height: 1.6;
+}
+```
+
+Be mindful that a different font-family and/or line-height changes the space that each word occupies, which might break some UI elements. For instance, with the chosen font above, the following changes are needed:
+
+```css
+/* the hamburger menu beside "Refine search" */
+.chaise-body .side-panel-container .side-panel-heading-menu {
+  left: 140px;
+}
+/* ensure "None on page" button has the proper width */
+.chaise-body .chaise-table.table .table-heading .actions-header.multi-select-header button,
+.chaise-body .chaise-table-sticky-header > table .table-heading .actions-header.multi-select-header button {
+  width: 130px;
+}
+```
 
 ## Custom Markdown Styles
 Markdown component applies special styles for all general purpose preview and content rendering. Here are some of the examples:
