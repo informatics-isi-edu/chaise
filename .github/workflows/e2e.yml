@@ -125,15 +125,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('chaise/package-lock.json') }}
+          key: playwright-browsers-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('chaise/package-lock.json') }}
       - name: Install chaise dev deps and Playwright
         run: |
           cd chaise
           NODE_ENV=development npm clean-install --include=dev
           if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
-            sudo npx playwright install-deps
+            npx playwright install-deps
           else
-            sudo npx playwright install --with-deps --no-shell
+            npx playwright install --with-deps --no-shell
           fi
           make lint
       - name: Add tests users
