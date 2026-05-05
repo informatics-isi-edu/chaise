@@ -40,6 +40,9 @@ test/e2e/.auth
 test/e2e/.download
 test/e2e/.upload
 
+# Claude Code user-local settings (personal permissions, env vars, etc.)
+.claude/settings.local.json
+
 # config files
 config/*-config.js
 
