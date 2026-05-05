@@ -750,7 +750,7 @@ export default function RecordsetProvider({
        * the places that we want to show edit or delete button, we should also ask for trs.
        * technically this should be based on passed config options but we're passing editable
        * to mean both edit and create, so it's not really useful here.
-       * 
+       *
        * for viewer channel selector popup, we need tcrs so we can disable
        * the edit button for channels that user shouldn't be able to edit the channel config.
        */
@@ -980,6 +980,7 @@ export default function RecordsetProvider({
         printDebugMessage(`: after aggregated value for column (priority=${aggModel.priority}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
         processRequestsCB();
       }).catch((err: any) => {
+        flowControl.current.slots.occupiedSlots--;
         dispatchError({ error: err });
       });
     }

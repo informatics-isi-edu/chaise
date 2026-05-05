@@ -338,8 +338,15 @@ export default function RecordProvider({
       flowControl.current.conditionModels.forEach((cm) => {
         cm.evaluated = false;
         cm.shouldShow = false;
+        // mark dependents as processed so any stale queue entry from the
+        // previous run is a no-op until evaluateConditionModel re-decides.
+        // For async conditions this gating is load-bearing: the async early
+        // return in evaluateConditionModel doesn't touch dep.processed, so
+        // without this a queued dep would fire before re-evaluation.
+        // evaluateConditionModel flips this back to false (and re-upserts)
+        // when the new condition resolves to show.
         cm.dependentRequestModels.forEach((rm) => {
-          rm.processed = false;
+          rm.processed = true;
         });
       });
 
@@ -541,6 +548,7 @@ export default function RecordProvider({
           processRequests(isUpdate);
         })
         .catch((err: any) => {
+          flowControl.current.slots.occupiedSlots--;
           dispatchError({ error: err });
         });
     }
