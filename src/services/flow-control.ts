@@ -7,12 +7,16 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
+// utils
+import { IndexedMinHeap } from '@isrd-isi-edu/chaise/src/utils/priority-queue';
+
 export default class FlowControl {
 
   reloadCauses: string[];
   reloadStartTime: number;
 
-  queue: FlowControlQueueInfo;
+  slots: FlowControlQueueInfo;
+  requestQueue!: IndexedMinHeap<any>;
 
   logStack: any;
   logStackPath: string;
@@ -29,7 +33,7 @@ constructor(
     queue?: FlowControlQueueInfo,
   ) {
 
-    this.queue = queue ? queue : new FlowControlQueueInfo();
+    this.slots = queue ? queue : new FlowControlQueueInfo();
 
     this.reloadStartTime = -1;
     this.reloadCauses = [];
@@ -45,7 +49,7 @@ constructor(
   * @return {boolean}
   */
   haveFreeSlot(printMessage = true) {
-    const res = this.queue.occupiedSlots < this.queue.maxRequests;
+    const res = this.slots.occupiedSlots < this.slots.maxRequests;
     if (!res && printMessage) {
       $log.debug('No free slot available.');
     }

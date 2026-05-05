@@ -34,6 +34,9 @@ const RecordMainSection = (): JSX.Element => {
   const { reference, recordValues, columnModels, showMainSectionSpinner, showEmptySections, page } = useRecord();
 
   const canShow = (columnModel: RecordColumnModel): boolean => {
+    // condition evaluated to hide, so should be hidden
+    if (columnModel.conditionHide) return false;
+
     if (columnModel.relatedModel) {
       return canShowInlineRelated(columnModel, showEmptySections);
     } else if (columnModel.requireSecondaryRequest) {

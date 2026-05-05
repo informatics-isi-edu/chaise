@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(npm info:*)",
-      "Bash(npm audit:*)"
-    ]
-  }
-}

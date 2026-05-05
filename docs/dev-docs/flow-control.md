@@ -1,8 +1,8 @@
 # Flow Control
 
- In this document, we'll explain how flow control is implemented in Chaise. Flow control has been added to different modules/apps in Chaise to handle the generation of vast amounts of requests.
+In this document, we'll explain how flow control is implemented in Chaise. Flow control has been added to different modules/apps in Chaise to handle the generation of vast amounts of requests.
 
- ## Recordset
+## Recordset
 
 For showing a recordset view (whether its recordset app or a modal-picker in record and recordedit apps), we need to generate requests for the following:
 
@@ -17,7 +17,7 @@ For showing a recordset view (whether its recordset app or a modal-picker in rec
 Since the main entity can have multiple pseudo-columns and we might have more than one open facet, we might have to generate more than 4 requests at a time to update the page. The following is how flow control is going to control these requests:
 
 - Only 4 requests will be generated at a time. If a request gets back, we will fire the next cycle of requests.
-- We don't have a queue of requests here. Each time that page has been updated or a response gets back; we will go through all the sections to make sure if we need to update them or not. ُThe following is the order:
+- We don't have a queue of requests here. Each time that page has been updated or a response gets back; we will go through all the sections to make sure if we need to update them or not. The following is the order:
 
   1. Main entity.
 
@@ -41,7 +41,7 @@ The best way to handle these would be using states and state-management. But in 
   - `counter`: The current cycle number. Using this we can figure out if the returned data is outdated or not
 
 - Main entity attributes:
-  - `initialized`: Whether we have
+  - `initialized`: Whether the main data has been initialized or not.
   - `hasLoaded`: If the request is done and we should show the data.
   - `dirtyResult`: Whether we should send a request to get the new results.
   - `dirtyCount`: Whether we should send a request to get the number of matching rows.
@@ -77,7 +77,7 @@ The following are the category of requests that we need to send in record page:
 
 ### Flow-Control Logic
 
-The flow-control of record page is the same as recordset. We don't have a queue of requests and each time that page has been updated or a response gets back; we will go through all the sections to make sure if we need to update them or not. ُThe following is the order:
+The flow-control of record page uses a priority queue (`IndexedMinHeap`) of request models. When the page is updated or a response gets back, we re-enqueue the affected request models and drain the queue. The priority is derived from the order ERMrestJS's activeList API returns the requests, so the queue ends up dispatching them in the following order:
 
 1. Main entity request. If we need to send a request for the main entity (due to an update in some part of the page), flow-control will stop here and waits for the main entity request to get back.
 
@@ -142,14 +142,32 @@ As we mentioned the logic of ordering the secondary requests is hidden from Chai
   - `objects`: An array of objects that signal which part of the page needs this pseudo-column value.
     - If `"citation": true` is available on an object, citation is waiting for this value.
     - If `"column": true` is available on an object, a visible column is waiting for this value. `index` attribute can be used to find the column.
+    - If `"inline": true` is available on an object, an inline table is waiting for this value. `index` attribute can be used to find the inline entity.
     - If `"related": true` is available on an object, a related entity is waiting for this value. `index` attribute can be used to find the related entity.
+    - If `"condition": true` is available on an object, a condition evaluation is waiting for this value. `index` attribute refers to the `conditionalGroups` index.
 - entity sets: If the `"entityset": true` is available in the returned object, we know that it's pseudo-column entity set. It will have the same attributes as aggregate but we had to distinguish between them because Chaise has to use a different API call to get the value.
 - inline entities: If `"inline": true` is available in the returned object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
-- related entities: If `"related": true` is available in the returned object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
+- related entities: If `"related": true` is available in the returned object, the request belongs to a related table. `index` is the other attribute that Chaise is using to generate a request for the related entity.
 
 
-‌Based on this, Chaise uses the returned list of requests and creates its own copy called `requestModels`. This will allow chaise to add extra attributes for book-keeping. `requestModels` is an array of object with the following attributes:
+Based on this, Chaise uses the returned list of requests and creates its own copy called `requestModels`. This will allow chaise to add extra attributes for book-keeping. `requestModels` is an array of object with the following attributes:
   - `activeListModel`: the exact object that ERMrestJS returns.
   - `processed`: A boolean to help track of the processed requests. If this is `false`, Chaise will attempt to send a new request for it.
+  - `priority`: A number used by the priority queue to order requests. It comes from the order ERMrestJS's activeList API returns them.
   - `reference`: Only available on entity set requests. Used for generating the request.
   - Other extra log related attributes are only available for entity set and aggregate requests.
+
+
+### Conditions
+
+A column / inline / related entity can have a `condition` (or a reusable `condition_key`) that gates its visibility. ERMrestJS exposes these via `Reference.activeList.conditionalGroups`. Each group has:
+
+- `condition`: an `ActiveListCondition` with the source column, wait-fors, and an `evaluateCondition` method.
+- `conditionedItems`: identities of the columns / inline / related entities gated behind this condition.
+- `dependentRequests`: secondary fetches that should only run after the condition resolves to "show".
+
+For each conditional group, Chaise builds a `RecordConditionModel` and a list of `dependentRequestModels` that are tracked in `requestModels` but NOT added to the request queue. After the main entity read, `evaluateConditionModel` runs for each group. Sync conditions (no async source / wait-for) decide immediately from the main tuple. Async conditions wait until their source's secondary fetch lands, at which point `attachPseudoColumnValue` dispatches `evaluateConditionModel` for them.
+
+When the condition resolves to "show", the dependents are upserted into the queue with `processed = false`. When it resolves to "hide", the dependents are marked `processed = true` so they never run.
+
+On update (page re-read), every condition is reset to `evaluated = false` and every dependent is marked `processed = true`. This is load-bearing for async conditions: the early return in `evaluateConditionModel` (when the source data hasn't been re-fetched yet) doesn't touch dep `processed`, so without the `true` reset a stale queue entry from the previous run would fire before re-evaluation. `evaluateConditionModel` flips dep `processed` back to `false` (and re-upserts) when the new condition resolves to show.

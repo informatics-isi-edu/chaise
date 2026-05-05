@@ -1,0 +1,396 @@
+{
+    "schema_name": "condition-test",
+    "tables": {
+        "main": {
+            "kind": "table",
+            "table_name": "main",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "main_fk1"]],
+                    "foreign_key_columns": [
+                        {"column_name": "fk_col", "table_name": "main", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "outbound1", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "title", "type": {"typename": "text"}, "nullok": false},
+                {"name": "fk_col", "type": {"typename": "int4"}},
+                {"name": "local_col", "type": {"typename": "text"}},
+                {"name": "null_col", "type": {"typename": "text"}},
+                {"name": "cond_input", "type": {"typename": "text"}},
+                {"name": "pattern_col_1", "type": {"typename": "text"}},
+                {"name": "pattern_col_2", "type": {"typename": "text"}},
+                {"name": "gated_col", "type": {"typename": "text"}}
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "columns": true,
+                    "sources": {
+                        "cond_input_wf": {
+                            "source": "cond_input"
+                        },
+                        "outbound1_data": {
+                            "source": [{"outbound": ["condition-test", "main_fk1"]}, "name"]
+                        },
+                        "outbound1_chain": {
+                            "source": [
+                                {"outbound": ["condition-test", "main_fk1"]},
+                                {"outbound": ["condition-test", "outbound1_fk1"]},
+                                "name"
+                            ]
+                        },
+                        "cond_outbound_entity_src": {
+                            "source": [{"outbound": ["condition-test", "main_fk1"]}, "id"],
+                            "entity": true
+                        },
+                        "cond_inbound1_src": {
+                            "source": [{"inbound": ["condition-test", "inbound1_fk"]}, "RID"],
+                            "entity": true
+                        },
+                        "cond_inbound_count_src": {
+                            "source": [{"inbound": ["condition-test", "inbound1_fk"]}, "RID"],
+                            "aggregate": "cnt"
+                        },
+                        "cond_assoc_src": {
+                            "source": [
+                                {"inbound": ["condition-test", "assoc_fk_main"]},
+                                {"outbound": ["condition-test", "assoc_fk_target"]},
+                                "id"
+                            ],
+                            "entity": true
+                        },
+                        "cond_path_multi_src": {
+                            "source": [
+                                {"sourcekey": "cond_inbound1_src"},
+                                {"inbound": ["condition-test", "path_link_fk"]},
+                                {"outbound": ["condition-test", "path_target_fk"]},
+                                "id"
+                            ],
+                            "entity": true
+                        },
+                        "cond_path_filter_src": {
+                            "source": [
+                                {"inbound": ["condition-test", "inbound1_fk"]},
+                                {"and": [
+                                    {"filter": "kind", "operand_pattern": "primary"}
+                                ]},
+                                "RID"
+                            ],
+                            "entity": true
+                        },
+                        "always_empty_src": {
+                            "source": [{"inbound": ["condition-test", "always_empty_fk"]}, "RID"],
+                            "entity": true
+                        }
+                    },
+                    "conditions": {
+                        "cond_local_null": {
+                            "source": "null_col",
+                            "on_empty": "hide"
+                        },
+                        "cond_outbound_scalar": {
+                            "sourcekey": "outbound1_data",
+                            "on_empty": "hide"
+                        },
+                        "cond_inbound1": {
+                            "sourcekey": "cond_inbound1_src",
+                            "on_empty": "hide"
+                        },
+                        "cond_inbound_count": {
+                            "sourcekey": "cond_inbound_count_src",
+                            "on_empty": "hide"
+                        },
+                        "cond_assoc": {
+                            "sourcekey": "cond_assoc_src",
+                            "on_empty": "hide"
+                        },
+                        "cond_path_multi": {
+                            "sourcekey": "cond_path_multi_src",
+                            "on_empty": "hide"
+                        },
+                        "cond_path_filter": {
+                            "sourcekey": "cond_path_filter_src",
+                            "on_empty": "hide"
+                        },
+                        "cond_always_show": {
+                            "sourcekey": "always_empty_src",
+                            "on_empty": "show"
+                        }
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "detailed": [
+                        "title",
+                        {
+                            "source": "local_col",
+                            "condition_key": "cond_local_null"
+                        },
+                        {
+                            "sourcekey": "outbound1_data",
+                            "markdown_name": "outbound1_col",
+                            "condition_key": "cond_outbound_scalar"
+                        },
+                        {
+                            "sourcekey": "outbound1_chain",
+                            "markdown_name": "outbound2_col"
+                        },
+                        {
+                            "source": "pattern_col_1",
+                            "markdown_name": "pattern_local_col",
+                            "condition": {
+                                "sourcekey": "cond_outbound_entity_src",
+                                "on_empty": "hide",
+                                "condition_pattern": "{{#if (eq $self.values.id \"1\")}}show{{/if}}",
+                                "template_engine": "handlebars"
+                            }
+                        },
+                        {
+                            "source": "pattern_col_2",
+                            "markdown_name": "pattern_with_waitfor_col",
+                            "condition": {
+                                "source": "id",
+                                "on_empty": "hide",
+                                "condition_pattern": "{{#if (eq cond_input_wf \"YES\")}}go{{/if}}",
+                                "wait_for": ["cond_input_wf"],
+                                "template_engine": "handlebars"
+                            }
+                        },
+                        {
+                            "source": "gated_col",
+                            "markdown_name": "gated_col",
+                            "condition_key": "cond_inbound1",
+                            "display": {
+                                "markdown_pattern": "{{{cond_input_wf}}}: {{{$_self}}}",
+                                "wait_for": ["cond_input_wf"]
+                            }
+                        },
+                        {
+                            "sourcekey": "cond_inbound_count_src",
+                            "markdown_name": "inbound1_count_col",
+                            "condition_key": "cond_inbound_count"
+                        }
+                    ]
+                },
+                "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+                    "detailed": [
+                        {
+                            "sourcekey": "cond_inbound1_src",
+                            "markdown_name": "inbound1"
+                        },
+                        {
+                            "sourcekey": "cond_assoc_src",
+                            "markdown_name": "assoc_target",
+                            "condition_key": "cond_assoc"
+                        },
+                        {
+                            "sourcekey": "cond_path_filter_src",
+                            "markdown_name": "filtered_inbound1",
+                            "condition_key": "cond_path_filter"
+                        },
+                        {
+                            "sourcekey": "cond_path_multi_src",
+                            "markdown_name": "path_target",
+                            "condition_key": "cond_path_multi"
+                        },
+                        {
+                            "sourcekey": "always_empty_src",
+                            "markdown_name": "always_shown_table",
+                            "condition_key": "cond_always_show"
+                        }
+                    ]
+                }
+            }
+        },
+        "outbound1": {
+            "kind": "table",
+            "table_name": "outbound1",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "outbound1_fk1"]],
+                    "foreign_key_columns": [
+                        {"column_name": "fk_col", "table_name": "outbound1", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "outbound2", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "name", "type": {"typename": "text"}},
+                {"name": "fk_col", "type": {"typename": "int4"}}
+            ]
+        },
+        "outbound2": {
+            "kind": "table",
+            "table_name": "outbound2",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "name", "type": {"typename": "text"}}
+            ]
+        },
+        "inbound1": {
+            "kind": "table",
+            "table_name": "inbound1",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "inbound1_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "main_id", "table_name": "inbound1", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "main", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "main_id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "value", "type": {"typename": "text"}},
+                {"name": "kind", "type": {"typename": "text"}}
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["id", "value", "kind"]
+                }
+            }
+        },
+        "path_link": {
+            "kind": "table",
+            "table_name": "path_link",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "path_link_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "inbound1_id", "table_name": "path_link", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "inbound1", "schema_name": "condition-test"}
+                    ]
+                },
+                {
+                    "names": [["condition-test", "path_target_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "target_id", "table_name": "path_link", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "path_target", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "inbound1_id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "target_id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "value", "type": {"typename": "text"}}
+            ]
+        },
+        "path_target": {
+            "kind": "table",
+            "table_name": "path_target",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "value", "type": {"typename": "text"}}
+            ]
+        },
+        "assoc_table": {
+            "kind": "table",
+            "table_name": "assoc_table",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["main_id", "target_id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "assoc_fk_main"]],
+                    "foreign_key_columns": [
+                        {"column_name": "main_id", "table_name": "assoc_table", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "main", "schema_name": "condition-test"}
+                    ]
+                },
+                {
+                    "names": [["condition-test", "assoc_fk_target"]],
+                    "foreign_key_columns": [
+                        {"column_name": "target_id", "table_name": "assoc_table", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "assoc_target", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "main_id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "target_id", "type": {"typename": "int4"}, "nullok": false}
+            ]
+        },
+        "assoc_target": {
+            "kind": "table",
+            "table_name": "assoc_target",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "name", "type": {"typename": "text"}}
+            ]
+        },
+        "always_empty": {
+            "kind": "table",
+            "table_name": "always_empty",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "always_empty_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "main_id", "table_name": "always_empty", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "main", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "main_id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "value", "type": {"typename": "text"}}
+            ]
+        }
+    }
+}

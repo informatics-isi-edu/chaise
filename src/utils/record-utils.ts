@@ -200,6 +200,7 @@ export function canShowRelated(relatedModel: RecordRelatedModel, showEmptySectio
   if (!allPreviousRelatedInitialized(relatedModel)) {
     return false;
   }
+  if (relatedModel.conditionHide) return false;
 
   // this flag signals that the returned data is non-empty and is returned
   const nonEmpty = relatedModel.recordsetState.page && relatedModel.recordsetState.page.length > 0;
@@ -220,6 +221,7 @@ export function canShowRelated(relatedModel: RecordRelatedModel, showEmptySectio
  */
 export function canShowInlineRelated(columnModel: RecordColumnModel, showEmptySections: boolean): boolean {
   if (!columnModel.relatedModel) return false;
+  if (columnModel.conditionHide) return false;
 
   // this flag signals that the returned data is non-empty and is returned
   const nonEmpty = (columnModel.relatedModel.recordsetState.page && columnModel.relatedModel.recordsetState.page.length > 0 &&

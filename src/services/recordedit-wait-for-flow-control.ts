@@ -10,7 +10,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
  * The flow control for loading the wait-for columns required for the asset columns
  */
 export default class RecordeditWaitForFlowControl {
-  queue: FlowControlQueueInfo;
+  slots: FlowControlQueueInfo;
 
   /**
    * the requests that should be sent
@@ -51,7 +51,7 @@ export default class RecordeditWaitForFlowControl {
    * @param queue should be passed if we want a existing queue
    */
   constructor(reference: any, queue?: FlowControlQueueInfo) {
-    this.queue = queue ? queue : new FlowControlQueueInfo();
+    this.slots = queue ? queue : new FlowControlQueueInfo();
 
     if (reference.activeList) {
       reference.activeList.requests.forEach((activeListModel: any) => {
@@ -83,7 +83,7 @@ export default class RecordeditWaitForFlowControl {
    * @returns
    */
   haveFreeSlot(printMessage = true) {
-    const res = this.queue.occupiedSlots < this.queue.maxRequests;
+    const res = this.slots.occupiedSlots < this.slots.maxRequests;
     if (!res && printMessage) {
       $log.debug('No free slot available.');
     }
@@ -94,7 +94,7 @@ export default class RecordeditWaitForFlowControl {
    * restart the flow-contorl
    */
   reset() {
-    this.queue.occupiedSlots = 0;
+    this.slots.occupiedSlots = 0;
     this.templateVariables = [];
     this.waitForRequests.forEach((req) => {
       req.processed = false;

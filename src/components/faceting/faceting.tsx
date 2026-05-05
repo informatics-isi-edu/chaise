@@ -410,7 +410,7 @@ const Faceting = ({
   };
 
   const afterFacetUpdate = (index: number, res: boolean, flowControl: any) => {
-    flowControl.current.queue.occupiedSlots--;
+    flowControl.current.slots.occupiedSlots--;
     const currFm = facetRequestModels.current[index];
     currFm.processed = res || currFm.processed;
 
@@ -437,7 +437,7 @@ const Faceting = ({
     // preprocess facets first
     const index = facetsToPreProcess.current.shift();
     if (typeof index === 'number') {
-      flowControl.current.queue.occupiedSlots++;
+      flowControl.current.slots.occupiedSlots++;
       (function (i: number, currentCounter: number) {
         printDebugMessage(`initializing facet (index=${index})`);
         facetRequestModels.current[i]
@@ -446,7 +446,7 @@ const Faceting = ({
             printDebugMessage(
               `after facet (index=${i}) initialize: ${res ? 'successful.' : 'unsuccessful.'}`
             );
-            flowControl.current.queue.occupiedSlots--;
+            flowControl.current.slots.occupiedSlots--;
             facetRequestModels.current[i].preProcessed = true;
             setFacetModelByIndex(i, { facetHasTimeoutError: false });
             updatePage();
@@ -459,7 +459,7 @@ const Faceting = ({
               dispatchError({ error: err });
             }
           });
-      })(index, flowControl.current.queue.counter);
+      })(index, flowControl.current.slots.counter);
     } else {
       const updateFacet = (index: number) => {
         const frm = facetRequestModels.current[index];
@@ -467,7 +467,7 @@ const Faceting = ({
           return;
         }
 
-        flowControl.current.queue.occupiedSlots++;
+        flowControl.current.slots.occupiedSlots++;
         frm.processed = true;
 
         (function (i) {

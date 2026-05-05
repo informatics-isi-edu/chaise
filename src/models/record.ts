@@ -5,6 +5,7 @@ import {
   RecordsetProviderFetchSecondaryRequests,
   RecordsetProviderUpdateMainEntity
 } from '@isrd-isi-edu/chaise/src/models/recordset'
+import type ActiveListCondition from '@isrd-isi-edu/ermrestjs/src/models/active-list-condition'
 
 export interface RecordRelatedModelRecordsetProps {
   page: any,
@@ -19,6 +20,16 @@ export interface RecordRelatedModel {
   isInline: boolean,
   isPureBinary: boolean,
   initialReference: any,
+  /** whether this related entity has a condition controlling its visibility */
+  isConditioned?: boolean,
+  /**
+   * Whether to hide this related entity due to its condition.
+   * Starts as `true` when `isConditioned` is set, meaning the item is hidden
+   * until the condition fully resolves (all wait_for sources fetched and
+   * condition evaluated). Only set to `false` when the condition evaluates
+   * to "show". In all other states (pending, evaluated to hide), remains `true`.
+   */
+  conditionHide?: boolean,
   /**
    * whether we're showing the tabular view or custom view
    */
@@ -63,6 +74,16 @@ export interface RecordColumnModel {
   isLoading: boolean,
   requireSecondaryRequest: boolean,
   relatedModel?: RecordRelatedModel,
+  /** whether this column has a condition controlling its visibility */
+  isConditioned?: boolean,
+  /**
+   * Whether to hide this column due to its condition.
+   * Starts as `true` when `isConditioned` is set, meaning the column is hidden
+   * until the condition fully resolves (all wait_for sources fetched and
+   * condition evaluated). Only set to `false` when the condition evaluates
+   * to "show". In all other states (pending, evaluated to hide), remains `true`.
+   */
+  conditionHide?: boolean,
 }
 
 export interface RecordRelatedRequestModel {
@@ -89,6 +110,7 @@ export interface RecordRelatedRequestModel {
 export interface RecordRequestModel {
   activeListModel: any,
   processed: boolean,
+  priority: number,
   // TODO maybe we need a sub-type here?
   logStack?: any,
   logStackPath?: string,
@@ -106,6 +128,29 @@ export interface CitationModel {
    * whether the value is ready to be looked at
    */
   isReady: boolean
+}
+
+export interface RecordConditionModel {
+  /** The ActiveListCondition from ERMrestJS (has evaluateCondition method) */
+  condition: ActiveListCondition;
+  /**
+   * The request model for the condition source. Undefined for purely sync
+   * sources (local column / all-outbound with no async wait-for) — those
+   * have no fetch and no entry in the active list's `requests`.
+   */
+  conditionRequestModel?: RecordRequestModel;
+  /**
+   * Identities of the columns / inline-related / related entities gated by
+   * this condition. Used by `updateConditionedVisibility` to flip the
+   * `conditionHide` flag on the right models when the condition resolves.
+   */
+  conditionedItems: Array<{ column?: boolean; inline?: boolean; related?: boolean; index: number }>;
+  /** Request models for items gated behind this condition */
+  dependentRequestModels: RecordRequestModel[];
+  /** Whether condition has been evaluated */
+  evaluated: boolean;
+  /** Whether conditioned content should be shown */
+  shouldShow: boolean;
 }
 
 export interface ChangeContainerDetails {

@@ -463,7 +463,7 @@ export default function RecordsetProvider({
   };
 
   const printDebugMessage = (message: string, counter?: number): void => {
-    counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
+    counter = typeof counter !== 'number' ? flowControl.current.slots.counter : counter;
     let dm = `${Date.now()}, ${counter}: `;
     if (config.containerDetails) {
       dm += `${config.containerDetails.isInline ? 'inline' : 'related'}(index=${config.containerDetails.index}), `;
@@ -479,7 +479,7 @@ export default function RecordsetProvider({
   const initialize = () => {
     flowControl.current.dirtyResult = true;
     flowControl.current.dirtyCount = true;
-    flowControl.current.queue.counter = 0;
+    flowControl.current.slots.counter = 0;
 
     // just initiate the flow control without providing an new values
     update(null, null);
@@ -563,8 +563,8 @@ export default function RecordsetProvider({
     flowControl.current.dirtyCount = updateCount || flowControl.current.dirtyCount;
 
     if (!sameCounter) {
-      flowControl.current.queue.counter++;
-      $log.debug(`adding one to counter, new: ${flowControl.current.queue.counter}`);
+      flowControl.current.slots.counter++;
+      $log.debug(`adding one to counter, new: ${flowControl.current.slots.counter}`);
     }
 
     // processRequests is called as a result of updating the reference
@@ -593,7 +593,7 @@ export default function RecordsetProvider({
    */
   const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo, forceIsLoading?: boolean) => {
     if (queue) {
-      flowControl.current.queue = queue;
+      flowControl.current.slots = queue;
     }
 
     if (setDirtyResult) {
@@ -666,7 +666,7 @@ export default function RecordsetProvider({
     }
 
     dontAutomaticallyFetchSecondary.current = (dontFetchSecondary === true);
-    flowControl.current.queue.occupiedSlots++;
+    flowControl.current.slots.occupiedSlots++;
     flowControl.current.dirtyResult = false;
 
     (function (currentCounter) {
@@ -699,7 +699,7 @@ export default function RecordsetProvider({
         }
         dispatchError({ error: err });
       });
-    }(flowControl.current.queue.counter));
+    }(flowControl.current.slots.counter));
   }
 
   /**
@@ -708,7 +708,7 @@ export default function RecordsetProvider({
    * based on success or failure of request.
    */
   const afterUpdateMainEntity = (res: boolean, counter: number) => {
-    flowControl.current.queue.occupiedSlots--;
+    flowControl.current.slots.occupiedSlots--;
     flowControl.current.dirtyResult = !res;
     if (res) {
       setIsLoading(false);
@@ -750,7 +750,7 @@ export default function RecordsetProvider({
        * the places that we want to show edit or delete button, we should also ask for trs.
        * technically this should be based on passed config options but we're passing editable
        * to mean both edit and create, so it's not really useful here.
-       * 
+       *
        * for viewer channel selector popup, we need tcrs so we can disable
        * the edit button for channels that user shouldn't be able to edit the channel config.
        */
@@ -773,7 +773,7 @@ export default function RecordsetProvider({
       const getTCRs = config.displayMode === RecordsetDisplayMode.VIEWER_CHANNEL_SELECTOR_POPUP;
 
       referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, getTCRs, getUnlinkTRS).then((pageRes: any) => {
-        if (current !== flowControl.current.queue.counter) {
+        if (current !== flowControl.current.slots.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;
         }
@@ -788,7 +788,7 @@ export default function RecordsetProvider({
           return { page: result.page };
         }
       }).then((result: { page: any, disabledRows?: DisabledRow[] }) => {
-        if (current !== flowControl.current.queue.counter) {
+        if (current !== flowControl.current.slots.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;
         }
@@ -811,13 +811,14 @@ export default function RecordsetProvider({
         }
 
         // make sure we're getting the data for aggregate columns
-        flowControl.current.requestModels.forEach((agg: any) => {
+        flowControl.current.requestModels.forEach((agg) => {
           if (result.page.length > 0) {
-            agg.processed = false;
             agg.reloadCauses = requestCauses;
             if (!Number.isInteger(agg.reloadStartTime) || agg.reloadStartTime === -1) {
               agg.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
             }
+            agg.processed = false;
+            flowControl.current.requestQueue.upsert(agg);
           } else {
             agg.processed = true;
 
@@ -841,7 +842,7 @@ export default function RecordsetProvider({
 
         defer.resolve({ success: true, page: result.page });
       }).catch((err: any) => {
-        if (current !== flowControl.current.queue.counter) {
+        if (current !== flowControl.current.slots.counter) {
           return defer.resolve({ success: false, page: null });
         }
 
@@ -868,7 +869,7 @@ export default function RecordsetProvider({
       return;
     }
 
-    flowControl.current.queue.occupiedSlots++;
+    flowControl.current.slots.occupiedSlots++;
     flowControl.current.dirtyCount = false;
 
     (function (curr) {
@@ -879,7 +880,7 @@ export default function RecordsetProvider({
         afterUpdateTotalRowCount(true, curr);
         dispatchError({ error: err });
       });
-    })(flowControl.current.queue.counter);
+    })(flowControl.current.slots.counter);
   }
 
   /**
@@ -912,7 +913,7 @@ export default function RecordsetProvider({
         aggList,
         { action: flowControl.current.getLogAction(action), stack: stack }
       );
-      if (current !== flowControl.current.queue.counter) {
+      if (current !== flowControl.current.slots.counter) {
         return false;
       }
 
@@ -925,7 +926,7 @@ export default function RecordsetProvider({
 
       return true;
     } catch (err: any) {
-      if (current !== flowControl.current.queue.counter) {
+      if (current !== flowControl.current.slots.counter) {
         return false;
       }
 
@@ -943,7 +944,7 @@ export default function RecordsetProvider({
    * will be called after getting data for count to set the flags.
    */
   const afterUpdateTotalRowCount = (res: boolean, current: number) => {
-    flowControl.current.queue.occupiedSlots--;
+    flowControl.current.slots.occupiedSlots--;
     flowControl.current.dirtyCount = !res;
     printDebugMessage(`after update total row count: ${res ? 'successful.' : 'unsuccessful.'}, old cnt=${current}`);
   }
@@ -961,26 +962,28 @@ export default function RecordsetProvider({
     // if the data is still loading, don't fetch the secondary requests
     if (isLoadingRef.current) return;
 
-    flowControl.current.requestModels.forEach((aggModel: any, index: number) => {
-      if (!flowControl.current.haveFreeSlot() || aggModel.processed) {
-        return;
-      }
+    while (flowControl.current.requestQueue.size() > 0 && flowControl.current.haveFreeSlot()) {
+      const aggModel = flowControl.current.requestQueue.dequeue();
+      if (!aggModel || aggModel.processed) continue;
 
-      flowControl.current.queue.occupiedSlots++;
-
+      flowControl.current.slots.occupiedSlots++;
       aggModel.processed = true;
 
-      printDebugMessage(`getting aggregated values for column (index=${index})`);
-      updateColumnAggregate(aggModel, flowControl.current.queue.counter, hideSpinner).then((res: any) => {
-        flowControl.current.queue.occupiedSlots--;
+      printDebugMessage(`getting aggregated values for column (priority=${aggModel.priority})`);
+      updateColumnAggregate(aggModel, flowControl.current.slots.counter, hideSpinner).then((res: any) => {
+        flowControl.current.slots.occupiedSlots--;
         aggModel.processed = res;
+        if (!res) {
+          flowControl.current.requestQueue.upsert(aggModel);
+        }
 
-        printDebugMessage(`: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
+        printDebugMessage(`: after aggregated value for column (priority=${aggModel.priority}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
         processRequestsCB();
       }).catch((err: any) => {
+        flowControl.current.slots.occupiedSlots--;
         dispatchError({ error: err });
       });
-    });
+    }
   };
 
   /**
@@ -1014,7 +1017,7 @@ export default function RecordsetProvider({
     };
     try {
       const values = await activeListModel.column.getAggregatedValue(pageRef.current, logObj)
-      if (flowControl.current.queue.counter !== current) {
+      if (flowControl.current.slots.counter !== current) {
         printDebugMessage(`getAggregatedValue success counter missmatch, old cnt=${current}`);
         return false;
       }
@@ -1088,7 +1091,7 @@ export default function RecordsetProvider({
 
       return true;
     } catch (err: any) {
-      if (flowControl.current.queue.counter !== current) {
+      if (flowControl.current.slots.counter !== current) {
         return false;
       }
 

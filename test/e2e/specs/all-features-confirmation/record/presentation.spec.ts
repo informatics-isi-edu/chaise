@@ -302,7 +302,7 @@ test.describe('View existing record', () => {
       });
 
       const notNullColumns = testParams.columns.filter((c: any) => {
-        return !c.hasOwnProperty('value') || c.value !== null;
+        return !Object.prototype.hasOwnProperty.call(c, 'value') || c.value !== null;
       });
 
       await test.step(`should have '${testParams.title}' as title`, async () => {
@@ -402,7 +402,7 @@ test.describe('View existing record', () => {
       await test.step('should validate the values of each column', async () => {
         await expect.soft(RecordLocators.getAllColumnValues(page)).toHaveCount(notNullColumns.length);
 
-        const columns = testParams.columns.filter((c: any) => (c.hasOwnProperty('value') && c.value));
+        const columns = testParams.columns.filter((c: any) => (Object.prototype.hasOwnProperty.call(c, 'value') && c.value));
         const colNames = columns.map((col: any) => col.title);
         const colValues = columns.map((col: any) => col.value)
 

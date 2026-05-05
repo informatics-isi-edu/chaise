@@ -1,11 +1,22 @@
 // models
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
-import { RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordConditionModel, RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogObjectType } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import FlowControl from '@isrd-isi-edu/chaise/src/services/flow-control';
+
+// utils
+import { IndexedMinHeap } from '@isrd-isi-edu/chaise/src/utils/priority-queue';
+
+export const getRecordRequestKey = (rm: RecordRequestModel): string => {
+  const req = rm.activeListModel;
+  if (req.column) return `pc-${req.column.name}`;
+  if (req.inline) return `inline-${req.index}`;
+  if (req.related) return `related-${req.index}`;
+  return `unknown-${rm.priority}`;
+};
 
 export default class RecordFlowControl extends FlowControl {
   dirtyMain = false;
@@ -20,6 +31,11 @@ export default class RecordFlowControl extends FlowControl {
    * we're using this number for the logic of showing the main section spinner
    */
   numColsRequireSecondaryRequests = 0;
+
+  /**
+   * all condition models for conditional visibility
+   */
+  conditionModels: RecordConditionModel[] = [];
 
   /**
    * the initial values for the templateVariables
@@ -44,6 +60,10 @@ export default class RecordFlowControl extends FlowControl {
     queue?: FlowControlQueueInfo,
   ) {
     super(logInfo, queue);
+    this.requestQueue = new IndexedMinHeap<RecordRequestModel>(
+      getRecordRequestKey,
+      (rm) => rm.priority,
+    );
   }
 
   addCausesToRequestModel(m: RecordRequestModel, causes: any[]) {

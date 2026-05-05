@@ -13,7 +13,7 @@ import { getPrefillObject } from '@isrd-isi-edu/chaise/src/utils/recordedit-util
  * The flow control for loading the default and preffiled fk values
  */
 export default class RecordeditInitialLoadFlowControl {
-  queue: FlowControlQueueInfo;
+  slots: FlowControlQueueInfo;
 
   /**
    * the prefilled object used for fetching prefilled fks
@@ -44,7 +44,7 @@ export default class RecordeditInitialLoadFlowControl {
    * @param queue should be passed if we want a existing queue
    */
   constructor(queryParams?: any, queue?: FlowControlQueueInfo) {
-    this.queue = queue ? queue : new FlowControlQueueInfo();
+    this.slots = queue ? queue : new FlowControlQueueInfo();
 
     if (queryParams) {
       this.prefillObj = getPrefillObject(queryParams);
@@ -63,7 +63,7 @@ export default class RecordeditInitialLoadFlowControl {
    * @returns
    */
   haveFreeSlot(printMessage = true) {
-    const res = this.queue.occupiedSlots < this.queue.maxRequests;
+    const res = this.slots.occupiedSlots < this.slots.maxRequests;
     if (!res && printMessage) {
       $log.debug('No free slot available.');
     }

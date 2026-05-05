@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 import { RefObject } from 'react';
@@ -289,7 +290,7 @@ const RecordInner = ({
     if (showMainSectionSpinner || !relatedSectionInitialized) return;
     setDisablePanel(
       columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
-      relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
+      relatedModels.every((rm) => (!canShowRelated(rm, showEmptySections)))
     );
   }, [showMainSectionSpinner, relatedSectionInitialized, showEmptySections, columnModels, relatedModels]);
 
@@ -487,7 +488,7 @@ const RecordInner = ({
       action: getRecordLogAction(LogActions.DELETE),
       stack: getRecordLogStack()
     };
-    reference.delete(null, logObj).then(function deleteSuccess() {
+    reference.delete(undefined, logObj).then(function deleteSuccess() {
       // Get an appLink from a reference to the table that the existing reference came from
       const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
       // $rootScope.showSpinner = false;

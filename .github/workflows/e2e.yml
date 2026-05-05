@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: chaise/package-lock.json
       - name: Setup the system
         run: |
           sudo timedatectl set-timezone America/Los_Angeles
@@ -114,11 +116,25 @@ jobs:
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
           sudo make root-install
-      - name: Install chaise
+      - name: Install chaise (build & deploy)
         run: |
           cd chaise
           sudo make root-install
-          make deps-test
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('chaise/package-lock.json') }}
+      - name: Install chaise dev deps and Playwright
+        run: |
+          cd chaise
+          NODE_ENV=development npm clean-install --include=dev
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
+            npx playwright install-deps
+          else
+            npx playwright install --with-deps --no-shell
+          fi
           make lint
       - name: Add tests users
         run: |
