@@ -115,6 +115,7 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
+          git checkout condition-no-source
           sudo make root-install
       - name: Install chaise (build & deploy)
         run: |
