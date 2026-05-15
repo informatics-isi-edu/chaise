@@ -28,6 +28,11 @@ const tableName = 'main';
  *   - async 3-hop with shared-prefix sourcekey -> cond_path_multi  (vis-fk path_target)
  *   - async path with filter       -> cond_path_filter  (vis-fk filtered_inbound1)
  *   - on_empty:"show" inversion    -> cond_always_show  (vis-fk always_shown_table)
+ *   - no-source (pattern-only)     -> inline + condition_key, on both vis-col
+ *                                     (ns_inline_show / ns_inline_hide / ns_key_show)
+ *                                     and vis-fk (ns_related_show / ns_related_hide).
+ *                                     These are evaluated synchronously at column-build
+ *                                     time and filtered before chaise sees them.
  *
  * Visible item exercising both a condition AND its own display.wait_for:
  *   inline-related vis-col "inbound1 (inline)" — condition_key cond_inbound1
@@ -48,6 +53,9 @@ test.describe('Condition on visible columns and foreign keys', () => {
     await RecordLocators.waitForRecordPageReady(page);
 
     await test.step('main-section visible columns are exactly the expected list, in order', async () => {
+      // ns_inline_show / ns_key_show: no-source conditions that render non-empty -> kept.
+      // ns_inline_hide: no-source condition that renders empty -> filtered out by the
+      // no-source filter pass in ermrestjs (applyNoSourceConditions).
       await expect.soft(RecordLocators.getAllColumnNames(page)).toHaveText([
         'title',
         'local_col',
@@ -57,16 +65,21 @@ test.describe('Condition on visible columns and foreign keys', () => {
         'pattern_with_waitfor_col',
         'gated_col',
         'inbound1_count_col',
+        'ns_inline_show',
+        'ns_key_show',
       ]);
     });
 
     await test.step('related-table accordions are exactly the expected list, in order', async () => {
+      // ns_related_show: no-source condition renders non-empty -> kept.
+      // ns_related_hide: no-source condition renders empty -> filtered out.
       await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText([
         'inbound1',
         'assoc_target',
         'filtered_inbound1',
         'path_target',
         'always_shown_table',
+        'ns_related_show',
       ]);
     });
 
@@ -78,27 +91,33 @@ test.describe('Condition on visible columns and foreign keys', () => {
         'filtered_inbound1 (1)',
         'path_target (1)',
         'always_shown_table (0)',
+        'ns_related_show (0)',
       ]);
     });
   });
 
-  test('id=2 (empty): conditioned content hidden, only unconditional + on_empty:"show" remain', async ({ page, baseURL }, testInfo) => {
+  test('id=2 (empty): conditioned content hidden, only unconditional + on_empty:"show" + no-source-show remain', async ({ page, baseURL }, testInfo) => {
     const url = generateChaiseURL(APP_NAMES.RECORD, schemaName, tableName, testInfo, baseURL) + '/id=2';
     await page.goto(url);
     await RecordLocators.waitForRecordPageReady(page);
 
-    await test.step('only title + outbound columns remain in main-section', async () => {
+    await test.step('title + outbound columns + no-source-show columns remain in main-section', async () => {
+      // no-source conditions are deterministic (don't depend on row data), so ns_inline_show
+      // and ns_key_show appear for id=2 just like for id=1.
       await expect.soft(RecordLocators.getAllColumnNames(page)).toHaveText([
         'title',
         'outbound1_col',
         'outbound2_col',
+        'ns_inline_show',
+        'ns_key_show',
       ]);
     });
 
-    await test.step('inbound1 (always visible) and always_shown_table accordions are visible', async () => {
+    await test.step('inbound1 + always_shown_table + ns_related_show accordions are visible', async () => {
       await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText([
         'inbound1',
         'always_shown_table',
+        'ns_related_show',
       ]);
     });
 
@@ -107,6 +126,7 @@ test.describe('Condition on visible columns and foreign keys', () => {
         'Summary',
         'inbound1 (0)',
         'always_shown_table (0)',
+        'ns_related_show (0)',
       ]);
     });
   });
@@ -121,10 +141,13 @@ test.describe('Condition on visible columns and foreign keys', () => {
         'title',
         'outbound1_col',
         'outbound2_col',
+        'ns_inline_show',
+        'ns_key_show',
       ]);
       await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText([
         'inbound1',
         'always_shown_table',
+        'ns_related_show',
       ]);
     });
 
@@ -156,23 +179,27 @@ test.describe('Condition on visible columns and foreign keys', () => {
 
       // gated_col (cond_inbound1) and inbound1_count_col (cond_inbound_count)
       // flip from hidden to shown because their conditions now resolve to
-      // non-empty.
+      // non-empty. ns_inline_show / ns_key_show remain visible throughout.
       await expect.soft(RecordLocators.getAllColumnNames(page)).toHaveText([
         'title',
         'outbound1_col',
         'outbound2_col',
         'gated_col',
         'inbound1_count_col',
+        'ns_inline_show',
+        'ns_key_show',
       ]);
 
       // filtered_inbound1 (path_filter on inbound1.kind=primary) flips because
       // the new row has kind=primary. assoc_target and path_target stay
       // hidden because their data chains are still empty for main.id=2 —
       // proving re-evaluation in BOTH directions is correct, not blanket "show".
+      // ns_related_show remains visible (no-source conditions are unaffected by re-evaluation).
       await expect.soft(RecordLocators.getDisplayedRelatedTableTitles(page)).toHaveText([
         'inbound1',
         'filtered_inbound1',
         'always_shown_table',
+        'ns_related_show',
       ]);
     });
   });

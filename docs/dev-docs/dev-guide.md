@@ -536,11 +536,9 @@ This section will go over how we think the NPM modules should be managed.
   - Run `npm install --include=dev` to sync `package-lock.json` with `package.json`.
   - Double-check the changes to `package-lock.json`.
 - Only for main contributors: to publish a new version of chaise to npm, we should,
-  1. Update the `version` property in `package.json`.
-  2. Update the `version` and `packages.version` properties in `package-lock.json`. Or run `npm install --include=dev`.
-    - If you used `npm install` double-check the changes to `package-lock.json`.
-  3. Push the changes to the main branch.
-  4. After pushing the changes, `npm-publish.yml` GitHub workflow will detect the version change and properly publish the new version to npm.
+  1. Go to the [Actions page](https://github.com/informatics-isi-edu/chaise/actions) of the repository on GitHub.
+  2. Find the `Release` workflow in the sidebar and click `Run workflow`.
+  3. The workflow uses `semantic-release`, which only publishes a new version if it detects a release-worthy change from the commit messages on `master` (`feat`, `fix`, `perf`, or `refactor` since the last release). If no such commits are found, the workflow will finish without publishing.
 
 ### Dependabot
 

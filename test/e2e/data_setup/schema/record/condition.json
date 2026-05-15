@@ -28,7 +28,10 @@
                 {"name": "cond_input", "type": {"typename": "text"}},
                 {"name": "pattern_col_1", "type": {"typename": "text"}},
                 {"name": "pattern_col_2", "type": {"typename": "text"}},
-                {"name": "gated_col", "type": {"typename": "text"}}
+                {"name": "gated_col", "type": {"typename": "text"}},
+                {"name": "no_source_col", "type": {"typename": "text"}},
+                {"name": "no_source_col_b", "type": {"typename": "text"}},
+                {"name": "no_source_col_c", "type": {"typename": "text"}}
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2019:source-definitions": {
@@ -89,6 +92,14 @@
                         "always_empty_src": {
                             "source": [{"inbound": ["condition-test", "always_empty_fk"]}, "RID"],
                             "entity": true
+                        },
+                        "ns_show_src": {
+                            "source": [{"inbound": ["condition-test", "inbound_ns_show_fk"]}, "RID"],
+                            "entity": true
+                        },
+                        "ns_hide_src": {
+                            "source": [{"inbound": ["condition-test", "inbound_ns_hide_fk"]}, "RID"],
+                            "entity": true
                         }
                     },
                     "conditions": {
@@ -123,6 +134,9 @@
                         "cond_always_show": {
                             "sourcekey": "always_empty_src",
                             "on_empty": "show"
+                        },
+                        "cond_ns_show": {
+                            "condition_pattern": "yes"
                         }
                     }
                 },
@@ -176,6 +190,21 @@
                             "sourcekey": "cond_inbound_count_src",
                             "markdown_name": "inbound1_count_col",
                             "condition_key": "cond_inbound_count"
+                        },
+                        {
+                            "source": "no_source_col",
+                            "markdown_name": "ns_inline_show",
+                            "condition": {"condition_pattern": "yes"}
+                        },
+                        {
+                            "source": "no_source_col_b",
+                            "markdown_name": "ns_inline_hide",
+                            "condition": {"condition_pattern": "{{#missing}}x{{/missing}}"}
+                        },
+                        {
+                            "source": "no_source_col_c",
+                            "markdown_name": "ns_key_show",
+                            "condition_key": "cond_ns_show"
                         }
                     ]
                 },
@@ -204,6 +233,16 @@
                             "sourcekey": "always_empty_src",
                             "markdown_name": "always_shown_table",
                             "condition_key": "cond_always_show"
+                        },
+                        {
+                            "sourcekey": "ns_show_src",
+                            "markdown_name": "ns_related_show",
+                            "condition": {"condition_pattern": "yes"}
+                        },
+                        {
+                            "sourcekey": "ns_hide_src",
+                            "markdown_name": "ns_related_hide",
+                            "condition": {"condition_pattern": "{{#missing}}x{{/missing}}"}
                         }
                     ]
                 }
@@ -390,6 +429,52 @@
                 {"name": "id", "type": {"typename": "int4"}, "nullok": false},
                 {"name": "main_id", "type": {"typename": "int4"}, "nullok": false},
                 {"name": "value", "type": {"typename": "text"}}
+            ]
+        },
+        "inbound_ns_show": {
+            "kind": "table",
+            "table_name": "inbound_ns_show",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "inbound_ns_show_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "main_id", "table_name": "inbound_ns_show", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "main", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "main_id", "type": {"typename": "int4"}, "nullok": false}
+            ]
+        },
+        "inbound_ns_hide": {
+            "kind": "table",
+            "table_name": "inbound_ns_hide",
+            "schema_name": "condition-test",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["condition-test", "inbound_ns_hide_fk"]],
+                    "foreign_key_columns": [
+                        {"column_name": "main_id", "table_name": "inbound_ns_hide", "schema_name": "condition-test"}
+                    ],
+                    "referenced_columns": [
+                        {"column_name": "id", "table_name": "main", "schema_name": "condition-test"}
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {"name": "id", "type": {"typename": "int4"}, "nullok": false},
+                {"name": "main_id", "type": {"typename": "int4"}, "nullok": false}
             ]
         }
     }
