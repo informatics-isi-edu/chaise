@@ -52,8 +52,12 @@
 
   &.chaise-btn.chaise-btn-primary[disabled],
   &.chaise-btn.chaise-btn-secondary[disabled],
+  &.chaise-btn.chaise-btn-danger[disabled],
+  &.chaise-btn.chaise-btn-success[disabled],
   &.chaise-btn.chaise-btn-primary.disabled,
-  &.chaise-btn.chaise-btn-secondary.disabled {
+  &.chaise-btn.chaise-btn-secondary.disabled,
+  &.chaise-btn.chaise-btn-danger.disabled,
+  &.chaise-btn.chaise-btn-success.disabled {
     color: map.get(variables.$color-map, 'disabled');
     background-color: map.get(variables.$color-map, 'disabled-background');
     border-color: map.get(variables.$color-map, 'disabled-background');
@@ -85,6 +89,12 @@
     color: map.get(variables.$color-map, 'white');
     background-color: map.get(variables.$color-map, 'danger');
     border-color: color.adjust(map.get(variables.$color-map, 'danger'), $lightness: -10%);
+  }
+
+  &.chaise-btn-success {
+    color: map.get(variables.$color-map, 'white');
+    background-color: map.get(variables.$color-map, 'success');
+    border-color: color.adjust(map.get(variables.$color-map, 'success'), $lightness: -10%);
   }
 
   &.chaise-download-btn {

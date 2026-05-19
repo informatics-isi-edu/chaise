@@ -47,6 +47,36 @@
       margin-right: 5px;
       margin-bottom: 5px;
     }
+
+    // When buttons are wrapped in a chaise-btn-group, they should be visually
+    // attached (no inter-button gap). The group itself keeps the standard
+    // right/bottom spacing so it doesn't crowd neighboring toolbar buttons.
+    .chaise-btn-group {
+      margin-right: 5px;
+      margin-bottom: 5px;
+      > .chaise-btn {
+        margin-right: 0;
+        margin-bottom: 0;
+
+        // Match the default chaise-btn-primary border (black) for every button
+        // and every interaction state. Without this, the success/danger
+        // variants use a darker-green/darker-red border, and hover/focus can
+        // shift the border color further. We want the same visible black
+        // border at all times so the grouped buttons match the rest of the
+        // toolbar.
+        //
+        // The :not([disabled]):not(.disabled) guard lets the global disabled
+        // rule (which sets a grey border) win when the button is disabled.
+        &:not([disabled]):not(.disabled) {
+          &,
+          &:hover,
+          &:focus,
+          &:active {
+            border-color: map.get(variables.$color-map, 'black');
+          }
+        }
+      }
+    }
   }
 
   // viewer error overlay

@@ -35,6 +35,11 @@ const ViewerMenuButtons = (): JSX.Element => {
 
   const [showChannelList, setShowChannelList] = useState(false);
   const [waitingForScreenshot, setWaitingForScreenshot] = useState(false);
+  /**
+   * Current display rotation in degrees, normalized to [0, 360).
+   * Mirrors what OSD is showing so we can decide when to surface the Save/Reset controls.
+   */
+  const [currentRotation, setCurrentRotation] = useState(0);
 
   useEffect(() => {
     const recieveIframeMessage = (event: any) => {
@@ -99,6 +104,29 @@ const ViewerMenuButtons = (): JSX.Element => {
     }
 
     logViewerClientAction(action, false);
+  }
+
+  const rotateImage = () => {
+    const degrees = -90;
+    getOSDViewerIframe().contentWindow!.postMessage(
+      { messageType: 'rotate', content: { degrees } },
+      origin,
+    );
+    setCurrentRotation((prev) => (((prev + degrees) % 360) + 360) % 360);
+    logViewerClientAction(LogActions.VIEWER_ROTATE, false);
+  }
+
+  const resetRotation = () => {
+    getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'resetRotation' }, origin);
+    setCurrentRotation(0);
+    logViewerClientAction(LogActions.VIEWER_ROTATE_RESET, false);
+  }
+
+  const saveRotation = () => {
+    // TODO(rotation): persist current rotation to the Image table once the
+    // schema/ACL (canUpdateImageConfig) is wired up. For now this is a no-op
+    // so the UI flow is testable without DB writes.
+    logViewerClientAction(LogActions.VIEWER_ROTATE_SAVE, false);
   }
 
   const takeScreenshot = () => {
@@ -185,6 +213,45 @@ const ViewerMenuButtons = (): JSX.Element => {
           <span>Reset Zoom</span>
         </button>
       </ChaiseTooltip>
+      <div className='chaise-btn-group'>
+        <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
+          <button
+            className='chaise-btn chaise-btn-primary'
+            type='button'
+            onClick={rotateImage}
+            disabled={disableFeatures}
+          >
+            <span className='chaise-btn-icon fa-solid fa-arrows-rotate'></span>
+            <span>Rotate Left</span>
+          </button>
+        </ChaiseTooltip>
+        {currentRotation !== 0 && (
+          <>
+            <ChaiseTooltip placement='top' tooltip='Save rotation'>
+              <button
+                className='chaise-btn chaise-btn-success icon-btn'
+                type='button'
+                onClick={saveRotation}
+                disabled={disableFeatures}
+                aria-label='Save rotation'
+              >
+                <span className='chaise-btn-icon fa-solid fa-check'></span>
+              </button>
+            </ChaiseTooltip>
+            <ChaiseTooltip placement='top' tooltip='Discard rotation and return to original orientation'>
+              <button
+                className='chaise-btn chaise-btn-danger icon-btn'
+                type='button'
+                onClick={resetRotation}
+                disabled={disableFeatures}
+                aria-label='Discard rotation'
+              >
+                <span className='chaise-btn-icon fa-solid fa-xmark'></span>
+              </button>
+            </ChaiseTooltip>
+          </>
+        )}
+      </div>
       <ChaiseTooltip placement='top' tooltip={screenshotTooltip}>
         <button
           className='chaise-btn chaise-btn-primary'
