@@ -77,32 +77,31 @@
 
   .file-preview-card-wrapper {
     margin-bottom: 5px;
+  }
 
-    &.reduce-space {
-      margin-top: -15px;
-    }
+  .file-preview-top-section,
+  .file-preview-alert-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
 
-    .file-preview-header-row {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
+    .file-preview-controls {
+      margin-left: auto;
 
-      .file-preview-message {
-        flex: 1;
-      }
-
-      .file-preview-controls {
-        align-self: flex-end;
-
-        .file-preview-toggle-btn {
-          border-color: map.get(variables.$color-map, 'border');
-          border-bottom: 0;
-          border-bottom-left-radius: 0;
-          border-bottom-right-radius: 0;
-        }
+      .file-preview-toggle-btn {
+        border-color: map.get(variables.$color-map, 'border');
+        border-bottom: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
       }
     }
+  }
 
+  // when there's no alert below, give the download row its own breathing space
+  // against the card. when an alert (truncated, file-too-large, etc.) follows,
+  // its own margin-top supplies the gap so we skip this margin.
+  .file-preview-top-section:not(:has(+ .file-preview-alert-row, + .file-preview-error)) .file-preview-download-btn {
+    margin-bottom: 5px;
   }
 
   .file-preview-container-inner {
@@ -121,10 +120,9 @@
   }
 
   .file-preview-content {
-    border: 1px solid map.get(variables.$color-map, 'border');
+    border: 0;
     border-radius: 0;
     margin-bottom: 0;
-    border: 0;
     overflow: visible;
     min-height: 100%;
 
@@ -186,8 +184,7 @@
   .file-preview-error {
     padding: 0 5px;
     width: fit-content;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin: 5px 0;
 
     .error-title {
       padding-right: 5px;
