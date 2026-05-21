@@ -98,48 +98,35 @@
       padding-bottom: 5px;
     }
 
-    // sticky inner wrapper inside the entity-key cell. position: sticky on a <td>
-    // is unreliable across browsers, so the cell content is wrapped in this div
-    // and the div is what actually sticks. top:12px matches the .main-container scroll padding.
+    // lifted above `.record-show-more-content` so RTA stays clickable.
+    .related-table-actions {
+      position: relative;
+      z-index: map.get(variables.$z-index-map, 'record-related-table-actions');
+    }
+
+    // position: sticky on a <td> is unreliable; sticky this inner div instead.
+    // top:12px matches the .main-container scroll padding.
     .record-entity-key-inner {
       position: sticky;
       top: 12px;
     }
 
-    // value cell wrapper for show-more rows
     .record-show-more-value {
-      position: relative;
 
-      // sticky overlay that holds the Show/Collapse button at the top-right of the
-      // value cell. height:0 + an absolute-positioned button means the overlay does
-      // NOT take up vertical space and never pushes the cell content down.
-      .record-show-more-sticky {
-        position: sticky;
-        top: 12px;
-        z-index: 2;
-        height: 0;
-        pointer-events: none;
-
-        .record-show-collapse-button {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
-      }
-
-      // keep this max-height in sync with SHOW_MORE_MAX_HEIGHT_PX in record-main-section.tsx
+      // `max-height` is set inline from JS (SHOW_MORE_MAX_HEIGHT_PX) so the
+      // threshold can eventually come from an ermrestjs annotation.
+      // `overflow: clip` (not `hidden`) avoids creating a BFC, which would
+      // shrink the nested <table> to its content width.
       .record-show-more-content {
-        max-height: 200px;
-        overflow: hidden;
-        position: relative;
+        overflow: clip;
+        position: relative; // containing block for the fade gradient
 
         &.expanded {
-          max-height: none;
+          overflow: visible;
         }
       }
 
-      // TODO POC: fade-out gradient at the cutoff. Set `display: none` to remove.
-      // Note: assumes a white page background — switch to the page bg variable when finalizing.
+      // assumes white page bg — switch to the page bg variable if/when one exists
       .record-show-more-fade {
         position: absolute;
         left: 0;
