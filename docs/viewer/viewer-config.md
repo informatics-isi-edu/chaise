@@ -187,3 +187,14 @@ So an example of a stored channel config looks like the following:
   }
 }
 ```
+
+
+```json
+{
+  "name": "image-parameters",
+  "version": "1.0",
+  "config": {
+      "rotate": 180
+  }
+}
+```

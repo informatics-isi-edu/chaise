@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
+import { createPortal } from 'react-dom';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
@@ -17,6 +19,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getOSDViewerIframe } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
+import RotateLeftIcon from '@isrd-isi-edu/chaise/src/components/icons/rotate-left';
 
 /**
  * created a separate comp for this to avoid rerendering the parent when internal state changes.
@@ -40,6 +43,12 @@ const ViewerMenuButtons = (): JSX.Element => {
    * Mirrors what OSD is showing so we can decide when to surface the Save/Reset controls.
    */
   const [currentRotation, setCurrentRotation] = useState(0);
+  /**
+   * Whether the rotation overlay banner has been tucked away. Resets on every
+   * new rotation / discard so transitions always start with the banner visible
+   * again. Set to true on Save so the user can tuck it after committing.
+   */
+  const [bannerCollapsed, setBannerCollapsed] = useState(false);
 
   useEffect(() => {
     const recieveIframeMessage = (event: any) => {
@@ -113,12 +122,16 @@ const ViewerMenuButtons = (): JSX.Element => {
       origin,
     );
     setCurrentRotation((prev) => (((prev + degrees) % 360) + 360) % 360);
+    // Every new rotation re-surfaces the banner; previous "tucked" state is
+    // about old information.
+    setBannerCollapsed(false);
     logViewerClientAction(LogActions.VIEWER_ROTATE, false);
   }
 
   const resetRotation = () => {
     getOSDViewerIframe().contentWindow!.postMessage({ messageType: 'resetRotation' }, origin);
     setCurrentRotation(0);
+    setBannerCollapsed(false);
     logViewerClientAction(LogActions.VIEWER_ROTATE_RESET, false);
   }
 
@@ -126,6 +139,8 @@ const ViewerMenuButtons = (): JSX.Element => {
     // TODO(rotation): persist current rotation to the Image table once the
     // schema/ACL (canUpdateImageConfig) is wired up. For now this is a no-op
     // so the UI flow is testable without DB writes.
+    // Tuck the banner — user just acted on it, it should get out of the way.
+    setBannerCollapsed(true);
     logViewerClientAction(LogActions.VIEWER_ROTATE_SAVE, false);
   }
 
@@ -152,7 +167,72 @@ const ViewerMenuButtons = (): JSX.Element => {
     screenshotTooltip = 'Processing the screenshot...';
   }
 
+  // Find the iframe's containing element so the rotation banner can be
+  // portal-ed in as an overlay at the top of the image area. Re-evaluated on
+  // every render so it picks up the element once it mounts.
+  const mainBodyEl = typeof document !== 'undefined' ? document.querySelector('.main-body') : null;
+
+  const rotationBanner = currentRotation !== 0 && mainBodyEl ? createPortal(
+    bannerCollapsed ? (
+      // Collapsed: a small tab poking down from the top of the image area.
+      // Clicking it expands the banner again.
+      <ChaiseTooltip placement='bottom' tooltip='Show rotation controls'>
+        <button
+          type='button'
+          className='viewer-rotation-banner-tab chaise-btn chaise-btn-primary'
+          onClick={() => setBannerCollapsed(false)}
+          aria-label='Show rotation controls'
+        >
+          <span className='chaise-btn-icon fa-solid fa-chevron-down'></span>
+        </button>
+      </ChaiseTooltip>
+    ) : (
+      <div className='viewer-rotation-banner'>
+        <span className='viewer-rotation-banner-text'>
+          Image is rotated {currentRotation}°. Save to keep this orientation, or discard to revert.
+        </span>
+        <ChaiseTooltip placement='bottom' tooltip='Save rotation'>
+          <button
+            className='chaise-btn chaise-btn-primary'
+            type='button'
+            onClick={saveRotation}
+            disabled={disableFeatures}
+          >
+            <span className='chaise-btn-icon fa-solid fa-check'></span>
+            <span>Save</span>
+          </button>
+        </ChaiseTooltip>
+        <ChaiseTooltip placement='bottom' tooltip='Discard rotation and return to original orientation'>
+          <button
+            className='chaise-btn chaise-btn-secondary'
+            type='button'
+            onClick={resetRotation}
+            disabled={disableFeatures}
+          >
+            <span className='chaise-btn-icon fa-solid fa-xmark'></span>
+            <span>Discard</span>
+          </button>
+        </ChaiseTooltip>
+        <ChaiseTooltip placement='bottom' tooltip='Hide this banner'>
+          <button
+            className='chaise-btn chaise-btn-secondary icon-btn viewer-rotation-banner-dismiss'
+            type='button'
+            onClick={() => setBannerCollapsed(true)}
+            aria-label='Hide rotation banner'
+          >
+            <span className='chaise-btn-icon fa-solid fa-chevron-up'></span>
+          </button>
+        </ChaiseTooltip>
+      </div>
+    ),
+    mainBodyEl,
+  ) : null;
+
   return (
+    <>
+    {/* Banner overlay variant — commented out; the hamburger-menu variant is
+        the chosen UI. Kept here so it's easy to revive later. */}
+    {/* {rotationBanner} */}
     <div className='menu-btn-container'>
       <ChaiseTooltip placement='top' tooltip={toggleAnnotationSidebarTooltip}>
         <button
@@ -213,6 +293,10 @@ const ViewerMenuButtons = (): JSX.Element => {
           <span>Reset Zoom</span>
         </button>
       </ChaiseTooltip>
+      {/* Inline button-group variant (Rotate Left + Save + Discard as separate
+          attached buttons) — commented out; superseded by the hamburger-menu
+          variant below. Kept around so we can revive it for comparison later. */}
+      {/*
       <div className='chaise-btn-group'>
         <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
           <button
@@ -221,7 +305,7 @@ const ViewerMenuButtons = (): JSX.Element => {
             onClick={rotateImage}
             disabled={disableFeatures}
           >
-            <span className='chaise-btn-icon fa-solid fa-arrows-rotate'></span>
+            <RotateLeftIcon className='chaise-btn-icon' />
             <span>Rotate Left</span>
           </button>
         </ChaiseTooltip>
@@ -229,7 +313,7 @@ const ViewerMenuButtons = (): JSX.Element => {
           <>
             <ChaiseTooltip placement='top' tooltip='Save rotation'>
               <button
-                className='chaise-btn chaise-btn-success icon-btn'
+                className='chaise-btn chaise-btn-primary icon-btn'
                 type='button'
                 onClick={saveRotation}
                 disabled={disableFeatures}
@@ -240,7 +324,7 @@ const ViewerMenuButtons = (): JSX.Element => {
             </ChaiseTooltip>
             <ChaiseTooltip placement='top' tooltip='Discard rotation and return to original orientation'>
               <button
-                className='chaise-btn chaise-btn-danger icon-btn'
+                className='chaise-btn chaise-btn-secondary icon-btn'
                 type='button'
                 onClick={resetRotation}
                 disabled={disableFeatures}
@@ -251,6 +335,64 @@ const ViewerMenuButtons = (): JSX.Element => {
             </ChaiseTooltip>
           </>
         )}
+      </div>
+      */}
+      {/* Split-button: "Rotate Left" + a hamburger that opens a menu with the
+          Save/Discard actions. Styled to mirror the faceting panel's dropdown
+          (renderFacetDropdownMenu in faceting.tsx) so the menu look/positioning
+          matches the rest of the app. */}
+      <div className='viewer-rotate-menu chaise-btn-group'>
+        <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
+          <button
+            className='chaise-btn chaise-btn-primary'
+            type='button'
+            onClick={rotateImage}
+            disabled={disableFeatures}
+          >
+            <RotateLeftIcon className='chaise-btn-icon' width={17} />
+            <span>Rotate Left</span>
+          </button>
+        </ChaiseTooltip>
+        {/* Render as a nested chaise-btn-group so the outer group's CSS
+            (border-radius/-margin reset) reaches the toggle button. Always
+            shown so the toggle's geometry doesn't appear/disappear as the
+            user rotates; individual items are disabled when not applicable. */}
+        <Dropdown className='chaise-dropdown chaise-dropdown-no-icon chaise-btn-group'>
+          <ChaiseTooltip placement='top' tooltip='Rotation actions'>
+            <Dropdown.Toggle
+              className='chaise-btn chaise-btn-primary'
+              disabled={disableFeatures}
+              aria-label='Rotation actions'
+            >
+              <span className='chaise-btn-icon fa-solid fa-bars'></span>
+            </Dropdown.Toggle>
+          </ChaiseTooltip>
+          {/* `align='end'` anchors the menu's right edge to the toggle's right
+              edge, so the menu opens leftward — landing under the Rotate Left
+              button instead of hanging off to the right of the toggle. */}
+          <Dropdown.Menu align='end'>
+            <Dropdown.Item
+              className='dropdown-item-w-icon save-rotation-btn'
+              onClick={saveRotation}
+              disabled={disableFeatures}
+            >
+              <span>
+                <span className='dropdown-item-icon fa-solid fa-check-to-slot'></span>
+                <span>Save rotation</span>
+              </span>
+            </Dropdown.Item>
+            <Dropdown.Item
+              className='dropdown-item-w-icon discard-rotation-btn'
+              onClick={resetRotation}
+              disabled={disableFeatures || currentRotation === 0}
+            >
+              <span>
+                <span className='dropdown-item-icon fa-solid fa-undo'></span>
+                <span>Discard rotation</span>
+              </span>
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
       <ChaiseTooltip placement='top' tooltip={screenshotTooltip}>
         <button
@@ -269,6 +411,7 @@ const ViewerMenuButtons = (): JSX.Element => {
         </button>
       </ChaiseTooltip>
     </div>
+    </>
   );
 }
 
