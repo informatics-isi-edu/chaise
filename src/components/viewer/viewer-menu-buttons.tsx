@@ -20,6 +20,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getOSDViewerIframe } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
 import RotateLeftIcon from '@isrd-isi-edu/chaise/src/components/icons/rotate-left';
+import RotateRightIcon from '@isrd-isi-edu/chaise/src/components/icons/rotate-right';
 
 /**
  * created a separate comp for this to avoid rerendering the parent when internal state changes.
@@ -115,8 +116,7 @@ const ViewerMenuButtons = (): JSX.Element => {
     logViewerClientAction(action, false);
   }
 
-  const rotateImage = () => {
-    const degrees = -90;
+  const rotateImage = (degrees: number) => {
     getOSDViewerIframe().contentWindow!.postMessage(
       { messageType: 'rotate', content: { degrees } },
       origin,
@@ -152,6 +152,50 @@ const ViewerMenuButtons = (): JSX.Element => {
 
     logViewerClientAction(LogActions.VIEWER_SCREENSHOT, false);
   }
+
+  //-------------------  render helpers:   --------------------//
+
+  /**
+   * The three icon buttons inside the Rotate trio. Returned as a fragment so
+   * it can be dropped into each label-style variant below.
+   */
+  const renderRotateTrioButtons = () => (
+    <>
+      <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
+        <button
+          className='chaise-btn chaise-btn-primary icon-btn'
+          type='button'
+          onClick={() => rotateImage(-90)}
+          disabled={disableFeatures}
+          aria-label='Rotate left'
+        >
+          <RotateLeftIcon className='chaise-btn-icon' width={17} />
+        </button>
+      </ChaiseTooltip>
+      <ChaiseTooltip placement='top' tooltip='Rotate image 90° clockwise'>
+        <button
+          className='chaise-btn chaise-btn-primary icon-btn'
+          type='button'
+          onClick={() => rotateImage(90)}
+          disabled={disableFeatures}
+          aria-label='Rotate right'
+        >
+          <RotateRightIcon className='chaise-btn-icon' width={17} />
+        </button>
+      </ChaiseTooltip>
+      <ChaiseTooltip placement='top' tooltip='Discard rotation and return to original orientation'>
+        <button
+          className='chaise-btn chaise-btn-primary icon-btn'
+          type='button'
+          onClick={resetRotation}
+          disabled={disableFeatures}
+          aria-label='Discard rotation'
+        >
+          <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
+        </button>
+      </ChaiseTooltip>
+    </>
+  );
 
   //-------------------  render logics:   --------------------//
   const disableFeatures = !mainImageLoaded;
@@ -260,6 +304,9 @@ const ViewerMenuButtons = (): JSX.Element => {
           <span>{(showChannelList ? 'Hide' : 'Show') + ' Channel List'}</span>
         </button>
       </ChaiseTooltip>
+      {/* Original three labeled Zoom buttons — commented out in favor of the
+          trio variant below. Kept around so we can revive it for comparison. */}
+      {/*
       <ChaiseTooltip placement='top' tooltip='Zoom in'>
         <button
           className='chaise-btn chaise-btn-primary'
@@ -293,64 +340,63 @@ const ViewerMenuButtons = (): JSX.Element => {
           <span>Reset Zoom</span>
         </button>
       </ChaiseTooltip>
-      {/* Inline button-group variant (Rotate Left + Save + Discard as separate
-          attached buttons) — commented out; superseded by the hamburger-menu
-          variant below. Kept around so we can revive it for comparison later. */}
-      {/*
-      <div className='chaise-btn-group'>
-        <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
+      */}
+      {/* Trio variant: "Zoom" label + three icon-only buttons (in, out, reset). */}
+      <div className='viewer-zoom-trio chaise-btn-group'>
+        <span className='chaise-btn-group-text'>Zoom</span>
+        <ChaiseTooltip placement='top' tooltip='Zoom in'>
           <button
-            className='chaise-btn chaise-btn-primary'
+            className='chaise-btn chaise-btn-primary icon-btn'
             type='button'
-            onClick={rotateImage}
+            onClick={() => changeZoom(ViewerZoomFunction.ZOOM_IN)}
             disabled={disableFeatures}
+            aria-label='Zoom in'
           >
-            <RotateLeftIcon className='chaise-btn-icon' />
-            <span>Rotate Left</span>
+            <span className='chaise-btn-icon fa-solid fa-magnifying-glass-plus'></span>
           </button>
         </ChaiseTooltip>
-        {currentRotation !== 0 && (
-          <>
-            <ChaiseTooltip placement='top' tooltip='Save rotation'>
-              <button
-                className='chaise-btn chaise-btn-primary icon-btn'
-                type='button'
-                onClick={saveRotation}
-                disabled={disableFeatures}
-                aria-label='Save rotation'
-              >
-                <span className='chaise-btn-icon fa-solid fa-check'></span>
-              </button>
-            </ChaiseTooltip>
-            <ChaiseTooltip placement='top' tooltip='Discard rotation and return to original orientation'>
-              <button
-                className='chaise-btn chaise-btn-secondary icon-btn'
-                type='button'
-                onClick={resetRotation}
-                disabled={disableFeatures}
-                aria-label='Discard rotation'
-              >
-                <span className='chaise-btn-icon fa-solid fa-xmark'></span>
-              </button>
-            </ChaiseTooltip>
-          </>
-        )}
+        <ChaiseTooltip placement='top' tooltip='Zoom out'>
+          <button
+            className='chaise-btn chaise-btn-primary icon-btn'
+            type='button'
+            onClick={() => changeZoom(ViewerZoomFunction.ZOOM_OUT)}
+            disabled={disableFeatures}
+            aria-label='Zoom out'
+          >
+            <span className='chaise-btn-icon fa-solid fa-magnifying-glass-minus'></span>
+          </button>
+        </ChaiseTooltip>
+        <ChaiseTooltip placement='top' tooltip='Reset Zoom'>
+          <button
+            className='chaise-btn chaise-btn-primary icon-btn'
+            type='button'
+            onClick={() => changeZoom(ViewerZoomFunction.RESET_ZOOM)}
+            disabled={disableFeatures}
+            aria-label='Reset zoom'
+          >
+            <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
+          </button>
+        </ChaiseTooltip>
       </div>
-      */}
-      {/* Split-button: "Rotate Left" + a hamburger that opens a menu with the
+      {/* "Rotate" label + three icon-only buttons (left, right, discard). */}
+      <div className='viewer-rotate-trio chaise-btn-group'>
+        <span className='chaise-btn-group-text'>Rotate</span>
+        {renderRotateTrioButtons()}
+      </div>
+      {/* Split-button: "Rotate Right" + a hamburger that opens a menu with the
           Save/Discard actions. Styled to mirror the faceting panel's dropdown
           (renderFacetDropdownMenu in faceting.tsx) so the menu look/positioning
           matches the rest of the app. */}
       <div className='viewer-rotate-menu chaise-btn-group'>
-        <ChaiseTooltip placement='top' tooltip='Rotate image 90° counterclockwise'>
+        <ChaiseTooltip placement='top' tooltip='Rotate image 90° clockwise'>
           <button
             className='chaise-btn chaise-btn-primary'
             type='button'
-            onClick={rotateImage}
+            onClick={() => rotateImage(90)}
             disabled={disableFeatures}
           >
-            <RotateLeftIcon className='chaise-btn-icon' width={17} />
-            <span>Rotate Left</span>
+            <RotateRightIcon className='chaise-btn-icon' width={17} />
+            <span>Rotate Right</span>
           </button>
         </ChaiseTooltip>
         {/* Render as a nested chaise-btn-group so the outer group's CSS
@@ -408,6 +454,24 @@ const ViewerMenuButtons = (): JSX.Element => {
             </span>
           )}
           <span>Take a Screenshot</span>
+        </button>
+      </ChaiseTooltip>
+      {/* Icon-only variant of the screenshot button. Same handler + state, so
+          it swaps in the spinner alongside the labeled button. */}
+      <ChaiseTooltip placement='top' tooltip={screenshotTooltip}>
+        <button
+          className='chaise-btn chaise-btn-primary icon-btn'
+          type='button'
+          onClick={takeScreenshot}
+          disabled={waitingForScreenshot || disableFeatures}
+          aria-label='Take a screenshot'
+        >
+          {!waitingForScreenshot && <span className='chaise-btn-icon fa-solid fa-camera'></span>}
+          {waitingForScreenshot && (
+            <span className='chaise-btn-icon'>
+              <Spinner animation='border' size='sm' />
+            </span>
+          )}
         </button>
       </ChaiseTooltip>
     </div>

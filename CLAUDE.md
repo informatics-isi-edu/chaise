@@ -73,6 +73,7 @@ npm link @isrd-isi-edu/ermrestjs
 - Avoid `any` types
 - Single quotes, semicolons, 2-space indent
 - All functions must have proper JSDoc comments (you can skip the return type if it's self-explanatory)
+- **SCSS colors**: never use a hex/literal color directly in SCSS. Either reuse an existing general-purpose entry from `src/assets/scss/maps/_color-map.scss`, or add a new entry there and reference it via `map.get(variables.$color-map, '<key>')`.
 
 ## Commit Messages
 
