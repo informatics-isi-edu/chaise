@@ -46,26 +46,18 @@
           }
         }
 
+        // ring drawn per <td> (shadow on <tr> isn't reliable in tables).
         &.row-focus {
-          // row-focus will change the border top and bottom size,
-          // so we should adjust that and account for the default border
-          td {
-            $_row_focus_padding: map.get(variables.$record-spacing-map, 'record-table-cell-padding') - (map.get(variables.$record-spacing-map, 'row-focus-border-width') - map.get(variables.$record-spacing-map, 'record-table-cell-border-width'));
-            padding-top: $_row_focus_padding;
-            padding-bottom: $_row_focus_padding;
-
-            // if the size of row-focus is bigger than the current border width,
-            // we should adjust the content of inline tables so the whole page doesn't shift
-            @if map.get(variables.$record-spacing-map, 'row-focus-border-width') > map.get(variables.$record-spacing-map, 'record-table-cell-border-width') {
-              .inline-table-display {
-                padding-bottom: map.get(variables.$record-spacing-map, 'row-focus-border-width');
-              }
-            }
+          $_w: map.get(variables.$record-spacing-map, 'row-focus-border-width');
+          $_c: map.get(variables.$color-map, 'primary');
+          > td {
+            box-shadow: inset 0 $_w 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
           }
-
-          // when there are two of them, the bottom should use the default padding
-          + tr.row-focus td {
-            padding-top:  map.get(variables.$record-spacing-map, 'record-table-cell-padding');
+          > td:first-child {
+            box-shadow: inset 0 $_w 0 0 $_c, inset $_w 0 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
+          }
+          > td:last-child {
+            box-shadow: inset 0 $_w 0 0 $_c, inset (-$_w) 0 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
           }
         }
 

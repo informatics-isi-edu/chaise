@@ -1014,28 +1014,18 @@ html {
         margin-top: $_space-between-accordions;
       }
 
-      // row-focus will add a border of 2px,
-      // - adding -2px margin to left and right to avoid shrinkage
-      // - reducing the margin-top from 5px to 3px to avoid moving
+      // pseudo ring; shadow/outline on parent gets covered by the header bg.
       &.row-focus {
-        margin-left: -$_row-focus-border-width;
-        margin-right: -$_row-focus-border-width;
-        margin-top: $_space-between-accordions - $_row-focus-border-width;
+        position: relative;
 
-        + .chaise-accordion:not(.row-focus) {
-          margin-top: $_space-between-accordions - $_row-focus-border-width;
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          box-shadow: inset 0 0 0 $_row-focus-border-width map.get(variables.$color-map, 'primary');
+          pointer-events: none;
+          z-index: 1;
         }
-
-        // if there are two row-focus on top of each other, we should
-        // change the margin to account for both of their borders.
-        + .row-focus {
-          margin-top: $_space-between-accordions - ($_row-focus-border-width * 2);
-        }
-      }
-
-      // the first row doesn't have margin top
-      &:first-child.row-focus {
-        margin-top: -$_row-focus-border-width;
       }
 
       .accordion-button {
