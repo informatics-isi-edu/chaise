@@ -57,7 +57,7 @@
   text-align: center;
   white-space: nowrap;
   background-color: map.get(variables.$color-map, 'chaise-btn-group-text');
-  border: variables.$btn-border-width solid map.get(variables.$color-map, 'border');
+  border: variables.$btn-border-width solid map.get(variables.$color-map, 'black');
   @include helpers.border-radius(variables.$btn-border-radius);
 }
 

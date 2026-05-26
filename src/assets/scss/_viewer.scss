@@ -41,61 +41,6 @@
     padding-top: 10px;
   }
 
-  // Hamburger-style rotation menu (experimental variant). Hide the default
-  // dropdown caret so the toggle reads as a clean hamburger icon.
-  .viewer-rotate-menu .dropdown-toggle::after {
-    display: none;
-  }
-
-  // Banner that appears at the top of the image area while the viewport is
-  // rotated but the rotation hasn't been saved/discarded yet. Portal-ed into
-  // .main-body by ViewerMenuButtons.
-  .viewer-rotation-banner {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid map.get(variables.$color-map, 'border');
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    white-space: nowrap;
-
-    .viewer-rotation-banner-text {
-      font-size: 0.9rem;
-      color: map.get(variables.$color-map, 'black');
-    }
-  }
-
-  // Collapsed banner — small tab poking down from the top center, clickable to
-  // re-expand the banner. Hugs the very top edge so the rest of the image area
-  // is free; bottom corners rounded so it reads as a tab pulled down.
-  .viewer-rotation-banner-tab {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    padding: 2px 14px;
-    border-top: none !important;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-
-  // Slightly soften the dismiss button so it doesn't compete with Save/Discard.
-  .viewer-rotation-banner-dismiss {
-    opacity: 0.7;
-    &:hover { opacity: 1; }
-  }
-
   .menu-btn-container {
     padding-top: 5px;
     .chaise-btn {
