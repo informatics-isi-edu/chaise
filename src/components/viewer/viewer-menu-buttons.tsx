@@ -203,7 +203,7 @@ const ViewerMenuButtons = (): JSX.Element => {
             disabled={disableFeatures}
             aria-label='Reset zoom'
           >
-            <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
+            <span className='chaise-btn-icon fa-solid fa-xmark'></span>
           </button>
         </ChaiseTooltip>
       </div>
@@ -242,7 +242,7 @@ const ViewerMenuButtons = (): JSX.Element => {
             disabled={disableFeatures}
             aria-label='Discard rotation'
           >
-            <span className='chaise-btn-icon fa-solid fa-rotate-left'></span>
+            <span className='chaise-btn-icon fa-solid fa-xmark'></span>
           </button>
         </ChaiseTooltip>
       </div>
