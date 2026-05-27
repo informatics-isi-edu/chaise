@@ -50,7 +50,7 @@
 .chaise-btn-group-text {
   display: flex;
   align-items: center;
-  padding: variables.$btn-padding-y variables.$btn-padding-x;
+  padding: variables.$btn-padding-y variables.$group-btn-text-padding-x;
   margin-bottom: 0;
   font-size: 1rem;
   color: map.get(variables.$color-map, 'black');
