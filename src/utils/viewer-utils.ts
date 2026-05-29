@@ -3,6 +3,7 @@ import React from 'react';
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { OSDViewerParameters, OSDImageConfig } from '@isrd-isi-edu/chaise/src/models/viewer';
 
 // services
 import ViewerConfigService from '@isrd-isi-edu/chaise/src/services/viewer-config';
@@ -105,7 +106,7 @@ export const initializeOSDParams = (pageQueryParams: any, imageURI: string, defa
   const osdConstant = VIEWER_CONSTANT.OSD_VIEWER;
 
   let imageURIQueryParams: any = {};
-  const osdViewerParams: any = {
+  const osdViewerParams: OSDViewerParameters = {
     mainImage: { zIndex: defaultZIndex, info: [] },
     channels: [],
     annotationSetURLs: [],
@@ -192,7 +193,7 @@ export const initializeOSDParams = (pageQueryParams: any, imageURI: string, defa
  * @returns
  */
 export const loadImageMetadata = (
-  osdViewerParameters: React.RefObject<any>,
+  osdViewerParameters: React.RefObject<OSDViewerParameters>,
   viewerLogStack: any,
   viewerLogStackPath: string,
   imageID: string,
@@ -609,6 +610,55 @@ export const updateChannelConfig = (data: any, imageID: string): Promise<void> =
   });
 }
 
+/**
+ * Persist the image-level config (currently just rotation) to the image_config column.
+ * Mirrors updateDefaultZIndex: a direct attributegroup PUT, since the config column
+ * may not be a visible column. The caller handles session validation, the success
+ * alert, and the unauthorized repaint.
+ */
+export const updateImageConfig = (mainImageReference: any, imageID: string, rotation: number): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const ic = VIEWER_CONSTANT.OSD_VIEWER.IMAGE_CONFIG;
+    const colName = ViewerConfigService.imageConfig.image_config_column_name;
+
+    const tableName = mainImageReference.table.name,
+      schemaName = mainImageReference.table.schema.name;
+
+    const url = [
+      `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/attributegroup`,
+      `${fixedEncodeURIComponent(schemaName)}:${fixedEncodeURIComponent(tableName)}`,
+      `RID;${fixedEncodeURIComponent(colName)}`
+    ].join('/');
+
+    const config: any = {};
+    config[ic.NAME_ATTR] = ic.FORMAT_NAME;
+    config[ic.VERSION_ATTR] = _getImageConfigFormatVersion();
+    config[ic.CONFIG_ATTR] = { rotate: rotation };
+
+    const payload: any = { RID: imageID };
+    payload[colName] = config;
+
+    const headers: any = {};
+    const stack = LogService.addExtraInfoToStack(null, {
+      'num_updated': 1,
+      'updated_keys': {
+        'cols': ['RID'],
+        'vals': [[imageID]]
+      }
+    });
+    headers[ConfigService.ERMrest.contextHeaderName] = {
+      catalog: ConfigService.catalogID,
+      schema_table: schemaName + ':' + tableName,
+      action: LogService.getActionString(LogActions.UPDATE),
+      stack: stack
+    };
+
+    ConfigService.http.put(url, [payload], { headers: headers }).then(() => {
+      resolve();
+    }).catch((err: any) => reject(err));
+  });
+}
+
 // --------------- local helper functions -------------------- //
 
 /**
@@ -658,6 +708,14 @@ const _getChannelConfigFormatVersion = () => {
   return res;
 }
 
+const _getImageConfigFormatVersion = () => {
+  let res = ViewerConfigService.imageConfig.image_config_format_version;
+  if (!isStringAndNotEmpty(res)) {
+    res = VIEWER_CONSTANT.OSD_VIEWER.IMAGE_CONFIG.FORMAT_VERSION;
+  }
+  return res;
+}
+
 /**
  * Map a single row's data + tuple into the channel entry format used in osdViewerParameters.channels.
  * channelNameFallback is used when channel_name is absent (processPage passes the running index; buildChannelListFromRows passes channelNumber).
@@ -698,6 +756,54 @@ const _buildChannelEntry = (data: any, tuple: any, channelNameFallback: any): an
   res[osdConstant.IS_RGB_QPARAM] = typeof isRGB === 'boolean' ? isRGB : null;
   if (hasConfig) {
     res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
+  }
+
+  return res;
+};
+
+/**
+ * Extract the image-level config (currently just rotation) from the image row.
+ * Mirrors _buildChannelEntry but for the single Image tuple.
+ * Returns whether the user can update the config column, and the inner config
+ * object (the CONFIG_ATTR contents) which is passed as-is to osd-viewer.
+ */
+export const buildImageConfig = (tuple: any): { canUpdateImageConfig: boolean, config: OSDImageConfig | null } => {
+  const colName = ViewerConfigService.imageConfig.image_config_column_name;
+  const configAttr = VIEWER_CONSTANT.OSD_VIEWER.IMAGE_CONFIG.CONFIG_ATTR;
+
+  const res: { canUpdateImageConfig: boolean, config: OSDImageConfig | null } = {
+    canUpdateImageConfig: false,
+    config: null
+  };
+
+  if (!colName) return res;
+
+  res.canUpdateImageConfig = tuple
+    ? tuple.canUpdate && tuple.checkPermissions('column_update', colName)
+    : false;
+
+  let stored = tuple && tuple.data ? tuple.data[colName] : null;
+  stored = isObjectAndNotNull(stored) ? stored : [];
+  let rawConfig = null;
+  if (Array.isArray(stored)) {
+    const match = stored.filter(_isAppropriateImageConfig);
+    if (match.length > 0) {
+      rawConfig = match[0][configAttr];
+    }
+  } else if (_isAppropriateImageConfig(stored)) {
+    rawConfig = stored[configAttr];
+  }
+
+  // validate + normalize here so everything downstream (chaise state and
+  // osd-viewer) consumes a clean config. an invalid rotate (e.g. "somevalue")
+  // is dropped so we behave as if no rotation was set; a valid one is
+  // normalized to the [0, 360) range.
+  if (isObjectAndNotNull(rawConfig)) {
+    res.config = {};
+    const rotate = parseFloat(rawConfig.rotate);
+    if (!isNaN(rotate)) {
+      res.config.rotate = ((rotate % 360) + 360) % 360;
+    }
   }
 
   return res;
@@ -1117,6 +1223,14 @@ const _isAppropriateChannelConfig = (obj: any) => {
     ch.CONFIG_ATTR in obj && // has config attr
     obj[ch.NAME_ATTR] === ch.FORMAT_NAME && // name attr is correct
     obj[ch.VERSION_ATTR] === ViewerConfigService.channelConfig.channel_config_format_version; // version attr is correct
+}
+
+const _isAppropriateImageConfig = (obj: any) => {
+  const ic = VIEWER_CONSTANT.OSD_VIEWER.IMAGE_CONFIG;
+  return isObjectAndNotNull(obj) && // is a not-null object
+    ic.CONFIG_ATTR in obj && // has config attr
+    obj[ic.NAME_ATTR] === ic.FORMAT_NAME && // name attr is correct
+    obj[ic.VERSION_ATTR] === _getImageConfigFormatVersion(); // version attr is correct
 }
 
 /**

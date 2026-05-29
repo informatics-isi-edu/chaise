@@ -19,7 +19,7 @@ import {
   ViewerError,
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogAppModes, LogObjectType, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { ViewerAnnotationModal } from '@isrd-isi-edu/chaise/src/models/viewer';
+import { ViewerAnnotationModal, OSDViewerParameters, OSDImageConfig } from '@isrd-isi-edu/chaise/src/models/viewer';
 import { RecordeditDisplayMode, RecordeditProps, appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   DisabledRow,
@@ -45,7 +45,8 @@ import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/sr
 import {
   ReadAllAnnotationResultType, fetchZPlaneList, fetchZPlaneListByZIndex, getOSDViewerIframe,
   buildChannelListFromRows, fetchProcessedImageForChannels,
-  hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex
+  hasURLQueryParam, initializeOSDParams, loadImageMetadata, readAllAnnotations, updateChannelConfig, updateDefaultZIndex,
+  buildImageConfig, updateImageConfig
 } from '@isrd-isi-edu/chaise/src/utils/viewer-utils';
 import { HELP_PAGES, ID_NAMES, RECORDSET_DEFAULT_PAGE_SIZE, VIEWER_CONSTANT, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
@@ -182,6 +183,23 @@ export const ViewerContext = createContext<{
   channelSelectorSubmitting: boolean;
   hideChannelSelectorModal: () => void;
   onChannelSelectorSubmit: (rows: SelectedRow[]) => void;
+  /**
+   * whether the user can update the image config column (gates the rotation save button)
+   */
+  canUpdateImageConfig: boolean;
+  /**
+   * the saved/default rotation in degrees. used to initialize the live rotation
+   * and as the target the discard button returns to.
+   */
+  mainImageRotation: number;
+  /**
+   * whether the image config save request is in flight (drives the save button spinner)
+   */
+  savingImageConfig: boolean;
+  /**
+   * persist the given rotation (in degrees) to the image config column
+   */
+  saveImageConfig: (rotation: number) => void;
 } | null>(null);
 
 type ViewerProviderProps = {
@@ -292,7 +310,7 @@ export default function ViewerProvider({
   } | null>(null)
 
   // passed to osd-viewer
-  const osdViewerParameters = useRef<any>({});
+  const osdViewerParameters = useRef<OSDViewerParameters>({} as OSDViewerParameters);
 
   // ERMrest Tuple objects for all currently-active channels; used to build disabled rows in the Add Channels modal.
   // Indexed by osdItemId; entries are nulled out when a channel is removed via the toolbar.
@@ -316,6 +334,19 @@ export default function ViewerProvider({
    * - When this is false, we should disable any button/feature that requires the main image to be loaded.
    */
   const [mainImageLoaded, setMainImageLoaded, mainImageLoadedRef] = useStateRef(false);
+
+  /**
+   * whether the user can update the image config column (gates the rotation save button)
+   */
+  const [canUpdateImageConfig, setCanUpdateImageConfig] = useState(false);
+  /**
+   * the saved/default rotation in degrees (from the image config column, updated after each save)
+   */
+  const [mainImageRotation, setMainImageRotation] = useState(0);
+  /**
+   * whether the image config save request is in flight
+   */
+  const [savingImageConfig, setSavingImageConfig] = useState(false);
 
   useEffect(() => {
     if (!initializationStartedRef.current) {
@@ -351,6 +382,10 @@ export default function ViewerProvider({
     let imageDataFromQueryParams = false;
     let hasProcessedImage = false;
     let hasChannelUrl = false;
+
+    // the inner image config (e.g. { rotate }) to pass to osd-viewer; set after
+    // reading the image tuple and applied to osdViewerParameters once it's built.
+    let imageConfigForOSD: OSDImageConfig | null = null;
 
     // if there are svgs in query param, we should just use it and shouldn't get it from db.
     let hasAnnotationQueryParam = false
@@ -395,6 +430,19 @@ export default function ViewerProvider({
         // get the default zindex value
         if (imageConfig.default_z_index_column_name && imageConfig.default_z_index_column_name in imageTuple.data) {
           defaultZIndex.current = imageTuple.data[imageConfig.default_z_index_column_name];
+        }
+
+        // read the image config (currently only rotation): the permission gates the
+        // save button, and the config itself is passed to osd-viewer as the default.
+        if (imageConfig.image_config_column_name) {
+          const imageConfigRes = buildImageConfig(imageTuple);
+          setCanUpdateImageConfig(imageConfigRes.canUpdateImageConfig);
+          if (imageConfigRes.config) {
+            imageConfigForOSD = imageConfigRes.config;
+            if (typeof imageConfigRes.config.rotate === 'number') {
+              setMainImageRotation(imageConfigRes.config.rotate);
+            }
+          }
         }
 
         /**
@@ -493,6 +541,12 @@ export default function ViewerProvider({
         osdViewerParameters.current.acls.mainImage = {
           canUpdateDefaultZIndex: imageTuple.canUpdate && imageTuple.checkPermissions('column_update', imageConfig.default_z_index_column_name)
         };
+
+        // pass the image config (e.g. default rotation) to osd-viewer.
+        // set here (not at :401) because osdViewerParameters.current was just reassigned above.
+        if (imageConfigForOSD) {
+          osdViewerParameters.current.imageConfig = imageConfigForOSD;
+        }
       }
 
       const qParamName = osdConstant.WATERMARK_QPARAM;
@@ -1523,6 +1577,48 @@ export default function ViewerProvider({
   }
 
   /**
+   * persist the given rotation (in degrees) to the image config column.
+   * mirrors the updateChannelConfig / updateDefaultZIndex message handlers:
+   * validate session, PUT, then handle the success alert / auth repaint.
+   * @param rotation the rotation in degrees to save
+   */
+  const saveImageConfig = (rotation: number) => {
+    logViewerClientAction(LogActions.VIEWER_ROTATE_SAVE, false, undefined, { rotation });
+    validateSessionBeforeMutation(() => {
+      setSavingImageConfig(true);
+      updateImageConfig(reference, imageIDRef.current!, rotation)
+        .then(() => {
+          addAlert('Image settings have been updated.', ChaiseAlertType.SUCCESS);
+          // the saved value becomes the new default that the discard button returns to
+          setMainImageRotation(rotation);
+        })
+        .catch((error: any) => {
+          validateSession()
+            .then((session) => {
+              if (!session && error instanceof ConfigService.ERMrest.ConflictError) {
+                // login in a modal should show (Session timed out)
+                dispatchError({ error: new ConfigService.ERMrest.UnauthorizedError() });
+                return;
+              }
+
+              if (error instanceof ConfigService.ERMrest.NoDataChangedError) {
+                // do nothing
+              } else if (error instanceof DifferentUserConflictError) {
+                dispatchError({ error, isDismissible: true });
+              } else {
+                addAlert(error.message, ChaiseAlertType.ERROR);
+              }
+            })
+            .catch((err) => {
+              // validate session will not reject, added to silence ts warning
+              $log.error(err);
+            });
+        })
+        .finally(() => setSavingImageConfig(false));
+    });
+  };
+
+  /**
    * can be used for logging client actions
    */
   const logViewerClientAction = (action: LogActions, isAnnotation: boolean, item?: ViewerAnnotationModal, extraInfo?: any) => {
@@ -1861,6 +1957,10 @@ export default function ViewerProvider({
       channelSelectorSubmitting,
       hideChannelSelectorModal,
       onChannelSelectorSubmit,
+      canUpdateImageConfig,
+      mainImageRotation,
+      savingImageConfig,
+      saveImageConfig,
     };
   }, [
     imageID,
@@ -1880,6 +1980,9 @@ export default function ViewerProvider({
     mainImageLoaded,
     channelSelectorModalProps,
     channelSelectorSubmitting,
+    canUpdateImageConfig,
+    mainImageRotation,
+    savingImageConfig,
   ]);
 
   return (
