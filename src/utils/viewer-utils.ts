@@ -624,21 +624,26 @@ export const updateImageConfig = (mainImageReference: any, imageID: string, rota
     const tableName = mainImageReference.table.name,
       schemaName = mainImageReference.table.schema.name;
 
+    if (!isStringAndNotEmpty(colName) || !colName) {
+      reject(new Error('image_config_column_name is not configured.'));
+      return;
+    }
+
     const url = [
       `${ConfigService.chaiseConfig.ermrestLocation}/catalog/${ConfigService.catalogID}/attributegroup`,
       `${fixedEncodeURIComponent(schemaName)}:${fixedEncodeURIComponent(tableName)}`,
       `RID;${fixedEncodeURIComponent(colName)}`
     ].join('/');
 
-    const config: any = {};
+    const config: Record<string, unknown> = {};
     config[ic.NAME_ATTR] = ic.FORMAT_NAME;
     config[ic.VERSION_ATTR] = _getImageConfigFormatVersion();
     config[ic.CONFIG_ATTR] = { rotate: rotation };
 
-    const payload: any = { RID: imageID };
+    const payload: Record<string, unknown> = { RID: imageID };
     payload[colName] = config;
 
-    const headers: any = {};
+    const headers: Record<string, unknown> = {};
     const stack = LogService.addExtraInfoToStack(null, {
       'num_updated': 1,
       'updated_keys': {
@@ -655,7 +660,7 @@ export const updateImageConfig = (mainImageReference: any, imageID: string, rota
 
     ConfigService.http.put(url, [payload], { headers: headers }).then(() => {
       resolve();
-    }).catch((err: any) => reject(err));
+    }).catch((err: unknown) => reject(err));
   });
 }
 

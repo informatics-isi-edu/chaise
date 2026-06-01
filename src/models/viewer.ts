@@ -63,7 +63,7 @@ export type ViewerConfigProps = {
     /**
      * a jsonb column that holds the settings (rotation, etc.) for the image
      */
-    image_config_column_name: string;
+    image_config_column_name?: string;
     /**
      * the format version that should be used (default is 1.0)
      */
