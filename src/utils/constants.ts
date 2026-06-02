@@ -302,6 +302,13 @@ export const VIEWER_CONSTANT = {
       VERSION_ATTR: 'version',
       CONFIG_ATTR: 'config'
     },
+    IMAGE_CONFIG: {
+      FORMAT_NAME: 'image-parameters',
+      FORMAT_VERSION: '1.0',
+      CONFIG_ATTR: 'config',
+      NAME_ATTR: 'name',
+      VERSION_ATTR: 'version',
+    },
     NEW_ANNOTATION: {
       SVG_ID: 'NEW_SVG',
       GROUP_ID: 'NEW_GROUP'

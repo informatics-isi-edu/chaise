@@ -13,7 +13,8 @@ The following is the assumed model of a fully-configured viewer app:
 
 (All the table and column names are configurable)
 
-- `Image` table is the entry point of the viewer app.
+- `Image` table is the entry point of the viewer app. It can also store image-level
+  settings such as the default rotation (see [image configuration](#image-configuration)).
 - `Processed_Image` table is the actual table that stores the data for each image channel
   in each z-plane. For example, if an image has two stored z-indices and each one has
   two channels, there will be 4 records of `Processed_Image` table.
@@ -84,6 +85,11 @@ will manipulate the displayed colors for each channel. This column is defined as
 
 ```
 > If the Config column is not defined, or the value is not in the expected format, the OSD viewer will use the default values.
+
+The column value may be a single object as shown above, or an **array of such objects**.
+When it's an array, the viewer picks the first entry whose `name` and `version` match the
+expected format (`"channel-parameters"` / `"1.0"`); the rest are ignored. This lets you keep
+multiple parameter sets (e.g. for different format versions) in the same column.
 
 Currently, in the viewer app, we're using `"channel-parameters"` as the format name and `"1.0"`
 as the version number. And the config attributes are as follows:
@@ -184,6 +190,64 @@ So an example of a stored channel config looks like the following:
       "saturation_percent": 100,
       "hue_degree": 0,
       "display_greyscale": false
+  }
+}
+```
+
+## Image Configuration
+
+The `Image` table can have a config column (`image_config_column_name`) that stores
+image-level settings. Currently this is used to persist the default rotation. Like the
+channel config, this is a `jsonb` column with the following expected structure:
+
+```json
+{
+  "name": "<format-name>",
+  "version": "<format-version>",
+  "config": {
+
+  }
+}
+```
+> If the column is not defined, or the value is not in the expected format, the OSD viewer will use the default values.
+
+As with the channel config, the column value may be a single object or an **array of such
+objects**. When it's an array, the viewer uses the first entry whose `name` and `version`
+match the expected format; the rest are ignored.
+
+Currently the viewer app uses `"image-parameters"` as the format name and `"1.0"` as the
+version number (the version can be overridden via `image_config_format_version`). The config
+attributes are as follows:
+
+<table>
+    <tbody>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Acceptable values</th>
+            <th>Default value</th>
+        </tr>
+        <tr>
+            <td><strong>rotate</strong></td>
+            <td>
+                The default rotation (in degrees, clockwise) applied to the image when
+                the viewer loads. Users with update permission on the config column can
+                change and save this from the toolbar.
+            </td>
+            <td>Integers in [0, 360) range (typically 0, 90, 180, 270)</td>
+            <td>0</td>
+        </tr>
+    </tbody>
+</table>
+
+So an example of a stored image config looks like the following:
+
+```json
+{
+  "name": "image-parameters",
+  "version": "1.0",
+  "config": {
+      "rotate": 180
   }
 }
 ```
