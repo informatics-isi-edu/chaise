@@ -34,6 +34,11 @@ var viewerConfigs = {
             // what should be displayed in the page title in full screen mode (non-iframe)
             "page_title_markdown_pattern": "",
 
+            // (optional) a jsonb column that holds the settings for the image (e.g., rotate)
+            // "image_config_column_name": "Config",
+            // (optional) the format version that should be used (default is "1.0")
+            // "image_config_format_version": "1.0",
+
             /**
              * @DEPRECATED This is here for just backward compatibilty and should not be used.
              * if defined and value is none-empty, we will not send any extra request for image channel info

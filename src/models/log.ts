@@ -121,6 +121,9 @@ export enum LogActions {
   VIEWER_ZOOM_RESET= 'toolbar' + ';zoom-reset',
   VIEWER_ZOOM_IN= 'toolbar' + ';zoom-in',
   VIEWER_ZOOM_OUT= 'toolbar' + ';zoom-out',
+  VIEWER_ROTATE= 'toolbar' + ';rotate',
+  VIEWER_ROTATE_RESET= 'toolbar' + ';rotate-reset',
+  VIEWER_ROTATE_SAVE= 'toolbar' + ';rotate-save',
   // VIEWER_ZOOM_IN_MOUSE= 'mouse' + ';zoom-in',
   // VIEWER_ZOOM_OUT_MOUSE= 'mouse' + ';zoom-out',
 

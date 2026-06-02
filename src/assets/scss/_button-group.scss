@@ -43,20 +43,41 @@
   }
 }
 
+// Textual addon inside a chaise-btn-group. Same role as
+// .chaise-input-group-text for input groups: a non-clickable label cell that
+// sits flush with the adjacent buttons and shares their border-radius and
+// negative-margin overlap behavior.
+.chaise-btn-group-text {
+  display: flex;
+  align-items: center;
+  padding: variables.$btn-padding-y variables.$group-btn-text-padding-x;
+  margin-bottom: 0;
+  font-size: 1rem;
+  color: map.get(variables.$color-map, 'black');
+  text-align: center;
+  white-space: nowrap;
+  background-color: map.get(variables.$color-map, 'chaise-btn-group-text');
+  border: variables.$btn-border-width solid map.get(variables.$color-map, 'black');
+  @include helpers.border-radius(variables.$btn-border-radius);
+}
+
 .chaise-btn-group {
-  // Prevent double borders when buttons are next to each other
+  // Prevent double borders when adjacent children touch.
   > .chaise-btn-group:not(:first-child):not([disabled]),
-  > .chaise-btn:not(:first-child):not([disabled]) {
+  > .chaise-btn:not(:first-child):not([disabled]),
+  > .chaise-btn-group-text:not(:first-child) {
     margin-left: variables.$btn-border-width * -1;
   }
-  // Reset rounded corners
+  // Reset rounded corners on the side that touches a sibling.
   > .chaise-btn-group:not(:last-child) > .chaise-btn,
-  > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
+  > .chaise-btn:not(:last-child):not(.dropdown-toggle),
+  > .chaise-btn-group-text:not(:last-child) {
     @include helpers.border-right-radius(0);
   }
 
   > .chaise-btn-group:not(:first-child) > .chaise-btn,
-  > .chaise-btn:not(:first-child) {
+  > .chaise-btn:not(:first-child),
+  > .chaise-btn-group-text:not(:first-child) {
     @include helpers.border-left-radius(0);
   }
 }
