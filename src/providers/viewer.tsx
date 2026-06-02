@@ -649,7 +649,7 @@ export default function ViewerProvider({
 
             error = new UnauthorizedViewerAccess();
           } else if (error instanceof ConfigService.ERMrest.ForbiddenError) {
-            error = new ForbiddenViewerAccess(session!);
+            error = session ? new ForbiddenViewerAccess(session) : new UnauthorizedViewerAccess();
           } else {
             // show better error messages for known errors
             let message: string | undefined;
