@@ -50,6 +50,7 @@
 .chaise-btn-group-text {
   display: flex;
   align-items: center;
+  height: variables.$btn-height;
   padding: variables.$btn-padding-y variables.$group-btn-text-padding-x;
   margin-bottom: 0;
   font-size: 1rem;
