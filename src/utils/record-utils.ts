@@ -392,3 +392,52 @@ export function referenceHasRelatedEntities(reference: any): boolean {
 export function isBulkEditEnabled(page: any): boolean {
   return page && page.length > 0 && page.tuples.some((tuple: any) => tuple.canUpdate);
 }
+
+/**
+ * Collapses a main section row (show more/less). If the row's top has scrolled
+ * out of view above the container, snaps the viewport back to it in the same
+ * frame; otherwise leaves the scroll position alone (the column start is still
+ * on screen, so there's nothing to jump back to).
+ *
+ * Measuring + scrolling BEFORE flipping `expanded` works because the row's
+ * top position in the document doesn't change when it collapses (only its
+ * bottom does). Committing the instant scroll and the state change together
+ * lets the browser paint both in a single frame, with no intermediate state
+ * where layout has shifted but scroll hasn't caught up.
+ *
+ * The row-focus flash only fires when we actually scrolled (it's the cue that
+ * the viewport jumped, so flashing without a jump would be noise).
+ *
+ * @param fromElement any element inside the row; we walk up to find the <tr>
+ * and the scroll container so the same helper works regardless of where the
+ * button is rendered.
+ * @param setExpanded the row's show-more state setter
+ */
+export function collapseAndScrollToRowTop(
+  fromElement: HTMLElement | null,
+  setExpanded: (value: boolean) => void
+): void {
+  const row = fromElement?.closest('tr');
+  const container = row?.closest<HTMLElement>('.main-container');
+  let didScroll = false;
+  if (row && container) {
+    const rowTop = row.getBoundingClientRect().top;
+    const containerTop = container.getBoundingClientRect().top;
+    // leave ~24px above the row so its top border + a bit of breathing room are visible
+    const topGap = 24;
+    const delta = rowTop - containerTop - topGap;
+    // only scroll up when the row's top is above the visible area
+    if (delta < 0) {
+      container.scrollBy({ top: delta });
+      didScroll = true;
+    }
+  }
+  setExpanded(false);
+  if (row && didScroll) {
+    // row-focus flash, same timings as scrollToRelatedTable in record.tsx
+    setTimeout(() => {
+      row.classList.add('row-focus');
+      setTimeout(() => row.classList.remove('row-focus'), 1600);
+    }, 100);
+  }
+}

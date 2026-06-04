@@ -92,6 +92,7 @@
     "uglify-js": "3.9.2",
     "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1",
-    "yet-another-react-lightbox": "^3.28.0"
+    "yet-another-react-lightbox": "^3.28.0",
+    "zustand": "^5.0.14"
   }
 }

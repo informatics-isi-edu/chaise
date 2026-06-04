@@ -57,6 +57,14 @@ This is a guide for people who develop Chaise.
     - [2. Add custom hook](#2-add-custom-hook)
     - [3. Use provider in the parent](#3-use-provider-in-the-parent)
     - [4. Use custom hook to acces the context](#4-use-custom-hook-to-acces-the-context)
+- [State management with zustand](#state-management-with-zustand)
+  - [Global vs scoped stores](#global-vs-scoped-stores)
+  - [How to implement a scoped store](#how-to-implement-a-scoped-store)
+    - [1. Create the store, context, and Provider component](#1-create-the-store-context-and-provider-component)
+    - [2. Add custom hook](#2-add-custom-hook-1)
+    - [3. Use provider in the parent](#3-use-provider-in-the-parent-1)
+    - [4. Use the hook with selectors](#4-use-the-hook-with-selectors)
+  - [Notes](#notes)
 - [Performance](#performance)
   - [Debugging](#debugging)
   - [Memoization](#memoization)
@@ -1065,6 +1073,8 @@ promise.then(
 
 Our apps heavily rely on [`Context`](https://reactjs.org/docs/context.html) to facilitate how components communicate. This helps us to avoid passing props on each level and instead use the [`useContext`](https://reactjs.org/docs/hooks-reference.html#usecontext) hook to access the context.
 
+> For new shared state, also consider [zustand](#state-management-with-zustand). The context pattern below re-renders every consumer whenever any value in the provider changes, while zustand lets components subscribe to just the slices they use.
+
 ### How to implement
 
 Before going through the providers that we've implemented for Chaise apps, let's go over the skeleton of how we're using `Context`. This example is just to demonstrate the concept. In a small example like the following, it's more efficient to just pass the props without using context/provider.
@@ -1188,6 +1198,135 @@ const CounterDisplayInner = () => {
 
 export default CounterDisplay;
 ```
+
+## State management with zustand
+
+The context pattern above has a known performance cost: the provider's value is a single object, so whenever any field in it changes, every component that calls the custom hook re-renders, whether it uses that field or not. [zustand](https://zustand.docs.pmnd.rs/) solves this with stores and selectors: components subscribe to a slice of the state and re-render only when that slice changes.
+
+Prefer zustand for new shared state. The existing app providers (record, recordset, ...) still use the context pattern and can migrate over time.
+
+### Global vs scoped stores
+
+zustand has two flavors:
+
+- [`create`](https://zustand.docs.pmnd.rs/apis/create) returns a ready-to-use hook bound to a single module-level store. Use it for app-wide singleton state (what the app providers would become after migration).
+- [`createStore`](https://zustand.docs.pmnd.rs/apis/create-store) (from `zustand/vanilla`) returns a plain store object that can be instantiated as many times as needed. For state that's scoped to a component instance (per row, per panel), create one store per instance and distribute it through a thin context. This is the [scoped-store pattern](https://zustand.docs.pmnd.rs/learn/guides/initialize-state-with-props) and the one documented below.
+
+Note that the context still exists in the scoped pattern, but it distributes the store reference (which never changes), not the state values. So the provider never re-renders when the state changes, and consumers control their own re-renders with selectors.
+
+### How to implement a scoped store
+
+The following implements the same counter example as the [context and provider pattern](#context-and-provider-pattern) section, so the two can be compared directly. For a real implementation, see `src/providers/record-show-more.tsx` and `src/hooks/record-show-more.ts`.
+
+#### 1. Create the store, context, and Provider component
+
+The store's state type includes both the values and the actions that change them. Actions are defined in the store initializer via `set` and have stable identities (they never cause re-renders).
+
+```tsx
+// src/providers/counter.tsx
+
+import { createContext, useState } from 'react';
+import { createStore, type StoreApi } from 'zustand/vanilla';
+
+export type CounterState = {
+  counter: number;
+  lastModified: Date | null;
+  addOneToCounter: () => void;
+};
+
+const createCounterStore = (initialCounter: number) =>
+  createStore<CounterState>((set) => ({
+    counter: initialCounter,
+    lastModified: null,
+    addOneToCounter: () =>
+      set((state) => ({ counter: state.counter + 1, lastModified: new Date() })),
+  }));
+
+// distributes the store reference, not the state values. Access it through
+// the useCounter hook, not directly.
+export const CounterContext = createContext<StoreApi<CounterState> | null>(null);
+
+type CounterProviderProps = {
+  children: React.ReactNode,
+  initialCounter: number
+};
+
+export default function CounterProvider({
+  children,
+  initialCounter
+}: CounterProviderProps): JSX.Element {
+  // lazy initializer: the store is created once per provider instance
+  const [store] = useState(() => createCounterStore(initialCounter));
+
+  return <CounterContext.Provider value={store}>{children}</CounterContext.Provider>
+}
+```
+
+#### 2. Add custom hook
+
+The hook takes a selector. The generic `T` ties the hook's return type to whatever the selector picks, so call sites are fully typed without annotations.
+
+```ts
+// src/hooks/counter.ts
+
+import { useContext } from 'react';
+import { useStore } from 'zustand';
+import { CounterContext, type CounterState } from '@isrd-isi-edu/chaise/src/providers/counter';
+
+function useCounter<T>(selector: (state: CounterState) => T): T {
+  const store = useContext(CounterContext);
+  if (!store) {
+    throw new Error('No CounterProvider found when calling CounterContext');
+  }
+  return useStore(store, selector);
+}
+
+export default useCounter;
+```
+
+#### 3. Use provider in the parent
+
+Same as the context pattern: the provider must wrap the components that use the hook, and the same "Inner" suffix trick applies when there's no logical parent.
+
+```tsx
+// src/components/container.tsx
+
+const Container = () => {
+  ...
+  return (
+    <CounterProvider initialCounter={0}>
+       <CounterDisplay />
+    </CounterProvider>
+  )
+};
+
+export default Container;
+```
+
+#### 4. Use the hook with selectors
+
+Each call declares one dependency, and that's the component's whole re-render contract. `CounterDisplay` re-renders when `counter` changes but NOT when `lastModified` changes:
+
+```tsx
+// src/components/counter-display.tsx
+
+const CounterDisplay = () => {
+  const counter = useCounter((state) => state.counter);
+  const addOneToCounter = useCounter((state) => state.addOneToCounter);
+
+  return (
+    <span onClick={addOneToCounter}>{counter}</span>
+  )
+};
+
+export default CounterDisplay;
+```
+
+### Notes
+
+- Prefer one selector per field as above. Each returns a primitive or a stable action reference, so the default `Object.is` equality always does the right thing.
+- Selecting multiple fields as an object (`useCounter((state) => ({ ... }))`) creates a new object on every store change and would re-render on every update. If a component needs a multi-field subset of a large store, wrap the selector with [`useShallow`](https://zustand.docs.pmnd.rs/hooks/use-shallow) to compare the result field-by-field instead. Our stores are small enough that per-field selectors are usually the simpler choice.
+- Never call `useCounter((state) => state)` to "get everything": it re-renders on any change, the same behavior the context pattern has.
 
 ## Performance
 

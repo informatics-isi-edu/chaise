@@ -12,14 +12,14 @@ const ExpandIcon = ({ className, width = 14 }: Props) => (
     strokeLinejoin='round'
     aria-hidden='true'
   >
-    {/* Up arrow: apex (7, 1.17), arms at y=2.92, tail extends to y=5.25 */}
-    <line x1='7' y1='1.17' x2='7' y2='5.25' />
-    <polyline points='5.25 2.92 7 1.17 8.75 2.92' />
+    {/* Up arrow */}
+    <line x1='7' y1='1' x2='7' y2='4.25' />
+    <polyline points='5.25 2.75 7 1 8.75 2.75' />
     {/* Middle divider */}
     <line x1='2.33' y1='7' x2='11.67' y2='7' />
-    {/* Down arrow: shaft from y=8.75, arms at y=11.08, apex (7, 12.83) */}
-    <line x1='7' y1='8.75' x2='7' y2='12.83' />
-    <polyline points='5.25 11.08 7 12.83 8.75 11.08' />
+    {/* Down arrow */}
+    <line x1='7' y1='9.75' x2='7' y2='13' />
+    <polyline points='5.25 11.25 7 13 8.75 11.25' />
   </svg>
 );
 

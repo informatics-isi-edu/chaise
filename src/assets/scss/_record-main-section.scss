@@ -65,7 +65,8 @@
           padding-left: map.get(variables.$record-spacing-map, 'record-header-padding-left');
           border-bottom-width: 0px;
           position: relative;
-          padding-right: 15px;
+          // preserve space for the spinner and rail (show more/less) icons
+          padding-right: 18px;
 
           .entity-key-icons {
             position: absolute;
@@ -105,12 +106,8 @@
 
     .record-show-more-value {
 
-      // `max-height` is set inline from JS (SHOW_MORE_MAX_HEIGHT_PX) so the
-      // threshold can eventually come from an ermrestjs annotation.
-      // `overflow: clip` (not `hidden`) avoids creating a BFC, which would
-      // shrink the nested <table> to its content width.
       .record-show-more-content {
-        overflow: clip;
+        overflow: clip; // avoid creating a BFC that would shrink the nested table to its content width
         position: relative; // containing block for the fade gradient
 
         &.expanded {
@@ -140,12 +137,61 @@
       }
     }
 
-    // entity-key collapse button always renders on the line below the column name
-    .record-show-more-entity-key-button {
-      margin-top: 8px;
+    .record-show-collapse-rail {
+      position: absolute;
+      // 3px inset so the bookend caps don't sit on the row-focus border
+      top: 3px;
+      bottom: 3px;
+      right: 0px;
+      width: 32px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+
+      .record-show-collapse-rail-line {
+        $_dash: map.get(variables.$color-map, 'placeholder');
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        margin-left: -0.5px;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          $_dash 0,
+          $_dash 4px,
+          transparent 4px,
+          transparent 8px
+        );
+      }
+
+      .record-show-collapse-rail-icon {
+        position: sticky;
+        top: 42px;
+        display: block;
+        margin: 35px auto 5px;
+        width: 25px;
+        padding: 2px;
+        background-color: white;
+        color: map.get(variables.$color-map, 'placeholder');
+      }
+
+      .record-show-collapse-rail-cap {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 2px 3px;
+        background-color: white;
+        color: map.get(variables.$color-map, 'placeholder');
+        font-size: 12px;
+        line-height: 1;
+      }
+      .record-show-collapse-rail-cap-top { top: 0; }
+      .record-show-collapse-rail-cap-bottom { bottom: 0; }
     }
 
-    // Show / Collapse buttons are hidden by default and revealed on row hover.
+    // Show / Collapse controls are hidden by default and revealed on row hover.
     // `:focus-visible` keeps them reachable for keyboard navigation.
     .record-show-collapse-button {
       opacity: 0;
