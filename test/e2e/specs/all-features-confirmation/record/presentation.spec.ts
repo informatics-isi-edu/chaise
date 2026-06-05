@@ -669,4 +669,116 @@ test.describe('View existing record', () => {
     await RecordLocators.waitForRecordPageReady(page);
     await expect.soft(RecordLocators.getEntitySubTitleElement(page)).not.toContainClass('chaise-icon-for-tooltip');
   });
+
+  test('show more/less for columns with visible_cell_height', async ({ page, baseURL }, testInfo) => {
+    /**
+     * verifies the value is clipped at `height` px: the inline max-height style
+     * carries the annotation value and the rendered box is capped by it.
+     */
+    const expectClipped = async (displayname: string, height: number) => {
+      const content = RecordLocators.getShowMoreContent(page, displayname);
+      await expect.soft(content).toBeVisible();
+      await expect.soft(content).toHaveCSS('max-height', `${height}px`);
+      const box = await content.boundingBox();
+      expect.soft(box?.height, `rendered height missmatch for ${displayname}`).toBeGreaterThanOrEqual(height - 1);
+      expect.soft(box?.height, `rendered height missmatch for ${displayname}`).toBeLessThanOrEqual(height + 1);
+      await expect.soft(RecordLocators.getShowMoreFade(page, displayname)).toBeVisible();
+      await expect.soft(RecordLocators.getShowMoreLink(page, displayname)).toHaveText('more');
+    };
+
+    /**
+     * verifies the column doesn't have any of the show more/less controls
+     */
+    const expectNoShowMore = async (displayname: string) => {
+      await expect.soft(RecordLocators.getShowMoreContent(page, displayname)).toHaveCount(0);
+      await expect.soft(RecordLocators.getShowMoreLink(page, displayname)).toHaveCount(0);
+      await expect.soft(RecordLocators.getShowCollapseRail(page, displayname)).toHaveCount(0);
+    };
+
+    await page.goto(generateChaiseURL(APP_NAMES.RECORD, testParams.schema_name, 'record_show_more_table', testInfo, baseURL) + '/id=1');
+    await RecordLocators.waitForRecordPageReady(page);
+
+    await test.step('columns with the annotation should be clipped to the defined height', async () => {
+      // height_100_md uses the column display annotation, height_300_md the column-directive
+      await expectClipped('height_100_md', 100);
+      await expectClipped('height_300_md', 300);
+    });
+
+    await test.step('columns without the annotation should show the full value without any controls', async () => {
+      await expectNoShowMore('no_height_md');
+    });
+
+    await test.step('clicking on `more` should expand the value and `less` should clip it again', async () => {
+      const content = RecordLocators.getShowMoreContent(page, 'height_100_md');
+      const link = RecordLocators.getShowMoreLink(page, 'height_100_md');
+      const rail = RecordLocators.getShowCollapseRail(page, 'height_100_md');
+
+      await link.click();
+      await expect.soft(content).toContainClass('expanded');
+      await expect.soft(content).toHaveCSS('max-height', 'none');
+      const box = await content.boundingBox();
+      expect.soft(box?.height, 'expanded height missmatch').toBeGreaterThan(150);
+      await expect.soft(RecordLocators.getShowMoreFade(page, 'height_100_md')).toHaveCount(0);
+      // both controls must reflect the expanded state
+      await expect.soft(link).toHaveText('less');
+      await expect.soft(rail).toHaveAttribute('aria-label', 'Show less');
+
+      await link.click();
+      await expect.soft(content).toHaveCSS('max-height', '100px');
+      await expect.soft(link).toHaveText('more');
+      await expect.soft(rail).toHaveAttribute('aria-label', 'Show all content');
+    });
+
+    await test.step('the rail should be revealed on row hover and toggle the value', async () => {
+      const rail = RecordLocators.getShowCollapseRail(page, 'height_100_md');
+      const content = RecordLocators.getShowMoreContent(page, 'height_100_md');
+      const link = RecordLocators.getShowMoreLink(page, 'height_100_md');
+
+      await expect.soft(rail).toHaveCSS('opacity', '0');
+      await RecordLocators.getEntityRow(page, 'height_100_md').hover();
+      await expect.soft(rail).toHaveCSS('opacity', '1');
+      await expect.soft(rail).toHaveAttribute('aria-label', 'Show all content');
+
+      await rail.click();
+      await expect.soft(content).toContainClass('expanded');
+      // both controls must reflect the expanded state
+      await expect.soft(rail).toHaveAttribute('aria-label', 'Show less');
+      await expect.soft(link).toHaveText('less');
+
+      await rail.click();
+      await expect.soft(content).toHaveCSS('max-height', '100px');
+      await expect.soft(rail).toHaveAttribute('aria-label', 'Show all content');
+      await expect.soft(link).toHaveText('more');
+    });
+
+    await test.step('inline related tables should honor the annotation', async () => {
+      // wait for the tabular inline tables to load their rows first
+      for (const displayname of ['inline_none', 'inline_100']) {
+        const inlineTable = RecordLocators.getEntityRelatedTable(page, displayname);
+        await expect.soft(RecordsetLocators.getRows(inlineTable)).toHaveCount(25);
+      }
+      // inline_300 starts in the custom (markdown) display mode
+      const inline300 = RecordLocators.getEntityRelatedTable(page, 'inline_300');
+      await expect.soft(inline300.locator('.markdown-container').first()).toBeVisible();
+
+      await expectClipped('inline_100', 100);
+      await expectClipped('inline_300', 300);
+      await expectNoShowMore('inline_none');
+
+      // toggling inline_300 to the tabular mode should keep the clipping
+      await RecordLocators.getRelatedTableToggleDisplay(page, 'inline_300', true).click();
+      await expect.soft(RecordsetLocators.getRows(inline300)).toHaveCount(25);
+      await expectClipped('inline_300', 300);
+
+      // make sure expand works for inline tables as well
+      const content = RecordLocators.getShowMoreContent(page, 'inline_300');
+      await RecordLocators.getShowMoreLink(page, 'inline_300').click();
+      await expect.soft(content).toContainClass('expanded');
+      const box = await content.boundingBox();
+      expect.soft(box?.height, 'expanded inline height missmatch').toBeGreaterThan(350);
+      // both controls must reflect the expanded state
+      await expect.soft(RecordLocators.getShowMoreLink(page, 'inline_300')).toHaveText('less');
+      await expect.soft(RecordLocators.getShowCollapseRail(page, 'inline_300')).toHaveAttribute('aria-label', 'Show less');
+    });
+  });
 });

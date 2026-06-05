@@ -124,6 +124,33 @@ export default class RecordLocators {
     return el.locator('.markdown-container:not(.chaise-comment)');
   }
 
+  // ----------------- show more/less (visible_cell_height) ----------------- //
+
+  static getShowMoreContent(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .record-show-more-content`);
+  }
+
+  static getShowMoreFade(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .record-show-more-fade`);
+  }
+
+  static getShowMoreLink(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .record-show-more-link .readmore`);
+  }
+
+  static getShowCollapseRail(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} td.entity-key .record-show-collapse-rail`);
+  }
+
+  static getEntityRow(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName}`);
+  }
+
   // --------------------- file preview ----------------- //
 
   static getFilePreviewContainer(container: Locator | Page, columnName: string): Locator {

@@ -2693,6 +2693,233 @@
               "detailed": []
             }
           }
+        },
+        "record_show_more_table": {
+          "kind": "table",
+          "schema_name": "product-record",
+          "table_name": "record_show_more_table",
+          "keys": [
+            {
+              "unique_columns": ["id"]
+            }
+          ],
+          "column_definitions": [
+            {
+              "name": "id",
+              "nullok": false,
+              "type": {
+                "typename": "int4"
+              }
+            },
+            {
+              "name": "no_height_md",
+              "type": {
+                "typename": "markdown"
+              }
+            },
+            {
+              "name": "height_100_md",
+              "type": {
+                "typename": "markdown"
+              },
+              "annotations": {
+                "tag:misd.isi.edu,2015:display": {
+                  "visible_cell_height": {
+                    "detailed": 100
+                  }
+                }
+              }
+            },
+            {
+              "name": "height_300_md",
+              "type": {
+                "typename": "markdown"
+              }
+            }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:visible-columns": {
+              "detailed": [
+                "id",
+                "no_height_md",
+                "height_100_md",
+                {
+                  "source": "height_300_md",
+                  "visible_cell_height": 300
+                },
+                {
+                  "source": [{"inbound": ["product-record", "record_show_more_inline_none_fk1"]}, "id"],
+                  "markdown_name": "inline_none"
+                },
+                {
+                  "source": [{"inbound": ["product-record", "record_show_more_inline_100_fk1"]}, "id"],
+                  "markdown_name": "inline_100",
+                  "visible_cell_height": 100
+                },
+                {
+                  "source": [{"inbound": ["product-record", "record_show_more_inline_300_fk1"]}, "id"],
+                  "markdown_name": "inline_300",
+                  "visible_cell_height": 300
+                }
+              ]
+            },
+            "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+              "detailed": []
+            }
+          }
+        },
+        "record_show_more_inline_none": {
+          "kind": "table",
+          "schema_name": "product-record",
+          "table_name": "record_show_more_inline_none",
+          "keys": [
+            {
+              "unique_columns": ["id"]
+            }
+          ],
+          "foreign_keys": [
+            {
+              "names": [["product-record", "record_show_more_inline_none_fk1"]],
+              "foreign_key_columns": [
+                {
+                  "column_name": "fk1_col",
+                  "table_name": "record_show_more_inline_none",
+                  "schema_name": "product-record"
+                }
+              ],
+              "referenced_columns": [
+                {
+                  "column_name": "id",
+                  "table_name": "record_show_more_table",
+                  "schema_name": "product-record"
+                }
+              ]
+            }
+          ],
+          "column_definitions": [
+            {
+              "name": "id",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "name",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "fk1_col",
+              "type": {
+                "typename": "int4"
+              }
+            }
+          ]
+        },
+        "record_show_more_inline_100": {
+          "kind": "table",
+          "schema_name": "product-record",
+          "table_name": "record_show_more_inline_100",
+          "keys": [
+            {
+              "unique_columns": ["id"]
+            }
+          ],
+          "foreign_keys": [
+            {
+              "names": [["product-record", "record_show_more_inline_100_fk1"]],
+              "foreign_key_columns": [
+                {
+                  "column_name": "fk1_col",
+                  "table_name": "record_show_more_inline_100",
+                  "schema_name": "product-record"
+                }
+              ],
+              "referenced_columns": [
+                {
+                  "column_name": "id",
+                  "table_name": "record_show_more_table",
+                  "schema_name": "product-record"
+                }
+              ]
+            }
+          ],
+          "column_definitions": [
+            {
+              "name": "id",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "name",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "fk1_col",
+              "type": {
+                "typename": "int4"
+              }
+            }
+          ]
+        },
+        "record_show_more_inline_300": {
+          "kind": "table",
+          "schema_name": "product-record",
+          "table_name": "record_show_more_inline_300",
+          "keys": [
+            {
+              "unique_columns": ["id"]
+            }
+          ],
+          "foreign_keys": [
+            {
+              "names": [["product-record", "record_show_more_inline_300_fk1"]],
+              "foreign_key_columns": [
+                {
+                  "column_name": "fk1_col",
+                  "table_name": "record_show_more_inline_300",
+                  "schema_name": "product-record"
+                }
+              ],
+              "referenced_columns": [
+                {
+                  "column_name": "id",
+                  "table_name": "record_show_more_table",
+                  "schema_name": "product-record"
+                }
+              ]
+            }
+          ],
+          "column_definitions": [
+            {
+              "name": "id",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "name",
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              }
+            },
+            {
+              "name": "fk1_col",
+              "type": {
+                "typename": "int4"
+              }
+            }
+          ]
         }
     },
     "comment": null,

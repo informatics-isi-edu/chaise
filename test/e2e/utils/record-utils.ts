@@ -542,6 +542,7 @@ export const testAddRelatedTable = async (page: Page, inputCallback: (newPage: P
       const addBtn = RecordLocators.getRelatedTableAddButton(page, params.displayname, params.isInline);
       newPage = await clickNewTabLink(addBtn);
       await newPage.waitForURL(`**/${params.schemaName}:${params.tableName}**`);
+      // eslint-disable-next-line no-useless-escape
       await expect.soft(newPage).toHaveURL(/prefill\=/);
       await expect.soft(RecordeditLocators.getPageTitle(newPage)).toHaveText(`Create 1 ${params.tableDisplayname} record`);
 
