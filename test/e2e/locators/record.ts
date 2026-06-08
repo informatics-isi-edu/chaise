@@ -92,13 +92,15 @@ export default class RecordLocators {
 
   static getAllColumnNames(container: Locator | Page): Locator {
     return container.locator(
-      'tr:not(.forced-hidden) td.entity-key > span.column-displayname > span'
+      'tr:not(.forced-hidden) td.entity-key .record-entity-key-inner > span.column-displayname > span'
     );
   }
 
   static getColumnNameElement(container: Locator | Page, columnDisplayName: string): Locator {
     const displayName = makeSafeIdAttr(columnDisplayName);
-    return container.locator(`.entity-row-${displayName} td.entity-key > span.column-displayname`);
+    return container.locator(
+      `.entity-row-${displayName} td.entity-key .record-entity-key-inner > span.column-displayname`
+    );
   }
 
   static getAllColumnValues(container: Locator | Page): Locator {
@@ -120,6 +122,28 @@ export default class RecordLocators {
 
   static getValueMarkdownContainer(el: Locator) {
     return el.locator('.markdown-container:not(.chaise-comment)');
+  }
+
+  // ----------------- show more/less (visible_cell_height) ----------------- //
+
+  static getShowMoreContent(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .show-more-content`);
+  }
+
+  static getShowMoreLink(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} .show-more-link .readmore`);
+  }
+
+  static getShowCollapseRail(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName} td.entity-key .record-show-collapse-rail`); // rail stays record-specific
+  }
+
+  static getEntityRow(container: Locator | Page, columnDisplayName: string): Locator {
+    const displayName = makeSafeIdAttr(columnDisplayName);
+    return container.locator(`.entity-row-${displayName}`);
   }
 
   // --------------------- file preview ----------------- //

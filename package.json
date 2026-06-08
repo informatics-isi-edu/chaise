@@ -61,7 +61,7 @@
     "@babel/preset-typescript": "^7.26.0",
     "@fortawesome/fontawesome-free": "6.5.2",
     "@hello-pangea/dnd": "^18.0.1",
-    "@isrd-isi-edu/ermrestjs": "^2.7.0",
+    "@isrd-isi-edu/ermrestjs": "^2.9.0",
     "@types/bootstrap": "^5.2.10",
     "@types/papaparse": "^5.3.16",
     "@types/q": "^1.5.5",
@@ -92,6 +92,7 @@
     "uglify-js": "3.9.2",
     "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1",
-    "yet-another-react-lightbox": "^3.28.0"
+    "yet-another-react-lightbox": "^3.28.0",
+    "zustand": "^5.0.14"
   }
 }

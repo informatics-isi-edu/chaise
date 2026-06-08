@@ -1,0 +1,35 @@
+// Shared show more/less presentation (record main section and recordset cells).
+// State and overflow detection live in the consumers; this is style only.
+
+.show-more-value {
+
+  .show-more-content {
+    overflow: clip; // avoid creating a BFC that would shrink a nested table to its content width
+    position: relative;
+
+    &.expanded {
+      overflow: visible;
+    }
+  }
+
+  // fade the bottom of clipped content via a mask so it's independent of the
+  // background (works over striped/highlighted rows, unlike a color overlay)
+  .show-more-faded {
+    mask-image: linear-gradient(to bottom, black calc(100% - 30px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 30px), transparent);
+  }
+
+  .show-more-link {
+    display: inline;
+
+    // styled as inline text; it's a <button> for keyboard accessibility
+    .readmore {
+      display: inline-block;
+      padding: 0;
+      border: 0;
+      background: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+}

@@ -46,26 +46,18 @@
           }
         }
 
+        // ring drawn per <td> (shadow on <tr> isn't reliable in tables).
         &.row-focus {
-          // row-focus will change the border top and bottom size,
-          // so we should adjust that and account for the default border
-          td {
-            $_row_focus_padding: map.get(variables.$record-spacing-map, 'record-table-cell-padding') - (map.get(variables.$record-spacing-map, 'row-focus-border-width') - map.get(variables.$record-spacing-map, 'record-table-cell-border-width'));
-            padding-top: $_row_focus_padding;
-            padding-bottom: $_row_focus_padding;
-
-            // if the size of row-focus is bigger than the current border width,
-            // we should adjust the content of inline tables so the whole page doesn't shift
-            @if map.get(variables.$record-spacing-map, 'row-focus-border-width') > map.get(variables.$record-spacing-map, 'record-table-cell-border-width') {
-              .inline-table-display {
-                padding-bottom: map.get(variables.$record-spacing-map, 'row-focus-border-width');
-              }
-            }
+          $_w: map.get(variables.$record-spacing-map, 'row-focus-border-width');
+          $_c: map.get(variables.$color-map, 'primary');
+          > td {
+            box-shadow: inset 0 $_w 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
           }
-
-          // when there are two of them, the bottom should use the default padding
-          + tr.row-focus td {
-            padding-top:  map.get(variables.$record-spacing-map, 'record-table-cell-padding');
+          > td:first-child {
+            box-shadow: inset 0 $_w 0 0 $_c, inset $_w 0 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
+          }
+          > td:last-child {
+            box-shadow: inset 0 $_w 0 0 $_c, inset (-$_w) 0 0 0 $_c, inset 0 (-$_w) 0 0 $_c;
           }
         }
 
@@ -73,7 +65,8 @@
           padding-left: map.get(variables.$record-spacing-map, 'record-header-padding-left');
           border-bottom-width: 0px;
           position: relative;
-          padding-right: 15px;
+          // preserve space for the spinner and rail (show more/less) icons
+          padding-right: 18px;
 
           .entity-key-icons {
             position: absolute;
@@ -96,6 +89,86 @@
     .inline-table-display .inline-tooltip {
       color: map.get(variables.$color-map, 'column-inline-tooltip');
       padding-bottom: 5px;
+    }
+
+    // lifted above `.show-more-content` so RTA stays clickable.
+    .related-table-actions {
+      position: relative;
+      z-index: map.get(variables.$z-index-map, 'record-related-table-actions');
+    }
+
+    // position: sticky on a <td> is unreliable; sticky this inner div instead.
+    // top:12px matches the .main-container scroll padding.
+    .record-entity-key-inner {
+      position: sticky;
+      top: 12px;
+    }
+
+    .record-show-collapse-rail {
+      position: absolute;
+      // 3px inset so the bookend caps don't sit on the row-focus border
+      top: 3px;
+      bottom: 3px;
+      right: 0px;
+      width: 32px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+
+      .record-show-collapse-rail-line {
+        $_dash: map.get(variables.$color-map, 'placeholder');
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        margin-left: -0.5px;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          $_dash 0,
+          $_dash 4px,
+          transparent 4px,
+          transparent 8px
+        );
+      }
+
+      .record-show-collapse-rail-icon {
+        position: sticky;
+        top: 42px;
+        display: block;
+        margin: 35px auto 5px;
+        width: 25px;
+        padding: 2px;
+        background-color: map.get(variables.$color-map, 'white');
+        color: map.get(variables.$color-map, 'placeholder');
+      }
+
+      .record-show-collapse-rail-cap {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 2px 3px;
+        background-color: map.get(variables.$color-map, 'white');
+        color: map.get(variables.$color-map, 'placeholder');
+        font-size: 12px;
+        line-height: 1;
+      }
+      .record-show-collapse-rail-cap-top { top: 0; }
+      .record-show-collapse-rail-cap-bottom { bottom: 0; }
+    }
+
+    // Show / Collapse controls are hidden by default and revealed on row hover.
+    // `:focus-visible` keeps them reachable for keyboard navigation.
+    .record-show-collapse-button {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+    tr:hover .record-show-collapse-button,
+    .record-show-collapse-button:focus-visible {
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 }
