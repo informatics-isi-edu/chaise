@@ -17,7 +17,7 @@ make clean              # Remove build artifacts
 make distclean          # Remove build artifacts + node_modules
 ```
 
-Avoid `npm install` directly — it can modify `package-lock.json` unintentionally. Use `make npm-install-all-modules` when you need all deps regardless of `NODE_ENV`.
+Avoid bare `npm install` for setup since it can modify `package-lock.json` unintentionally; use `make npm-install-all-modules`. A deliberate single-dep bump (`npm install pkg@ver`, then verify the lock diff) is fine.
 
 ## Running Tests
 
