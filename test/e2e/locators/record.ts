@@ -128,22 +128,17 @@ export default class RecordLocators {
 
   static getShowMoreContent(container: Locator | Page, columnDisplayName: string): Locator {
     const displayName = makeSafeIdAttr(columnDisplayName);
-    return container.locator(`.entity-row-${displayName} .record-show-more-content`);
-  }
-
-  static getShowMoreFade(container: Locator | Page, columnDisplayName: string): Locator {
-    const displayName = makeSafeIdAttr(columnDisplayName);
-    return container.locator(`.entity-row-${displayName} .record-show-more-fade`);
+    return container.locator(`.entity-row-${displayName} .show-more-content`);
   }
 
   static getShowMoreLink(container: Locator | Page, columnDisplayName: string): Locator {
     const displayName = makeSafeIdAttr(columnDisplayName);
-    return container.locator(`.entity-row-${displayName} .record-show-more-link .readmore`);
+    return container.locator(`.entity-row-${displayName} .show-more-link .readmore`);
   }
 
   static getShowCollapseRail(container: Locator | Page, columnDisplayName: string): Locator {
     const displayName = makeSafeIdAttr(columnDisplayName);
-    return container.locator(`.entity-row-${displayName} td.entity-key .record-show-collapse-rail`);
+    return container.locator(`.entity-row-${displayName} td.entity-key .record-show-collapse-rail`); // rail stays record-specific
   }
 
   static getEntityRow(container: Locator | Page, columnDisplayName: string): Locator {

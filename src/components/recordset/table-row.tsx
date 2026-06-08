@@ -3,6 +3,7 @@ import type { Tuple } from '@isrd-isi-edu/ermrestjs/src/models/reference';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import ShowMoreValue from '@isrd-isi-edu/chaise/src/components/show-more-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
 import DeleteConfirmationModal, {
@@ -64,12 +65,6 @@ type TableRowProps = {
   disabledType?: DisabledRowType;
 };
 
-type ReadMoreStateProps = {
-  hideContent: boolean;
-  linkText: string;
-  maxHeightStyle: { maxHeight?: string };
-};
-
 const TableRow = ({
   config,
   rowIndex,
@@ -106,22 +101,18 @@ const TableRow = ({
    */
   const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGHT === false;
 
-  // +10 to account for padding on <td>
-  const tdPadding = 10;
   const moreButtonHeight = 20;
   const maxHeight = typeof CONFIG_MAX_ROW_HEIGHT === 'number' ? CONFIG_MAX_ROW_HEIGHT : 160;
-  const defaultMaxHeightStyle = { maxHeight: maxHeight - moreButtonHeight + 'px' };
+  // leave room for the "... more" line below the clipped content
+  const clipHeight = maxHeight - moreButtonHeight;
 
   const numImages = useRef<number>(0);
   const numImagesLoaded = useRef<number>(0);
   const sensor = useRef<ResizeSensor | null>(null);
 
   const [overflow, setOverflow] = useState<boolean[]>([]);
-  const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
-    hideContent: true,
-    linkText: 'more',
-    maxHeightStyle: defaultMaxHeightStyle,
-  });
+  // whole row is expanded together (all overflowing cells show their full value)
+  const [rowExpanded, setRowExpanded] = useState(false);
   const [applySavedQuery, setApplySavedQuery] = useState<string | boolean>(false);
 
   /**
@@ -166,17 +157,15 @@ const TableRow = ({
         for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
           let hasOverflow = overflow[i] || false;
 
-          // children is each <td>, span is the cell wrapping the content
+          // the clip element rendered by ShowMoreValue
           const dataCell = rowContainer.current.children[i].querySelector(
-            '.display-value > span'
-          ) as HTMLSpanElement;
+            '.show-more-content'
+          ) as HTMLElement;
 
           // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
           if (dataCell && !hasOverflow) {
-            // overflow is true if the content overflows the cell
-            // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
-            // hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
-            hasOverflow = dataCell.getBoundingClientRect().height + tdPadding > maxHeight;
+            // scrollHeight is the natural height even when the element is clipped
+            hasOverflow = dataCell.scrollHeight > clipHeight + 1;
           }
 
           newOverflow[i] = hasOverflow;
@@ -503,19 +492,7 @@ const TableRow = ({
   };
 
   const readMore = () => {
-    if (readMoreObj.hideContent) {
-      setReadMoreObj({
-        hideContent: false,
-        linkText: 'less',
-        maxHeightStyle: {},
-      });
-    } else {
-      setReadMoreObj({
-        hideContent: true,
-        linkText: 'more',
-        maxHeightStyle: defaultMaxHeightStyle,
-      });
-    }
+    setRowExpanded((prev) => !prev);
   };
 
   const renderActionButtons = (selectMode?: RecordsetSelectMode, newTab?: boolean) => {
@@ -661,30 +638,20 @@ const TableRow = ({
 
     // rowValues is an array of values for each column. Does not include action column
     return rowValues.map((value, colIndex) => {
+      const cellValue = <DisplayValue addClass={true} value={value} />;
       return (
         <td key={rowIndex + '-' + colIndex} className={'table-value-cell' + (rowDisabled ? ' disabled-cell' : '')}>
-          <div
-            className={
-              'display-value ' +
-              (!disableMaxRowHeightFeature && readMoreObj.hideContent === true
-                ? 'hideContent'
-                : 'showContent')
-            }
-            style={!disableMaxRowHeightFeature ? readMoreObj.maxHeightStyle : {}}
-          >
-            <DisplayValue addClass={true} value={value} />
-          </div>
-          {!disableMaxRowHeightFeature && overflow[colIndex + shift] && (
-            <div style={{ display: 'inline' }}>
-              {' ... '}
-              <span
-                className='text-primary readmore'
-                style={{ display: 'inline-block', textDecoration: 'underline', cursor: 'pointer' }}
-                onClick={readMore}
-              >
-                {readMoreObj.linkText}
-              </span>
-            </div>
+          {disableMaxRowHeightFeature ? (
+            cellValue
+          ) : (
+            <ShowMoreValue
+              expanded={rowExpanded}
+              overflowing={overflow[colIndex + shift] || false}
+              maxHeight={clipHeight}
+              onToggle={readMore}
+            >
+              {cellValue}
+            </ShowMoreValue>
           )}
         </td>
       );

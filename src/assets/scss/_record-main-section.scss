@@ -91,7 +91,7 @@
       padding-bottom: 5px;
     }
 
-    // lifted above `.record-show-more-content` so RTA stays clickable.
+    // lifted above `.show-more-content` so RTA stays clickable.
     .related-table-actions {
       position: relative;
       z-index: map.get(variables.$z-index-map, 'record-related-table-actions');
@@ -102,39 +102,6 @@
     .record-entity-key-inner {
       position: sticky;
       top: 12px;
-    }
-
-    .record-show-more-value {
-
-      .record-show-more-content {
-        overflow: clip; // avoid creating a BFC that would shrink the nested table to its content width
-        position: relative; // containing block for the fade gradient
-
-        &.expanded {
-          overflow: visible;
-        }
-      }
-
-      // assumes white page bg — switch to the page bg variable if/when one exists
-      .record-show-more-fade {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 30px;
-        pointer-events: none;
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
-      }
-
-      .record-show-more-link {
-        display: inline;
-
-        .readmore {
-          display: inline-block;
-          text-decoration: underline;
-          cursor: pointer;
-        }
-      }
     }
 
     .record-show-collapse-rail {
@@ -173,7 +140,7 @@
         margin: 35px auto 5px;
         width: 25px;
         padding: 2px;
-        background-color: white;
+        background-color: map.get(variables.$color-map, 'white');
         color: map.get(variables.$color-map, 'placeholder');
       }
 
@@ -182,7 +149,7 @@
         left: 50%;
         transform: translateX(-50%);
         padding: 2px 3px;
-        background-color: white;
+        background-color: map.get(variables.$color-map, 'white');
         color: map.get(variables.$color-map, 'placeholder');
         font-size: 12px;
         line-height: 1;

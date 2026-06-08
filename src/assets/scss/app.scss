@@ -477,18 +477,6 @@ html {
     color: map.get(variables.$color-map, 'black');
   }
 
-  // show more/show less ellipsis
-  .hideContent {
-    overflow: hidden;
-    line-height: 20px;
-  }
-
-  .showContent {
-    line-height: 20px;
-    height: auto;
-    display: inline;
-  }
-
   // ellipsis for the texts
   // TODO we might want to rename this
   .ellipsis {

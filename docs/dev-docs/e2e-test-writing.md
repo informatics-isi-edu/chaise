@@ -288,7 +288,7 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   await newPage.waitForURL('someURL');
 
   await newPage.waitForURL(`**/recordedit/**`);
-  await expect.soft(newPage).toHaveURL(/prefill\=/);
+  await expect.soft(newPage).toHaveURL(/prefill=/);
 
   await newPage.close();
   ```

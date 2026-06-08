@@ -680,9 +680,10 @@ test.describe('View existing record', () => {
       await expect.soft(content).toBeVisible();
       await expect.soft(content).toHaveCSS('max-height', `${height}px`);
       const box = await content.boundingBox();
-      expect.soft(box?.height, `rendered height missmatch for ${displayname}`).toBeGreaterThanOrEqual(height - 1);
-      expect.soft(box?.height, `rendered height missmatch for ${displayname}`).toBeLessThanOrEqual(height + 1);
-      await expect.soft(RecordLocators.getShowMoreFade(page, displayname)).toBeVisible();
+      expect.soft(box?.height, `rendered height mismatch for ${displayname}`).toBeGreaterThanOrEqual(height - 1);
+      expect.soft(box?.height, `rendered height mismatch for ${displayname}`).toBeLessThanOrEqual(height + 1);
+      // clipped content is faded (via the mask class) and shows the `more` link
+      await expect.soft(content).toContainClass('show-more-faded');
       await expect.soft(RecordLocators.getShowMoreLink(page, displayname)).toHaveText('more');
     };
 
@@ -717,8 +718,8 @@ test.describe('View existing record', () => {
       await expect.soft(content).toContainClass('expanded');
       await expect.soft(content).toHaveCSS('max-height', 'none');
       const box = await content.boundingBox();
-      expect.soft(box?.height, 'expanded height missmatch').toBeGreaterThan(150);
-      await expect.soft(RecordLocators.getShowMoreFade(page, 'height_100_md')).toHaveCount(0);
+      expect.soft(box?.height, 'expanded height mismatch').toBeGreaterThan(150);
+      await expect.soft(content).not.toContainClass('show-more-faded');
       // both controls must reflect the expanded state
       await expect.soft(link).toHaveText('less');
       await expect.soft(rail).toHaveAttribute('aria-label', 'Show less');
@@ -775,7 +776,7 @@ test.describe('View existing record', () => {
       await RecordLocators.getShowMoreLink(page, 'inline_300').click();
       await expect.soft(content).toContainClass('expanded');
       const box = await content.boundingBox();
-      expect.soft(box?.height, 'expanded inline height missmatch').toBeGreaterThan(350);
+      expect.soft(box?.height, 'expanded inline height mismatch').toBeGreaterThan(350);
       // both controls must reflect the expanded state
       await expect.soft(RecordLocators.getShowMoreLink(page, 'inline_300')).toHaveText('less');
       await expect.soft(RecordLocators.getShowCollapseRail(page, 'inline_300')).toHaveAttribute('aria-label', 'Show less');

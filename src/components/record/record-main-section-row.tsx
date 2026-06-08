@@ -5,7 +5,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import ShowCollapseRail from '@isrd-isi-edu/chaise/src/components/record/show-collapse-rail';
-import ShowMoreValue from '@isrd-isi-edu/chaise/src/components/record/show-more-value';
+import RecordShowMoreValue from '@isrd-isi-edu/chaise/src/components/record/record-show-more-value';
 import Spinner from 'react-bootstrap/Spinner';
 import FilePreview from '@isrd-isi-edu/chaise/src/components/file-preview';
 
@@ -146,7 +146,7 @@ const RecordMainSectionRow = ({ columnModel: cm }: RecordMainSectionRowProps): J
 
   // values are wrapped with show-more clipping only when the annotation is set
   const wrapValue = (content: JSX.Element) => {
-    return hasShowMore ? <ShowMoreValue>{content}</ShowMoreValue> : content;
+    return hasShowMore ? <RecordShowMoreValue>{content}</RecordShowMoreValue> : content;
   };
 
   const renderedRow = (
