@@ -13,6 +13,9 @@ const testParams = {
 }
 
 test('clone button', async ({ page, baseURL }, testInfo) => {
+  // cloning to the 200-form max plus submitting 201 records is heavy; the 60s default times out under CI load.
+  test.slow();
+
   const cloneFormInput = RecordeditLocators.getCloneFormInput(page);
   const cloneFormSubmitButton = RecordeditLocators.getCloneFormInputSubmitButton(page);
 
