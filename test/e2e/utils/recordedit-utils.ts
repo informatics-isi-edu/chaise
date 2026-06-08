@@ -1127,6 +1127,9 @@ export const testCreateRecords = (usedParams: TestCreateRecordsParams) => {
     test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
       const numForms = presentation.inputs.length;
 
+      // multi-form create clones, validates, and submits every form in one test; the 60s default times out under CI load.
+      if (numForms > 1) test.slow();
+
       await test.step('open recordedit page', async () => {
         await page.goto(generateChaiseURL(APP_NAMES.RECORDEDIT, presentation.schemaName, presentation.tableName, testInfo, baseURL));
         await RecordeditLocators.waitForRecordeditPageReady(page);
