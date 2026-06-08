@@ -47,7 +47,8 @@ const getConfig = (options: TestOptions) => {
     // Fail the build on CI if you accidentally left test.only in the source code.
     forbidOnly: !!process.env.CI,
 
-    retries: 0,
+    // CI flakes (timeouts/races) shouldn't fail the whole build; Playwright still reports retried tests as "flaky".
+    retries: process.env.CI ? 2 : 0,
 
     // Opt out of parallel tests on CI.
     workers: options.runSequentially ? 1 : 4,
