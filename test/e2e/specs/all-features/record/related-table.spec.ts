@@ -69,7 +69,7 @@ const testParams = {
 
 // TODO playwright: we should break this file into at least two files
 
-test.describe('Related tables', () => {
+test.describe.serial('Related tables', () => {
   test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const keys = [];
     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
