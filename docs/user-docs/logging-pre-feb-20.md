@@ -71,7 +71,7 @@ The table below summarizes all the requests that we currently are logging in cha
 
 | App                                                 | Description                                           | Action                                       | Extra                        | Notes                                                                                                                                                 | Change                        |
 |-----------------------------------------------------|-------------------------------------------------------|----------------------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| chaise-wide (record, recordset, recordedit, viewer) | get catalog snapshot  information                               | model/snaptime                                |                              |                                                                                                                                                       | [added (4/18/19)](#041819) [updated (10/??/19)](#10??19)    |
+| chaise-wide (record, recordset, recordedit, viewer) | get catalog snapshot  information                               | model/snaptime                                |                              |                                                                                                                                                       | [added (4/18/19)](#041819) [updated (10/??/19)](#1019)    |
 |                                                     | get catalog schemas information                       | model/schema                                 |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
 |                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
 | record                                              | load main entity                                      | record/main                                  | ppid, pcid                   |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
@@ -325,6 +325,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 
 ## Change Log
 
+<a name="1019"></a>
 ### 10/??/19
 
 #### Commit Links
@@ -334,7 +335,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
  - changed model/catalog -> model/snaptime
 
 ##### Added
- - [Button Action List](#button-action-list)
+ - [Button Action List](#client-button-action-list)
 
 ### 07/16/19
 
@@ -344,6 +345,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 ###### Added
  - Added `pcid` and `ppid` to navbar links that are for the same origin/host.
 
+<a name="071219"></a>
 ### 07/12/19
 
 ##### Commit Links
@@ -369,6 +371,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 ###### Added
   - We are going to send `cid`, `wid`, and `pid` headers with authen requests from now on.
 
+<a name="041819"></a>
 ### 04/18/19
 
 ###### Commit Links
@@ -406,6 +409,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 - Added `cfacet`, `cfacet_str`, and `cfacet_path`.
 - Added `cqp` attribute to track urls that are using `?` (query parameter) instead of `#` (hash fragment).
 
+<a name="030819"></a>
 ### 03/08/19
 
 ###### Commit Links

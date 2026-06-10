@@ -68,6 +68,7 @@ This is a guide for people who develop Chaise.
 - [Performance](#performance)
   - [Debugging](#debugging)
   - [Memoization](#memoization)
+- [Documentation](#documentation)
 
 ## Commit message conventions
 
@@ -1349,4 +1350,19 @@ That being said, performance-related changes applied incorrectly can even harm p
 Useful links:
 - https://react.dev/reference/react/memo
 - https://dmitripavlutin.com/use-react-memo-wisely/
+
+## Documentation
+
+The Markdown files under [`docs/user-docs`](../user-docs) that are listed in [`docs/index.rst`](../index.rst) are published on [docs.derivacloud.org](https://docs.derivacloud.org/chaise/index.html) by deriva-docs. If you add a new user-docs file, add it to `index.rst` as well.
+
+GitHub and the docs site (Sphinx) generate heading anchors differently. GitHub keeps `_` and a leading `1.` number and drops other punctuation without a separator, while Sphinx turns `_` and punctuation runs into `-` and strips leading digits. So a heading like `### 1. Install Chaise` is `#1-install-chaise` on GitHub but `#install-chaise` on the site, and an in-page link can only target one of them. To support both, an explicit `<a name="<github-slug>"></a>` anchor is added right before any heading whose two slugs differ: GitHub resolves the link through the heading's own id, and the explicit anchor gives Sphinx a matching `id`.
+
+[`scripts/docs-anchors.py`](../../scripts/docs-anchors.py) automates this. It follows the toctree in `index.rst` to find the published files, computes both slugs for every heading, and reports or inserts the needed anchors. Run it after adding or renaming headings:
+
+```sh
+python3 scripts/docs-anchors.py          # check only; exits non-zero if anchors are missing
+python3 scripts/docs-anchors.py --fix    # insert the missing anchors
+```
+
+It is idempotent, so re-running is safe. Links flagged with `!` point at no heading (a typo or a stale cross-reference) and must be fixed by hand.
 

@@ -7,7 +7,7 @@ This document will describe how chaise is logging server requests as well as cli
 ## Table of Contents
 
 - [Logging](#logging)
-    - [Overview](#Overview)
+    - [Overview](#overview)
     - [Attributes](#attributes)
     - [Action definition](#action-definition)
     - [List of requests](#list-of-requests)
@@ -387,6 +387,7 @@ As you might have noticed, we are not adding any extra flag to signal truncation
 
 In this section we're going to mention some of the patterns that you can use to process the logs.
 
+<a name="asset-download--csv-default-export"></a>
 #### Asset Download & CSV Default Export
 
 Since the asset download and also the default CSV export requests are simple redirects to the location, we cannot pass `dcctx` to the header. Instead, we're sending these query parameters:
