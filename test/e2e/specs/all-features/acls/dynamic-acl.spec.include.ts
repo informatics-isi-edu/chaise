@@ -255,6 +255,30 @@ export const runDynamicACLTests = () => {
                     'projection_type': 'nonnull'
                   }
                 }
+              },
+              'dynamic_acl_col_table': {
+                'acls': {
+                  // statically updatable by the restricted user, so the table-level update right is static (true)
+                  'update': [process.env.RESTRICTED_AUTH_COOKIE_ID]
+                },
+                'columns': {
+                  'name': {
+                    // clear the static update inherited from the table so the binding below
+                    // is the only (dynamic) grant, making the column's update right row-dependent
+                    'acls': { 'update': [] },
+                    'acl_bindings': {
+                      // only row id=1 is updatable, so id=2's `name` is non-editable
+                      'col_updatable_rows': {
+                        'types': ['update'],
+                        'projection': [
+                          { 'filter': 'id', 'operand': 1 },
+                          'id'
+                        ],
+                        'projection_type': 'nonnull'
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -432,6 +456,20 @@ export const runDynamicACLTests = () => {
         await RecordeditLocators.submitForm(page);
         // wait for url change (which means successful request)
         await page.waitForURL('**/record/**');
+      });
+    });
+
+    // ensure ermrestjs properly fetches tcrs
+    test('when only a column (not the table) has a dynamic update ACL, the column input should be disabled', async ({ page, baseURL }, testInfo) => {
+      await test.step('should load the page properly', async () => {
+        const url = generateChaiseURL(APP_NAMES.RECORDEDIT, 'multi-permissions', 'dynamic_acl_col_table', testInfo, baseURL) + '/id=2';
+        await page.goto(url);
+        await RecordeditLocators.waitForRecordeditPageReady(page);
+      });
+
+      await test.step('the column with a row-dependent update ACL should be disabled, while a normal column stays editable', async () => {
+        await expect.soft(RecordeditLocators.getInputForAColumn(page, 'name', 1)).toBeDisabled();
+        await expect.soft(RecordeditLocators.getInputForAColumn(page, 'term', 1)).not.toBeDisabled();
       });
     });
 

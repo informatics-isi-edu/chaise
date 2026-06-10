@@ -1250,6 +1250,47 @@
               }
             }
           }
+        },
+        "dynamic_acl_col_table": {
+            "table_name": "dynamic_acl_col_table",
+            "comment": "Table is statically updatable, but the `name` column has a row-dependent (dynamic) update ACL. Used to exercise canUseTCRS when only a column (not the table) is dynamic.",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": {}
+                    }
+                },
+                {
+                    "name": "name",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": ["id", "name", "term"]
+                },
+                "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+                    "detailed": []
+                }
+            }
         }
     },
     "annotations": {}
