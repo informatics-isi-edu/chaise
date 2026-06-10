@@ -21,16 +21,19 @@ This document will focus on the new implementation of the login app using React.
 
 You need to follow these steps to add the login app to any non-Chaise web page:
 
+<a name="1-install-chaise"></a>
 ### 1. Install Chaise
 
 Make sure Chaise is properly installed. The following steps (and the login app) assume that Chaise is installed and deployed on the server. For more information about how to install Chaise please refer to [installation document](installation.md).
 
+<a name="2-include-login-dependencies"></a>
 ### 2. Include login dependencies
 
 For the login to work, we need to include several JavaScript and CSS files on the page. To do so, you can either change your build process to prefetch them or include a JavaScript file that will dynamically fetch them. The first method MUST be done after Chaise installation; otherwise, it would break the app. That's why we suggest doing it as part of the automated process of building Chaise and other apps.
 
 While the second method seems more straightforward, it will drastically affect the UX by increasing the load time of the login. Therefore we recommend the first method.
 
+<a name="21-change-the-build-process-to-prefetch-dependencies-preferred-method"></a>
 #### 2.1. Change the build process to prefetch dependencies (Preferred method)
 
 To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/login/login-dependencies.html` into the HTML page that displays the login. This file won't be present in the Chaise repository folder, and you can only find this folder where you've deployed chaise (By default it should be under `/var/www/chaise/`).
@@ -72,6 +75,7 @@ The following is an example of how this can be achieved using [Jekyll](https://j
 
 4. Build your Jekyll site as you normally would (using `jekyll build` or `jekyll serve` commands.)
 
+<a name="22-dynamically-fetch-the-dependencies"></a>
 #### 2.2. Dynamically fetch the dependencies
 
 To automatically fetch the dependencies, you must include the `/chaise/lib/login/login.dependencies.js` on your page.
@@ -84,6 +88,7 @@ To automatically fetch the dependencies, you must include the `/chaise/lib/login
 
 As we mentioned before, this can cause UX issues as it will increase the loading time of the login app.
 
+<a name="3-prefetch-custom-styles-optional"></a>
 ### 3. Prefetch custom styles (optional)
 
 If you define the `customCSS` property in your [chaise-config](chaise-config.md), Chaise will fetch it during the runtime. To increase the performance, you can prefetch this file by including it in your HTML file (this only needs to be done once and can be done manually). So
@@ -100,6 +105,7 @@ If you define the `customCSS` property in your [chaise-config](chaise-config.md)
 ```
 If you want to prefetch it, the include statement MUST be added before the content of `lib/login/login-dependencies.html` .
 
+<a name="4-use-login"></a>
 ### 4. Use login
 
 The login React app expects a `login` tag on the page and will populate the app inside it. So make sure you've included it on your page.

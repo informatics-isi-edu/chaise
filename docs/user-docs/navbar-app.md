@@ -24,16 +24,19 @@ This documentation focuses on the navbar and how it can be used in external HTML
 
 You need to follow these steps to add the navbar app to any non-Chaise web page:
 
+<a name="1-install-chaise"></a>
 ### 1. Install Chaise
 
 Make sure Chaise is properly installed. The following steps (and the navbar app) assume that Chaise is installed and deployed on the server. For more information about how to install Chaise please refer to [installation document](installation.md).
 
+<a name="2-include-navbar-dependencies"></a>
 ### 2. Include navbar dependencies
 
 For the navbar to work, we need to include several JavaScript and CSS files on the page. To do so, you can either change your build process to prefetch them or include a JavaScript file that will dynamically fetch them. The first method MUST be done after Chaise installation; otherwise, it would break the app. That's why we suggest doing it as part of the automated process of building Chaise and other apps.
 
 While the second method seems more straightforward, it will drastically affect the UX by increasing the load time of the navbar. Therefore we recommend the first method.
 
+<a name="21-change-the-build-process-to-prefetch-dependencies-preferred-method"></a>
 #### 2.1. Change the build process to prefetch dependencies (Preferred method)
 
 To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/navbar/navbar-dependencies.html` into the HTML page that displays the navbar. This file won't be present in the Chaise repository folder, and you can only find this folder where you've deployed chaise (By default it should be under `/var/www/chaise/`).
@@ -75,6 +78,7 @@ The following is an example of how this can be achieved using [Jekyll](https://j
 
 4. Build your Jekyll site as you normally would (using `jekyll build` or `jekyll serve` commands.)
 
+<a name="22-dynamically-fetch-the-dependencies"></a>
 #### 2.2. Dynamically fetch the dependencies
 
 To automatically fetch the dependencies, you must include the `/chaise/lib/navbar/navbar.dependencies.js` on your page.
@@ -87,6 +91,7 @@ To automatically fetch the dependencies, you must include the `/chaise/lib/navba
 
 As we mentioned before, this can cause UX issues as it will increase the loading time of the navbar app.
 
+<a name="3-prefetch-custom-styles-optional"></a>
 ### 3. Prefetch custom styles (optional)
 
 If you define the `customCSS` property in your [chaise-config](chaise-config.md), Chaise will fetch it during the runtime. To increase the performance, you can prefetch this file by including it in your HTML file (this only needs to be done once and can be done manually). So
@@ -103,6 +108,7 @@ If you define the `customCSS` property in your [chaise-config](chaise-config.md)
 ```
 If you want to prefetch it, the include statement MUST be added before the content of `lib/navbar/navbar-dependencies.html` .
 
+<a name="4-use-navbar"></a>
 ### 4. Use navbar
 
 The navbar React app expects a `navbar` tag on the page and will populate the app inside it. So make sure you've included it as the first element on the body of your page.
@@ -124,6 +130,7 @@ The navbar React app expects a `navbar` tag on the page and will populate the ap
   ```
 
 
+<a name="5-avoid-manually-including-bootstrap"></a>
 ### 5. Avoid manually including bootstrap
 
 Chaise uses [Bootstrap version 5.1.9](https://getbootstrap.com/docs/5.1/getting-started/introduction/), so it will be included in pages using Navbar. Therefore there's no reason to include Bootstrap manually. Apart from an extra file that has to be fetched to render the page, the Bootstrap version you have included might be different from the one that Chaises uses, which might have some side effects.
