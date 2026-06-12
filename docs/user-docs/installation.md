@@ -84,6 +84,16 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 <!-- **TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient. -->
 
+## Checking the deployed version
+
+Each deploy writes a `version.txt` to the Chaise root, readable in the browser (relative to your Chaise deployment path):
+
+```
+http://<hostname>/chaise/version.txt
+```
+
+It shows the build date, the Chaise branch/commit/release version, and the ERMrestJS commit Chaise was built against. Note the ERMrestJS commit here reflects the build environment. The authoritative deployed ERMrestJS commit is at `http://<hostname>/ermrestjs/ermrest.ver.txt`.
+
 ## Testing
 
 Please refer to he [E2E tests guide](../dev-docs/e2e-test.md).
