@@ -33,6 +33,7 @@ const helpSettings: ConfigServiceSettings = {
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,    // links in navbar might need this
   overrideExternalLinkBehavior: true,      // links in navbar might need this
+  overrideImageErrorBehavior: true,
   // the url for this app doesn't follow other chaise apps.
   skipParsingURLForCatalogID: true
 };

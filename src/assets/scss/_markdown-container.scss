@@ -847,3 +847,14 @@
   }
 // }
 }
+
+/**
+ * fallback image swapped in by overrideImageErrorBehavior (app-wrapper.tsx) when a
+ * chaise-rendered image fails to load. the placeholder keeps the original image's
+ * width/height so it occupies the same space, but `scale-down` caps the rendered
+ * svg at its intrinsic size so the icon/text don't balloon on large images (it still
+ * shrinks to fit on small cells).
+ */
+img.chaise-image-fallback-applied {
+  object-fit: scale-down;
+}

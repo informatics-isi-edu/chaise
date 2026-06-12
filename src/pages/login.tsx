@@ -32,6 +32,7 @@ const loginSettings : ConfigServiceSettings = {
   overrideImagePreviewBehavior: false,
   overrideDownloadClickBehavior: false,
   overrideExternalLinkBehavior: false,
+  overrideImageErrorBehavior: false,
   // the url for this app doesn't follow other chaise apps:
   skipParsingURLForCatalogID: true,
 };

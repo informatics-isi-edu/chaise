@@ -36,6 +36,7 @@ const viewerSettings : ConfigServiceSettings = {
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
   overrideExternalLinkBehavior: true,
+  overrideImageErrorBehavior: true,
   openIframeLinksInTab: true
 };
 

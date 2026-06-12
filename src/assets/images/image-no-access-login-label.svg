@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120" role="img" aria-label="Login required to view image">
+  <rect x="0.5" y="0.5" width="139" height="119" fill="#f2f2f2" stroke="#cccccc"/>
+  <g fill="none" stroke="#999999" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="58" y="30" width="24" height="20"/>
+    <path d="M63 30v-5a7 7 0 0 1 14 0v5"/>
+  </g>
+  <circle cx="70" cy="40" r="2.5" fill="#999999"/>
+  <g fill="#777777" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="70" y="78">Login</text>
+    <text x="70" y="96">required</text>
+  </g>
+</svg>

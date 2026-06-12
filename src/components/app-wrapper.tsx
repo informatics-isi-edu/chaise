@@ -3,6 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
+// assets: fallback images shown when a chaise-rendered image fails to load
+import imageLoading from '@isrd-isi-edu/chaise/src/assets/images/image-loading.svg';
+import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label.svg';
+import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label.svg';
+import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label.svg';
+import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label.svg';
+
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { StrictMode, useEffect, useState, type JSX } from 'react';
@@ -31,8 +38,8 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 import { sweepStalePrefillEntries } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 
 // utils
-import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { addClickListener, createChaiseTooltip } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -188,6 +195,69 @@ const AppWrapperInner = ({
     );
   };
 
+  /**
+   * when a chaise-rendered image (tagged `chaise-image-fallback` by ermrestjs) fails
+   * to load, show a fallback image instead of the browser's broken-image icon.
+   * `error` events don't bubble, so we use a capture-phase listener on the document.
+   * For same-origin images we additionally classify the failure with a single HEAD
+   * request (401/403 -> no access, 404 -> not found) and refine the fallback + tooltip.
+   */
+  const overrideImageErrorBehavior = () => {
+    const onImageError = (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK)) return;
+      // already handled (also stops an error loop once we swap in the fallback below)
+      if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_APPLIED)) return;
+
+      img.classList.add(CLASS_NAMES.IMAGE_FALLBACK_APPLIED);
+      const originalSrc = img.src;
+      img.setAttribute('data-original-src', originalSrc);
+
+      // swap to a fallback image and explain why on hover.
+      const showFallback = (src: string, message: string) => {
+        img.src = src;
+        img.title = message;
+        // img.setAttribute('data-chaise-tooltip', message);
+        // img.setAttribute('data-chaise-tooltip-no-icon', '');
+        // createChaiseTooltip(img);
+      };
+      const showGeneric = () => showFallback(imageUnavailable, errorMessages.imageFallback.unknownError);
+
+      // we can't read the status of a cross-origin image, so show the generic fallback
+      if (!isSameOrigin(originalSrc)) {
+        showGeneric();
+        return;
+      }
+
+      // show a spinner while we classify the failure, then swap to the matching
+      // fallback once (avoids flashing the generic image before the real one)
+      img.src = imageLoading;
+
+      const config = { skipRetryBrowserError: true, skipHTTP401Handling: true };
+      ConfigService.http
+        .head(originalSrc, config)
+        // unexpected: the HEAD succeeded but the image still failed to render
+        .then(showGeneric)
+        .catch((exception: any) => {
+          const ermrestError = ConfigService.ERMrest.responseToError(exception);
+          if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
+            // 401: not logged in (or session expired)
+            showFallback(imageLoginRequired, errorMessages.imageFallback.unauthorized);
+          } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
+            // 403: logged in but not authorized
+            showFallback(imageAccessDenied, errorMessages.imageFallback.forbidden);
+          } else if (ermrestError instanceof ConfigService.ERMrest.NotFoundError) {
+            showFallback(imageNotFound, errorMessages.imageFallback.notFound);
+          } else {
+            showGeneric();
+          }
+        });
+    };
+
+    document.addEventListener('error', onImageError, true);
+  };
+
   useEffect(() => {
     // sweep stale prefill localStorage entries
     sweepStalePrefillEntries();
@@ -251,6 +321,7 @@ const AppWrapperInner = ({
     if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
     if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
     if (settings.overrideImagePreviewBehavior) overrideImagePreviewBehavior();
+    if (settings.overrideImageErrorBehavior) overrideImageErrorBehavior();
   }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {

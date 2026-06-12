@@ -36,7 +36,8 @@ const recordSettings : ConfigServiceSettings = {
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
-  overrideExternalLinkBehavior: true
+  overrideExternalLinkBehavior: true,
+  overrideImageErrorBehavior: true
 };
 
 const RecordApp = (): JSX.Element => {
