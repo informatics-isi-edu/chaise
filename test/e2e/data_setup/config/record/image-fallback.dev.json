@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "record/image-fallback.config.json"
+        ],
+        "schema": "image-fallback"
+    },
+    "cleanup": true
+}

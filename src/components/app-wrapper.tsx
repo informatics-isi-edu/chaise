@@ -5,10 +5,16 @@ import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 // assets: fallback images shown when a chaise-rendered image fails to load
 import imageLoading from '@isrd-isi-edu/chaise/src/assets/images/image-loading.svg';
-import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label.svg';
-import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label.svg';
-import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label.svg';
-import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label.svg';
+// framed (background baked in) - works with object-fit: contain
+// import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label.svg';
+// import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label.svg';
+// import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label.svg';
+// import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label.svg';
+// transparent (no background) - works with object-fit: scale-down
+import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label-frameless.svg';
+import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label-frameless.svg';
+import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label-frameless.svg';
+import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label-frameless.svg';
 
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
@@ -207,6 +213,8 @@ const AppWrapperInner = ({
       const img = e.target as HTMLImageElement;
       if (!(img instanceof HTMLImageElement)) return;
       if (!img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK)) return;
+      // author opted this image out of the fallback - leave the native broken image
+      if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_DISABLED)) return;
       // already handled (also stops an error loop once we swap in the fallback below)
       if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_APPLIED)) return;
 

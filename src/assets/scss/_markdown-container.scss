@@ -856,5 +856,8 @@
  * shrinks to fit on small cells).
  */
 img.chaise-image-fallback-applied {
+  // `contain` scales the placeholder up to fill the cell; `scale-down` caps it at
+  // the svg's intrinsic size so it doesn't balloon on large images. swap to toggle.
   object-fit: scale-down;
+  // object-fit: contain;
 }

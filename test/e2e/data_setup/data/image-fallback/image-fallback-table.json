@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "col_unauthorized": "![img](/chaise/image-fallback/unauthorized.png)",
+    "col_forbidden": "![img](/chaise/image-fallback/forbidden.png)",
+    "col_not_found": "![img](/chaise/image-fallback/not-found.png)",
+    "col_generic": "![img](/chaise/image-fallback/generic.png)",
+    "col_real_404": "![img](/chaise/image-fallback-does-not-exist-smoke.png)",
+    "col_disabled": "![img](/chaise/image-fallback/disabled.png){.chaise-image-fallback-disabled}"
+  }
+]
