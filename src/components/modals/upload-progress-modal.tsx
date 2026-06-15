@@ -2,7 +2,6 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Modal from 'react-bootstrap/Modal';
 import Spinner from 'react-bootstrap/Spinner';
-import ProgressBar from 'react-bootstrap/ProgressBar';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -781,24 +780,17 @@ const UploadProgressModal = ({ rows, linkedData, templateVariables, show, onSucc
   // render individual progress bars for each file to be uploaded
   const renderRowSummary = (row: UploadFileObject[]) => {
     return row.map((item: UploadFileObject, itemIdx: number) => {
+      // during upload show upload progress; before that show checksum progress
+      const percent = item.uploadStarted ? item.progressPercent : item.checksumPercent;
       return (<tr key={itemIdx}>
         <td>
           <div className='ellipsis'>{item.name} ( {item.humanFileSize} )</div>
         </td>
         <td>
           <div className='progress'>
-            {(!item.uploadStarted) ?
-              <ProgressBar now={item.checksumPercent} /> : <ProgressBar now={item.checksumPercent} />
-            }
+            <div className='progress-bar upload-progress-bar' role='progressbar' style={{ 'width': percent + '%' }}></div>
           </div>
-          {(!item.uploadStarted) ?
-            <div className='progress-percent inner-progress-percent'>
-              {Number(item.checksumPercent).toFixed(2)}%
-            </div> :
-            <div className='progress-percent inner-progress-percent'>
-              {Number(item.progressPercent).toFixed(2)}%
-            </div>
-          }
+          <div className='progress-percent inner-progress-percent'>{Number(percent).toFixed(2)}%</div>
         </td>
       </tr>)
     })
