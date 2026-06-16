@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { createContext, useMemo, useRef, useState, type JSX } from 'react';
+import { createContext, useCallback, useMemo, useRef, useState, type JSX } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 // TODO should we move the types to somewhere else?
@@ -85,7 +85,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * @param onRemove the callback that will be called when the users remove the alert.
    * @return the newly created alert
    */
-  const addAlert: AddAlertFunction = (
+  // memoized so its identity is stable across alert changes; consumers can list
+  // it in effect deps without spurious re-runs (it only uses functional setState).
+  const addAlert: AddAlertFunction = useCallback((
     message: string | JSX.Element,
     type: ChaiseAlertType,
     onRemove?: () => void,
@@ -94,20 +96,21 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     const newAlert = { message, type, onRemove, isSessionExpiredAlert };
     setAlerts((alerts) => [...alerts, newAlert]);
     return newAlert;
-  };
+  }, []);
 
   /**
    * remove a given alert from the list of alerts
    * @param alert the alert that should be removed
    */
-  const removeAlert: RemoveAlertFunction = (alert: ChaiseAlert) => {
+  // memoized for a stable identity (see addAlert above).
+  const removeAlert: RemoveAlertFunction = useCallback((alert: ChaiseAlert) => {
     setAlerts((prev: ChaiseAlert[]) => {
       if (alert.onRemove) alert.onRemove();
       return prev.filter((al: ChaiseAlert) => {
         return alert !== al;
       });
     });
-  };
+  }, []);
 
   const removeAllAlerts = () => {
     setAlerts([]);
