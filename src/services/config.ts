@@ -31,6 +31,11 @@ export interface AppSettings {
   overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
+  /**
+   * shows a fallback image (instead of the browser's broken-image icon) when a
+   * chaise-rendered image fails to load
+   */
+  overrideImageErrorBehavior?: boolean,
   overrideHeadTitle?: boolean,
 
 }
@@ -46,6 +51,7 @@ export interface ConfigServiceSettings {
   overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
+  overrideImageErrorBehavior?: boolean,
   openIframeLinksInTab?: boolean,
   /**
    * this can be used to make sure we're not parsing the url to find the catalog id.
@@ -146,6 +152,7 @@ export class ConfigService {
       overrideImagePreviewBehavior: settings.overrideImagePreviewBehavior,
       overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
       overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
+      overrideImageErrorBehavior: settings.overrideImageErrorBehavior,
       openLinksInTab
     };
 

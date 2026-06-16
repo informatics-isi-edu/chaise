@@ -39,7 +39,8 @@ const recordsetSettings : ConfigServiceSettings = {
   overrideHeadTitle: true,
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
-  overrideExternalLinkBehavior: true
+  overrideExternalLinkBehavior: true,
+  overrideImageErrorBehavior: true
 };
 
 const RecordsetApp = (): JSX.Element => {

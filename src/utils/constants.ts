@@ -166,6 +166,12 @@ export const errorMessages = {
     unknownError: 'An error occurred while fetching the file. Refresh the page to retry and contact the system administrator if the problem persists.',
     notFound: 'This file could not be found.'
   },
+  imageFallback: {
+    unauthorized: 'Login is required to view this image.',
+    forbidden: 'You do not have permission to view this image.',
+    notFound: 'This image could not be found.',
+    unknownError: 'This image could not be loaded.'
+  },
   goToSnapshot: {
     terminal: 'Unable to convert the given datetime to snapshot. <br> If you continue to face this issue, please contact the system administrator.',
   }
@@ -200,6 +206,12 @@ export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden',
   IMAGE_PREVIEW: 'chaise-image-preview',
   IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in',
+  // images ermrestjs tags for the broken-image fallback behavior, the marker we add
+  // once the fallback has been applied (also guards against error loops), and the
+  // opt-out class authors can add to skip the fallback for a specific image
+  IMAGE_FALLBACK: 'chaise-image-fallback',
+  IMAGE_FALLBACK_APPLIED: 'chaise-image-fallback-applied',
+  IMAGE_FALLBACK_DISABLED: 'chaise-image-fallback-disabled',
   COMMENT: 'chaise-comment',
   COMMENT_IS_HTML: 'chaise-comment-html',
   SCROLLABLE_APP_CONTENT_CONTAINER: 'app-content-container-scrollable',

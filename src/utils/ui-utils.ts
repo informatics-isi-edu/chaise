@@ -410,26 +410,35 @@ export function waitForElementToLoad(selector: string) {
 export function createChaiseTooltips(container: Element) {
   const tooltipTriggerList = container.querySelectorAll('[data-chaise-tooltip]');
   if (tooltipTriggerList && tooltipTriggerList.length > 0) {
-    tooltipTriggerList.forEach((el) => {
-      const title = el.getAttribute('data-chaise-tooltip');
-      const placement = el.getAttribute('data-chaise-tooltip-placement') || 'bottom';
-      const noIcon = el.hasAttribute('data-chaise-tooltip-no-icon');
-      if (!title) return;
-      if (!noIcon) {
-        // adding space between content and the icon is how we're making sure spacing between the two is correct.
-        // should we come up with a better solution instead?
-        el.innerHTML = el.innerHTML + ' ';
-        el.classList.add('chaise-icon-for-tooltip');
-      }
-      new Tooltip(el, {
-        title,
-        placement:
-          ['auto', 'top', 'bottom', 'left', 'right'].indexOf(placement) !== -1
-            ? (placement as Tooltip.PopoverPlacement)
-            : 'bottom',
-      });
-    });
+    tooltipTriggerList.forEach((el) => createChaiseTooltip(el));
   }
+}
+
+/**
+ * turn a single element with a `data-chaise-tooltip` attribute into a bootstrap tooltip.
+ * useful when the element is created/updated imperatively (outside the markdown render pass)
+ * and so isn't covered by createChaiseTooltips.
+ * @param el the element to attach the tooltip to (must have the `data-chaise-tooltip` attribute)
+ */
+export function createChaiseTooltip(el: Element) {
+  const title = el.getAttribute('data-chaise-tooltip');
+  const placement = el.getAttribute('data-chaise-tooltip-placement') || 'bottom';
+  const noIcon = el.hasAttribute('data-chaise-tooltip-no-icon');
+  if (!title) return;
+  if (!noIcon) {
+    // adding space between content and the icon is how we're making sure spacing between the two is correct.
+    // should we come up with a better solution instead?
+    el.innerHTML = el.innerHTML + ' ';
+    el.classList.add('chaise-icon-for-tooltip');
+  }
+  // reuse any existing instance so we don't stack duplicate tooltips on re-application
+  Tooltip.getOrCreateInstance(el, {
+    title,
+    placement:
+      ['auto', 'top', 'bottom', 'left', 'right'].indexOf(placement) !== -1
+        ? (placement as Tooltip.PopoverPlacement)
+        : 'bottom',
+  });
 }
 
 /**

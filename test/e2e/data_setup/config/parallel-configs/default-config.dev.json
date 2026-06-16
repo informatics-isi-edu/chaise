@@ -3,6 +3,7 @@
         "schemaConfigurations": [
             "record/links.config.json",
             "record/condition.config.json",
+            "record/image-fallback.config.json",
 
             "recordedit/immutable-inputs.config.json",
             "recordedit/multi-form-input.config.json",

@@ -3,6 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
+// assets: fallback images shown when a chaise-rendered image fails to load
+import imageLoading from '@isrd-isi-edu/chaise/src/assets/images/image-loading.svg';
+import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable.svg';
+import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found.svg';
+import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login.svg';
+import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied.svg';
+
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { StrictMode, useEffect, useState, type JSX } from 'react';
@@ -31,8 +38,8 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 import { sweepStalePrefillEntries } from '@isrd-isi-edu/chaise/src/services/prefill-storage';
 
 // utils
-import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { addClickListener, createChaiseTooltip } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CLASS_NAMES, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -188,6 +195,67 @@ const AppWrapperInner = ({
     );
   };
 
+  /**
+   * when a chaise-rendered image (tagged `chaise-image-fallback` by ermrestjs) fails
+   * to load, show a fallback image instead of the browser's broken-image icon.
+   */
+  const overrideImageErrorBehavior = () => {
+    const onImageError = (e: Event) => {
+      const img = e.target as HTMLImageElement;
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK)) return;
+      if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_DISABLED)) return;
+      if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_APPLIED)) return;
+
+      img.classList.add(CLASS_NAMES.IMAGE_FALLBACK_APPLIED);
+      const originalSrc = img.src;
+      img.setAttribute('data-original-src', originalSrc);
+      // show spinner while fetching head
+      img.src = imageLoading;
+
+      // swap to a fallback image and explain why on hover.
+      const showFallback = (src: string, message: string) => {
+        img.src = src;
+        img.title = message;
+      };
+
+      // show the generic fallback image
+      const showGeneric = () => {
+        showFallback(imageUnavailable, errorMessages.imageFallback.unknownError);
+      };
+
+      // we can't read the status of a cross-origin image
+      if (!isSameOrigin(originalSrc)) {
+        showGeneric();
+        return;
+      }
+
+      const config = {
+        skipRetryBrowserError: true,
+        skipHTTP401Handling: true,
+        skipHTTPErrorStatusReplacement: true,
+      };
+      ConfigService.http
+        .head(originalSrc, config)
+        // unexpected: the HEAD succeeded but the image still failed to render
+        .then(showGeneric)
+        .catch((exception: unknown) => {
+          const ermrestError = ConfigService.ERMrest.responseToError(exception);
+          if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
+            showFallback(imageLoginRequired, errorMessages.imageFallback.unauthorized);
+          } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
+            showFallback(imageAccessDenied, errorMessages.imageFallback.forbidden);
+          } else if (ermrestError instanceof ConfigService.ERMrest.NotFoundError) {
+            showFallback(imageNotFound, errorMessages.imageFallback.notFound);
+          } else {
+            showGeneric();
+          }
+        });
+    };;
+
+    document.addEventListener('error', onImageError, true);
+  };
+
   useEffect(() => {
     // sweep stale prefill localStorage entries
     sweepStalePrefillEntries();
@@ -251,6 +319,7 @@ const AppWrapperInner = ({
     if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
     if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
     if (settings.overrideImagePreviewBehavior) overrideImagePreviewBehavior();
+    if (settings.overrideImageErrorBehavior) overrideImageErrorBehavior();
   }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {

@@ -1,0 +1,83 @@
+{
+  "schema_name": "image-fallback",
+  "tables": {
+    "image-fallback-table": {
+      "comment": "Table whose markdown columns render images that fail to load, to test the broken-image fallback.",
+      "kind": "table",
+      "keys": [
+        {
+          "unique_columns": ["id"]
+        }
+      ],
+      "foreign_keys": [],
+      "table_name": "image-fallback-table",
+      "schema_name": "image-fallback",
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          }
+        },
+        {
+          "name": "col_unauthorized",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        },
+        {
+          "name": "col_forbidden",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        },
+        {
+          "name": "col_not_found",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        },
+        {
+          "name": "col_generic",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        },
+        {
+          "name": "col_real_404",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        },
+        {
+          "name": "col_disabled",
+          "nullok": true,
+          "type": {
+            "typename": "markdown"
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "col_unauthorized",
+            "col_forbidden",
+            "col_not_found",
+            "col_generic",
+            "col_real_404",
+            "col_disabled"
+          ]
+        },
+        "tag:misd.isi.edu,2015:display": {
+          "markdown_name": "**Image Fallback Table**"
+        }
+      }
+    }
+  }
+}
