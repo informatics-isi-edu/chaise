@@ -204,56 +204,52 @@ const AppWrapperInner = ({
   /**
    * when a chaise-rendered image (tagged `chaise-image-fallback` by ermrestjs) fails
    * to load, show a fallback image instead of the browser's broken-image icon.
-   * `error` events don't bubble, so we use a capture-phase listener on the document.
-   * For same-origin images we additionally classify the failure with a single HEAD
-   * request (401/403 -> no access, 404 -> not found) and refine the fallback + tooltip.
    */
   const overrideImageErrorBehavior = () => {
     const onImageError = (e: Event) => {
       const img = e.target as HTMLImageElement;
       if (!(img instanceof HTMLImageElement)) return;
       if (!img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK)) return;
-      // author opted this image out of the fallback - leave the native broken image
       if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_DISABLED)) return;
-      // already handled (also stops an error loop once we swap in the fallback below)
       if (img.classList.contains(CLASS_NAMES.IMAGE_FALLBACK_APPLIED)) return;
 
       img.classList.add(CLASS_NAMES.IMAGE_FALLBACK_APPLIED);
       const originalSrc = img.src;
       img.setAttribute('data-original-src', originalSrc);
+      // show spinner while fetching head
+      img.src = imageLoading;
 
       // swap to a fallback image and explain why on hover.
       const showFallback = (src: string, message: string) => {
         img.src = src;
         img.title = message;
-        // img.setAttribute('data-chaise-tooltip', message);
-        // img.setAttribute('data-chaise-tooltip-no-icon', '');
-        // createChaiseTooltip(img);
       };
-      const showGeneric = () => showFallback(imageUnavailable, errorMessages.imageFallback.unknownError);
 
-      // we can't read the status of a cross-origin image, so show the generic fallback
+      // show the generic fallback image
+      const showGeneric = () => {
+        showFallback(imageUnavailable, errorMessages.imageFallback.unknownError);
+      };
+
+      // we can't read the status of a cross-origin image
       if (!isSameOrigin(originalSrc)) {
         showGeneric();
         return;
       }
 
-      // show a spinner while we classify the failure, then swap to the matching
-      // fallback once (avoids flashing the generic image before the real one)
-      img.src = imageLoading;
-
-      const config = { skipRetryBrowserError: true, skipHTTP401Handling: true };
+      const config = {
+        skipRetryBrowserError: true,
+        skipHTTP401Handling: true,
+        skipHTTPErrorStatusReplacement: true,
+      };
       ConfigService.http
         .head(originalSrc, config)
         // unexpected: the HEAD succeeded but the image still failed to render
         .then(showGeneric)
-        .catch((exception: any) => {
+        .catch((exception: unknown) => {
           const ermrestError = ConfigService.ERMrest.responseToError(exception);
           if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
-            // 401: not logged in (or session expired)
             showFallback(imageLoginRequired, errorMessages.imageFallback.unauthorized);
           } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-            // 403: logged in but not authorized
             showFallback(imageAccessDenied, errorMessages.imageFallback.forbidden);
           } else if (ermrestError instanceof ConfigService.ERMrest.NotFoundError) {
             showFallback(imageNotFound, errorMessages.imageFallback.notFound);
@@ -261,7 +257,7 @@ const AppWrapperInner = ({
             showGeneric();
           }
         });
-    };
+    };;
 
     document.addEventListener('error', onImageError, true);
   };
