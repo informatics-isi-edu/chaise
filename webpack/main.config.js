@@ -57,6 +57,12 @@ module.exports = (env) => {
         externalFiles: [...recordsetExtFiles],
       },
       {
+        appName: 'chat',
+        appTitle: 'Assistant',
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles],
+      },
+      {
         appName: 'navbar',
         bundleName: 'navbar-lib',
         appTitle: 'Navbar standalone library',

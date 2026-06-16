@@ -32,6 +32,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'hideGoToSnapshot', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
   'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
+  'assistantBasePath',
 ];
 
 /**
@@ -85,7 +86,11 @@ export const DEFAULT_CHAISE_CONFIG = {
       enable: []
     }
   },
-  asciiTextValidation: false
+  asciiTextValidation: false,
+  // base path (relative to origin) of the deriva-mcp-ui chat backend; default matches the
+  // conventional reverse-proxy mount so no chaise-config entry is needed. Override in
+  // chaise-config.js (e.g. '' for same-origin root) if the backend is mounted elsewhere.
+  assistantBasePath: '/deriva-mcp-ui'
 };
 
 export const dataFormats = {
@@ -186,6 +191,7 @@ export const QUERY_PARAMS = {
 
 // these are the captured as `cid` value in logs
 export enum APP_NAMES {
+  CHAT = 'chat',
   HELP = 'help',
   LOGIN = 'login',
   NAVBAR = 'navbar',
