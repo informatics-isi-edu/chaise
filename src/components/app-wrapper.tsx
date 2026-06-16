@@ -5,16 +5,10 @@ import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 // assets: fallback images shown when a chaise-rendered image fails to load
 import imageLoading from '@isrd-isi-edu/chaise/src/assets/images/image-loading.svg';
-// framed (background baked in) - works with object-fit: contain
-// import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label.svg';
-// import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label.svg';
-// import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label.svg';
-// import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label.svg';
-// transparent (no background) - works with object-fit: scale-down
-import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable-label-frameless.svg';
-import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found-label-frameless.svg';
-import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login-label-frameless.svg';
-import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied-label-frameless.svg';
+import imageUnavailable from '@isrd-isi-edu/chaise/src/assets/images/image-unavailable.svg';
+import imageNotFound from '@isrd-isi-edu/chaise/src/assets/images/image-not-found.svg';
+import imageLoginRequired from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-login.svg';
+import imageAccessDenied from '@isrd-isi-edu/chaise/src/assets/images/image-no-access-denied.svg';
 
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
