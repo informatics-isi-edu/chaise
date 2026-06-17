@@ -6,7 +6,6 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import Dropdown from 'react-bootstrap/Dropdown';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
@@ -19,7 +18,6 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
 import Title, { TitleProps } from '@isrd-isi-edu/chaise/src/components/title';
 import TitleVersion from '@isrd-isi-edu/chaise/src/components/title-version';
-import SnapshotForm from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-form';
 
 // hooks
 import React, { useEffect, useRef, useState, type JSX } from 'react';

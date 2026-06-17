@@ -108,6 +108,17 @@ test.describe('My feature', () => {
 });
 ```
 
+### Test & step descriptions
+
+Keep `test()` and `test.step()` descriptions short so the run logs stay easy to scan. Describe the action or
+the expectation in a few words; don't restate the assertion or explain the "why" (put rationale in a code
+comment if needed).
+
+```typescript
+await test.step('bulk copy opens copy mode', async () => { ... });   // ✅ concise
+await test.step('clicking the bulk copy button should open recordedit in copy mode and show the same number of forms as rows', async () => { ... });  // ❌ too long
+```
+
 ### Parameterized Tests
 
 Use a `for...of` loop around `test()` to run the same test with different data:

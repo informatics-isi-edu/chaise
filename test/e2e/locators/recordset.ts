@@ -162,6 +162,10 @@ export default class RecordsetLocators {
     return container.locator('.chaise-table-header-edit-link');
   }
 
+  static getBulkCopyLink(container: Page | Locator): Locator {
+    return container.locator('.chaise-table-header-bulk-copy-link');
+  }
+
   static getRecordSetTable(container: Page | Locator): Locator {
     return container.locator('.recordset-table');
   }

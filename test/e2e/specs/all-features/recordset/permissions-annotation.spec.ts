@@ -15,6 +15,10 @@ test.describe('Viewing Recordset app with permission related annotations', () =>
       await testButtonState(RecordsetLocators.getAddRecordsLink(page), true, false);
     });
 
+    await test.step('should not display the bulk copy button', async () => {
+      await testButtonState(RecordsetLocators.getBulkCopyLink(page), true, false);
+    });
+
     await test.step('should not display the edit button', async () => {
       await testButtonState(RecordsetLocators.getBulkEditLink(page), true, false);
     });
@@ -43,6 +47,10 @@ test.describe('Viewing Recordset app with permission related annotations', () =>
 
     await test.step('should display the create button', async () => {
       await testButtonState(RecordsetLocators.getAddRecordsLink(page), true, true);
+    });
+
+    await test.step('should display the bulk copy button', async () => {
+      await testButtonState(RecordsetLocators.getBulkCopyLink(page), true, true, false);
     });
 
     await test.step('should not display the edit button', async () => {
@@ -75,6 +83,10 @@ test.describe('Viewing Recordset app with permission related annotations', () =>
       await testButtonState(RecordsetLocators.getAddRecordsLink(page), true, true);
     });
 
+    await test.step('should display the bulk copy button', async () => {
+      await testButtonState(RecordsetLocators.getBulkCopyLink(page), true, true, false);
+    });
+
     await test.step('should display the edit button', async () => {
       await testButtonState(RecordsetLocators.getBulkEditLink(page), true, true);
     });
@@ -103,6 +115,10 @@ test.describe('Viewing Recordset app with permission related annotations', () =>
 
     await test.step('should not display the create button', async () => {
       await testButtonState(RecordsetLocators.getAddRecordsLink(page), true, false);
+    });
+
+    await test.step('should not display the bulk copy button', async () => {
+      await testButtonState(RecordsetLocators.getBulkCopyLink(page), true, false);
     });
 
     await test.step('should not display the edit button', async () => {

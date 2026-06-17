@@ -66,9 +66,11 @@ const RecordeditApp = (): JSX.Element => {
       let reference = response;
       const location = reference.location;
 
-      if (location.filter || location.facets) {
-        appMode = res.queryParams.prefill ? appModes.CREATE : (res.queryParams.copy ? appModes.COPY : appModes.EDIT);
-      } else if (res.queryParams.limit) {
+      if (res.queryParams.prefill) {
+        appMode = appModes.CREATE;
+      } else if (res.queryParams.copy) {
+        appMode = appModes.COPY;
+      } else if (location.filter || location.facets || res.queryParams.limit) {
         appMode = appModes.EDIT;
       }
 
