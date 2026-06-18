@@ -283,7 +283,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                   disabled={!page || page.tuples.length === 0}
                 >
                   <span className='chaise-btn-icon fa fa-clipboard' />
-                  <span>Bulk Copy</span>
+                  <span>Bulk copy</span>
                 </button>
               </ChaiseTooltip>
             </>
