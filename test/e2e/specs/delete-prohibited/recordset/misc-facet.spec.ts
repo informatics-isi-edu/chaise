@@ -10,7 +10,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 
 // utils
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { clickNewTabLink, generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import { testRecordMainSectionValues } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
 import {
   openFacet, openFacetAndTestFilterOptions, testColumnSort,
@@ -307,7 +307,7 @@ const testParams = {
 };
 
 test.describe('Other facet features', () => {
-  test.describe.configure({ mode: 'parallel', retries: 3 });
+  // test.describe.configure({ mode: 'parallel', retries: 3 });
 
   test('selecting entity facet that is not on the shortest key.', async ({ page, baseURL }, testInfo) => {
     const facet = RecordsetLocators.getFacetById(page, testParams.filter_secondary_key.facetIdx);
@@ -922,6 +922,27 @@ test.describe('Other facet features', () => {
         await RecordeditLocators.waitForRecordeditPageReady(page);
 
         await expect.soft(RecordeditLocators.getRecordeditForms(page)).toHaveCount(25);
+      });
+    });
+
+    test('bulk copy from recordset', async ({ page, baseURL }, testInfo) => {
+      await test.step('load recordset and clear filters', async () => {
+        await page.goto(generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL));
+        await RecordsetLocators.waitForRecordsetPageReady(page);
+
+        await testClearAllFilters(page, 25);
+      });
+
+      await test.step('bulk copy opens copy mode in a new tab, one form per row', async () => {
+        // bulk copy opens recordedit in a new tab
+        const newPage = await clickNewTabLink(RecordsetLocators.getBulkCopyLink(page));
+        await RecordeditLocators.waitForRecordeditPageReady(newPage);
+
+        await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(25);
+        // copy mode shows "Create 25 ..." vs edit's "Edit 25 ..."; guards the no-filter copy fix
+        await expect.soft(RecordeditLocators.getPageTitle(newPage)).toContainText('Create 25');
+
+        await newPage.close();
       });
     });
 

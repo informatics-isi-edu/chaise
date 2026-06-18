@@ -38,7 +38,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const container = useRef<HTMLDivElement>(null);
 
   /**
- * as long as the table doesn't have any static update:false ACL, we should show the button.
+   * as long as the table doesn't have any static update:false ACL, we should show the button.
    * if user cannot edit any of the displayed rows, we should disable the button.
    */
   const canShowEditButton = config.displayMode === RecordsetDisplayMode.FULLSCREEN && config.editable && reference && reference.canUpdate;
@@ -51,7 +51,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         There may be editable records in other pages or with different search criteria
       </>
     );
-  }
+  };
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -148,13 +148,16 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   /**
    * on click of create button generate referrer id, construct the link and open in new tab
    */
-  const addRecord = () => {
-    const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
-    const newRef = reference.table?.reference?.contextualize?.entryCreate;
+  const addRecord = (isBulkCopy = false) => {
+    // in copy, we want the filter/facets. but in create, we should start with an unfiltered reference
+    const currRef = isBulkCopy ? reference : reference.table.reference;
+    const newRef = currRef.contextualize.entryCreate;
     let appLink = newRef.appLink;
-
-    if (!!container.current) {
-      const eventDetails: { [key: string]: any } = { id: referrer_id };
+    
+    const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
+    
+    if (container.current) {
+      const eventDetails: { [key: string]: unknown } = { id: referrer_id };
 
       // currently containerDetails is not used for this code path,
       // but for completeness I added the following:
@@ -165,7 +168,12 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
 
     if (appLink) {
       appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
-        'invalidate=' + fixedEncodeURIComponent(referrer_id);
+        'invalidate=' + fixedEncodeURIComponent(referrer_id) + (isBulkCopy ? '&copy=true' : '');
+
+      // add page limit in copy mode
+      if (isBulkCopy && appLink.indexOf('?limit=') === -1 && appLink.indexOf('&limit=') === -1) {
+        appLink = `${appLink + '&limit=' + pageLimit}`;
+      }
 
       if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
         logRecordsetClientAction(LogActions.ADD_INTEND);
@@ -208,6 +216,8 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     return isAddableDisplayMode && reference && reference.canCreate;
   }
 
+  const createButtonType = config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary';
+
   return (
     <div className='chaise-table-header row' ref={container}>
       <div
@@ -220,50 +230,76 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         {page && page.length > 0 && renderPageSizeDropdown()}
         <span className='total-count-text'>
           {appendLabel()}
-          {totalRowCountHasTimeoutError &&
+          {totalRowCountHasTimeoutError && (
             <ChaiseTooltip
               placement='bottom'
-              tooltip={'Request timeout: total count cannot be retrieved. Refresh the page later to try again.'}
+              tooltip={
+                'Request timeout: total count cannot be retrieved. Refresh the page later to try again.'
+              }
             >
               <span className='timeout-icon fa-solid fa-triangle-exclamation' />
             </ChaiseTooltip>
-          }
+          )}
         </span>
       </div>
       <div className='col-12 col-sm-6'>
-        <div
-          className='chaise-table-header-buttons'
-        >
+        <div className='chaise-table-header-buttons'>
           {shouldShowCreateButton() && (
-            <ChaiseTooltip
-              placement='bottom-end'
-              tooltip={<>Create new{' '}<DisplayValue value={reference.displayname} /></>}
-            >
-              <span className='chaise-table-header-buttons-span'>
+            <>
+              {/* create new button */}
+              <ChaiseTooltip
+                placement='bottom-end'
+                tooltip={
+                  <>
+                    Create new <DisplayValue value={reference.displayname} />
+                  </>
+                }
+              >
                 <button
-                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-create-link`}
-                  onClick={addRecord}
+                  className={`chaise-btn  ${createButtonType} chaise-table-header-create-link`}
+                  onClick={() => addRecord(false)}
                 >
                   <span className='chaise-btn-icon fa-solid fa-plus' />
-                  <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
+                  <span>
+                    {config.displayMode === RecordsetDisplayMode.FULLSCREEN
+                      ? 'Create'
+                      : 'Create new'}
+                  </span>
                 </button>
-              </span>
-            </ChaiseTooltip>
+              </ChaiseTooltip>
+
+              {/* bulk copy button */}
+              <ChaiseTooltip
+                placement='bottom-end'
+                tooltip={
+                  <>
+                    Create new records by copying this page of records. <br />
+                  </>
+                }
+              >
+                <button
+                  className={`chaise-btn  ${createButtonType} chaise-table-header-bulk-copy-link`}
+                  onClick={() => addRecord(true)}
+                  disabled={!page || page.tuples.length === 0}
+                >
+                  <span className='chaise-btn-icon fa fa-clipboard' />
+                  <span>Bulk Copy</span>
+                </button>
+              </ChaiseTooltip>
+            </>
           )}
 
           {/* Edit Button */}
           {canShowEditButton && (
-            <ChaiseTooltip placement='bottom-end' tooltip={editButtonTooltip} >
-              <span>
-                <button
-                  className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
-                  onClick={editRecord}
-                  disabled={disableEditButton}
-                >
-                  <span className='chaise-btn-icon fa-solid fa-pen' />
-                  <span>Bulk edit</span>
-                </button>
-              </span>
+            <ChaiseTooltip placement='bottom-end' tooltip={editButtonTooltip}>
+              <button
+                className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
+                onClick={editRecord}
+                disabled={disableEditButton}
+              >
+                <span className='chaise-btn-icon fa-solid fa-pen' />
+                <span>Bulk edit</span>
+              </button>
             </ChaiseTooltip>
           )}
         </div>

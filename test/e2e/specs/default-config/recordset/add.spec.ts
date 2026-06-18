@@ -9,7 +9,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getEntityRow } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { clickNewTabLink, manuallyTriggerFocus } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
-import { setInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
+import { setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
@@ -21,6 +21,8 @@ const testParams = {
   rating: '3.50',
   summary: 'The BEST WESTERN PLUS Amedia Art Salzburg is located near the traditional old part of town, near the highway, near the train station and close to the exhibition center of Salzburg.\nBEST WESTERN PLUS Amedia Art Salzburg offers harmony of modern technique and convenient atmosphere to our national and international business guest and tourists.'
 };
+
+test.describe.configure({ mode: 'parallel' });
 
 test('Recordset add record', async ({ page, baseURL }, testInfo) => {
   const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, testParams.table_name, testInfo, baseURL);
@@ -135,5 +137,54 @@ test('Recordset add record', async ({ page, baseURL }, testInfo) => {
     await manuallyTriggerFocus(page);
 
     await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(testParams.num_rows+1);
+  });
+});
+
+test('bulk copy creates records from recordset', async ({ page, baseURL }, testInfo) => {
+  const PAGE_URL = generateChaiseURL(APP_NAMES.RECORDSET, testParams.schema_name, 'bulk_copy_table', testInfo, baseURL);
+  let newPage: Page;
+
+  await test.step('load recordset', async () => {
+    await page.goto(`${PAGE_URL}@sort(id)`);
+    await RecordsetLocators.waitForRecordsetPageReady(page);
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(3);
+  });
+
+  await test.step('bulk copy opens 3 pre-filled forms in a new tab', async () => {
+    // bulk copy opens recordedit in a new tab
+    newPage = await clickNewTabLink(RecordsetLocators.getBulkCopyLink(page));
+    await RecordeditLocators.waitForRecordeditPageReady(newPage);
+
+    await expect.soft(RecordeditLocators.getRecordeditForms(newPage)).toHaveCount(3);
+    // copy mode ("Create 3 ...") vs edit's "Edit 3 ..."
+    await expect.soft(RecordeditLocators.getPageTitle(newPage)).toContainText('Create 3');
+    await expect.soft(RecordeditLocators.getInputForAColumn(newPage, 'title', 1)).toHaveValue('Alpha');
+    await expect.soft(RecordeditLocators.getInputForAColumn(newPage, 'title', 2)).toHaveValue('Beta');
+    await expect.soft(RecordeditLocators.getForeignKeyInputDisplay(newPage, 'Outbound 1', 1)).toHaveText('Type A');
+  });
+
+  await test.step('edit keys and submit', async () => {
+    await RecordeditLocators.getInputForAColumn(newPage, 'id', 1).fill('101');
+    await RecordeditLocators.getInputForAColumn(newPage, 'id', 2).fill('102');
+    await RecordeditLocators.getInputForAColumn(newPage, 'id', 3).fill('103');
+    await RecordeditLocators.getInputForAColumn(newPage, 'title', 1).fill('Alpha edited');
+
+    await testSubmission(newPage, {
+      tableDisplayname: 'bulk_copy_table',
+      resultColumnNames: ['id', 'title', 'Outbound 1'],
+      resultRowValues: [
+        ['101', 'Alpha edited', 'Type A'],
+        ['102', 'Beta', 'Type B'],
+        ['103', 'Gamma', 'Type C'],
+      ],
+    });
+  });
+
+  await test.step('recordset auto-refreshes with the new rows', async () => {
+    await newPage.close();
+    // playwright keeps tabs focused, so manually fire focus on the recordset
+    await manuallyTriggerFocus(page);
+
+    await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(6);
   });
 });

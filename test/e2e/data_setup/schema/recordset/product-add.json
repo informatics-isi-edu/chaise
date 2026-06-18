@@ -789,6 +789,65 @@
           "*": ["id", "term"]
         }
       }
+    },
+    "bulk_copy_outbound1": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        { "comment": null, "annotations": {}, "unique_columns": ["id"] },
+        { "comment": null, "annotations": {}, "unique_columns": ["name"] }
+      ],
+      "table_name": "bulk_copy_outbound1",
+      "schema_name": "product-recordset-add",
+      "column_definitions": [
+        { "comment": null, "name": "id", "nullok": false, "type": { "typename": "int4" }, "annotations": {} },
+        { "comment": null, "name": "name", "nullok": false, "type": { "typename": "text" }, "annotations": {} }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "name"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "row_name": { "row_markdown_pattern": "{{{name}}}" }
+        }
+      }
+    },
+    "bulk_copy_table": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        { "comment": null, "annotations": {}, "unique_columns": ["id"] }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-recordset-add", "bulk_copy_fk1"]],
+          "foreign_key_columns": [
+            { "table_name": "bulk_copy_table", "schema_name": "product-recordset-add", "column_name": "outbound1" }
+          ],
+          "annotations": {
+            "tag:isrd.isi.edu,2016:foreign-key": { "to_name": "Outbound 1" }
+          },
+          "referenced_columns": [
+            { "table_name": "bulk_copy_outbound1", "schema_name": "product-recordset-add", "column_name": "name" }
+          ]
+        }
+      ],
+      "table_name": "bulk_copy_table",
+      "schema_name": "product-recordset-add",
+      "column_definitions": [
+        { "comment": null, "name": "id", "nullok": false, "type": { "typename": "int4" }, "annotations": {} },
+        { "comment": null, "name": "title", "nullok": false, "type": { "typename": "text" }, "annotations": {} },
+        { "comment": null, "name": "outbound1", "nullok": true, "type": { "typename": "text" }, "annotations": {} }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "compact": ["id", "title", ["product-recordset-add", "bulk_copy_fk1"]],
+          "entry/create": ["id", "title", ["product-recordset-add", "bulk_copy_fk1"]],
+          "entry/edit": ["id", "title", ["product-recordset-add", "bulk_copy_fk1"]]
+        }
+      }
     }
   },
   "table_names": [
@@ -796,7 +855,9 @@
     "file",
     "accommodation",
     "accommodation_image",
-    "booking"
+    "booking",
+    "bulk_copy_outbound1",
+    "bulk_copy_table"
   ],
   "comment": null,
   "annotations": {
