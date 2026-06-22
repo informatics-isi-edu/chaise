@@ -22,10 +22,13 @@ const tableName = 'main';
  *   - sync all-outbound scalar     -> cond_outbound_scalar  (vis-col outbound1_col)
  *   - sync all-outbound entity     -> inline cond on pattern_local_col
  *   - inline condition + wait_for  -> inline cond on pattern_with_waitfor_col
- *   - async inbound entityset      -> cond_inbound1  (shared by 3 items)
+ *   - async inbound entityset      -> cond_inbound1  (shared by 3 items; condition_pattern over
+ *                                     $self -> exercises single-inbound entityset $self end-to-end)
  *   - async aggregate cnt          -> cond_inbound_count (vis-col inbound1_count_col)
  *   - async pure-and-binary        -> cond_assoc  (vis-fk assoc_target)
- *   - async 3-hop with shared-prefix sourcekey -> cond_path_multi  (vis-fk path_target)
+ *   - async 3-hop with shared-prefix sourcekey -> cond_path_multi  (vis-fk path_target;
+ *                                     condition_pattern over $self -> exercises multi-hop entityset
+ *                                     $self end-to-end, proving chaise routes the page to $self)
  *   - async path with filter       -> cond_path_filter  (vis-fk filtered_inbound1)
  *   - on_empty:"show" inversion    -> cond_always_show  (vis-fk always_shown_table)
  *   - no-source (pattern-only)     -> inline + condition_key, on both vis-col
@@ -128,6 +131,48 @@ test.describe('Condition on visible columns and foreign keys', () => {
         'always_shown_table (0)',
         'ns_related_show (0)',
       ]);
+    });
+  });
+
+  test('id=1: a source used as display + condition + gated value is read once', async ({ page, baseURL }, testInfo) => {
+    // Two dedup paths, both should collapse to a single read:
+    //  - cond_inbound1_src (entity set) is BOTH the inbound1 vis-fk display AND the source of
+    //    cond_inbound1 -> the condition source folds onto the display (one entity-set read).
+    //  - cond_inbound_count_src (cnt aggregate) is BOTH inbound1_count_col's value AND its own
+    //    gate cond_inbound_count -> the gated value folds onto the condition source (one count read).
+    const ermrestReads: string[] = [];
+    page.on('request', (req) => {
+      const u = req.url();
+      if (req.method() === 'GET' && u.includes('/ermrest/catalog/') &&
+        (u.includes('/entity/') || u.includes('/attributegroup/') || u.includes('/aggregate/'))) {
+        ermrestReads.push(u);
+      }
+    });
+
+    const url = generateChaiseURL(APP_NAMES.RECORD, schemaName, tableName, testInfo, baseURL) + '/id=1';
+    await page.goto(url);
+    await RecordLocators.waitForRecordPageReady(page);
+    await page.waitForLoadState('networkidle');
+
+    // the inbound1 entity-set read (related reads aggregate rows via array_d). This is the
+    // query shared by the inbound1 vis-fk display and the cond_inbound1 source. The count
+    // aggregate (cnt), the kind=primary filtered read, and the multi-hop path read also touch
+    // inbound1 but are distinct queries, so the source-hash anchor + array_d excludes them.
+    const inbound1EntitySetReads = ermrestReads.filter((u) =>
+      u.includes('M:=condition-test:inbound1/(main_id)') &&
+      u.includes('array_d') &&
+      !u.includes('kind=primary')
+    );
+
+    // the inbound1 count aggregate, shared by inbound1_count_col's value and its gate.
+    const inbound1CountReads = ermrestReads.filter((u) => u.includes('cnt(T:RID)') && u.includes('inbound1:main_id'));
+
+    await test.step('inbound1 entity set is read exactly once', async () => {
+      expect(inbound1EntitySetReads, 'inbound1 entity-set reads:\n' + inbound1EntitySetReads.join('\n')).toHaveLength(1);
+    });
+
+    await test.step('inbound1 count aggregate is read exactly once', async () => {
+      expect(inbound1CountReads, 'inbound1 count reads:\n' + inbound1CountReads.join('\n')).toHaveLength(1);
     });
   });
 

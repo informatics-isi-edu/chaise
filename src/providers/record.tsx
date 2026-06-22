@@ -772,8 +772,11 @@ export default function RecordProvider({
         // all-outbound, no async wait_for) the condition has no fetch and no
         // request model — that's expected; chaise just evaluates it against
         // the main tuple after the main entity is read.
+        // After the consolidation pass the source may instead live on a display
+        // request (inline/related) whose `entitysetSourceName` is the source
+        // hash — match that too, so the display read drives the condition.
         const condReqModel = flowControl.current.requestModels.find(
-          (m) => m.activeListModel.column?.name === condColName
+          (m) => m.activeListModel.column?.name === condColName || m.activeListModel.entitysetSourceName === condColName
         );
 
         // dependents inherit the condition source's priority when async, or get
@@ -1061,6 +1064,26 @@ export default function RecordProvider({
        * If the request errored out (timeout or other types of error) page will be undefined.
        */
       const hasMainData = res.success && res.page;
+
+      // If the consolidation pass folded data consumers (value / wait_for /
+      // citation / condition) onto this display request, this display read is the
+      // single read for the source. Store the page and dispatch those consumers
+      // the same way fetchSecondaryRequest does for an entityset. Done before the
+      // markdown block below so a self-referential markdown table sees its own
+      // page variables.
+      const activeListModel = reqModel.activeListModel;
+      if (hasMainData && activeListModel.entitysetSourceName && Array.isArray(activeListModel.objects) && activeListModel.objects.length > 0) {
+        const sourceName: string = activeListModel.entitysetSourceName;
+        flowControl.current.entitySetResults[sourceName] = res.page;
+        const sm = reference.table.sourceDefinitions.sourceMapping[sourceName];
+        if (Array.isArray(sm)) {
+          sm.forEach((k: string) => {
+            flowControl.current.templateVariables[k] = res.page.templateVariables;
+          });
+        }
+        attachPseudoColumnValue(activeListModel, isUpdate);
+      }
+
       const hasWaitForData = !rm.hasWaitFor || rm.waitForDataLoaded;
       if (hasMainData && hasWaitForData) {
         printDebugMessage('updating markdown content in afterUpdateRelatedEntity', m);
