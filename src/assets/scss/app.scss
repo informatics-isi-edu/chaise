@@ -998,7 +998,7 @@ html {
       box-shadow: none;
       border-radius: 0;
       border: 0;
-      &:not(.forced-hidden) + .chaise-accordion:not(.forced-hidden) {
+      &:not(.forced-hidden) ~ .chaise-accordion:not(.forced-hidden) {
         margin-top: $_space-between-accordions;
       }
 
