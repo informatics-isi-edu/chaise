@@ -350,20 +350,14 @@ export default function RecordProvider({
         });
       });
 
-      // re-set conditionHide = true on all conditioned items so the UI hides
-      // them while the new evaluation runs.
-      setColumnModels((prevModels: RecordColumnModel[]) =>
-        prevModels.map((val) => {
-          if (val.isConditioned) return { ...val, conditionHide: true };
-          return val;
-        })
-      );
-      setRelatedModels((prevModels: RecordRelatedModel[]) =>
-        prevModels.map((val) => {
-          if (val.isConditioned) return { ...val, conditionHide: true };
-          return val;
-        })
-      );
+      /**
+       * we used to set conditionHide to true here, but I decided to remove it
+       * to reduce the flickering. This way, on update the element stays in
+       * its current state until the condition is evaluated.
+       *
+       * Setting the .evaluated and .procesesed above is already ensuring
+       * the condition is re-evaluated and the dependent models are re-queued if needed.
+       */
     }
 
     // request models — skip dependents of conditions (they'll be enqueued after condition evaluation)
