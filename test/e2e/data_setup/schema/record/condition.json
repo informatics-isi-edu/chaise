@@ -113,7 +113,9 @@
                         },
                         "cond_inbound1": {
                             "sourcekey": "cond_inbound1_src",
-                            "on_empty": "hide"
+                            "on_empty": "hide",
+                            "condition_pattern": "{{#if (gt $self.length 0)}}show{{/if}}",
+                            "template_engine": "handlebars"
                         },
                         "cond_inbound_count": {
                             "sourcekey": "cond_inbound_count_src",
@@ -125,7 +127,9 @@
                         },
                         "cond_path_multi": {
                             "sourcekey": "cond_path_multi_src",
-                            "on_empty": "hide"
+                            "on_empty": "hide",
+                            "condition_pattern": "{{#if (gt $self.length 0)}}show{{/if}}",
+                            "template_engine": "handlebars"
                         },
                         "cond_path_filter": {
                             "sourcekey": "cond_path_filter_src",

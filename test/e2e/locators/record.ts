@@ -107,8 +107,13 @@ export default class RecordLocators {
     return container.locator('tr:not(.forced-hidden) td.entity-value');
   }
 
-  static getColumnValue(container: Locator | Page, columnName: string): Locator {
-    return container.locator(`#row-${columnName} .entity-value span:not(.chaise-comment)`);
+  /**
+   * @param columnName either the column name or the column displayname (if isColumnDisplayname is true)
+   * @param isColumnDisplayname whether the second param is a column displayname (not the name/hash).
+   */
+  static getColumnValue(container: Locator | Page, columnName: string, isColumnDisplayname?: boolean): Locator {
+    const rowSelector = isColumnDisplayname ? `.entity-row-${makeSafeIdAttr(columnName)}` : `#row-${columnName}`;
+    return container.locator(`${rowSelector} .entity-value span:not(.chaise-comment)`);
   }
 
   static getColumnInlineComment(container: Locator | Page, columnDisplayName: string): Locator {

@@ -772,14 +772,21 @@ export default function RecordProvider({
         // all-outbound, no async wait_for) the condition has no fetch and no
         // request model — that's expected; chaise just evaluates it against
         // the main tuple after the main entity is read.
+        // After the consolidation pass the source may instead live on a display
+        // request (inline/related) whose `entitysetSourceName` is the source
+        // hash — match that too, so the display read drives the condition.
         const condReqModel = flowControl.current.requestModels.find(
-          (m) => m.activeListModel.column?.name === condColName
+          (m) =>
+            m.activeListModel.column?.name === condColName ||
+            m.activeListModel.entitysetSourceName === condColName
         );
 
         // dependents inherit the condition source's priority when async, or get
         // a synthetic late priority when sync (they're upserted at evaluation
         // time, so the priority only matters relative to other queued items).
-        const dependentPriority = condReqModel ? condReqModel.priority : flowControl.current.requestModels.length;
+        const dependentPriority = condReqModel
+          ? condReqModel.priority
+          : flowControl.current.requestModels.length;
 
         // create request models for dependent items but do NOT add to requestQueue
         const dependentModels: RecordRequestModel[] = [];
@@ -839,8 +846,8 @@ export default function RecordProvider({
 
     printDebugMessage(
       `initialized ${flowControl.current.conditionModels.length} condition models — ` +
-      `column-conditioned indices: [${Array.from(conditionedColumnIndices).join(',')}], ` +
-      `related-conditioned indices: [${Array.from(conditionedRelatedIndices).join(',')}]`
+        `column-conditioned indices: [${Array.from(conditionedColumnIndices).join(',')}], ` +
+        `related-conditioned indices: [${Array.from(conditionedRelatedIndices).join(',')}]`
     );
 
     // column models
@@ -1048,6 +1055,8 @@ export default function RecordProvider({
     isInline: boolean
   ) => {
     return function (res: { success: boolean; page: any }) {
+      const activeListModel = reqModel.activeListModel;
+
       reqModel.processed = !res.success;
 
       const rm = isInline
@@ -1061,6 +1070,30 @@ export default function RecordProvider({
        * If the request errored out (timeout or other types of error) page will be undefined.
        */
       const hasMainData = res.success && res.page;
+
+      /**
+       * when consolidation folded data consumers (value / wait_for / citation / condition)
+       * onto this display, the display read is the single read for the source,
+       * so store its page and dispatch those consumers like fetchSecondaryRequest does.
+       * before the markdown block so a self-referential markdown table sees its own page variables.
+       */
+      if (
+        hasMainData &&
+        activeListModel.entitysetSourceName &&
+        Array.isArray(activeListModel.objects) &&
+        activeListModel.objects.length > 0
+      ) {
+        const sourceName: string = activeListModel.entitysetSourceName;
+        flowControl.current.entitySetResults[sourceName] = res.page;
+        const sm = reference.table.sourceDefinitions.sourceMapping[sourceName];
+        if (Array.isArray(sm)) {
+          sm.forEach((k: string) => {
+            flowControl.current.templateVariables[k] = res.page.templateVariables;
+          });
+        }
+        attachPseudoColumnValue(activeListModel, isUpdate);
+      }
+
       const hasWaitForData = !rm.hasWaitFor || rm.waitForDataLoaded;
       if (hasMainData && hasWaitForData) {
         printDebugMessage('updating markdown content in afterUpdateRelatedEntity', m);
@@ -1429,9 +1462,10 @@ export default function RecordProvider({
 
     // all data available -- get the condition value and evaluate
     const condColName = condModel.condition.column.name;
-    const conditionValue = flowControl.current.aggregateResults[condColName]
-      ?? flowControl.current.entitySetResults[condColName]
-      ?? null;
+    const conditionValue =
+      flowControl.current.aggregateResults[condColName] ??
+      flowControl.current.entitySetResults[condColName] ??
+      null;
 
     const result = condModel.condition.evaluateCondition(
       flowControl.current.templateVariables,
@@ -1444,7 +1478,7 @@ export default function RecordProvider({
 
     printDebugMessage(
       `condition evaluated, key=${condModel.condition.conditionKey || '<inline>'} ` +
-      `source=${condColName} shouldShow=${result.shouldShow}`
+        `source=${condColName} shouldShow=${result.shouldShow}`
     );
 
     if (result.shouldShow) {
@@ -1483,8 +1517,8 @@ export default function RecordProvider({
 
     printDebugMessage(
       `updateConditionedVisibility hide=${hide} key=${condModel.condition.conditionKey || '<inline>'} ` +
-      `colIdxs=[${Array.from(affectedColumnIndices).join(',')}] ` +
-      `relIdxs=[${Array.from(affectedRelatedIndices).join(',')}]`
+        `colIdxs=[${Array.from(affectedColumnIndices).join(',')}] ` +
+        `relIdxs=[${Array.from(affectedRelatedIndices).join(',')}]`
     );
     if (affectedColumnIndices.size > 0) {
       setColumnModels((prevModels: RecordColumnModel[]) =>
@@ -1496,7 +1530,11 @@ export default function RecordProvider({
             updated.relatedModel = {
               ...updated.relatedModel,
               tableMarkdownContentInitialized: true,
-              recordsetState: { ...updated.relatedModel.recordsetState, isInitialized: true, isLoading: false },
+              recordsetState: {
+                ...updated.relatedModel.recordsetState,
+                isInitialized: true,
+                isLoading: false,
+              },
             };
           }
           return updated;
@@ -1512,7 +1550,11 @@ export default function RecordProvider({
           // when hiding, mark as initialized so the related section spinner stops
           if (hide) {
             updated.tableMarkdownContentInitialized = true;
-            updated.recordsetState = { ...updated.recordsetState, isInitialized: true, isLoading: false };
+            updated.recordsetState = {
+              ...updated.recordsetState,
+              isInitialized: true,
+              isLoading: false,
+            };
           }
           return updated;
         })
