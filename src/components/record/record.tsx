@@ -53,6 +53,7 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 export type RecordProps = {
   /**
@@ -276,6 +277,8 @@ const RecordInner = ({
   useEffect(() => {
     if (setupAfterPageLoadisDone.current || !relatedSectionInitialized || showMainSectionSpinner) return;
     setupAfterPageLoadisDone.current = true;
+
+    logPerformanceMilestone('fullPageLoad');
 
     // scroll to section based on query parameter
     if (scrollToDisplayname) {

@@ -32,6 +32,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'hideGoToSnapshot', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
   'debug', 'templating', 'hideRecordeditLeaveAlert', 'shareCite', 'exportConfigsSubmenu', 'asciiTextValidation',
+  'performanceLogging',
 ];
 
 /**
@@ -85,7 +86,8 @@ export const DEFAULT_CHAISE_CONFIG = {
       enable: []
     }
   },
-  asciiTextValidation: false
+  asciiTextValidation: false,
+  performanceLogging: false
 };
 
 export const dataFormats = {

@@ -36,6 +36,7 @@ import {
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { APP_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = ConfigService.catalogID;
@@ -288,6 +289,7 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   const renderRidSearch = () => {
+    logPerformanceMilestone('navbarLoad');
     if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
 
     return (

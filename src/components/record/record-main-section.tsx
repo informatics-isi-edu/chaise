@@ -11,6 +11,9 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 // models
 import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 
+// utilities
+import { logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
+
 import type { JSX } from 'react';
 
 /**
@@ -19,6 +22,8 @@ import type { JSX } from 'react';
 const RecordMainSection = (): JSX.Element => {
   const { errors } = useError();
   const { columnModels, showMainSectionSpinner } = useRecord();
+
+  logPerformanceMilestone('mainDataLoad');
 
   const hasSpinner = errors.length === 0 && showMainSectionSpinner;
   return (
