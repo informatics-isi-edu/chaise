@@ -26,6 +26,7 @@ import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { isPerformanceLoggingEnabled, logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -268,6 +269,13 @@ const RecordsetTable = ({
       });
     }
   }, [isLoading]);
+
+  useEffect(() => {
+    if (!isPerformanceLoggingEnabled() || isLoading || config.displayMode !== RecordsetDisplayMode.FULLSCREEN) return;
+    if (columnModels.every((col: any) => !col.isLoading)) {
+      logPerformanceMilestone('allAggregatesLoaded');
+    }
+  }, [columnModels, isLoading, config.displayMode]);
 
   //------------------- react hook callbacks: --------------------//
   // Sync widths of the columns

@@ -43,6 +43,7 @@ import { CLASS_NAMES, errorMessages } from '@isrd-isi-edu/chaise/src/utils/const
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type AppWrapperProps = {
   /**
@@ -261,9 +262,11 @@ const AppWrapperInner = ({
     sweepStalePrefillEntries();
 
     const onError = (event: any) => {
+      logPerformanceError('navbar', event.error);
       dispatchError({ error: event.error });
     };
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      logPerformanceError('navbar', event.reason);
       dispatchError({ error: event.reason });
     };
     const onHashChange = () => {

@@ -1,5 +1,28 @@
 import { ViewerConfig } from '@isrd-isi-edu/chaise/src/models/viewer';
 
+/**
+ * load-error info recorded on window.__chaisePerf
+ */
+export interface ChaisePerfError {
+  milestone: 'navbar' | 'main' | 'full';
+  status?: string;
+  code?: number;
+  message?: string;
+}
+
+/**
+ * page-load milestones in ms, recorded only when chaiseConfig.performanceLogging is on.
+ * fullPageLoad is record-only; allFacetsLoaded and allAggregatesLoaded are recordset-only.
+ */
+export interface ChaisePerfMarks {
+  navbarLoad?: number;
+  mainDataLoad?: number;
+  fullPageLoad?: number;
+  allFacetsLoaded?: number;
+  allAggregatesLoaded?: number;
+  error?: ChaisePerfError;
+}
+
 // exporting so third-party apps can customize this
 export interface ICustomWindow extends Window {
   // WID
@@ -44,7 +67,11 @@ export interface ICustomWindow extends Window {
   /**
    * the config file of viewer app
    */
-  viewerConfigs: ViewerConfig
+  viewerConfigs: ViewerConfig,
+  /**
+   * timing marks read by the deriva-load-testing tool
+   */
+  __chaisePerf?: ChaisePerfMarks
 }
 
 declare let window: ICustomWindow;
