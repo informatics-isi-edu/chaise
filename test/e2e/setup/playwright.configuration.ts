@@ -78,6 +78,12 @@ const getConfig = (options: TestOptions) => {
       // screenshots will be added to the playwright-report folder
       screenshot: 'only-on-failure',
 
+      /**
+       * Record one video per failing test: only the first attempt is captured, and kept
+       * only if it failed. A failure yields exactly one video, without duplicates from retries.
+       */
+      video: 'retain-on-first-failure',
+
       // set the timezone to Los Angeles
       timezoneId: 'America/Los_Angeles'
     },

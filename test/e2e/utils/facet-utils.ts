@@ -13,12 +13,7 @@ import { dragAndDropWithScroll } from '@isrd-isi-edu/chaise/test/e2e/utils/page-
 export const changeStoredOrder = async (page: Page, testInfo: TestInfo, schemaName: string, tableName: string, order: unknown) => {
   const keyName = `facet-order-${getCatalogID(testInfo.project.name)}_${schemaName}_${tableName}`;
   const orderStr = JSON.stringify(order);
-  await page.evaluate(
-    ({ keyName, orderStr }) => {
-      window.localStorage.setItem(keyName, orderStr);
-    },
-    { keyName, orderStr }
-  );
+  await page.localStorage.setItem(keyName, orderStr);
 
   await page.reload();
 };
