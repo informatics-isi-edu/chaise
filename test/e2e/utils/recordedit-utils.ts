@@ -916,9 +916,11 @@ const _testInputValidationAndExtraFeatures = async (
         let invalidMaxNo = '2343243243242414423243242353253253253252352',
           invalidMinNo = '-2343243243242414423243242353253253253252352';
         if (inputType === RecordeditInputType.INT_2) {
-          ((invalidMaxNo = '8375832757832'), (invalidMinNo = '-237587565'));
+          invalidMaxNo = '8375832757832';
+          invalidMinNo = '-237587565';
         } else if (inputType === RecordeditInputType.INT_4) {
-          ((invalidMaxNo = '3827374576453'), (invalidMinNo = '-326745374576375'));
+          invalidMaxNo = '3827374576453';
+          invalidMinNo = '-326745374576375';
         }
 
         await intInput.clear();

@@ -61,6 +61,8 @@ const FileField = (props: FileFieldProps): JSX.Element => {
             `Invalid file extension for "${filename}". Valid file extensions are ${fileExtensions}`,
             ChaiseAlertType.ERROR
           );
+          // reset so re-selecting the same file still fires a change event
+          fileInput.value = '';
           return;
         }
       }
@@ -71,6 +73,8 @@ const FileField = (props: FileFieldProps): JSX.Element => {
           `The selected file "${filename}" is empty (0 bytes). Empty files are not allowed.`,
           ChaiseAlertType.ERROR
         );
+        // reset so re-selecting the same file still fires a change event
+        fileInput.value = '';
         return;
       }
 
