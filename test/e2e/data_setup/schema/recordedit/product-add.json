@@ -8,9 +8,7 @@
         {
           "comment": null,
           "annotations": {},
-          "unique_columns": [
-            "id"
-          ]
+          "unique_columns": ["id"]
         }
       ],
       "foreign_keys": [
@@ -88,11 +86,9 @@
             "typename": "serial4"
           },
           "annotations": {
-            "comment": [
-              "hidden"
-            ],
+            "comment": ["hidden"],
             "tag:misd.isi.edu,2015:display": {
-              "name" : "Id"
+              "name": "Id"
             },
             "tag:isrd.isi.edu,2016:generated": null,
             "tag:isrd.isi.edu,2016:immutable": null
@@ -107,20 +103,14 @@
             "typename": "text"
           },
           "annotations": {
-            "comment": [
-              "title",
-              "top",
-              "orderby"
-            ],
+            "comment": ["title", "top", "orderby"],
             "description": {
               "display": "Name of Accommodation"
             },
-            "tag:misd.isi.edu,2015:display" : {
-              "name" : "Name of Accommodation"
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Name of Accommodation"
             },
-            "facetOrder": [
-              "1"
-            ]
+            "facetOrder": ["1"]
           }
         },
         {
@@ -132,12 +122,12 @@
             "typename": "text"
           },
           "annotations": {
-            "tag:misd.isi.edu,2015:url" : {
-              "url" : "{cname}"
+            "tag:misd.isi.edu,2015:url": {
+              "url": "{cname}"
             },
-            "tag:isrd.isi.edu,2016:column-display" : {
+            "tag:isrd.isi.edu,2016:column-display": {
               "*": {
-                "markdown_pattern" : "[Link to Website]({{website}})"
+                "markdown_pattern": "[Link to Website]({{website}})"
               }
             },
             "tag:misd.isi.edu,2015:display": {
@@ -219,7 +209,7 @@
             "typename": "int2"
           },
           "annotations": {
-            "comment" : ["top"],
+            "comment": ["top"],
             "tag:misd.isi.edu,2015:display": {
               "name": "Number of Rooms",
               "comment_display": {
@@ -283,14 +273,14 @@
             "tag:misd.isi.edu,2015:display": {
               "name": "Is Luxurious"
             },
-            "tag:isrd.isi.edu,2016:ignore" : ["record"]
+            "tag:isrd.isi.edu,2016:ignore": ["record"]
           }
         },
         {
-            "name": "date_col",
-            "type": {
-                "typename": "date"
-            }
+          "name": "date_col",
+          "type": {
+            "typename": "date"
+          }
         },
         {
           "name": "text_array",
@@ -371,35 +361,91 @@
         }
       ],
       "annotations": {
-        "comment": [
-          "default"
-        ],
+        "comment": ["default"],
         "tag:misd.isi.edu,2015:display": {
           "name": "Accommodations"
         },
-        "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["id", "title", "website", ["product-add", "fk_category"],  "rating", "summary", "description", "json_col","no_of_rooms", "opened_on", "date_col", "luxurious"],
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "detailed": [
+            "id",
+            "title",
+            "website",
+            ["product-add", "fk_category"],
+            "rating",
+            "summary",
+            "description",
+            "json_col",
+            "no_of_rooms",
+            "opened_on",
+            "date_col",
+            "luxurious"
+          ],
           "entry/create": [
-            "id", "title", "website", ["product-add", "fk_category"], "rating",
-            { "source": "summary", "comment": "A comment displayed for the _summary_ column", "comment_display": "inline"},
-            "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious",
-            "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array",
+            "id",
+            "title",
+            "website",
+            ["product-add", "fk_category"],
+            "rating",
+            {
+              "source": "summary",
+              "comment": "A comment displayed for the _summary_ column",
+              "comment_display": "inline"
+            },
+            "description",
+            "json_col",
+            "no_of_rooms",
+            "opened_on",
+            "date_col",
+            "luxurious",
+            "text_array",
+            "boolean_array",
+            "int4_array",
+            "float4_array",
+            "date_array",
+            "timestamp_array",
+            "timestamptz_array",
             "color_rgb_hex_column"
           ],
           "entry/edit": [
-              "id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious"
+            "id",
+            "title",
+            "website",
+            ["product-add", "fk_category"],
+            "rating",
+            "summary",
+            "description",
+            "json_col",
+            "no_of_rooms",
+            "opened_on",
+            "date_col",
+            "luxurious"
           ],
-          "compact" : [
-              "title", "website", ["product-add", "fk_category"],  "rating",
-              "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col", "luxurious",
-              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array",
-              "color_rgb_hex_column"
+          "compact": [
+            "title",
+            "website",
+            ["product-add", "fk_category"],
+            "rating",
+            "summary",
+            "description",
+            "json_col",
+            "no_of_rooms",
+            "opened_on",
+            "date_col",
+            "luxurious",
+            "text_array",
+            "boolean_array",
+            "int4_array",
+            "float4_array",
+            "date_array",
+            "timestamp_array",
+            "timestamptz_array",
+            "color_rgb_hex_column"
           ]
         },
-        "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
-          "*" : [
-              ["product-add", "fk_booking_accommodation"],
-              ["product-add", "fk_accommodation_image"]
+        "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+          "*": [
+            ["product-add", "fk_booking_accommodation"],
+            ["product-add", "fk_accommodation_image"]
           ]
         },
         "tag:isrd.isi.edu,2016:table-display": {
@@ -417,15 +463,12 @@
         {
           "comment": null,
           "annotations": {},
-          "unique_columns": [
-            "id",
-            "accommodation_id"
-          ]
+          "unique_columns": ["id", "accommodation_id"]
         }
       ],
       "foreign_keys": [
         {
-          "names" : [["product-add", "fk_booking_accommodation"]],
+          "names": [["product-add", "fk_booking_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -517,9 +560,7 @@
         {
           "comment": null,
           "annotations": {},
-          "unique_columns": [
-            "id"
-          ]
+          "unique_columns": ["id"]
         }
       ],
       "entityCount": 0,
@@ -558,8 +599,8 @@
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_fileid}}}/{{{_uri.filename_ext}}}/{{{_uri.md5_hex}}}",
-              "filename_column" : "filename",
+              "url_pattern": "/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_fileid}}}/{{{_uri.filename_ext}}}/{{{_uri.md5_hex}}}",
+              "filename_column": "filename",
               "byte_count_column": "bytes",
               "md5": "md5",
               "filename_ext_filter": [".txt", ".png"],
@@ -613,8 +654,8 @@
           }
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-            "*": ["fileid", "uri", "filename", "bytes"],
-            "entry": ["fileid", "uri", "timestamp_txt"]
+          "*": ["fileid", "uri", "filename", "bytes"],
+          "entry": ["fileid", "uri", "timestamp_txt"]
         }
       }
     },
@@ -622,7 +663,7 @@
       "kind": "table",
       "schema_name": "product-add",
       "table_name": "file_w_fk_in_url_pattern",
-      "keys": [{"unique_columns": ["id"]}],
+      "keys": [{ "unique_columns": ["id"] }],
       "foreign_keys": [
         {
           "names": [["product-add", "file_w_fk_in_url_pattern_fk1"]],
@@ -646,7 +687,7 @@
         {
           "name": "id",
           "nullok": false,
-          "type": {"typename": "text"}
+          "type": { "typename": "text" }
         },
         {
           "name": "asset_col",
@@ -656,8 +697,9 @@
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{$fkey_product-add_file_w_fk_in_url_pattern_fk1.values.term}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
-              "filename_column" : "asset_filename_col",
+              "url_pattern": "/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{$fkey_product-add_file_w_fk_in_url_pattern_fk1.values.term}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
+              "filename_column": "asset_filename_col",
+              "allow_empty_file": true,
               "display": {
                 "detailed": {
                   "file_preview": false
@@ -675,7 +717,7 @@
         },
         {
           "name": "fk_to_category",
-          "type": {"typename": "int4"}
+          "type": { "typename": "int4" }
         },
         {
           "name": "timestamp_txt",
@@ -686,13 +728,11 @@
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": [
-            "id", ["product-add", "file_w_fk_in_url_pattern_fk1"], "asset_col"
-          ],
+          "*": ["id", ["product-add", "file_w_fk_in_url_pattern_fk1"], "asset_col"],
           "entry": [
             "id",
             {
-              "source": [{"outbound": ["product-add", "file_w_fk_in_url_pattern_fk1"]}, "RID"],
+              "source": [{ "outbound": ["product-add", "file_w_fk_in_url_pattern_fk1"] }, "RID"],
               "comment": false,
               "markdown_name": "Category"
             },
@@ -709,16 +749,13 @@
         {
           "comment": "vocabulary",
           "annotations": {},
-          "unique_columns": [
-            "image_id",
-            "accommodation_id"
-          ]
+          "unique_columns": ["image_id", "accommodation_id"]
         }
       ],
       "entityCount": 0,
       "foreign_keys": [
         {
-          "names" : [["product-add", "fk_accommodation_image"]],
+          "names": [["product-add", "fk_accommodation_image"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -738,7 +775,7 @@
         },
         {
           "comment": null,
-          "names" : [["product-add-record", "fk_accommodation_image_2"]],
+          "names": [["product-add-record", "fk_accommodation_image_2"]],
           "foreign_key_columns": [
             {
               "table_name": "accommodation_image",
@@ -768,9 +805,7 @@
             "typename": "int4"
           },
           "annotations": {
-            "comment": [
-              "dataset"
-            ]
+            "comment": ["dataset"]
           }
         },
         {
@@ -782,9 +817,7 @@
             "typename": "int4"
           },
           "annotations": {
-            "comment": [
-              "image"
-            ],
+            "comment": ["image"],
             "description": {
               "display": "Image"
             }
@@ -792,14 +825,15 @@
         }
       ],
       "annotations": {
-        "comment": [
-          "image"
-        ],
+        "comment": ["image"],
         "description": {
           "display": "Accommodation Images"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": [["product-add", "fk_accommodation_image"], ["product-add", "fk_accommodation_image_2"]]
+          "*": [
+            ["product-add", "fk_accommodation_image"],
+            ["product-add", "fk_accommodation_image_2"]
+          ]
         }
       }
     },
@@ -810,16 +844,12 @@
         {
           "comment": "vocabulary",
           "annotations": {},
-          "unique_columns": [
-            "id"
-          ]
+          "unique_columns": ["id"]
         },
         {
           "comment": "vocabulary",
           "annotations": {},
-          "unique_columns": [
-            "term"
-          ]
+          "unique_columns": ["term"]
         }
       ],
       "entityCount": 0,
@@ -836,9 +866,7 @@
             "typename": "int4"
           },
           "annotations": {
-            "comment": [
-              "hidden"
-            ]
+            "comment": ["hidden"]
           }
         },
         {
@@ -866,7 +894,7 @@
         },
         "tag:isrd.isi.edu,2016:table-display": {
           "compact": {
-            "row_order": [{"column": "id"}]
+            "row_order": [{ "column": "id" }]
           }
         }
       }
@@ -875,24 +903,28 @@
       "kind": "table",
       "keys": [
         {
-          "unique_columns": [
-            "id"
+          "unique_columns": ["id"]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-add", "file_w_wait_for_in_url_pattern_1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_1",
+              "schema_name": "product-add",
+              "column_name": "fk_col"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_1_o1",
+              "schema_name": "product-add",
+              "column_name": "id"
+            }
           ]
         }
       ],
-      "foreign_keys": [{
-        "names": [["product-add", "file_w_wait_for_in_url_pattern_1_fk1"]],
-        "foreign_key_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_1",
-          "schema_name": "product-add",
-          "column_name": "fk_col"
-        }],
-        "referenced_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_1_o1",
-          "schema_name": "product-add",
-          "column_name": "id"
-        }]
-      }],
       "table_name": "file_w_wait_for_in_url_pattern_1",
       "schema_name": "product-add",
       "column_definitions": [
@@ -918,8 +950,8 @@
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-1-{{{path_to_o1_o1.values.name}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
-              "filename_column" : "asset_filename_col",
+              "url_pattern": "/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-1-{{{path_to_o1_o1.values.name}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
+              "filename_column": "asset_filename_col",
               "wait_for": ["path_to_o1_o1"],
               "display": {
                 "detailed": {
@@ -940,13 +972,12 @@
           "name": "asset_col_2",
           "nullok": true,
           "type": {
-
             "typename": "text"
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-2-{{{path_to_o1_o1.rowName}}}/{{{_id}}}/{{{_asset_col_2.md5_hex}}}",
-              "filename_column" : "asset_filename_col_2",
+              "url_pattern": "/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-2-{{{path_to_o1_o1.rowName}}}/{{{_id}}}/{{{_asset_col_2.md5_hex}}}",
+              "filename_column": "asset_filename_col_2",
               "wait_for": ["path_to_o1_o1"],
               "display": {
                 "detailed": {
@@ -973,7 +1004,10 @@
       "annotations": {
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": [
-            "id", ["product-add", "file_w_wait_for_in_url_pattern_1_fk1"], "asset_col", "asset_col_2"
+            "id",
+            ["product-add", "file_w_wait_for_in_url_pattern_1_fk1"],
+            "asset_col",
+            "asset_col_2"
           ],
           "entry": [
             "id",
@@ -989,8 +1023,8 @@
           "sources": {
             "path_to_o1_o1": {
               "source": [
-                {"outbound": ["product-add", "file_w_wait_for_in_url_pattern_1_fk1"]},
-                {"outbound": ["product-add", "file_w_wait_for_in_url_pattern_1_o1_fk1"]},
+                { "outbound": ["product-add", "file_w_wait_for_in_url_pattern_1_fk1"] },
+                { "outbound": ["product-add", "file_w_wait_for_in_url_pattern_1_o1_fk1"] },
                 "RID"
               ]
             }
@@ -1002,24 +1036,28 @@
       "kind": "table",
       "keys": [
         {
-          "unique_columns": [
-            "id"
+          "unique_columns": ["id"]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-add", "file_w_wait_for_in_url_pattern_1_o1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_1_o1",
+              "schema_name": "product-add",
+              "column_name": "file_w_wait_for_in_url_pattern_1_o1_fk_col"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_1_o1_o1",
+              "schema_name": "product-add",
+              "column_name": "id"
+            }
           ]
         }
       ],
-      "foreign_keys": [{
-        "names": [["product-add", "file_w_wait_for_in_url_pattern_1_o1_fk1"]],
-        "foreign_key_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_1_o1",
-          "schema_name": "product-add",
-          "column_name": "file_w_wait_for_in_url_pattern_1_o1_fk_col"
-        }],
-        "referenced_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_1_o1_o1",
-          "schema_name": "product-add",
-          "column_name": "id"
-        }]
-      }],
       "table_name": "file_w_wait_for_in_url_pattern_1_o1",
       "schema_name": "product-add",
       "column_definitions": [
@@ -1050,9 +1088,7 @@
       "kind": "table",
       "keys": [
         {
-          "unique_columns": [
-            "id"
-          ]
+          "unique_columns": ["id"]
         }
       ],
       "foreign_keys": [],
@@ -1079,38 +1115,38 @@
       "kind": "table",
       "keys": [
         {
-          "unique_columns": [
-            "id"
+          "unique_columns": ["id"]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-add", "file_w_wait_for_in_url_pattern_2_fk1"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2",
+              "schema_name": "product-add",
+              "column_name": "fk_col_1"
+            },
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2",
+              "schema_name": "product-add",
+              "column_name": "fk_col_2"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2_o1",
+              "schema_name": "product-add",
+              "column_name": "id1"
+            },
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2_o1",
+              "schema_name": "product-add",
+              "column_name": "id2"
+            }
           ]
         }
       ],
-      "foreign_keys": [{
-        "names": [["product-add", "file_w_wait_for_in_url_pattern_2_fk1"]],
-        "foreign_key_columns": [
-          {
-            "table_name": "file_w_wait_for_in_url_pattern_2",
-            "schema_name": "product-add",
-            "column_name": "fk_col_1"
-          },
-          {
-            "table_name": "file_w_wait_for_in_url_pattern_2",
-            "schema_name": "product-add",
-            "column_name": "fk_col_2"
-          }
-        ],
-        "referenced_columns": [
-          {
-            "table_name": "file_w_wait_for_in_url_pattern_2_o1",
-            "schema_name": "product-add",
-            "column_name": "id1"
-          },
-          {
-            "table_name": "file_w_wait_for_in_url_pattern_2_o1",
-            "schema_name": "product-add",
-            "column_name": "id2"
-          }
-        ]
-      }],
       "table_name": "file_w_wait_for_in_url_pattern_2",
       "schema_name": "product-add",
       "column_definitions": [
@@ -1143,8 +1179,8 @@
           },
           "annotations": {
             "tag:isrd.isi.edu,2017:asset": {
-              "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-3-{{{_path_to_o1_i1}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
-              "filename_column" : "asset_filename_col",
+              "url_pattern": "/hatrac/js/chaise/{{{_timestamp_txt}}}/asset-3-{{{_path_to_o1_i1}}}/{{{_id}}}/{{{_asset_col.md5_hex}}}",
+              "filename_column": "asset_filename_col",
               "wait_for": ["path_to_o1_i1"],
               "display": {
                 "detailed": {
@@ -1170,15 +1206,8 @@
       ],
       "annotations": {
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": [
-            "id", {"sourcekey": "path_to_o1"}, "asset_col"
-          ],
-          "entry": [
-            "id",
-            {"sourcekey": "path_to_o1"},
-            "asset_col",
-            "timestamp_txt"
-          ]
+          "*": ["id", { "sourcekey": "path_to_o1" }, "asset_col"],
+          "entry": ["id", { "sourcekey": "path_to_o1" }, "asset_col", "timestamp_txt"]
         },
         "tag:isrd.isi.edu,2019:source-definitions": {
           "columns": true,
@@ -1186,15 +1215,15 @@
           "sources": {
             "path_to_o1": {
               "source": [
-                {"outbound": ["product-add", "file_w_wait_for_in_url_pattern_2_fk1"]},
+                { "outbound": ["product-add", "file_w_wait_for_in_url_pattern_2_fk1"] },
                 "RID"
               ],
               "markdown_name": "Composite Foreign key"
             },
             "path_to_o1_i1": {
               "source": [
-                {"outbound": ["product-add", "file_w_wait_for_in_url_pattern_2_fk1"]},
-                {"inbound": ["product-add", "file_w_wait_for_in_url_pattern_2_o1_i1_fk1"]},
+                { "outbound": ["product-add", "file_w_wait_for_in_url_pattern_2_fk1"] },
+                { "inbound": ["product-add", "file_w_wait_for_in_url_pattern_2_o1_i1_fk1"] },
                 "name"
               ],
               "aggregate": "min"
@@ -1250,24 +1279,28 @@
       "kind": "table",
       "keys": [
         {
-          "unique_columns": [
-            "id"
+          "unique_columns": ["id"]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names": [["product-add", "file_w_wait_for_in_url_pattern_2_o1_i1_fk1"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2_o1_i1",
+              "schema_name": "product-add",
+              "column_name": "file_w_wait_for_in_url_pattern_2_o1_i1_fk_col"
+            }
+          ],
+          "referenced_columns": [
+            {
+              "table_name": "file_w_wait_for_in_url_pattern_2_o1",
+              "schema_name": "product-add",
+              "column_name": "id"
+            }
           ]
         }
       ],
-      "foreign_keys": [{
-        "names": [["product-add", "file_w_wait_for_in_url_pattern_2_o1_i1_fk1"]],
-        "foreign_key_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_2_o1_i1",
-          "schema_name": "product-add",
-          "column_name": "file_w_wait_for_in_url_pattern_2_o1_i1_fk_col"
-        }],
-        "referenced_columns": [{
-          "table_name": "file_w_wait_for_in_url_pattern_2_o1",
-          "schema_name": "product-add",
-          "column_name": "id"
-        }]
-      }],
       "table_name": "file_w_wait_for_in_url_pattern_2_o1_i1",
       "schema_name": "product-add",
       "column_definitions": [

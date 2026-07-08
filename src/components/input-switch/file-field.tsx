@@ -1,7 +1,9 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
+import InputField, {
+  InputFieldProps,
+} from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 // hooks
@@ -21,11 +23,10 @@ type FileFieldProps = InputFieldProps & {
   /**
    * The column model representing this field in the form.
    */
-  columnModel: RecordeditColumnModel,
+  columnModel: RecordeditColumnModel;
 };
 
 const FileField = (props: FileFieldProps): JSX.Element => {
-
   const { addAlert } = useAlert();
   const fileInputRef = useRef(null);
 
@@ -40,22 +41,41 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   const handleChange = (field: any, e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target;
     if (fileInput.files?.length && fileInput.files?.length > 0) {
-      let filename = '';
+      const filename = fileInput.files[0].name;
 
       if (fileExtensionFilter.length > 0) {
         let validFileExtension = false;
         // loop through the array, if any of the extensions in the array match the extension in the current filename, validates as true
-        for (let j = 0; j < fileExtensionFilter.length; j++) {
-          filename = fileInput.files[0].name;
-          if (filename.slice(filename.length - fileExtensionFilter[j].length, filename.length) === fileExtensionFilter[j]) {
+        for (let j = 0; j < fileExtensionFilter.length && !validFileExtension; j++) {
+          const ext = filename.slice(
+            filename.length - fileExtensionFilter[j].length,
+            filename.length
+          );
+          if (ext === fileExtensionFilter[j]) {
             validFileExtension = true;
           }
         }
 
         if (!validFileExtension) {
-          addAlert('Invalid file extension for "' + filename + '". Valid file extensions are ' + fileExtensions, ChaiseAlertType.ERROR);
+          addAlert(
+            `Invalid file extension for "${filename}". Valid file extensions are ${fileExtensions}`,
+            ChaiseAlertType.ERROR
+          );
+          // reset so re-selecting the same file still fires a change event
+          fileInput.value = '';
           return;
         }
+      }
+
+      // reject empty files unless the asset column explicitly allows them via allow_empty_file
+      if (props.columnModel.column.allowEmptyFile !== true && fileInput.files[0].size === 0) {
+        addAlert(
+          `The selected file "${filename}" is empty (0 bytes). Empty files are not allowed.`,
+          ChaiseAlertType.ERROR
+        );
+        // reset so re-selecting the same file still fires a change event
+        fileInput.value = '';
+        return;
       }
 
       // set the reference value object with selected file, url/filename
@@ -63,7 +83,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       const tempFileObject: FileObject = {
         url: '',
         filename: '',
-        filesize: 0
+        filesize: 0,
       };
       tempFileObject.file = fileInput.files[0];
       tempFileObject.url = tempFileObject.filename = tempFileObject.file.name;
@@ -75,8 +95,8 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   };
 
   /**
- * input-field checks for falsy values, but the check here is different
- */
+   * input-field checks for falsy values, but the check here is different
+   */
   const hasValue = (v: any) => {
     return v?.url && v.url !== '';
   };
@@ -88,7 +108,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     // does this make sense?
     // NOTE: .click() not available for type never so casting to HTMLInputElement
     (fileInputElement as HTMLInputElement).click();
-  }
+  };
 
   const renderFileTooltip = (fieldValue: any) => {
     return () => {
@@ -100,27 +120,31 @@ const FileField = (props: FileFieldProps): JSX.Element => {
         }
       }
       return null;
-    }
-  }
+    };
+  };
 
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
     return (
       <div
         className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
-        {... (!props.disableInput && { onClick: openFilePicker })}
+        {...(!props.disableInput && { onClick: openFilePicker })}
         ref={ellipsisRef}
       >
-        {isStringAndNotEmpty(fieldValue?.filename) ?
-          <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-          <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a file'}</span>
-        }
+        {isStringAndNotEmpty(fieldValue?.filename) ? (
+          <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} />
+        ) : (
+          <span className='chaise-input-placeholder'>
+            {props.placeholder ? props.placeholder : 'Select a file'}
+          </span>
+        )}
         <ClearInputBtn
           btnClassName={`${props.clearClasses} input-switch-clear`}
-          clickCallback={clearInput} show={showClear && !props.disableInput}
+          clickCallback={clearInput}
+          show={showClear && !props.disableInput}
         />
       </div>
-    )
-  }
+    );
+  };
 
   const renderImagePreview = (fieldValue: any) => {
     if (!props.columnModel.column.displayImagePreview) return null;
@@ -146,28 +170,29 @@ const FileField = (props: FileFieldProps): JSX.Element => {
       <div className={CLASS_NAMES.IMAGE_PREVIEW}>
         <img src={imageURL} />
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <InputField {...props} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
         <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
-          <EllipsisWrapper
-            elementRef={ellipsisRef}
-            tooltip={renderFileTooltip(field.value)}
-          >
+          <EllipsisWrapper elementRef={ellipsisRef} tooltip={renderFileTooltip(field.value)}>
             <div className='chaise-input-group'>
               {renderInput(field.value, showClear, clearInput)}
-              {!props.disableInput &&
+              {!props.disableInput && (
                 <div className='chaise-input-group-append' tabIndex={0}>
-                  <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
+                  <label
+                    className='chaise-btn chaise-btn-secondary'
+                    role='button'
+                    htmlFor={fileElementId}
+                  >
                     <span className='fa-solid fa-folder-open'></span>
                     <span className='button-text'>Select file</span>
                   </label>
                 </div>
-              }
+              )}
             </div>
           </EllipsisWrapper>
           {renderImagePreview(field.value)}
@@ -181,7 +206,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
             onChange={(e) => handleChange(field, e)}
             ref={fileInputRef}
           />
-        </div >
+        </div>
       )}
     </InputField>
   );
