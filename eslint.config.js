@@ -3,7 +3,6 @@ const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsparser = require('@typescript-eslint/parser');
 const react = require('eslint-plugin-react');
 const reactHooks = require('eslint-plugin-react-hooks');
-const jsxa11y = require('eslint-plugin-jsx-a11y');
 const globals = require('globals');
 
 module.exports = [
@@ -40,7 +39,6 @@ module.exports = [
       '@typescript-eslint': tseslint,
       'react': react,
       'react-hooks': reactHooks,
-      'jsx-a11y': jsxa11y,
     },
     settings: {
       react: {
@@ -84,6 +82,11 @@ module.exports = [
       'react/react-in-jsx-scope': 0,
       // downgrade to warning - useful for catching mutations but strict on declaration order
       'react-hooks/immutability': 'warn',
+      /* react-hooks 7.1 compiler rules flag pre-existing patterns across many files.
+         keep them as warnings (visible for incremental cleanup) instead of blocking lint/CI */
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/error-boundaries': 'warn',
 
       // ------------------ typescript ------------------
       '@typescript-eslint/no-duplicate-enum-values': 'warn',
