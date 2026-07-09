@@ -53,7 +53,7 @@ import {
 // utils
 import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { isPerformanceLoggingEnabled, logPerformanceMilestone, logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
+import { isPerformanceLoggingEnabled, logRecordsetDetail, logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type FacetingProps = {
   /**
@@ -346,7 +346,7 @@ const Faceting = ({
   useEffect(() => {
     if (!isPerformanceLoggingEnabled()) return;
     if (allFacetsRegistered && facetModels.every((fm) => !fm.isLoading)) {
-      logPerformanceMilestone('allFacetsLoaded');
+      logRecordsetDetail('allFacetsLoaded');
     }
   }, [facetModels, allFacetsRegistered]);
 
