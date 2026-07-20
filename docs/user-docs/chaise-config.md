@@ -72,6 +72,8 @@ If a property appears in the same configuration twice, the property defined late
 - [Other Configuration:](#other-configuration)
   - [footerMarkdown](#footermarkdown)
   - [assetDownloadPolicyURL](#assetdownloadpolicyurl)
+  - [debug](#debug)
+  - [performanceLogging](#performancelogging)
 
 ## General Configuration:
  ### ermrestLocation
@@ -819,4 +821,24 @@ Use this property to modify the display settings for the "share and cite" button
    - Sample syntax:
      ```
      assetDownloadPolicyURL: "<your url>"
+     ```
+
+### debug
+
+Setting this property to `true` will enable the debug mode for chaise. In debug mode, chaise will log more information to the console.
+   - Type: Boolean
+   - Default behavior: debug mode is off
+   - Sample syntax:
+     ```
+     debug: true
+     ```
+
+### performanceLogging
+
+Setting this property to `true` will enable the performance logging for chaise. In performance logging mode, chaise captures the performance of record, recordset, and recordedit apps as they load and stores it in `window.__chaisePerf`. Please refer to [the type definitions](https://github.com/informatics-isi-edu/chaise/blob/master/src/utils/window-ref.ts) for more information about this object, and how to use it. This property is used by [deriva-load-testing](https://github.com/informatics-isi-edu/deriva-load-testing) to measure the performance of the apps.
+   - Type: Boolean
+   - Default behavior: performance logging is off
+   - Sample syntax:
+     ```
+     performanceLogging: true
      ```
