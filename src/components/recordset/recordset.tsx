@@ -50,6 +50,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isPerformanceLoggingEnabled, logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 const Recordset = ({
   initialReference,
@@ -837,6 +838,9 @@ const RecordsetInner = ({
 
   const renderMainContainer = () => {
     const hasSpinner = errors.length === 0 && (isLoading || forceShowSpinner);
+    if (isPerformanceLoggingEnabled() && !hasSpinner && config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
+      logPerformanceMilestone('mainDataLoad');
+    }
     return (
       <div className='main-container dynamic-padding' ref={mainContainer}>
         {hasSpinner &&

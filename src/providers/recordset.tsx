@@ -35,6 +35,7 @@ import { RECORDSET_DEFAULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-ed
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 /**
@@ -854,6 +855,7 @@ export default function RecordsetProvider({
         if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
           err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
         }
+        logPerformanceError('main', err);
         defer.reject(err);
       });
 
@@ -1110,6 +1112,7 @@ export default function RecordsetProvider({
         return true;
       } else {
         setColumnModelValues(errorIndexes, { isLoading: false });
+        logPerformanceError('full', err);
       }
 
       throw err;

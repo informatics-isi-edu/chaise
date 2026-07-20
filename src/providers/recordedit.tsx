@@ -42,6 +42,7 @@ import {
 import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type ResultsetProps = {
   pageTitle: string,
@@ -643,6 +644,8 @@ export default function RecordeditProvider({
         };
 
         const submitErrorCB = (exception: any) => {
+          logPerformanceError('submit', exception);
+
           if (onSubmitError) {
             const res = onSubmitError(exception);
             if (!res) return;

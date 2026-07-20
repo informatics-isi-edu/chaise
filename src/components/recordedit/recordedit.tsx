@@ -53,6 +53,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isPerformanceLoggingEnabled, logPerformanceMilestone } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 const Recordedit = ({
   appMode,
@@ -366,6 +367,16 @@ const RecordeditInner = ({
       resizeSensors?.forEach((rs) => !!rs && rs.detach());
     }
   }, [formProviderInitialized]);
+
+  /**
+   * record the canonical load milestones for the deriva-load-testing tool:
+   * mainDataLoad once the form is rendered, fullPageLoad once it is fully interactive
+   */
+  useEffect(() => {
+    if (!isPerformanceLoggingEnabled() || config.displayMode !== RecordeditDisplayMode.FULLSCREEN) return;
+    if (formProviderInitialized) logPerformanceMilestone('mainDataLoad');
+    if (allFormDataLoaded) logPerformanceMilestone('fullPageLoad');
+  }, [formProviderInitialized, allFormDataLoaded]);
 
   /**
    * This useEffect triggers when addFormsEffect is set to true when "clone" is clicked

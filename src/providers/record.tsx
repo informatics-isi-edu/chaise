@@ -45,6 +45,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { attachGoogleDatasetJsonLd } from '@isrd-isi-edu/chaise/src/utils/google-dataset';
+import { logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 import {
   canCreateRelated,
   generateRelatedRecordModel,
@@ -701,6 +702,7 @@ export default function RecordProvider({
               exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
             }
           }
+          logPerformanceError('main', exception);
           reject(exception);
         });
 
@@ -1261,6 +1263,7 @@ export default function RecordProvider({
           resolve(true);
         } else {
           setColumnModelValues(errorIndexes, { isLoading: false });
+          logPerformanceError('full', err);
           reject(err);
         }
       });

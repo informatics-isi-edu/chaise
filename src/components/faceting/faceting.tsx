@@ -53,6 +53,7 @@ import {
 // utils
 import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { isPerformanceLoggingEnabled, logRecordsetDetail, logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type FacetingProps = {
   /**
@@ -342,6 +343,13 @@ const Faceting = ({
     setReadyToInitialize();
   }, [allFacetsRegistered]);
 
+  useEffect(() => {
+    if (!isPerformanceLoggingEnabled()) return;
+    if (allFacetsRegistered && facetModels.every((fm) => !fm.isLoading)) {
+      logRecordsetDetail('allFacetsLoaded');
+    }
+  }, [facetModels, allFacetsRegistered]);
+
   /**
    * This will ensure the registered functions in flow-control
    * are updated based on the latest facet changes
@@ -456,6 +464,7 @@ const Faceting = ({
             if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
               setFacetModelByIndex(i, { facetHasTimeoutError: true });
             } else {
+              logPerformanceError('full', err);
               dispatchError({ error: err });
             }
           });
@@ -484,6 +493,7 @@ const Faceting = ({
               if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
                 setFacetModelByIndex(i, { facetHasTimeoutError: true });
               } else {
+                logPerformanceError('full', err);
                 dispatchError({ error: err });
               }
 
