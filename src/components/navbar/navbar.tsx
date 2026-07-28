@@ -1,6 +1,14 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 
-import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState, type JSX, } from 'react';
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+  type JSX,
+} from 'react';
 
 // components
 import Nav from 'react-bootstrap/Nav';
@@ -10,8 +18,11 @@ import Spinner from 'react-bootstrap/Spinner';
 
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import DropdownSubmenu, { DropdownSubmenuDisplayTypes } from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
+import DropdownSubmenu, {
+  DropdownSubmenuDisplayTypes,
+} from '@isrd-isi-edu/chaise/src/components/dropdown-submenu';
 import SnapshotDropdown from '@isrd-isi-edu/chaise/src/components/navbar/snapshot-dropdown';
 
 // hooks
@@ -30,8 +41,15 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 // utilities
 import { splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
-  MenuOption, NavbarBanner, canEnable, canShow, createMenuList, menuItemClasses,
-  onDropdownToggle, onLinkClick, renderName
+  MenuOption,
+  NavbarBanner,
+  canEnable,
+  canShow,
+  createMenuList,
+  menuItemClasses,
+  onDropdownToggle,
+  onLinkClick,
+  renderName,
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -62,9 +80,9 @@ const ChaiseNavbar = (): JSX.Element => {
 
   const dropdownWrapper = useRef<any>(null);
 
-  const isValueDefined = (val: any): boolean => (val !== undefined && val !== null);
+  const isValueDefined = (val: any): boolean => val !== undefined && val !== null;
 
-  const isVersioned = (): boolean => (!!catalogId.split('@')[1]);
+  const isVersioned = (): boolean => !!catalogId.split('@')[1];
 
   useEffect(() => {
     const root = typeof cc.navbarMenu === 'object' ? { ...cc.navbarMenu } : {};
@@ -73,8 +91,11 @@ const ChaiseNavbar = (): JSX.Element => {
     const forceNewTab = settings.openLinksInTab === true;
 
     // use newTab property if defined and forceNewTab is false
-    const parentNewTab = (Object.prototype.hasOwnProperty.call(root, 'newTab') && !forceNewTab) ? root.newTab : true;
-    const parentAcls = Object.prototype.hasOwnProperty.call(root, 'acls') ? root.acls : { 'show': ['*'], 'enable': ['*'] };
+    const parentNewTab =
+      Object.prototype.hasOwnProperty.call(root, 'newTab') && !forceNewTab ? root.newTab : true;
+    const parentAcls = Object.prototype.hasOwnProperty.call(root, 'acls')
+      ? root.acls
+      : { show: ['*'], enable: ['*'] };
 
     let menuOptions: MenuOption[] = [];
     if (Array.isArray(root.children)) {
@@ -111,14 +132,14 @@ const ChaiseNavbar = (): JSX.Element => {
       }
 
       const banner: NavbarBanner = {
-        dismissible: (conf.dismissible === true),
+        dismissible: conf.dismissible === true,
         hide: false,
         html: html,
-        key: isStringAndNotEmpty(conf.key) ? conf.key : ''
+        key: isStringAndNotEmpty(conf.key) ? conf.key : '',
       };
 
       // add the banner to top or bottom based on given position
-      if ((conf.position !== 'bottom')) {
+      if (conf.position !== 'bottom') {
         tempTopBanners.push(banner);
       } else {
         tempBottomBanners.push(banner);
@@ -161,7 +182,7 @@ const ChaiseNavbar = (): JSX.Element => {
         ele.style.maxHeight = winHeight - y - padding + 'px';
       }
     }
-  }
+  };
 
   /**
    * Responsible for adjusting height of navbar based on available height
@@ -182,24 +203,30 @@ const ChaiseNavbar = (): JSX.Element => {
       const height = parent.getBoundingClientRect().height;
       menu.style.maxHeight = winHeight - y - height - padding + 'px';
     }
-  }
+  };
 
   // TODO: onToggle event type
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption, index: number) => {
+  const handleNavbarDropdownToggle = (
+    isOpen: boolean,
+    event: any,
+    item: MenuOption,
+    index: number
+  ) => {
     /**
      * Update the state to reflect most recently opened dropdown
      */
     setOpenedDropDownIndex(isOpen ? index : undefined);
 
     onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
-  }
+  };
 
-  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => onLinkClick(event, item);
+  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) =>
+    onLinkClick(event, item);
 
-  const handleOnBrandingClick = () => LogService.logClientAction({
-    action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
-  });
-
+  const handleOnBrandingClick = () =>
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', ''),
+    });
 
   const handleRidSearchEnter = (e: KeyboardEvent) => {
     if (e.key === 'Enter') handleRidSearch();
@@ -210,9 +237,9 @@ const ChaiseNavbar = (): JSX.Element => {
 
     const resolverId = cc.resolverImplicitCatalog;
     let splitId = {
-      catalog: '',
-      version: '',
-    },
+        catalog: '',
+        version: '',
+      },
       url = '/id/';
 
     setShowRidSpinner(true);
@@ -243,18 +270,21 @@ const ChaiseNavbar = (): JSX.Element => {
     headers[ERMrest.contextHeaderName] = logObj;
 
     // try to fetch the resolver link to see if the path resolves before sending the user
-    ConfigService.http.get(url, { headers: headers }).then(() => {
-      setShowRidSpinner(false);
-      windowRef.open(url, '_blank');
-    }).catch((err: any) => {
-      setShowRidSpinner(false);
-      // when using `/id/ridSearchTerm`, ermrest might throw 400 instead of 404
-      if (err.status === 404 || err.status === 400) {
-        err = new NoRecordRidError();
-      }
+    ConfigService.http
+      .get(url, { headers: headers })
+      .then(() => {
+        setShowRidSpinner(false);
+        windowRef.open(url, '_blank');
+      })
+      .catch((err: any) => {
+        setShowRidSpinner(false);
+        // when using `/id/ridSearchTerm`, ermrest might throw 400 instead of 404
+        if (err.status === 404 || err.status === 400) {
+          err = new NoRecordRidError();
+        }
 
-      dispatchError({ error: err, isDismissible: true });
-    });
+        dispatchError({ error: err, isDismissible: true });
+      });
   };
 
   const handleRidSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -264,28 +294,27 @@ const ChaiseNavbar = (): JSX.Element => {
     }));
   };
 
-  const renderBanners = (banners: NavbarBanner[]) => banners.map(
-    (banner: NavbarBanner, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>)
-  );
+  const renderBanners = (banners: NavbarBanner[]) =>
+    banners.map((banner: NavbarBanner, index: number) => (
+      <ChaiseBanner key={index} banner={banner}></ChaiseBanner>
+    ));
 
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
 
-    return (<img id='brand-image' alt='' src={cc.navbarBrandImage} />);
+    return <img id='brand-image' alt='' src={cc.navbarBrandImage} />;
   };
 
   const renderBrandingHTML = () => {
     if (!cc.navbarBrandText) return;
 
-    return (
-      <span id='brand-text'>{cc.navbarBrandText}</span>
-    );
+    return <span id='brand-text'>{cc.navbarBrandText}</span>;
   };
 
   const renderRidSearchIcon = () => {
     if (showRidSpinner) return <Spinner size='sm' animation='border' />;
 
-    return (<span className='chaise-btn-icon fa-solid fa-share' />);
+    return <span className='chaise-btn-icon fa-solid fa-share' />;
   };
 
   const renderRidSearch = () => {
@@ -303,11 +332,20 @@ const ChaiseNavbar = (): JSX.Element => {
             onChange={handleRidSearchChange}
             onKeyDown={handleRidSearchEnter}
           />
-          <div className='chaise-input-group-append'>
-            <button className='chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary' onClick={handleRidSearch} role='button'>
-              {renderRidSearchIcon()}
-            </button>
-          </div>
+          <ChaiseTooltip
+            placement='bottom'
+            tooltip='Navigate directly to a record with the specified Record ID (RID)'
+          >
+            <div className='chaise-input-group-append'>
+              <button
+                className='chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary'
+                onClick={handleRidSearch}
+                role='button'
+              >
+                {renderRidSearchIcon()}
+              </button>
+            </div>
+          </ChaiseTooltip>
         </div>
       </span>
     );
@@ -316,16 +354,23 @@ const ChaiseNavbar = (): JSX.Element => {
   const renderSnapshotControl = () => {
     if (cc.hideGoToSnapshot === true) return;
     // only available on record and recordset apps
-    if ([APP_NAMES.RECORD as string, APP_NAMES.RECORDSET as string].indexOf(ConfigService.appSettings.appName) === -1) return;
+    if (
+      [APP_NAMES.RECORD as string, APP_NAMES.RECORDSET as string].indexOf(
+        ConfigService.appSettings.appName
+      ) === -1
+    )
+      return;
 
     return (
       <span className='nav navbar-nav navbar-right chaise-snapshot-control'>
         <SnapshotDropdown />
       </span>
     );
-  }
+  };
 
-  const renderDropdownName = (item: MenuOption) => (<DisplayValue value={{ isHTML: true, value: renderName(item) }} />);
+  const renderDropdownName = (item: MenuOption) => (
+    <DisplayValue value={{ isHTML: true, value: renderName(item) }} />
+  );
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
@@ -343,7 +388,7 @@ const ChaiseNavbar = (): JSX.Element => {
             props={{
               href: item.url,
               target: item.newTab ? '_blank' : '_self',
-              onClick: (event: MouseEvent<HTMLElement>) => handleOnLinkClick(event, item)
+              onClick: (event: MouseEvent<HTMLElement>) => handleOnLinkClick(event, item),
             }}
           />
         );
@@ -362,26 +407,38 @@ const ChaiseNavbar = (): JSX.Element => {
             renderMenuOnMount
             className='chaise-nav-item chaise-dropdown'
           >
-            <DropdownSubmenu menu={item.children} parentDropdown={dropdownWrapper} alignRight displayType={DropdownSubmenuDisplayTypes.NAVBAR} />
+            <DropdownSubmenu
+              menu={item.children}
+              parentDropdown={dropdownWrapper}
+              alignRight
+              displayType={DropdownSubmenuDisplayTypes.NAVBAR}
+            />
           </NavDropdown>
         );
       }
 
       // NOTE: I don't think it should reach this case
-      return (<></>);
+      return <></>;
     });
   };
 
   return (
     <header id='navheader'>
-      {!ConfigService.appSettings.hideNavbar &&
+      {!ConfigService.appSettings.hideNavbar && (
         <>
           {renderBanners(topBanners)}
-          <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
-            <Navbar.Brand href={(cc.navbarBrand ? cc.navbarBrand : '/')} onClick={handleOnBrandingClick}>
-              {renderBrandImage()}
-              {' '}
-              {renderBrandingHTML()}
+          <Navbar
+            collapseOnSelect
+            expand='lg'
+            variant='dark'
+            className='navbar-inverse'
+            id='mainnav'
+          >
+            <Navbar.Brand
+              href={cc.navbarBrand ? cc.navbarBrand : '/'}
+              onClick={handleOnBrandingClick}
+            >
+              {renderBrandImage()} {renderBrandingHTML()}
             </Navbar.Brand>
             <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
             <Navbar.Collapse id='chaise-navbar-collapse-btn'>
@@ -396,7 +453,7 @@ const ChaiseNavbar = (): JSX.Element => {
           </Navbar>
           {renderBanners(bottomBanners)}
         </>
-      }
+      )}
     </header>
   );
 };
