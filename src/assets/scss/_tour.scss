@@ -1,0 +1,52 @@
+@use 'sass:map';
+@use 'variables';
+
+/*
+ * Guided tour styles.
+ *
+ * Deliberately minimal: react-joyride styles its own overlay, tooltip and buttons inline, and
+ * for the proof of concept we are leaving those at their defaults so we can judge whether they
+ * work in Chaise unmodified. Only the launcher button below is ours.
+ *
+ * If we do decide to restyle joyride, note that its styling comes through JS props
+ * (backgroundColor, primaryColor, textColor, ...) rather than CSS, so the values would need to
+ * reach tour.tsx rather than living here. A CSS custom property set from $color-map is the
+ * usual way to bridge that.
+ */
+
+.tour-launcher-btn {
+  // the pulse marks the button as unvisited; it stops once the user has taken the tour
+  &.tour-launcher-btn-pulse {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      // sits behind the button face so the label stays legible while the ring expands
+      z-index: -1;
+      background-color: map.get(variables.$color-map, 'primary');
+      animation: tour-launcher-pulse 2s ease-out infinite;
+    }
+  }
+}
+
+@keyframes tour-launcher-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+// respect a user's reduced-motion preference
+@media (prefers-reduced-motion: reduce) {
+  .tour-launcher-btn.tour-launcher-btn-pulse::after {
+    animation: none;
+  }
+}

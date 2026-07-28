@@ -58,6 +58,10 @@ $map: (
 
   'navbar': 1037,
 
+  // covers the navbar, but stays under modals so a dialog still wins
+  // NOTE: kept in sync with the zIndex option passed to Joyride in components/tour/tour.tsx
+  'tour-overlay': 1040,
+
   // more than nabvar
   'modal-backdrop': 1050,
   'modal': 1055,

@@ -53,6 +53,7 @@ import {
 // utils
 import { HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { facetTourTarget, tourTarget } from '@isrd-isi-edu/chaise/src/utils/tour-utils';
 import { isPerformanceLoggingEnabled, logRecordsetDetail, logPerformanceError } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
 type FacetingProps = {
@@ -1069,6 +1070,7 @@ const Faceting = ({
             className={`facet-item-container fc-${facetIndex}${facetModels[facetIndex].isOpen ? ' facet-item-open' : ''}`}
             ref={draggableArgs.innerRef}
             {...draggableArgs.draggableProps}
+            {...tourTarget(facetTourTarget(facetIndex))}
           >
             <ChaiseTooltip
               placement='right'

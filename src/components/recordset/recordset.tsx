@@ -11,6 +11,7 @@ import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
+import RecordsetTour from '@isrd-isi-edu/chaise/src/components/tour/recordset-tour';
 import SavedQueryDropdown from '@isrd-isi-edu/chaise/src/components/recordset/saved-query-dropdown';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
@@ -47,6 +48,7 @@ import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { TOUR_CHROME_TARGETS, tourTarget } from '@isrd-isi-edu/chaise/src/utils/tour-utils';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -820,7 +822,7 @@ const RecordsetInner = ({
       ref={leftRef}
     >
       {facetColumnsReady &&
-        <div className='side-panel-container'>
+        <div className='side-panel-container' {...tourTarget(TOUR_CHROME_TARGETS.FACET_PANEL)}>
           <Faceting
             facetPanelOpen={facetPanelOpen}
             registerRecordsetCallbacks={registerCallbacksFromFaceting}
@@ -898,6 +900,7 @@ const RecordsetInner = ({
               <>
                 <div className='recordset-title-container title-container'>
                   <div className='recordset-title-buttons title-buttons'>
+                    <RecordsetTour />
                     <Export
                       reference={reference}
                       disabled={isLoading || !page || page.length === 0}
@@ -932,7 +935,10 @@ const RecordsetInner = ({
                   <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
                 }
                 <div className='row'>
-                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-6'>
+                  <div
+                    className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-6'
+                    {...tourTarget(TOUR_CHROME_TARGETS.MAIN_SEARCH)}
+                  >
                     <SearchInput
                       initialSearchTerm={initialReference.location.searchTerm}
                       searchCallback={changeSearch}

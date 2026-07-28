@@ -25,6 +25,7 @@ import {
 import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { columnTourTarget, tourTarget } from '@isrd-isi-edu/chaise/src/utils/tour-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isPerformanceLoggingEnabled, logRecordsetDetail } from '@isrd-isi-edu/chaise/src/utils/performance-logging-utils';
 
@@ -523,6 +524,12 @@ const RecordsetTable = ({
           key={index}
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
+          /*
+           * the class above keys off the generated column hash, which is exactly what authors
+           * should not have to know. the positional key here is a stand-in until a column
+           * directive can carry an author-assigned `alias`.
+           */
+          {...tourTarget(col.column.alias || columnTourTarget(index))}
         >
           {hasTooltip ?
             // if comment, show tooltip
