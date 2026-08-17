@@ -1,3 +1,21 @@
-.container {
-  color: red
+.erd-container {
+  // react-flow needs a concrete height on its parent, so the whole chain from
+  // main-container down to the canvas must grow instead of sizing to content.
+  .main-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-body {
+    flex-grow: 1;
+    // let the canvas shrink below its content size instead of overflowing
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .erd-canvas {
+    flex-grow: 1;
+    min-height: 0;
+  }
 }
