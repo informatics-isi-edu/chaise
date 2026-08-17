@@ -73,7 +73,13 @@ module.exports = (env) => {
         isLib: true,
         // app-wrapper uses navbar
         externalFiles: [...recordsetExtFiles]
-      }
+      },
+      {
+        appName: 'erd',
+        appTitle: 'Model Diagram',
+        // app-wrapper uses navbar
+        externalFiles: [...recordsetExtFiles],
+      },
     ],
     mode,
     env,
