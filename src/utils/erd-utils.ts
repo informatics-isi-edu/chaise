@@ -129,6 +129,7 @@ export function elkToFlow(
     id: edge.id,
     source: edge.sources[0],
     target: edge.targets[0],
+    type: 'erdFloating',
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
 

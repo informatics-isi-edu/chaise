@@ -15,6 +15,7 @@ import {
 import ELK from 'elkjs/lib/elk.bundled.js';
 
 // components
+import ERDFloatingEdge from '@isrd-isi-edu/chaise/src/components/erd/floating-edge';
 import ERDTableNode from '@isrd-isi-edu/chaise/src/components/erd/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
@@ -43,6 +44,11 @@ const elk = new ELK();
  * render and make react-flow re-create all nodes.
  */
 const nodeTypes = { erdTable: ERDTableNode };
+
+/**
+ * same reasoning as nodeTypes: module level, not inline.
+ */
+const edgeTypes = { erdFloating: ERDFloatingEdge };
 
 const DETAIL_LEVELS: ERDDetailLevel[] = ['names', 'keys', 'full'];
 
@@ -165,6 +171,7 @@ const ERDInner = (): JSX.Element => {
                   nodes={nodes}
                   edges={edges}
                   nodeTypes={nodeTypes}
+                  edgeTypes={edgeTypes}
                   onNodesChange={onNodesChange}
                   onEdgesChange={onEdgesChange}
                   fitView
