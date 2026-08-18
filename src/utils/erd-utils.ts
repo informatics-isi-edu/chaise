@@ -2,17 +2,76 @@ import { MarkerType, type Edge, type Node } from '@xyflow/react';
 import type { ElkNode } from 'elkjs/lib/elk.bundled.js';
 
 // models
-import { ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
+import { ERDColumn, ERDGraph, ERDTable } from '@isrd-isi-edu/chaise/src/models/erd';
+
+// providers
+import { ERDDetailLevel, ERDLayoutAlgorithm } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 /**
- * estimated node box size, used by elk for layout. react-flow will render the
- * node at its natural size, so keep the estimate close to the rendered size
- * (default react-flow node: 10px padding, 12px font).
+ * the react-flow node shape used by the erd app: an `erdTable` node carrying
+ * its ERDTable in data. positions and sizes come from elk.
  */
-const NODE_HEIGHT = 40;
-const MIN_NODE_WIDTH = 60;
-function estimateNodeWidth(label: string): number {
-  return Math.max(MIN_NODE_WIDTH, Math.round(label.length * 7.5) + 24);
+export type ERDTableNodeModel = Node<{ table: ERDTable }, 'erdTable'>;
+
+/**
+ * box measurements used for both the elk size estimates and the rendered node
+ * (see _erd.scss). the two must stay in sync or the layout won't match what is
+ * drawn.
+ */
+const HEADER_HEIGHT = 28;
+const ROW_HEIGHT = 24;
+const BORDER_HEIGHT = 2;
+const MIN_NODE_WIDTH = 100;
+const MAX_NODE_WIDTH = 320;
+/**
+ * rough text width at the node font sizes. an estimate is enough: rows ellipsis
+ * on overflow.
+ */
+const CHAR_WIDTH = 7;
+/**
+ * horizontal padding plus the gap between the name and type in a row
+ */
+const ROW_EXTRA_WIDTH = 45;
+
+/**
+ * the columns drawn (and measured) for a table at the given detail level.
+ * single source of truth shared by estimateNodeSize and the table-node
+ * component.
+ */
+export function visibleColumns(table: ERDTable, detail: ERDDetailLevel): ERDColumn[] {
+  if (detail === 'names') return [];
+  return table.columns.filter((col) => {
+    if (col.isSystemColumn) return false;
+    return detail === 'full' || col.isPrimaryKey || col.isForeignKey;
+  });
+}
+
+function estimateNodeSize(table: ERDTable, detail: ERDDetailLevel): { width: number; height: number } {
+  const columns = visibleColumns(table, detail);
+
+  let width = table.name.length * CHAR_WIDTH + 20;
+  columns.forEach((col) => {
+    width = Math.max(width, (col.name.length + col.type.length) * CHAR_WIDTH + ROW_EXTRA_WIDTH);
+  });
+
+  return {
+    width: Math.min(MAX_NODE_WIDTH, Math.max(MIN_NODE_WIDTH, Math.round(width))),
+    height: HEADER_HEIGHT + columns.length * ROW_HEIGHT + BORDER_HEIGHT,
+  };
+}
+
+/**
+ * options that only mean something to the 'layered' algorithm ('elk.layered.*'
+ * keys, and direction). elk silently ignores options an algorithm doesn't
+ * recognize rather than erroring, so leaving them in for e.g. 'force' would
+ * be dead config, not a bug that shows up.
+ */
+function layeredOnlyOptions(layout: ERDLayoutAlgorithm): Record<string, string> {
+  if (layout !== 'layered') return {};
+  return {
+    'elk.direction': 'RIGHT',
+    'elk.layered.spacing.nodeNodeBetweenLayers': '60',
+  };
 }
 
 /**
@@ -20,7 +79,7 @@ function estimateNodeWidth(label: string): number {
  * connections, so edges are deduped per table pair (multiple fks between the
  * same two tables would just stack identical lines).
  */
-export function graphToElk(graph: ERDGraph): ElkNode {
+export function graphToElk(graph: ERDGraph, detail: ERDDetailLevel, layout: ERDLayoutAlgorithm): ElkNode {
   const seen = new Set<string>();
   const elkEdges: ElkNode['edges'] = [];
   graph.edges.forEach((edge) => {
@@ -33,15 +92,13 @@ export function graphToElk(graph: ERDGraph): ElkNode {
   return {
     id: 'root',
     layoutOptions: {
-      'elk.algorithm': 'layered',
-      'elk.direction': 'RIGHT',
+      'elk.algorithm': layout,
       'elk.spacing.nodeNode': '30',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '60',
+      ...layeredOnlyOptions(layout),
     },
     children: Object.values(graph.tables).map((table) => ({
       id: `${table.schema}:${table.name}`,
-      width: estimateNodeWidth(table.name),
-      height: NODE_HEIGHT,
+      ...estimateNodeSize(table, detail),
     })),
     edges: elkEdges,
   };
@@ -50,12 +107,20 @@ export function graphToElk(graph: ERDGraph): ElkNode {
 /**
  * combine the graph with the elk layout result into react-flow nodes/edges.
  * elk reports top-left coordinates, which is exactly what react-flow expects.
+ * the estimated sizes are passed along as explicit node dimensions so the
+ * rendered boxes match the layout.
  */
-export function elkToFlow(graph: ERDGraph, laidOut: ElkNode): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = (laidOut.children || []).map((child) => ({
+export function elkToFlow(
+  graph: ERDGraph,
+  laidOut: ElkNode
+): { nodes: ERDTableNodeModel[]; edges: Edge[] } {
+  const nodes: ERDTableNodeModel[] = (laidOut.children || []).map((child) => ({
     id: child.id,
+    type: 'erdTable',
     position: { x: child.x || 0, y: child.y || 0 },
-    data: { label: graph.tables[child.id]?.name || child.id },
+    width: child.width,
+    height: child.height,
+    data: { table: graph.tables[child.id] },
     // rendering-only diagram: no connect handles on either side
     connectable: false,
   }));

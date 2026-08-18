@@ -18,4 +18,78 @@
     flex-grow: 1;
     min-height: 0;
   }
+
+  // sizes below must stay in sync with the estimates in utils/erd-utils.ts
+  // (HEADER_HEIGHT, ROW_HEIGHT, font sizes drive the width estimate)
+  .erd-table-node {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    overflow: hidden;
+
+    .erd-table-node-header {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      background: #f0f0f0;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .erd-table-node-row {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px;
+      border-top: 1px solid #e5e5e5;
+      white-space: nowrap;
+
+      .erd-column-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .erd-column-pk {
+        font-weight: 600;
+      }
+
+      .erd-column-fk-badge {
+        margin-left: 5px;
+        font-size: 9px;
+        font-weight: 600;
+        color: #b04a2a;
+      }
+
+      .erd-column-type {
+        color: #888;
+        font-size: 11px;
+      }
+    }
+
+    // edges attach to the node box; the handles are an implementation detail
+    .react-flow__handle {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  .erd-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    .chaise-btn.active {
+      background-color: #e7e7e7;
+      font-weight: 600;
+    }
+  }
 }

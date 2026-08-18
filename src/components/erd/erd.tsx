@@ -1,43 +1,91 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_erd.scss';
 import '@xyflow/react/dist/style.css';
 
-import { Background, Controls, ReactFlow, useEdgesState, useNodesState, type Edge, type Node } from '@xyflow/react';
+import {
+  Background,
+  Controls,
+  Panel,
+  ReactFlow,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+  type Edge,
+} from '@xyflow/react';
 import ELK from 'elkjs/lib/elk.bundled.js';
 
 // components
+import ERDTableNode from '@isrd-isi-edu/chaise/src/components/erd/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { catalogToGraph } from '@isrd-isi-edu/chaise/src/models/erd';
+import { catalogToGraph, type ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
+
+// providers
+import { useErdStore, type ERDDetailLevel, type ERDLayoutAlgorithm } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
-import { elkToFlow, graphToElk } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const elk = new ELK();
 
-const ERD = (): JSX.Element => {
+/**
+ * registered at module level: an inline object would change identity on every
+ * render and make react-flow re-create all nodes.
+ */
+const nodeTypes = { erdTable: ERDTableNode };
+
+const DETAIL_LEVELS: ERDDetailLevel[] = ['names', 'keys', 'full'];
+
+const LAYOUT_ALGORITHMS: ERDLayoutAlgorithm[] = ['layered', 'stress', 'force', 'mrtree', 'radial', 'disco'];
+
+const ERDInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
+  const { fitView } = useReactFlow();
+
+  const detail = useErdStore((state) => state.detail);
+  const setDetail = useErdStore((state) => state.setDetail);
+
+  const layout = useErdStore((state) => state.layout);
+  const setLayout = useErdStore((state) => state.setLayout);
 
   /**
    * react-flow with a `nodes` prop is a controlled component: interactions
    * (dragging included) only apply if the change events are folded back into
    * state, which is what these hooks do.
    */
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<ERDTableNodeModel>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [layoutDone, setLayoutDone] = useState(false);
 
+  // the introspected graph, kept so detail changes don't refetch the catalog
+  const graphRef = useRef<ERDGraph | null>(null);
+
   // guard against strict mode calling the effect twice in dev mode
   const setupStarted = useRef<boolean>(false);
+
+  const relayout = useCallback(
+    (graph: ERDGraph, level: ERDDetailLevel, algorithm: ERDLayoutAlgorithm) => {
+      return elk.layout(graphToElk(graph, level, algorithm)).then((laidOut) => {
+        const flow = elkToFlow(graph, laidOut);
+        setNodes(flow.nodes);
+        setEdges(flow.edges);
+        setLayoutDone(true);
+        // wait for react-flow to pick up the new nodes before framing them
+        window.requestAnimationFrame(() => fitView());
+      });
+    },
+    [fitView, setNodes, setEdges]
+  );
 
   useEffect(() => {
     if (setupStarted.current) return;
@@ -65,17 +113,23 @@ const ERD = (): JSX.Element => {
      */
     catalog.server.catalogs
       .get(catalog.id)
-      .then((introspected: typeof catalog) => {
-        const graph = catalogToGraph(introspected);
-        return elk.layout(graphToElk(graph)).then((laidOut) => {
-          const flow = elkToFlow(graph, laidOut);
-          setNodes(flow.nodes);
-          setEdges(flow.edges);
-          setLayoutDone(true);
-        });
+      .then((cat: typeof catalog) => {
+        graphRef.current = catalogToGraph(cat);
+        const initial = useErdStore.getState();
+        return relayout(graphRef.current, initial.detail, initial.layout);
       })
       .catch((error: any) => dispatchError({ error }));
   }, []);
+
+  /**
+   * node sizes change with the detail level, and the algorithm changes the
+   * whole arrangement, so either one re-runs the layout. manual
+   * repositioning is lost by design.
+   */
+  useEffect(() => {
+    if (!graphRef.current || !layoutDone) return;
+    relayout(graphRef.current, detail, layout).catch((error: any) => dispatchError({ error }));
+  }, [detail, layout]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the
@@ -110,14 +164,42 @@ const ERD = (): JSX.Element => {
                 <ReactFlow
                   nodes={nodes}
                   edges={edges}
+                  nodeTypes={nodeTypes}
                   onNodesChange={onNodesChange}
                   onEdgesChange={onEdgesChange}
                   fitView
                   nodesConnectable={false}
                   edgesReconnectable={false}
+                  onlyRenderVisibleElements={true}
                 >
                   <Background />
                   <Controls showInteractive={false} />
+                  <Panel position='top-right' className='erd-toolbar'>
+                    <div className='chaise-btn-group'>
+                      {DETAIL_LEVELS.map((level) => (
+                        <button
+                          key={level}
+                          type='button'
+                          className={`chaise-btn chaise-btn-secondary${detail === level ? ' active' : ''}`}
+                          onClick={() => setDetail(level)}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                    <div className='chaise-btn-group'>
+                      {LAYOUT_ALGORITHMS.map((algorithm) => (
+                        <button
+                          key={algorithm}
+                          type='button'
+                          className={`chaise-btn chaise-btn-secondary${layout === algorithm ? ' active' : ''}`}
+                          onClick={() => setLayout(algorithm)}
+                        >
+                          {algorithm}
+                        </button>
+                      ))}
+                    </div>
+                  </Panel>
                 </ReactFlow>
               )}
             </div>
@@ -128,5 +210,15 @@ const ERD = (): JSX.Element => {
     </div>
   );
 };
+
+/**
+ * useReactFlow (used for fitView after re-layout) needs a ReactFlowProvider
+ * above the component that calls it.
+ */
+const ERD = (): JSX.Element => (
+  <ReactFlowProvider>
+    <ERDInner />
+  </ReactFlowProvider>
+);
 
 export default ERD;

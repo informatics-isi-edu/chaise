@@ -65,7 +65,7 @@ function isTableIncluded(table: Table): boolean {
   return !table.ignore && table.kind === 'table' && EXCLUDED_SCHEMAS.indexOf(table.schema.name) === -1;
 }
 
-function erdTableFromErmrest(table: Table): ERDTable {
+function createERDTable(table: Table): ERDTable {
   // column membership in any foreign key of this table
   const fkColumns = new Set<string>();
   table.foreignKeys.all().forEach((fk) => {
@@ -88,7 +88,7 @@ function erdTableFromErmrest(table: Table): ERDTable {
   };
 }
 
-function erdEdgesFromErmrest(table: Table): Array<ERDEdge> {
+function getERDEdgesForTable(table: Table): Array<ERDEdge> {
   const edges: Array<ERDEdge> = [];
   table.foreignKeys.all().forEach((fk) => {
     // skip edges that point outside the graph (excluded schemas, views)
@@ -116,8 +116,8 @@ export function catalogToGraph(catalog: Catalog): ERDGraph {
     if (schema.ignore || EXCLUDED_SCHEMAS.indexOf(schema.name) !== -1) return;
     schema.tables.all().forEach((table) => {
       if (!isTableIncluded(table)) return;
-      tables[tableKey(schema.name, table.name)] = erdTableFromErmrest(table);
-      edges.push(...erdEdgesFromErmrest(table));
+      tables[tableKey(schema.name, table.name)] = createERDTable(table);
+      edges.push(...getERDEdgesForTable(table));
     });
   });
 
