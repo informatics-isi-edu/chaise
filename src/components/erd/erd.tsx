@@ -34,6 +34,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { exportErdToPdf } from '@isrd-isi-edu/chaise/src/utils/erd-pdf-export';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const elk = new ELK();
@@ -86,6 +87,10 @@ const ERDInner = (): JSX.Element => {
     },
     [fitView, setNodes, setEdges]
   );
+
+  const handleExportPdf = useCallback(() => {
+    exportErdToPdf(nodes, edges, detail).catch((error: any) => dispatchError({ error }));
+  }, [nodes, edges, detail, dispatchError]);
 
   useEffect(() => {
     if (setupStarted.current) return;
@@ -198,6 +203,11 @@ const ERDInner = (): JSX.Element => {
                           {algorithm}
                         </button>
                       ))}
+                    </div>
+                    <div className='chaise-btn-group'>
+                      <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
+                        Export PDF
+                      </button>
                     </div>
                   </Panel>
                 </ReactFlow>
