@@ -18,8 +18,12 @@ export type ERDTableNodeModel = Node<{ table: ERDTable }, 'erdTable'>;
  * (see _erd.scss). the two must stay in sync or the layout won't match what is
  * drawn.
  */
-const HEADER_HEIGHT = 28;
-const ROW_HEIGHT = 24;
+/**
+ * exported so erd-pdf-export.ts can lay out rows against the same metrics
+ * used here, instead of duplicating them.
+ */
+export const HEADER_HEIGHT = 28;
+export const ROW_HEIGHT = 24;
 const BORDER_HEIGHT = 2;
 const MIN_NODE_WIDTH = 100;
 const MAX_NODE_WIDTH = 320;
