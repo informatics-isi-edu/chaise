@@ -1,43 +1,12 @@
-import {
-  BaseEdge,
-  getStraightPath,
-  useInternalNode,
-  type EdgeProps,
-  type InternalNode,
-  type Node,
-} from '@xyflow/react';
+import { BaseEdge, getStraightPath, useInternalNode, type EdgeProps, type InternalNode, type Node } from '@xyflow/react';
 import { type JSX } from 'react';
 
-function nodeCenter(node: InternalNode<Node>) {
+// utilities
+import { rectCenter, rectIntersection, type ERDRect } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+
+function nodeRect(node: InternalNode<Node>): ERDRect {
   const { x, y } = node.internals.positionAbsolute;
-  return {
-    x: x + (node.measured.width ?? 0) / 2,
-    y: y + (node.measured.height ?? 0) / 2,
-  };
-}
-
-/**
- * point where the straight line from `node`'s center toward `otherCenter`
- * crosses `node`'s own rectangle boundary.
- */
-function getRectIntersection(node: InternalNode<Node>, otherCenter: { x: number; y: number }) {
-  const { x, y } = node.internals.positionAbsolute;
-  const width = node.measured.width ?? 0;
-  const height = node.measured.height ?? 0;
-  const center = { x: x + width / 2, y: y + height / 2 };
-
-  const dx = otherCenter.x - center.x;
-  const dy = otherCenter.y - center.y;
-
-  // how far (as a fraction of the dx/dy vector) we can travel before hitting
-  // each pair of sides; the smaller of the two is the side actually hit.
-  // clamped to 1 so overlapping/adjacent nodes don't overshoot past the
-  // other node's center.
-  const scaleX = dx !== 0 ? width / 2 / Math.abs(dx) : Infinity;
-  const scaleY = dy !== 0 ? height / 2 / Math.abs(dy) : Infinity;
-  const scale = Math.min(scaleX, scaleY, 1);
-
-  return { x: center.x + dx * scale, y: center.y + dy * scale };
+  return { x, y, width: node.measured.width ?? 0, height: node.measured.height ?? 0 };
 }
 
 /**
@@ -55,8 +24,10 @@ const ERDFloatingEdge = ({ id, source, target, markerEnd }: EdgeProps): JSX.Elem
 
   if (!sourceNode || !targetNode) return null;
 
-  const sourcePoint = getRectIntersection(sourceNode, nodeCenter(targetNode));
-  const targetPoint = getRectIntersection(targetNode, nodeCenter(sourceNode));
+  const sourceRect = nodeRect(sourceNode);
+  const targetRect = nodeRect(targetNode);
+  const sourcePoint = rectIntersection(sourceRect, rectCenter(targetRect));
+  const targetPoint = rectIntersection(targetRect, rectCenter(sourceRect));
 
   const [path] = getStraightPath({
     sourceX: sourcePoint.x,

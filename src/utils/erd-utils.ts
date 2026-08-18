@@ -50,6 +50,44 @@ export function visibleColumns(table: ERDTable, detail: ERDDetailLevel): ERDColu
   });
 }
 
+export interface ERDRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * center point of a node's box. shared by the on screen floating edge
+ * (floating-edge.tsx) and the PDF export (erd-pdf-export.ts), each of
+ * which reads a node's live position/size from a different shape (react-flow
+ * internal node vs. plain ERDTableNodeModel) and reduces it to this rect.
+ */
+export function rectCenter(rect: ERDRect): { x: number; y: number } {
+  return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+}
+
+/**
+ * point where the straight line from `rect`'s center toward `otherCenter`
+ * crosses `rect`'s own boundary. used to anchor an edge to whichever side of
+ * a node currently faces the other node, instead of a fixed handle side.
+ */
+export function rectIntersection(rect: ERDRect, otherCenter: { x: number; y: number }): { x: number; y: number } {
+  const center = rectCenter(rect);
+  const dx = otherCenter.x - center.x;
+  const dy = otherCenter.y - center.y;
+
+  // how far (as a fraction of the dx/dy vector) we can travel before hitting
+  // each pair of sides; the smaller of the two is the side actually hit.
+  // clamped to 1 so overlapping/adjacent nodes don't overshoot past the
+  // other node's center.
+  const scaleX = dx !== 0 ? rect.width / 2 / Math.abs(dx) : Infinity;
+  const scaleY = dy !== 0 ? rect.height / 2 / Math.abs(dy) : Infinity;
+  const scale = Math.min(scaleX, scaleY, 1);
+
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
 function estimateNodeSize(table: ERDTable, detail: ERDDetailLevel): { width: number; height: number } {
   const columns = visibleColumns(table, detail);
 

@@ -1,4 +1,4 @@
-import { getBezierPath, getNodesBounds, Position, type Edge } from '@xyflow/react';
+import { getNodesBounds, getStraightPath, type Edge } from '@xyflow/react';
 import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
 
@@ -6,7 +6,14 @@ import 'svg2pdf.js';
 import type { ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // utilities
-import { HEADER_HEIGHT, ROW_HEIGHT, visibleColumns, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import {
+  HEADER_HEIGHT,
+  rectCenter,
+  rectIntersection,
+  ROW_HEIGHT,
+  visibleColumns,
+  type ERDTableNodeModel,
+} from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 
 /**
  * colors mirror `_erd.scss`. kept separate since this file builds SVG markup
@@ -87,22 +94,26 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel): string {
 }
 
 /**
- * react-flow computes the live bezier path from each node's Left/Right handle
- * position at render time; this reproduces the same geometry from the node's
- * position/width/height so the exported edge matches what's on screen.
+ * same anchor logic as the on screen edge (floating-edge.tsx): each edge
+ * connects whichever point on each node's boundary currently faces the
+ * other node, not a fixed handle side, so a dragged/rerouted node exports
+ * exactly as it renders on screen.
  */
 function edgeToSvg(edge: Edge, nodesById: Map<string, ERDTableNodeModel>): string {
   const source = nodesById.get(edge.source);
   const target = nodesById.get(edge.target);
   if (!source || !target) return '';
 
-  const [path] = getBezierPath({
-    sourceX: source.position.x + (source.width ?? 0),
-    sourceY: source.position.y + (source.height ?? 0) / 2,
-    sourcePosition: Position.Right,
-    targetX: target.position.x,
-    targetY: target.position.y + (target.height ?? 0) / 2,
-    targetPosition: Position.Left,
+  const sourceRect = { ...source.position, width: source.width ?? 0, height: source.height ?? 0 };
+  const targetRect = { ...target.position, width: target.width ?? 0, height: target.height ?? 0 };
+  const sourcePoint = rectIntersection(sourceRect, rectCenter(targetRect));
+  const targetPoint = rectIntersection(targetRect, rectCenter(sourceRect));
+
+  const [path] = getStraightPath({
+    sourceX: sourcePoint.x,
+    sourceY: sourcePoint.y,
+    targetX: targetPoint.x,
+    targetY: targetPoint.y,
   });
 
   return `<path d="${path}" fill="none" stroke="${EDGE_COLOR}" stroke-width="1" marker-end="url(#erd-export-arrow)" />`;

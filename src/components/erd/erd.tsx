@@ -13,6 +13,7 @@ import {
   type Edge,
 } from '@xyflow/react';
 import ELK from 'elkjs/lib/elk.bundled.js';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 // components
 import ERDFloatingEdge from '@isrd-isi-edu/chaise/src/components/erd/floating-edge';
@@ -53,7 +54,20 @@ const edgeTypes = { erdFloating: ERDFloatingEdge };
 
 const DETAIL_LEVELS: ERDDetailLevel[] = ['names', 'keys', 'full'];
 
-const LAYOUT_ALGORITHMS: ERDLayoutAlgorithm[] = ['layered', 'stress', 'force', 'mrtree', 'radial', 'disco'];
+/**
+ * display names as ELK itself titles them (minus the 'ELK ' prefix), see
+ * https://eclipse.dev/elk/reference/algorithms.html
+ */
+const LAYOUT_ALGORITHM_LABELS: Record<ERDLayoutAlgorithm, string> = {
+  layered: 'Layered',
+  stress: 'Stress',
+  force: 'Force',
+  mrtree: 'Mr. Tree',
+  radial: 'Radial',
+  rectpacking: 'Rectangle Packing',
+  sporeOverlap: 'SPOrE Overlap Removal',
+  sporeCompaction: 'SPOrE Compaction',
+};
 
 const ERDInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
@@ -199,18 +213,18 @@ const ERDInner = (): JSX.Element => {
                         </button>
                       ))}
                     </div>
-                    <div className='chaise-btn-group'>
-                      {LAYOUT_ALGORITHMS.map((algorithm) => (
-                        <button
-                          key={algorithm}
-                          type='button'
-                          className={`chaise-btn chaise-btn-secondary${layout === algorithm ? ' active' : ''}`}
-                          onClick={() => setLayout(algorithm)}
-                        >
-                          {algorithm}
-                        </button>
-                      ))}
-                    </div>
+                    <Dropdown className='chaise-dropdown' onSelect={(algorithm) => setLayout(algorithm as ERDLayoutAlgorithm)}>
+                      <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                        {LAYOUT_ALGORITHM_LABELS[layout]}
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {Object.entries(LAYOUT_ALGORITHM_LABELS).map(([algorithm, label]) => (
+                          <Dropdown.Item key={algorithm} eventKey={algorithm} active={layout === algorithm}>
+                            {label}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
                     <div className='chaise-btn-group'>
                       <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
                         Export PDF

@@ -10,11 +10,20 @@ import { create } from 'zustand';
 export type ERDDetailLevel = 'names' | 'keys' | 'full';
 
 /**
- * elk layout algorithm ids. 'layered' suits mostly-acyclic fk graphs (the
- * default); the others are organic/force-directed alternatives worth
- * offering once there's a UI to pick them.
+ * elk layout algorithm ids, verified against what this installed elkjs build
+ * actually registers (elk.knownLayoutAlgorithms()), not just the readme,
+ * which lists a 'disco' algorithm this build doesn't have. 'layered' suits
+ * mostly-acyclic fk graphs and is the default; the rest are here to compare.
  */
-export type ERDLayoutAlgorithm = 'layered' | 'stress' | 'force' | 'mrtree' | 'radial' | 'disco';
+export type ERDLayoutAlgorithm =
+  | 'layered'
+  | 'stress'
+  | 'force'
+  | 'mrtree'
+  | 'radial'
+  | 'rectpacking'
+  | 'sporeOverlap'
+  | 'sporeCompaction';
 
 interface ERDStore {
   detail: ERDDetailLevel;
