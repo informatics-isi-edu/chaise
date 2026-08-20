@@ -17,6 +17,18 @@
   .erd-canvas {
     flex-grow: 1;
     min-height: 0;
+    // positioning context for erd-loading-overlay, and for ChaiseSpinner's
+    // own absolute positioning to scope to this area instead of the viewport
+    position: relative;
+  }
+
+  // covers the diagram + toolbar during a relayout so nothing needs its own
+  // disabled state; the diagram stays visible (dimmed) underneath.
+  .erd-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.6);
   }
 
   // sizes below must stay in sync with the estimates in utils/erd-utils.ts
@@ -35,6 +47,7 @@
       height: 28px;
       display: flex;
       align-items: center;
+      justify-content: center;
       padding: 0 10px;
       background: #f0f0f0;
       font-weight: 600;
@@ -91,5 +104,26 @@
       background-color: #e7e7e7;
       font-weight: 600;
     }
+  }
+
+  // click-to-focus a table: same ring style/color as .row-focus elsewhere in
+  // the app (record.tsx, chaise-accordions), #4674a7 is variables.$color-map's
+  // 'primary'.
+  .react-flow__node.erd-node-focused {
+    box-shadow: inset 0 0 0 2px #4674a7;
+  }
+
+  .react-flow__node.erd-node-dimmed {
+    opacity: 0.35;
+  }
+
+  .react-flow__edge.erd-edge-highlighted .react-flow__edge-path {
+    stroke: #4674a7;
+    stroke-width: 2.5px;
+  }
+
+  // opacity on the wrapper, not the path, so the arrowhead marker dims too
+  .react-flow__edge.erd-edge-dimmed {
+    opacity: 0.25;
   }
 }

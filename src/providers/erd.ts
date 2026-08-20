@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 
 /**
- * how much of each table is drawn, mirroring the `--detail` levels of the
- * deriva-er-diagram python CLI:
- *   names: just the table name
- *   keys:  key and foreign-key columns only
- *   full:  every (non-system) column
+ * how much of each table is drawn. loosely mirrors the `--detail` levels of
+ * the deriva-er-diagram python CLI, split further here since "keys" and
+ * "keys + foreign keys" turned out to be genuinely different views:
+ *   names:   just the table name
+ *   keys:    primary key columns only
+ *   keysFks: primary key and foreign key columns
+ *   full:    every (non-system) column
  */
-export type ERDDetailLevel = 'names' | 'keys' | 'full';
+export type ERDDetailLevel = 'names' | 'keys' | 'keysFks' | 'full';
 
 /**
  * elk layout algorithm ids, verified against what this installed elkjs build
@@ -15,22 +17,14 @@ export type ERDDetailLevel = 'names' | 'keys' | 'full';
  * which lists a 'disco' algorithm this build doesn't have. 'layered' suits
  * mostly-acyclic fk graphs and is the default; the rest are here to compare.
  */
-export type ERDLayoutAlgorithm =
-  | 'layered'
-  | 'stress'
-  | 'force'
-  | 'mrtree'
-  | 'radial'
-  | 'rectpacking'
-  | 'sporeOverlap'
-  | 'sporeCompaction';
+export type ERDBaseLayoutAlgorithm = 'layered' | 'stress' | 'force' | 'mrtree' | 'radial' | 'rectpacking';
 
 interface ERDStore {
   detail: ERDDetailLevel;
   setDetail: (detail: ERDDetailLevel) => void;
 
-  layout: ERDLayoutAlgorithm;
-  setLayout: (layout: ERDLayoutAlgorithm) => void;
+  baseLayout: ERDBaseLayoutAlgorithm;
+  setBaseLayout: (baseLayout: ERDBaseLayoutAlgorithm) => void;
 }
 
 /**
@@ -42,6 +36,6 @@ export const useErdStore = create<ERDStore>((set) => ({
   detail: 'keys',
   setDetail: (detail) => set({ detail }),
 
-  layout: 'layered',
-  setLayout: (layout) => set({ layout }),
+  baseLayout: 'layered',
+  setBaseLayout: (baseLayout) => set({ baseLayout }),
 }));

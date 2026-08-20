@@ -5,7 +5,7 @@ import type { ElkNode } from 'elkjs/lib/elk.bundled.js';
 import { ERDColumn, ERDGraph, ERDTable } from '@isrd-isi-edu/chaise/src/models/erd';
 
 // providers
-import { ERDDetailLevel, ERDLayoutAlgorithm } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { ERDDetailLevel, ERDBaseLayoutAlgorithm } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 /**
  * the react-flow node shape used by the erd app: an `erdTable` node carrying
@@ -46,7 +46,9 @@ export function visibleColumns(table: ERDTable, detail: ERDDetailLevel): ERDColu
   if (detail === 'names') return [];
   return table.columns.filter((col) => {
     if (col.isSystemColumn) return false;
-    return detail === 'full' || col.isPrimaryKey || col.isForeignKey;
+    if (detail === 'full') return true;
+    if (detail === 'keysFks') return col.isPrimaryKey || col.isForeignKey;
+    return col.isPrimaryKey;
   });
 }
 
@@ -108,7 +110,7 @@ function estimateNodeSize(table: ERDTable, detail: ERDDetailLevel): { width: num
  * recognize rather than erroring, so leaving them in for e.g. 'force' would
  * be dead config, not a bug that shows up.
  */
-function layeredOnlyOptions(layout: ERDLayoutAlgorithm): Record<string, string> {
+function layeredOnlyOptions(layout: ERDBaseLayoutAlgorithm): Record<string, string> {
   if (layout !== 'layered') return {};
   return {
     'elk.direction': 'RIGHT',
@@ -121,7 +123,7 @@ function layeredOnlyOptions(layout: ERDLayoutAlgorithm): Record<string, string> 
  * connections, so edges are deduped per table pair (multiple fks between the
  * same two tables would just stack identical lines).
  */
-export function graphToElk(graph: ERDGraph, detail: ERDDetailLevel, layout: ERDLayoutAlgorithm): ElkNode {
+export function graphToElk(graph: ERDGraph, detail: ERDDetailLevel, layout: ERDBaseLayoutAlgorithm): ElkNode {
   const seen = new Set<string>();
   const elkEdges: ElkNode['edges'] = [];
   graph.edges.forEach((edge) => {
