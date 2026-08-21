@@ -38,16 +38,24 @@ const CHAR_WIDTH = 7;
 const ROW_EXTRA_WIDTH = 45;
 
 /**
+ * RID is a system column but is exempted below: it's the implicit primary
+ * key ermrest guarantees on every table, so a table with no other key would
+ * otherwise show zero rows under ERDDetailLevel.KEYS, misleadingly
+ * suggesting it has no key at all.
+ */
+const RID_COLUMN_NAME = 'RID';
+
+/**
  * the columns drawn (and measured) for a table at the given detail level.
  * single source of truth shared by estimateNodeSize and the table-node
  * component.
  */
 export function visibleColumns(table: ERDTable, detail: ERDDetailLevel): ERDColumn[] {
-  if (detail === 'names') return [];
+  if (detail === ERDDetailLevel.NAMES) return [];
   return table.columns.filter((col) => {
-    if (col.isSystemColumn) return false;
-    if (detail === 'full') return true;
-    if (detail === 'keysFks') return col.isPrimaryKey || col.isForeignKey;
+    if (col.isSystemColumn && col.name !== RID_COLUMN_NAME) return false;
+    if (detail === ERDDetailLevel.FULL) return true;
+    if (detail === ERDDetailLevel.KEYS_FKS) return col.isPrimaryKey || col.isForeignKey;
     return col.isPrimaryKey;
   });
 }
@@ -111,7 +119,7 @@ function estimateNodeSize(table: ERDTable, detail: ERDDetailLevel): { width: num
  * be dead config, not a bug that shows up.
  */
 function layeredOnlyOptions(layout: ERDBaseLayoutAlgorithm): Record<string, string> {
-  if (layout !== 'layered') return {};
+  if (layout !== ERDBaseLayoutAlgorithm.LAYERED) return {};
   return {
     'elk.direction': 'RIGHT',
     'elk.layered.spacing.nodeNodeBetweenLayers': '60',
@@ -121,12 +129,27 @@ function layeredOnlyOptions(layout: ERDBaseLayoutAlgorithm): Record<string, stri
 /**
  * turn the graph into elk's input shape. layout only cares about boxes and
  * connections, so edges are deduped per table pair (multiple fks between the
- * same two tables would just stack identical lines).
+ * same two tables would just stack identical lines). a table shows only if
+ * both its schema (visibleSchemas) and its own id (visibleTableIds) are
+ * checked; excluded tables, and any edge touching one, are left out
+ * entirely, not just hidden visually, so they don't take up layout space.
  */
-export function graphToElk(graph: ERDGraph, detail: ERDDetailLevel, layout: ERDBaseLayoutAlgorithm): ElkNode {
+export function graphToElk(
+  graph: ERDGraph,
+  detail: ERDDetailLevel,
+  layout: ERDBaseLayoutAlgorithm,
+  visibleSchemas: Set<string>,
+  visibleTableIds: Set<string>
+): ElkNode {
+  const includedTables = Object.values(graph.tables).filter(
+    (table) => visibleSchemas.has(table.schema) && visibleTableIds.has(`${table.schema}:${table.name}`)
+  );
+  const includedIds = new Set(includedTables.map((table) => `${table.schema}:${table.name}`));
+
   const seen = new Set<string>();
   const elkEdges: ElkNode['edges'] = [];
   graph.edges.forEach((edge) => {
+    if (!includedIds.has(edge.fromTable) || !includedIds.has(edge.toTable)) return;
     const id = `${edge.fromTable}->${edge.toTable}`;
     if (seen.has(id)) return;
     seen.add(id);
@@ -140,7 +163,7 @@ export function graphToElk(graph: ERDGraph, detail: ERDDetailLevel, layout: ERDB
       'elk.spacing.nodeNode': '30',
       ...layeredOnlyOptions(layout),
     },
-    children: Object.values(graph.tables).map((table) => ({
+    children: includedTables.map((table) => ({
       id: `${table.schema}:${table.name}`,
       ...estimateNodeSize(table, detail),
     })),

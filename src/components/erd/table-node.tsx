@@ -2,7 +2,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { type JSX } from 'react';
 
 // providers
-import { useErdStore } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { useErdStore, ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // utilities
 import { visibleColumns, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
@@ -28,7 +28,7 @@ const ERDTableNode = ({ data }: NodeProps<ERDTableNodeModel>): JSX.Element => {
         <div key={col.name} className='erd-table-node-row'>
           <span className={`erd-column-name${col.isPrimaryKey ? ' erd-column-pk' : ''}`}>
             {col.name}
-            {col.isForeignKey && <span className='erd-column-fk-badge'>FK</span>}
+            {col.isForeignKey && detail !== ERDDetailLevel.KEYS && <span className='erd-column-fk-badge'>FK</span>}
           </span>
           <span className='erd-column-type'>{col.type}</span>
         </div>

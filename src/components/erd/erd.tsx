@@ -18,10 +18,12 @@ import ELK from 'elkjs/lib/elk.bundled.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // components
+import ErdChecklist from '@isrd-isi-edu/chaise/src/components/erd/checklist';
 import ERDFloatingEdge from '@isrd-isi-edu/chaise/src/components/erd/floating-edge';
 import ERDTableNode from '@isrd-isi-edu/chaise/src/components/erd/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
@@ -31,7 +33,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { catalogToGraph, type ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
 
 // providers
-import { useErdStore, type ERDBaseLayoutAlgorithm, type ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { useErdStore, ERDBaseLayoutAlgorithm, ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -55,10 +57,10 @@ const nodeTypes = { erdTable: ERDTableNode };
 const edgeTypes = { erdFloating: ERDFloatingEdge };
 
 const DETAIL_LEVEL_LABELS: Record<ERDDetailLevel, string> = {
-  names: 'Names',
-  keys: 'Keys',
-  keysFks: 'Keys + FKeys',
-  full: 'Full',
+  [ERDDetailLevel.NAMES]: 'Table Names',
+  [ERDDetailLevel.KEYS]: 'Keys',
+  [ERDDetailLevel.KEYS_FKS]: 'Keys + Foreign Keys',
+  [ERDDetailLevel.FULL]: 'All Columns',
 };
 
 /**
@@ -66,12 +68,12 @@ const DETAIL_LEVEL_LABELS: Record<ERDDetailLevel, string> = {
  * https://eclipse.dev/elk/reference/algorithms.html
  */
 const BASE_LAYOUT_LABELS: Record<ERDBaseLayoutAlgorithm, string> = {
-  layered: 'Layered',
-  stress: 'Stress',
-  force: 'Force',
-  mrtree: 'Mr. Tree',
-  radial: 'Radial',
-  rectpacking: 'Rectangle Packing',
+  [ERDBaseLayoutAlgorithm.LAYERED]: 'Layered',
+  [ERDBaseLayoutAlgorithm.STRESS]: 'Stress',
+  [ERDBaseLayoutAlgorithm.FORCE]: 'Force',
+  [ERDBaseLayoutAlgorithm.MRTREE]: 'Mr. Tree',
+  [ERDBaseLayoutAlgorithm.RADIAL]: 'Radial',
+  [ERDBaseLayoutAlgorithm.RECTPACKING]: 'Rectangle Packing',
 };
 
 const ERDInner = (): JSX.Element => {
@@ -83,6 +85,12 @@ const ERDInner = (): JSX.Element => {
 
   const baseLayout = useErdStore((state) => state.baseLayout);
   const setBaseLayout = useErdStore((state) => state.setBaseLayout);
+
+  const visibleSchemas = useErdStore((state) => state.visibleSchemas);
+  const setVisibleSchemas = useErdStore((state) => state.setVisibleSchemas);
+
+  const visibleTableIds = useErdStore((state) => state.visibleTableIds);
+  const setVisibleTableIds = useErdStore((state) => state.setVisibleTableIds);
 
   /**
    * react-flow with a `nodes` prop is a controlled component: interactions
@@ -151,10 +159,16 @@ const ERDInner = (): JSX.Element => {
   const setupStarted = useRef<boolean>(false);
 
   const relayout = useCallback(
-    (graph: ERDGraph, level: ERDDetailLevel, algorithm: ERDBaseLayoutAlgorithm) => {
+    (
+      graph: ERDGraph,
+      level: ERDDetailLevel,
+      algorithm: ERDBaseLayoutAlgorithm,
+      schemas: Set<string>,
+      tableIds: Set<string>
+    ) => {
       setIsRelayouting(true);
       return elk
-        .layout(graphToElk(graph, level, algorithm))
+        .layout(graphToElk(graph, level, algorithm, schemas, tableIds))
         .then((laidOut) => {
           const flow = elkToFlow(graph, laidOut);
           setNodes(flow.nodes);
@@ -196,13 +210,61 @@ const ERDInner = (): JSX.Element => {
         setEdges(flow.edges);
         window.requestAnimationFrame(() => fitView());
       })
-      .catch((error: any) => dispatchError({ error }))
+      .catch((error: unknown) => dispatchError({ error }))
       .finally(() => setIsRelayouting(false));
   }, [nodes, edges, fitView, setNodes, setEdges, dispatchError]);
 
   const handleExportPdf = useCallback(() => {
     exportErdToPdf(nodes, edges, detail).catch((error: any) => dispatchError({ error }));
   }, [nodes, edges, detail, dispatchError]);
+
+  const [catalogId, setCatalogId] = useState<string | null>(null);
+  const [allSchemas, setAllSchemas] = useState<string[]>([]);
+
+  const handleToggleSchema = useCallback(
+    (schema: string) => {
+      const next = new Set(visibleSchemas);
+      if (next.has(schema)) {
+        next.delete(schema);
+      } else {
+        next.add(schema);
+      }
+      setVisibleSchemas(next);
+    },
+    [visibleSchemas, setVisibleSchemas]
+  );
+
+  // same pattern as allSchemas: set once at load, static afterward. keeps
+  // the schema field around so the table checklist can be scoped to
+  // currently visible schemas, unlike allSchemas this isn't rendered as-is.
+  const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
+
+  // tables whose schema is currently hidden are dropped from the list they'd
+  // show a checkbox for; that state is already fully explained by the schema
+  // checklist, showing them here too would just be a second, confusing
+  // control for the same thing.
+  const visibleSchemaTableItems = useMemo(
+    () =>
+      allTables
+        .filter((table) => visibleSchemas.has(table.schema))
+        .map((table) => ({ id: table.id, label: table.id }))
+        // id is "schema:name", so this also groups by schema before alphabetizing within it
+        .sort((a, b) => a.id.localeCompare(b.id)),
+    [allTables, visibleSchemas]
+  );
+
+  const handleToggleTable = useCallback(
+    (tableId: string) => {
+      const next = new Set(visibleTableIds);
+      if (next.has(tableId)) {
+        next.delete(tableId);
+      } else {
+        next.add(tableId);
+      }
+      setVisibleTableIds(next);
+    },
+    [visibleTableIds, setVisibleTableIds]
+  );
 
   useEffect(() => {
     if (setupStarted.current) return;
@@ -232,22 +294,43 @@ const ERDInner = (): JSX.Element => {
       .get(catalog.id)
       .then((cat: typeof catalog) => {
         graphRef.current = catalogToGraph(cat);
+        setCatalogId(graphRef.current.catalogId);
+
+        const schemas = new Set(Object.values(graphRef.current.tables).map((table) => table.schema));
+        setVisibleSchemas(schemas);
+        setAllSchemas(Array.from(schemas).sort());
+
+        const tables = Object.values(graphRef.current.tables).map((table) => ({
+          id: `${table.schema}:${table.name}`,
+          schema: table.schema,
+        }));
+        setAllTables(tables);
+        setVisibleTableIds(new Set(tables.map((table) => table.id)));
+
         const initial = useErdStore.getState();
-        return relayout(graphRef.current, initial.detail, initial.baseLayout);
+        return relayout(
+          graphRef.current,
+          initial.detail,
+          initial.baseLayout,
+          initial.visibleSchemas,
+          initial.visibleTableIds
+        );
       })
-      .catch((error: any) => dispatchError({ error }));
+      .catch((error: unknown) => dispatchError({ error }));
   }, []);
 
   /**
-   * node sizes change with the detail level, and the algorithm changes the
-   * whole arrangement, so either one re-runs the layout. manual
+   * detail level, base algorithm, or which schemas/tables are visible all
+   * change the whole arrangement, so any of them re-runs the layout. manual
    * repositioning is lost by design (remove-overlaps is the exception,
    * see handleRemoveOverlaps).
    */
   useEffect(() => {
     if (!graphRef.current || !layoutDone) return;
-    relayout(graphRef.current, detail, baseLayout).catch((error: any) => dispatchError({ error }));
-  }, [detail, baseLayout]);
+    relayout(graphRef.current, detail, baseLayout, visibleSchemas, visibleTableIds).catch((error: unknown) =>
+      dispatchError({ error })
+    );
+  }, [detail, baseLayout, visibleSchemas, visibleTableIds]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the
@@ -304,44 +387,78 @@ const ERDInner = (): JSX.Element => {
                 >
                   <Background />
                   <Controls showInteractive={false} />
-                  <Panel position='top-right' className='erd-toolbar'>
-                    <div className='chaise-btn-group'>
-                      {Object.entries(DETAIL_LEVEL_LABELS).map(([level, label]) => (
-                        <button
-                          key={level}
-                          type='button'
-                          className={`chaise-btn chaise-btn-secondary${detail === level ? ' active' : ''}`}
-                          onClick={() => setDetail(level as ERDDetailLevel)}
-                        >
-                          {label}
+                  <Panel position='top-center' className='erd-title'>
+                    Catalog {catalogId} Data Model
+                  </Panel>
+                  <Panel position='top-left' className='erd-toolbar'>
+                    <div className='erd-toolbar-row'>
+                      <label>Detail</label>
+                      <ChaiseTooltip placement='right' tooltip='How many columns to show per table.'>
+                        <span className='chaise-icon chaise-info'></span>
+                      </ChaiseTooltip>
+                      <Dropdown
+                        className='chaise-dropdown'
+                        onSelect={(level) => setDetail(level as ERDDetailLevel)}
+                      >
+                        <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                          {DETAIL_LEVEL_LABELS[detail]}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          {Object.entries(DETAIL_LEVEL_LABELS).map(([level, label]) => (
+                            <Dropdown.Item key={level} eventKey={level} active={detail === level}>
+                              {label}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </div>
+                    <div className='erd-toolbar-row'>
+                      <label>Layout</label>
+                      <ChaiseTooltip placement='right' tooltip='Which algorithm arranges the tables.'>
+                        <span className='chaise-icon chaise-info'></span>
+                      </ChaiseTooltip>
+                      <Dropdown
+                        className='chaise-dropdown'
+                        onSelect={(algorithm) => setBaseLayout(algorithm as ERDBaseLayoutAlgorithm)}
+                      >
+                        <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                          {BASE_LAYOUT_LABELS[baseLayout]}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                          {Object.entries(BASE_LAYOUT_LABELS).map(([algorithm, label]) => (
+                            <Dropdown.Item key={algorithm} eventKey={algorithm} active={baseLayout === algorithm}>
+                              {label}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </div>
+                    <div className='erd-toolbar-row'>
+                      <ChaiseTooltip placement='top' tooltip='Spread out overlapping tables in the current layout.'>
+                        <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleRemoveOverlaps}>
+                          <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
+                          <span>Remove Overlaps</span>
                         </button>
-                      ))}
+                      </ChaiseTooltip>
+                      <ChaiseTooltip placement='top' tooltip='Download the current diagram as a PDF.'>
+                        <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
+                          <span className='chaise-btn-icon fa-solid fa-file-export' />
+                          <span>Export PDF</span>
+                        </button>
+                      </ChaiseTooltip>
                     </div>
-                    <Dropdown
-                      className='chaise-dropdown'
-                      onSelect={(algorithm) => setBaseLayout(algorithm as ERDBaseLayoutAlgorithm)}
-                    >
-                      <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
-                        {BASE_LAYOUT_LABELS[baseLayout]}
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {Object.entries(BASE_LAYOUT_LABELS).map(([algorithm, label]) => (
-                          <Dropdown.Item key={algorithm} eventKey={algorithm} active={baseLayout === algorithm}>
-                            {label}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                    <div className='chaise-btn-group'>
-                      <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleRemoveOverlaps}>
-                        Remove Overlaps
-                      </button>
-                    </div>
-                    <div className='chaise-btn-group'>
-                      <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
-                        Export PDF
-                      </button>
-                    </div>
+                    <ErdChecklist
+                      title='Schemas'
+                      items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
+                      checkedIds={visibleSchemas}
+                      onToggle={handleToggleSchema}
+                    />
+                    <ErdChecklist
+                      title='Tables'
+                      items={visibleSchemaTableItems}
+                      checkedIds={visibleTableIds}
+                      onToggle={handleToggleTable}
+                    />
                   </Panel>
                 </ReactFlow>
                 </>
