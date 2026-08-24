@@ -236,21 +236,9 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 	@> .make-rsync-list-w-config
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST_W_CONFIG),.make-rsync-list-w-config)
 
-# vendor files that will be treated externally in webpack
-WEBPACK_EXTERNAL_VENDOR_FILES= \
-	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
 define add_array_to_file
 	for folder in $(1); do \
 		echo "$$folder" >> $(2); \
-	done
-endef
-
-define copy_webpack_external_vendor_files
-	$(info - copying webpack external files into location)
-	mkdir -p $(REACT_BUNDLES)
-	for f in $(WEBPACK_EXTERNAL_VENDOR_FILES); do \
-		eval "rsync -a $$f $(REACT_BUNDLES)" ; \
 	done
 endef
 
@@ -312,12 +300,10 @@ dist-wo-deps: print-variables run-webpack gitversion
 # Rule to install the dependencies and create the pacakge
 $(DIST): deps dist-wo-deps
 
-# run webpack to build the react folder and bundles in it, and
-# copy the external vendor files that webpack expects into react folder
+# run webpack to build the react folder and bundles in it
 run-webpack: $(SOURCE) $(BUILD_VERSION)
 	$(info - creating webpack bundles)
 	@npx webpack --config ./webpack/main.config.js --env BUILD_VARIABLES.BUILD_VERSION=$(BUILD_VERSION) --env BUILD_VARIABLES.CHAISE_BASE_PATH=$(CHAISE_BASE_PATH) --env BUILD_VARIABLES.ERMRESTJS_BASE_PATH=$(ERMRESTJS_BASE_PATH) --env BUILD_VARIABLES.OSD_VIEWER_BASE_PATH=$(OSD_VIEWER_BASE_PATH)
-	@$(call copy_webpack_external_vendor_files)
 
 # deploy chaise to the location
 # this is separated into three seaprate rsyncs:

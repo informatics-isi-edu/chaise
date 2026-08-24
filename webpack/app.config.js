@@ -169,6 +169,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       rules: [
         {
           test: /\.(ts|js)x?$/,
+          exclude: /node_modules/,
           use: ['babel-loader'],
         },
         {
@@ -226,7 +227,6 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         minSize: 50000,
         maxSize: 500000,
         hidePathInfo: true,
-        name: 'common',
         /**
          * the noted priority is also changing the order of include statements in the output html.
          * we want to make sure chaise is the last css file that is added, that's why it has the lowest priority.
@@ -258,9 +258,18 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
           },
           vendor: {
             test: /[\\/]node_modules[\\/](?!(\@isrd-isi-edu[\\/]chaise|bootstrap|react|react-dom|react-bootstrap)[\\/])/,
-            name: 'vendor-rest',
             chunks: 'all',
-            priority: 4
+            priority: 4,
+            /**
+             * a static name here would merge every matched dependency into one chunk shared by
+             * all entries (e.g. an erd-only dep shipping to every app); naming per-module keeps
+             * each entry scoped to only the vendor code it actually imports.
+             */
+            name(module) {
+              const match = module.context && module.context.match(/[\\/]node_modules[\\/](@[^\\/]+[\\/][^\\/]+|[^\\/]+)/);
+              const pkg = match ? match[1].replace('@', '').replace(/[\\/]/g, '-') : 'misc';
+              return `vendor-${pkg}`;
+            }
           }
         },
       },

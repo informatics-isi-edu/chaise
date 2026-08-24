@@ -13,6 +13,12 @@
     margin-left: -5px;
   }
 
+  // shown while the lazy-loaded histogram module is being fetched
+  .plotly-loading {
+    padding-top: 15px;
+    text-align: center;
+  }
+
   .plotly-actions {
     padding-top: 15px;
     text-align: right;
