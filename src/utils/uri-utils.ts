@@ -53,7 +53,7 @@ export function chaiseURItoErmrestURI(
    */
   location: Location,
   /**
-   * set to true if you dont want the query parameters to me modified in any way.
+   * set to true if you don't want the query parameters to be modified in any way.
    */
   dontDecodeQueryParams?: boolean,
 ): {

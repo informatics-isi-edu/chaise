@@ -336,10 +336,6 @@ export const VIEWER_CONSTANT = {
 };
 
 
-export const ERD_CONSTANT = {
-  EXCLUDED_SCHEMAS: ['public', '_ermrest', '_acl_admin'],
-}
-
 // TODO if chaise is not built how we expect, this value will be undefiend.
 //      we might be able to enforce this during the npm install command of chaise
 // if (typeof CHAISE_BUILD_VARIABLES !== 'object') {

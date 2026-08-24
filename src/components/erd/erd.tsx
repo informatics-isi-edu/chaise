@@ -44,7 +44,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utilities
 import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { attachContainerHeightSensors, getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 /*
  * elkjs is ~1.5MB, so it's lazy-loaded to keep it out of the initial payload. the fetch
@@ -145,13 +145,17 @@ const ERDInner = (): JSX.Element => {
 
   const displayEdges = useMemo(() => {
     if (!focusedTableId) return edges;
+    /*
+     * marker fill doesn't follow the path's CSS stroke color, so read the same color-map
+     * value the highlighted stroke uses (see $erd-js-colors in _erd.scss)
+     */
+    const highlightColor = getCssVariable('primary', document.querySelector('.erd-container') ?? undefined, '#4674a7');
     return edges.map((edge) => {
       const connected = edge.source === focusedTableId || edge.target === focusedTableId;
       return {
         ...edge,
         className: connected ? 'erd-edge-highlighted' : 'erd-edge-dimmed',
-        // marker fill doesn't follow the path's CSS stroke color, has to be set directly
-        markerEnd: connected ? { type: MarkerType.ArrowClosed, color: '#4674a7' } : edge.markerEnd,
+        markerEnd: connected ? { type: MarkerType.ArrowClosed, color: highlightColor } : edge.markerEnd,
       };
     });
   }, [edges, focusedTableId]);
@@ -254,7 +258,7 @@ const ERDInner = (): JSX.Element => {
     // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
     import('@isrd-isi-edu/chaise/src/utils/erd-pdf-export')
       .then(({ exportErdToPdf }) => exportErdToPdf(nodes, edges, detail))
-      .catch((error: any) => dispatchError({ error }));
+      .catch((error: unknown) => dispatchError({ error }));
   }, [nodes, edges, detail, dispatchError]);
 
   const [catalogId, setCatalogId] = useState<string | null>(null);

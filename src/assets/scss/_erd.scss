@@ -5,7 +5,7 @@
 // directly, outside the normal css pipeline). exposed as custom properties so
 // that file can read them via getCssVariable() instead of hardcoding hex
 // values that can drift from _color-map.scss.
-$erd-js-colors: 'white', 'placeholder', 'erd-node-border', 'erd-node-header-background',
+$erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-header-background',
   'erd-node-row-border', 'erd-fk-badge';
 
 .erd-container {
@@ -13,7 +13,7 @@ $erd-js-colors: 'white', 'placeholder', 'erd-node-border', 'erd-node-header-back
     --#{$key}: #{map.get(variables.$color-map, $key)};
   }
 
-  // tigher space
+  // tighter space
   @at-root .app-header-container > .alerts-container:empty {
     padding: 0;
   }
