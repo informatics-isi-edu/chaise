@@ -1363,6 +1363,8 @@ Guidelines:
 - Mount the lazy component as soon as the feature is visible, even if its data hasn't arrived yet (return `null` from the component until it has). This lets the chunk download run in parallel with data requests instead of after them.
 - Give the `Suspense` `fallback` a spinner so users see progress while the chunk downloads.
 
+## Documentation
+
 The Markdown files under [`docs/user-docs`](../user-docs) that are listed in [`docs/index.rst`](../index.rst) are published on [docs.derivacloud.org](https://docs.derivacloud.org/chaise/index.html) by deriva-docs. If you add a new user-docs file, add it to `index.rst` as well.
 
 GitHub and the docs site (Sphinx) generate heading anchors differently. GitHub keeps `_` and a leading `1.` number and drops other punctuation without a separator, while Sphinx turns `_` and punctuation runs into `-` and strips leading digits. So a heading like `### 1. Install Chaise` is `#1-install-chaise` on GitHub but `#install-chaise` on the site, and an in-page link can only target one of them. To support both, an explicit `<a name="<github-slug>"></a>` anchor is added right before any heading whose two slugs differ: GitHub resolves the link through the heading's own id, and the explicit anchor gives Sphinx a matching `id`.
