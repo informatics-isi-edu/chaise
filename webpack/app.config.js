@@ -169,7 +169,11 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       rules: [
         {
           test: /\.(ts|js)x?$/,
-          exclude: /node_modules/,
+          /*
+           * skip transpiling prebuilt dependencies, except @isrd-isi-edu packages: downstream
+           * repos (deriva-webapps) compile chaise/ermrestjs source from node_modules
+           */
+          exclude: /node_modules[\\/](?!@isrd-isi-edu[\\/])/,
           use: ['babel-loader'],
         },
         {
