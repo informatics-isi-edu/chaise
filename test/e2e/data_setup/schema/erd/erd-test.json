@@ -1,0 +1,138 @@
+{
+    "schema_name": "erd-test",
+    "tables": {
+        "outbound_1": {
+            "kind": "table",
+            "table_name": "outbound_1",
+            "schema_name": "erd-test",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "name",
+                    "nullok": true,
+                    "type": { "typename": "text" }
+                }
+            ]
+        },
+        "main": {
+            "kind": "table",
+            "table_name": "main",
+            "schema_name": "erd-test",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["erd-test", "main_fk_to_outbound_1"]],
+                    "foreign_key_columns": [
+                        { "column_name": "fk_to_outbound_1", "table_name": "main", "schema_name": "erd-test" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "outbound_1", "schema_name": "erd-test" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "fk_to_outbound_1",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                },
+                {
+                    "name": "plain_col",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "inbound_1": {
+            "kind": "table",
+            "table_name": "inbound_1",
+            "schema_name": "erd-test",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                },
+                {
+                    "unique_columns": ["key_col_1", "key_col_2"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["erd-test", "inbound_1_fk_to_main"]],
+                    "foreign_key_columns": [
+                        { "column_name": "fk_to_main", "table_name": "inbound_1", "schema_name": "erd-test" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "main", "schema_name": "erd-test" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "fk_to_main",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                },
+                {
+                    "name": "key_col_1",
+                    "nullok": false,
+                    "type": { "typename": "text" }
+                },
+                {
+                    "name": "key_col_2",
+                    "nullok": false,
+                    "type": { "typename": "text" }
+                }
+            ]
+        },
+        "isolated": {
+            "kind": "table",
+            "table_name": "isolated",
+            "schema_name": "erd-test",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "name",
+                    "nullok": true,
+                    "type": { "typename": "text" }
+                }
+            ]
+        }
+    },
+    "table_names": ["outbound_1", "main", "inbound_1", "isolated"],
+    "comment": null,
+    "annotations": {}
+}

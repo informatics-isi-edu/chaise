@@ -10,7 +10,7 @@ import { ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config'
 
 const erdSettings: ConfigServiceSettings = {
   appName: APP_NAMES.ERD,
-  appTitle: 'Model Diagram',
+  appTitle: 'Data Model',
   overrideHeadTitle: false,
   overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,

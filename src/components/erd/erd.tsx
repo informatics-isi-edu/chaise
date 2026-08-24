@@ -31,6 +31,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { catalogToGraph, type ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
+import { CustomError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -315,9 +316,14 @@ const ERDInner = (): JSX.Element => {
      */
     const catalog = ConfigService.catalog;
     if (!catalog) {
+      /*
+       * a plain Error would render as the generic "Terminal Error"; CustomError shows the
+       * message. the message is rendered as HTML, so it must not contain angle brackets.
+       */
       dispatchError({
-        error: new Error(
-          'No catalog specified. Use a url like /chaise/erd/#<catalog-id>, or define a defaultCatalog in chaise-config.'
+        error: new CustomError(
+          'No Catalog',
+          'No catalog specified. Use a url like /chaise/erd/#catalog-id, or define a defaultCatalog in chaise-config.'
         ),
       });
       return;
@@ -491,13 +497,13 @@ const ERDInner = (): JSX.Element => {
                     </div>
                     <div className='erd-toolbar-row'>
                       <ChaiseTooltip placement='top' tooltip='Spread out overlapping tables in the current layout.'>
-                        <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleRemoveOverlaps}>
+                        <button type='button' className='erd-remove-overlaps-btn chaise-btn chaise-btn-secondary' onClick={handleRemoveOverlaps}>
                           <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
                           <span>Remove Overlaps</span>
                         </button>
                       </ChaiseTooltip>
                       <ChaiseTooltip placement='top' tooltip='Download the current diagram as a PDF.'>
-                        <button type='button' className='chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
+                        <button type='button' className='erd-export-pdf-btn chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
                           <span className='chaise-btn-icon fa-solid fa-file-export' />
                           <span>Export PDF</span>
                         </button>

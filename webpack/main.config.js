@@ -60,7 +60,7 @@ module.exports = (env) => {
       },
       {
         appName: 'erd',
-        appTitle: 'Model Diagram',
+        appTitle: 'Data Model',
       },
     ],
     mode,
