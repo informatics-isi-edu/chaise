@@ -27,20 +27,24 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { catalogToGraph, type ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
 
 // providers
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { useErdStore, ERDBaseLayoutAlgorithm, ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 import { exportErdToPdf } from '@isrd-isi-edu/chaise/src/utils/erd-pdf-export';
+import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const elk = new ELK();
@@ -78,6 +82,7 @@ const BASE_LAYOUT_LABELS: Record<ERDBaseLayoutAlgorithm, string> = {
 
 const ERDInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
+  const { addAlert, removeAllAlerts } = useAlert();
   const { fitView } = useReactFlow();
 
   const detail = useErdStore((state) => state.detail);
@@ -160,6 +165,14 @@ const ERDInner = (): JSX.Element => {
   // guard against strict mode calling the effect twice in dev mode
   const setupStarted = useRef<boolean>(false);
 
+  /**
+   * elk can throw on pathological inputs (dense/cyclic graphs, certain
+   * algorithms on large catalogs), so failure here is expected often enough
+   * to handle in one place rather than at every call site. it's recoverable
+   * (pick a different algorithm), so it surfaces as a dismissible alert
+   * rather than the blocking ErrorModal, and it never rejects: whatever was
+   * on screen before (nothing, on the very first layout) stays as-is.
+   */
   const relayout = useCallback(
     (
       graph: ERDGraph,
@@ -169,19 +182,31 @@ const ERDInner = (): JSX.Element => {
       tableIds: Set<string>
     ) => {
       setIsRelayouting(true);
+      // any alert from a previous attempt no longer applies to this one
+      removeAllAlerts();
       return elk
         .layout(graphToElk(graph, level, algorithm, schemas, tableIds))
         .then((laidOut) => {
           const flow = elkToFlow(graph, laidOut);
           setNodes(flow.nodes);
           setEdges(flow.edges);
-          setLayoutDone(true);
           // wait for react-flow to pick up the new nodes before framing them
           window.requestAnimationFrame(() => fitView());
         })
-        .finally(() => setIsRelayouting(false));
+        .catch((error: unknown) => {
+          $log.error('elk layout failed', error);
+          addAlert(
+            `Could not lay out the diagram with the "${BASE_LAYOUT_LABELS[algorithm]}" algorithm. ` +
+              'Try a different layout algorithm from the Layout dropdown.',
+            ChaiseAlertType.WARNING
+          );
+        })
+        .finally(() => {
+          setLayoutDone(true);
+          setIsRelayouting(false);
+        });
     },
-    [fitView, setNodes, setEdges]
+    [fitView, setNodes, setEdges, addAlert, removeAllAlerts]
   );
 
   /**
@@ -212,9 +237,15 @@ const ERDInner = (): JSX.Element => {
         setEdges(flow.edges);
         window.requestAnimationFrame(() => fitView());
       })
-      .catch((error: unknown) => dispatchError({ error }))
+      .catch(() => {
+        addAlert(
+          'Could not automatically resolve overlapping tables. Try a different layout algorithm, ' +
+            'or drag tables apart manually.',
+          ChaiseAlertType.WARNING
+        );
+      })
       .finally(() => setIsRelayouting(false));
-  }, [nodes, edges, fitView, setNodes, setEdges, dispatchError]);
+  }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
     exportErdToPdf(nodes, edges, detail).catch((error: any) => dispatchError({ error }));
@@ -297,6 +328,7 @@ const ERDInner = (): JSX.Element => {
       .then((cat: typeof catalog) => {
         graphRef.current = catalogToGraph(cat);
         setCatalogId(graphRef.current.catalogId);
+        updateHeadTitle(`Data Model #${graphRef.current.catalogId}`);
 
         const schemas = new Set(Object.values(graphRef.current.tables).map((table) => table.schema));
         setVisibleSchemas(schemas);
@@ -329,9 +361,7 @@ const ERDInner = (): JSX.Element => {
    */
   useEffect(() => {
     if (!graphRef.current || !layoutDone) return;
-    relayout(graphRef.current, detail, baseLayout, visibleSchemas, visibleTableIds).catch((error: unknown) =>
-      dispatchError({ error })
-    );
+    void relayout(graphRef.current, detail, baseLayout, visibleSchemas, visibleTableIds);
   }, [detail, baseLayout, visibleSchemas, visibleTableIds]);
 
   /**
