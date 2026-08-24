@@ -6,7 +6,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 // TODO why are we doing this?
 // export plotly types by getting the typeof the interfaces
 export type PlotData = typeof PlotData;
-type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;
+export type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;
 export type PlotlyLayout = typeof PlotlyLayout;
 export type HTMLPlotElement = typeof HTMLPlotElement;
 

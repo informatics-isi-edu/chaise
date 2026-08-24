@@ -12,26 +12,20 @@ if (nodeDevs.indexOf(mode) === -1) {
 module.exports = (env) => {
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
 
-  const recordsetExtFiles = [`${chaisePath}bundles/plotly-basic.min.js`];
-
   return getWebPackConfig(
     [
       {
         appName: 'login',
         appTitle: 'Login',
-        // app-wrapper uses navbar
-        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'recordset',
         appTitle: 'Recordset',
-        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'record',
         appTitle: 'Record',
         externalFiles: [
-          ...recordsetExtFiles,
           `${chaisePath}google-dataset-config.js`,
           `${chaisePath}config/google-dataset-config.js`
         ]
@@ -39,13 +33,11 @@ module.exports = (env) => {
       {
         appName: 'recordedit',
         appTitle: 'Recordedit',
-        externalFiles: [...recordsetExtFiles]
       },
       {
         appName: 'viewer',
         appTitle: 'Image Viewer',
         externalFiles: [
-          ...recordsetExtFiles,
           `${chaisePath}viewer/viewer-config.js`,
           `${chaisePath}config/viewer-config.js`
         ]
@@ -53,37 +45,21 @@ module.exports = (env) => {
       {
         appName: 'help',
         appTitle: 'Wiki Pages',
-        // app-wrapper uses navbar
-        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'navbar',
         bundleName: 'navbar-lib',
         appTitle: 'Navbar standalone library',
         isLib: true,
-        /**
-         * navbar -> snapshot-dropdown -> input-switch -> recordset (fk) -> plotly
-         */
-        externalFiles: [...recordsetExtFiles],
       },
       {
         appName: 'login',
         bundleName: 'login-lib',
         appTitle: 'Login standalone library',
         isLib: true,
-        // app-wrapper uses navbar
-        externalFiles: [...recordsetExtFiles]
       }
     ],
     mode,
     env,
-    {
-      extraWebpackProps: {
-        externals: {
-          // treat plotly as an external dependency and don't compute it
-          'plotly.js-basic-dist-min': 'Plotly'
-        }
-      }
-    }
   );
 }

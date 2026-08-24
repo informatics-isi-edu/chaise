@@ -6,15 +6,10 @@ import React from 'react';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
 import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
-
-
-// customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
-import Plotly from 'plotly.js-basic-dist-min';
-import createPlotlyComponent from 'react-plotly.js/factory';
-const Plot = createPlotlyComponent(Plotly);
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
 
@@ -42,6 +37,12 @@ import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-e
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ResizeSensor } from 'css-element-queries';
 import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+
+/*
+ * plotly.js-basic-dist-min is ~1MB, so it's lazy-loaded (not every range facet shows a
+ * histogram, see `showHistogram`)
+ */
+const FacetRangePlot = lazy(() => import('@isrd-isi-edu/chaise/src/components/faceting/facet-range-plot'));
 
 const FacetRangePicker = ({
   dispatchFacetUpdate,
@@ -154,6 +155,11 @@ const FacetRangePicker = ({
   const plotlyRef = useRef<HTMLPlotElement>(null);
 
   const numBuckets = facetColumn.histogramBucketCount;
+
+  const showHistogram = (): boolean => {
+    return facetModel.initialized && facetModel.isOpen && facetPanelOpen &&
+      facetColumn.barPlot && (compState.rangeOptions.absMin !== null && compState.rangeOptions.absMax !== null)
+  }
 
   // set the resize sensor to call the plot resize fucntion
   useLayoutEffect(() => {
@@ -532,10 +538,6 @@ const FacetRangePicker = ({
     const res = facetColumnRef.current.sourceReference.defaultLogInfo;
     res.stack = getFacetLogStack(facetIndex);
     return res;
-  }
-
-  const showHistogram = (): boolean => {
-    return facetColumn.barPlot && (compState.rangeOptions.absMin !== null && compState.rangeOptions.absMax !== null)
   }
 
   // floats should truncate to 4 digits always
@@ -922,21 +924,6 @@ const FacetRangePicker = ({
     )
   };
 
-  const renderPlot = () => {
-    const plotData = compState.plot.data as PlotData[];
-    if (plotData[0].x.length < 1 || plotData[0].y.length < 1) return;
-    return (<Plot
-      config={compState.plot.config}
-      data={compState.plot.data}
-      layout={compState.plot.layout ? compState.plot.layout : {}}
-      labels={compState.plot.labels}
-      onRelayout={(event: any) => plotlyRelayout(event)}
-      ref={plotlyRef}
-      style={{ 'width': '100%' }}
-      useResizeHandler
-    />)
-  }
-
   const renderHistogramHelpTooltip = () => {
     // to avoid max line length eslint error
     const splitLine1 = 'Clicking and holding anywhere in the graph display will allow you to zoom into a smaller subset of data. ' +
@@ -987,8 +974,14 @@ const FacetRangePicker = ({
   }
 
   const renderHistogram = () => {
-    if (facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()) {
-      return (<>
+    if (!showHistogram()) return;
+
+    /*
+     * the toolbar is only useful alongside the plot, so both wait behind one Suspense.
+     * FacetRangePlot mounts before data arrives so the module and data fetches run in parallel.
+     */
+    return (
+      <Suspense fallback={<div className='plotly-loading'><Spinner animation='border' size='sm' /></div>}>
         <div className='plotly-actions'>
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
             <ChaiseTooltip
@@ -1008,11 +1001,13 @@ const FacetRangePicker = ({
             </ChaiseTooltip>
           </div>
         </div>
-        {renderPlot()}
-      </>)
-    }
-
-    return;
+        <FacetRangePlot
+          plot={compState.plot}
+          onRelayout={(event: any) => plotlyRelayout(event)}
+          plotlyRef={plotlyRef}
+        />
+      </Suspense>
+    )
   }
 
   return (
