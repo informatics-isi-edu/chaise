@@ -1,9 +1,7 @@
 import { create } from 'zustand';
 
 /**
- * how much of each table is drawn. loosely mirrors the `--detail` levels of
- * the deriva-er-diagram python CLI, split further here since "keys" and
- * "keys + foreign keys" turned out to be genuinely different views.
+ * how much of each table is drawn
  */
 export enum ERDDetailLevel {
   /** just the table name */

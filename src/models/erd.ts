@@ -3,9 +3,7 @@ import type { Table } from '@isrd-isi-edu/ermrestjs/src/models/table';
 
 /**
  * The ERD model is a plain, JSON-serializable snapshot of the catalog model.
- * It is the single shape that layout and rendering consume, and it matches the
- * JSON that the deriva-er-diagram python CLI will emit, so the two
- * implementations can be diffed against the same catalog.
+ * It is the single shape that layout and rendering consume.
  */
 
 export interface ERDColumn {
