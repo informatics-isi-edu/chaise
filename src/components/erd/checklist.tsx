@@ -16,6 +16,7 @@ interface ErdChecklistProps {
   items: ErdChecklistItem[];
   checkedIds: Set<string>;
   onToggle: (id: string) => void;
+  emptyMessage: string;
 }
 
 interface ErdChecklistRowProps {
@@ -43,15 +44,19 @@ const ErdChecklistRow = ({ item, checked, onToggle }: ErdChecklistRowProps): JSX
  * tooltip pattern (see faceting/facet-check-list.tsx) rather than a new
  * dependency.
  */
-const ErdChecklist = ({ title, items, checkedIds, onToggle }: ErdChecklistProps): JSX.Element => {
+const ErdChecklist = ({ title, items, checkedIds, onToggle, emptyMessage }: ErdChecklistProps): JSX.Element => {
   return (
     <div className='erd-checklist-container'>
       <div className='erd-checklist-title'>{title}</div>
-      <ul className='chaise-list-container erd-checklist chaise-scrollbar-y'>
-        {items.map((item) => (
-          <ErdChecklistRow key={item.id} item={item} checked={checkedIds.has(item.id)} onToggle={onToggle} />
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <div className='erd-checklist-empty'>{emptyMessage}</div>
+      ) : (
+        <ul className='chaise-list-container erd-checklist chaise-scrollbar-y'>
+          {items.map((item) => (
+            <ErdChecklistRow key={item.id} item={item} checked={checkedIds.has(item.id)} onToggle={onToggle} />
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

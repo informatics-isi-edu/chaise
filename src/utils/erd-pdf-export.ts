@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
 
 // models
-import type { ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // utilities
 import {
@@ -14,17 +14,37 @@ import {
   visibleColumns,
   type ERDTableNodeModel,
 } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+
+interface ErdSvgColors {
+  nodeBorder: string;
+  nodeBackground: string;
+  headerBackground: string;
+  rowBorder: string;
+  typeText: string;
+  fkBadge: string;
+}
 
 /**
- * colors mirror `_erd.scss`. kept separate since this file builds SVG markup
- * directly rather than through the app's CSS/color-map pipeline.
+ * reads the custom properties `_erd.scss` emits from `_color-map.scss`
+ * (`$erd-js-colors`), so this stays in sync with the stylesheet instead of
+ * hardcoding colors that can drift from it. called lazily, never at module
+ * load time, since the styles aren't guaranteed ready until then.
  */
-const NODE_BORDER_COLOR = '#999';
-const NODE_BACKGROUND = '#fff';
-const HEADER_BACKGROUND = '#f0f0f0';
-const ROW_BORDER_COLOR = '#e5e5e5';
-const TYPE_COLOR = '#888';
-const FK_BADGE_COLOR = '#b04a2a';
+function getErdSvgColors(): ErdSvgColors {
+  const container = document.querySelector('.erd-container') ?? document.documentElement;
+  return {
+    nodeBorder: getCssVariable('erd-node-border', container, '#999'),
+    nodeBackground: getCssVariable('white', container, '#fff'),
+    headerBackground: getCssVariable('erd-node-header-background', container, '#f0f0f0'),
+    rowBorder: getCssVariable('erd-node-row-border', container, '#e5e5e5'),
+    typeText: getCssVariable('placeholder', container, '#888'),
+    fkBadge: getCssVariable('erd-fk-badge', container, '#b04a2a'),
+  };
+}
+
+// no _erd.scss counterpart yet (react-flow's own default edge stroke, not
+// something chaise's stylesheet defines), so this stays a plain constant.
 const EDGE_COLOR = '#999';
 
 /**
@@ -45,7 +65,7 @@ function escapeXml(value: string): string {
  * column. header and rows are clipped to a rounded rect so corners match the
  * on screen node (which relies on `overflow: hidden` for the same effect).
  */
-function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel): string {
+function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdSvgColors): string {
   const { x, y } = node.position;
   const width = node.width ?? 0;
   const height = node.height ?? 0;
@@ -60,18 +80,19 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel): string {
       const textY = rowY + ROW_HEIGHT / 2;
 
       const badgeX = nameX + col.name.length * CHAR_WIDTH + 5;
-      const fkBadge = col.isForeignKey
-        ? `<text x="${badgeX}" y="${textY}" font-size="9" font-weight="bold" fill="${FK_BADGE_COLOR}"
-            alignment-baseline="middle">FK</text>`
-        : '';
+      const fkBadge =
+        col.isForeignKey && detail !== ERDDetailLevel.KEYS
+          ? `<text x="${badgeX}" y="${textY}" font-size="9" font-weight="bold" fill="${colors.fkBadge}"
+              alignment-baseline="middle">FK</text>`
+          : '';
       const nameWeight = col.isPrimaryKey ? 'bold' : 'normal';
 
       return `
-        <line x1="${x}" y1="${rowY}" x2="${x + width}" y2="${rowY}" stroke="${ROW_BORDER_COLOR}" stroke-width="1" />
+        <line x1="${x}" y1="${rowY}" x2="${x + width}" y2="${rowY}" stroke="${colors.rowBorder}" stroke-width="1" />
         <text x="${nameX}" y="${textY}" font-size="12" font-weight="${nameWeight}"
           alignment-baseline="middle">${escapeXml(col.name)}</text>
         ${fkBadge}
-        <text x="${typeX}" y="${textY}" font-size="11" fill="${TYPE_COLOR}" text-anchor="end"
+        <text x="${typeX}" y="${textY}" font-size="11" fill="${colors.typeText}" text-anchor="end"
           alignment-baseline="middle">${escapeXml(col.type)}</text>
       `;
     })
@@ -79,14 +100,15 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel): string {
 
   return `
     <g>
-      <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="4" fill="${NODE_BACKGROUND}" stroke="${NODE_BORDER_COLOR}" stroke-width="1" />
+      <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="4" fill="${colors.nodeBackground}"
+        stroke="${colors.nodeBorder}" stroke-width="1" />
       <clipPath id="${clipId}">
         <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="4" />
       </clipPath>
       <g clip-path="url(#${clipId})">
-        <rect x="${x}" y="${y}" width="${width}" height="${HEADER_HEIGHT}" fill="${HEADER_BACKGROUND}" />
-        <text x="${x + 10}" y="${y + HEADER_HEIGHT / 2}" font-size="12" font-weight="bold"
-          alignment-baseline="middle">${escapeXml(node.data.table.name)}</text>
+        <rect x="${x}" y="${y}" width="${width}" height="${HEADER_HEIGHT}" fill="${colors.headerBackground}" />
+        <text x="${x + width / 2}" y="${y + HEADER_HEIGHT / 2}" font-size="12" font-weight="bold"
+          text-anchor="middle" alignment-baseline="middle">${escapeXml(node.data.table.name)}</text>
         ${rows}
       </g>
     </g>
@@ -129,6 +151,7 @@ export function nodesToSvg(nodes: ERDTableNodeModel[], edges: Edge[], detail: ER
   const bounds = getNodesBounds(nodes);
   const viewBox = `${bounds.x - PADDING} ${bounds.y - PADDING} ${bounds.width + PADDING * 2} ${bounds.height + PADDING * 2}`;
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  const colors = getErdSvgColors();
 
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" font-family="sans-serif">
@@ -138,7 +161,7 @@ export function nodesToSvg(nodes: ERDTableNodeModel[], edges: Edge[], detail: ER
         </marker>
       </defs>
       ${edges.map((edge) => edgeToSvg(edge, nodesById)).join('')}
-      ${nodes.map((node) => nodeToSvg(node, detail)).join('')}
+      ${nodes.map((node) => nodeToSvg(node, detail, colors)).join('')}
     </svg>
   `;
 }

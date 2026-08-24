@@ -111,6 +111,8 @@ const ERDInner = (): JSX.Element => {
   // (export deliberately ignores focus and always exports the full diagram).
   const [focusedTableId, setFocusedTableId] = useState<string | null>(null);
 
+  const [toolbarOpen, setToolbarOpen] = useState(true);
+
   const connectedTableIds = useMemo(() => {
     if (!focusedTableId) return null;
     const ids = new Set<string>();
@@ -388,9 +390,28 @@ const ERDInner = (): JSX.Element => {
                   <Background />
                   <Controls showInteractive={false} />
                   <Panel position='top-center' className='erd-title'>
-                    Catalog {catalogId} Data Model
+                    <h3>Catalog {catalogId} Data Model</h3>
                   </Panel>
+                  {!toolbarOpen ? (
+                    <Panel position='top-left' className='erd-toolbar-collapsed'>
+                      <ChaiseTooltip placement='top' tooltip='Click to show settings'>
+                        <button type='button' className='chaise-btn chaise-btn-tertiary' onClick={() => setToolbarOpen(true)}>
+                          <span className='chaise-btn-icon chaise-icon chaise-sidebar-open' />
+                          <span>Show settings</span>
+                        </button>
+                      </ChaiseTooltip>
+                    </Panel>
+                  ) : (
                   <Panel position='top-left' className='erd-toolbar'>
+                    <div className='erd-toolbar-header'>
+                      <h3 className='erd-toolbar-title'>Settings</h3>
+                      <ChaiseTooltip placement='top' tooltip='Click to hide settings'>
+                        <button type='button' className='chaise-btn chaise-btn-tertiary' onClick={() => setToolbarOpen(false)}>
+                          <span className='chaise-btn-icon chaise-icon chaise-sidebar-close' />
+                          <span>Hide settings</span>
+                        </button>
+                      </ChaiseTooltip>
+                    </div>
                     <div className='erd-toolbar-row'>
                       <label>Detail</label>
                       <ChaiseTooltip placement='right' tooltip='How many columns to show per table.'>
@@ -452,14 +473,17 @@ const ERDInner = (): JSX.Element => {
                       items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
                       checkedIds={visibleSchemas}
                       onToggle={handleToggleSchema}
+                      emptyMessage='No schemas found.'
                     />
                     <ErdChecklist
                       title='Tables'
                       items={visibleSchemaTableItems}
                       checkedIds={visibleTableIds}
                       onToggle={handleToggleTable}
+                      emptyMessage='No tables to show. Select a schema above.'
                     />
                   </Panel>
+                  )}
                 </ReactFlow>
                 </>
               )}
