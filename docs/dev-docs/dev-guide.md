@@ -68,6 +68,7 @@ This is a guide for people who develop Chaise.
 - [Performance](#performance)
   - [Debugging](#debugging)
   - [Memoization](#memoization)
+  - [Lazy loading heavy dependencies](#lazy-loading-heavy-dependencies)
 - [Documentation](#documentation)
 
 ## Commit message conventions
@@ -1350,6 +1351,17 @@ That being said, performance-related changes applied incorrectly can even harm p
 Useful links:
 - https://react.dev/reference/react/memo
 - https://dmitripavlutin.com/use-react-memo-wisely/
+
+### Lazy loading heavy dependencies
+
+When a large dependency is only needed on some code paths, don't import it eagerly. Isolate it in its own module and load it with [`React.lazy`](https://react.dev/reference/react/lazy) + `Suspense` so webpack puts it in a separate chunk that's only fetched when that path actually renders. For example, `plotly.js-basic-dist-min` (~1MB) is only needed when a range facet shows a histogram, so it's isolated in `facet-range-plot.tsx` and lazy-loaded from `facet-range-picker.tsx`.
+
+Guidelines:
+
+- Place the `lazy()` boundary at the call site with an existing conditional (the place that decides whether the feature shows), not inside the heavy component itself. A module cannot defer its own load; whoever imports it decides eager vs lazy.
+- `import()` splits at module granularity. If only part of a component needs the heavy dependency, extract that part into its own file first (like `facet-range-plot.tsx`) and keep the rest eagerly loaded.
+- Mount the lazy component as soon as the feature is visible, even if its data hasn't arrived yet (return `null` from the component until it has). This lets the chunk download run in parallel with data requests instead of after them.
+- Give the `Suspense` `fallback` a spinner so users see progress while the chunk downloads.
 
 ## Documentation
 
