@@ -14,7 +14,6 @@ import {
   type Edge,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import ELK from 'elkjs/lib/elk.bundled.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // components
@@ -43,11 +42,14 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
-import { exportErdToPdf } from '@isrd-isi-edu/chaise/src/utils/erd-pdf-export';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-const elk = new ELK();
+/*
+ * elkjs is ~1.5MB, so it's lazy-loaded to keep it out of the initial payload. the fetch
+ * starts right away (module evaluation) so it downloads in parallel with the catalog request.
+ */
+const elkPromise = import('elkjs/lib/elk.bundled.js').then((mod) => new mod.default());
 
 /**
  * registered at module level: an inline object would change identity on every
@@ -184,8 +186,8 @@ const ERDInner = (): JSX.Element => {
       setIsRelayouting(true);
       // any alert from a previous attempt no longer applies to this one
       removeAllAlerts();
-      return elk
-        .layout(graphToElk(graph, level, algorithm, schemas, tableIds))
+      return elkPromise
+        .then((elk) => elk.layout(graphToElk(graph, level, algorithm, schemas, tableIds)))
         .then((laidOut) => {
           const flow = elkToFlow(graph, laidOut);
           setNodes(flow.nodes);
@@ -218,8 +220,8 @@ const ERDInner = (): JSX.Element => {
   const handleRemoveOverlaps = useCallback(() => {
     if (!graphRef.current) return;
     setIsRelayouting(true);
-    elk
-      .layout({
+    elkPromise
+      .then((elk) => elk.layout({
         id: 'root',
         layoutOptions: { 'elk.algorithm': 'sporeOverlap' },
         children: nodes.map((node) => ({
@@ -230,7 +232,7 @@ const ERDInner = (): JSX.Element => {
           height: node.height ?? 0,
         })),
         edges: edges.map((edge) => ({ id: edge.id, sources: [edge.source], targets: [edge.target] })),
-      })
+      }))
       .then((laidOut) => {
         const flow = elkToFlow(graphRef.current as ERDGraph, laidOut);
         setNodes(flow.nodes);
@@ -248,7 +250,10 @@ const ERDInner = (): JSX.Element => {
   }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
-    exportErdToPdf(nodes, edges, detail).catch((error: any) => dispatchError({ error }));
+    // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
+    import('@isrd-isi-edu/chaise/src/utils/erd-pdf-export')
+      .then(({ exportErdToPdf }) => exportErdToPdf(nodes, edges, detail))
+      .catch((error: any) => dispatchError({ error }));
   }, [nodes, edges, detail, dispatchError]);
 
   const [catalogId, setCatalogId] = useState<string | null>(null);
