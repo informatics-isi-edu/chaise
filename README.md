@@ -80,13 +80,14 @@ set of entities in the database.
       <td>
         Visualizes a catalog's data model as an interactive entity-relationship diagram.
         <ul>
-          <li>Tables are laid out automatically with a choice of layout algorithms, and can be rearranged by dragging.</li>
-          <li>Relationships can be rendered in crow's foot (ERD) notation or as simple arrows, with adjustable per-table detail from names only up to all columns.</li>
+          <li>Tables are displayed automatically with a choice of algorithms, and can be rearranged by dragging.</li>
+          <li>Relationships can be rendered ERD notation or as simple arrows, with adjustable per-table detail from names only up to all columns.</li>
           <li>Schemas and tables can be toggled on and off to focus the diagram, and clicking a table highlights its direct connections.</li>
-          <li>The current diagram can be exported as a vector PDF.</li>
+          <li>The current diagram can be exported as a PDF file.</li>
         </ul>
       </td>
-      <td></td>
+      <td><img width="1624" height="999" alt="Screenshot 2026-08-26 at 4 15 29 PM" src="https://github.com/user-attachments/assets/0c73db65-eed5-4fb7-86b8-f6bf3ab357bc" /></td>
+
     </tr>
   </tbody>
 </table>
