@@ -1,5 +1,6 @@
 @use 'sass:map';
 @use 'variables';
+@use 'scrollbar';
 
 // colors that erd-pdf-export.ts needs at runtime (it builds SVG markup
 // directly, outside the normal css pipeline). exposed as custom properties so
@@ -25,6 +26,7 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     flex-direction: column;
 
     padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .main-body {
@@ -140,14 +142,24 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
 
   .erd-toolbar-collapsed,
   .erd-toolbar {
-    padding: 12px;
+    padding: 10px;
   }
 
   .erd-toolbar {
-    width: 300px;
+    width: 275px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    // 140px = the bottom-left zoom controls plus panel margins, so the
+    // toolbar always stops above them
+    max-height: calc(100% - 130px);
+    overflow-y: auto;
+    @include scrollbar.chaise-scrollbar-style;
+
+    // every section keeps its natural height except the tables checklist
+    > * {
+      flex: 0 0 auto;
+    }
 
     .erd-toolbar-header {
       display: flex;
@@ -159,7 +171,7 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     }
 
     // ensure the hide settings button is properly aligned to the right.
-    .chaise-sidebar-close {
+    .chaise-sidebar-open {
       padding-right: 0;
     }
 
@@ -175,15 +187,16 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
       width: 100%;
 
       > label {
-        flex: 0 0 85px;
+        flex: 0 0 80px;
         margin: 0;
         font-size: 12px;
         font-weight: 600;
         color: map.get(variables.$color-map, 'erd-secondary-label');
       }
 
+      // action buttons (remove overlaps, export pdf) fill their own row
       > button {
-        flex: 0 1 auto;
+        flex: 1 1 auto;
         white-space: nowrap;
       }
     }
@@ -219,7 +232,6 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     }
 
     .erd-checklist {
-      max-height: 180px;
       width: 100%;
       box-sizing: border-box;
       padding-top: 6px;
@@ -235,6 +247,44 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
           min-width: 0;
         }
       }
+    }
+
+    // fixed cap: about 5 rows (5 x ~21px row + list padding)
+    .erd-schemas-checklist .erd-checklist {
+      max-height: 112px;
+    }
+
+    /*
+     * the tables checklist is the flexible section: it takes whatever height
+     * is left under the toolbar's max-height (see .erd-toolbar) and scrolls
+     */
+    .erd-tables-checklist {
+      flex: 1 1 auto;
+      // below ~4 rows the list stops shrinking and the toolbar scrollbar takes over
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+
+      .erd-checklist {
+        flex: 1 1 auto;
+        min-height: 90px;
+      }
+    }
+  }
+
+  // the attribution sits flush against the corner (margin 0) while panels
+  // default to margin 15px; give it the same right inset as the minimap
+  .react-flow__attribution {
+    margin-right: 15px;
+  }
+
+  // keep the diagram readable under the minimap; it wakes up on hover
+  .react-flow__minimap {
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in-out;
+
+    &:hover {
+      opacity: 1;
     }
   }
 

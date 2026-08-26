@@ -393,8 +393,11 @@ const ERDInner = (): JSX.Element => {
         const schemas = new Set(
           Object.values(graphRef.current.tables).map((table) => table.schema)
         );
-        setVisibleSchemas(schemas);
-        setAllSchemas(Array.from(schemas).sort());
+        const sortedSchemas = Array.from(schemas).sort();
+        // only the first schema starts checked: large catalogs would otherwise
+        // pay a slow first layout over everything before the user trims it
+        setVisibleSchemas(new Set(sortedSchemas.slice(0, 1)));
+        setAllSchemas(sortedSchemas);
 
         const tables = Object.values(graphRef.current.tables).map((table) => ({
           id: `${table.schema}:${table.name}`,
@@ -600,6 +603,8 @@ const ERDInner = (): JSX.Element => {
                               <span>Remove Overlaps</span>
                             </button>
                           </ChaiseTooltip>
+                        </div>
+                        <div className='erd-toolbar-row'>
                           <ChaiseTooltip
                             placement='top'
                             tooltip='Download the current diagram as a PDF.'
@@ -616,6 +621,7 @@ const ERDInner = (): JSX.Element => {
                         </div>
                         <ErdChecklist
                           title='Schemas'
+                          className='erd-schemas-checklist'
                           items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
                           checkedIds={visibleSchemas}
                           onToggle={handleToggleSchema}
@@ -623,6 +629,7 @@ const ERDInner = (): JSX.Element => {
                         />
                         <ErdChecklist
                           title='Tables'
+                          className='erd-tables-checklist'
                           items={visibleSchemaTableItems}
                           checkedIds={visibleTableIds}
                           onToggle={handleToggleTable}
