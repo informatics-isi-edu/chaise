@@ -527,7 +527,7 @@ const ModelInner = (): JSX.Element => {
                           </ChaiseTooltip>
                         </div>
                         <div className='model-toolbar-row'>
-                          <label>Display Mode</label>
+                          <label>Mode</label>
                           <Dropdown
                             className='chaise-dropdown'
                             onSelect={(opt) => setDisplayMode(opt as ModelDisplayMode)}

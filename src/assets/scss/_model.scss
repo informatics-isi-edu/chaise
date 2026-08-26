@@ -146,7 +146,7 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
   }
 
   .model-toolbar {
-    width: 275px;
+    width: 260px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -187,7 +187,7 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
       width: 100%;
 
       > label {
-        flex: 0 0 80px;
+        flex: 0 0 55px;
         margin: 0;
         font-size: 12px;
         font-weight: 600;
@@ -244,9 +244,14 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
       }
     }
 
-    // fixed cap: about 5 rows (5 x ~21px row + list padding)
+    .model-schemas-checklist {
+      // tighten the space above the Schemas title (the flex gap alone is too much)
+      margin-top: -5px;
+    }
+
     .model-schemas-checklist .model-checklist {
-      max-height: 112px;
+      // make sure 5 schemas can show up
+      max-height: 120px;
     }
 
     /*
@@ -254,6 +259,8 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
      * is left under the toolbar's max-height (see .model-toolbar) and scrolls
      */
     .model-tables-checklist {
+      // tighten the space above the Tables title (the flex gap alone is too much)
+      margin-top: -5px;
       flex: 1 1 auto;
       // below ~4 rows the list stops shrinking and the toolbar scrollbar takes over
       min-height: 110px;
