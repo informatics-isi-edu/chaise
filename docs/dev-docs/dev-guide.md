@@ -261,7 +261,7 @@ The rules that should be followed while writing code.
   - `useStateRef`:
     - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
     - intended to be synchronous
-- Use this order inside the compoents (so the file reads storage first, then what is derived from it, then what reacts to it):
+- Use this order inside the component (so the file reads storage first, then what is derived from it, then what reacts to it):
   1. External/context hooks: store selectors, `useContext`, custom hooks like `useError`/`useAlert`.
   2. `useState` (including wrappers like `useNodesState`).
   3. `useRef`

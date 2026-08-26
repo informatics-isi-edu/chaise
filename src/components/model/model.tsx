@@ -82,7 +82,7 @@ const nodeTypes = { modelTable: ModelTableNode };
  */
 const edgeTypes = { modelFloating: ModelFloatingEdge };
 
-const DISPLAY_MODEL_LABELS: Record<ModelDisplayMode, string> = {
+const DISPLAY_MODE_LABELS: Record<ModelDisplayMode, string> = {
   [ModelDisplayMode.ERD]: 'ERD',
   [ModelDisplayMode.SIMPLIFIED]: 'Simplified',
 };
@@ -528,10 +528,10 @@ const ModelInner = (): JSX.Element => {
                             onSelect={(opt) => setDisplayMode(opt as ModelDisplayMode)}
                           >
                             <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
-                              {DISPLAY_MODEL_LABELS[displayMode]}
+                              {DISPLAY_MODE_LABELS[displayMode]}
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                              {Object.entries(DISPLAY_MODEL_LABELS).map(([opt, label]) => (
+                              {Object.entries(DISPLAY_MODE_LABELS).map(([opt, label]) => (
                                 <Dropdown.Item
                                   key={opt}
                                   eventKey={opt}
