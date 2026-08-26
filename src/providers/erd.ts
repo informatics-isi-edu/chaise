@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 
+
+/**
+ * whether ERD notions should be used or a simplified view
+ */
+export enum ERDDisplayMode {
+  ERD = 'erd',
+  SIMPLIFIED = 'simplified',
+}
+
 /**
  * how much of each table is drawn
  */
@@ -30,6 +39,9 @@ export enum ERDBaseLayoutAlgorithm {
 }
 
 interface ERDStore {
+  displayMode: ERDDisplayMode;
+  setDisplayMode: (displayMode: ERDDisplayMode) => void;
+
   detail: ERDDetailLevel;
   setDetail: (detail: ERDDetailLevel) => void;
 
@@ -52,6 +64,9 @@ interface ERDStore {
  *   const detail = useErdStore((state) => state.detail);
  */
 export const useErdStore = create<ERDStore>((set) => ({
+  displayMode: ERDDisplayMode.SIMPLIFIED,
+  setDisplayMode: (displayMode) => set({ displayMode }),
+
   detail: ERDDetailLevel.KEYS,
   setDetail: (detail) => set({ detail }),
 

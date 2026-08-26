@@ -1,17 +1,20 @@
-import { getNodesBounds, getStraightPath, type Edge } from '@xyflow/react';
+import { getNodesBounds } from '@xyflow/react';
 import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
 
-// models
-import { ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
+// providers
+import { ERDDetailLevel, ERDDisplayMode } from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // utilities
 import {
-  HEADER_HEIGHT,
-  rectCenter,
-  rectIntersection,
-  ROW_HEIGHT,
+  computeEdgePath,
+  ERD_MARKERS,
+  erdMarkerId,
+  erdMarkerUrls,
+  NODE_SIZING,
   visibleColumns,
+  type ERDEdgeModel,
+  type ERDMarkerShape,
   type ERDTableNodeModel,
 } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 import { getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -74,10 +77,10 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdS
 
   const rows = columns
     .map((col, i) => {
-      const rowY = y + HEADER_HEIGHT + i * ROW_HEIGHT;
+      const rowY = y + NODE_SIZING.HEADER_HEIGHT + i * NODE_SIZING.ROW_HEIGHT;
       const nameX = x + 10;
       const typeX = x + width - 10;
-      const textY = rowY + ROW_HEIGHT / 2;
+      const textY = rowY + NODE_SIZING.ROW_HEIGHT / 2;
 
       const badgeX = nameX + col.name.length * CHAR_WIDTH + 5;
       const fkBadge =
@@ -106,8 +109,8 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdS
         <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="4" />
       </clipPath>
       <g clip-path="url(#${clipId})">
-        <rect x="${x}" y="${y}" width="${width}" height="${HEADER_HEIGHT}" fill="${colors.headerBackground}" />
-        <text x="${x + width / 2}" y="${y + HEADER_HEIGHT / 2}" font-size="12" font-weight="bold"
+        <rect x="${x}" y="${y}" width="${width}" height="${NODE_SIZING.HEADER_HEIGHT}" fill="${colors.headerBackground}" />
+        <text x="${x + width / 2}" y="${y + NODE_SIZING.HEADER_HEIGHT / 2}" font-size="12" font-weight="bold"
           text-anchor="middle" alignment-baseline="middle">${escapeXml(node.data.table.name)}</text>
         ${rows}
       </g>
@@ -116,29 +119,46 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdS
 }
 
 /**
- * same anchor logic as the on screen edge (floating-edge.tsx): each edge
- * connects whichever point on each node's boundary currently faces the
- * other node, not a fixed handle side, so a dragged/rerouted node exports
- * exactly as it renders on screen.
+ * one crow's foot marker def for the export svg, mirroring marker-defs.tsx
+ * (same ERD_MARKERS spec, so canvas and PDF cannot drift apart)
  */
-function edgeToSvg(edge: Edge, nodesById: Map<string, ERDTableNodeModel>): string {
+function erdMarkerToSvg(shape: ERDMarkerShape): string {
+  const spec = ERD_MARKERS.SHAPES[shape];
+  const circle = 'circle' in spec
+    ? `<circle cx="${spec.circle.cx}" cy="${spec.circle.cy}" r="${spec.circle.r}" fill="none" stroke="${ERD_MARKERS.COLOR}" stroke-width="1.5" />`
+    : '';
+  const paths = spec.paths
+    .map((d) => `<path d="${d}" fill="none" stroke="${ERD_MARKERS.COLOR}" stroke-width="1.5" />`)
+    .join('');
+  return `
+    <marker id="${erdMarkerId(shape)}" viewBox="0 0 ${ERD_MARKERS.WIDTH} ${ERD_MARKERS.HEIGHT}"
+      refX="${ERD_MARKERS.WIDTH}" refY="${ERD_MARKERS.REF_Y}" markerWidth="${ERD_MARKERS.WIDTH}"
+      markerHeight="${ERD_MARKERS.HEIGHT}" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      ${circle}${paths}
+    </marker>
+  `;
+}
+
+/**
+ * same geometry as the on screen edge (floating-edge.tsx): both go through
+ * computeEdgePath, so a dragged/rerouted node, parallel fk curves, and
+ * self-loops all export exactly as rendered. markers are orient=auto, so end
+ * decorations follow the path tangent on curves too. end decorations depend
+ * on the display mode, same as the canvas.
+ */
+function edgeToSvg(edge: ERDEdgeModel, nodesById: Map<string, ERDTableNodeModel>, displayMode: ERDDisplayMode): string {
   const source = nodesById.get(edge.source);
   const target = nodesById.get(edge.target);
   if (!source || !target) return '';
 
   const sourceRect = { ...source.position, width: source.width ?? 0, height: source.height ?? 0 };
   const targetRect = { ...target.position, width: target.width ?? 0, height: target.height ?? 0 };
-  const sourcePoint = rectIntersection(sourceRect, rectCenter(targetRect));
-  const targetPoint = rectIntersection(targetRect, rectCenter(sourceRect));
+  const path = computeEdgePath(sourceRect, targetRect, edge.data);
 
-  const [path] = getStraightPath({
-    sourceX: sourcePoint.x,
-    sourceY: sourcePoint.y,
-    targetX: targetPoint.x,
-    targetY: targetPoint.y,
-  });
-
-  return `<path d="${path}" fill="none" stroke="${EDGE_COLOR}" stroke-width="1" marker-end="url(#erd-export-arrow)" />`;
+  const markers = displayMode === ERDDisplayMode.ERD
+    ? `marker-start="${erdMarkerUrls(edge.data).markerStart}" marker-end="${erdMarkerUrls(edge.data).markerEnd}"`
+    : 'marker-end="url(#erd-export-arrow)"';
+  return `<path d="${path}" fill="none" stroke="${EDGE_COLOR}" stroke-width="1" ${markers} />`;
 }
 
 /**
@@ -147,20 +167,27 @@ function edgeToSvg(edge: Edge, nodesById: Map<string, ERDTableNodeModel>): strin
  * string: rect/text for table boxes, path for edges, no `foreignObject`. that
  * makes it convert cleanly to a vector PDF, unlike react-flow's own DOM.
  */
-export function nodesToSvg(nodes: ERDTableNodeModel[], edges: Edge[], detail: ERDDetailLevel): string {
+export function nodesToSvg(
+  nodes: ERDTableNodeModel[],
+  edges: ERDEdgeModel[],
+  detail: ERDDetailLevel,
+  displayMode: ERDDisplayMode
+): string {
   const bounds = getNodesBounds(nodes);
   const viewBox = `${bounds.x - PADDING} ${bounds.y - PADDING} ${bounds.width + PADDING * 2} ${bounds.height + PADDING * 2}`;
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const colors = getErdSvgColors();
 
+  const shapes = Object.keys(ERD_MARKERS.SHAPES) as ERDMarkerShape[];
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" font-family="sans-serif">
       <defs>
         <marker id="erd-export-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="${EDGE_COLOR}" />
         </marker>
+        ${shapes.map((shape) => erdMarkerToSvg(shape)).join('')}
       </defs>
-      ${edges.map((edge) => edgeToSvg(edge, nodesById)).join('')}
+      ${edges.map((edge) => edgeToSvg(edge, nodesById, displayMode)).join('')}
       ${nodes.map((node) => nodeToSvg(node, detail, colors)).join('')}
     </svg>
   `;
@@ -172,8 +199,13 @@ export function nodesToSvg(nodes: ERDTableNodeModel[], edges: Edge[], detail: ER
  * v1 scales the whole diagram to fit one Letter landscape page; pagination
  * for large diagrams is a follow-up (see task notes).
  */
-export async function exportErdToPdf(nodes: ERDTableNodeModel[], edges: Edge[], detail: ERDDetailLevel): Promise<void> {
-  const svgString = nodesToSvg(nodes, edges, detail);
+export async function exportErdToPdf(
+  nodes: ERDTableNodeModel[],
+  edges: ERDEdgeModel[],
+  detail: ERDDetailLevel,
+  displayMode: ERDDisplayMode
+): Promise<void> {
+  const svgString = nodesToSvg(nodes, edges, detail, displayMode);
   const svgEl = new DOMParser().parseFromString(svgString, 'image/svg+xml').documentElement;
 
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });

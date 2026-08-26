@@ -5,19 +5,20 @@ import {
   Background,
   Controls,
   MarkerType,
+  MiniMap,
   Panel,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
   useReactFlow,
-  type Edge,
   type NodeMouseHandler,
 } from '@xyflow/react';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // components
 import ErdChecklist from '@isrd-isi-edu/chaise/src/components/erd/checklist';
+import ErdMarkerDefs from '@isrd-isi-edu/chaise/src/components/erd/marker-defs';
 import ERDFloatingEdge from '@isrd-isi-edu/chaise/src/components/erd/floating-edge';
 import ERDTableNode from '@isrd-isi-edu/chaise/src/components/erd/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -25,7 +26,15 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
@@ -35,21 +44,31 @@ import { CustomError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { useErdStore, ERDBaseLayoutAlgorithm, ERDDetailLevel } from '@isrd-isi-edu/chaise/src/providers/erd';
+import {
+  useErdStore,
+  ERDBaseLayoutAlgorithm,
+  ERDDetailLevel,
+  ERDDisplayMode,
+} from '@isrd-isi-edu/chaise/src/providers/erd';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import { elkToFlow, graphToElk, type ERDTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import {
+  elkToFlow,
+  graphToElk,
+  type ERDEdgeModel,
+  type ERDTableNodeModel,
+} from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { attachContainerHeightSensors, getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import {
+  attachContainerHeightSensors,
+  getCssVariable,
+} from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-/*
- * elkjs is ~1.5MB, so it's lazy-loaded to keep it out of the initial payload. the fetch
- * starts right away (module evaluation) so it downloads in parallel with the catalog request.
- */
+// lazy-load elk since it's a large standalone file that only this component needs
 const elkPromise = import('elkjs/lib/elk.bundled.js').then((mod) => new mod.default());
 
 /**
@@ -62,6 +81,11 @@ const nodeTypes = { erdTable: ERDTableNode };
  * same reasoning as nodeTypes: module level, not inline.
  */
 const edgeTypes = { erdFloating: ERDFloatingEdge };
+
+const DISPLAY_MODEL_LABELS: Record<ERDDisplayMode, string> = {
+  [ERDDisplayMode.ERD]: 'ERD',
+  [ERDDisplayMode.SIMPLIFIED]: 'Simplified',
+};
 
 const DETAIL_LEVEL_LABELS: Record<ERDDetailLevel, string> = {
   [ERDDetailLevel.NAMES]: 'Table Names',
@@ -88,6 +112,9 @@ const ERDInner = (): JSX.Element => {
   const { addAlert, removeAllAlerts } = useAlert();
   const { fitView } = useReactFlow();
 
+  const displayMode = useErdStore((state) => state.displayMode);
+  const setDisplayMode = useErdStore((state) => state.setDisplayMode);
+
   const detail = useErdStore((state) => state.detail);
   const setDetail = useErdStore((state) => state.setDetail);
 
@@ -100,26 +127,38 @@ const ERDInner = (): JSX.Element => {
   const visibleTableIds = useErdStore((state) => state.visibleTableIds);
   const setVisibleTableIds = useErdStore((state) => state.setVisibleTableIds);
 
+  //-------------------  state:   --------------------//
+
   /**
    * react-flow with a `nodes` prop is a controlled component: interactions
    * (dragging included) only apply if the change events are folded back into
    * state, which is what these hooks do.
    */
   const [nodes, setNodes, onNodesChange] = useNodesState<ERDTableNodeModel>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [layoutDone, setLayoutDone] = useState(false);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ERDEdgeModel>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // true from the moment any relayout() call (or the remove-overlaps action)
-  // starts until it settles. neither elk nor react-flow expose their own
-  // progress, this is just our own flag.
   const [isRelayouting, setIsRelayouting] = useState(false);
-
-  // which table (if any) is focused by click. kept separate from nodes/edges
-  // state, which stays "clean" for dragging, relayout, and pdf export
-  // (export deliberately ignores focus and always exports the full diagram).
   const [focusedTableId, setFocusedTableId] = useState<string | null>(null);
-
   const [toolbarOpen, setToolbarOpen] = useState(true);
+
+  const [catalogId, setCatalogId] = useState<string | null>(null);
+  const [allSchemas, setAllSchemas] = useState<string[]>([]);
+
+  // same pattern as allSchemas: set once at load, static afterward. keeps
+  // the schema field around so the table checklist can be scoped to
+  // currently visible schemas, unlike allSchemas this isn't rendered as-is.
+  const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
+
+  //-------------------  refs:   --------------------//
+
+  // the introspected graph, kept so detail changes don't refetch the catalog
+  const graphRef = useRef<ERDGraph | null>(null);
+
+  // guard against strict mode calling the effect twice in dev mode
+  const setupStarted = useRef<boolean>(false);
+
+  //-------------------  derived values:   --------------------//
 
   const connectedTableIds = useMemo(() => {
     if (!focusedTableId) return null;
@@ -139,7 +178,12 @@ const ERDInner = (): JSX.Element => {
     if (!focusedTableId) return nodes;
     return nodes.map((node) => ({
       ...node,
-      className: node.id === focusedTableId ? 'erd-node-focused' : connectedTableIds?.has(node.id) ? '' : 'erd-node-dimmed',
+      className:
+        node.id === focusedTableId
+          ? 'erd-node-focused'
+          : connectedTableIds?.has(node.id)
+            ? ''
+            : 'erd-node-dimmed',
     }));
   }, [nodes, focusedTableId, connectedTableIds]);
 
@@ -149,16 +193,44 @@ const ERDInner = (): JSX.Element => {
      * marker fill doesn't follow the path's CSS stroke color, so read the same color-map
      * value the highlighted stroke uses (see $erd-js-colors in _erd.scss)
      */
-    const highlightColor = getCssVariable('primary', document.querySelector('.erd-container') ?? undefined, '#4674a7');
+    const highlightColor = getCssVariable(
+      'primary',
+      document.querySelector('.erd-container') ?? undefined,
+      '#4674a7'
+    );
     return edges.map((edge) => {
       const connected = edge.source === focusedTableId || edge.target === focusedTableId;
       return {
         ...edge,
         className: connected ? 'erd-edge-highlighted' : 'erd-edge-dimmed',
-        markerEnd: connected ? { type: MarkerType.ArrowClosed, color: highlightColor } : edge.markerEnd,
+        /*
+         * the ERD display mode picks its own (crow's foot) markers in
+         * floating-edge.tsx off data.highlighted, so the arrow recolor only
+         * applies to the simplified mode
+         */
+        markerEnd: connected && displayMode === ERDDisplayMode.SIMPLIFIED
+          ? { type: MarkerType.ArrowClosed, color: highlightColor }
+          : edge.markerEnd,
+        data: edge.data && { ...edge.data, highlighted: connected },
       };
     });
-  }, [edges, focusedTableId]);
+  }, [edges, focusedTableId, displayMode]);
+
+  // tables whose schema is currently hidden are dropped from the list they'd
+  // show a checkbox for; that state is already fully explained by the schema
+  // checklist, showing them here too would just be a second, confusing
+  // control for the same thing.
+  const visibleSchemaTableItems = useMemo(
+    () =>
+      allTables
+        .filter((table) => visibleSchemas.has(table.schema))
+        .map((table) => ({ id: table.id, label: table.id }))
+        // id is "schema:name", so this also groups by schema before alphabetizing within it
+        .sort((a, b) => a.id.localeCompare(b.id)),
+    [allTables, visibleSchemas]
+  );
+
+  //-------------------  callbacks:   --------------------//
 
   const handleNodeClick: NodeMouseHandler<ERDTableNodeModel> = useCallback((_event, node) => {
     setFocusedTableId((current) => (current === node.id ? null : node.id));
@@ -166,52 +238,36 @@ const ERDInner = (): JSX.Element => {
 
   const handlePaneClick = useCallback(() => setFocusedTableId(null), []);
 
-  // the introspected graph, kept so detail changes don't refetch the catalog
-  const graphRef = useRef<ERDGraph | null>(null);
-
-  // guard against strict mode calling the effect twice in dev mode
-  const setupStarted = useRef<boolean>(false);
-
-  /**
-   * elk can throw on pathological inputs (dense/cyclic graphs, certain
-   * algorithms on large catalogs), so failure here is expected often enough
-   * to handle in one place rather than at every call site. it's recoverable
-   * (pick a different algorithm), so it surfaces as a dismissible alert
-   * rather than the blocking ErrorModal, and it never rejects: whatever was
-   * on screen before (nothing, on the very first layout) stays as-is.
-   */
   const relayout = useCallback(
-    (
+    async (
       graph: ERDGraph,
+      displayMode: ERDDisplayMode,
       level: ERDDetailLevel,
       algorithm: ERDBaseLayoutAlgorithm,
       schemas: Set<string>,
-      tableIds: Set<string>
+      tableIds: Set<string>,
     ) => {
       setIsRelayouting(true);
       // any alert from a previous attempt no longer applies to this one
       removeAllAlerts();
-      return elkPromise
-        .then((elk) => elk.layout(graphToElk(graph, level, algorithm, schemas, tableIds)))
-        .then((laidOut) => {
-          const flow = elkToFlow(graph, laidOut);
-          setNodes(flow.nodes);
-          setEdges(flow.edges);
-          // wait for react-flow to pick up the new nodes before framing them
-          window.requestAnimationFrame(() => fitView());
-        })
-        .catch((error: unknown) => {
-          $log.error('elk layout failed', error);
-          addAlert(
-            `Could not lay out the diagram with the "${BASE_LAYOUT_LABELS[algorithm]}" algorithm. ` +
-              'Try a different layout algorithm from the Layout dropdown.',
-            ChaiseAlertType.WARNING
-          );
-        })
-        .finally(() => {
-          setLayoutDone(true);
-          setIsRelayouting(false);
-        });
+      try {
+        const elk = await elkPromise;
+        const laidOut = await elk.layout(graphToElk(graph, displayMode, level, algorithm, schemas, tableIds));
+        const flow = elkToFlow(graph, laidOut);
+        setNodes(flow.nodes);
+        setEdges(flow.edges);
+        // wait for react-flow to pick up the new nodes before framing them
+        window.requestAnimationFrame(() => fitView());
+      } catch (error) {
+        $log.error('elk layout failed', error);
+        addAlert(
+          `Could not lay out the diagram with the "${BASE_LAYOUT_LABELS[algorithm]}" algorithm. ` +
+            'Try a different layout algorithm from the Layout dropdown.',
+          ChaiseAlertType.WARNING
+        );
+      }
+      setIsInitialized(true);
+      setIsRelayouting(false);
     },
     [fitView, setNodes, setEdges, addAlert, removeAllAlerts]
   );
@@ -226,18 +282,31 @@ const ERDInner = (): JSX.Element => {
     if (!graphRef.current) return;
     setIsRelayouting(true);
     elkPromise
-      .then((elk) => elk.layout({
-        id: 'root',
-        layoutOptions: { 'elk.algorithm': 'sporeOverlap' },
-        children: nodes.map((node) => ({
-          id: node.id,
-          x: node.position.x,
-          y: node.position.y,
-          width: node.width ?? 0,
-          height: node.height ?? 0,
-        })),
-        edges: edges.map((edge) => ({ id: edge.id, sources: [edge.source], targets: [edge.target] })),
-      }))
+      .then((elk) =>
+        elk.layout({
+          id: 'root',
+          layoutOptions: { 'elk.algorithm': 'sporeOverlap' },
+          children: nodes.map((node) => ({
+            id: node.id,
+            x: node.position.x,
+            y: node.position.y,
+            width: node.width ?? 0,
+            height: node.height ?? 0,
+          })),
+          /*
+           * ids are prefixed because constraint-based edge ids can collide with node ids
+           * in elk's flat id space; they're throwaway (elkToFlow rebuilds edges from the
+           * graph). self-loops don't affect placement, so they're left out.
+           */
+          edges: edges
+            .filter((edge) => edge.source !== edge.target)
+            .map((edge) => ({
+              id: `edge:${edge.id}`,
+              sources: [edge.source],
+              targets: [edge.target],
+            })),
+        })
+      )
       .then((laidOut) => {
         const flow = elkToFlow(graphRef.current as ERDGraph, laidOut);
         setNodes(flow.nodes);
@@ -257,12 +326,9 @@ const ERDInner = (): JSX.Element => {
   const handleExportPdf = useCallback(() => {
     // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
     import('@isrd-isi-edu/chaise/src/utils/erd-pdf-export')
-      .then(({ exportErdToPdf }) => exportErdToPdf(nodes, edges, detail))
+      .then(({ exportErdToPdf }) => exportErdToPdf(nodes, edges, detail, displayMode))
       .catch((error: unknown) => dispatchError({ error }));
-  }, [nodes, edges, detail, dispatchError]);
-
-  const [catalogId, setCatalogId] = useState<string | null>(null);
-  const [allSchemas, setAllSchemas] = useState<string[]>([]);
+  }, [nodes, edges, detail, displayMode, dispatchError]);
 
   const handleToggleSchema = useCallback(
     (schema: string) => {
@@ -275,25 +341,6 @@ const ERDInner = (): JSX.Element => {
       setVisibleSchemas(next);
     },
     [visibleSchemas, setVisibleSchemas]
-  );
-
-  // same pattern as allSchemas: set once at load, static afterward. keeps
-  // the schema field around so the table checklist can be scoped to
-  // currently visible schemas, unlike allSchemas this isn't rendered as-is.
-  const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
-
-  // tables whose schema is currently hidden are dropped from the list they'd
-  // show a checkbox for; that state is already fully explained by the schema
-  // checklist, showing them here too would just be a second, confusing
-  // control for the same thing.
-  const visibleSchemaTableItems = useMemo(
-    () =>
-      allTables
-        .filter((table) => visibleSchemas.has(table.schema))
-        .map((table) => ({ id: table.id, label: table.id }))
-        // id is "schema:name", so this also groups by schema before alphabetizing within it
-        .sort((a, b) => a.id.localeCompare(b.id)),
-    [allTables, visibleSchemas]
   );
 
   const handleToggleTable = useCallback(
@@ -309,6 +356,8 @@ const ERDInner = (): JSX.Element => {
     [visibleTableIds, setVisibleTableIds]
   );
 
+  //-------------------  effects:   --------------------//
+
   useEffect(() => {
     if (setupStarted.current) return;
     setupStarted.current = true;
@@ -320,14 +369,10 @@ const ERDInner = (): JSX.Element => {
      */
     const catalog = ConfigService.catalog;
     if (!catalog) {
-      /*
-       * a plain Error would render as the generic "Terminal Error"; CustomError shows the
-       * message. the message is rendered as HTML, so it must not contain angle brackets.
-       */
       dispatchError({
         error: new CustomError(
           'No Catalog',
-          'No catalog specified. Use a url like /chaise/erd/#catalog-id, or define a defaultCatalog in chaise-config.'
+          'No catalog specified. Use a url like `/chaise/mv/#catalog-id`, or define a `defaultCatalog` in chaise-config.'
         ),
       });
       return;
@@ -345,7 +390,9 @@ const ERDInner = (): JSX.Element => {
         setCatalogId(graphRef.current.catalogId);
         updateHeadTitle(`Data Model #${graphRef.current.catalogId}`);
 
-        const schemas = new Set(Object.values(graphRef.current.tables).map((table) => table.schema));
+        const schemas = new Set(
+          Object.values(graphRef.current.tables).map((table) => table.schema)
+        );
         setVisibleSchemas(schemas);
         setAllSchemas(Array.from(schemas).sort());
 
@@ -359,6 +406,7 @@ const ERDInner = (): JSX.Element => {
         const initial = useErdStore.getState();
         return relayout(
           graphRef.current,
+          initial.displayMode,
           initial.detail,
           initial.baseLayout,
           initial.visibleSchemas,
@@ -366,6 +414,7 @@ const ERDInner = (): JSX.Element => {
         );
       })
       .catch((error: unknown) => dispatchError({ error }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -375,9 +424,9 @@ const ERDInner = (): JSX.Element => {
    * see handleRemoveOverlaps).
    */
   useEffect(() => {
-    if (!graphRef.current || !layoutDone) return;
-    void relayout(graphRef.current, detail, baseLayout, visibleSchemas, visibleTableIds);
-  }, [detail, baseLayout, visibleSchemas, visibleTableIds]);
+    if (!graphRef.current || !isInitialized) return;
+    void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds);
+  }, [isInitialized, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, relayout]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the
@@ -391,8 +440,11 @@ const ERDInner = (): JSX.Element => {
     };
   }, []);
 
+
+  //-------------------  render logic:   --------------------//
+
   // if there was an error during setup, hide everything
-  if (errors.length > 0 && !layoutDone) {
+  if (errors.length > 0 && !isInitialized) {
     return <></>;
   }
 
@@ -406,130 +458,181 @@ const ERDInner = (): JSX.Element => {
         <div className='main-container'>
           <div className='main-body'>
             <div className='erd-canvas'>
-              {!layoutDone ? (
+              {!isInitialized ? (
                 <ChaiseSpinner />
               ) : (
                 <>
-                {isRelayouting && (
-                  <div className='erd-loading-overlay'>
-                    <ChaiseSpinner />
-                  </div>
-                )}
-                <ReactFlow
-                  nodes={displayNodes}
-                  edges={displayEdges}
-                  nodeTypes={nodeTypes}
-                  edgeTypes={edgeTypes}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onNodeClick={handleNodeClick}
-                  onPaneClick={handlePaneClick}
-                  fitView
-                  nodesConnectable={false}
-                  edgesReconnectable={false}
-                  onlyRenderVisibleElements={true}
-                  // default is 0.5, too shallow to fit a large catalog; fitView
-                  // and manual zoom both get clamped by this
-                  minZoom={0.05}
-                >
-                  <Background />
-                  <Controls showInteractive={false} />
-                  <Panel position='top-center' className='erd-title'>
-                    <h3>Catalog {catalogId} Data Model</h3>
-                  </Panel>
-                  {!toolbarOpen ? (
-                    <Panel position='top-left' className='erd-toolbar-collapsed'>
-                      <ChaiseTooltip placement='top' tooltip='Click to show settings'>
-                        <button type='button' className='chaise-btn chaise-btn-tertiary' onClick={() => setToolbarOpen(true)}>
-                          <span className='chaise-btn-icon chaise-icon chaise-sidebar-open' />
-                          <span>Show settings</span>
-                        </button>
-                      </ChaiseTooltip>
-                    </Panel>
-                  ) : (
-                  <Panel position='top-left' className='erd-toolbar'>
-                    <div className='erd-toolbar-header'>
-                      <h3 className='erd-toolbar-title'>Settings</h3>
-                      <ChaiseTooltip placement='top' tooltip='Click to hide settings'>
-                        <button type='button' className='chaise-btn chaise-btn-tertiary' onClick={() => setToolbarOpen(false)}>
-                          <span className='chaise-btn-icon chaise-icon chaise-sidebar-close' />
-                          <span>Hide settings</span>
-                        </button>
-                      </ChaiseTooltip>
+                  <ErdMarkerDefs />
+                  {isRelayouting && (
+                    <div className='erd-loading-overlay'>
+                      <ChaiseSpinner />
                     </div>
-                    <div className='erd-toolbar-row'>
-                      <label>Detail</label>
-                      <ChaiseTooltip placement='right' tooltip='How many columns to show per table.'>
-                        <span className='chaise-icon chaise-info'></span>
-                      </ChaiseTooltip>
-                      <Dropdown
-                        className='chaise-dropdown'
-                        onSelect={(level) => setDetail(level as ERDDetailLevel)}
-                      >
-                        <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
-                          {DETAIL_LEVEL_LABELS[detail]}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          {Object.entries(DETAIL_LEVEL_LABELS).map(([level, label]) => (
-                            <Dropdown.Item key={level} eventKey={level} active={detail === level}>
-                              {label}
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </div>
-                    <div className='erd-toolbar-row'>
-                      <label>Layout</label>
-                      <ChaiseTooltip placement='right' tooltip='Which algorithm arranges the tables.'>
-                        <span className='chaise-icon chaise-info'></span>
-                      </ChaiseTooltip>
-                      <Dropdown
-                        className='chaise-dropdown'
-                        onSelect={(algorithm) => setBaseLayout(algorithm as ERDBaseLayoutAlgorithm)}
-                      >
-                        <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
-                          {BASE_LAYOUT_LABELS[baseLayout]}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          {Object.entries(BASE_LAYOUT_LABELS).map(([algorithm, label]) => (
-                            <Dropdown.Item key={algorithm} eventKey={algorithm} active={baseLayout === algorithm}>
-                              {label}
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </div>
-                    <div className='erd-toolbar-row'>
-                      <ChaiseTooltip placement='top' tooltip='Spread out overlapping tables in the current layout.'>
-                        <button type='button' className='erd-remove-overlaps-btn chaise-btn chaise-btn-secondary' onClick={handleRemoveOverlaps}>
-                          <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
-                          <span>Remove Overlaps</span>
-                        </button>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip placement='top' tooltip='Download the current diagram as a PDF.'>
-                        <button type='button' className='erd-export-pdf-btn chaise-btn chaise-btn-secondary' onClick={handleExportPdf}>
-                          <span className='chaise-btn-icon fa-solid fa-file-export' />
-                          <span>Export PDF</span>
-                        </button>
-                      </ChaiseTooltip>
-                    </div>
-                    <ErdChecklist
-                      title='Schemas'
-                      items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
-                      checkedIds={visibleSchemas}
-                      onToggle={handleToggleSchema}
-                      emptyMessage='No schemas found.'
-                    />
-                    <ErdChecklist
-                      title='Tables'
-                      items={visibleSchemaTableItems}
-                      checkedIds={visibleTableIds}
-                      onToggle={handleToggleTable}
-                      emptyMessage='No tables to show. Select a schema above.'
-                    />
-                  </Panel>
                   )}
-                </ReactFlow>
+                  <ReactFlow
+                    nodes={displayNodes}
+                    edges={displayEdges}
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onNodeClick={handleNodeClick}
+                    onPaneClick={handlePaneClick}
+                    fitView
+                    nodesConnectable={false}
+                    edgesReconnectable={false}
+                    onlyRenderVisibleElements={true}
+                    // default is 0.5, too shallow to fit a large catalog; fitView
+                    // and manual zoom both get clamped by this
+                    minZoom={0.05}
+                  >
+                    <Background />
+                    <Controls showInteractive={false} />
+                    <Panel position='top-center' className='erd-title'>
+                      <h3>Catalog {catalogId} Data Model</h3>
+                    </Panel>
+                    {!toolbarOpen ? (
+                      <Panel position='top-left' className='erd-toolbar-collapsed'>
+                        <ChaiseTooltip placement='top' tooltip='Click to show settings'>
+                          <button
+                            type='button'
+                            className='chaise-btn chaise-btn-tertiary'
+                            onClick={() => setToolbarOpen(true)}
+                          >
+                            <span className='chaise-btn-icon chaise-icon chaise-sidebar-open' />
+                            <span>Show settings</span>
+                          </button>
+                        </ChaiseTooltip>
+                      </Panel>
+                    ) : (
+                      <Panel position='top-left' className='erd-toolbar'>
+                        <div className='erd-toolbar-header'>
+                          <h3 className='erd-toolbar-title'>Settings</h3>
+                          <ChaiseTooltip placement='top' tooltip='Click to hide settings'>
+                            <button
+                              type='button'
+                              className='chaise-btn chaise-btn-tertiary chaise-sidebar-open'
+                              onClick={() => setToolbarOpen(false)}
+                            >
+                              <span className='chaise-btn-icon chaise-icon chaise-sidebar-close' />
+                              <span>Hide settings</span>
+                            </button>
+                          </ChaiseTooltip>
+                        </div>
+                        <div className='erd-toolbar-row'>
+                          <label>Display Mode</label>
+                          <Dropdown
+                            className='chaise-dropdown'
+                            onSelect={(opt) => setDisplayMode(opt as ERDDisplayMode)}
+                          >
+                            <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                              {DISPLAY_MODEL_LABELS[displayMode]}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              {Object.entries(DISPLAY_MODEL_LABELS).map(([opt, label]) => (
+                                <Dropdown.Item
+                                  key={opt}
+                                  eventKey={opt}
+                                  active={displayMode === opt}
+                                >
+                                  {label}
+                                </Dropdown.Item>
+                              ))}
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                        <div className='erd-toolbar-row'>
+                          <label>Detail</label>
+                          <Dropdown
+                            className='chaise-dropdown'
+                            onSelect={(opt) => setDetail(opt as ERDDetailLevel)}
+                          >
+                            <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                              {DETAIL_LEVEL_LABELS[detail]}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              {Object.entries(DETAIL_LEVEL_LABELS).map(([opt, label]) => (
+                                <Dropdown.Item
+                                  key={opt}
+                                  eventKey={opt}
+                                  active={detail === opt}
+                                >
+                                  {label}
+                                </Dropdown.Item>
+                              ))}
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                        <div className='erd-toolbar-row'>
+                          <label>Layout</label>
+                          <Dropdown
+                            className='chaise-dropdown'
+                            onSelect={(opt) =>
+                              setBaseLayout(opt as ERDBaseLayoutAlgorithm)
+                            }
+                          >
+                            <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
+                              {BASE_LAYOUT_LABELS[baseLayout]}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              {Object.entries(BASE_LAYOUT_LABELS).map(([opt, label]) => (
+                                <Dropdown.Item
+                                  key={opt}
+                                  eventKey={opt}
+                                  active={baseLayout === opt}
+                                >
+                                  {label}
+                                </Dropdown.Item>
+                              ))}
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </div>
+                        <div className='erd-toolbar-row'>
+                          <ChaiseTooltip
+                            placement='top'
+                            tooltip='Spread out overlapping tables in the current layout.'
+                          >
+                            <button
+                              type='button'
+                              className='erd-remove-overlaps-btn chaise-btn chaise-btn-secondary'
+                              onClick={handleRemoveOverlaps}
+                            >
+                              <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
+                              <span>Remove Overlaps</span>
+                            </button>
+                          </ChaiseTooltip>
+                          <ChaiseTooltip
+                            placement='top'
+                            tooltip='Download the current diagram as a PDF.'
+                          >
+                            <button
+                              type='button'
+                              className='erd-export-pdf-btn chaise-btn chaise-btn-secondary'
+                              onClick={handleExportPdf}
+                            >
+                              <span className='chaise-btn-icon fa-solid fa-file-export' />
+                              <span>Export PDF</span>
+                            </button>
+                          </ChaiseTooltip>
+                        </div>
+                        <ErdChecklist
+                          title='Schemas'
+                          items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
+                          checkedIds={visibleSchemas}
+                          onToggle={handleToggleSchema}
+                          emptyMessage='No schemas found.'
+                        />
+                        <ErdChecklist
+                          title='Tables'
+                          items={visibleSchemaTableItems}
+                          checkedIds={visibleTableIds}
+                          onToggle={handleToggleTable}
+                          emptyMessage='No tables to show. Select a schema above.'
+                        />
+                      </Panel>
+                    )}
+
+                    <MiniMap pannable zoomable />
+                  </ReactFlow>
                 </>
               )}
             </div>

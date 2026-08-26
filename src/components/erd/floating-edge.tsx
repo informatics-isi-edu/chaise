@@ -1,8 +1,11 @@
-import { BaseEdge, getStraightPath, useInternalNode, type EdgeProps, type InternalNode, type Node } from '@xyflow/react';
+import { BaseEdge, useInternalNode, type EdgeProps, type InternalNode, type Node } from '@xyflow/react';
 import { type JSX } from 'react';
 
+// providers
+import { useErdStore, ERDDisplayMode } from '@isrd-isi-edu/chaise/src/providers/erd';
+
 // utilities
-import { rectCenter, rectIntersection, type ERDRect } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { computeEdgePath, erdMarkerUrls, type ERDEdgeModel, type ERDRect } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
 
 function nodeRect(node: InternalNode<Node>): ERDRect {
   const { x, y } = node.internals.positionAbsolute;
@@ -17,24 +20,28 @@ function nodeRect(node: InternalNode<Node>): ERDRect {
  * dragged to, which looks wrong once a node ends up in an unexpected
  * direction relative to its neighbor. same idea as xyflow's "floating
  * edges" pattern: https://reactflow.dev/examples/edges/simple-floating-edges
+ *
+ * the path itself (straight line, offset curve for parallel fks, or loop for
+ * self-referencing fks) comes from computeEdgePath, driven by the offsets
+ * assigned in buildFlowEdges (see ERDEdgeData in erd-utils.ts).
+ *
+ * end decorations depend on the display mode: the simplified mode uses the
+ * arrow react-flow resolved into the markerEnd prop, the ERD mode swaps in
+ * crow's foot markers on both ends (defs in marker-defs.tsx).
  */
-const ERDFloatingEdge = ({ id, source, target, markerEnd }: EdgeProps): JSX.Element | null => {
+const ERDFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<ERDEdgeModel>): JSX.Element | null => {
+  const displayMode = useErdStore((state) => state.displayMode);
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
   if (!sourceNode || !targetNode) return null;
 
-  const sourceRect = nodeRect(sourceNode);
-  const targetRect = nodeRect(targetNode);
-  const sourcePoint = rectIntersection(sourceRect, rectCenter(targetRect));
-  const targetPoint = rectIntersection(targetRect, rectCenter(sourceRect));
+  const path = computeEdgePath(nodeRect(sourceNode), nodeRect(targetNode), data);
 
-  const [path] = getStraightPath({
-    sourceX: sourcePoint.x,
-    sourceY: sourcePoint.y,
-    targetX: targetPoint.x,
-    targetY: targetPoint.y,
-  });
+  if (displayMode === ERDDisplayMode.ERD) {
+    const markers = erdMarkerUrls(data);
+    return <BaseEdge id={id} path={path} markerStart={markers.markerStart} markerEnd={markers.markerEnd} />;
+  }
 
   return <BaseEdge id={id} path={path} markerEnd={markerEnd} />;
 };

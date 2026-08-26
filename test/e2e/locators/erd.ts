@@ -74,10 +74,17 @@ export default class ErdLocators {
   }
 
   /**
-   * @param fromId the FK-holding table id, @param toId the referenced table id, both `schema:table`
+   * @param constraintId the fk constraint id in `schema:constraint_name` format (the edge's data-id)
    */
-  static getEdge(page: Page, fromId: string, toId: string): Locator {
-    return page.locator(`.react-flow__edge[data-id="${fromId}->${toId}"]`);
+  static getEdge(page: Page, constraintId: string): Locator {
+    return page.locator(`.react-flow__edge[data-id="${constraintId}"]`);
+  }
+
+  /**
+   * the rendered svg path of an edge, for `d` attribute assertions
+   */
+  static getEdgePath(page: Page, constraintId: string): Locator {
+    return ErdLocators.getEdge(page, constraintId).locator('.react-flow__edge-path');
   }
 
   static getFocusedNodes(page: Page): Locator {
@@ -105,11 +112,11 @@ export default class ErdLocators {
   }
 
   static getHideSettingsButton(page: Page): Locator {
-    return ErdLocators.getToolbar(page).locator('.erd-toolbar-header button');
+    return ErdLocators.getToolbar(page).locator('.erd-toolbar-header .chaise-sidebar-close');
   }
 
   static getShowSettingsButton(page: Page): Locator {
-    return ErdLocators.getCollapsedToolbar(page).locator('button');
+    return ErdLocators.getCollapsedToolbar(page).locator('.chaise-sidebar-open');
   }
 
   /**
@@ -117,6 +124,10 @@ export default class ErdLocators {
    */
   static getToolbarRow(page: Page, label: string): Locator {
     return ErdLocators.getToolbar(page).locator('.erd-toolbar-row').filter({ hasText: label });
+  }
+
+  static getDisplayModeDropdown(page: Page): Locator {
+    return ErdLocators.getToolbarRow(page, 'Display Mode').locator('.dropdown-toggle');
   }
 
   static getDetailDropdown(page: Page): Locator {
