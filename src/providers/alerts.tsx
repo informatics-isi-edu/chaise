@@ -1,9 +1,7 @@
-import { ReactNode } from 'react';
+import { createContext, useState, type JSX, type ReactNode } from 'react';
+import { createStore, type StoreApi } from 'zustand/vanilla';
 
-import { createContext, useMemo, useRef, useState, type JSX } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-
-// TODO should we move the types to somewhere else?
 
 export enum ChaiseAlertType {
   SUCCESS = 'success',
@@ -46,21 +44,98 @@ type AddAlertFunction = (
 
 type RemoveAlertFunction = (alert: ChaiseAlert) => void;
 
-export const AlertsContext = createContext<
-  | {
-      alerts: ChaiseAlert[];
-      addAlert: AddAlertFunction;
-      removeAlert: RemoveAlertFunction;
-      addURLLimitAlert: () => void;
-      removeURLLimitAlert: () => void;
-      addTooManyFormsAlert: (message: string, type: ChaiseAlertType) => void;
-      removeTooManyFormsAlert: () => void;
-      removeAllAlerts: () => void;
-    }
-  // NOTE: since it can be null, to make sure the context is used properly with
-  //       a provider, the useRecordset hook will throw an error if it's null.
-  | null
->(null);
+export type AlertsState = {
+  alerts: ChaiseAlert[];
+  addAlert: AddAlertFunction;
+  removeAlert: RemoveAlertFunction;
+  addURLLimitAlert: () => void;
+  removeURLLimitAlert: () => void;
+  addTooManyFormsAlert: (message: string, type: ChaiseAlertType) => void;
+  removeTooManyFormsAlert: () => void;
+  removeAllAlerts: () => void;
+};
+
+type AlertsStore = StoreApi<AlertsState>;
+
+/**
+ * one store per AlertsProvider instance (zustand scoped-store pattern, see
+ * record-show-more.tsx and the dev-guide). zustand actions are created once
+ * per store, so their identities are stable and safe to use in hook
+ * dependency arrays, unlike callbacks recreated by a provider component.
+ */
+const createAlertsStore = (): AlertsStore => {
+  /*
+   * singleton-alert guards (only one url-limit / too-many-forms alert at a
+   * time). closure variables, not store state: nothing renders off of them.
+   */
+  let urlLimitAlert: ChaiseAlert | null = null;
+  let tooManyFormsAlert: ChaiseAlert | null = null;
+
+  return createStore<AlertsState>((set, get) => ({
+    alerts: [],
+
+    addAlert: (message, type, onRemove?, isSessionExpiredAlert?) => {
+      const newAlert = { message, type, onRemove, isSessionExpiredAlert };
+      set((state) => ({ alerts: [...state.alerts, newAlert] }));
+      return newAlert;
+    },
+
+    removeAlert: (alert) => {
+      if (alert.onRemove) alert.onRemove();
+      set((state) => ({ alerts: state.alerts.filter((al) => al !== alert) }));
+    },
+
+    removeAllAlerts: () => {
+      // no-op when empty so callers can clear defensively without re-renders
+      if (get().alerts.length === 0) return;
+      set({ alerts: [] });
+    },
+
+    /**
+     * Display the URL limit alert
+     * (we want to ensure only one alert is displayed at the time)
+     */
+    addURLLimitAlert: () => {
+      if (urlLimitAlert) return;
+      urlLimitAlert = get().addAlert(
+        MESSAGE_MAP.URLLimitMessage,
+        ChaiseAlertType.WARNING,
+        () => (urlLimitAlert = null)
+      );
+    },
+
+    removeURLLimitAlert: () => {
+      if (!urlLimitAlert) return;
+      get().removeAlert(urlLimitAlert);
+      urlLimitAlert = null;
+    },
+
+    /**
+     * display the too many forms alert
+     * (we want to ensure only one alert is displayed at the time)
+     *
+     * @param message the alert message to show. this can differ depending on how many forms can still be added
+     * @param type the type of alert to show
+     */
+    addTooManyFormsAlert: (message, type) => {
+      if (tooManyFormsAlert) return;
+      tooManyFormsAlert = get().addAlert(message, type, () => (tooManyFormsAlert = null));
+    },
+
+    removeTooManyFormsAlert: () => {
+      if (!tooManyFormsAlert) return;
+      get().removeAlert(tooManyFormsAlert);
+      tooManyFormsAlert = null;
+    },
+  }));
+};
+
+/**
+ * The context distributes the store reference (stable), not the state values,
+ * so the provider never re-renders when alerts change. Access it through the
+ * useAlert hook, not directly.
+ */
+export const AlertsContext = createContext<AlertsStore | null>(null);
 
 type AlertsProviderProps = {
   children: ReactNode;
@@ -73,105 +148,7 @@ type AlertsProviderProps = {
  * Alerts component can be used to show the errors.
  */
 export default function AlertsProvider({ children }: AlertsProviderProps): JSX.Element {
-  const [alerts, setAlerts] = useState<ChaiseAlert[]>([]);
-
-  const urlLimitAlert = useRef<ChaiseAlert | null>(null);
-  const tooManyFormsAlert = useRef<ChaiseAlert | null>(null);
-
-  /**
-   * create add an alert
-   * @param message the message that will be displayed (if it's a string, will be treated like HTML. so it can have HTML tags)
-   * @param type type of message
-   * @param onRemove the callback that will be called when the users remove the alert.
-   * @return the newly created alert
-   */
-  const addAlert: AddAlertFunction = (
-    message: string | JSX.Element,
-    type: ChaiseAlertType,
-    onRemove?: () => void,
-    isSessionExpiredAlert?: boolean
-  ) => {
-    const newAlert = { message, type, onRemove, isSessionExpiredAlert };
-    setAlerts((alerts) => [...alerts, newAlert]);
-    return newAlert;
-  };
-
-  /**
-   * remove a given alert from the list of alerts
-   * @param alert the alert that should be removed
-   */
-  const removeAlert: RemoveAlertFunction = (alert: ChaiseAlert) => {
-    setAlerts((prev: ChaiseAlert[]) => {
-      if (alert.onRemove) alert.onRemove();
-      return prev.filter((al: ChaiseAlert) => {
-        return alert !== al;
-      });
-    });
-  };
-
-  const removeAllAlerts = () => {
-    setAlerts([]);
-  };
-
-  /**
-   * Display the URL limit alert
-   * (we want to ensure only one alert is displayed at the time)
-   */
-  const addURLLimitAlert = () => {
-    if (urlLimitAlert.current) return;
-
-    urlLimitAlert.current = addAlert(
-      MESSAGE_MAP.URLLimitMessage,
-      ChaiseAlertType.WARNING,
-      () => (urlLimitAlert.current = null)
-    );
-  };
-
-  /**
-   * Remove the URL limit alert
-   */
-  const removeURLLimitAlert = () => {
-    if (!urlLimitAlert.current) return;
-
-    removeAlert(urlLimitAlert.current);
-    urlLimitAlert.current = null;
-  };
-
-  /**
-   * display the too many forms alert
-   * (we want to ensure only one alert is displayed at the time)
-   *
-   * @param message the alert message to show. this can differ depending on how many forms can still be added
-   * @param type the type of alert to show
-   */
-  const addTooManyFormsAlert = (message: string, type: ChaiseAlertType) => {
-    if (tooManyFormsAlert.current) return;
-
-    tooManyFormsAlert.current = addAlert(message, type, () => (tooManyFormsAlert.current = null));
-  };
-
-  /**
-   * remove too many forms alert
-   */
-  const removeTooManyFormsAlert = () => {
-    if (!tooManyFormsAlert.current) return;
-
-    removeAlert(tooManyFormsAlert.current);
-    tooManyFormsAlert.current = null;
-  };
-
-  const providerValue = useMemo(() => {
-    return {
-      alerts,
-      addAlert,
-      removeAlert,
-      removeAllAlerts,
-      addURLLimitAlert,
-      removeURLLimitAlert,
-      addTooManyFormsAlert,
-      removeTooManyFormsAlert,
-    };
-  }, [alerts]);
-
-  return <AlertsContext.Provider value={providerValue}>{children}</AlertsContext.Provider>;
+  // lazy initializer: the store is created once and never replaced
+  const [store] = useState(() => createAlertsStore());
+  return <AlertsContext.Provider value={store}>{children}</AlertsContext.Provider>;
 }
