@@ -39,4 +39,4 @@ State is managed via React Context + custom hooks. Each app has a provider with 
 
 ### Webpack Build
 
-`webpack/main.config.js` → `webpack/app.config.js` (`getWebPackConfig()`). Builds one bundle per app. Also produces library builds of navbar and login for embedding in external apps. ERMrestJS and Plotly are treated as externals (loaded at runtime, not bundled).
+`webpack/main.config.js` → `webpack/app.config.js` (`getWebPackConfig()`). Builds one bundle per app. Also produces library builds of navbar and login for embedding in external apps. ERMrestJS is treated as an external (loaded at runtime via a script tag, not bundled). Vendor chunks are split per package; heavy conditional dependencies (plotly, elkjs, jspdf) are lazy-loaded.
