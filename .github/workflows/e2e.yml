@@ -146,42 +146,32 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
+      # `if: !cancelled()` lets every spec run even when an earlier one fails,
+      # while the failed steps still fail the job at the end
       - name: Run default config test spec
-        id: test-default-config
-        continue-on-error: true
         run: |
           cd chaise
           make testdefaultconfig
       - name: Run delete prohibited test spec
-        id: test-delete-prohibited
-        continue-on-error: true
+        if: ${{ !cancelled() }}
         run: |
           cd chaise
           make testdeleteprohibited
       - name: Run all features confirmation test spec
-        id: test-all-features-confirmation
-        continue-on-error: true
+        if: ${{ !cancelled() }}
         run: |
           cd chaise
           make testallfeaturesconfirmation
       - name: Run all features test spec
-        id: test-all-features
-        continue-on-error: true
+        if: ${{ !cancelled() }}
         run: |
           cd chaise
           make testallfeatures
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited test spec
-        if: always() && steps.test-delete-prohibited.outcome != 'success'
-        run: exit 1
-      - name: Check on all features confirmation test spec
-        if: always() && steps.test-all-features-confirmation.outcome != 'success'
-        run: exit 1
-      - name: Check on all features test spec
-        if: always() && steps.test-all-features.outcome != 'success'
-        run: exit 1
+      - name: Run model app test spec
+        if: ${{ !cancelled() }}
+        run: |
+          cd chaise
+          make testmodel
       - uses: actions/upload-artifact@v7
         if: always()
         with:

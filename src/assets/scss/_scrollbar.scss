@@ -1,0 +1,43 @@
+@use 'sass:map';
+@use 'variables';
+
+/*
+ * thin, always-visible scrollbar (styling it overrides mac's hide-until-
+ * scroll default). .chaise-scrollbar-y/-x also set overflow for their axis.
+ */
+@mixin chaise-scrollbar-style {
+  scrollbar-width: thin;
+  scrollbar-color: map.get(variables.$color-map, 'disabled') transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: map.get(variables.$color-map, 'disabled');
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: map.get(variables.$color-map, 'placeholder');
+  }
+}
+
+.chaise-scrollbar-y {
+  @include chaise-scrollbar-style;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.chaise-scrollbar-x {
+  @include chaise-scrollbar-style;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

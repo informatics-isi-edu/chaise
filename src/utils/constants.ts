@@ -194,6 +194,7 @@ export const QUERY_PARAMS = {
 
 // these are the captured as `cid` value in logs
 export enum APP_NAMES {
+  MODEL = 'model',
   HELP = 'help',
   LOGIN = 'login',
   NAVBAR = 'navbar',

@@ -576,3 +576,17 @@ export function addClickListener(
   wrapper.addEventListener('click', listener);
   return listener;
 }
+
+/**
+ * read a css custom property (e.g. one emitted by a scss `@each` loop over
+ * `$color-map`, see `_model.scss`) from an element's computed styles. lets code
+ * that can't use scss directly (svg/canvas export, etc.) stay in sync with
+ * `_color-map.scss` instead of hardcoding colors that can drift from it.
+ * @param name the custom property name, without the leading `--`
+ * @param element the element to read computed styles from, defaults to `<html>`
+ * @param fallback returned if the property isn't set (e.g. missing/typo'd)
+ */
+export function getCssVariable(name: string, element: Element = document.documentElement, fallback = ''): string {
+  const value = getComputedStyle(element).getPropertyValue(`--${name}`).trim();
+  return value || fallback;
+}

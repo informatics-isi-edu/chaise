@@ -35,6 +35,7 @@ make testnavbar
 make testfooter
 make testerrors
 make testpermissions
+make testmodel
 
 # Run a single Playwright config file directly:
 npx playwright test --project=chromium --config test/e2e/specs/all-features/recordset/presentation.config.ts

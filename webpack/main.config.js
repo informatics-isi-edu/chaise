@@ -57,7 +57,11 @@ module.exports = (env) => {
         bundleName: 'login-lib',
         appTitle: 'Login standalone library',
         isLib: true,
-      }
+      },
+      {
+        appName: 'model',
+        appTitle: 'Data Model',
+      },
     ],
     mode,
     env,

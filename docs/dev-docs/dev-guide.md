@@ -261,6 +261,17 @@ The rules that should be followed while writing code.
   - `useStateRef`:
     - when a value is needed in functions and is used for triggering component rerenders, use this custom hook
     - intended to be synchronous
+- Use this order inside the component (so the file reads storage first, then what is derived from it, then what reacts to it):
+  1. External/context hooks: store selectors, `useContext`, custom hooks like `useError`/`useAlert`.
+  2. `useState` (including wrappers like `useNodesState`).
+  3. `useRef`
+  4. `useMemo` (derived values)
+  5. `useCallback` (handlers and actions)
+  6. `useEffect` / `useLayoutEffect` (they typically call the callbacks, so they come last)
+  7. render helpers, early returns, JSX
+
+  Separate the groups with the `//---- state: ----//` style section banners. See `example.tsx` for a full example.
+- Prefer `useMemo` for values computed from state/props and `useCallback` for handlers passed to children (see `components/model/model.tsx` for the pattern). Newer components should follow this; older components can be refactored opportunistically when touched.
 - Calling functions after `useState` update and browser repaint
   - When the set function of a `useState` hook is called, a browser repaint is triggered followed by each `useEffect` and `useLayoutEffect` being checked for changes
   - If a change occurred that triggers a `useEffect` or `useLayoutEffect` hook, the defined function for that hook will run after the browser repaint with the updated values for the `useState` hook.
@@ -1377,4 +1388,3 @@ python3 scripts/docs-anchors.py --fix    # insert the missing anchors
 ```
 
 It is idempotent, so re-running is safe. Links flagged with `!` point at no heading (a typo or a stale cross-reference) and must be fixed by hand.
-

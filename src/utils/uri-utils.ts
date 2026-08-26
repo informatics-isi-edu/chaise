@@ -44,23 +44,19 @@ export function getURLHashFragment(location: Location): {
 }
 
 /**
-* @function
-* @param {Object} location - location Object from the $window resource
-* @param {boolean} returnObject - Whether we should just return the url
-*  or an object with all the different attributes
-* @desc
 * Converts a chaise URI to an ermrest resource URI object or string.
-* @returns {Object}
-* an object with the following attributes:
-*  - 'ermrestURI': the uri that should be used for communicating with ermrestjs
-*  - `isQueryParameter`: whether the hash was written using ? (not #)
-*  - `ppid`, 'pcid', `paction`: parent context
-*  - `queryParams`: an object containing query parameters of the url.
-*                   The keys are query params names, and value either a
-*                   string value or an array containing multiple strings.
 * @throws {MalformedUriError} if table or catalog data are missing.
 */
-export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?: boolean): {
+export function chaiseURItoErmrestURI(
+  /**
+   * location Object from the $window resource
+   */
+  location: Location,
+  /**
+   * set to true if you don't want the query parameters to be modified in any way.
+   */
+  dontDecodeQueryParams?: boolean,
+): {
   ermrestUri: string,
   catalogId: string,
   hash: string,
@@ -69,7 +65,7 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   paction: string,
   queryParamsString: string,
   queryParams: {
-    [key: string]: string
+    [key: string]: string | Array<string>
   },
   isQueryParameter: boolean
 } {
@@ -81,7 +77,7 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   let hash = originalHash;
 
   // eslint-disable-next-line prefer-const
-  let queryParams: any = {},
+  let queryParams: {[key: string]: string | Array<string>} = {},
     queryParamsString = '',
     catalogId,
     ppid = '',
@@ -132,9 +128,9 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
       // save the query param
       if (qKey in queryParams) {
         if (!Array.isArray(queryParams[qKey])) {
-          queryParams[qKey] = [queryParams[qKey]];
+          queryParams[qKey] = [queryParams[qKey] as string];
         }
-        queryParams[qKey].push(qVal);
+        (queryParams[qKey] as Array<string>).push(qVal);
       } else {
         queryParams[qKey] = qVal;
       }

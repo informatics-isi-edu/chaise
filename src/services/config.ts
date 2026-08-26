@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// import type ( Catalog } from '@isrd-isi-edu/ermrestjs/js/core';)
+import type { Catalog } from '@isrd-isi-edu/ermrestjs/src/models/catalog';
 
 // models
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
@@ -93,7 +93,7 @@ export class ConfigService {
 
   private static _catalogIDVersion?: string;
 
-  static catalog: any;
+  static catalog: Catalog;
 
   /**
    * If the catalog version was corrected, this will hold the previous version info.
