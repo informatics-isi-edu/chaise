@@ -2,11 +2,11 @@ import type { Catalog } from '@isrd-isi-edu/ermrestjs/src/models/catalog';
 import type { Table } from '@isrd-isi-edu/ermrestjs/src/models/table';
 
 /**
- * The ERD model is a plain, JSON-serializable snapshot of the catalog model.
+ * The model-app graph is a plain, JSON-serializable snapshot of the catalog model.
  * It is the single shape that layout and rendering consume.
  */
 
-export interface ERDColumn {
+export interface ModelColumn {
   name: string;
   type: string;
   nullok: boolean;
@@ -15,25 +15,25 @@ export interface ERDColumn {
   isSystemColumn: boolean;
 }
 
-export interface ERDTable {
+export interface ModelTable {
   schema: string;
   name: string;
   /**
    * `table` or `view`
    */
   kind: string;
-  columns: Array<ERDColumn>;
+  columns: Array<ModelColumn>;
   isAssociation: boolean;
 }
 
-export interface ERDEdge {
+export interface ModelEdge {
   /**
    * schema part of the fk's constraint name; bare constraint names are only unique per schema
    */
   constraintSchema: string;
   constraint: string;
   /**
-   * table properties are `schema:table` keys into ERDGraph.tables
+   * table properties are `schema:table` keys into ModelGraph.tables
    */
   fromTable: string;
   fromColumns: Array<string>;
@@ -51,13 +51,13 @@ export interface ERDEdge {
   isOneToOne: boolean;
 }
 
-export interface ERDGraph {
+export interface ModelGraph {
   catalogId: string;
   /**
    * keyed by `schema:table`
    */
-  tables: { [key: string]: ERDTable };
-  edges: Array<ERDEdge>;
+  tables: { [key: string]: ModelTable };
+  edges: Array<ModelEdge>;
 }
 
 /**
@@ -76,7 +76,7 @@ export function tableKey(schema: string, table: string): string {
 /**
  * single source of truth for edge ids: `constraintSchema:constraintName`
  */
-export function edgeKey(edge: ERDEdge): string {
+export function edgeKey(edge: ModelEdge): string {
   return `${edge.constraintSchema}:${edge.constraint}`;
 }
 
@@ -84,7 +84,7 @@ function isTableIncluded(table: Table): boolean {
   return !table.ignore && table.kind === 'table' && EXCLUDED_SCHEMAS.indexOf(table.schema.name) === -1;
 }
 
-function createERDTable(table: Table): ERDTable {
+function createModelTable(table: Table): ModelTable {
   // column membership in any foreign key of this table
   const fkColumns = new Set<string>();
   table.foreignKeys.all().forEach((fk) => {
@@ -107,8 +107,8 @@ function createERDTable(table: Table): ERDTable {
   };
 }
 
-function getERDEdgesForTable(table: Table): Array<ERDEdge> {
-  const edges: Array<ERDEdge> = [];
+function getModelEdgesForTable(table: Table): Array<ModelEdge> {
+  const edges: Array<ModelEdge> = [];
   table.foreignKeys.all().forEach((fk) => {
     // skip edges that point outside the graph (excluded schemas, views)
     if (!isTableIncluded(fk.key.table)) return;
@@ -128,18 +128,18 @@ function getERDEdgesForTable(table: Table): Array<ERDEdge> {
 }
 
 /**
- * turn an introspected ermrestjs catalog (ConfigService.catalog) into an ERDGraph.
+ * turn an introspected ermrestjs catalog (ConfigService.catalog) into an ModelGraph.
  */
-export function catalogToGraph(catalog: Catalog): ERDGraph {
-  const tables: { [key: string]: ERDTable } = {};
-  const edges: Array<ERDEdge> = [];
+export function catalogToGraph(catalog: Catalog): ModelGraph {
+  const tables: { [key: string]: ModelTable } = {};
+  const edges: Array<ModelEdge> = [];
 
   catalog.schemas.all().forEach((schema) => {
     if (schema.ignore || EXCLUDED_SCHEMAS.indexOf(schema.name) !== -1) return;
     schema.tables.all().forEach((table) => {
       if (!isTableIncluded(table)) return;
-      tables[tableKey(schema.name, table.name)] = createERDTable(table);
-      edges.push(...getERDEdgesForTable(table));
+      tables[tableKey(schema.name, table.name)] = createModelTable(table);
+      edges.push(...getModelEdgesForTable(table));
     });
   });
 

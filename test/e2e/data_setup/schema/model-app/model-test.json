@@ -1,10 +1,10 @@
 {
-    "schema_name": "erd-test",
+    "schema_name": "model-test",
     "tables": {
         "outbound_1": {
             "kind": "table",
             "table_name": "outbound_1",
-            "schema_name": "erd-test",
+            "schema_name": "model-test",
             "keys": [
                 {
                     "unique_columns": ["id"]
@@ -27,7 +27,7 @@
         "main": {
             "kind": "table",
             "table_name": "main",
-            "schema_name": "erd-test",
+            "schema_name": "model-test",
             "keys": [
                 {
                     "unique_columns": ["id"]
@@ -35,21 +35,21 @@
             ],
             "foreign_keys": [
                 {
-                    "names": [["erd-test", "main_fk_to_outbound_1"]],
+                    "names": [["model-test", "main_fk_to_outbound_1"]],
                     "foreign_key_columns": [
-                        { "column_name": "fk_to_outbound_1", "table_name": "main", "schema_name": "erd-test" }
+                        { "column_name": "fk_to_outbound_1", "table_name": "main", "schema_name": "model-test" }
                     ],
                     "referenced_columns": [
-                        { "column_name": "id", "table_name": "outbound_1", "schema_name": "erd-test" }
+                        { "column_name": "id", "table_name": "outbound_1", "schema_name": "model-test" }
                     ]
                 },
                 {
-                    "names": [["erd-test", "main_fk2_to_outbound_1"]],
+                    "names": [["model-test", "main_fk2_to_outbound_1"]],
                     "foreign_key_columns": [
-                        { "column_name": "fk2_to_outbound_1", "table_name": "main", "schema_name": "erd-test" }
+                        { "column_name": "fk2_to_outbound_1", "table_name": "main", "schema_name": "model-test" }
                     ],
                     "referenced_columns": [
-                        { "column_name": "id", "table_name": "outbound_1", "schema_name": "erd-test" }
+                        { "column_name": "id", "table_name": "outbound_1", "schema_name": "model-test" }
                     ]
                 }
             ],
@@ -79,7 +79,7 @@
         "inbound_1": {
             "kind": "table",
             "table_name": "inbound_1",
-            "schema_name": "erd-test",
+            "schema_name": "model-test",
             "keys": [
                 {
                     "unique_columns": ["id"]
@@ -90,12 +90,12 @@
             ],
             "foreign_keys": [
                 {
-                    "names": [["erd-test", "inbound_1_fk_to_main"]],
+                    "names": [["model-test", "inbound_1_fk_to_main"]],
                     "foreign_key_columns": [
-                        { "column_name": "fk_to_main", "table_name": "inbound_1", "schema_name": "erd-test" }
+                        { "column_name": "fk_to_main", "table_name": "inbound_1", "schema_name": "model-test" }
                     ],
                     "referenced_columns": [
-                        { "column_name": "id", "table_name": "main", "schema_name": "erd-test" }
+                        { "column_name": "id", "table_name": "main", "schema_name": "model-test" }
                     ]
                 }
             ],
@@ -125,7 +125,7 @@
         "self_ref": {
             "kind": "table",
             "table_name": "self_ref",
-            "schema_name": "erd-test",
+            "schema_name": "model-test",
             "keys": [
                 {
                     "unique_columns": ["id"]
@@ -133,12 +133,12 @@
             ],
             "foreign_keys": [
                 {
-                    "names": [["erd-test", "self_ref_fk_to_self"]],
+                    "names": [["model-test", "self_ref_fk_to_self"]],
                     "foreign_key_columns": [
-                        { "column_name": "parent_id", "table_name": "self_ref", "schema_name": "erd-test" }
+                        { "column_name": "parent_id", "table_name": "self_ref", "schema_name": "model-test" }
                     ],
                     "referenced_columns": [
-                        { "column_name": "id", "table_name": "self_ref", "schema_name": "erd-test" }
+                        { "column_name": "id", "table_name": "self_ref", "schema_name": "model-test" }
                     ]
                 }
             ],
@@ -158,7 +158,7 @@
         "isolated": {
             "kind": "table",
             "table_name": "isolated",
-            "schema_name": "erd-test",
+            "schema_name": "model-test",
             "keys": [
                 {
                     "unique_columns": ["id"]

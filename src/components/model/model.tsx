@@ -1,4 +1,4 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_erd.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_model.scss';
 import '@xyflow/react/dist/style.css';
 
 import {
@@ -17,10 +17,10 @@ import {
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // components
-import ErdChecklist from '@isrd-isi-edu/chaise/src/components/erd/checklist';
-import ErdMarkerDefs from '@isrd-isi-edu/chaise/src/components/erd/marker-defs';
-import ERDFloatingEdge from '@isrd-isi-edu/chaise/src/components/erd/floating-edge';
-import ERDTableNode from '@isrd-isi-edu/chaise/src/components/erd/table-node';
+import ModelChecklist from '@isrd-isi-edu/chaise/src/components/model/checklist';
+import ErdMarkerDefs from '@isrd-isi-edu/chaise/src/components/model/marker-defs';
+import ModelFloatingEdge from '@isrd-isi-edu/chaise/src/components/model/floating-edge';
+import ModelTableNode from '@isrd-isi-edu/chaise/src/components/model/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -39,17 +39,17 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { catalogToGraph, type ERDGraph } from '@isrd-isi-edu/chaise/src/models/erd';
+import { catalogToGraph, type ModelGraph } from '@isrd-isi-edu/chaise/src/models/model-app';
 import { CustomError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import {
-  useErdStore,
-  ERDBaseLayoutAlgorithm,
-  ERDDetailLevel,
-  ERDDisplayMode,
-} from '@isrd-isi-edu/chaise/src/providers/erd';
+  useModelStore,
+  ModelBaseLayoutAlgorithm,
+  ModelDetailLevel,
+  ModelDisplayMode,
+} from '@isrd-isi-edu/chaise/src/providers/model';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -59,9 +59,9 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import {
   elkToFlow,
   graphToElk,
-  type ERDEdgeModel,
-  type ERDTableNodeModel,
-} from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+  type ModelEdgeModel,
+  type ModelTableNodeModel,
+} from '@isrd-isi-edu/chaise/src/utils/model-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import {
   attachContainerHeightSensors,
@@ -75,57 +75,57 @@ const elkPromise = import('elkjs/lib/elk.bundled.js').then((mod) => new mod.defa
  * registered at module level: an inline object would change identity on every
  * render and make react-flow re-create all nodes.
  */
-const nodeTypes = { erdTable: ERDTableNode };
+const nodeTypes = { modelTable: ModelTableNode };
 
 /**
  * same reasoning as nodeTypes: module level, not inline.
  */
-const edgeTypes = { erdFloating: ERDFloatingEdge };
+const edgeTypes = { modelFloating: ModelFloatingEdge };
 
-const DISPLAY_MODEL_LABELS: Record<ERDDisplayMode, string> = {
-  [ERDDisplayMode.ERD]: 'ERD',
-  [ERDDisplayMode.SIMPLIFIED]: 'Simplified',
+const DISPLAY_MODEL_LABELS: Record<ModelDisplayMode, string> = {
+  [ModelDisplayMode.ERD]: 'ERD',
+  [ModelDisplayMode.SIMPLIFIED]: 'Simplified',
 };
 
-const DETAIL_LEVEL_LABELS: Record<ERDDetailLevel, string> = {
-  [ERDDetailLevel.NAMES]: 'Table Names',
-  [ERDDetailLevel.KEYS]: 'Keys',
-  [ERDDetailLevel.KEYS_FKS]: 'Keys + Foreign Keys',
-  [ERDDetailLevel.FULL]: 'All Columns',
+const DETAIL_LEVEL_LABELS: Record<ModelDetailLevel, string> = {
+  [ModelDetailLevel.NAMES]: 'Table Names',
+  [ModelDetailLevel.KEYS]: 'Keys',
+  [ModelDetailLevel.KEYS_FKS]: 'Keys + Foreign Keys',
+  [ModelDetailLevel.FULL]: 'All Columns',
 };
 
 /**
  * display names as ELK itself titles them (minus the 'ELK ' prefix), see
  * https://eclipse.dev/elk/reference/algorithms.html
  */
-const BASE_LAYOUT_LABELS: Record<ERDBaseLayoutAlgorithm, string> = {
-  [ERDBaseLayoutAlgorithm.LAYERED]: 'Layered',
-  [ERDBaseLayoutAlgorithm.STRESS]: 'Stress',
-  [ERDBaseLayoutAlgorithm.FORCE]: 'Force',
-  [ERDBaseLayoutAlgorithm.MRTREE]: 'Mr. Tree',
-  [ERDBaseLayoutAlgorithm.RADIAL]: 'Radial',
-  [ERDBaseLayoutAlgorithm.RECTPACKING]: 'Rectangle Packing',
+const BASE_LAYOUT_LABELS: Record<ModelBaseLayoutAlgorithm, string> = {
+  [ModelBaseLayoutAlgorithm.LAYERED]: 'Layered',
+  [ModelBaseLayoutAlgorithm.STRESS]: 'Stress',
+  [ModelBaseLayoutAlgorithm.FORCE]: 'Force',
+  [ModelBaseLayoutAlgorithm.MRTREE]: 'Mr. Tree',
+  [ModelBaseLayoutAlgorithm.RADIAL]: 'Radial',
+  [ModelBaseLayoutAlgorithm.RECTPACKING]: 'Rectangle Packing',
 };
 
-const ERDInner = (): JSX.Element => {
+const ModelInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
   const { addAlert, removeAllAlerts } = useAlert();
   const { fitView } = useReactFlow();
 
-  const displayMode = useErdStore((state) => state.displayMode);
-  const setDisplayMode = useErdStore((state) => state.setDisplayMode);
+  const displayMode = useModelStore((state) => state.displayMode);
+  const setDisplayMode = useModelStore((state) => state.setDisplayMode);
 
-  const detail = useErdStore((state) => state.detail);
-  const setDetail = useErdStore((state) => state.setDetail);
+  const detail = useModelStore((state) => state.detail);
+  const setDetail = useModelStore((state) => state.setDetail);
 
-  const baseLayout = useErdStore((state) => state.baseLayout);
-  const setBaseLayout = useErdStore((state) => state.setBaseLayout);
+  const baseLayout = useModelStore((state) => state.baseLayout);
+  const setBaseLayout = useModelStore((state) => state.setBaseLayout);
 
-  const visibleSchemas = useErdStore((state) => state.visibleSchemas);
-  const setVisibleSchemas = useErdStore((state) => state.setVisibleSchemas);
+  const visibleSchemas = useModelStore((state) => state.visibleSchemas);
+  const setVisibleSchemas = useModelStore((state) => state.setVisibleSchemas);
 
-  const visibleTableIds = useErdStore((state) => state.visibleTableIds);
-  const setVisibleTableIds = useErdStore((state) => state.setVisibleTableIds);
+  const visibleTableIds = useModelStore((state) => state.visibleTableIds);
+  const setVisibleTableIds = useModelStore((state) => state.setVisibleTableIds);
 
   //-------------------  state:   --------------------//
 
@@ -134,8 +134,8 @@ const ERDInner = (): JSX.Element => {
    * (dragging included) only apply if the change events are folded back into
    * state, which is what these hooks do.
    */
-  const [nodes, setNodes, onNodesChange] = useNodesState<ERDTableNodeModel>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<ERDEdgeModel>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<ModelTableNodeModel>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ModelEdgeModel>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
@@ -153,7 +153,7 @@ const ERDInner = (): JSX.Element => {
   //-------------------  refs:   --------------------//
 
   // the introspected graph, kept so detail changes don't refetch the catalog
-  const graphRef = useRef<ERDGraph | null>(null);
+  const graphRef = useRef<ModelGraph | null>(null);
 
   // guard against strict mode calling the effect twice in dev mode
   const setupStarted = useRef<boolean>(false);
@@ -180,10 +180,10 @@ const ERDInner = (): JSX.Element => {
       ...node,
       className:
         node.id === focusedTableId
-          ? 'erd-node-focused'
+          ? 'model-node-focused'
           : connectedTableIds?.has(node.id)
             ? ''
-            : 'erd-node-dimmed',
+            : 'model-node-dimmed',
     }));
   }, [nodes, focusedTableId, connectedTableIds]);
 
@@ -191,24 +191,24 @@ const ERDInner = (): JSX.Element => {
     if (!focusedTableId) return edges;
     /*
      * marker fill doesn't follow the path's CSS stroke color, so read the same color-map
-     * value the highlighted stroke uses (see $erd-js-colors in _erd.scss)
+     * value the highlighted stroke uses (see $model-js-colors in _model.scss)
      */
     const highlightColor = getCssVariable(
       'primary',
-      document.querySelector('.erd-container') ?? undefined,
+      document.querySelector('.model-container') ?? undefined,
       '#4674a7'
     );
     return edges.map((edge) => {
       const connected = edge.source === focusedTableId || edge.target === focusedTableId;
       return {
         ...edge,
-        className: connected ? 'erd-edge-highlighted' : 'erd-edge-dimmed',
+        className: connected ? 'model-edge-highlighted' : 'model-edge-dimmed',
         /*
          * the ERD display mode picks its own (crow's foot) markers in
          * floating-edge.tsx off data.highlighted, so the arrow recolor only
          * applies to the simplified mode
          */
-        markerEnd: connected && displayMode === ERDDisplayMode.SIMPLIFIED
+        markerEnd: connected && displayMode === ModelDisplayMode.SIMPLIFIED
           ? { type: MarkerType.ArrowClosed, color: highlightColor }
           : edge.markerEnd,
         data: edge.data && { ...edge.data, highlighted: connected },
@@ -232,7 +232,7 @@ const ERDInner = (): JSX.Element => {
 
   //-------------------  callbacks:   --------------------//
 
-  const handleNodeClick: NodeMouseHandler<ERDTableNodeModel> = useCallback((_event, node) => {
+  const handleNodeClick: NodeMouseHandler<ModelTableNodeModel> = useCallback((_event, node) => {
     setFocusedTableId((current) => (current === node.id ? null : node.id));
   }, []);
 
@@ -240,10 +240,10 @@ const ERDInner = (): JSX.Element => {
 
   const relayout = useCallback(
     async (
-      graph: ERDGraph,
-      displayMode: ERDDisplayMode,
-      level: ERDDetailLevel,
-      algorithm: ERDBaseLayoutAlgorithm,
+      graph: ModelGraph,
+      displayMode: ModelDisplayMode,
+      level: ModelDetailLevel,
+      algorithm: ModelBaseLayoutAlgorithm,
       schemas: Set<string>,
       tableIds: Set<string>,
     ) => {
@@ -308,7 +308,7 @@ const ERDInner = (): JSX.Element => {
         })
       )
       .then((laidOut) => {
-        const flow = elkToFlow(graphRef.current as ERDGraph, laidOut);
+        const flow = elkToFlow(graphRef.current as ModelGraph, laidOut);
         setNodes(flow.nodes);
         setEdges(flow.edges);
         window.requestAnimationFrame(() => fitView());
@@ -325,8 +325,8 @@ const ERDInner = (): JSX.Element => {
 
   const handleExportPdf = useCallback(() => {
     // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
-    import('@isrd-isi-edu/chaise/src/utils/erd-pdf-export')
-      .then(({ exportErdToPdf }) => exportErdToPdf(nodes, edges, detail, displayMode))
+    import('@isrd-isi-edu/chaise/src/utils/model-pdf-export')
+      .then(({ exportModelToPdf }) => exportModelToPdf(nodes, edges, detail, displayMode))
       .catch((error: unknown) => dispatchError({ error }));
   }, [nodes, edges, detail, displayMode, dispatchError]);
 
@@ -372,7 +372,7 @@ const ERDInner = (): JSX.Element => {
       dispatchError({
         error: new CustomError(
           'No Catalog',
-          'No catalog specified. Use a url like `/chaise/mv/#catalog-id`, or define a `defaultCatalog` in chaise-config.'
+          'No catalog specified. Use a url like `/chaise/model/#catalog-id`, or define a `defaultCatalog` in chaise-config.'
         ),
       });
       return;
@@ -406,7 +406,7 @@ const ERDInner = (): JSX.Element => {
         setAllTables(tables);
         setVisibleTableIds(new Set(tables.map((table) => table.id)));
 
-        const initial = useErdStore.getState();
+        const initial = useModelStore.getState();
         return relayout(
           graphRef.current,
           initial.displayMode,
@@ -452,7 +452,7 @@ const ERDInner = (): JSX.Element => {
   }
 
   return (
-    <div className='app-content-container erd-container'>
+    <div className='app-content-container model-container'>
       {/* this is just for consistency with all apps (height logic needs it): */}
       <div className='top-panel-container'></div>
       <div className='bottom-panel-container'>
@@ -460,14 +460,14 @@ const ERDInner = (): JSX.Element => {
         <div className='side-panel-resizable close-panel'></div>
         <div className='main-container'>
           <div className='main-body'>
-            <div className='erd-canvas'>
+            <div className='model-canvas'>
               {!isInitialized ? (
                 <ChaiseSpinner />
               ) : (
                 <>
                   <ErdMarkerDefs />
                   {isRelayouting && (
-                    <div className='erd-loading-overlay'>
+                    <div className='model-loading-overlay'>
                       <ChaiseSpinner />
                     </div>
                   )}
@@ -490,11 +490,11 @@ const ERDInner = (): JSX.Element => {
                   >
                     <Background />
                     <Controls showInteractive={false} />
-                    <Panel position='top-center' className='erd-title'>
+                    <Panel position='top-center' className='model-title'>
                       <h3>Catalog {catalogId} Data Model</h3>
                     </Panel>
                     {!toolbarOpen ? (
-                      <Panel position='top-left' className='erd-toolbar-collapsed'>
+                      <Panel position='top-left' className='model-toolbar-collapsed'>
                         <ChaiseTooltip placement='top' tooltip='Click to show settings'>
                           <button
                             type='button'
@@ -507,9 +507,9 @@ const ERDInner = (): JSX.Element => {
                         </ChaiseTooltip>
                       </Panel>
                     ) : (
-                      <Panel position='top-left' className='erd-toolbar'>
-                        <div className='erd-toolbar-header'>
-                          <h3 className='erd-toolbar-title'>Settings</h3>
+                      <Panel position='top-left' className='model-toolbar'>
+                        <div className='model-toolbar-header'>
+                          <h3 className='model-toolbar-title'>Settings</h3>
                           <ChaiseTooltip placement='top' tooltip='Click to hide settings'>
                             <button
                               type='button'
@@ -521,11 +521,11 @@ const ERDInner = (): JSX.Element => {
                             </button>
                           </ChaiseTooltip>
                         </div>
-                        <div className='erd-toolbar-row'>
+                        <div className='model-toolbar-row'>
                           <label>Display Mode</label>
                           <Dropdown
                             className='chaise-dropdown'
-                            onSelect={(opt) => setDisplayMode(opt as ERDDisplayMode)}
+                            onSelect={(opt) => setDisplayMode(opt as ModelDisplayMode)}
                           >
                             <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
                               {DISPLAY_MODEL_LABELS[displayMode]}
@@ -543,11 +543,11 @@ const ERDInner = (): JSX.Element => {
                             </Dropdown.Menu>
                           </Dropdown>
                         </div>
-                        <div className='erd-toolbar-row'>
+                        <div className='model-toolbar-row'>
                           <label>Detail</label>
                           <Dropdown
                             className='chaise-dropdown'
-                            onSelect={(opt) => setDetail(opt as ERDDetailLevel)}
+                            onSelect={(opt) => setDetail(opt as ModelDetailLevel)}
                           >
                             <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
                               {DETAIL_LEVEL_LABELS[detail]}
@@ -565,12 +565,12 @@ const ERDInner = (): JSX.Element => {
                             </Dropdown.Menu>
                           </Dropdown>
                         </div>
-                        <div className='erd-toolbar-row'>
+                        <div className='model-toolbar-row'>
                           <label>Layout</label>
                           <Dropdown
                             className='chaise-dropdown'
                             onSelect={(opt) =>
-                              setBaseLayout(opt as ERDBaseLayoutAlgorithm)
+                              setBaseLayout(opt as ModelBaseLayoutAlgorithm)
                             }
                           >
                             <Dropdown.Toggle className='chaise-btn chaise-btn-secondary'>
@@ -589,14 +589,14 @@ const ERDInner = (): JSX.Element => {
                             </Dropdown.Menu>
                           </Dropdown>
                         </div>
-                        <div className='erd-toolbar-row'>
+                        <div className='model-toolbar-row'>
                           <ChaiseTooltip
                             placement='top'
                             tooltip='Spread out overlapping tables in the current layout.'
                           >
                             <button
                               type='button'
-                              className='erd-remove-overlaps-btn chaise-btn chaise-btn-secondary'
+                              className='model-remove-overlaps-btn chaise-btn chaise-btn-secondary'
                               onClick={handleRemoveOverlaps}
                             >
                               <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
@@ -604,14 +604,14 @@ const ERDInner = (): JSX.Element => {
                             </button>
                           </ChaiseTooltip>
                         </div>
-                        <div className='erd-toolbar-row'>
+                        <div className='model-toolbar-row'>
                           <ChaiseTooltip
                             placement='top'
                             tooltip='Download the current diagram as a PDF.'
                           >
                             <button
                               type='button'
-                              className='erd-export-pdf-btn chaise-btn chaise-btn-secondary'
+                              className='model-export-pdf-btn chaise-btn chaise-btn-secondary'
                               onClick={handleExportPdf}
                             >
                               <span className='chaise-btn-icon fa-solid fa-file-export' />
@@ -619,17 +619,17 @@ const ERDInner = (): JSX.Element => {
                             </button>
                           </ChaiseTooltip>
                         </div>
-                        <ErdChecklist
+                        <ModelChecklist
                           title='Schemas'
-                          className='erd-schemas-checklist'
+                          className='model-schemas-checklist'
                           items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
                           checkedIds={visibleSchemas}
                           onToggle={handleToggleSchema}
                           emptyMessage='No schemas found.'
                         />
-                        <ErdChecklist
+                        <ModelChecklist
                           title='Tables'
-                          className='erd-tables-checklist'
+                          className='model-tables-checklist'
                           items={visibleSchemaTableItems}
                           checkedIds={visibleTableIds}
                           onToggle={handleToggleTable}
@@ -655,10 +655,10 @@ const ERDInner = (): JSX.Element => {
  * useReactFlow (used for fitView after re-layout) needs a ReactFlowProvider
  * above the component that calls it.
  */
-const ERD = (): JSX.Element => (
+const Model = (): JSX.Element => (
   <ReactFlowProvider>
-    <ERDInner />
+    <ModelInner />
   </ReactFlowProvider>
 );
 
-export default ERD;
+export default Model;

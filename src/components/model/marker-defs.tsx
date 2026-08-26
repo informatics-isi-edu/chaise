@@ -1,11 +1,11 @@
 import { type JSX } from 'react';
 
 // utilities
-import { ERD_MARKERS, erdMarkerId, type ERDMarkerShape } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { ERD_MARKERS, erdMarkerId, type ERDMarkerShape } from '@isrd-isi-edu/chaise/src/utils/model-utils';
 import { getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 /**
- * one crow's foot marker def (see ERD_MARKERS in erd-utils.ts for the shapes).
+ * one crow's foot marker def (see ERD_MARKERS in model-utils.ts for the shapes).
  * markerUnits=userSpaceOnUse keeps the symbol the same size when the focus
  * highlight thickens the path stroke, and auto-start-reverse makes the same
  * def usable as a markerStart (it flips to face the node the path starts at).
@@ -46,15 +46,15 @@ const ErdMarker = ({ shape, highlighted, color }: {
 
 /**
  * hidden svg carrying the crow's foot marker defs the ERD display mode
- * references by url. rendered once inside the erd canvas; url(#id) markers
+ * references by url. rendered once inside the model canvas; url(#id) markers
  * resolve document-wide, react-flow doesn't need to know about them.
  */
 const ErdMarkerDefs = (): JSX.Element => {
   const shapes = Object.keys(ERD_MARKERS.SHAPES) as ERDMarkerShape[];
-  // same color-map value (and fallback) the focus highlight uses in erd.tsx
+  // same color-map value (and fallback) the focus highlight uses in model.tsx
   const highlightColor = getCssVariable(
     'primary',
-    document.querySelector('.erd-container') ?? undefined,
+    document.querySelector('.model-container') ?? undefined,
     '#4674a7'
   );
   return (

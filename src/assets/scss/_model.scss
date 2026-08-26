@@ -2,15 +2,15 @@
 @use 'variables';
 @use 'scrollbar';
 
-// colors that erd-pdf-export.ts needs at runtime (it builds SVG markup
+// colors that model-pdf-export.ts needs at runtime (it builds SVG markup
 // directly, outside the normal css pipeline). exposed as custom properties so
 // that file can read them via getCssVariable() instead of hardcoding hex
 // values that can drift from _color-map.scss.
-$erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-header-background',
-  'erd-node-row-border', 'erd-fk-badge';
+$model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model-node-header-background',
+  'model-node-row-border', 'model-fk-badge';
 
-.erd-container {
-  @each $key in $erd-js-colors {
+.model-container {
+  @each $key in $model-js-colors {
     --#{$key}: #{map.get(variables.$color-map, $key)};
   }
 
@@ -37,75 +37,75 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     flex-direction: column;
   }
 
-  .erd-canvas {
+  .model-canvas {
     flex-grow: 1;
     min-height: 0;
-    // positioning context for erd-loading-overlay, and for ChaiseSpinner's
+    // positioning context for model-loading-overlay, and for ChaiseSpinner's
     // own absolute positioning to scope to this area instead of the viewport
     position: relative;
   }
 
   // covers the diagram + toolbar during a relayout so nothing needs its own
   // disabled state; the diagram stays visible (dimmed) underneath.
-  .erd-loading-overlay {
+  .model-loading-overlay {
     position: absolute;
     inset: 0;
     z-index: 20;
-    background: map.get(variables.$color-map, 'erd-loading-overlay-background');
+    background: map.get(variables.$color-map, 'model-loading-overlay-background');
   }
 
-  // sizes below must stay in sync with the estimates in utils/erd-utils.ts
+  // sizes below must stay in sync with the estimates in utils/model-utils.ts
   // (NODE_SIZING: header/row heights, font sizes drive the width estimate)
-  .erd-table-node {
+  .model-table-node {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    border: 1px solid map.get(variables.$color-map, 'erd-node-border');
+    border: 1px solid map.get(variables.$color-map, 'model-node-border');
     border-radius: 4px;
     background: map.get(variables.$color-map, 'white');
     font-size: 12px;
     overflow: hidden;
 
-    .erd-table-node-header {
+    .model-table-node-header {
       height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 10px;
-      background: map.get(variables.$color-map, 'erd-node-header-background');
+      background: map.get(variables.$color-map, 'model-node-header-background');
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .erd-table-node-row {
+    .model-table-node-row {
       height: 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       padding: 0 10px;
-      border-top: 1px solid map.get(variables.$color-map, 'erd-node-row-border');
+      border-top: 1px solid map.get(variables.$color-map, 'model-node-row-border');
       white-space: nowrap;
 
-      .erd-column-name {
+      .model-column-name {
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
-      .erd-column-pk {
+      .model-column-pk {
         font-weight: 600;
       }
 
-      .erd-column-fk-badge {
+      .model-column-fk-badge {
         margin-left: 5px;
         font-size: 9px;
         font-weight: 600;
-        color: map.get(variables.$color-map, 'erd-fk-badge');
+        color: map.get(variables.$color-map, 'model-fk-badge');
       }
 
-      .erd-column-type {
+      .model-column-type {
         color: map.get(variables.$color-map, 'placeholder');
         font-size: 11px;
       }
@@ -120,17 +120,17 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
 
   // floating card treatment shared by the title and the toolbar, open or
   // collapsed: white background, border, radius, shadow.
-  .erd-title,
-  .erd-toolbar-collapsed,
-  .erd-toolbar {
+  .model-title,
+  .model-toolbar-collapsed,
+  .model-toolbar {
     box-sizing: border-box;
     background: map.get(variables.$color-map, 'white');
-    border: 1px solid map.get(variables.$color-map, 'erd-panel-border');
+    border: 1px solid map.get(variables.$color-map, 'model-panel-border');
     border-radius: 8px;
-    box-shadow: 0 2px 10px map.get(variables.$color-map, 'erd-panel-shadow');
+    box-shadow: 0 2px 10px map.get(variables.$color-map, 'model-panel-shadow');
   }
 
-  .erd-title {
+  .model-title {
     padding: 8px 18px;
     border: 0;
     box-shadow: none;
@@ -140,12 +140,12 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     }
   }
 
-  .erd-toolbar-collapsed,
-  .erd-toolbar {
+  .model-toolbar-collapsed,
+  .model-toolbar {
     padding: 10px;
   }
 
-  .erd-toolbar {
+  .model-toolbar {
     width: 275px;
     display: flex;
     flex-direction: column;
@@ -161,13 +161,13 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
       flex: 0 0 auto;
     }
 
-    .erd-toolbar-header {
+    .model-toolbar-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: -4px;
       padding-bottom: 6px;
-      border-bottom: 1px solid map.get(variables.$color-map, 'erd-divider');
+      border-bottom: 1px solid map.get(variables.$color-map, 'model-divider');
     }
 
     // ensure the hide settings button is properly aligned to the right.
@@ -175,11 +175,11 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
       padding-right: 0;
     }
 
-    .erd-toolbar-title {
+    .model-toolbar-title {
       margin: 0;
     }
 
-    .erd-toolbar-row {
+    .model-toolbar-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -191,7 +191,7 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
         margin: 0;
         font-size: 12px;
         font-weight: 600;
-        color: map.get(variables.$color-map, 'erd-secondary-label');
+        color: map.get(variables.$color-map, 'model-secondary-label');
       }
 
       // action buttons (remove overlaps, export pdf) fill their own row
@@ -214,28 +214,28 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
       }
     }
 
-    .erd-checklist-title {
+    .model-checklist-title {
       text-align: center;
       // font-size: 11px;
       // font-weight: 700;
       // letter-spacing: 0.05em;
       // text-transform: uppercase;
-      // color: map.get(variables.$color-map, 'erd-secondary-label');
+      // color: map.get(variables.$color-map, 'model-secondary-label');
       margin-bottom: 4px;
     }
 
-    .erd-checklist-empty {
+    .model-checklist-empty {
       text-align: center;
       font-size: 12px;
       color: map.get(variables.$color-map, 'placeholder');
       padding: 6px 0;
     }
 
-    .erd-checklist {
+    .model-checklist {
       width: 100%;
       box-sizing: border-box;
       padding-top: 6px;
-      border-top: 1px solid map.get(variables.$color-map, 'erd-divider');
+      border-top: 1px solid map.get(variables.$color-map, 'model-divider');
 
       .chaise-checkbox {
         height: auto;
@@ -250,22 +250,22 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
     }
 
     // fixed cap: about 5 rows (5 x ~21px row + list padding)
-    .erd-schemas-checklist .erd-checklist {
+    .model-schemas-checklist .model-checklist {
       max-height: 112px;
     }
 
     /*
      * the tables checklist is the flexible section: it takes whatever height
-     * is left under the toolbar's max-height (see .erd-toolbar) and scrolls
+     * is left under the toolbar's max-height (see .model-toolbar) and scrolls
      */
-    .erd-tables-checklist {
+    .model-tables-checklist {
       flex: 1 1 auto;
       // below ~4 rows the list stops shrinking and the toolbar scrollbar takes over
       min-height: 110px;
       display: flex;
       flex-direction: column;
 
-      .erd-checklist {
+      .model-checklist {
         flex: 1 1 auto;
         min-height: 90px;
       }
@@ -290,21 +290,21 @@ $erd-js-colors: 'white', 'placeholder', 'primary', 'erd-node-border', 'erd-node-
 
   // click-to-focus a table: same ring style as .row-focus elsewhere in the
   // app (record.tsx, chaise-accordions).
-  .react-flow__node.erd-node-focused {
+  .react-flow__node.model-node-focused {
     box-shadow: inset 0 0 0 2px map.get(variables.$color-map, 'primary');
   }
 
-  .react-flow__node.erd-node-dimmed {
+  .react-flow__node.model-node-dimmed {
     opacity: 0.35;
   }
 
-  .react-flow__edge.erd-edge-highlighted .react-flow__edge-path {
+  .react-flow__edge.model-edge-highlighted .react-flow__edge-path {
     stroke: map.get(variables.$color-map, 'primary');
     stroke-width: 2.5px;
   }
 
   // opacity on the wrapper, not the path, so the arrowhead marker dims too
-  .react-flow__edge.erd-edge-dimmed {
+  .react-flow__edge.model-edge-dimmed {
     opacity: 0.25;
   }
 }

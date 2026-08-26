@@ -4,28 +4,28 @@ import type { ElkNode } from 'elkjs/lib/elk.bundled.js';
 // models
 import {
   edgeKey,
-  ERDColumn,
-  ERDEdge,
-  ERDGraph,
-  ERDTable,
-} from '@isrd-isi-edu/chaise/src/models/erd';
+  ModelColumn,
+  ModelEdge,
+  ModelGraph,
+  ModelTable,
+} from '@isrd-isi-edu/chaise/src/models/model-app';
 
 // providers
-import { ERDDetailLevel, ERDBaseLayoutAlgorithm, ERDDisplayMode } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { ModelDetailLevel, ModelBaseLayoutAlgorithm, ModelDisplayMode } from '@isrd-isi-edu/chaise/src/providers/model';
 
 //-------------------  types  --------------------//
 
 /**
- * the react-flow node shape used by the erd app: an `erdTable` node carrying
- * its ERDTable in data. positions and sizes come from elk.
+ * the react-flow node shape used by the model app: a `modelTable` node carrying
+ * its ModelTable in data. positions and sizes come from elk.
  */
-export type ERDTableNodeModel = Node<{ table: ERDTable }, 'erdTable'>;
+export type ModelTableNodeModel = Node<{ table: ModelTable }, 'modelTable'>;
 
 /**
  * per-edge geometry inputs, computed once in buildFlowEdges and read by
  * computeEdgePath (both on the canvas and in the PDF export)
  */
-export interface ERDEdgeData extends Record<string, unknown> {
+export interface ModelEdgeData extends Record<string, unknown> {
   /**
    * signed perpendicular step relative to this edge's own source->target
    * direction; 0 = straight line. the canonical sign is baked in at assignment
@@ -49,9 +49,9 @@ export interface ERDEdgeData extends Record<string, unknown> {
   highlighted?: boolean;
 }
 
-export type ERDEdgeModel = Edge<ERDEdgeData, 'erdFloating'>;
+export type ModelEdgeModel = Edge<ModelEdgeData, 'modelFloating'>;
 
-export interface ERDRect {
+export interface ModelRect {
   x: number;
   y: number;
   width: number;
@@ -63,7 +63,7 @@ export interface ERDRect {
 /**
  * box measurements used by estimateNodeSize for the elk size estimates, and by
  * the PDF export to draw boxes with the same proportions. they must stay in
- * sync with the rendered node styles (see _erd.scss) or the layout won't match
+ * sync with the rendered node styles (see _model.scss) or the layout won't match
  * what is drawn.
  */
 export const NODE_SIZING = {
@@ -103,7 +103,7 @@ const EDGE_GEOMETRY = {
 /**
  * RID is a system column but is exempted in visibleColumns: it's the implicit
  * primary key ermrest guarantees on every table, so a table with no other key
- * would otherwise show zero rows under ERDDetailLevel.KEYS, misleadingly
+ * would otherwise show zero rows under ModelDetailLevel.KEYS, misleadingly
  * suggesting it has no key at all.
  */
 const RID_COLUMN_NAME = 'RID';
@@ -154,7 +154,7 @@ export function erdMarkerId(shape: ERDMarkerShape, highlighted?: boolean): strin
  * the fk is nullable. so: exactly-one (double bar), or zero-or-one when
  * optional.
  */
-export function erdMarkerUrls(data?: ERDEdgeData): { markerStart: string; markerEnd: string } {
+export function erdMarkerUrls(data?: ModelEdgeData): { markerStart: string; markerEnd: string } {
   const hl = data?.highlighted;
   const start: ERDMarkerShape = data?.isOneToOne ? 'zeroOne' : 'zeroMany';
   const end: ERDMarkerShape = data?.isOptional ? 'zeroOne' : 'exactlyOne';
@@ -171,19 +171,19 @@ export function erdMarkerUrls(data?: ERDEdgeData): { markerStart: string; marker
  * single source of truth shared by estimateNodeSize and the table-node
  * component.
  */
-export function visibleColumns(table: ERDTable, detail: ERDDetailLevel): ERDColumn[] {
-  if (detail === ERDDetailLevel.NAMES) return [];
+export function visibleColumns(table: ModelTable, detail: ModelDetailLevel): ModelColumn[] {
+  if (detail === ModelDetailLevel.NAMES) return [];
   return table.columns.filter((col) => {
     if (col.isSystemColumn && col.name !== RID_COLUMN_NAME) return false;
-    if (detail === ERDDetailLevel.FULL) return true;
-    if (detail === ERDDetailLevel.KEYS_FKS) return col.isPrimaryKey || col.isForeignKey;
+    if (detail === ModelDetailLevel.FULL) return true;
+    if (detail === ModelDetailLevel.KEYS_FKS) return col.isPrimaryKey || col.isForeignKey;
     return col.isPrimaryKey;
   });
 }
 
 function estimateNodeSize(
-  table: ERDTable,
-  detail: ERDDetailLevel
+  table: ModelTable,
+  detail: ModelDetailLevel
 ): { width: number; height: number } {
   const columns = visibleColumns(table, detail);
 
@@ -205,11 +205,11 @@ function estimateNodeSize(
 
 /**
  * center point of a node's box. shared by the on screen floating edge
- * (floating-edge.tsx) and the PDF export (erd-pdf-export.ts), each of
+ * (floating-edge.tsx) and the PDF export (model-pdf-export.ts), each of
  * which reads a node's live position/size from a different shape (react-flow
- * internal node vs. plain ERDTableNodeModel) and reduces it to this rect.
+ * internal node vs. plain ModelTableNodeModel) and reduces it to this rect.
  */
-export function rectCenter(rect: ERDRect): { x: number; y: number } {
+export function rectCenter(rect: ModelRect): { x: number; y: number } {
   return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
 }
 
@@ -219,7 +219,7 @@ export function rectCenter(rect: ERDRect): { x: number; y: number } {
  * a node currently faces the other node, instead of a fixed handle side.
  */
 export function rectIntersection(
-  rect: ERDRect,
+  rect: ModelRect,
   otherCenter: { x: number; y: number }
 ): { x: number; y: number } {
   const center = rectCenter(rect);
@@ -246,9 +246,9 @@ export function rectIntersection(
  * gracefully, same as the straight case always has.
  */
 export function computeEdgePath(
-  sourceRect: ERDRect,
-  targetRect: ERDRect,
-  data?: ERDEdgeData
+  sourceRect: ModelRect,
+  targetRect: ModelRect,
+  data?: ModelEdgeData
 ): string {
   if (data?.isSelfLoop) {
     const r = EDGE_GEOMETRY.LOOP_BASE + data.loopIndex * EDGE_GEOMETRY.LOOP_STEP;
@@ -305,8 +305,8 @@ export function computeEdgePath(
  * recognize rather than erroring, so leaving them in for e.g. 'force' would
  * be dead config, not a bug that shows up.
  */
-function layeredOnlyOptions(layout: ERDBaseLayoutAlgorithm): Record<string, string> {
-  if (layout !== ERDBaseLayoutAlgorithm.LAYERED) return {};
+function layeredOnlyOptions(layout: ModelBaseLayoutAlgorithm): Record<string, string> {
+  if (layout !== ModelBaseLayoutAlgorithm.LAYERED) return {};
   return {
     'elk.direction': 'RIGHT',
     'elk.layered.spacing.nodeNodeBetweenLayers': '60',
@@ -323,10 +323,10 @@ function layeredOnlyOptions(layout: ERDBaseLayoutAlgorithm): Record<string, stri
  * layout space.
  */
 export function graphToElk(
-  graph: ERDGraph,
-  displayMode: ERDDisplayMode,
-  detail: ERDDetailLevel,
-  layout: ERDBaseLayoutAlgorithm,
+  graph: ModelGraph,
+  displayMode: ModelDisplayMode,
+  detail: ModelDetailLevel,
+  layout: ModelBaseLayoutAlgorithm,
   visibleSchemas: Set<string>,
   visibleTableIds: Set<string>
 ): ElkNode {
@@ -364,13 +364,13 @@ export function graphToElk(
 
 /**
  * one react-flow edge per fk constraint, with the geometry inputs each edge
- * needs (see ERDEdgeData). edges between the same table pair (either
+ * needs (see ModelEdgeData). edges between the same table pair (either
  * direction) share an offset group and fan out around the straight line;
  * self-loops nest per table. group members are sorted by edge id so offsets
  * are deterministic across renders.
  */
-function buildFlowEdges(edges: ERDEdge[]): ERDEdgeModel[] {
-  const groups = new Map<string, ERDEdge[]>();
+function buildFlowEdges(edges: ModelEdge[]): ModelEdgeModel[] {
+  const groups = new Map<string, ModelEdge[]>();
   edges.forEach((edge) => {
     const key =
       edge.fromTable === edge.toTable
@@ -381,7 +381,7 @@ function buildFlowEdges(edges: ERDEdge[]): ERDEdgeModel[] {
     else groups.set(key, [edge]);
   });
 
-  const flowEdges: ERDEdgeModel[] = [];
+  const flowEdges: ModelEdgeModel[] = [];
   groups.forEach((group) => {
     group.sort((a, b) => (edgeKey(a) < edgeKey(b) ? -1 : 1));
     group.forEach((edge, i) => {
@@ -393,7 +393,7 @@ function buildFlowEdges(edges: ERDEdge[]): ERDEdgeModel[] {
         id: edgeKey(edge),
         source: edge.fromTable,
         target: edge.toTable,
-        type: 'erdFloating',
+        type: 'modelFloating',
         markerEnd: { type: MarkerType.ArrowClosed },
         data: {
           offset: isSelfLoop ? 0 : edge.fromTable < edge.toTable ? raw : -raw,
@@ -418,12 +418,12 @@ function buildFlowEdges(edges: ERDEdge[]): ERDEdgeModel[] {
  * the relayout and remove-overlaps call paths.
  */
 export function elkToFlow(
-  graph: ERDGraph,
+  graph: ModelGraph,
   laidOut: ElkNode
-): { nodes: ERDTableNodeModel[]; edges: ERDEdgeModel[] } {
-  const nodes: ERDTableNodeModel[] = (laidOut.children || []).map((child) => ({
+): { nodes: ModelTableNodeModel[]; edges: ModelEdgeModel[] } {
+  const nodes: ModelTableNodeModel[] = (laidOut.children || []).map((child) => ({
     id: child.id,
-    type: 'erdTable',
+    type: 'modelTable',
     position: { x: child.x || 0, y: child.y || 0 },
     width: child.width,
     height: child.height,

@@ -1,6 +1,6 @@
 // Configure deployment-specific data here
 
 var chaiseConfig = {
-  name: 'ERD',
+  name: 'Model',
   logClientActions: false,
 };

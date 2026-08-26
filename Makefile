@@ -84,8 +84,8 @@ E2EServicesTest=test/e2e/specs/default-config/services.config.ts
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/playwright.config.ts
 # errors test
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/errors.config.ts
-# erd test
-E2Eerd=test/e2e/specs/erd/playwright.config.ts
+# model app test
+E2Emodel=test/e2e/specs/model-app/playwright.config.ts
 ## Parallel test scripts
 AllFeaturesParallel=test/e2e/specs/all-features/playwright.config.ts
 AllFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/playwright.config.ts
@@ -103,13 +103,13 @@ RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDrecordEditNullValues) $(E2ErecordEditI
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)
-ERD_TESTS=$(E2Eerd)
+MODEL_TESTS=$(E2Emodel)
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 ALL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(AllFeaturesConfirmationParallel)
 ALL_FEATURES_PARALLEL_TESTS=$(AllFeaturesParallel)
 PARALLEL_TESTS=$(AllFeaturesConfirmationParallel) $(DefaultConfigParallel) $(AllFeaturesParallel) $(DeleteProhibitedParallel)
-ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS) $(ERD_TESTS)
+ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS) $(MODEL_TESTS)
 
 ALL_MANUAL_TESTS=$(Manualrecordset)
 
@@ -158,9 +158,9 @@ testfooter: test-FOOTER_TESTS
 .PHONY: testerrors
 testerrors: test-ERRORS_TESTS
 
-#Rule to run the erd app tests
-.PHONY: testerd
-testerd: test-ERD_TESTS
+#Rule to run the model app tests
+.PHONY: testmodel
+testmodel: test-MODEL_TESTS
 
 #### Parallel make commands - these commands will run tests in parallel
 #Rule to run all parallel test configurations
@@ -393,5 +393,5 @@ usage:
 	@echo "  testrecord                     run record app e2e tests"
 	@echo "  testrecordset                  run recordset app e2e tests"
 	@echo "  testviewer                     run viewer app e2e tests"
-	@echo "  testerd                        run erd app e2e tests"
+	@echo "  testmodel                      run model app e2e tests"
 	@echo "  testnavbar                     run navbar e2e tests"

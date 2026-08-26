@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import 'svg2pdf.js';
 
 // providers
-import { ERDDetailLevel, ERDDisplayMode } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { ModelDetailLevel, ModelDisplayMode } from '@isrd-isi-edu/chaise/src/providers/model';
 
 // utilities
 import {
@@ -13,13 +13,13 @@ import {
   erdMarkerUrls,
   NODE_SIZING,
   visibleColumns,
-  type ERDEdgeModel,
+  type ModelEdgeModel,
   type ERDMarkerShape,
-  type ERDTableNodeModel,
-} from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+  type ModelTableNodeModel,
+} from '@isrd-isi-edu/chaise/src/utils/model-utils';
 import { getCssVariable } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-interface ErdSvgColors {
+interface ModelSvgColors {
   nodeBorder: string;
   nodeBackground: string;
   headerBackground: string;
@@ -29,30 +29,30 @@ interface ErdSvgColors {
 }
 
 /**
- * reads the custom properties `_erd.scss` emits from `_color-map.scss`
- * (`$erd-js-colors`), so this stays in sync with the stylesheet instead of
+ * reads the custom properties `_model.scss` emits from `_color-map.scss`
+ * (`$model-js-colors`), so this stays in sync with the stylesheet instead of
  * hardcoding colors that can drift from it. called lazily, never at module
  * load time, since the styles aren't guaranteed ready until then.
  */
-function getErdSvgColors(): ErdSvgColors {
-  const container = document.querySelector('.erd-container') ?? document.documentElement;
+function getModelSvgColors(): ModelSvgColors {
+  const container = document.querySelector('.model-container') ?? document.documentElement;
   return {
-    nodeBorder: getCssVariable('erd-node-border', container, '#999'),
+    nodeBorder: getCssVariable('model-node-border', container, '#999'),
     nodeBackground: getCssVariable('white', container, '#fff'),
-    headerBackground: getCssVariable('erd-node-header-background', container, '#f0f0f0'),
-    rowBorder: getCssVariable('erd-node-row-border', container, '#e5e5e5'),
+    headerBackground: getCssVariable('model-node-header-background', container, '#f0f0f0'),
+    rowBorder: getCssVariable('model-node-row-border', container, '#e5e5e5'),
     typeText: getCssVariable('placeholder', container, '#888'),
-    fkBadge: getCssVariable('erd-fk-badge', container, '#b04a2a'),
+    fkBadge: getCssVariable('model-fk-badge', container, '#b04a2a'),
   };
 }
 
-// no _erd.scss counterpart yet (react-flow's own default edge stroke, not
+// no _model.scss counterpart yet (react-flow's own default edge stroke, not
 // something chaise's stylesheet defines), so this stays a plain constant.
 const EDGE_COLOR = '#999';
 
 /**
  * rough text width estimate, matching the CHAR_WIDTH heuristic in
- * erd-utils.ts. only used to place the FK badge after the column name; an
+ * model-utils.ts. only used to place the FK badge after the column name; an
  * exact measurement would need a canvas/DOM text-measure pass.
  */
 const CHAR_WIDTH = 7;
@@ -68,12 +68,12 @@ function escapeXml(value: string): string {
  * column. header and rows are clipped to a rounded rect so corners match the
  * on screen node (which relies on `overflow: hidden` for the same effect).
  */
-function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdSvgColors): string {
+function nodeToSvg(node: ModelTableNodeModel, detail: ModelDetailLevel, colors: ModelSvgColors): string {
   const { x, y } = node.position;
   const width = node.width ?? 0;
   const height = node.height ?? 0;
   const columns = visibleColumns(node.data.table, detail);
-  const clipId = `erd-export-clip-${node.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const clipId = `model-export-clip-${node.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
   const rows = columns
     .map((col, i) => {
@@ -84,7 +84,7 @@ function nodeToSvg(node: ERDTableNodeModel, detail: ERDDetailLevel, colors: ErdS
 
       const badgeX = nameX + col.name.length * CHAR_WIDTH + 5;
       const fkBadge =
-        col.isForeignKey && detail !== ERDDetailLevel.KEYS
+        col.isForeignKey && detail !== ModelDetailLevel.KEYS
           ? `<text x="${badgeX}" y="${textY}" font-size="9" font-weight="bold" fill="${colors.fkBadge}"
               alignment-baseline="middle">FK</text>`
           : '';
@@ -146,7 +146,7 @@ function erdMarkerToSvg(shape: ERDMarkerShape): string {
  * decorations follow the path tangent on curves too. end decorations depend
  * on the display mode, same as the canvas.
  */
-function edgeToSvg(edge: ERDEdgeModel, nodesById: Map<string, ERDTableNodeModel>, displayMode: ERDDisplayMode): string {
+function edgeToSvg(edge: ModelEdgeModel, nodesById: Map<string, ModelTableNodeModel>, displayMode: ModelDisplayMode): string {
   const source = nodesById.get(edge.source);
   const target = nodesById.get(edge.target);
   if (!source || !target) return '';
@@ -155,9 +155,9 @@ function edgeToSvg(edge: ERDEdgeModel, nodesById: Map<string, ERDTableNodeModel>
   const targetRect = { ...target.position, width: target.width ?? 0, height: target.height ?? 0 };
   const path = computeEdgePath(sourceRect, targetRect, edge.data);
 
-  const markers = displayMode === ERDDisplayMode.ERD
+  const markers = displayMode === ModelDisplayMode.ERD
     ? `marker-start="${erdMarkerUrls(edge.data).markerStart}" marker-end="${erdMarkerUrls(edge.data).markerEnd}"`
-    : 'marker-end="url(#erd-export-arrow)"';
+    : 'marker-end="url(#model-export-arrow)"';
   return `<path d="${path}" fill="none" stroke="${EDGE_COLOR}" stroke-width="1" ${markers} />`;
 }
 
@@ -168,21 +168,21 @@ function edgeToSvg(edge: ERDEdgeModel, nodesById: Map<string, ERDTableNodeModel>
  * makes it convert cleanly to a vector PDF, unlike react-flow's own DOM.
  */
 export function nodesToSvg(
-  nodes: ERDTableNodeModel[],
-  edges: ERDEdgeModel[],
-  detail: ERDDetailLevel,
-  displayMode: ERDDisplayMode
+  nodes: ModelTableNodeModel[],
+  edges: ModelEdgeModel[],
+  detail: ModelDetailLevel,
+  displayMode: ModelDisplayMode
 ): string {
   const bounds = getNodesBounds(nodes);
   const viewBox = `${bounds.x - PADDING} ${bounds.y - PADDING} ${bounds.width + PADDING * 2} ${bounds.height + PADDING * 2}`;
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
-  const colors = getErdSvgColors();
+  const colors = getModelSvgColors();
 
   const shapes = Object.keys(ERD_MARKERS.SHAPES) as ERDMarkerShape[];
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" font-family="sans-serif">
       <defs>
-        <marker id="erd-export-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <marker id="model-export-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="${EDGE_COLOR}" />
         </marker>
         ${shapes.map((shape) => erdMarkerToSvg(shape)).join('')}
@@ -199,11 +199,11 @@ export function nodesToSvg(
  * v1 scales the whole diagram to fit one Letter landscape page; pagination
  * for large diagrams is a follow-up (see task notes).
  */
-export async function exportErdToPdf(
-  nodes: ERDTableNodeModel[],
-  edges: ERDEdgeModel[],
-  detail: ERDDetailLevel,
-  displayMode: ERDDisplayMode
+export async function exportModelToPdf(
+  nodes: ModelTableNodeModel[],
+  edges: ModelEdgeModel[],
+  detail: ModelDetailLevel,
+  displayMode: ModelDisplayMode
 ): Promise<void> {
   const svgString = nodesToSvg(nodes, edges, detail, displayMode);
   const svgEl = new DOMParser().parseFromString(svgString, 'image/svg+xml').documentElement;
@@ -214,5 +214,5 @@ export async function exportErdToPdf(
   const height = doc.internal.pageSize.getHeight() - margin * 2;
 
   await doc.svg(svgEl, { x: margin, y: margin, width, height });
-  doc.save('erd.pdf');
+  doc.save('model.pdf');
 }

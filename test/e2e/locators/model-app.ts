@@ -1,12 +1,12 @@
 import { expect, Locator, Page } from '@playwright/test';
 
-export default class ErdLocators {
+export default class ModelAppLocators {
   /**
    * waits for the first layout to finish: at least one table node visible and no relayout in progress
    */
-  static async waitForErdPageReady(page: Page, timeout?: number): Promise<void> {
-    await expect(ErdLocators.getNodes(page).first()).toBeVisible({ timeout });
-    await ErdLocators.waitForLayoutSettled(page, timeout);
+  static async waitForPageReady(page: Page, timeout?: number): Promise<void> {
+    await expect(ModelAppLocators.getNodes(page).first()).toBeVisible({ timeout });
+    await ModelAppLocators.waitForLayoutSettled(page, timeout);
   }
 
   /**
@@ -15,19 +15,19 @@ export default class ErdLocators {
    * appear first would be flaky.
    */
   static async waitForLayoutSettled(page: Page, timeout?: number): Promise<void> {
-    await ErdLocators.getLoadingOverlay(page).waitFor({ state: 'detached', timeout });
+    await ModelAppLocators.getLoadingOverlay(page).waitFor({ state: 'detached', timeout });
   }
 
   static getCanvas(page: Page): Locator {
-    return page.locator('.erd-canvas');
+    return page.locator('.model-canvas');
   }
 
   static getLoadingOverlay(page: Page): Locator {
-    return page.locator('.erd-loading-overlay');
+    return page.locator('.model-loading-overlay');
   }
 
   static getTitle(page: Page): Locator {
-    return page.locator('.erd-title h3');
+    return page.locator('.model-title h3');
   }
 
   static getPane(page: Page): Locator {
@@ -35,38 +35,38 @@ export default class ErdLocators {
   }
 
   static getNodes(page: Page): Locator {
-    return page.locator('.react-flow__node-erdTable');
+    return page.locator('.react-flow__node-modelTable');
   }
 
   /**
    * @param tableId the node id in `schema:table` format
    */
   static getNode(page: Page, tableId: string): Locator {
-    return page.locator(`.react-flow__node-erdTable[data-id="${tableId}"]`);
+    return page.locator(`.react-flow__node-modelTable[data-id="${tableId}"]`);
   }
 
   static getNodeHeader(node: Locator): Locator {
-    return node.locator('.erd-table-node-header');
+    return node.locator('.model-table-node-header');
   }
 
   static getNodeRows(container: Locator | Page): Locator {
-    return container.locator('.erd-table-node-row');
+    return container.locator('.model-table-node-row');
   }
 
   static getColumnNames(node: Locator): Locator {
-    return node.locator('.erd-column-name');
+    return node.locator('.model-column-name');
   }
 
   static getPkColumns(node: Locator): Locator {
-    return node.locator('.erd-column-pk');
+    return node.locator('.model-column-pk');
   }
 
   static getFkBadges(container: Locator | Page): Locator {
-    return container.locator('.erd-column-fk-badge');
+    return container.locator('.model-column-fk-badge');
   }
 
   static getColumnTypes(node: Locator): Locator {
-    return node.locator('.erd-column-type');
+    return node.locator('.model-column-type');
   }
 
   static getEdges(page: Page): Locator {
@@ -84,58 +84,58 @@ export default class ErdLocators {
    * the rendered svg path of an edge, for `d` attribute assertions
    */
   static getEdgePath(page: Page, constraintId: string): Locator {
-    return ErdLocators.getEdge(page, constraintId).locator('.react-flow__edge-path');
+    return ModelAppLocators.getEdge(page, constraintId).locator('.react-flow__edge-path');
   }
 
   static getFocusedNodes(page: Page): Locator {
-    return page.locator('.react-flow__node.erd-node-focused');
+    return page.locator('.react-flow__node.model-node-focused');
   }
 
   static getDimmedNodes(page: Page): Locator {
-    return page.locator('.react-flow__node.erd-node-dimmed');
+    return page.locator('.react-flow__node.model-node-dimmed');
   }
 
   static getHighlightedEdges(page: Page): Locator {
-    return page.locator('.react-flow__edge.erd-edge-highlighted');
+    return page.locator('.react-flow__edge.model-edge-highlighted');
   }
 
   static getDimmedEdges(page: Page): Locator {
-    return page.locator('.react-flow__edge.erd-edge-dimmed');
+    return page.locator('.react-flow__edge.model-edge-dimmed');
   }
 
   static getToolbar(page: Page): Locator {
-    return page.locator('.erd-toolbar');
+    return page.locator('.model-toolbar');
   }
 
   static getCollapsedToolbar(page: Page): Locator {
-    return page.locator('.erd-toolbar-collapsed');
+    return page.locator('.model-toolbar-collapsed');
   }
 
   static getHideSettingsButton(page: Page): Locator {
-    return ErdLocators.getToolbar(page).locator('.erd-toolbar-header .chaise-sidebar-close');
+    return ModelAppLocators.getToolbar(page).locator('.model-toolbar-header .chaise-sidebar-close');
   }
 
   static getShowSettingsButton(page: Page): Locator {
-    return ErdLocators.getCollapsedToolbar(page).locator('.chaise-sidebar-open');
+    return ModelAppLocators.getCollapsedToolbar(page).locator('.chaise-sidebar-open');
   }
 
   /**
    * @param label the row label, e.g. 'Detail' or 'Layout'
    */
   static getToolbarRow(page: Page, label: string): Locator {
-    return ErdLocators.getToolbar(page).locator('.erd-toolbar-row').filter({ hasText: label });
+    return ModelAppLocators.getToolbar(page).locator('.model-toolbar-row').filter({ hasText: label });
   }
 
   static getDisplayModeDropdown(page: Page): Locator {
-    return ErdLocators.getToolbarRow(page, 'Display Mode').locator('.dropdown-toggle');
+    return ModelAppLocators.getToolbarRow(page, 'Display Mode').locator('.dropdown-toggle');
   }
 
   static getDetailDropdown(page: Page): Locator {
-    return ErdLocators.getToolbarRow(page, 'Detail').locator('.dropdown-toggle');
+    return ModelAppLocators.getToolbarRow(page, 'Detail').locator('.dropdown-toggle');
   }
 
   static getLayoutDropdown(page: Page): Locator {
-    return ErdLocators.getToolbarRow(page, 'Layout').locator('.dropdown-toggle');
+    return ModelAppLocators.getToolbarRow(page, 'Layout').locator('.dropdown-toggle');
   }
 
   /**
@@ -146,19 +146,19 @@ export default class ErdLocators {
   }
 
   static getRemoveOverlapsButton(page: Page): Locator {
-    return page.locator('.erd-remove-overlaps-btn');
+    return page.locator('.model-remove-overlaps-btn');
   }
 
   static getExportPdfButton(page: Page): Locator {
-    return page.locator('.erd-export-pdf-btn');
+    return page.locator('.model-export-pdf-btn');
   }
 
   /**
    * @param title the checklist title, 'Schemas' or 'Tables'
    */
   static getChecklist(page: Page, title: string): Locator {
-    return page.locator('.erd-checklist-container').filter({
-      has: page.locator('.erd-checklist-title', { hasText: title })
+    return page.locator('.model-checklist-container').filter({
+      has: page.locator('.model-checklist-title', { hasText: title })
     });
   }
 
@@ -174,6 +174,6 @@ export default class ErdLocators {
   }
 
   static getChecklistEmpty(checklist: Locator): Locator {
-    return checklist.locator('.erd-checklist-empty');
+    return checklist.locator('.model-checklist-empty');
   }
 }

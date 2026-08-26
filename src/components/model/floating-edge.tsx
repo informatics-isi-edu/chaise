@@ -2,12 +2,12 @@ import { BaseEdge, useInternalNode, type EdgeProps, type InternalNode, type Node
 import { type JSX } from 'react';
 
 // providers
-import { useErdStore, ERDDisplayMode } from '@isrd-isi-edu/chaise/src/providers/erd';
+import { useModelStore, ModelDisplayMode } from '@isrd-isi-edu/chaise/src/providers/model';
 
 // utilities
-import { computeEdgePath, erdMarkerUrls, type ERDEdgeModel, type ERDRect } from '@isrd-isi-edu/chaise/src/utils/erd-utils';
+import { computeEdgePath, erdMarkerUrls, type ModelEdgeModel, type ModelRect } from '@isrd-isi-edu/chaise/src/utils/model-utils';
 
-function nodeRect(node: InternalNode<Node>): ERDRect {
+function nodeRect(node: InternalNode<Node>): ModelRect {
   const { x, y } = node.internals.positionAbsolute;
   return { x, y, width: node.measured.width ?? 0, height: node.measured.height ?? 0 };
 }
@@ -23,14 +23,14 @@ function nodeRect(node: InternalNode<Node>): ERDRect {
  *
  * the path itself (straight line, offset curve for parallel fks, or loop for
  * self-referencing fks) comes from computeEdgePath, driven by the offsets
- * assigned in buildFlowEdges (see ERDEdgeData in erd-utils.ts).
+ * assigned in buildFlowEdges (see ModelEdgeData in model-utils.ts).
  *
  * end decorations depend on the display mode: the simplified mode uses the
  * arrow react-flow resolved into the markerEnd prop, the ERD mode swaps in
  * crow's foot markers on both ends (defs in marker-defs.tsx).
  */
-const ERDFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<ERDEdgeModel>): JSX.Element | null => {
-  const displayMode = useErdStore((state) => state.displayMode);
+const ModelFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<ModelEdgeModel>): JSX.Element | null => {
+  const displayMode = useModelStore((state) => state.displayMode);
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
@@ -38,7 +38,7 @@ const ERDFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<ERDE
 
   const path = computeEdgePath(nodeRect(sourceNode), nodeRect(targetNode), data);
 
-  if (displayMode === ERDDisplayMode.ERD) {
+  if (displayMode === ModelDisplayMode.ERD) {
     const markers = erdMarkerUrls(data);
     return <BaseEdge id={id} path={path} markerStart={markers.markerStart} markerEnd={markers.markerEnd} />;
   }
@@ -46,4 +46,4 @@ const ERDFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<ERDE
   return <BaseEdge id={id} path={path} markerEnd={markerEnd} />;
 };
 
-export default ERDFloatingEdge;
+export default ModelFloatingEdge;

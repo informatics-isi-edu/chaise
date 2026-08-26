@@ -7,7 +7,7 @@ import { resolve } from 'path';
  * import from there and have to duplicate the definition.
  */
 export enum APP_NAMES {
-  ERD = 'erd',
+  MODEL = 'model',
   HELP = 'help',
   LOGIN = 'login',
   NAVBAR = 'navbar',

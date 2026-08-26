@@ -167,11 +167,11 @@ jobs:
         run: |
           cd chaise
           make testallfeatures
-      - name: Run erd test spec
+      - name: Run model app test spec
         if: ${{ !cancelled() }}
         run: |
           cd chaise
-          make testerd
+          make testmodel
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -4,7 +4,7 @@ import { create } from 'zustand';
 /**
  * whether ERD notions should be used or a simplified view
  */
-export enum ERDDisplayMode {
+export enum ModelDisplayMode {
   ERD = 'erd',
   SIMPLIFIED = 'simplified',
 }
@@ -12,7 +12,7 @@ export enum ERDDisplayMode {
 /**
  * how much of each table is drawn
  */
-export enum ERDDetailLevel {
+export enum ModelDetailLevel {
   /** just the table name */
   NAMES = 'names',
   /** primary key columns only */
@@ -29,7 +29,7 @@ export enum ERDDetailLevel {
  * which lists a 'disco' algorithm this build doesn't have. LAYERED suits
  * mostly-acyclic fk graphs and is the default; the rest are here to compare.
  */
-export enum ERDBaseLayoutAlgorithm {
+export enum ModelBaseLayoutAlgorithm {
   LAYERED = 'layered',
   STRESS = 'stress',
   FORCE = 'force',
@@ -38,15 +38,15 @@ export enum ERDBaseLayoutAlgorithm {
   RECTPACKING = 'rectpacking',
 }
 
-interface ERDStore {
-  displayMode: ERDDisplayMode;
-  setDisplayMode: (displayMode: ERDDisplayMode) => void;
+interface ModelStore {
+  displayMode: ModelDisplayMode;
+  setDisplayMode: (displayMode: ModelDisplayMode) => void;
 
-  detail: ERDDetailLevel;
-  setDetail: (detail: ERDDetailLevel) => void;
+  detail: ModelDetailLevel;
+  setDetail: (detail: ModelDetailLevel) => void;
 
-  baseLayout: ERDBaseLayoutAlgorithm;
-  setBaseLayout: (baseLayout: ERDBaseLayoutAlgorithm) => void;
+  baseLayout: ModelBaseLayoutAlgorithm;
+  setBaseLayout: (baseLayout: ModelBaseLayoutAlgorithm) => void;
 
   visibleSchemas: Set<string>;
   setVisibleSchemas: (schemas: Set<string>) => void;
@@ -61,16 +61,16 @@ interface ERDStore {
 /**
  * app-wide singleton store (zustand `create` flavor). read with a selector so
  * components only re-render on the slice they use:
- *   const detail = useErdStore((state) => state.detail);
+ *   const detail = useModelStore((state) => state.detail);
  */
-export const useErdStore = create<ERDStore>((set) => ({
-  displayMode: ERDDisplayMode.SIMPLIFIED,
+export const useModelStore = create<ModelStore>((set) => ({
+  displayMode: ModelDisplayMode.SIMPLIFIED,
   setDisplayMode: (displayMode) => set({ displayMode }),
 
-  detail: ERDDetailLevel.KEYS,
+  detail: ModelDetailLevel.KEYS,
   setDetail: (detail) => set({ detail }),
 
-  baseLayout: ERDBaseLayoutAlgorithm.LAYERED,
+  baseLayout: ModelBaseLayoutAlgorithm.LAYERED,
   setBaseLayout: (baseLayout) => set({ baseLayout }),
 
   visibleSchemas: new Set(),

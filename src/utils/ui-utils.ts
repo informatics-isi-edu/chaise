@@ -579,7 +579,7 @@ export function addClickListener(
 
 /**
  * read a css custom property (e.g. one emitted by a scss `@each` loop over
- * `$color-map`, see `_erd.scss`) from an element's computed styles. lets code
+ * `$color-map`, see `_model.scss`) from an element's computed styles. lets code
  * that can't use scss directly (svg/canvas export, etc.) stay in sync with
  * `_color-map.scss` instead of hardcoding colors that can drift from it.
  * @param name the custom property name, without the leading `--`

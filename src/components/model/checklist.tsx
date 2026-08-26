@@ -6,14 +6,14 @@ import { useRef, type JSX } from 'react';
 // components
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
-export interface ErdChecklistItem {
+export interface ModelChecklistItem {
   id: string;
   label: string;
 }
 
-interface ErdChecklistProps {
+interface ModelChecklistProps {
   title: string;
-  items: ErdChecklistItem[];
+  items: ModelChecklistItem[];
   checkedIds: Set<string>;
   onToggle: (id: string) => void;
   emptyMessage: string;
@@ -23,13 +23,13 @@ interface ErdChecklistProps {
   className?: string;
 }
 
-interface ErdChecklistRowProps {
-  item: ErdChecklistItem;
+interface ModelChecklistRowProps {
+  item: ModelChecklistItem;
   checked: boolean;
   onToggle: (id: string) => void;
 }
 
-const ErdChecklistRow = ({ item, checked, onToggle }: ErdChecklistRowProps): JSX.Element => {
+const ModelChecklistRow = ({ item, checked, onToggle }: ModelChecklistRowProps): JSX.Element => {
   const labelRef = useRef<HTMLLabelElement>(null);
 
   return (
@@ -48,16 +48,16 @@ const ErdChecklistRow = ({ item, checked, onToggle }: ErdChecklistRowProps): JSX
  * tooltip pattern (see faceting/facet-check-list.tsx) rather than a new
  * dependency.
  */
-const ErdChecklist = ({ title, items, checkedIds, onToggle, emptyMessage, className }: ErdChecklistProps): JSX.Element => {
+const ModelChecklist = ({ title, items, checkedIds, onToggle, emptyMessage, className }: ModelChecklistProps): JSX.Element => {
   return (
-    <div className={`erd-checklist-container${className ? ` ${className}` : ''}`}>
-      <div className='erd-checklist-title'>{title}</div>
+    <div className={`model-checklist-container${className ? ` ${className}` : ''}`}>
+      <div className='model-checklist-title'>{title}</div>
       {items.length === 0 ? (
-        <div className='erd-checklist-empty'>{emptyMessage}</div>
+        <div className='model-checklist-empty'>{emptyMessage}</div>
       ) : (
-        <ul className='chaise-list-container erd-checklist chaise-scrollbar-y'>
+        <ul className='chaise-list-container model-checklist chaise-scrollbar-y'>
           {items.map((item) => (
-            <ErdChecklistRow key={item.id} item={item} checked={checkedIds.has(item.id)} onToggle={onToggle} />
+            <ModelChecklistRow key={item.id} item={item} checked={checkedIds.has(item.id)} onToggle={onToggle} />
           ))}
         </ul>
       )}
@@ -65,4 +65,4 @@ const ErdChecklist = ({ title, items, checkedIds, onToggle, emptyMessage, classN
   );
 };
 
-export default ErdChecklist;
+export default ModelChecklist;

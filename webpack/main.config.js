@@ -59,7 +59,7 @@ module.exports = (env) => {
         isLib: true,
       },
       {
-        appName: 'erd',
+        appName: 'model',
         appTitle: 'Data Model',
       },
     ],
