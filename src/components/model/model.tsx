@@ -372,7 +372,12 @@ const ModelInner = (): JSX.Element => {
       dispatchError({
         error: new CustomError(
           'No Catalog',
-          'No catalog specified. Use a url like `/chaise/model/#catalog-id`, or define a `defaultCatalog` in chaise-config.'
+          'No catalog specified. The model app needs to know which data model to display.',
+          undefined,
+          undefined,
+          undefined,
+          // shown behind "Show Error Details", rendered as plain text
+          'Use a url like /chaise/model/#catalog-id, or define a defaultCatalog in chaise-config.'
         ),
       });
       return;
