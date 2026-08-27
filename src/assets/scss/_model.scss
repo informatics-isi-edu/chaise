@@ -27,6 +27,10 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
 
     padding-left: 0 !important;
     padding-right: 0 !important;
+
+    .footer-container {
+      margin-left: 0 !important;
+    }
   }
 
   .main-body {
@@ -150,9 +154,8 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
     display: flex;
     flex-direction: column;
     gap: 10px;
-    // 140px = the bottom-left zoom controls plus panel margins, so the
-    // toolbar always stops above them
-    max-height: calc(100% - 130px);
+    // preserve enough space for the zoom controls
+    max-height: calc(100% - 85px);
     overflow-y: auto;
     @include scrollbar.chaise-scrollbar-style;
 
@@ -278,6 +281,17 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
   // default to margin 15px; give it the same right inset as the minimap
   .react-flow__attribution {
     margin-right: 15px;
+
+    // tone the link down to grey (chaise's global link blue is too pronounced
+    // here); it stays a link, with underline on hover
+    a {
+      color: map.get(variables.$color-map, 'placeholder');
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   // keep the diagram readable under the minimap; it wakes up on hover

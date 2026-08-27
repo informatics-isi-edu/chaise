@@ -53,6 +53,8 @@ test.describe('Model app', () => {
       // playwright reports rendered svg <g> edges as hidden, so assert attachment
       for (const id of [MAIN_FK1, MAIN_FK2, INBOUND_FK, SELF_FK]) {
         await expect.soft(ModelAppLocators.getEdge(page, id)).toBeAttached();
+        // the hover tooltip carries the fk constraint id
+        await expect.soft(ModelAppLocators.getEdge(page, id).locator('title')).toHaveText(id);
       }
     });
 
@@ -232,7 +234,7 @@ test.describe('Model app', () => {
 
     await test.step('erd display mode swaps edge markers', async () => {
       await ModelAppLocators.getDisplayModeDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'ERD').click();
+      await ModelAppLocators.getDropdownOption(page, 'ERD-like').click();
       // mode change re-runs the layout (see the settings-change effect)
       await ModelAppLocators.waitForLayoutSettled(page);
 

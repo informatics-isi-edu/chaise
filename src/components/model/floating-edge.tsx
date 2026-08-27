@@ -38,12 +38,27 @@ const ModelFloatingEdge = ({ id, source, target, markerEnd, data }: EdgeProps<Mo
 
   const path = computeEdgePath(nodeRect(sourceNode), nodeRect(targetNode), data);
 
+  /*
+   * the edge id is the fk constraint id (`schema:constraint`); a <title> child
+   * of the edge's <g> wrapper shows it as a native tooltip on hover, same as
+   * the table-node headers do for their `schema:table`.
+   */
   if (displayMode === ModelDisplayMode.ERD) {
     const markers = erdMarkerUrls(data);
-    return <BaseEdge id={id} path={path} markerStart={markers.markerStart} markerEnd={markers.markerEnd} />;
+    return (
+      <>
+        <title>{id}</title>
+        <BaseEdge id={id} path={path} markerStart={markers.markerStart} markerEnd={markers.markerEnd} />
+      </>
+    );
   }
 
-  return <BaseEdge id={id} path={path} markerEnd={markerEnd} />;
+  return (
+    <>
+      <title>{id}</title>
+      <BaseEdge id={id} path={path} markerEnd={markerEnd} />
+    </>
+  );
 };
 
 export default ModelFloatingEdge;

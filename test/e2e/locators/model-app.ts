@@ -127,7 +127,7 @@ export default class ModelAppLocators {
   }
 
   static getDisplayModeDropdown(page: Page): Locator {
-    return ModelAppLocators.getToolbarRow(page, 'Display Mode').locator('.dropdown-toggle');
+    return ModelAppLocators.getToolbarRow(page, 'Mode').locator('.dropdown-toggle');
   }
 
   static getDetailDropdown(page: Page): Locator {
