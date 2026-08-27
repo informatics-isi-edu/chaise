@@ -83,8 +83,8 @@ const nodeTypes = { modelTable: ModelTableNode };
 const edgeTypes = { modelFloating: ModelFloatingEdge };
 
 const DISPLAY_MODE_LABELS: Record<ModelDisplayMode, string> = {
-  [ModelDisplayMode.ERD]: 'ERD',
   [ModelDisplayMode.SIMPLIFIED]: 'Simplified',
+  [ModelDisplayMode.ERD]: 'ERD-like',
 };
 
 const DETAIL_LEVEL_LABELS: Record<ModelDetailLevel, string> = {
@@ -494,7 +494,7 @@ const ModelInner = (): JSX.Element => {
                     minZoom={0.05}
                   >
                     <Background />
-                    <Controls showInteractive={false} />
+                    <Controls showInteractive={false} orientation='horizontal' />
                     <Panel position='top-center' className='model-title'>
                       <h3>Catalog {catalogId} Data Model</h3>
                     </Panel>
