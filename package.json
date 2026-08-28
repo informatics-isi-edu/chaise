@@ -4,7 +4,7 @@
   "version": "2.7.2",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">= 20.0.0",
+    "node": ">= 20.9.0",
     "npm": ">= 7.0.0"
   },
   "files": [
@@ -94,7 +94,7 @@
     "typescript": "~6.0.3",
     "uglify-js": "3.9.2",
     "webpack": "^5.108.4",
-    "webpack-cli": "^6.0.1",
+    "webpack-cli": "^7.2.2",
     "yet-another-react-lightbox": "^3.28.0",
     "zustand": "^5.0.14"
   }
