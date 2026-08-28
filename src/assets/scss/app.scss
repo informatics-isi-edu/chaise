@@ -182,7 +182,7 @@ html {
     &::after {
       display: inline-block;
       font-size: 0.85rem;
-      font-family: "Font Awesome 6 Free";
+      font-family: "Font Awesome 7 Free";
       font-weight: 900;
       content: "\f35d"; // fa-solid fa-up-right-from-square
       padding-left: 2px;
@@ -190,7 +190,7 @@ html {
   }
 
   .fullscreen-icon::after {
-    font-family: 'Font Awesome 6 Free';
+    font-family: 'Font Awesome 7 Free';
     font-weight: 900;
     content: '\f065'; // fa-solid fa-expand
   }
@@ -803,7 +803,7 @@ html {
         position: absolute;
         top: 4px;
         left: 4px;
-        font-family: "Font Awesome 6 Free";
+        font-family: "Font Awesome 7 Free";
         font-weight: 900;
         content: "\f068"; // fa-solid fa-minus"
         font-size: 1rem; // the visible part of icon is small, so we have to make it properly fit the box
@@ -815,7 +815,7 @@ html {
         position: absolute;
         top: 2px;
         left: 2px;
-        font-family: "Font Awesome 6 Free";
+        font-family: "Font Awesome 7 Free";
         font-weight: 900;
         content: "\f00c"; // fa-solid fa-check
         font-size: 1.3rem; // the visible part of icon is small, so we have to make it properly fit the box
@@ -1039,7 +1039,7 @@ html {
           margin-left: 2px;
           background-image: none;
           content: "\f054"; // fa-solid fa-chevron-right
-          font-family: "Font Awesome 6 Free";
+          font-family: "Font Awesome 7 Free";
           font-weight: 900;
           transform: unset;
           font-size: 1.75rem;
