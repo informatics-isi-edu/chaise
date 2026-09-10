@@ -122,7 +122,7 @@ const AppWrapperInner = ({
 
         const spinnerHTML = `
         <div class="spinner-border spinner-border-sm" role="status">
-          <span class="sr-only">Loading...</span>
+          <span class="visually-hidden">Loading...</span>
         </div>
       `;
         //show spinner
@@ -391,7 +391,7 @@ const AppWrapperInner = ({
       return (
         <div className='chaise-app-wrapper-sm-spinner'>
           <div className='spinner-border text-light' role='status' style={spinnerStyles}>
-            <span className='sr-only'>Loading...</span>
+            <span className='visually-hidden'>Loading...</span>
           </div>
         </div>
       );
