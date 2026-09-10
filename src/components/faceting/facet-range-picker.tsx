@@ -18,7 +18,7 @@ import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
-  HTMLPlotElement,
+  FacetRangePlotHandle,
   PlotData,
   PlotlyLayout,
   RangeOptions,
@@ -152,7 +152,7 @@ const FacetRangePicker = ({
 
   const rangePickerContainer = useRef<HTMLDivElement>(null);
   const listContainer = useRef<HTMLDivElement>(null);
-  const plotlyRef = useRef<HTMLPlotElement>(null);
+  const plotRef = useRef<FacetRangePlotHandle>(null);
 
   const numBuckets = facetColumn.histogramBucketCount;
 
@@ -167,7 +167,7 @@ const FacetRangePicker = ({
     const rs = new ResizeSensor(
       rangePickerContainer.current,
       () => {
-        if (rangePickerContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
+        if (rangePickerContainer.current && plotRef.current) plotRef.current.resize();
       }
     )
 
@@ -1004,7 +1004,7 @@ const FacetRangePicker = ({
         <FacetRangePlot
           plot={compState.plot}
           onRelayout={(event: any) => plotlyRelayout(event)}
-          plotlyRef={plotlyRef}
+          plotHandleRef={plotRef}
         />
       </Suspense>
     )
