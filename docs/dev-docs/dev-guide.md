@@ -574,15 +574,15 @@ While reviewing a PR that Dependabot opened:
 3. Grab the branch locally and ensure you can build it using all the Node.js versions that we support:
 
     ```
-    nvm use 18.18
+    nvm use 20.9
     make dist
     ```
     This should not throw any errors and should finish properly.
 
-5. Build and deploy the branch locally with the main Node.js version we support and use on our servers (currently 20.12.2):
+5. Build and deploy the branch locally with the minimum Node.js version we support and use on our servers (currently 20.19):
 
     ```
-    nvm use 20.12.2
+    nvm use 20.19
     make deps-test
     make dist-wo-deps
     make deploy
