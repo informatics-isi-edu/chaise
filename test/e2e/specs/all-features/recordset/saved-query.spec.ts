@@ -11,7 +11,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 // utils
 import { getCatalogID, getEntityRow, updateCatalogAnnotation } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { testShareCiteModal } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, TEST_LOCKS } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
 const testParams = {
@@ -25,7 +25,8 @@ const testParams = {
   }
 };
 
-test.describe('View recordset page and form a query,', () => {
+// modifies the catalog annotation, so it must not overlap with other specs that do the same
+test.describe('View recordset page and form a query,', { lock: TEST_LOCKS.CATALOG_MODEL }, () => {
 
   test.beforeAll('update the catalog annotation', async ({}, testInfo) => {
     const catalogId = getCatalogID(testInfo.project.name);

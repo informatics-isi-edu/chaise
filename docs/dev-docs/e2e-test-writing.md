@@ -37,6 +37,8 @@ This section summarizes the best practices for writing test cases in Chaise.
   - Useful links:
     - https://playwright.dev/docs/api/class-test
     - https://playwright.dev/docs/test-parallel
+  - The parallel configs (`test/e2e/specs/<group>/playwright.config.ts`) share one catalog per group. If your spec mutates the catalog model (annotations or ACLs), declare the `TEST_LOCKS.CATALOG_MODEL` lock on its `test.describe` (see `all-features/acls/main.spec.ts`). ERMrest serializes model mutations, so two specs changing the model at the same time get a 503 even when they touch different endpoints or different tables. Locks only serialize the specs that hold them, so other specs must not assert on the state you're changing.
+    - https://playwright.dev/docs/test-parallel#test-locks
   - The following are different ways that you can structure your tests:
     - To reduce the runtime, breaking tests into multiple files is preferable. So if these tests won't affect each other, it's best to create multiple files that the `.config.ts` will then run.
     - Another option is to keep them in the same file as two separate tests. In this case, each `test` will open a separate browser.

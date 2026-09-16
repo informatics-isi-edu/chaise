@@ -65,7 +65,8 @@ test.describe('View existing record,', function () {
 
     await test.step('should have only "This record (CSV)" option in export menu because of `disableDefaultExport` chaise-config.', async () => {
       await ExportLocators.getExportDropdown(page).click();
-      const options = ExportLocators.getExportOptions(page);
+      // the acl spec might be running at the same time and add the "Configurations" submenu, so ignore it
+      const options = ExportLocators.getExportTemplateOptions(page);
       await expect.soft(options).toHaveCount(1);
       await expect.soft(options).toHaveText('This record (CSV)');
     });
