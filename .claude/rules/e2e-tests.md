@@ -7,7 +7,7 @@ paths:
 
 ### Framework & Structure
 
-Tests use **Playwright** (TypeScript) with Chromium. Test files are organized under `test/e2e/specs/` in 4 parallel groups:
+Tests use **Playwright** (TypeScript) with Chromium. Test files are organized under `test/e2e/specs/` in 5 parallel groups:
 
 | Group | Purpose | Notes |
 |---|---|---|
@@ -15,8 +15,9 @@ Tests use **Playwright** (TypeScript) with Chromium. Test files are organized un
 | `all-features-confirmation` | Read-only feature verification | |
 | `default-config` | Default configuration behavior | |
 | `delete-prohibited` | ACL-restricted scenarios | |
+| `model-app` | Model visualization app | Runs in CI as its own step (`make testmodel`) |
 
-All four groups run with 4 workers and share one catalog per group. A spec that mutates the catalog model
+All five groups run with 4 workers and share one catalog per group. A spec that mutates the catalog model
 (annotations or ACLs) must declare `{ lock: TEST_LOCKS.CATALOG_MODEL }` on its `test.describe` (see
 `all-features/acls/main.spec.ts`). ERMrest serializes model mutations, so two specs changing the model at the same
 time get a 503 even when they touch different endpoints or different tables. Locks only serialize the specs that
