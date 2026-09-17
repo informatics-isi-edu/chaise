@@ -62,24 +62,17 @@ const testParams = {
   ]
 }
 
-test('asciiTextValidation chaise-config support,', async ({ page, baseURL }, testInfo) => {
-  /**
-   * NOTE: the all-features spec is running sequentially right now, that's why this spec is created with steps
-   * instead of individual tests.
-   *
-   * if we changed the all-features to allow parallel tests, we should
-   * - change the outer test to be test.describe
-   * - change the first step to be a test.beforeeach
-   * - change the first test.step to be individual test blocks
-   */
-  await test.step('load the page', async () => {
+test.describe('asciiTextValidation chaise-config support,', () => {
+  test.describe.configure({ mode: 'parallel' });
+
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const PAGE_URL = `/recordedit/#${getCatalogID(testInfo.project.name)}/${testParams.schema_table}`;
     await page.goto(`${baseURL}${PAGE_URL}`);
     await RecordeditLocators.waitForRecordeditPageReady(page);
   });
 
-  for await (const params of testParams.cases) {
-    await test.step(`${params.type}`, async () => {
+  for (const params of testParams.cases) {
+    test(`${params.type}`, async ({ page }) => {
       const cellError = RecordeditLocators.getErrorMessageForAColumn(page, params.column_name, 1);
 
       for await (const [inpIndex, inpParams] of params.inputs.entries()) {
@@ -120,5 +113,4 @@ test('asciiTextValidation chaise-config support,', async ({ page, baseURL }, tes
       }
     });
   }
-
 });

@@ -5,12 +5,13 @@ In this section, we have summarized all the resources you need to write test cas
 ## Table of contents
 
 - [Test Idioms](#test-idioms)
-   * [Data and schema](#data-and-schema)
-   * [Test structure](#test-structure)
-   * [Locators](#locators)
-   * [Assertions](#assertions)
-   * [Actions](#actions)
-   * [Managing page](#managing-page)
+  - [Data and schema](#data-and-schema)
+  - [Test structure](#test-structure)
+  - [Test locks](#test-locks)
+  - [Locators](#locators)
+  - [Assertions](#assertions)
+  - [Actions](#actions)
+  - [Managing page](#managing-page)
 - [Common issues/errors](#common-issueserrors)
 
 ## Test Idioms
@@ -25,7 +26,6 @@ This section summarizes the best practices for writing test cases in Chaise.
 
 - Don't rely on ERMrestJS heuristics for the parts of the code you are not testing, and define annotations. The heuristics change more regularly than the annotation won't. For example, if you are testing the presentation of the record app, define your own visible-columns and visible-foreignkeys annotation.
 
-
 ### Test structure
 
 - Be specific about the scenario that you are testing. If you want to test a specific scenario, you don't have to test all the other features. For instance, if you want to test recordset page in a particular scenario, you don't have to test all the facet data and main data (The more general case should already be tested and should be separate from this specific test).
@@ -37,62 +37,68 @@ This section summarizes the best practices for writing test cases in Chaise.
   - Useful links:
     - https://playwright.dev/docs/api/class-test
     - https://playwright.dev/docs/test-parallel
-  - The parallel configs (`test/e2e/specs/<group>/playwright.config.ts`) share one catalog per group. If your spec mutates the catalog model (annotations or ACLs), declare the `TEST_LOCKS.CATALOG_MODEL` lock on its `test.describe` (see `all-features/acls/main.spec.ts`). ERMrest serializes model mutations, so two specs changing the model at the same time get a 503 even when they touch different endpoints or different tables. Locks only serialize the specs that hold them, so other specs must not assert on the state you're changing.
-    - https://playwright.dev/docs/test-parallel#test-locks
+  - If your spec mutates the catalog model (annotations or ACLs), it also needs a lock. See [Test locks](#test-locks).
   - The following are different ways that you can structure your tests:
     - To reduce the runtime, breaking tests into multiple files is preferable. So if these tests won't affect each other, it's best to create multiple files that the `.config.ts` will then run.
     - Another option is to keep them in the same file as two separate tests. In this case, each `test` will open a separate browser.
-        ```ts
-        test.describe('recordset tests', () => {
-          test.beforeEach(({page}) => {
-            await page.goto('https://example.com/chaise/recordset/#1/schema:table');
-            await RecordsetLocators.waitForRecordsetPageReady();
-          })
 
-          test('search', async ({page}) => {
-            await RecordsetLocators.getMainSearchBox(page).fill('test');
-            await expect(RecordsetLocators.getRows(page)).toHaveCount(2);
-          });
-
-          test('facet', async ({page}) => {
-            await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
-            await expect(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(5);
-            await RecordsetLocators.getFacetOption(page, 2).click();
-            await expect(RecordsetLocators.getRows(page)).toHaveCount(5);
-          });
+      ```ts
+      test.describe('recordset tests', () => {
+        test.beforeEach(({ page }) => {
+          await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+          await RecordsetLocators.waitForRecordsetPageReady();
         });
-        ```
+
+        test('search', async ({ page }) => {
+          await RecordsetLocators.getMainSearchBox(page).fill('test');
+          await expect(RecordsetLocators.getRows(page)).toHaveCount(2);
+        });
+
+        test('facet', async ({ page }) => {
+          await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+          await expect(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(5);
+          await RecordsetLocators.getFacetOption(page, 2).click();
+          await expect(RecordsetLocators.getRows(page)).toHaveCount(5);
+        });
+      });
+      ```
+
     - If your file has multiple independent `test`s that can run in parallel, you can ask playwright to run them in parallel by adding the following:
-        ```ts
-        test.describe.configure({ mode: 'parallel' });
-        ```
+
+      ```ts
+      test.describe.configure({ mode: 'parallel' });
+      ```
+
       - Don't use this configuration if you have a `beforeAll` or `afterAll` that you want to run only once. Because in this case each worker will run their own `beforeAll` and `afterAll` instead of running it once (https://github.com/microsoft/playwright/issues/28201).
+
     - If your tests must run in order and on the same browser, use the `test.step` method.
       - Don't forget to include `await` before each `test.step`.
       - Playwright will not run the remaining steps if any of the steps fail. To get around this, you should use `expect.soft`.
+
         ```ts
-          test('recordset search and facet', () => {
-            await test.step('go to recordset page', async () => {
-              await page.goto('https://example.com/chaise/recordset/#1/schema:table');
-              await RecordsetLocators.waitForRecordsetPageReady();
-            });
-
-            await test.step('search', async ({page}) => {
-              await RecordsetLocators.getMainSearchBox(page).fill('test');
-              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2);
-            });
-
-            await test.step('facet', async ({page}) => {
-              await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
-              await expect.soft(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(2);
-              await RecordsetLocators.getFacetOption(page, 2).click();
-              await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
-            });
+        test('recordset search and facet', () => {
+          await test.step('go to recordset page', async () => {
+            await page.goto('https://example.com/chaise/recordset/#1/schema:table');
+            await RecordsetLocators.waitForRecordsetPageReady();
           });
-          ```
+
+          await test.step('search', async ({ page }) => {
+            await RecordsetLocators.getMainSearchBox(page).fill('test');
+            await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(2);
+          });
+
+          await test.step('facet', async ({ page }) => {
+            await RecordsetLocators.getFacetHeaderButtonById(page, facetID).click();
+            await expect.soft(RecordsetLocators.getFacetOptions(page, facetID)).toHaveCount(2);
+            await RecordsetLocators.getFacetOption(page, 2).click();
+            await expect.soft(RecordsetLocators.getRows(page)).toHaveCount(1);
+          });
+        });
+        ```
 
 - If you want to run async code inside a loop, use [for ... of](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of).
   - Array
+
     ```ts
     const disabledRows = ['one', 'three'];
 
@@ -103,19 +109,80 @@ This section summarizes the best practices for writing test cases in Chaise.
       index++;
     }
     ```
+
   - Object
+
     ```ts
     const values = {
-      'col1': 1,
-      'col2': 2
-    }
+      col1: 1,
+      col2: 2,
+    };
 
     let index = 0;
     for (const colName of Object.keys(values)) {
-      await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(values[colName]);
+      await expect(RecordeditLocators.getInputForAColumn(page, colName, 1)).toHaveValue(
+        values[colName]
+      );
       index++;
     }
     ```
+
+### Test locks
+
+Each parallel config (`test/e2e/specs/<group>/playwright.config.ts`) creates **one catalog shared by every
+spec in that group**, and the specs run across 4 workers. A spec that mutates the catalog model therefore has
+to declare a lock, otherwise it runs at the same time as the others and corrupts their state.
+
+Playwright runs no two tests holding the same lock at the same time, across files, workers and projects, while
+everything else stays parallel ([docs](https://playwright.dev/docs/test-parallel#test-locks)).
+
+#### When to add one
+
+Add `{ lock: TEST_LOCKS.CATALOG_MODEL }` if your spec calls `updateCatalogAnnotation` or `importACLs` (from
+`test/e2e/utils/catalog-utils.ts`), at any level: catalog, schema, table or column.
+
+Two separate reasons, and either one is enough:
+
+1. `updateCatalogAnnotation` does a `PUT` to `/catalog/<id>/annotation/`, which replaces
+   the entire annotation object. Two specs calling it overwrite each other no matter which keys each one sets.
+2. ERMrest serializes model mutations. Two specs changing the model at the same time get a `503`, even on
+   different endpoints and different tables. Annotations and ACLs are separate APIs but still conflict, which is
+   why there is a single `CATALOG_MODEL` lock rather than one per API.
+
+Reading catalog state needs no lock. Mutating rows needs no lock either, only the model.
+
+#### How to add one
+
+Put it on the `test.describe` that owns the mutation, so it is obvious which block is responsible:
+
+```ts
+import { TEST_LOCKS } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+
+test.describe('batch unlink with dynamic acls', { lock: TEST_LOCKS.CATALOG_MODEL }, () => {
+  test.beforeAll(async ({}, testInfo) => {
+    await importACLs({
+      /* ... */
+    });
+  });
+  // ...
+  test.afterAll(async ({}, testInfo) => {
+    // always restore what you changed
+  });
+});
+```
+
+A test can hold several locks (`{ lock: ['a', 'b'] }`), though today `CATALOG_MODEL` is the only one.
+
+#### Notes
+
+- The lock covers the whole file, not just the describe.\*\* We run with `fullyParallel: false`, so tests in a
+  file run in order and a lock declared anywhere in it is held for the entire file, `beforeAll` and `afterAll`
+  included. Adding a lock to one describe serializes its whole spec against every other lock holder.
+- Locks do not protect readers. They only order the specs that hold them. If your mutation changes something
+  another spec asserts on, that spec breaks and the lock will not save it. Check for readers before adding a
+  mutation. For example, turning on `exportConfigsSubmenu` adds a "Configurations" entry to the export menu,
+  which is why `ExportLocators.getExportTemplateOptions` exists to exclude it from counts.
+- Always undo your change in `afterAll`, so the next spec starts from a known state.
 
 ### Locators
 
@@ -134,7 +201,7 @@ This section summarizes the best practices for writing test cases in Chaise.
 
   ```ts
   const locator = page.locator('.some-element');
-  const samePage = locator.page()
+  const samePage = locator.page();
   const context = samePage.context();
   ```
 
@@ -150,6 +217,7 @@ This section summarizes the best practices for writing test cases in Chaise.
 - You can find all the assertions that Playwright supports [here](https://playwright.dev/docs/test-assertions).
 
 - If you want to test whether an element is attached to DOM or visible, avoid using `isVisible` and `isPresent` and use the special assertions instead:
+
   ```ts
   // ❌ bad
   expect(el.isVisible()).toBeTruthy();
@@ -165,6 +233,7 @@ This section summarizes the best practices for writing test cases in Chaise.
   ```
 
 - Testing the inner text of an element ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-have-text)):
+
   ```ts
   // partial regex match
   await expect.soft(title).toHaveText(/Collections/);
@@ -177,6 +246,7 @@ This section summarizes the best practices for writing test cases in Chaise.
   ```
 
 - Alternative for testing inner text of an element ([reference](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-contain-text)):
+
   ```ts
   // partial match using contains
   await expect.soft(title).toContainText('Data Collect');
@@ -212,7 +282,7 @@ This section summarizes the best practices for writing test cases in Chaise.
   await expect(link).toHaveAttribute('href', regexOrFullString);
 
   // if you cannot come up with a proper regex, do this. but generally toHaveAttribute is much better
-  expect(await link.getAttribute('href')).toContain(partialExpected)
+  expect(await link.getAttribute('href')).toContain(partialExpected);
   ```
 
 - Test `innerHTML`:
@@ -231,17 +301,17 @@ This section summarizes the best practices for writing test cases in Chaise.
   await expect(page).toHaveURL(/\/recordset\//);
 
   // testing if the URL contains some string
-  await expect(page).toHaveURL(url => {
-    return url.href.includes('@sort(my_column)')
+  await expect(page).toHaveURL((url) => {
+    return url.href.includes('@sort(my_column)');
   });
   ```
-
 
 ### Actions
 
 In here we've listed all the actions that we encountered and we found useful. Please refer to [this link](https://playwright.dev/docs/input) for the complete list of available actions.
 
 - To change value of a input
+
   ```ts
   // set the value of an input or textarea
   // https://playwright.dev/docs/api/class-locator#locator-fill
@@ -256,6 +326,7 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   ```
 
 - When filling a value in an input, we want to ensure it is filled afterwards:
+
   ```ts
   await locator.fill(value);
   await expect.soft(locator).toHaveValue(value);
@@ -280,11 +351,15 @@ In here we've listed all the actions that we encountered and we found useful. Pl
   - https://playwright.dev/docs/pages
 
 - Use `generateChaiseURL` for creating a chaise url:
+
   ```ts
-  await page.goto(generateChaiseURL(APP_NAMES.RECORD, 'schema', 'table', testInfo, baseURL) + '/id=12');
+  await page.goto(
+    generateChaiseURL(APP_NAMES.RECORD, 'schema', 'table', testInfo, baseURL) + '/id=12'
+  );
   ```
 
 - Use `clickNewTabLink` function in `page-utils.ts` for testing buttons that open a new tab:
+
   ```ts
   const newPage = await PageLocators.clickNewTabLink(someButton, context);
   await newPage.waitForURL('someURL');
@@ -312,7 +387,7 @@ test.describe('feature', () => {
 
   test.beforeEach(async ({ page, baseURL }) => {
     await page.goto(`${baseURL}${PAGE_URL}`);
-  })
+  });
 
   test('basic features,', async ({ page }) => {
     const navbar = NavbarLocators.getContainer(page);
@@ -321,5 +396,5 @@ test.describe('feature', () => {
       await navbar.waitFor({ state: 'visible' });
     });
   });
-})
+});
 ```
