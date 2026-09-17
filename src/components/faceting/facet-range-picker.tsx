@@ -410,16 +410,12 @@ const FacetRangePicker = ({
               return;
             }
 
-            setCompState({
-              ...compState,
-              disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
-              histogramDataStack: [],
-              rangeOptions: minMaxRangeOptions,
-              relayout: false
-            });
-            // get initial histogram data
-
-            return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
+            /*
+             * get initial histogram data. we're not setting any state here since histogramData
+             * writes every value we would have set, and doing it twice resets the range inputs
+             * an extra time and leaves partial state behind if the request is stale or fails.
+             */
+            return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime, true);
           }).then((response: any) => {
 
             resolve(response);
@@ -443,8 +439,16 @@ const FacetRangePicker = ({
     });
   };
 
-  // NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
-  const histogramData = (min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any) => {
+  /**
+   * fetch the histogram data for the given range and show it.
+   * NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
+   * @param resetStack whether the fetched data starts a new stack (min/max reload) or is pushed
+   *                   onto the current one (zoom). passed in for the same reason as min/max:
+   *                   the state we would read here is the snapshot this closure captured.
+   */
+  const histogramData = (
+    min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any, resetStack?: boolean
+  ) => {
     return new Promise((resolve, reject) => {
 
       (function (uri) {
@@ -476,6 +480,13 @@ const FacetRangePicker = ({
             shouldRelayout = false;
           }
 
+          response.min = requestMin;
+          response.max = requestMax;
+
+          // push the data on the stack to be used for unzoom and reset
+          const histogramDataStack = resetStack ? [] : [...compState.histogramDataStack];
+          histogramDataStack.push(response)
+
           const plotData = [...compState.plot.data] as PlotData[];
           plotData[0].x = response.x;
           plotData[0].y = response.y;
@@ -484,19 +495,12 @@ const FacetRangePicker = ({
           // set xaxis range
           if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
             plotLayout.xaxis.range = updateHistogramXRange(min, max);
-            plotLayout.xaxis.fixedrange = disableZoomIn(min, max);
+            plotLayout.xaxis.fixedrange = disableZoomIn(min, max, histogramDataStack.length);
           }
-
-          response.min = requestMin;
-          response.max = requestMax;
-
-          // push the data on the stack to be used for unzoom and reset
-          const histogramDataStack = [...compState.histogramDataStack];
-          histogramDataStack.push(response)
 
           setCompState({
             ...compState,
-            disableZoomIn: disableZoomIn(min, max),
+            disableZoomIn: disableZoomIn(min, max, histogramDataStack.length),
             histogramDataStack: histogramDataStack,
             plot: {
               ...compState.plot,
@@ -732,8 +736,14 @@ const FacetRangePicker = ({
     return val !== undefined && val !== null;
   }
 
-  // disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
-  const disableZoomIn = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
+  /**
+   * disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
+   * @param stackLength the size of the stack being committed. defaults to the current state, so
+   *                    callers that are about to change the stack have to pass their own value.
+   */
+  const disableZoomIn = (
+    min: RangeOptions['absMin'], max: RangeOptions['absMax'], stackLength: number = compState.histogramDataStack.length
+  ) => {
     let limitedRange = false;
 
     if (_isValueDefined(min) && _isValueDefined(max)) {
@@ -755,7 +765,7 @@ const FacetRangePicker = ({
       }
     }
 
-    return compState.histogramDataStack.length >= 20 || limitedRange;
+    return stackLength >= 20 || limitedRange;
   };
 
   const zoomOutPlot = () => {
@@ -797,12 +807,12 @@ const FacetRangePicker = ({
     const rangeOptions = updateRangeMinMax(data.min, data.max);
     if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
       plotLayout.xaxis.range = updateHistogramXRange(rangeOptions.absMin, rangeOptions.absMax);
-      plotLayout.xaxis.fixedrange = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax)
+      plotLayout.xaxis.fixedrange = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax, histogramDataStack.length)
     }
 
     setCompState({
       ...compState,
-      disableZoomIn: disableZoomIn(rangeOptions.absMin, rangeOptions.absMax),
+      disableZoomIn: disableZoomIn(rangeOptions.absMin, rangeOptions.absMax, histogramDataStack.length),
       histogramDataStack: histogramDataStack,
       plot: {
         ...compState.plot,
