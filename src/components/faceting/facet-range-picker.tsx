@@ -836,19 +836,21 @@ const FacetRangePicker = ({
   const plotlyRelayout = (event: any) => {
     try {
       setTimeout(function () {
-        let shouldRelayout = true;
         // min/max is value interpretted by plotly by position of range in respect to x axis values
         const min = event['xaxis.range[0]'];
         const max = event['xaxis.range[1]'];
 
-        // This case can happen when:
-        //   - the user double clicks the plot
-        //   - the relayout event is called because the element was resized (panel stretched or shrunk)
-        //   - Plotly.relayout is called to update xaxis.fixedrange
-        // if both undefined, don't re-fetch data
+        /*
+         * This case can happen when:
+         *   - the user double clicks the plot
+         *   - the relayout event is called because the element was resized (panel stretched or shrunk)
+         *   - Plotly.relayout is called to update xaxis.fixedrange
+         * if both undefined, don't re-fetch data. only write when a relayout is actually pending,
+         * otherwise resize events (which fire continuously while dragging a window edge) would
+         * replace the state object and re-render the picker without changing anything.
+         */
         if (typeof min === 'undefined' && typeof max === 'undefined') {
-          shouldRelayout = false
-          setCompState({ ...compState, relayout: shouldRelayout });
+          if (compState.relayout) setCompState({ ...compState, relayout: false });
           return;
         }
 
@@ -883,7 +885,7 @@ const FacetRangePicker = ({
 
         setCompState({
           ...compState,
-          relayout: shouldRelayout,
+          relayout: true,
           rangeOptions: {
             ...compState.rangeOptions,
             absMin: minMaxRangeOptions.absMin,
