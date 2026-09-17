@@ -80,8 +80,13 @@ const FacetRangePicker = ({
    */
   const facetColumnRef = useVarRef(facetColumn);
 
+  /**
+   * reads the prop rather than facetColumnRef: a column's type doesn't change when the reference
+   * updates, so there's nothing to keep fresh, and the ref can't be read during render anyway
+   * (the compState initializer calls this).
+   */
   const isColumnOfType = (columnType: string) => {
-    return (facetColumnRef.current.column.type.rootName.indexOf(columnType) > -1)
+    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
   }
 
   const createChoiceDisplay = (filter: any, selected: boolean) => {
