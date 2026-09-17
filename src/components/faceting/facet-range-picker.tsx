@@ -44,6 +44,13 @@ import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
  */
 const FacetRangePlot = lazy(() => import('@isrd-isi-edu/chaise/src/components/faceting/facet-range-plot'));
 
+/*
+ * `select` makes plotly report the dragged range instead of applying it, so we fetch the data and
+ * repaint once, like the zoom button does. `zoom` is plotly's default: it rescales the axis over
+ * the buckets we already have, then the plot repaints again when the new data arrives.
+ */
+const PLOT_DRAG_MODE = 'select';
+
 const FacetRangePicker = ({
   dispatchFacetUpdate,
   facetColumn,
@@ -95,6 +102,13 @@ const FacetRangePicker = ({
     const defaultPlotLayout: PlotlyLayout = {
       autosize: true,
       height: 150,
+      /*
+       * `h` keeps the selection band full height, since only the x range matters here.
+       * NOTE: dragmode covers the plot area only. panning by dragging the x axis has no
+       * report-only mode in plotly, so it always moves first and refetches after.
+       */
+      dragmode: PLOT_DRAG_MODE,
+      selectdirection: 'h',
       margin: {
         l: 40,
         r: 0,
@@ -139,7 +153,9 @@ const FacetRangePicker = ({
         data: [{
           x: [],
           y: [],
-          type: 'bar'
+          type: 'bar',
+          // plotly dims unselected bars while a range is being dragged, which reads as data loss
+          unselected: { marker: { opacity: 1 } }
         }],
         config: {
           displayModeBar: false,
@@ -159,6 +175,15 @@ const FacetRangePicker = ({
   const showHistogram = (): boolean => {
     return facetModel.initialized && facetModel.isOpen && facetPanelOpen &&
       facetColumn.barPlot && (compState.rangeOptions.absMin !== null && compState.rangeOptions.absMax !== null)
+  }
+
+  /**
+   * whether the plot has something to show. mirrors the guard in FacetRangePlot, which renders
+   * nothing until the first histogram arrives.
+   */
+  const plotHasData = (): boolean => {
+    const plotData = compState.plot.data as PlotData[];
+    return plotData[0].x.length > 0 && plotData[0].y.length > 0;
   }
 
   // set the resize sensor to call the plot resize fucntion
@@ -411,9 +436,9 @@ const FacetRangePicker = ({
             }
 
             /*
-             * get initial histogram data. we're not setting any state here since histogramData
-             * writes every value we would have set, and doing it twice resets the range inputs
-             * an extra time and leaves partial state behind if the request is stale or fails.
+             * no state is set here on purpose: histogramData writes every value we would have,
+             * and doing it twice resets the range inputs again and leaves partial state behind
+             * when the request turns out to be stale or fails.
              */
             return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime, true);
           }).then((response: any) => {
@@ -441,10 +466,9 @@ const FacetRangePicker = ({
 
   /**
    * fetch the histogram data for the given range and show it.
-   * NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
-   * @param resetStack whether the fetched data starts a new stack (min/max reload) or is pushed
-   *                   onto the current one (zoom). passed in for the same reason as min/max:
-   *                   the state we would read here is the snapshot this closure captured.
+   * NOTE: min, max and resetStack are passed in rather than read from state, since the state this
+   * closure captured may be several updates behind by the time the response lands.
+   * @param resetStack true to start a new stack (min/max reload), false to append to it (zoom)
    */
   const histogramData = (
     min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any, resetStack?: boolean
@@ -491,16 +515,21 @@ const FacetRangePicker = ({
           plotData[0].x = response.x;
           plotData[0].y = response.y;
 
+          const noMoreZoom = disableZoomIn(min, max, histogramDataStack.length);
+
           const plotLayout = { ...compState.plot.layout };
+          // drop the band left over from the drag that asked for this data
+          plotLayout.selections = [];
+          plotLayout.dragmode = noMoreZoom ? false : PLOT_DRAG_MODE;
           // set xaxis range
           if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
             plotLayout.xaxis.range = updateHistogramXRange(min, max);
-            plotLayout.xaxis.fixedrange = disableZoomIn(min, max, histogramDataStack.length);
+            plotLayout.xaxis.fixedrange = noMoreZoom;
           }
 
           setCompState({
             ...compState,
-            disableZoomIn: disableZoomIn(min, max, histogramDataStack.length),
+            disableZoomIn: noMoreZoom,
             histogramDataStack: histogramDataStack,
             plot: {
               ...compState.plot,
@@ -738,8 +767,8 @@ const FacetRangePicker = ({
 
   /**
    * disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
-   * @param stackLength the size of the stack being committed. defaults to the current state, so
-   *                    callers that are about to change the stack have to pass their own value.
+   * @param stackLength size of the stack being committed. callers about to change the stack have
+   *                    to pass their own, otherwise the default reads the one being replaced.
    */
   const disableZoomIn = (
     min: RangeOptions['absMin'], max: RangeOptions['absMax'], stackLength: number = compState.histogramDataStack.length
@@ -805,14 +834,18 @@ const FacetRangePicker = ({
     const plotLayout = { ...compState.plot.layout };
 
     const rangeOptions = updateRangeMinMax(data.min, data.max);
+    const noMoreZoom = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax, histogramDataStack.length);
+
+    plotLayout.selections = [];
+    plotLayout.dragmode = noMoreZoom ? false : PLOT_DRAG_MODE;
     if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
       plotLayout.xaxis.range = updateHistogramXRange(rangeOptions.absMin, rangeOptions.absMax);
-      plotLayout.xaxis.fixedrange = disableZoomIn(rangeOptions.absMin, rangeOptions.absMax, histogramDataStack.length)
+      plotLayout.xaxis.fixedrange = noMoreZoom;
     }
 
     setCompState({
       ...compState,
-      disableZoomIn: disableZoomIn(rangeOptions.absMin, rangeOptions.absMax, histogramDataStack.length),
+      disableZoomIn: noMoreZoom,
       histogramDataStack: histogramDataStack,
       plot: {
         ...compState.plot,
@@ -845,9 +878,8 @@ const FacetRangePicker = ({
          *   - the user double clicks the plot
          *   - the relayout event is called because the element was resized (panel stretched or shrunk)
          *   - Plotly.relayout is called to update xaxis.fixedrange
-         * if both undefined, don't re-fetch data. only write when a relayout is actually pending,
-         * otherwise resize events (which fire continuously while dragging a window edge) would
-         * replace the state object and re-render the picker without changing anything.
+         * if both undefined, don't re-fetch data. only write when a relayout is pending, since
+         * resize events fire continuously and would re-render the picker for no change.
          */
         if (typeof min === 'undefined' && typeof max === 'undefined') {
           if (compState.relayout) setCompState({ ...compState, relayout: false });
@@ -917,6 +949,18 @@ const FacetRangePicker = ({
 
       $log.warn(err);
     }
+  }
+
+
+  /**
+   * triggered when the user drags a range in the plot. hands the range to the relayout handler,
+   * which already knows how to turn it into a fetch.
+   * NOTE: plotly passes undefined when the user clicks without dragging.
+   */
+  const plotlySelected = (event: any) => {
+    if (!event || !event.range || !Array.isArray(event.range.x)) return;
+
+    plotlyRelayout({ 'xaxis.range[0]': event.range.x[0], 'xaxis.range[1]': event.range.x[1] });
   }
 
 
@@ -1013,11 +1057,18 @@ const FacetRangePicker = ({
             </ChaiseTooltip>
           </div>
         </div>
-        <FacetRangePlot
-          plot={compState.plot}
-          onRelayout={(event: any) => plotlyRelayout(event)}
-          plotHandleRef={plotRef}
-        />
+        <div className='plotly-container'>
+          {/* only cover a plot that's already showing something, nothing to mark as stale otherwise */}
+          {facetModel.isLoading && plotHasData() &&
+            <div className='plotly-loading-overlay'><Spinner animation='border' size='sm' /></div>
+          }
+          <FacetRangePlot
+            plot={compState.plot}
+            onRelayout={(event: any) => plotlyRelayout(event)}
+            onSelected={(event: any) => plotlySelected(event)}
+            plotHandleRef={plotRef}
+          />
+        </div>
       </Suspense>
     )
   }
