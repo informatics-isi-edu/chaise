@@ -19,6 +19,10 @@ type FacetRangePlotProps = {
    */
   onRelayout: (event: any) => void,
   /**
+   * called when the user drags a range in the plot
+   */
+  onSelected: (event: any) => void,
+  /**
    * handle the parent uses to imperatively resize the plot
    */
   plotHandleRef: RefObject<FacetRangePlotHandle | null>,
@@ -32,7 +36,7 @@ type FacetRangePlotProps = {
  * a ref resolves to the plain div with no `resizeHandler` on it, and calling `Plotly.Plots.resize`
  * from the parent would pull plotly back out of this lazy chunk.
  */
-const FacetRangePlot = ({ plot, onRelayout, plotHandleRef }: FacetRangePlotProps): JSX.Element | null => {
+const FacetRangePlot = ({ plot, onRelayout, onSelected, plotHandleRef }: FacetRangePlotProps): JSX.Element | null => {
   const graphDivRef = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(plotHandleRef, () => ({
@@ -51,6 +55,7 @@ const FacetRangePlot = ({ plot, onRelayout, plotHandleRef }: FacetRangePlotProps
       data={plot.data}
       layout={plot.layout ? plot.layout : {}}
       onRelayout={onRelayout}
+      onSelected={onSelected}
       ref={graphDivRef}
       style={{ 'width': '100%' }}
       useResizeHandler
