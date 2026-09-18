@@ -179,62 +179,102 @@ export const removeAllCatalogs = async () => {
   return true;
 }
 
+/**
+ * how many times we attempt a catalog model change before giving up.
+ */
+const MODEL_CHANGE_MAX_ATTEMPTS = 5;
+
+/**
+ * whether the given error is an ERMrest 503.
+ */
+const isServiceUnavailable = (err: any): boolean => {
+  if (isAxiosError(err)) return err.response?.status === 503;
+  return err?.response?.status === 503 || err?.status === 503;
+};
+
+/**
+ * Run a catalog model change (annotation or ACL) and retry it if ERMrest answers with a 503.
+ *
+ * ERMrest serializes model mutations and returns a 503 when it cannot take another one right away.
+ * Test locks keep our own specs from mutating the model at the same time, but the catalog is still
+ * busy serving reads from the other workers, so a 503 can happen anyway. Backoff is exponential with
+ * jitter so that retries from different workers don't line up again.
+ *
+ * @param label used in the retry log line so it's clear which call is being retried
+ * @param fn the request to run
+ */
+const retryOnServiceUnavailable = async <T>(label: string, fn: () => Promise<T>): Promise<T> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isServiceUnavailable(err) || attempt === MODEL_CHANGE_MAX_ATTEMPTS) throw err;
+
+      const delay = 500 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 250);
+      console.log(`${label}: ERMrest returned 503, retrying in ${delay}ms (attempt ${attempt} of ${MODEL_CHANGE_MAX_ATTEMPTS})`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+};
+
 export const importACLs = async (params: any) => {
-  return new Promise((resolve, reject) => {
-    ermrestUtils.importACLS({
+  try {
+    await retryOnServiceUnavailable('importACLs', () => ermrestUtils.importACLS({
       url: process.env.ERMREST_URL,
       authCookie: process.env.AUTH_COOKIE,
       setup: params
-    }).then(function () {
-      console.log('successfully updated the ACLs');
-      resolve(true);
-    }).catch(function (err: any) {
-      console.log('error while trying to change ACLs');
-      console.dir(err);
-      reject(err);
-    });
-
-  })
+    }));
+    console.log('successfully updated the ACLs');
+    return true;
+  } catch (err: any) {
+    console.log('error while trying to change ACLs');
+    console.dir(err);
+    throw err;
+  }
 }
 
 export const updateCatalogAnnotation = async (catalogId: string, annotation: any): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const catalogObj = {
-      url: process.env.ERMREST_URL,
-      id: catalogId
-    };
-    ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, annotation, null).then(function () {
-      resolve();
-    }).catch((err: any) => {
-      console.log('error while trying to update catalog annotation');
-      if (isAxiosError(err)) {
-        console.log(err.response?.data);
-      } else {
-        console.log('An unexpected error occurred:', err);
-      }
-      reject(err);
-    });
-  });
+  const catalogObj = {
+    url: process.env.ERMREST_URL,
+    id: catalogId
+  };
+
+  try {
+    await retryOnServiceUnavailable(
+      'updateCatalogAnnotation',
+      () => ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, annotation, null)
+    );
+  } catch (err: any) {
+    console.log('error while trying to update catalog annotation');
+    if (isAxiosError(err)) {
+      console.log(err.response?.data);
+    } else {
+      console.log('An unexpected error occurred:', err);
+    }
+    throw err;
+  }
 }
 
 export const updateCatalogAlias = async (catalogId: string, alias: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const catalogObj = {
-      url: process.env.ERMREST_URL,
-      id: catalogId
-    };
-    ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, undefined, undefined, alias).then(function () {
-      resolve();
-    }).catch((err: any) => {
-      console.log('error while trying to update catalog alias');
-      if (isAxiosError(err)) {
-        console.log(err.response?.data);
-      } else {
-        console.log('An unexpected error occurred:', err);
-      }
-      reject(err);
-    });
-  });
+  const catalogObj = {
+    url: process.env.ERMREST_URL,
+    id: catalogId
+  };
+
+  try {
+    await retryOnServiceUnavailable(
+      'updateCatalogAlias',
+      () => ermrestUtils.createOrModifyCatalog(catalogObj, process.env.AUTH_COOKIE, undefined, undefined, alias)
+    );
+  } catch (err: any) {
+    console.log('error while trying to update catalog alias');
+    if (isAxiosError(err)) {
+      console.log(err.response?.data);
+    } else {
+      console.log('An unexpected error occurred:', err);
+    }
+    throw err;
+  }
 }
 
 /**

@@ -10,6 +10,13 @@ export default class ExportLocators {
     return container.locator('.export-menu-item');
   }
 
+  /**
+   * export templates only. excludes the "Configurations" submenu that shows up based on `exportConfigsSubmenu` acls
+   */
+  static getExportTemplateOptions(container: Locator | Page): Locator {
+    return container.locator('.export-menu-item:not(.export-menu-item-configurations)');
+  }
+
   static getExportOption(container: Locator | Page, optionName: string): Locator {
     optionName = makeSafeIdAttr(optionName);
     return container.locator(`.export-menu-item-${optionName}`);

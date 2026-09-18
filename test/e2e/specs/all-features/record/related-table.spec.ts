@@ -9,7 +9,7 @@ import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset'
 
 //utils
 import { getCatalogID, getEntityRow, importACLs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import { APP_NAMES, RESTRICTED_USER_STORAGE_STATE, TEST_LOCKS } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { clickNewTabLink, testTooltip } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 import {
   testAddAssociationTable, testAddRelatedTable, testAddRelatedWithForeignKeyMultiPicker,
@@ -292,7 +292,7 @@ test.describe.serial('Related tables', () => {
    * verifies the error case works as expected and rows are still selected after failure
    * need to attach a 'postLogin' function to reload the record page we are testing
    */
-  test.describe('batch unlink with dynamic acls', () => {
+  test.describe('batch unlink with dynamic acls', { lock: TEST_LOCKS.CATALOG_MODEL }, () => {
     const params = {
       displayname: 'association_table',
       modalTitle: 'Unlink association_table from Accommodations: Super 8 North Hollywood Motel',
