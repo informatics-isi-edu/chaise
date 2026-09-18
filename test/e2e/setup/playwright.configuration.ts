@@ -41,7 +41,7 @@ const getConfig = (options: TestOptions) => {
     // Look for test files in the "tests" directory, relative to this configuration file.
     // testDir: '',
 
-    // Run all tests in parallel.
+    // Run test files in parallel, but the tests within a file in order.
     fullyParallel: false,
 
     // Fail the build on CI if you accidentally left test.only in the source code.
@@ -50,7 +50,7 @@ const getConfig = (options: TestOptions) => {
     // CI flakes (timeouts/races) shouldn't fail the whole build; Playwright still reports retried tests as "flaky".
     retries: process.env.CI ? 2 : 0,
 
-    // Opt out of parallel tests on CI.
+    // `runSequentially` is an opt-in escape hatch for a spec that cannot overlap with anything.
     workers: options.runSequentially ? 1 : 4,
 
     // the outputDir is used for screenshot or other tests that use a file, so we should define it anyways

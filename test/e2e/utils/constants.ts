@@ -48,3 +48,17 @@ export enum PW_PROJECT_NAMES {
   FIREFOX = 'firefox',
   SAFARI = 'safari'
 }
+
+/**
+ * Playwright test locks (added in 1.63): tests or describe blocks that share a lock never run at the same time, across files and
+ * workers (https://playwright.dev/docs/test-parallel#test-locks). With `fullyParallel: false` (our default), the
+ * lock is held for the duration of the whole file, including its beforeAll/afterAll hooks.
+ */
+export enum TEST_LOCKS {
+  /**
+   * for specs that mutate the catalog model (annotations, ACLs). the parallel configs share one catalog per
+   * group, and ERMrest serializes model mutations: two specs changing the model at the same time get a 503,
+   * even when they touch different endpoints or different tables.
+   */
+  CATALOG_MODEL = 'catalog-model'
+}

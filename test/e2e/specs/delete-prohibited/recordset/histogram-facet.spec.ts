@@ -198,6 +198,9 @@ test.describe('Testing features for range picker facet types with histograms', (
             facetParams.initialMin as TimestampDateTime,
             facetParams.initialMax as TimestampDateTime
           );
+
+          // the zoom stack should be reset with the refetched data, not appended to
+          await expect.soft(histogramButtons.unzoomDisabled).toHaveCount(1);
       });
 
       // case for int_col, float_col, date_col
@@ -318,6 +321,9 @@ test.describe('Testing features for range picker facet types with histograms', (
             facetParams.initialMin as string,
             facetParams.initialMax as string
           );
+
+          // the zoom stack should be reset with the refetched data, not appended to
+          await expect.soft(histogramButtons.unzoomDisabled).toHaveCount(1);
         });
       }
     });

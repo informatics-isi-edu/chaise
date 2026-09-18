@@ -1,5 +1,5 @@
 /* eslint-disable no-redeclare */
-import { PlotData, PlotlyDataLayoutConfig, PlotlyLayout, HTMLPlotElement } from 'plotly.js-basic-dist-min'
+import { PlotData, PlotlyDataLayoutConfig, PlotlyLayout } from 'plotly.js-basic-dist-min'
 import { FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset'
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
@@ -8,7 +8,14 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 export type PlotData = typeof PlotData;
 export type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;
 export type PlotlyLayout = typeof PlotlyLayout;
-export type HTMLPlotElement = typeof HTMLPlotElement;
+
+/**
+ * what FacetRangePlot exposes to its parent. react-plotly.js v4 resolves a ref to the
+ * plain graph div, so resizing has to be driven from inside the component where plotly lives.
+ */
+export type FacetRangePlotHandle = {
+  resize: () => void,
+};
 
 export type FacetRangePickerProps = {
   /**
