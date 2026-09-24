@@ -112,7 +112,7 @@ The following are the selectors for the inline comments:
 - `.inline-tooltip`: The wrapper for the comments that are displayed inline.
   - `.inline-tooltip.inline-tooltip-sm`: Used for column-level inline comments
     - `.recordedit-container .inline-comment-row`: Recordedit columns
-  - `.inline-tooltip.inline-tooltip-lg`: Table-level inline comments (Recordset page title, Record inline and related entities)
+  - `.inline-tooltip.inline-tooltip-lg`: Table-level inline comments (Recordset page title, Recordedit form title, Record inline and related entities)
 
 Common custom rules that you might want to define for inline comments:
 

@@ -230,6 +230,9 @@ html {
 
   #page-title .inline-tooltip {
     display: block;
+    // the action buttons next to the title are floated, so without this the comment would
+    // be squeezed in beside them instead of starting on its own row underneath.
+    clear: right;
     // the page title has a larger font, so this 2px will make sure
     // the title and inline-tooltip are alinged.
     padding-left: 2px;

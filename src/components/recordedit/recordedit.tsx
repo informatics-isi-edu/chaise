@@ -6,6 +6,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
@@ -25,6 +26,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import ViewerAnnotationFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/viewer-annotation-form-container';
 
 // models
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   appModes, RecordeditColumnModel,
@@ -952,6 +954,10 @@ const RecordeditInner = ({
                       {/* NOTE: Modal uses h2 */}
                       <h2 className='modal-title'>
                         {/* NOTE: currently only used for saved queries. Turn into configuration param if reused */}
+                        {/*
+                          TODO inline table comments are deliberately not shown here. this form edits the
+                          saved query table, not the table the user is looking at, so its comment isn't relevant.
+                        */}
                         <span>Save current search criteria for table </span>
                         <Title reference={modalOptions?.parentReference} />
                       </h2>
@@ -1008,7 +1014,19 @@ const RecordeditInner = ({
                   {renderSubmitButton()}
                   {renderBulkDeleteButton()}
                 </div>}
-                <h1 id='page-title'>{renderTitle()}</h1>
+                <h1 id='page-title'>
+                  {renderTitle()}
+                  {/*
+                    the table comment describes the form, so we're not showing it on the resultset
+                    page (which has its own explanation of what the displayed rows are).
+                  */}
+                  {!resultsetProps && reference.comment && reference.comment.value &&
+                    reference.comment.displayMode === CommentDisplayModes.INLINE &&
+                    <span className='inline-tooltip inline-tooltip-lg'>
+                      <DisplayCommentValue comment={reference.comment} />
+                    </span>
+                  }
+                </h1>
               </div>
               {!resultsetProps && <div className='form-controls'>
                 {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}

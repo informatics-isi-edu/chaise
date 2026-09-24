@@ -9,6 +9,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DisplayCommentValue from '@isrd-isi-edu/chaise/src/components/display-comment-value';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -29,6 +30,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
+import { CommentDisplayModes } from '@isrd-isi-edu/chaise/src/models/displayname';
 import { LogActions, LogObjectType, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { RecordeditNotifyActions, RecordeditNotifyEventType } from '@isrd-isi-edu/chaise/src/models/events';
@@ -772,6 +774,17 @@ const RecordInner = ({
   });
 
   const btnClasses = 'chaise-btn chaise-btn-primary';
+
+  /**
+   * the table comment, when it's meant to be shown under the title instead of as a tooltip.
+   * it's a block element, so it always takes its own row inside the title.
+   */
+  const inlineTableComment = (
+    reference.comment && reference.comment.value && reference.comment.displayMode === CommentDisplayModes.INLINE ?
+      <span className='inline-tooltip inline-tooltip-lg'><DisplayCommentValue comment={reference.comment} /></span> :
+      null
+  );
+
   return (
     <div className='record-container app-content-container'>
       {errors.length === 0 && showDeleteSpinner &&
@@ -838,6 +851,12 @@ const RecordInner = ({
                     />
                     <span>: </span>
                     <DisplayValue className='entity-title' value={page.tuples[0].displayname} />
+                    {/*
+                      the comment is placed before the action buttons so it sits right under the title.
+                      since it's a block, the buttons can no longer share the title's last line and move
+                      to their own row below the comment.
+                    */}
+                    {inlineTableComment}
                     {(canCreate || canEdit || canDelete) &&
                       <div className='title-buttons record-action-btns-container'>
                         {/* create */}

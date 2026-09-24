@@ -63,6 +63,10 @@ export default class RecordeditLocators {
     return container.locator('#page-title a span');
   }
 
+  static getPageTitleInlineComment(container: Locator | Page): Locator {
+    return RecordeditLocators.getPageTitle(container).locator('.inline-tooltip');
+  }
+
   static getRequiredInfoEl(container: Locator | Page): Locator {
     return container.locator('.required-info');
   }

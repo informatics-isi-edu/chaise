@@ -433,7 +433,15 @@
           "default"
         ],
         "tag:misd.isi.edu,2015:display": {
-          "name": "Accommodations"
+          "name": "Accommodations",
+          "comment": {
+              "entry": "Recordedit inline comment"
+          },
+          "comment_display": {
+              "entry": {
+                  "table_comment_display": "inline"
+              }
+          }
         },
         "description": {
           "display": "Accommodations",

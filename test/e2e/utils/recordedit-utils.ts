@@ -1027,7 +1027,14 @@ export type TestFormPresentationAndValidation = {
   schemaName: string;
   tableName: string;
   tableDisplayname: string;
+  /**
+   * the table comment that is displayed as a tooltip on the title
+   */
   tableComment?: string;
+  /**
+   * the table comment that is displayed inline under the title
+   */
+  inlineTableComment?: string;
   /**
    * applicaple only to edit mode
    */
@@ -1109,7 +1116,15 @@ export const testFormPresentationAndValidation = async (
     }
 
     const titleEl = RecordeditLocators.getPageTitle(page);
-    await expect.soft(titleEl).toHaveText(pageTitle);
+    /*
+     * the inline comment lives inside the title element, so its text is part of the title's
+     * text content. the comment itself is asserted separately below.
+     */
+    if (params.inlineTableComment) {
+      await expect.soft(titleEl).toContainText(pageTitle);
+    } else {
+      await expect.soft(titleEl).toHaveText(pageTitle);
+    }
 
     const linkEl = RecordeditLocators.getPageTitleLink(page);
     const expectedLink =
@@ -1129,6 +1144,16 @@ export const testFormPresentationAndValidation = async (
        * when the title tooltip is displayed, the tooltip is blocking the "required info", that's why in here we're passing our own hover element.
        */
       await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true, titleEl);
+
+      // a tooltip comment shouldn't also be displayed inline
+      await expect.soft(RecordeditLocators.getPageTitleInlineComment(page)).toHaveCount(0);
+    }
+
+    if (params.inlineTableComment) {
+      await expect.soft(RecordeditLocators.getPageTitleInlineComment(page)).toHaveText(params.inlineTableComment);
+
+      // an inline comment replaces the tooltip, so the tooltip icon shouldn't be added to the title
+      await expect.soft(titleEl.locator('.chaise-icon-for-tooltip')).toHaveCount(0);
     }
   });
 

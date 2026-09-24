@@ -35,7 +35,7 @@ const accomodationDefaultPresentationProps = {
   schemaName: 'product-edit',
   tableName: 'accommodation',
   tableDisplayname: 'Accommodations',
-  tableComment: 'List of different types of accommodations',
+  inlineTableComment: 'Recordedit inline comment',
   columns: [
     { name: 'id', displayname: 'Id', type: RecordeditInputType.INT_4, disabled: true },
     { name: 'title', displayname: 'Name of Accommodation', type: RecordeditInputType.TEXT, isRequired: true },
