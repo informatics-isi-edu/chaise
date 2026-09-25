@@ -178,7 +178,23 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         },
         {
           test: /\.(css|scss)$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            {
+              loader: 'sass-loader',
+              options: {
+                /*
+                 * _chaise-alert.scss compiles some of Bootstrap's Sass source, which still uses the deprecated
+                 * `@import`. without these, every build prints a long list of deprecation warnings.
+                 */
+                sassOptions: {
+                  quietDeps: true,
+                  silenceDeprecations: ['import'],
+                },
+              },
+            },
+          ],
           // cue up for tree shake
           sideEffects: true
         },

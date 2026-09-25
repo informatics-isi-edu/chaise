@@ -36,6 +36,7 @@ const accomodationDefaultPresentationProps = {
   tableName: 'accommodation',
   tableDisplayname: 'Accommodations',
   tableComment: 'List of different types of accommodations',
+  instructions: 'Changes to an accommodation are visible to all users.',
   columns: [
     { name: 'id', displayname: 'Id', type: RecordeditInputType.INT_4, disabled: true },
     { name: 'title', displayname: 'Name of Accommodation', type: RecordeditInputType.TEXT, isRequired: true },

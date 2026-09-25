@@ -1,0 +1,34 @@
+@use 'sass:map';
+
+/**
+ * `.chaise-alert` and its color variants (e.g., `.chaise-alert-warning`), meant to be used in markdown
+ * (together with the `:::div` block) to make a piece of content stand out.
+ *
+ * They extend Bootstrap's own alert classes, so any change Bootstrap makes to them is picked up
+ * automatically. Bootstrap itself is included as precompiled CSS (so static sites that include the navbar
+ * can use all of its classes), which Sass cannot see. That's why the alert partial is compiled here too.
+ * Its rules are emitted a second time, but they're identical to Bootstrap's and small.
+ */
+
+// the dependencies don't emit any CSS, only the alert partial does
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/alert';
+
+.chaise-alert {
+  @extend .alert;
+
+  // markdown wraps text in a <p>, and its bottom margin would make the alert uneven
+  & > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+@each $state in map.keys($theme-colors) {
+  .chaise-alert-#{$state} {
+    @extend .alert-#{$state};
+  }
+}

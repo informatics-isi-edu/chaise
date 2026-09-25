@@ -915,6 +915,13 @@
                 "tag:misd.isi.edu,2015:display": {
                     "name": "Saved Query"
                 },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "entry": {
+                        "instructions": {
+                            "markdown_pattern": ":::div {.chaise-alert .chaise-alert-warning}\nSaved queries are only visible to you.\n:::"
+                        }
+                    }
+                },
                 "tag:isrd.isi.edu,2019:table-resource": {
                     "name": "saved_query",
                     "title": "Saved Query",

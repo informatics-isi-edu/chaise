@@ -13,6 +13,8 @@ const parallelTestParams: TestCreateRecordsParams = {
         tableName: 'accommodation',
         tableDisplayname: 'Accommodations',
         tableComment: 'List of different types of accommodations',
+        // the markdown is rendered, so the ** around "all" shouldn't be visible
+        instructions: 'Fill in all the required fields.',
         columns: [
           { name: 'id', displayname: 'Id', type: RecordeditInputType.INT_4, disabled: true },
           { name: 'title', displayname: 'Name of Accommodation', type: RecordeditInputType.TEXT, isRequired: true },

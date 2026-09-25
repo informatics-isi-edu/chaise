@@ -4,6 +4,7 @@
 
 // globally used
 @use "chaise-icon";
+@use "chaise-alert";
 @use "markdown-container";
 @use "buttons";
 @use "button-group";
@@ -223,17 +224,29 @@ html {
     &.inline-tooltip-sm {
       font-size: 13px;
     }
-    &.inline-tooltip-lg {
-      font-size: 16px;
-    }
   }
 
-  #page-title .inline-tooltip {
+  // the page instructions share the look of the table-level inline comments
+  .inline-tooltip.inline-tooltip-lg,
+  .page-instructions {
+    font-size: 16px;
+  }
+
+  #page-title .inline-tooltip,
+  .page-instructions {
     display: block;
+    // the title buttons are floated, so this makes sure the text starts on its own row below them
+    clear: right;
     // the page title has a larger font, so this 2px will make sure
     // the title and inline-tooltip are alinged.
     padding-left: 2px;
     padding-top: 5px;
+  }
+
+  .page-instructions {
+    // the instructions should be a bit more separated from the title,
+    // so they are more pronounced
+    padding-top: 15px;
   }
 
   .chaise-title-version-info {

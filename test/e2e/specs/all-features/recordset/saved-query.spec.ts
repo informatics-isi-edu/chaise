@@ -121,6 +121,11 @@ test.describe('View recordset page and form a query,', () => {
       const createSavedQueryModal = ModalLocators.getCreateSavedQueryModal(page);
       await expect.soft(ModalLocators.getModalTitle(createSavedQueryModal)).toHaveText('Save current search criteria for table main');
 
+      // the saved_query table's instructions, wrapped in a :::div with the chaise-alert classes
+      const instructions = RecordeditLocators.getPageInstructions(createSavedQueryModal);
+      await expect.soft(instructions).toHaveText('Saved queries are only visible to you.');
+      await expect.soft(instructions.locator('.chaise-alert.chaise-alert-warning')).toHaveCount(1);
+
       await expect.soft(RecordeditLocators.getInputForAColumn(createSavedQueryModal, 'name', 1)).toHaveValue(testParams.firstSavedQueryName);
 
       const textAreaVal = 'main with:\n  - int_col (1 choice): int_col ( 11 to 22);';
