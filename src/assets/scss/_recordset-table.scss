@@ -127,19 +127,28 @@
     .table-heading-icons {
       position: absolute;
       bottom: 7px;
-      right: 10px;
+      right: 2px;
       font-size: variables.$h4-font-size;
 
       .table-column-spinner {
         position: absolute;
         bottom: 2px;
-        right: -5px;
+        right: 2px;
 
         .spinner-border {
           // NOTE: we should not customize the width/height since it causes wobbling effect
           color: map.get(variables.$color-map, 'table-header-spinner');
           border-width: .16em;
         }
+      }
+
+      // inline svg (FA6 up-down artwork); box matches FA7's fixed 1.25em icon width so the
+      // header doesn't shift when the column becomes sorted
+      .not-sorted-icon {
+        height: 1em;
+        width: 1.25em;
+        overflow: visible; // the stroke pokes slightly outside the viewBox
+        vertical-align: -0.125em;
       }
     }
   }

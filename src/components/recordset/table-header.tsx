@@ -153,9 +153,9 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     const currRef = isBulkCopy ? reference : reference.table.reference;
     const newRef = currRef.contextualize.entryCreate;
     let appLink = newRef.appLink;
-    
+
     const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
-    
+
     if (container.current) {
       const eventDetails: { [key: string]: unknown } = { id: referrer_id };
 
@@ -297,7 +297,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 onClick={editRecord}
                 disabled={disableEditButton}
               >
-                <span className='chaise-btn-icon fa-solid fa-pen' />
+                <span className='chaise-btn-icon fa-solid fa-pencil' />
                 <span>Bulk edit</span>
               </button>
             </ChaiseTooltip>
