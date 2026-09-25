@@ -114,6 +114,8 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
+          # TODO remove before merging: test against the ermrestjs branch with the instructions support
+          git checkout 017-recordedit-instructions
           sudo make root-install
       - name: Install chaise (build & deploy)
         run: |
