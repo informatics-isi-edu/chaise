@@ -55,7 +55,11 @@ const ErrorModal = (): JSX.Element | null => {
   if (!errorWrapper) {
     return null;
   }
-  const exception = errorWrapper.error;
+  /**
+   * Browser-reported errors can have a null `ErrorEvent.error` (a cross-origin
+   * "Script error."), so fall back rather than throwing while displaying an error.
+   */
+  const exception = errorWrapper.error ? errorWrapper.error : {};
   const errorStatus = exception.status ? exception.status : 'Terminal Error';
   const isDismissibleError = (errorWrapper.isDismissible || exception.clickOkToDismiss);
 

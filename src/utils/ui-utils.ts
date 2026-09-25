@@ -6,10 +6,19 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import Tooltip from 'bootstrap/js/dist/tooltip';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { CLASS_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CLASS_NAMES, CSS_VARIABLES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { isFilePreviewType } from '@isrd-isi-edu/chaise/src/utils/file-utils';
 import { stringToNumber } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+
+// temporary height used while measuring a scrollbar; just has to exceed any platform's
+const SCROLLBAR_PROBE_SIZE = 30;
+
+/**
+ * Height for a scrollbar that takes no layout space, so the browser can still paint it.
+ * Can't be measured (overlay scrollbars report 0), so this is roughly what macOS draws.
+ */
+const OVERLAY_SCROLLBAR_PAINT_SIZE = 12;
 
 export type ContainerHeightSensorDimensions = {
   /**
@@ -159,7 +168,7 @@ export function attachContainerHeightSensors(
 
 /**
  * @param  {DOMElement} parentContainer - the container that we want the alignment for
- * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
+ * @return {ResizeObserver} ResizeObserver object that can be used to turn it off.
  *
  * Make sure the `.top-right-panel` and `.main-container` are aligned.
  * They can be missaligned if the scrollbar is visible and takes space.
@@ -170,24 +179,45 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
     : (document.querySelector(`#${ID_NAMES.APP_ROOT}`) as HTMLElement);
   const mainContainer = container.querySelector('.main-container') as HTMLElement;
   const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
-  let mainContainerPaddingTimeout: any;
 
-  // timeout makes sure we're not calling this more than we should
+  // the last value we applied, so we don't write the same padding twice (see the note below)
+  let appliedPadding: number | null = null;
+  let scheduledFrame: number | null = null;
+
   const setPadding = () => {
-    if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
-    mainContainerPaddingTimeout = setTimeout(function () {
-      try {
-        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
-        mainContainer.style.paddingRight = padding + 'px';
-      } catch {
-        /* silent failure */
-      }
-    }, 10);
+    scheduledFrame = null;
+    if (!mainContainer.isConnected) return;
+
+    try {
+      const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+      if (padding === appliedPadding) return;
+      appliedPadding = padding;
+      mainContainer.style.paddingRight = padding + 'px';
+    } catch {
+      /* silent failure */
+    }
   };
 
-  // watch the size of mainContainer
-  // (if width of topRightPanel changes, the mainContainer changes too, so just watching mainContainer is enough)
-  return new ResizeSensor(mainContainer, setPadding);
+  /**
+   * Writing the padding can toggle the scrollbar we're measuring. Doing that inside the
+   * observer callback keeps the cycle in one frame, which the browser reports as
+   * "ResizeObserver loop completed with undelivered notifications".
+   */
+  const schedulePadding = () => {
+    if (scheduledFrame !== null) return;
+    scheduledFrame = windowRef.requestAnimationFrame(setPadding);
+  };
+
+  /**
+   * Must stay on the default `content-box`: a scrollbar appearing changes only the
+   * content box, so `border-box` would never fire for the case this function exists for.
+   * Both elements are watched because either one's scrollbar affects the difference.
+   */
+  const observer = new ResizeObserver(schedulePadding);
+  observer.observe(mainContainer);
+  observer.observe(topRightPanel);
+
+  return observer;
 }
 
 /**
@@ -196,11 +226,13 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
  * @param {DOMElement} parent - the parent element
  * @param {boolean?} fixedPos - whether the scrollbar is fixed position or not (if so, we will attach extra rules)
  * @param {HTMLElement?} extraSensorTarget - if we want to trigger the logic based on changes to another element
+ * @return {ResizeObserver} ResizeObserver object that can be used to turn it off.
  */
 export function addTopHorizontalScroll(
   parent: HTMLElement,
   fixedPos = false,
-  extraSensorTarget?: HTMLElement
+  extraSensorTarget?: HTMLElement,
+  reservedSizeTarget?: HTMLElement
 ) {
   if (!parent) return;
 
@@ -234,6 +266,39 @@ export function addTopHorizontalScroll(
     isSyncingTableScroll = false;
   });
 
+  /**
+   * How much layout space the scrollbar takes: a positive value where scrollbars sit
+   * beside the content, 0 where they're overlays. Cached because the probe writes to the
+   * wrapper, and doing that on every resize would perturb the layout we're observing.
+   */
+  let scrollbarHeight: number | null = null;
+  const getScrollbarHeight = () => {
+    if (scrollbarHeight !== null) return scrollbarHeight;
+
+    // the scrollbar is the gap between the border and content boxes, but a zero-height
+    // box reports no gap, so give it a temporary height first
+    const previousHeight = topScrollElementWrapper!.style.height;
+    topScrollElementWrapper!.style.height = `${SCROLLBAR_PROBE_SIZE}px`;
+    const probedHeight = topScrollElementWrapper!.offsetHeight;
+    const measured = probedHeight - topScrollElementWrapper!.clientHeight;
+    topScrollElementWrapper!.style.height = previousHeight;
+
+    /**
+     * The probe had no effect, so the element is hidden. Related tables mount that way
+     * (`Accordion.Body` renders while closed), so don't cache it or a merely collapsed
+     * table would never get a scrollbar. Expanding resizes the content and we retry.
+     */
+    if (probedHeight === 0) return 0;
+
+    scrollbarHeight = measured;
+    return scrollbarHeight;
+  };
+
+  // publish the room needed, so layout that makes space for it reads one measured value
+  const setReservedSize = (size: number) => {
+    (reservedSizeTarget || parent).style.setProperty(CSS_VARIABLES.TOP_SCROLL_SIZE, `${size}px`);
+  };
+
   const setTopScrollStyles = () => {
     if (fixedPos) {
       topScrollElementWrapper!.style.width = `${scrollableContent.clientWidth}px`;
@@ -243,29 +308,75 @@ export function addTopHorizontalScroll(
     if (scrollableContent!.scrollWidth === scrollableContent!.clientWidth) {
       topScrollElement!.style.width = '0';
       topScrollElementWrapper!.style.height = '0';
-    } else {
-      topScrollElementWrapper!.style.height = '15px';
-      topScrollElement!.style.width = scrollableContent!.scrollWidth + 'px';
+      topScrollElementWrapper!.style.marginBottom = '0';
+      topScrollElementWrapper!.style.backgroundColor = '';
+      setReservedSize(0);
+      return;
     }
+
+    // widen the inner element first, so the wrapper overflows and can render a scrollbar
+    topScrollElement!.style.width = scrollableContent!.scrollWidth + 'px';
+
+    // overlay scrollbars reserve nothing, so the wrapper still needs a height to paint
+    // into but must not take up any space
+    const scrollbarSize = getScrollbarHeight();
+    const takesSpace = scrollbarSize > 0;
+    const paintHeight = takesSpace ? scrollbarSize : OVERLAY_SCROLLBAR_PAINT_SIZE;
+
+    topScrollElementWrapper!.style.height = `${paintHeight}px`;
+
+    /**
+     * A horizontal scrollbar is painted along the BOTTOM edge of its scroll container, so
+     * wherever the wrapper ends is where the bar shows up.
+     *
+     * In flow, the wrapper sits above the content and the bar lands right on its top
+     * edge, which is what we want. Out of flow (fixedPos) the caller reserves the room
+     * instead, via the custom property published below.
+     *
+     * With overlay scrollbars we can't reserve that room, so the wrapper is pulled out of
+     * flow with a negative margin and then shifted up by its own height. The transform is
+     * deliberate: it moves where the bar paints without moving anything else, so the bar
+     * still lines up with the top of the content rather than sitting across it.
+     */
+    /**
+     * `fixedPos` is out of flow so it already reserves nothing. Either way the bar draws
+     * over the first few pixels of the content, since a horizontal scrollbar paints along
+     * the BOTTOM edge of its container and there's no room above for that edge. Shifting
+     * it up clips it in recordset and covers the Clone button in recordedit.
+     */
+    topScrollElementWrapper!.style.marginBottom = takesSpace || fixedPos ? '0' : `-${paintHeight}px`;
+
+    // the opaque background hides content scrolling under the stuck wrapper, but would
+    // paint over the content it now overlaps
+    topScrollElementWrapper!.style.backgroundColor = takesSpace ? '' : 'transparent';
+
+    setReservedSize(takesSpace ? paintHeight : 0);
   };
 
-  const sensors = [];
-
-  // make sure that the length of the scroll is identical to the scroll at the bottom of the table
-  sensors.push(new ResizeSensor(scrollableContent, setTopScrollStyles));
-
-  if (extraSensorTarget) {
-    sensors.push(new ResizeSensor(extraSensorTarget, setTopScrollStyles));
-  }
+  // see the note in attachMainContainerPaddingSensor about why the write is deferred
+  let scheduledFrame: number | null = null;
+  const scheduleTopScrollStyles = () => {
+    if (scheduledFrame !== null) return;
+    scheduledFrame = windowRef.requestAnimationFrame(() => {
+      scheduledFrame = null;
+      if (!scrollableContent!.isConnected) return;
+      setTopScrollStyles();
+    });
+  };
 
   // make top scroll visible after adding the handlers to ensure its visible only when working
   topScrollElementWrapper.style.display = 'block';
-  // show only if content is overflowing
-  if (scrollableContent.scrollWidth !== scrollableContent.clientWidth) {
-    topScrollElementWrapper.style.height = '15px';
+  setTopScrollStyles();
+
+  // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+  const observer = new ResizeObserver(scheduleTopScrollStyles);
+  observer.observe(scrollableContent);
+
+  if (extraSensorTarget) {
+    observer.observe(extraSensorTarget);
   }
 
-  return sensors;
+  return observer;
 }
 
 /**

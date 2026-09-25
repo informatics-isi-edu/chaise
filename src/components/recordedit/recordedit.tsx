@@ -361,10 +361,11 @@ const RecordeditInner = ({
     if (!formProviderInitialized || config.displayMode !== RecordeditDisplayMode.FULLSCREEN) return;
 
     const resizeSensors = attachContainerHeightSensors(parentContainer);
-    resizeSensors.push(attachMainContainerPaddingSensor(parentContainer));
+    const paddingObserver = attachMainContainerPaddingSensor(parentContainer);
 
     return () => {
       resizeSensors?.forEach((rs) => !!rs && rs.detach());
+      paddingObserver.disconnect();
     }
   }, [formProviderInitialized]);
 

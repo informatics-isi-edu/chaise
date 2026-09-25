@@ -220,11 +220,10 @@ const RecordsetInner = ({
    *   - make sure the right padding is correct
    */
   useEffect(() => {
-    let paddingSensor: any;
     if (isInitialized) {
       // must be done after the data has been initialized to reduce the jitteriness
-      paddingSensor = attachMainContainerPaddingSensor(parentContainer);
-      return;
+      const paddingObserver = attachMainContainerPaddingSensor(parentContainer);
+      return () => { paddingObserver.disconnect(); };
     }
 
     // run this setup only once
@@ -335,12 +334,6 @@ const RecordsetInner = ({
       }
       dispatchError({ error: exception });
     });
-
-    return () => {
-      if (paddingSensor && typeof paddingSensor === 'function') {
-        paddingSensor.detach();
-      }
-    };
   }, [isInitialized]);
 
   useEffect(() => {

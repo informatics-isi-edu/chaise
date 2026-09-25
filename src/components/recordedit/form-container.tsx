@@ -47,7 +47,7 @@ const FormContainer = ({
   useLayoutEffect(() => {
     if (!formContainer.current) return;
 
-    const sensors = addTopHorizontalScroll(
+    const observer = addTopHorizontalScroll(
       formContainer.current,
       /**
        * we want to show the scrollbar outside of the container
@@ -59,11 +59,14 @@ const FormContainer = ({
        * NOTE: it's a bit hacky as we're looking at the children
        *       of the component. But given that it's useLayoutEffect it should be fine.
        */
-      document.querySelector('.form-header-row') as HTMLElement
+      document.querySelector('.form-header-row') as HTMLElement,
+      // the scrollbar is position:fixed so it makes no room for itself; .main-body pads
+      // the top instead, so that ancestor is where the size has to be published
+      formContainer.current.closest('.main-body') as HTMLElement
     );
 
     return () => {
-      sensors?.forEach((sensor) => sensor.detach());
+      observer?.disconnect();
     };
   }, []);
 

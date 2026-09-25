@@ -39,7 +39,9 @@
     flex-direction: row;
     width: 100%;
     position: relative;
-    padding-top: 15px;
+    // room for the fixed top scrollbar, which makes none for itself. javascript measures
+    // it (see addTopHorizontalScroll); the fallback only applies before that runs.
+    padding-top: var(--chaise-top-scroll-size, 15px);
     // padding at bottom of page so edit form isn't touching the bottom of viewport
     // padding instead of margin so it doesn't mess with scrollable area
     padding-bottom: 40px;
