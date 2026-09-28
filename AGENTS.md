@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents (Claude Code, Codex, and others) when working with code in this repository.
 
 ## Build & Development Commands
 
@@ -91,7 +91,21 @@ Common scopes: `record`, `recordset`, `recordedit`, `viewer`, `facet`, `export`,
 
 ## Apps
 
-App-specific implementation references live under `docs/dev-docs/` and are auto-loaded into Claude's context (via path-scoped rules in `.claude/rules/`) when working on the relevant app:
+App-specific implementation references live under `docs/dev-docs/`. Claude Code auto-loads them via path-scoped rules in `.claude/rules/` when working on the relevant app. Other agents (Codex, etc.) don't read `.claude/rules/`, so read the matching doc below, plus `.claude/rules/architecture.md` for the overall app structure and `.claude/rules/e2e-tests.md` when touching `test/e2e/`:
 
 - **Record**: [`docs/dev-docs/record-app.md`](docs/dev-docs/record-app.md) — provider state, flow control, condition gating
 - **Viewer**: [`docs/dev-docs/viewer-app.md`](docs/dev-docs/viewer-app.md) — file layout, init sequence, postMessage protocol
+
+## Writing
+
+Applies to PR descriptions, commit messages, issues, and review or PR comments.
+
+- Write for a human teammate unless told otherwise. Be concise: what changed and why, nothing the diff already makes obvious.
+- Scale length to the change. A one-line fix gets one sentence. No boilerplate headers like "Summary" or "Test plan" on routine PRs.
+- Automated PRs (Dependabot, releases) can be terser and more structured, but still short.
+
+## Code Review Rules
+
+- Keep each comment short: the problem, why it matters, and the fix. No praise, and no restating what the PR does.
+- Only comment on things that affect behavior, correctness, security, or compatibility. Formatting and lint belong to the linters.
+- Flag a PR title whose conventional-commit type doesn't match the change (e.g. `chore:` for a user-visible fix). PRs are squash-merged and semantic-release reads the title to decide whether and how to release.
