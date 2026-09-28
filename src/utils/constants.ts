@@ -220,6 +220,14 @@ export const CLASS_NAMES = {
   SCROLLABLE_APP_CONTENT_CONTAINER: 'app-content-container-scrollable',
 };
 
+/**
+ * CSS custom properties that javascript sets and stylesheets read.
+ */
+export const CSS_VARIABLES = {
+  // how much vertical room the top horizontal scrollbar needs; 0 where scrollbars are overlays
+  TOP_SCROLL_SIZE: '--chaise-top-scroll-size',
+};
+
 export const ID_NAMES = {
   APP_ROOT: 'chaise-app-root',
   VIEWER_ANNOTATION_FORM: 'viewer-annotation-form'

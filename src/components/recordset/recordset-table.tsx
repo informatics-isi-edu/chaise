@@ -22,7 +22,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // utils
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CSS_VARIABLES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { addTopHorizontalScroll, fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -229,9 +229,13 @@ const RecordsetTable = ({
    * add the top horizontal scroll if needed
    */
   useLayoutEffect(() => {
-    if (tableContainer.current) {
-      addTopHorizontalScroll(tableContainer.current);
-    }
+    if (!tableContainer.current) return;
+
+    const observer = addTopHorizontalScroll(tableContainer.current);
+
+    return () => {
+      observer?.disconnect();
+    };
   }, []);
 
   /**
@@ -316,8 +320,13 @@ const RecordsetTable = ({
   const setStickyHeaderTop = () => {
     if (!stickyHeaderRef.current || !usedParentContainer) return;
 
-    // Adjust the sticky header position based on the presence of a scrollbar height and top panel container's height
-    const scrollbarHeight = stickyScrollbarRef.current?.offsetHeight || 0;
+    /**
+     * Use the room the top scrollbar reserves (published by addTopHorizontalScroll), not
+     * its height: an overlay scrollbar has a height to paint into but reserves nothing.
+     */
+    const scrollbarHeight = parseFloat(
+      getComputedStyle(tableContainer.current as HTMLElement).getPropertyValue(CSS_VARIABLES.TOP_SCROLL_SIZE)
+    ) || 0;
     // const headerTop = tableContainer.current?.getBoundingClientRect().top || 0;
     const headerTop = usedParentContainer.getBoundingClientRect().top || 0;
     // stickyHeaderRef.current.style.top = `${headerTop ? headerTop + scrollbarHeight : 0}px`;

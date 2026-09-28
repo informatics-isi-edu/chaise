@@ -230,9 +230,9 @@ const RecordInner = ({
   // make sure the right padding is correct regardless of scrollbar being there or not
   useLayoutEffect(() => {
     if (!initialized) return;
-    const paddingSensor = attachMainContainerPaddingSensor(parentContainer);
+    const paddingObserver = attachMainContainerPaddingSensor(parentContainer);
 
-    return () => { paddingSensor.detach(); }
+    return () => { paddingObserver.disconnect(); }
   }, [initialized]);
 
   /**
