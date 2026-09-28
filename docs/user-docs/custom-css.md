@@ -20,6 +20,7 @@ Custom style classes with modified styling attributes can be added in `chaise.cs
   - [Navbar](#navbar)
   - [Page-sepecific](#page-sepecific)
   - [Inline comments](#inline-comments)
+  - [Instructions](#instructions)
 - [Character replacement](#character-replacement)
 - [Examples](#examples)
 - [Custom Font](#custom-font)
@@ -140,6 +141,21 @@ Common custom rules that you might want to define for inline comments:
 
   /* making it italic: */
   font-style: italic !important;
+}
+```
+
+### Instructions
+
+The instructions defined with the `instructions` property of the [table-display annotation](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/annotation.md#tag-2016-table-display) are displayed under the page title of the recordedit app (and the saved query popup). They use the following selector:
+
+- `.page-instructions`: The wrapper for the instructions.
+
+For example, to change their font-size and the space between them and the page title:
+
+```css
+.page-instructions {
+  font-size: 14px !important; /* default is 16px */
+  padding-top: 10px !important; /* default is 15px */
 }
 ```
 
