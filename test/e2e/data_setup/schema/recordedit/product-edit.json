@@ -468,6 +468,11 @@
         "tag:isrd.isi.edu,2016:table-display": {
           "compact": {
             "page_size": 15
+          },
+          "entry": {
+            "instructions": {
+              "markdown_pattern": "Changes to an accommodation are visible to all users."
+            }
           }
         }
       }

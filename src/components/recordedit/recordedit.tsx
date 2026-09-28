@@ -6,6 +6,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal, { DeleteConfirmationModalTypes } from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
@@ -16,7 +17,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 
 // hooks
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -125,6 +126,12 @@ const RecordeditInner = ({
     getPrefilledDefaultForeignKeyData, forms, MAX_ROWS_TO_ADD, removeForm, showCloneSpinner, setShowCloneSpinner,
     showApplyAllSpinner, showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction, notifyParentPage
   } = useRecordedit();
+
+  /**
+   * the instructions for the form. they don't depend on any data that changes while the form is
+   * open, so they only need to be computed once per reference.
+   */
+  const instructions = useMemo(() => reference.display.instructions?.compute(), [reference]);
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false);
   const [addFormsEffect, setAddFormsEffect] = useState<boolean>(false);
@@ -767,6 +774,15 @@ const RecordeditInner = ({
     return (<>{fnStr} {forms.length.toString()} {tableName} {forms.length > 1 ? 'records' : 'record'}</>);
   };
 
+  /**
+   * render the form instructions. they're placed after the title rather than inside it, since
+   * the markdown value can contain block elements (paragraphs, lists) that don't belong in a heading.
+   */
+  const renderInstructions = () => {
+    if (!instructions || !instructions.value) return;
+    return <DisplayValue as='div' className='page-instructions' addClass={instructions.isHTML} value={instructions} />;
+  };
+
   const renderSubmitButton = () => {
     const isModal = config.displayMode === RecordeditDisplayMode.POPUP;
     let tooltip = 'Waiting for some columns to properly load.';
@@ -955,6 +971,7 @@ const RecordeditInner = ({
                         <span>Save current search criteria for table </span>
                         <Title reference={modalOptions?.parentReference} />
                       </h2>
+                      {renderInstructions()}
                       <div className='form-controls'>
                         {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}
                         <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
@@ -1009,6 +1026,8 @@ const RecordeditInner = ({
                   {renderBulkDeleteButton()}
                 </div>}
                 <h1 id='page-title'>{renderTitle()}</h1>
+                {/* the instructions describe the form, so they're not shown on the resultset page */}
+                {!resultsetProps && renderInstructions()}
               </div>
               {!resultsetProps && <div className='form-controls'>
                 {/* NOTE: required-info used in testing for reseting cursor position when testing tooltips */}

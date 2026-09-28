@@ -540,6 +540,9 @@ export const testSubmission = async (
     const expectedTitle = `${params.resultRowValues.length} ${params.tableDisplayname} records ${isEditMode ? 'updated' : 'created'} successfully`;
     await expect.soft(RecordeditLocators.getPageTitle(page)).toHaveText(expectedTitle);
 
+    // the instructions are only meant for the form
+    await expect.soft(RecordeditLocators.getPageInstructions(page)).toHaveCount(0);
+
     await testRecordsetTableRowValues(resultset, params.resultRowValues, true);
   }
 };
@@ -1029,6 +1032,11 @@ export type TestFormPresentationAndValidation = {
   tableDisplayname: string;
   tableComment?: string;
   /**
+   * the expected text of the instructions displayed under the title.
+   * if missing, we're making sure the instructions are not displayed.
+   */
+  instructions?: string;
+  /**
    * applicaple only to edit mode
    */
   rowNames?: string[];
@@ -1129,6 +1137,15 @@ export const testFormPresentationAndValidation = async (
        * when the title tooltip is displayed, the tooltip is blocking the "required info", that's why in here we're passing our own hover element.
        */
       await testTooltip(linkEl, params.tableComment, APP_NAMES.RECORDEDIT, true, titleEl);
+    }
+  });
+
+  await test.step('should show the proper instructions.', async () => {
+    const instructionsEl = RecordeditLocators.getPageInstructions(page);
+    if (params.instructions) {
+      await expect.soft(instructionsEl).toHaveText(params.instructions);
+    } else {
+      await expect.soft(instructionsEl).toHaveCount(0);
     }
   });
 

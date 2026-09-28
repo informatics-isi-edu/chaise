@@ -178,7 +178,31 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         },
         {
           test: /\.(css|scss)$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            {
+              loader: 'sass-loader',
+              options: {
+                /*
+                 * _chaise-alert.scss compiles some of Bootstrap's Sass source, which still uses the deprecated
+                 * `@import`. without these, every build prints a long list of deprecation warnings:
+                 *   - quietDeps: hides the warnings coming from inside Bootstrap's own source.
+                 *   - silenceDeprecations: hides the `@import` warnings of _chaise-alert.scss itself. this applies to
+                 *     every file, so don't use `@import` anywhere else (use `@use`).
+                 *
+                 * TODO remove both once Bootstrap ships its Sass as modules (planned for v6) and _chaise-alert.scss
+                 * is switched to `@use`. this has to happen before upgrading `sass` to 3.x, which removes `@import`.
+                 * A custom `logger` to scope the silencing to one file is not an option: it would replace
+                 * sass-loader's own logger, and the other Sass warnings would no longer show up as webpack warnings.
+                 */
+                sassOptions: {
+                  quietDeps: true,
+                  silenceDeprecations: ['import'],
+                },
+              },
+            },
+          ],
           // cue up for tree shake
           sideEffects: true
         },
