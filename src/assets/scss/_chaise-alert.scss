@@ -8,6 +8,10 @@
  * automatically. Bootstrap itself is included as precompiled CSS (so static sites that include the navbar
  * can use all of its classes), which Sass cannot see. That's why the alert partial is compiled here too.
  * Its rules are emitted a second time, but they're identical to Bootstrap's and small.
+ *
+ * TODO switch to `@use` once Bootstrap ships its Sass as modules (planned for v6), and then remove the
+ * `quietDeps` and `silenceDeprecations` sass-loader options in webpack/app.config.js. this has to happen
+ * before upgrading `sass` to 3.x, which removes `@import` (Bootstrap 5's Sass source won't compile).
  */
 
 // the dependencies don't emit any CSS, only the alert partial does

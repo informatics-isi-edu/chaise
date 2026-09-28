@@ -75,6 +75,7 @@ npm link @isrd-isi-edu/ermrestjs
 - Single quotes, semicolons, 2-space indent
 - All functions must have proper JSDoc comments (you can skip the return type if it's self-explanatory)
 - **SCSS colors**: never use a hex/literal color directly in SCSS. Either reuse an existing general-purpose entry from `src/assets/scss/maps/_color-map.scss`, or add a new entry there and reference it via `map.get(variables.$color-map, '<key>')`.
+- **SCSS imports**: use `@use`, never `@import`. The only exception is `_chaise-alert.scss`, which has to `@import` Bootstrap's Sass source. Its deprecation warnings are silenced for every file in `webpack/app.config.js`, so a new `@import` elsewhere wouldn't warn.
 
 ## Commit Messages
 
