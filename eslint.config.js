@@ -58,8 +58,6 @@ module.exports = [
       'no-underscore-dangle': 0,
       'prefer-destructuring': 0,
       'no-plusplus': 0,
-      'import/no-unresolved': 0, // webpack will handle this
-      'import/extensions': 0, // webpack will handle this
       'no-param-reassign': 0,
       'one-var': 0,
       'one-var-declaration-per-line': 0,
