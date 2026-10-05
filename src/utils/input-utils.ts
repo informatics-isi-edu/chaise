@@ -278,8 +278,8 @@ const dateFieldValidation = (value: string) => {
 
 const timeFieldValidation = (value: string) => {
   if (!value) return;
-  const date = windowRef.moment(value, dataFormats.time, true);
-  return date.isValid() || ERROR_MESSAGES.INVALID_TIME;
+  // not using moment's strict mode since 2.30+ rejects zero-padded values for 'H:m:s' (e.g. '08')
+  return dataFormats.regexp.time.test(value) || ERROR_MESSAGES.INVALID_TIME;
 };
 
 const timestampFieldValidation = (value: string) => {

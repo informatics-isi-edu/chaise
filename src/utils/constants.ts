@@ -108,7 +108,9 @@ export const dataFormats = {
   },
   regexp: {
     integer: /^-?\d+$/,
-    float: /^-?(\d+)?((\.)?\d+)?$/
+    float: /^-?(\d+)?((\.)?\d+)?$/,
+    // 24-hr time with 1 or 2 digits per part (H, H:m, or H:m:s), and 24:00:00 like postgres
+    time: /^(?:(?:[01]?\d|2[0-3])(?::[0-5]?\d){0,2}|24(?::0?0){0,2})$/
   }
 }
 
