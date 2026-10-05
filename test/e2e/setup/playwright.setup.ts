@@ -5,8 +5,10 @@ import fs from 'fs';
 import path from 'path';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.model';
-import { copyFileToChaiseDir, getCatalogID, removeAllCatalogs, setupCatalog } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
-import { ENTITIES_PATH, PW_PROJECT_NAMES, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import {
+  copyFileToChaiseDir, deleteRegisteredHatracNamespaces, getCatalogID, removeAllCatalogs, setupCatalog
+} from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { ENTITIES_PATH, PW_PROJECT_NAMES, STATE_FOLDER, UPLOAD_FOLDER } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { setCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 /**
@@ -66,6 +68,9 @@ export default async function globalSetup(config: FullConfig) {
 
   // make sure ermrest-data-utils has the cookie
   testConfiguration.authCookie = process.env.AUTH_COOKIE;
+
+  // delete the hatrac namespaces that a previous test run didn't clean up (e.g. it was killed before the teardown)
+  await deleteRegisteredHatracNamespaces();
 
   // create the catalog
   try {
@@ -201,6 +206,7 @@ async function createCatalog(testConfiguration: any, projectNames: string[], isM
     }
 
     // write to file so it's easier to find.
+    fs.mkdirSync(STATE_FOLDER, { recursive: true });
     fs.writeFile(ENTITIES_PATH, JSON.stringify(entities), 'utf8', function (err) {
       if (err) {
         console.log('couldn\'t write entities.');

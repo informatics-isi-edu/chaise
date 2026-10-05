@@ -1,10 +1,13 @@
-import { readFileSync } from 'fs';
+import { appendFileSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync } from 'fs';
 import { execSync } from 'child_process';
+import { basename, join } from 'path';
 import { TestInfo } from '@playwright/test';
 import axios, { isAxiosError } from 'axios';
 
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { APP_NAMES, ENTITIES_PATH, ERMREST_URL } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
+import {
+  APP_NAMES, ENTITIES_PATH, ERMREST_URL, HATRAC_NAMESPACES_PATH, STATE_FOLDER
+} from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ermrestUtils = require('@isrd-isi-edu/ermrest-data-utils');
@@ -157,8 +160,8 @@ export const removeCatalog = async (catalogId: string) => {
           console.log(exp.response?.data);
         } else {
           console.log('An unexpected error occurred:', exp);
-          reject(exp);
         }
+        reject(exp);
     });
   });
 }
@@ -304,23 +307,144 @@ export const copyFileToChaiseDir = (fileLocation: string, destinationFilename: s
 }
 
 /**
+ * Delete the given hatrac namespace or object and everything under it.
+ *
+ * Hatrac's namespace DELETE currently leaves the object versions (and their files) behind. So the objects are deleted
+ * first, which deletes their versions, and then the root namespace, which deletes the rest of the names.
+ * @param path relative path of the namespace or object starting with `/hatrac/`
+ * @param isRoot whether this is the namespace that was registered. A 404 under it means it was already deleted.
+ */
+const deleteHatracResource = async (path: string, isRoot = true): Promise<void> => {
+  const headers = { Cookie: process.env.AUTH_COOKIE! };
+  const cleanPath = path.replace(/\/+$/, '');
+  /*
+   * resolve the path against the ermrest url, so it doesn't end up with `//hatrac`.
+   * hatrac doesn't recognize its prefix in that case and returns 404.
+   */
+  const toURL = (p: string) => new URL(p, ERMREST_URL);
+  const okOrGone = (status: number) => (status >= 200 && status < 300) || (!isRoot && status === 404);
+
+  // only objects have the versions sub-resource
+  const versions = await axios.get(toURL(`${cleanPath};versions`).toString(), {
+    headers,
+    validateStatus: (status) => status === 200 || status === 404,
+  });
+  const isObject = versions.status === 200;
+
+  if (!isObject) {
+    const listing = await axios.get(toURL(cleanPath).toString(), {
+      headers: { ...headers, Accept: 'application/json' },
+      validateStatus: okOrGone,
+    });
+    // already deleted
+    if (listing.status === 404) return;
+
+    if (!Array.isArray(listing.data)) {
+      throw new Error(`unexpected hatrac listing for ${cleanPath}`);
+    }
+
+    const parentPath = toURL(cleanPath).pathname;
+    for (const child of listing.data) {
+      const childPath = typeof child === 'string' ? toURL(child).pathname : '';
+      const relative = childPath.slice(parentPath.length + 1);
+      // only follow direct children, so nothing outside of the namespace is deleted
+      if (!childPath.startsWith(`${parentPath}/`) || !relative || relative.includes('/')) {
+        throw new Error(`unexpected child ${child} in hatrac listing for ${cleanPath}`);
+      }
+      await deleteHatracResource(childPath, false);
+    }
+  }
+
+  // the nested namespaces are deleted along with the root
+  if (isObject || isRoot) {
+    await axios.delete(toURL(cleanPath).toString(), { headers, validateStatus: okOrGone });
+  }
+};
+
+/**
  * delete the hatrac namespaces that are created during testing
  * @param namespaces relative paths for the namespaces starting with `/ .e.g. `/hatrac/js/chaise/some_name`
+ * @returns the namespaces that couldn't be deleted
  */
-export const deleteHatracNamespaces = async (namespaces: string[]) => {
-  const serverLocation = ERMREST_URL?.replace('ermrest', '');
+export const deleteHatracNamespaces = async (namespaces: string[]): Promise<string[]> => {
+  const failed: string[] = [];
   // cleanup the hatrac namespaces
-  for await (const ns of namespaces) {
+  for (const ns of namespaces) {
     try {
-      await axios(serverLocation + ns, { method: 'DELETE', headers: { Cookie: process.env.AUTH_COOKIE! } });
+      await deleteHatracResource(ns);
       console.log(`${ns} hatrac namespace deleted.`);
     } catch (e) {
+      /*
+       * nothing to delete (e.g. the spec failed before uploading). there's no point in trying again,
+       * but it's logged since it would also happen if the url is wrong.
+       */
+      if (isAxiosError(e) && e.response?.status === 404) {
+        console.warn(`nothing found at hatrac namespace ${ns}, so it was not deleted.`);
+        continue;
+      }
+
+      failed.push(ns);
       console.log(`encountered an error while trying to delete hatrac namespace: ${ns}`);
       if (isAxiosError(e)) {
-        console.error(e.response?.data);
+        // e.config itself shouldn't be logged since it has the cookie
+        console.error(`${e.config?.method?.toUpperCase()} ${e.config?.url} returned ${e.response?.status}`, e.response?.data);
       } else {
         console.error('An unexpected error occurred:', e);
       }
     }
+  }
+  return failed;
+}
+
+/**
+ * Keep track of a hatrac namespace that a spec uploads files to. Call this before uploading any files.
+ * Specs shouldn't delete the namespace themselves. The global teardown deletes all of them (or the next global setup,
+ * if the test run was killed), so each one is deleted once even if the spec fails.
+ * @param namespace relative path of the namespace starting with `/` e.g. `/hatrac/js/chaise/some_name`
+ */
+export const registerHatracNamespace = (namespace: string) => {
+  mkdirSync(STATE_FOLDER, { recursive: true });
+  // appending a short line is atomic, so it's safe with multiple workers
+  appendFileSync(HATRAC_NAMESPACES_PATH, `${namespace}\n`);
+}
+
+/**
+ * Delete all the hatrac namespaces that were registered using `registerHatracNamespace`.
+ * The ones that couldn't be deleted are registered again, so the next run can try again.
+ */
+export const deleteRegisteredHatracNamespaces = async () => {
+  const registryName = basename(HATRAC_NAMESPACES_PATH);
+
+  /*
+   * claim the registered namespaces by renaming the file (atomic), so anything that is registered in the meantime goes
+   * to a new file and isn't lost. claimed files that are left behind by a cleanup that was killed are picked up too.
+   */
+  try {
+    renameSync(HATRAC_NAMESPACES_PATH, `${HATRAC_NAMESPACES_PATH}.${process.pid}-${Date.now()}.claimed`);
+  } catch {
+    // nothing is registered
+  }
+
+  let claimedFiles: string[] = [];
+  try {
+    claimedFiles = readdirSync(STATE_FOLDER)
+      .filter((f) => f.startsWith(`${registryName}.`) && f.endsWith('.claimed'))
+      .map((f) => join(STATE_FOLDER, f));
+  } catch {
+    // the folder doesn't exist, so nothing was registered
+  }
+  if (claimedFiles.length === 0) return;
+
+  const content = claimedFiles.map((f) => readFileSync(f, { encoding: 'utf8' })).join('\n');
+  const namespaces = [...new Set(content.split('\n').filter((ns) => ns.length > 0))];
+  const failed = await deleteHatracNamespaces(namespaces);
+
+  failed.forEach((ns) => registerHatracNamespace(ns));
+  claimedFiles.forEach((f) => rmSync(f, { force: true }));
+
+  if (failed.length > 0) {
+    console.warn(
+      `${failed.length} hatrac namespace(s) couldn't be deleted and will be retried in the next run:\n  ${failed.join('\n  ')}`
+    );
   }
 }

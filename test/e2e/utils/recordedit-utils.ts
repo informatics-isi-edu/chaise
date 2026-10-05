@@ -1,4 +1,4 @@
-import test, { expect, Locator, Page, TestInfo } from '@playwright/test';
+import test, { expect, Locator, Page, Request, TestInfo } from '@playwright/test';
 import { execSync } from 'child_process';
 import { resolve } from 'path';
 import moment from 'moment';
@@ -118,6 +118,35 @@ export const selectFile = async (
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles(resolve(UPLOAD_FOLDER, file.path));
   if (!skipFilenameCheck) await expect.soft(fileTextInput).toHaveText(file.name);
+};
+
+/**
+ * If the given request is uploading a file chunk to hatrac, returns the index of the chunk. Otherwise returns null.
+ */
+export const getHatracChunkIndex = (request: Request): number | null => {
+  if (request.method() !== 'PUT') return null;
+  const match = new URL(request.url()).pathname.match(/;upload\/[^/]+\/(\d+)$/);
+  return match ? Number(match[1]) : null;
+};
+
+/**
+ * Whether the given request is creating a hatrac upload job.
+ */
+export const isHatracUploadJobRequest = (request: Request): boolean => {
+  return request.method() === 'POST' && new URL(request.url()).pathname.endsWith(';upload');
+};
+
+/**
+ * Wait for the request that creates records in the given table, and return the rows that are sent to ermrest.
+ * Call it before submitting the form.
+ * @param timeout overrides the default timeout. useful when there are assets in the form.
+ */
+export const waitForCreatedRows = async (page: Page, schemaName: string, tableName: string, timeout?: number) => {
+  const request = await page.waitForRequest(
+    (req) => req.method() === 'POST' && req.url().includes('/entity/') && req.url().includes(`${schemaName}:${tableName}`),
+    { timeout }
+  );
+  return request.postDataJSON() as Record<string, unknown>[];
 };
 
 export const selectDropdownValue = async (dropdownEl: Locator, value: string) => {

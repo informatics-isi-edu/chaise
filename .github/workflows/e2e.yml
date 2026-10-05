@@ -112,7 +112,8 @@ jobs:
           sudo service apache2 restart
       - name: Install ermrestjs
         run: |
-          git clone https://github.com/informatics-isi-edu/ermrestjs.git
+          # TODO remove the --branch before merging (the ermrestjs changes must be merged first)
+          git clone --branch 019-handle-filename-update-error https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
           sudo make root-install
       - name: Install chaise (build & deploy)

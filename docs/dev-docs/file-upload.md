@@ -11,7 +11,7 @@ There're a sequence of operations that are performed to upload the files that ca
 
 3. `checkFileExists` function checks whether a file already exists calling `fileExists` in `ERMrestJS` for the `hatracObj`. A parameter including the `previousJobUrl` is passed to this call for resuming file upload. It keeps track of the `checkFileExists` calls progress for each file and once all are done it calls `createUploadJobs`.
    - If the file already exists (same checksum and size), creating the upload job is skipped and marked as complete. `filesToUploadCt` is reduced by 1
-     - If the existing file has a different filename, its `content-disposition` metadata is updated to the new filename instead of uploading the file again. If this update fails with a 403 (the user didn't upload the existing version), 404, or 409, the file is uploaded as a new version instead.
+     - If the existing file has a different filename, a request is sent to update its `content-disposition` metadata to the new filename instead of uploading the file again
    - If there is a 403 returned (file exists but the current user can't read it), the file is uploaded as a new version
    - If there is a 409 returned, it could mean the namespace already exists
      - If this occurs, check if we have an existing job for that namespace we know is partially uploaded

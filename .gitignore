@@ -23,7 +23,6 @@ version.txt
 mdHelp.html
 # ignore uploaded files
 test/e2e/data_setup/uploaded_files/*.*
-entities.json
 lib/switchUserAccounts.html
 
 # the compiled css files
@@ -39,6 +38,7 @@ common/styles/navbar.css
 test/e2e/.auth
 test/e2e/.download
 test/e2e/.upload
+test/e2e/.state
 
 # Claude Code user-local settings (personal permissions, env vars, etc.)
 .claude/settings.local.json

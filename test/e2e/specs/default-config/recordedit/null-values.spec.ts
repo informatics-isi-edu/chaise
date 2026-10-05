@@ -6,7 +6,7 @@ import moment from 'moment';
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
-import { deleteHatracNamespaces } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { registerHatracNamespace } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { clearInputValue, createFiles, deleteFiles, setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
@@ -106,6 +106,7 @@ const testParams = {
 test('Null values in recordedit', async ({ page, baseURL }, testInfo) => {
   await test.step('create files', async () => {
     await createFiles(testFiles);
+    registerHatracNamespace(`/hatrac/js/chaise/${currentTimestampTimeStr}`);
   });
 
   await test.step('open recordedit page', async () => {
@@ -131,6 +132,5 @@ test('Null values in recordedit', async ({ page, baseURL }, testInfo) => {
 
   await test.step('delete create files', async () => {
     await deleteFiles(testFiles);
-    await deleteHatracNamespaces([`/hatrac/js/chaise/${currentTimestampTimeStr}`]);
   });
 })

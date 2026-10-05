@@ -57,6 +57,10 @@ export default class ModalLocators {
     return page.locator('.modal-upload-progress');
   }
 
+  static getUploadProgressCancelButton(modal: Locator): Locator {
+    return modal.locator('#confirm-btn');
+  }
+
   static getCreateSavedQueryModal(page: Page): Locator {
     return page.locator('.create-saved-query');
   }
