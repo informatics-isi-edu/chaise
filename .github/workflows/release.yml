@@ -43,8 +43,11 @@ jobs:
         run: npm clean-install
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
+      # commitlint 21 pulls in conventional-changelog-conventionalcommits 10, which needs
+      # conventional-changelog-writer 9. semantic-release's release-notes-generator still
+      # uses writer 8, so pin the preset to 9 until it catches up.
       - name: Install release plugins
-        run: npm install --no-save @semantic-release/git
+        run: npm install --no-save @semantic-release/git conventional-changelog-conventionalcommits@9
       - name: Release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
