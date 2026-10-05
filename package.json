@@ -30,8 +30,8 @@
     "ui"
   ],
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
-    "@commitlint/config-conventional": "^20.4.1",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@isrd-isi-edu/ermrest-data-utils": "^0.0.7",
     "@playwright/test": "latest",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
