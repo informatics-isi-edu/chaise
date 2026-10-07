@@ -50,8 +50,9 @@ test('clone button', async ({ page, baseURL }, testInfo) => {
     // submit the form
     await RecordeditLocators.getSubmitRecordButton(page).click();
 
+    // saving 201 records can take more than 30s under CI load
     const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
-    await expect.soft(resultset).toBeVisible({ timeout: 30_000 });
+    await expect.soft(resultset).toBeVisible({ timeout: 60_000 });
     await expect.soft(RecordsetLocators.getRows(resultset)).toHaveCount(testParams.max_input_rows + 1);
   });
 

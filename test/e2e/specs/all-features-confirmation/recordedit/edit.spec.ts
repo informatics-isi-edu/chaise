@@ -387,6 +387,9 @@ test.describe('Recordedit edit', () => {
     const presentation = params.presentation;
 
     test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
+      // multi-form edit validates and submits every form in one test; the 60s default times out under CI load.
+      if (presentation.inputs.length > 1) test.slow();
+
       /*
        * these tests run in parallel, so each worker has its own timestamp (and namespace).
        * the global teardown deletes all the registered namespaces.
