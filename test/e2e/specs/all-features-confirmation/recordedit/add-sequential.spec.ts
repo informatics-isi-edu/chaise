@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 import { createFiles, deleteFiles, testCreateRecords, TestCreateRecordsParams } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
-import { deleteHatracNamespaces } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { registerHatracNamespace } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 const currentTimestampTimeStr = moment().format('x');
 
@@ -391,12 +391,12 @@ test.describe('Recordedit create', () => {
 
   test.beforeAll(async () => {
     await createFiles(testFiles);
+    registerHatracNamespace(`/hatrac/js/chaise/${currentTimestampTimeStr}`);
   });
 
   testCreateRecords(testParams);
 
   test.afterAll(async () => {
     await deleteFiles(testFiles);
-    await deleteHatracNamespaces([`/hatrac/js/chaise/${currentTimestampTimeStr}`]);
   });
 });

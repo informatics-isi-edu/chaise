@@ -31,6 +31,11 @@ export const DOWNLOAD_FOLDER = resolve(__dirname, '../.download');
 export const UPLOAD_FOLDER = resolve(__dirname, '../.upload');
 
 /**
+ * the folder for the files that are shared between the global setup, specs, and global teardown of a test run.
+ */
+export const STATE_FOLDER = resolve(__dirname, '../.state');
+
+/**
  * This is where we're writing the entities to.
  *
  * There are some system generated columns that we might want to know the value of,
@@ -40,7 +45,13 @@ export const UPLOAD_FOLDER = resolve(__dirname, '../.upload');
  *
  * TODO is this limitation true with playwright?
  */
-export const ENTITIES_PATH = 'entities.json';
+export const ENTITIES_PATH = resolve(STATE_FOLDER, 'entities.json');
+
+/**
+ * The hatrac namespaces that specs registered (one per line).
+ * They are deleted in the global teardown, or in the next global setup if the test run was killed before the teardown.
+ */
+export const HATRAC_NAMESPACES_PATH = resolve(STATE_FOLDER, 'hatrac-namespaces.txt');
 
 export enum PW_PROJECT_NAMES {
   PRETEST = 'pretest',

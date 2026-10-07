@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
 
-import { deleteHatracNamespaces, getCatalogID } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { getCatalogID, registerHatracNamespace } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import {
   createFiles, deleteFiles, testFormPresentationAndValidation,
   TestFormPresentationAndValidation, testSubmission,
@@ -387,6 +387,16 @@ test.describe('Recordedit edit', () => {
     const presentation = params.presentation;
 
     test(`${presentation.description}`, async ({ page, baseURL }, testInfo) => {
+      // multi-form edit validates and submits every form in one test; the 60s default times out under CI load.
+      if (presentation.inputs.length > 1) test.slow();
+
+      /*
+       * these tests run in parallel, so each worker has its own timestamp (and namespace).
+       * the global teardown deletes all the registered namespaces.
+       */
+      if (params.num_files > 0) {
+        registerHatracNamespace(`/hatrac/js/chaise/${currentTimestampTimeStr}`);
+      }
 
       // create files if this is the first one
       if (index === 0) {
@@ -416,7 +426,6 @@ test.describe('Recordedit edit', () => {
       if (index === testParams.tables.length - 1) {
         await test.step('delete create files', async () => {
           await deleteFiles(testFiles);
-          await deleteHatracNamespaces([`/hatrac/js/chaise/${currentTimestampTimeStr}`]);
         });
       }
     });

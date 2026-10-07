@@ -2,7 +2,7 @@ import { FullConfig } from '@playwright/test';
 import fs from 'fs';
 
 import { TestOptions } from '@isrd-isi-edu/chaise/test/e2e/setup/playwright.model';
-import { removeAllCatalogs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
+import { deleteRegisteredHatracNamespaces, removeAllCatalogs } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 import { ENTITIES_PATH } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 async function globalTeardown(config: FullConfig) {
@@ -25,6 +25,12 @@ async function globalTeardown(config: FullConfig) {
       testConfiguration = require(`../../e2e/data_setup/config/${options.configFileName}`);
     }
   }
+
+  /*
+   * remove the hatrac namespaces that specs registered (including the ones of failed specs).
+   * done first so a failure in removing the catalogs doesn't skip it.
+   */
+  await deleteRegisteredHatracNamespaces();
 
   // remove the created catalogs
   if (testConfiguration.cleanup && testConfiguration.setup) {

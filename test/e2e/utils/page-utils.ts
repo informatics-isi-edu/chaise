@@ -241,9 +241,17 @@ export async function testExportDropdown(page: Page, fileNames: string[], app: A
     const bagOption = ExportLocators.getExportOption(page, 'BDBag');
     await expect.soft(bagOption).toHaveText('BDBag');
 
-    await clickAndVerifyDownload(bagOption, fileNames[1], async () => {
-      const modal = ModalLocators.getExportModal(page);
+    const modal = ModalLocators.getExportModal(page);
+    /*
+     * hold the export request until the progress modal is visible, so a fast export can't close it first.
+     * keep this soft: a hard expect would throw inside the route handler and the request would never continue.
+     */
+    await page.route((url) => url.pathname.endsWith('/bdbag'), async (route) => {
       await expect.soft(modal).toBeVisible();
+      await route.continue();
+    }, { times: 1 });
+
+    await clickAndVerifyDownload(bagOption, fileNames[1], async () => {
       await expect.soft(modal).not.toBeAttached({ timeout: 30_000 });
     });
   });

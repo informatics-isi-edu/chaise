@@ -4,5 +4,12 @@ export default getConfig({
   testName: 'all-features-confirmation/recordedit/add',
   configFileName: 'recordedit/add.dev.json',
   mainSpecName: 'all-features-confirmation',
-  testMatch: ['add.spec.ts', 'add-sequential.spec.ts', 'file-validation.spec.ts'],
+  testMatch: [
+    'add.spec.ts',
+    'add-sequential.spec.ts',
+    'file-validation.spec.ts',
+    'upload-cancel.spec.ts',
+    'upload-filename-update.spec.ts',
+    'upload-resume.spec.ts',
+  ],
 });
