@@ -26,16 +26,19 @@ const NUM_RECORD_COLUMNS = 4;
 /**
  * createFiles fills both files with the same character, so they have the same content.
  * with the same fileid and timestamp, the second one is uploaded to the same hatrac object as an existing file.
+ *
+ * NOTE: the files must not be .txt (text/plain). Apache on ubuntu (CI) compresses text/plain responses with mod_deflate,
+ * which removes the content-md5 and content-length headers, so the existing file is not detected.
  */
 const ORIGINAL_FILE: RecordeditFile = {
-  name: 'testfile_upload_filename_original.txt',
+  name: 'testfile_upload_filename_original.png',
   size: '100',
-  path: 'testfile_upload_filename_original.txt',
+  path: 'testfile_upload_filename_original.png',
 };
 const RENAMED_FILE: RecordeditFile = {
-  name: 'testfile_upload_filename_renamed.txt',
+  name: 'testfile_upload_filename_renamed.png',
   size: '100',
-  path: 'testfile_upload_filename_renamed.txt',
+  path: 'testfile_upload_filename_renamed.png',
 };
 
 /**
@@ -73,7 +76,7 @@ test.describe('Recordedit upload of an existing file', () => {
       originalUrl = String(rows[0].uri);
 
       // a versioned url (`<namespace>/<fileid>/<ext>/<md5>:<version>`)
-      expect.soft(originalUrl.startsWith(`${NAMESPACE}/1/.txt/`)).toBe(true);
+      expect.soft(originalUrl.startsWith(`${NAMESPACE}/1/.png/`)).toBe(true);
       expect.soft(originalUrl).toContain(':');
       await testRecordMainSectionPartialValues(page, NUM_RECORD_COLUMNS, { filename: ORIGINAL_FILE.name });
     });

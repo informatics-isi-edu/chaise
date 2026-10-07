@@ -6,7 +6,7 @@ import axios, { isAxiosError } from 'axios';
 
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import {
-  APP_NAMES, ENTITIES_PATH, ERMREST_URL, HATRAC_NAMESPACES_PATH, STATE_FOLDER
+  APP_NAMES, ENTITIES_PATH, HATRAC_NAMESPACES_PATH, STATE_FOLDER
 } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -320,8 +320,10 @@ const deleteHatracResource = async (path: string, isRoot = true): Promise<void> 
   /*
    * resolve the path against the ermrest url, so it doesn't end up with `//hatrac`.
    * hatrac doesn't recognize its prefix in that case and returns 404.
+   * NOTE: the ERMREST_URL constant can't be used here. In CI, the playwright config sets the env variable after importing
+   * the constants, so the constant is undefined in global setup and teardown.
    */
-  const toURL = (p: string) => new URL(p, ERMREST_URL);
+  const toURL = (p: string) => new URL(p, process.env.ERMREST_URL);
   const okOrGone = (status: number) => (status >= 200 && status < 300) || (!isRoot && status === 404);
 
   // only objects have the versions sub-resource
