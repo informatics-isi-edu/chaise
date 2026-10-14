@@ -858,33 +858,31 @@ const _testInputValidationAndExtraFeatures = async (
         // the test cases below are only checking time, so we should first add a proper date.
         await timestampProps.date.fill('2016-01-01');
 
-        // If user enters an invalid time an error msg should appear
-        await timestampProps.time.fill('24:12:00');
-        await expect.soft(cellError).toHaveText(timeErrorMessage);
+        const invalidTimes = [
+          '24:12:00', '24:00:01', '24:01', '25', '25:00:00', '08:60', '08:05:60',
+          '123', '08:005', '08:05:52:00', '08:', ':05', '08::52', '8-5-2', 'ab:cd',
+        ];
+        for (const value of invalidTimes) {
+          await timestampProps.time.fill(value);
+          await expect.soft(cellError, `"${value}" should be invalid`).toHaveText(timeErrorMessage);
+        }
 
-        // If user enters a valid time, then error msg should disappear
-        await timestampProps.time.fill('12:00:00');
-        await expect.soft(cellError).not.toBeAttached();
-
-        // users can enter 1 digit in any place
-        await timestampProps.time.clear();
-        await timestampProps.time.fill('2:2:2');
-        await expect.soft(cellError).not.toBeAttached();
-
-        // users can enter just the hours
-        await timestampProps.time.clear();
-        await timestampProps.time.fill('08');
-        await expect.soft(cellError).not.toBeAttached();
-
-        // users can enter just the hours and minutes
-        await timestampProps.time.clear();
-        await timestampProps.time.fill('2:10');
-        await expect.soft(cellError).not.toBeAttached();
-
-        // users can enter 0 for the time
-        await timestampProps.time.clear();
-        await timestampProps.time.fill('00:00:00');
-        await expect.soft(cellError).not.toBeAttached();
+        /**
+         * every part accepts 1 or 2 digits, in H, H:m, or H:m:s form.
+         * mixing padded and unpadded parts (e.g. 08:5:2) is what moment's strict mode used to reject.
+         */
+        const validTimes = ['0', '00:00:00', '12:00:00', '23:59:59', '24', '24:00', '24:0:0', '24:00:00'];
+        for (const h of ['8', '08']) {
+          validTimes.push(h);
+          for (const m of ['5', '05']) {
+            validTimes.push(`${h}:${m}`);
+            for (const s of ['2', '02']) validTimes.push(`${h}:${m}:${s}`);
+          }
+        }
+        for (const value of validTimes) {
+          await timestampProps.time.fill(value);
+          await expect.soft(cellError, `"${value}" should be valid`).not.toBeAttached();
+        }
 
         // Invalid date + good time = error
         // If user enters a valid time but no date, an error msg should appear
