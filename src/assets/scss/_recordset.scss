@@ -104,6 +104,12 @@
     height: 100%;
     -webkit-transition: all 1s;
     transition: all 1s;
+
+    .side-panel-heading-menu {
+      position: absolute;
+      top: -37px;
+      left: 125px;
+    }
   }
 
   .recordset-container {

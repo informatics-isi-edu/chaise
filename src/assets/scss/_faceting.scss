@@ -1,14 +1,6 @@
 @use 'sass:map';
 @use 'variables';
 
-.side-panel-container {
-  .side-panel-heading-menu {
-    position: absolute;
-    top: -37px;
-    left: 125px;
-  }
-}
-
 .faceting-columns-container {
   // disable the animation from all accordions (including nested ones at any level)
   .accordion-collapse.collapsing,
