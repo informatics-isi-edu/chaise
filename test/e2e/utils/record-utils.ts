@@ -841,6 +841,12 @@ export const testAddRelatedWithForeignKeyMultiPicker = async (
     await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 3).click();
     await RecordsetLocators.getRowCheckboxInput(bulkFKModal, 4).click();
 
+    /**
+     * the save button is disabled until the prefilled row is loaded. the new forms copy the foreign key
+     * data of the first form, so they only get the full row (used for the row names in the resultset) after that.
+     */
+    await expect.soft(RecordeditLocators.getSubmitRecordButton(newPage)).toBeEnabled();
+
     await ModalLocators.getSubmitButton(bulkFKModal).click();
     await expect.soft(bulkFKModal).not.toBeAttached();
 

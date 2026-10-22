@@ -20,11 +20,16 @@ type ResultsetTableProps = {
   * Determines if both horizontal scrollbars should always be visible, or if only one should appear at a time.
   */
   showSingleScrollbar: boolean,
+  /**
+   * whether each row should have a view button that links to its record page
+   */
+  viewable?: boolean,
 }
 
 const ResultsetTable = ({
   page,
   showSingleScrollbar,
+  viewable,
 }: ResultsetTableProps) : JSX.Element => {
 
   const logStack = [LogService.getStackNode(LogStackPaths.SET, page.reference.table, page.reference.filterInfo)];
@@ -34,13 +39,13 @@ const ResultsetTable = ({
   const logStackPath = LogService.getStackPath(null, LogStackPaths.RESULT_DISABLED_SET);
 
   const config : RecordsetConfig = {
-    viewable: false,
+    viewable: !!viewable,
     editable: false,
     deletable: false,
     sortable: false,
     selectMode: RecordsetSelectMode.NO_SELECT,
     disableFaceting: true,
-    displayMode: RecordsetDisplayMode.TABLE
+    displayMode: RecordsetDisplayMode.RESULTSET
   }
 
   return (

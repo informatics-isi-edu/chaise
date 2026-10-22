@@ -440,6 +440,26 @@
             "timestamp_array",
             "timestamptz_array",
             "color_rgb_hex_column"
+          ],
+          "resultset": [
+            "title",
+            "website",
+            ["product-add", "fk_category"],
+            "rating",
+            "summary",
+            "description",
+            "no_of_rooms",
+            "opened_on",
+            "date_col",
+            "luxurious",
+            "text_array",
+            "boolean_array",
+            "int4_array",
+            "float4_array",
+            "date_array",
+            "timestamp_array",
+            "timestamptz_array",
+            "color_rgb_hex_column"
           ]
         },
         "tag:isrd.isi.edu,2016:visible-foreign-keys": {

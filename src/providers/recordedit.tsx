@@ -704,10 +704,13 @@ export default function RecordeditProvider({
             }
           }
 
-          reference.update(tempTuples, logParams).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+          // the linked data is used for showing the foreign key row names in the resultset
+          reference.update(tempTuples, logParams, submissionRowsLinkedData)
+            .then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         } else {
           const createRef = reference.unfilteredReference.contextualize.entryCreate;
-          createRef.create(submissionRows, logParams).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+          createRef.create(submissionRows, logParams, false, submissionRowsLinkedData)
+            .then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         }
       });
     });

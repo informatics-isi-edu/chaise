@@ -667,7 +667,7 @@ Use this property to modify the display settings for the "share and cite" button
      ```
 
  ### systemColumnsDisplayEntry
- See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the entry contexts.
+ See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the entry contexts. It also applies to the table of records shown after creating or editing multiple records, unless the table defines a `resultset` visible-columns list (that table uses the same columns as the form by default).
    - Type: Boolean || Array
    - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
    - Sample syntax:

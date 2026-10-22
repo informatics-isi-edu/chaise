@@ -70,6 +70,8 @@ export enum RecordsetSelectMode {
 export enum RecordsetDisplayMode {
   FULLSCREEN = 'fullscreen',
   TABLE = 'table',
+  // the table of records shown in recordedit after creating or editing multiple records
+  RESULTSET = 'resultset',
   RELATED = 'related',
   INLINE = 'related/inline',
   POPUP = 'popup',

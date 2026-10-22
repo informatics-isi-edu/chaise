@@ -78,26 +78,26 @@ const parallelTestParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'Accommodations',
+        // the table has a resultset list (compact without json_col)
         resultColumnNames: [
           'title', 'website', 'product-add_fk_category', 'rating', 'summary', 'description',
-          'json_col', 'no_of_rooms', 'opened_on', 'date_col', 'luxurious',
+          'no_of_rooms', 'opened_on', 'date_col', 'luxurious',
           'text_array', 'boolean_array', 'int4_array', 'float4_array', 'date_array', 'timestamp_array', 'timestamptz_array', 'color_rgb_hex_column'
         ],
+        // the RID link shows the row name comes from the selected row (raw values would link by term)
         resultRowValues: [
           [
             'new title 1 ™', { url: 'https://example1.com', caption: 'Link to Website' },
-            { url: '/product-add:category/term=Hotel', caption: 'Hotel' },
+            { url: '/product-add:category/RID=', caption: 'Hotel' },
             '1.0000', 'This is the summary of this column 1.', 'Description 1 ©',
-            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple ®' }, 'customer': 'John Smith' }, undefined, 2),
             '1', '2017-01-01 01:01:01', '2017-01-01', 'false',
             'v1, v2', 'true', '1, 2', '1.0000, 2.2000', '2001-01-01, 2002-02-02', '2001-01-01 01:01:01', '2001-01-01 01:01:01',
             '#123456'
           ],
           [
             'new title 2', { url: 'https://example2.com', caption: 'Link to Website' },
-            { url: '/product-add:category/term=Ranch', caption: 'Ranch' },
+            { url: '/product-add:category/RID=', caption: 'Ranch' },
             '2.0000', 'This is the summary of this column 2.', 'Description 2',
-            JSON.stringify({ 'items': { 'qty': 6, 'product': 'apple' }, 'customer': 'John Smith' }, undefined, 2),
             '2', '2017-02-02 02:02:02', '2017-02-02', 'true',
             'v2, v3', 'false', '1, 2', '2.0000, 3.3000', '2002-02-02', '2002-02-02 02:02:02', '2002-02-02 02:02:02',
             '#654321'

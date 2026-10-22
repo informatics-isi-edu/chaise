@@ -1,10 +1,12 @@
 import { test, expect, TestInfo } from '@playwright/test';
 
 import RecordeditLocators, { RecordeditInputType } from '@isrd-isi-edu/chaise/test/e2e/locators/recordedit';
+import RecordsetLocators from '@isrd-isi-edu/chaise/test/e2e/locators/recordset';
 
 import { APP_NAMES } from '@isrd-isi-edu/chaise/test/e2e/utils/constants';
 import { setInputValue, testSubmission } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
+import { getEntityRowURL } from '@isrd-isi-edu/chaise/test/e2e/utils/catalog-utils';
 
 
 const MULI_FORM_INPUT_FORM_NUMBER = -1;
@@ -100,6 +102,14 @@ test.describe('Regarding multi form input button', () => {
        * 2 records, 10 seconds for each
        */
       await testSubmission(page, testParams.multiEdit.submission, true, 2 * 20 * 1000);
+    });
+
+    await test.step('each result row links to its record page.', async () => {
+      const resultset = RecordeditLocators.getRecoreditResultsetTables(page);
+      for (const [index, id] of ['9001', '9002'].entries()) {
+        const recordURL = getEntityRowURL(testInfo, APP_NAMES.RECORD, 'multi-form-input', 'main', [{ column: 'id', value: id }]);
+        expect.soft(await RecordsetLocators.getRowViewButton(resultset, index).getAttribute('href')).toContain(recordURL);
+      }
     });
   });
 

@@ -136,6 +136,10 @@
           "compact": [
             "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
             "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "array_text"
+          ],
+          "resultset": [
+            "markdown_col", "text_col", "int_col", "float_col", "date_col", "timestamp_col",
+            "boolean_col", ["multi-form-input", "main_fk1"], "asset_col", "array_text"
           ]
         }
       }

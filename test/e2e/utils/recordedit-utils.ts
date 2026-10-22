@@ -573,6 +573,9 @@ export const testSubmission = async (
     await expect.soft(RecordeditLocators.getPageInstructions(page)).toHaveCount(0);
 
     await testRecordsetTableRowValues(resultset, params.resultRowValues, true);
+
+    // each successful row links to its record page (the failed table doesn't have view buttons)
+    await expect.soft(RecordsetLocators.getViewActionButtons(resultset)).toHaveCount(params.resultRowValues.length);
   }
 };
 
