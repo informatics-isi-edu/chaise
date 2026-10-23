@@ -126,13 +126,18 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('chaise/package-lock.json') }}
       - name: Install chaise dev deps and Playwright
+        # Backstop only. Don't wrap apt in `timeout`: it can't signal the root apt-get
+        # that playwright runs via sudo, so it would orphan it holding the dpkg lock.
+        timeout-minutes: 20
         run: |
           cd chaise
           NODE_ENV=development npm clean-install --include=dev
+          # Tests only run the chromium project. Without a browser argument playwright
+          # also installs the firefox and webkit deps, most of a ~119 MB apt download.
           if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
-            npx playwright install-deps
+            npx playwright install-deps chromium
           else
-            npx playwright install --with-deps --no-shell
+            npx playwright install --with-deps --no-shell chromium
           fi
           make lint
       - name: Add tests users
