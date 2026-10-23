@@ -720,7 +720,7 @@ const RecordsetTable = ({
           </button>
         </div>
       }
-      {config.displayMode !== RecordsetDisplayMode.TABLE && renderNextPreviousBtn()}
+      {config.displayMode !== RecordsetDisplayMode.TABLE && config.displayMode !== RecordsetDisplayMode.RESULTSET && renderNextPreviousBtn()}
     </div>
   )
 }

@@ -511,21 +511,26 @@ const testParams = {
         'markdown_col', 'text_col', 'int_col', 'float_col', 'date_col', 'timestamp_input', 'boolean_input',
         'lIHKX0WnQgN1kJOKR0fK5A', 'asset_col', 'array_text'
       ],
+      // the foreign keys should show the row names of the selected rows (not the raw values)
       resultRowValues: [
         [
-          'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true', '1',
+          'markdown value', 'all text input', '432', '12.2000', '2011-10-09', '2021-10-09 18:00:00', 'true',
+          { url: '/multi-form-input:f1/RID=', caption: 'one' },
           'testfile128kb_1.png', 'all array text input 1, all array text input 2'
         ],
         [
-          'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '', '1',
+          'markdown value', '', '', '12.2000', '2011-10-09', '2021-10-09 18:00:00', '',
+          { url: '/multi-form-input:f1/RID=', caption: 'one' },
           'testfile128kb_1.png', ''
         ],
         [
-          'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true', '3',
+          'some markdown', 'all text input', '432', '4.6500', '2022-06-06', '2012-11-10 06:00:00', 'true',
+          { url: '/multi-form-input:f1/RID=', caption: 'three' },
           'testfile128kb_2.png', 'all array text input 1, all array text input 2'
         ],
         [
-          'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false', '4',
+          'manual value', 'some value', '666', '5.0000', '2006-06-06', '2006-06-06 06:06:00', 'false',
+          { url: '/multi-form-input:f1/RID=', caption: 'four' },
           'testfile128kb_3.png', 'some value'
         ],
         [

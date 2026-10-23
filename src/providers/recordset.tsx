@@ -318,7 +318,8 @@ export default function RecordsetProvider({
     initialReference.columns.map((col: any) => {
       return {
         column: col,
-        isLoading: col.hasWaitFor === true || col.isUnique === false,
+        // with initialPage, the secondary requests never run, so nothing would clear the loading state
+        isLoading: !initialPage && (col.hasWaitFor === true || col.isUnique === false),
         hasError: false
       };
     })

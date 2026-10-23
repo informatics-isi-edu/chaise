@@ -15,7 +15,9 @@ import {
   testAddAssociationTable, testAddRelatedTable, testAddRelatedWithForeignKeyMultiPicker,
   testBatchUnlinkAssociationTable, testRelatedTablePresentation, testShareCiteModal
 } from '@isrd-isi-edu/chaise/test/e2e/utils/record-utils';
-import { testModalClose, testRecordsetTableRowValues, testTotalCount } from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
+import {
+  RecordsetRowValue, testModalClose, testRecordsetTableRowValues, testTotalCount
+} from '@isrd-isi-edu/chaise/test/e2e/utils/recordset-utils';
 import { testInputValue } from '@isrd-isi-edu/chaise/test/e2e/utils/recordedit-utils';
 import { generateChaiseURL } from '@isrd-isi-edu/chaise/test/e2e/utils/page-utils';
 
@@ -843,6 +845,14 @@ test.describe.serial('Related tables', () => {
    *   for the bulk create foreign key functionality requiring an annotation to be defined instead.
    */
   test.describe('for a table that is almost p&b and the fks are a unique key', async () => {
+    /**
+     * the resultset should show the row names of the prefilled and selected rows (not the raw values).
+     * the RID link shows the row name comes from the loaded row.
+     */
+    const schemaPrefix = '/product-unordered-related-tables-links:';
+    const accommodationCell = { url: `${schemaPrefix}accommodation/RID=`, caption: 'Super 8 North Hollywood Motel' };
+    const leafCell = (leafTable: string, caption: string) => ({ url: `${schemaPrefix}${leafTable}/RID=`, caption });
+
     const params = {
       table_name: 'association_table_w_static_column',
       prefill_col: 'main_fk_col',
@@ -850,7 +860,10 @@ test.describe.serial('Related tables', () => {
       leaf_fk_name: 'leaf_fk_col',
       prefill_value: 'Super 8 North Hollywood Motel',
       column_names: ['static1', 'main_fk_col', 'leaf_fk_col'],
-      resultset_values: [['', '2004', '10'], ['', '2004', '7']],
+      resultset_values: [
+        ['', accommodationCell, leafCell('leaf_table_for_static_columns', 'Leaf 10')],
+        ['', accommodationCell, leafCell('leaf_table_for_static_columns', 'Leaf 7')]
+      ] as RecordsetRowValue[],
       related_table_values: [['2', 'Leaf 2'], ['', 'Leaf 10'], ['', 'Leaf 7']],
       bulk_modal_title: 'Select a set of leaf_fk_col for association_table_w_static_column',
       num_rows_in_bulk_modal: 10
@@ -959,6 +972,10 @@ test.describe.serial('Related tables', () => {
       params.table_name = 'association_table_w_static_column_dropdown';
       params.leaf_fk_name = 'U0KYeFQJ-lwuLEaGb2RNRg';
       params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_static_column_dropdown'
+      params.resultset_values = [
+        ['', accommodationCell, leafCell('leaf_table_for_static_columns_dropdown', 'Leaf 10')],
+        ['', accommodationCell, leafCell('leaf_table_for_static_columns_dropdown', 'Leaf 7')]
+      ];
 
       await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_DROPDOWN);
     });
@@ -969,7 +986,10 @@ test.describe.serial('Related tables', () => {
       params.bulk_modal_title = 'Select a set of leaf_fk_col for association_table_w_three_fks'
 
       params.column_names = ['static1', 'main_fk_col', 'leaf_fk_col', 'third_fk_col'];
-      params.resultset_values = [['', '2004', '10', ''], ['', '2004', '7', '']];
+      params.resultset_values = [
+        ['', accommodationCell, leafCell('leaf_table_for_three_fks', 'Leaf 10'), ''],
+        ['', accommodationCell, leafCell('leaf_table_for_three_fks', 'Leaf 7'), '']
+      ];
       params.related_table_values = [['2', 'Leaf 2', 'Other Leaf 2'], ['', 'Leaf 10', ''], ['', 'Leaf 7', '']];
       await testAddRelatedWithForeignKeyMultiPicker(page, params, RecordeditInputType.FK_POPUP);
     });

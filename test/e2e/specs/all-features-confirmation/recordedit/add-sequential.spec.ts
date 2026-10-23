@@ -90,19 +90,17 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
+        resultColumnNames: ['fileid', 'uri', 'timestamp_txt'],
         resultRowValues: [
           [
             '1',
             { caption: 'testfile1MB_add_seq.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/3a8c740953a168d9761d0ba2c9800475:` },
-            'testfile1MB_add_seq.txt',
-            '1.02 MB'
+            currentTimestampTimeStr
           ],
           [
             '2',
             { caption: 'testfile500kb_add_seq.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add_seq.png',
-            '512 kB'
+            currentTimestampTimeStr
           ]
         ]
       }
@@ -128,19 +126,17 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
+        resultColumnNames: ['fileid', 'uri', 'timestamp_txt'],
         resultRowValues: [
           [
             '1',
             { caption: 'testfile10MB_add_seq.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/b5dad28809685d9764dbd08fa23600bc:` },
-            'testfile10MB_add_seq.txt',
-            '10.2 MB'
+            currentTimestampTimeStr
           ],
           [
             '2',
             { caption: 'testfile500kb_add_seq.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add_seq.png',
-            '512 kB'
+            currentTimestampTimeStr
           ]
         ]
       }
@@ -166,19 +162,17 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
+        resultColumnNames: ['fileid', 'uri', 'timestamp_txt'],
         resultRowValues: [
           [
             '1',
             { caption: 'testfile1MB_add_seq.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/1/.txt/3a8c740953a168d9761d0ba2c9800475:` },
-            'testfile1MB_add_seq.txt',
-            '1.02 MB'
+            currentTimestampTimeStr
           ],
           [
             '2',
             { caption: 'testfile500kb_add_seq.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/2/.png/2ada69fe3cdadcefddc5a83144bddbb4:` },
-            'testfile500kb_add_seq.png',
-            '512 kB'
+            currentTimestampTimeStr
           ]
         ]
       }
@@ -220,10 +214,19 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file_w_fk_in_url_pattern',
-        resultColumnNames: ['id', 'Category', 'asset_col'],
+        resultColumnNames: ['id', 'Category', 'asset_col', 'timestamp_txt'],
+        // the RID link shows the row name comes from the selected row (raw values would show the id)
         resultRowValues: [
-          ['3', '10004', { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Ranch/3/` }],
-          ['4', '10006', { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Resort/4/` }]
+          [
+            '3', { url: '/product-add:category/RID=', caption: 'Ranch' },
+            { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Ranch/3/` },
+            currentTimestampTimeStr
+          ],
+          [
+            '4', { url: '/product-add:category/RID=', caption: 'Resort' },
+            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Resort/4/` },
+            currentTimestampTimeStr
+          ]
         ]
       }
     },
@@ -297,20 +300,22 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
-        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2'],
+        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2', 'timestamp_txt'],
         resultRowValues: [
           [
-            '2', '2',
+            '2', { url: '/product-add:file_w_wait_for_in_url_pattern_1_o1/RID=', caption: 'two' },
             { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-twenty-two/2/` },
-            { caption: 'testfile128kb_add_seq_6.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-twenty-two/2/` }
+            { caption: 'testfile128kb_add_seq_6.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-twenty-two/2/` },
+            currentTimestampTimeStr
           ],
           [
-            '3', '3',
+            '3', { url: '/product-add:file_w_wait_for_in_url_pattern_1_o1/RID=', caption: 'three' },
             { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-thirty-three/3/` },
-            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-thirty-three/3/` }
+            { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-thirty-three/3/` },
+            currentTimestampTimeStr
           ],
           [
-            '4', '', '', ''
+            '4', '', '', '', ''
           ]
         ]
       }
@@ -360,18 +365,21 @@ const testParams: TestCreateRecordsParams = {
       },
       submission: {
         tableDisplayname: 'file_w_wait_for_in_url_pattern_2',
-        resultColumnNames: ['id', 'Composite Foreign key', 'asset_col'],
+        resultColumnNames: ['id', 'Composite Foreign key', 'asset_col', 'timestamp_txt'],
+        // composite foreign key: the row name instead of the raw key values (e.g. 12:22)
         resultRowValues: [
           [
-            '1', '12:22',
+            '1', { url: '/product-add:file_w_wait_for_in_url_pattern_2_o1/RID=', caption: 'two' },
             { caption: 'testfile128kb_add_seq_4.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-3-o1_i1_twenty-two/1/` },
+            currentTimestampTimeStr
           ],
           [
-            '2', '13:23',
+            '2', { url: '/product-add:file_w_wait_for_in_url_pattern_2_o1/RID=', caption: 'three' },
             { caption: 'testfile500kb_add_seq_5.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-3-o1_i1_thirty-three/2/` },
+            currentTimestampTimeStr
           ],
           [
-            '3', '', '',
+            '3', '', '', ''
           ]
         ]
       }

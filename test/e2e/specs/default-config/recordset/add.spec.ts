@@ -172,10 +172,14 @@ test('bulk copy creates records from recordset', async ({ page, baseURL }, testI
     await testSubmission(newPage, {
       tableDisplayname: 'bulk_copy_table',
       resultColumnNames: ['id', 'title', 'Outbound 1'],
+      /**
+       * the foreign key refers to the name column, so the raw value and the row name are the same.
+       * the RID link shows that the copied rows were used (raw values would link by name).
+       */
       resultRowValues: [
-        ['101', 'Alpha edited', 'Type A'],
-        ['102', 'Beta', 'Type B'],
-        ['103', 'Gamma', 'Type C'],
+        ['101', 'Alpha edited', { url: '/product-recordset-add:bulk_copy_outbound1/RID=', caption: 'Type A' }],
+        ['102', 'Beta', { url: '/product-recordset-add:bulk_copy_outbound1/RID=', caption: 'Type B' }],
+        ['103', 'Gamma', { url: '/product-recordset-add:bulk_copy_outbound1/RID=', caption: 'Type C' }],
       ],
     });
   });

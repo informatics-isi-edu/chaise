@@ -526,6 +526,11 @@ export type TestSubmissionParams = {
    * we're not uploading in the CI, the caller should skip their values and not this function.
    */
   resultRowValues: RecordsetRowValue[];
+  /**
+   * the expected tooltips of the resultset column headers that have a comment (in the same order).
+   * only tested when there are multiple rows (the resultset is shown).
+   */
+  resultColumnComments?: string[];
 };
 
 /**
@@ -573,6 +578,23 @@ export const testSubmission = async (
     await expect.soft(RecordeditLocators.getPageInstructions(page)).toHaveCount(0);
 
     await testRecordsetTableRowValues(resultset, params.resultRowValues, true);
+
+    // each successful row links to its record page (the failed table doesn't have view buttons)
+    await expect.soft(RecordsetLocators.getViewActionButtons(resultset)).toHaveCount(params.resultRowValues.length);
+
+    if (params.resultColumnComments) {
+      const columnsWithTooltip = RecordsetLocators.getColumnsWithTooltipIcon(resultset);
+      await expect.soft(columnsWithTooltip).toHaveCount(params.resultColumnComments.length);
+
+      /**
+       * testTooltip needs an element without tooltip to hover over after each test (to remove the tooltip).
+       * its default element for recordedit is part of the form, so we're using the first value cell instead.
+       */
+      const hoverEl = RecordsetLocators.getColumnCells(resultset, 1).first();
+      for (const [index, comment] of params.resultColumnComments.entries()) {
+        await testTooltip(columnsWithTooltip.nth(index), comment, APP_NAMES.RECORDEDIT, true, hoverEl);
+      }
+    }
   }
 };
 

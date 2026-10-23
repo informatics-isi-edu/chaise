@@ -201,21 +201,37 @@ const testParams: {
       },
       submission: {
         tableDisplayname: 'Accommodations',
+        // no resultset list, so the result has the same columns as the entry/edit form
         resultColumnNames: [
-          'Name of Accommodation', 'Website', 'Category', 'User Rating', 'Summary', 'Description', 'Number of Rooms',
-          'Operational Since', 'date_col', 'Is Luxurious',
+          'Id', 'Name of Accommodation', 'Website', 'Category', 'User Rating', 'Summary', 'Description', 'Number of Rooms',
+          'Operational Since', 'date_col', 'Is Luxurious', 'json_col',
           'text_array', 'boolean_array', 'int4_array', 'float4_array', 'date_array', 'timestamp_array', 'timestamptz_array', 'color_rgb_hex_column'
         ],
+        /**
+         * same comments as the entry/edit form. for example category uses its entry comment (not the "*" one),
+         * and rating uses the comment defined on its column directive in the entry/edit list.
+         */
+        resultColumnComments: [
+          'A valid url of the accommodation',
+          '_markdown_ comment can be turned off',
+          'Average user rating from 1 to 5 stars',
+          'The exact time and date where this accommodation became available!'
+        ],
+        // the RID link shows the row name comes from the selected row (raw values would link by term)
         resultRowValues: [
           [
-            'Very simple Resort', { url: 'http://simple-resort.com', caption: 'Link to Website' }, { url: '/product-edit:category/', caption: 'Resort' },
+            '2001', 'Very simple Resort', { url: 'http://simple-resort.com', caption: 'Link to Website' },
+            { url: '/product-edit:category/RID=', caption: 'Resort' },
             '1.2000', 'A very simple resort', 'A resort!', '100', '2020-01-01 01:01:01', '2020-12-01', 'true',
+            JSON.stringify({ 'name': 'testing_json' }, undefined, 2),
             'val1', 'true', '1', '-0.5000', '2002-02-02, 2002-02-02', '2015-03-04 12:12:12',
             '2005-05-05 10:01:01, 2004-04-04 11:11:11', '#223456'
           ],
           [
-            'Super 8 North Hollywood Motel', { url: 'http://best-castle.com', caption: 'Link to Website' }, { url: '/product-edit:category/', caption: 'Castle' },
+            '2004', 'Super 8 North Hollywood Motel', { url: 'http://best-castle.com', caption: 'Link to Website' },
+            { url: '/product-edit:category/RID=', caption: 'Castle' },
             '3.4000', 'Best castle in the world!', 'Best castle in the world!', '35', '2015-05-05 05:05:05', '2018-12-01', 'false',
+            JSON.stringify({ 'age': 25, 'name': 'Testing' }, undefined, 2),
             'val2', 'false, false, true', '1, 2, 3', '5.0000', '', '', '2022-02-02 02:02:02, 2024-04-04 05:04:04', '#999999'
           ]
         ]
@@ -266,19 +282,18 @@ const testParams: {
       },
       submission: {
         tableDisplayname: 'file',
-        resultColumnNames: ['fileid', 'uri', 'filename', 'bytes'],
+        // same columns as the entry form
+        resultColumnNames: ['fileid', 'uri', 'timestamp_txt'],
         resultRowValues: [
           [
             '5',
             { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/5/.png/` },
-            'testfile500kb_edit.png',
-            '512 kB'
+            currentTimestampTimeStr
           ],
           [
             '6',
             { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/6/.txt/` },
-            'testfile1MB_edit.txt',
-            '1.02 MB'
+            currentTimestampTimeStr
           ]
         ]
       }
@@ -315,10 +330,19 @@ const testParams: {
       },
       submission: {
         tableDisplayname: 'file_w_fk_in_url_pattern',
-        resultColumnNames: ['id', 'Category', 'asset_col'],
+        resultColumnNames: ['id', 'Category', 'asset_col', 'timestamp_txt'],
+        // the first category is selected in the form, the second one comes from the row that was read
         resultRowValues: [
-          [ '1', '10003', { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Hotel/1/` } ],
-          [ '2', '10005', { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Motel/2/` } ]
+          [
+            '1', { url: '/product-edit:category/RID=', caption: 'Hotel' },
+            { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Hotel/1/` },
+            currentTimestampTimeStr
+          ],
+          [
+            '2', { url: '/product-edit:category/RID=', caption: 'Motel' },
+            { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/Motel/2/` },
+            currentTimestampTimeStr
+          ]
         ]
       }
     },
@@ -361,17 +385,20 @@ const testParams: {
       },
       submission: {
         tableDisplayname: 'file_w_wait_for_in_url_pattern_1',
-        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2'],
+        resultColumnNames: ['id', 'fk_col', 'asset_col', 'asset_col_2', 'timestamp_txt'],
+        // the first fk is selected in the form, the second one comes from the row that was read
         resultRowValues: [
           [
-            '111', '1',
+            '111', { url: '/product-edit:file_w_wait_for_in_url_pattern_1_o1/RID=', caption: 'one' },
             { caption: 'testfile500kb_edit.png', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-eleven/111/` },
-            { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-eleven/111/` }
+            { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-2-eleven/111/` },
+            currentTimestampTimeStr
           ],
           [
-            '222', '3',
+            '222', { url: '/product-edit:file_w_wait_for_in_url_pattern_1_o1/RID=', caption: 'three' },
             { caption: 'testfile1MB_edit.txt', url: `/hatrac/js/chaise/${currentTimestampTimeStr}/asset-1-thirty-three/222/` },
-            ''
+            '',
+            currentTimestampTimeStr
           ]
         ]
       }
