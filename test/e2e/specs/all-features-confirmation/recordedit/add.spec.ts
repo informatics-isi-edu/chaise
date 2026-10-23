@@ -84,6 +84,18 @@ const parallelTestParams: TestCreateRecordsParams = {
           'no_of_rooms', 'opened_on', 'date_col', 'luxurious',
           'text_array', 'boolean_array', 'int4_array', 'float4_array', 'date_array', 'timestamp_array', 'timestamptz_array', 'color_rgb_hex_column'
         ],
+        /**
+         * the comments are based on the resultset context:
+         * - rating uses the comment defined on the column directive of the resultset list.
+         * - luxurious uses a comment that is only defined for the resultset context (not shown in the form).
+         */
+        resultColumnComments: [
+          'A valid url of the accommodation',
+          'Type of accommodation (Resort, Hotel, or Motel)',
+          'rating comment defined in the resultset column directive',
+          'This shows the number of rooms!',
+          'luxurious comment defined only for the resultset context'
+        ],
         // the RID link shows the row name comes from the selected row (raw values would link by term)
         resultRowValues: [
           [

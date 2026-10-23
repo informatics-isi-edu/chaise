@@ -207,6 +207,16 @@ const testParams: {
           'Operational Since', 'date_col', 'Is Luxurious', 'json_col',
           'text_array', 'boolean_array', 'int4_array', 'float4_array', 'date_array', 'timestamp_array', 'timestamptz_array', 'color_rgb_hex_column'
         ],
+        /**
+         * same comments as the entry/edit form. for example category uses its entry comment (not the "*" one),
+         * and rating uses the comment defined on its column directive in the entry/edit list.
+         */
+        resultColumnComments: [
+          'A valid url of the accommodation',
+          '_markdown_ comment can be turned off',
+          'Average user rating from 1 to 5 stars',
+          'The exact time and date where this accommodation became available!'
+        ],
         // the RID link shows the row name comes from the selected row (raw values would link by term)
         resultRowValues: [
           [

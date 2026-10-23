@@ -526,19 +526,13 @@ const RecordsetTable = ({
     return <span className={'fas fa-long-arrow-alt-' + upOrDown}></span>;
   };
 
-  /**
-   * the columns of the resultset are usually the ones from the form,
-   * and their comments are written for the form, so we're not showing them.
-   */
-  const hideColumnComments = config.displayMode === RecordsetDisplayMode.RESULTSET;
-
   // handles tooltip class and spacing
   const renderDisplayValue = (column: any, hasTooltip: boolean) => {
     const headerClassName = `table-column-displayname${hasTooltip ? ' chaise-icon-for-tooltip' : ''}`;
     return (
       <span className={headerClassName} >
         <DisplayValue value={column.displayname} />
-        {column.comment && !hideColumnComments ? ' ' : ''}
+        {column.comment ? ' ' : ''}
       </span>
     )
   }
@@ -546,7 +540,7 @@ const RecordsetTable = ({
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
       const canSort = config.sortable && col.column.sortable && !col.hasError && !col.isLoading;
-      const hasTooltip = !hideColumnComments && !!col.column.comment && !!col.column.comment.value;
+      const hasTooltip = !!col.column.comment && !!col.column.comment.value;
 
       return (
         <th

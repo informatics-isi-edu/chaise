@@ -271,7 +271,8 @@
           },
           "annotations": {
             "tag:misd.isi.edu,2015:display": {
-              "name": "Is Luxurious"
+              "name": "Is Luxurious",
+              "comment": { "resultset": "luxurious comment defined only for the resultset context" }
             },
             "tag:isrd.isi.edu,2016:ignore": ["record"]
           }
@@ -445,7 +446,7 @@
             "title",
             "website",
             ["product-add", "fk_category"],
-            "rating",
+            { "source": "rating", "comment": "rating comment defined in the resultset column directive" },
             "summary",
             "description",
             "no_of_rooms",
