@@ -126,13 +126,26 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('chaise/package-lock.json') }}
       - name: Install chaise dev deps and Playwright
+        timeout-minutes: 30
         run: |
           cd chaise
-          NODE_ENV=development npm clean-install --include=dev
+          # The apt/download-heavy steps intermittently stall on the dpkg lock or a
+          # slow mirror. Bound each attempt with `timeout` so a hang fails fast, and
+          # retry the two playwright commands. npm ci is only timed out, not retried:
+          # a lockfile mismatch there is deterministic and should surface immediately.
+          retry() {
+            local n=1 max=3
+            until "$@"; do
+              if [ "$n" -ge "$max" ]; then return 1; fi
+              echo "attempt $n failed; retrying in 15s" >&2
+              n=$((n + 1)); sleep 15
+            done
+          }
+          timeout -k 30 300 env NODE_ENV=development npm clean-install --include=dev
           if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
-            npx playwright install-deps
+            retry timeout -k 30 300 npx playwright install-deps
           else
-            npx playwright install --with-deps --no-shell
+            retry timeout -k 30 420 npx playwright install --with-deps --no-shell
           fi
           make lint
       - name: Add tests users
