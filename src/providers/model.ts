@@ -56,6 +56,12 @@ interface ModelStore {
   // "populate the full set at load" initialization as visibleSchemas.
   visibleTableIds: Set<string>;
   setVisibleTableIds: (tableIds: Set<string>) => void;
+
+  /**
+   * `schema:table` key of the table the diagram is scoped to, or null for the whole catalog
+   */
+  focusTableId: string | null;
+  setFocusTableId: (focusTableId: string | null) => void;
 }
 
 /**
@@ -78,4 +84,7 @@ export const useModelStore = create<ModelStore>((set) => ({
 
   visibleTableIds: new Set(),
   setVisibleTableIds: (tableIds) => set({ visibleTableIds: tableIds }),
+
+  focusTableId: null,
+  setFocusTableId: (focusTableId) => set({ focusTableId }),
 }));

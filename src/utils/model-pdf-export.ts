@@ -182,7 +182,8 @@ export function nodesToSvg(
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" font-family="sans-serif">
       <defs>
-        <marker id="model-export-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <marker id="model-export-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="${EDGE_COLOR}" />
         </marker>
         ${shapes.map((shape) => erdMarkerToSvg(shape)).join('')}

@@ -87,8 +87,8 @@ export default class ModelAppLocators {
     return ModelAppLocators.getEdge(page, constraintId).locator('.react-flow__edge-path');
   }
 
-  static getFocusedNodes(page: Page): Locator {
-    return page.locator('.react-flow__node.model-node-focused');
+  static getHighlightedNodes(page: Page): Locator {
+    return page.locator('.react-flow__node.model-node-highlighted');
   }
 
   static getDimmedNodes(page: Page): Locator {

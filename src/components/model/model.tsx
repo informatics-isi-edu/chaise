@@ -4,7 +4,6 @@ import '@xyflow/react/dist/style.css';
 import {
   Background,
   Controls,
-  MarkerType,
   MiniMap,
   Panel,
   ReactFlow,
@@ -58,7 +57,10 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utilities
 import {
   elkToFlow,
+  getFocusTableIds,
   graphToElk,
+  resolveFocusFromURL,
+  SIMPLIFIED_ARROW_MARKER,
   type ModelEdgeModel,
   type ModelTableNodeModel,
 } from '@isrd-isi-edu/chaise/src/utils/model-utils';
@@ -107,6 +109,18 @@ const BASE_LAYOUT_LABELS: Record<ModelBaseLayoutAlgorithm, string> = {
   [ModelBaseLayoutAlgorithm.RECTPACKING]: 'Rectangle Packing',
 };
 
+/**
+ * a copy of `set` with `ids` added (checked) or removed
+ */
+function withMany(set: Set<string>, ids: string[], checked: boolean): Set<string> {
+  const next = new Set(set);
+  ids.forEach((id) => {
+    if (checked) next.add(id);
+    else next.delete(id);
+  });
+  return next;
+}
+
 const ModelInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
   const { addAlert, removeAllAlerts } = useAlert();
@@ -127,6 +141,9 @@ const ModelInner = (): JSX.Element => {
   const visibleTableIds = useModelStore((state) => state.visibleTableIds);
   const setVisibleTableIds = useModelStore((state) => state.setVisibleTableIds);
 
+  const focusTableId = useModelStore((state) => state.focusTableId);
+  const setFocusTableId = useModelStore((state) => state.setFocusTableId);
+
   //-------------------  state:   --------------------//
 
   /**
@@ -139,16 +156,20 @@ const ModelInner = (): JSX.Element => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
-  const [focusedTableId, setFocusedTableId] = useState<string | null>(null);
+  // click-to-highlight; unrelated to focusTableId, which scopes the whole diagram
+  const [highlightedTableId, setHighlightedTableId] = useState<string | null>(null);
   const [toolbarOpen, setToolbarOpen] = useState(true);
 
   const [catalogId, setCatalogId] = useState<string | null>(null);
   const [allSchemas, setAllSchemas] = useState<string[]>([]);
 
-  // same pattern as allSchemas: set once at load, static afterward. keeps
-  // the schema field around so the table checklist can be scoped to
-  // currently visible schemas, unlike allSchemas this isn't rendered as-is.
+  // same pattern as allSchemas: set by applyFocus. keeps the schema field
+  // around so the table checklist can be scoped to currently visible schemas,
+  // unlike allSchemas this isn't rendered as-is.
   const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
+
+  // kept here rather than in the checklist, which unmounts when the toolbar collapses
+  const [tableFilterText, setTableFilterText] = useState('');
 
   //-------------------  refs:   --------------------//
 
@@ -158,37 +179,50 @@ const ModelInner = (): JSX.Element => {
   // guard against strict mode calling the effect twice in dev mode
   const setupStarted = useRef<boolean>(false);
 
+  /*
+   * every layout takes the next number and only the latest may commit. elk's
+   * queue keeps its own results in order, but the empty-diagram path in
+   * relayout skips it, so an older queued layout could land after it.
+   */
+  const layoutRequestRef = useRef<number>(0);
+
   //-------------------  derived values:   --------------------//
 
+  // a highlighted table that has since been hidden must not dim everything that's left
+  const activeHighlightId = useMemo(
+    () => (highlightedTableId && nodes.some((node) => node.id === highlightedTableId) ? highlightedTableId : null),
+    [nodes, highlightedTableId]
+  );
+
   const connectedTableIds = useMemo(() => {
-    if (!focusedTableId) return null;
+    if (!activeHighlightId) return null;
     const ids = new Set<string>();
     edges.forEach((edge) => {
-      if (edge.source === focusedTableId) ids.add(edge.target);
-      if (edge.target === focusedTableId) ids.add(edge.source);
+      if (edge.source === activeHighlightId) ids.add(edge.target);
+      if (edge.target === activeHighlightId) ids.add(edge.source);
     });
     return ids;
-  }, [edges, focusedTableId]);
+  }, [edges, activeHighlightId]);
 
   // nodes/edges as actually rendered: same objects, with a className
-  // stamped on based on the current focus. react-flow applies Node/Edge
+  // stamped on based on the current highlight. react-flow applies Node/Edge
   // className to their wrapper elements itself, so table-node.tsx and
   // floating-edge.tsx need no changes for this.
   const displayNodes = useMemo(() => {
-    if (!focusedTableId) return nodes;
+    if (!activeHighlightId) return nodes;
     return nodes.map((node) => ({
       ...node,
       className:
-        node.id === focusedTableId
-          ? 'model-node-focused'
+        node.id === activeHighlightId
+          ? 'model-node-highlighted'
           : connectedTableIds?.has(node.id)
             ? ''
             : 'model-node-dimmed',
     }));
-  }, [nodes, focusedTableId, connectedTableIds]);
+  }, [nodes, activeHighlightId, connectedTableIds]);
 
   const displayEdges = useMemo(() => {
-    if (!focusedTableId) return edges;
+    if (!activeHighlightId) return edges;
     /*
      * marker fill doesn't follow the path's CSS stroke color, so read the same color-map
      * value the highlighted stroke uses (see $model-js-colors in _model.scss)
@@ -199,7 +233,7 @@ const ModelInner = (): JSX.Element => {
       '#4674a7'
     );
     return edges.map((edge) => {
-      const connected = edge.source === focusedTableId || edge.target === focusedTableId;
+      const connected = edge.source === activeHighlightId || edge.target === activeHighlightId;
       return {
         ...edge,
         className: connected ? 'model-edge-highlighted' : 'model-edge-dimmed',
@@ -209,34 +243,77 @@ const ModelInner = (): JSX.Element => {
          * applies to the simplified mode
          */
         markerEnd: connected && displayMode === ModelDisplayMode.SIMPLIFIED
-          ? { type: MarkerType.ArrowClosed, color: highlightColor }
+          ? { ...SIMPLIFIED_ARROW_MARKER, color: highlightColor }
           : edge.markerEnd,
         data: edge.data && { ...edge.data, highlighted: connected },
       };
     });
-  }, [edges, focusedTableId, displayMode]);
+  }, [edges, activeHighlightId, displayMode]);
 
   // tables whose schema is currently hidden are dropped from the list they'd
   // show a checkbox for; that state is already fully explained by the schema
   // checklist, showing them here too would just be a second, confusing
   // control for the same thing.
-  const visibleSchemaTableItems = useMemo(
+  // the focus table and its schema can't be unchecked, so focus mode never loses its focus
+  const tableItems = useMemo(
     () =>
       allTables
         .filter((table) => visibleSchemas.has(table.schema))
-        .map((table) => ({ id: table.id, label: table.id }))
+        .map((table) => ({
+          id: table.id,
+          label: table.id,
+          disabledReason: table.id === focusTableId ? 'The focus table is always shown.' : undefined,
+        }))
         // id is "schema:name", so this also groups by schema before alphabetizing within it
         .sort((a, b) => a.id.localeCompare(b.id)),
-    [allTables, visibleSchemas]
+    [allTables, visibleSchemas, focusTableId]
   );
+
+  const schemaItems = useMemo(() => {
+    const focusSchema = allTables.find((table) => table.id === focusTableId)?.schema;
+    return allSchemas.map((schema) => ({
+      id: schema,
+      label: schema,
+      disabledReason:
+        schema === focusSchema ? 'This schema contains the focus table, so it is always shown.' : undefined,
+    }));
+  }, [allSchemas, allTables, focusTableId]);
 
   //-------------------  callbacks:   --------------------//
 
   const handleNodeClick: NodeMouseHandler<ModelTableNodeModel> = useCallback((_event, node) => {
-    setFocusedTableId((current) => (current === node.id ? null : node.id));
+    setHighlightedTableId((current) => (current === node.id ? null : node.id));
   }, []);
 
-  const handlePaneClick = useCallback(() => setFocusedTableId(null), []);
+  const handlePaneClick = useCallback(() => setHighlightedTableId(null), []);
+
+  /**
+   * scope the diagram to a table's neighborhood (see getFocusTableIds), or to
+   * the whole catalog when nextFocusTableId is null. resets both lists, what's
+   * checked in them, and the click highlight, which may point outside the new
+   * set. setup lays out the first focus itself; later changes go through the
+   * relayout effect.
+   */
+  const applyFocus = useCallback(
+    (graph: ModelGraph, nextFocusTableId: string | null) => {
+      const tableIds = nextFocusTableId
+        ? getFocusTableIds(graph, nextFocusTableId)
+        : new Set(Object.keys(graph.tables));
+      const tables = Array.from(tableIds, (id) => ({ id, schema: graph.tables[id].schema }));
+      const sortedSchemas = Array.from(new Set(tables.map((table) => table.schema))).sort();
+
+      setAllSchemas(sortedSchemas);
+      setAllTables(tables);
+      setFocusTableId(nextFocusTableId);
+      // in catalog mode only the first schema starts checked: large catalogs
+      // would otherwise pay a slow first layout over everything before the user trims it
+      setVisibleSchemas(new Set(nextFocusTableId ? sortedSchemas : sortedSchemas.slice(0, 1)));
+      setVisibleTableIds(tableIds);
+      setHighlightedTableId(null);
+      updateHeadTitle(`Data Model #${graph.catalogId}${nextFocusTableId ? `: ${nextFocusTableId}` : ''}`);
+    },
+    [setFocusTableId, setVisibleSchemas, setVisibleTableIds]
+  );
 
   const relayout = useCallback(
     async (
@@ -247,19 +324,30 @@ const ModelInner = (): JSX.Element => {
       schemas: Set<string>,
       tableIds: Set<string>,
     ) => {
+      const requestId = ++layoutRequestRef.current;
+      const isCurrent = () => requestId === layoutRequestRef.current;
       setIsRelayouting(true);
       // any alert from a previous attempt no longer applies to this one
       removeAllAlerts();
       try {
-        const elk = await elkPromise;
-        const laidOut = await elk.layout(graphToElk(graph, displayMode, level, algorithm, schemas, tableIds));
-        const flow = elkToFlow(graph, laidOut);
-        setNodes(flow.nodes);
-        setEdges(flow.edges);
-        // wait for react-flow to pick up the new nodes before framing them
-        window.requestAnimationFrame(() => fitView());
+        const elkGraph = graphToElk(graph, displayMode, level, algorithm, schemas, tableIds);
+        if (!elkGraph.children?.length) {
+          // nothing to place, and radial throws on an empty graph
+          setNodes([]);
+          setEdges([]);
+        } else {
+          const elk = await elkPromise;
+          const laidOut = await elk.layout(elkGraph);
+          if (!isCurrent()) return;
+          const flow = elkToFlow(graph, laidOut);
+          setNodes(flow.nodes);
+          setEdges(flow.edges);
+          // wait for react-flow to pick up the new nodes before framing them
+          window.requestAnimationFrame(() => fitView());
+        }
       } catch (error) {
         $log.error('elk layout failed', error);
+        if (!isCurrent()) return;
         addAlert(
           `Could not lay out the diagram with the "${BASE_LAYOUT_LABELS[algorithm]}" algorithm. ` +
             'Try a different layout algorithm from the Layout dropdown.',
@@ -280,6 +368,8 @@ const ModelInner = (): JSX.Element => {
    */
   const handleRemoveOverlaps = useCallback(() => {
     if (!graphRef.current) return;
+    const requestId = ++layoutRequestRef.current;
+    const isCurrent = () => requestId === layoutRequestRef.current;
     setIsRelayouting(true);
     elkPromise
       .then((elk) =>
@@ -308,19 +398,23 @@ const ModelInner = (): JSX.Element => {
         })
       )
       .then((laidOut) => {
+        if (!isCurrent()) return;
         const flow = elkToFlow(graphRef.current as ModelGraph, laidOut);
         setNodes(flow.nodes);
         setEdges(flow.edges);
         window.requestAnimationFrame(() => fitView());
       })
       .catch(() => {
+        if (!isCurrent()) return;
         addAlert(
           'Could not automatically resolve overlapping tables. Try a different layout algorithm, ' +
             'or drag tables apart manually.',
           ChaiseAlertType.WARNING
         );
       })
-      .finally(() => setIsRelayouting(false));
+      .finally(() => {
+        if (isCurrent()) setIsRelayouting(false);
+      });
   }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
@@ -353,6 +447,11 @@ const ModelInner = (): JSX.Element => {
       }
       setVisibleTableIds(next);
     },
+    [visibleTableIds, setVisibleTableIds]
+  );
+
+  const handleSetManyTables = useCallback(
+    (tableIds: string[], checked: boolean) => setVisibleTableIds(withMany(visibleTableIds, tableIds, checked)),
     [visibleTableIds, setVisibleTableIds]
   );
 
@@ -391,29 +490,15 @@ const ModelInner = (): JSX.Element => {
     catalog.server.catalogs
       .get(catalog.id)
       .then((cat: typeof catalog) => {
-        graphRef.current = catalogToGraph(cat);
-        setCatalogId(graphRef.current.catalogId);
-        updateHeadTitle(`Data Model #${graphRef.current.catalogId}`);
-
-        const schemas = new Set(
-          Object.values(graphRef.current.tables).map((table) => table.schema)
-        );
-        const sortedSchemas = Array.from(schemas).sort();
-        // only the first schema starts checked: large catalogs would otherwise
-        // pay a slow first layout over everything before the user trims it
-        setVisibleSchemas(new Set(sortedSchemas.slice(0, 1)));
-        setAllSchemas(sortedSchemas);
-
-        const tables = Object.values(graphRef.current.tables).map((table) => ({
-          id: `${table.schema}:${table.name}`,
-          schema: table.schema,
-        }));
-        setAllTables(tables);
-        setVisibleTableIds(new Set(tables.map((table) => table.id)));
+        const graph = catalogToGraph(cat);
+        graphRef.current = graph;
+        setCatalogId(graph.catalogId);
+        // throws for a url table that can't be focused, landing in the catch below
+        applyFocus(graph, resolveFocusFromURL(cat, graph));
 
         const initial = useModelStore.getState();
         return relayout(
-          graphRef.current,
+          graph,
           initial.displayMode,
           initial.detail,
           initial.baseLayout,
@@ -496,7 +581,7 @@ const ModelInner = (): JSX.Element => {
                     <Background />
                     <Controls showInteractive={false} orientation='horizontal' />
                     <Panel position='top-center' className='model-title'>
-                      <h3>Catalog {catalogId} Data Model</h3>
+                      <h3>Catalog {catalogId} Data Model{focusTableId && <>: <code>{focusTableId}</code></>}</h3>
                     </Panel>
                     {!toolbarOpen ? (
                       <Panel position='top-left' className='model-toolbar-collapsed'>
@@ -626,18 +711,25 @@ const ModelInner = (): JSX.Element => {
                         </div>
                         <ModelChecklist
                           title='Schemas'
+                          itemName='schema'
+                          itemsName='schemas'
                           className='model-schemas-checklist'
-                          items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
+                          items={schemaItems}
                           checkedIds={visibleSchemas}
                           onToggle={handleToggleSchema}
                           emptyMessage='No schemas found.'
                         />
                         <ModelChecklist
                           title='Tables'
+                          itemName='table'
+                          itemsName='tables'
                           className='model-tables-checklist'
-                          items={visibleSchemaTableItems}
+                          items={tableItems}
                           checkedIds={visibleTableIds}
                           onToggle={handleToggleTable}
+                          onSetMany={handleSetManyTables}
+                          filterText={tableFilterText}
+                          onFilterTextChange={setTableFilterText}
                           emptyMessage='No tables to show. Select a schema above.'
                         />
                       </Panel>

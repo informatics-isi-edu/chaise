@@ -12,12 +12,13 @@ import { visibleColumns, type ModelTableNodeModel } from '@isrd-isi-edu/chaise/s
  * column. the detail level comes straight from the store, so toggling levels
  * re-renders the rows without the node objects changing.
  */
-const ModelTableNode = ({ data }: NodeProps<ModelTableNodeModel>): JSX.Element => {
+const ModelTableNode = ({ id, data }: NodeProps<ModelTableNodeModel>): JSX.Element => {
   const detail = useModelStore((state) => state.detail);
+  const isFocusTable = useModelStore((state) => state.focusTableId === id);
   const columns = visibleColumns(data.table, detail);
 
   return (
-    <div className='model-table-node'>
+    <div className={`model-table-node${isFocusTable ? ' model-table-node-focus' : ''}`}>
       {/* custom nodes have no built-in handles; without these, edges won't render */}
       <Handle type='target' position={Position.Left} />
       <Handle type='source' position={Position.Right} />

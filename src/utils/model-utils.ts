@@ -1,5 +1,6 @@
 import { getStraightPath, MarkerType, type Edge, type Node } from '@xyflow/react';
 import type { ElkNode } from 'elkjs/lib/elk.bundled.js';
+import type { Catalog } from '@isrd-isi-edu/ermrestjs/src/models/catalog';
 
 // models
 import {
@@ -8,10 +9,19 @@ import {
   ModelEdge,
   ModelGraph,
   ModelTable,
+  tableKey,
 } from '@isrd-isi-edu/chaise/src/models/model-app';
 
 // providers
 import { ModelDetailLevel, ModelBaseLayoutAlgorithm, ModelDisplayMode } from '@isrd-isi-edu/chaise/src/providers/model';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+
+// utilities
+import { escapeHTML } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { chaiseURItoErmrestURI, getURLHashFragment } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 //-------------------  types  --------------------//
 
@@ -43,7 +53,7 @@ export interface ModelEdgeData extends Record<string, unknown> {
   isOptional: boolean;
   isOneToOne: boolean;
   /**
-   * stamped on by displayEdges when the edge touches the focused table, so the
+   * stamped on by displayEdges when the edge touches the highlighted table, so the
    * floating edge can pick the highlighted marker variants
    */
   highlighted?: boolean;
@@ -134,6 +144,18 @@ export const ERD_MARKERS = {
 } as const;
 
 export type ERDMarkerShape = keyof typeof ERD_MARKERS.SHAPES;
+
+/**
+ * the simplified mode's arrowhead. react-flow's arrow only fills part of its
+ * 20-unit box, so 30 draws it about 12px tall, matching the ERD symbols, and
+ * userSpaceOnUse keeps it that size on thicker highlighted edges, like them.
+ */
+export const SIMPLIFIED_ARROW_MARKER = {
+  type: MarkerType.ArrowClosed,
+  width: 30,
+  height: 30,
+  markerUnits: 'userSpaceOnUse',
+} as const;
 
 /**
  * dom id of one marker def
@@ -303,12 +325,13 @@ export function computeEdgePath(
  * options that only mean something to the 'layered' algorithm ('elk.layered.*'
  * keys, and direction). elk silently ignores options an algorithm doesn't
  * recognize rather than erroring, so leaving them in for e.g. 'force' would
- * be dead config, not a bug that shows up.
+ * be dead config, not a bug that shows up. top-down puts tables holding an fk
+ * above the tables they reference.
  */
 function layeredOnlyOptions(layout: ModelBaseLayoutAlgorithm): Record<string, string> {
   if (layout !== ModelBaseLayoutAlgorithm.LAYERED) return {};
   return {
-    'elk.direction': 'RIGHT',
+    'elk.direction': 'DOWN',
     'elk.layered.spacing.nodeNodeBetweenLayers': '60',
   };
 }
@@ -394,7 +417,7 @@ function buildFlowEdges(edges: ModelEdge[]): ModelEdgeModel[] {
         source: edge.fromTable,
         target: edge.toTable,
         type: 'modelFloating',
-        markerEnd: { type: MarkerType.ArrowClosed },
+        markerEnd: SIMPLIFIED_ARROW_MARKER,
         data: {
           offset: isSelfLoop ? 0 : edge.fromTable < edge.toTable ? raw : -raw,
           isSelfLoop,
@@ -438,4 +461,81 @@ export function elkToFlow(
   );
 
   return { nodes, edges };
+}
+
+//-------------------  focus mode  --------------------//
+
+/**
+ * how many hops from the focus table getFocusTableIds reaches
+ */
+const FOCUS_DEFAULT_DEPTH = 1;
+
+/**
+ * whether the hash names more than a catalog. mirrors chaiseURItoErmrestURI's
+ * own check, which falls back to chaise-config's defaultTable for a
+ * catalog-only hash, while here that has to mean catalog mode.
+ */
+function hashHasTablePath(hash: string): boolean {
+  const path = hash.split('?')[0];
+  const slashIndex = path.indexOf('/');
+  return slashIndex !== -1 && path.length - slashIndex > 1;
+}
+
+/**
+ * the focus table named in the url (`#catalog/schema:table`, or `#catalog/table`
+ * when unique), or null when the url only names a catalog. resolved the same
+ * way recordset resolves its table, so filters, facets, joins and modifiers in
+ * the url are understood too.
+ * @throws ermrestjs errors for an unknown or ambiguous table, and a
+ * NotFoundError for a table that exists but isn't part of the diagram
+ */
+export function resolveFocusFromURL(catalog: Catalog, graph: ModelGraph): string | null {
+  if (!hashHasTablePath(getURLHashFragment(windowRef.location).hash)) return null;
+
+  const { ermrestUri } = chaiseURItoErmrestURI(windowRef.location);
+  // no catalog object: parse rejects one whose id doesn't match the url's snapshot exactly
+  const location: { tableName: string; schemaName: string } = ConfigService.ERMrest.parse(ermrestUri);
+  const table = catalog.schemas.findTable(location.tableName, location.schemaName);
+  const id = tableKey(table.schema.name, table.name);
+
+  if (!graph.tables[id]) {
+    throw new ConfigService.ERMrest.NotFoundError(
+      '',
+      // the error modal renders messages as html
+      `Table ${escapeHTML(id)} is not part of the data model diagram. ` +
+        'Views, ignored tables, and tables in system schemas are not drawn.'
+    );
+  }
+
+  return id;
+}
+
+/**
+ * the tables shown when focusing on rootId: tables it has an fk to, tables
+ * with an fk to it, and for an inbound pure binary association the table on
+ * its other side, without spending a hop on the association. repeated up to
+ * `depth` hops. bfs, so each table is reached at its shortest distance.
+ */
+export function getFocusTableIds(graph: ModelGraph, rootId: string, depth = FOCUS_DEFAULT_DEPTH): Set<string> {
+  const hops = new Map<string, number>([[rootId, 0]]);
+  const queue = [rootId];
+  const visit = (id: string, hop: number) => {
+    if (hops.has(id) || !graph.tables[id]) return;
+    hops.set(id, hop);
+    queue.push(id);
+  };
+
+  while (queue.length > 0) {
+    const id = queue.shift() as string;
+    const hop = hops.get(id) as number;
+    if (hop >= depth) continue;
+    graph.edges.forEach((edge) => {
+      if (edge.fromTable === id) visit(edge.toTable, hop + 1);
+      if (edge.toTable !== id) return;
+      visit(edge.fromTable, hop + 1);
+      graph.tables[edge.fromTable].associationTargets?.forEach((target) => visit(target, hop + 1));
+    });
+  }
+
+  return new Set(hops.keys());
 }
