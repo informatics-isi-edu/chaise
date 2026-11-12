@@ -7,6 +7,7 @@ import {
   edgeKey,
   ModelColumn,
   ModelEdge,
+  ModelFocusRelation,
   ModelGraph,
   ModelTable,
   tableKey,
@@ -20,7 +21,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { escapeHTML } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { chaiseURItoErmrestURI, getURLHashFragment } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { chaiseURItoErmrestURI, fixedEncodeURIComponent, getURLHashFragment } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 //-------------------  types  --------------------//
@@ -511,6 +512,35 @@ export function resolveFocusFromURL(catalog: Catalog, graph: ModelGraph): string
 }
 
 /**
+ * hash query params that only describe how this page was reached (for logging),
+ * so they don't belong on the urls the app pushes while switching focus
+ */
+const LOGGING_QUERY_PARAMS = ['pcid', 'ppid', 'paction'];
+
+/**
+ * the model app url for a focus table, or for the whole catalog when table is null.
+ * the current hash's query params carry over: chaise reads hideNavbar and config
+ * from there. location.search is dropped, since with the `?` instead of `#` form
+ * it holds the old table.
+ */
+export function getModelAppURL(table: ModelTable | null): string {
+  const { hash } = getURLHashFragment(windowRef.location);
+  const queryIndex = hash.indexOf('?');
+  const params = queryIndex === -1
+    ? []
+    : hash
+      .substring(queryIndex + 1)
+      .split('&')
+      .filter((param) => param && !LOGGING_QUERY_PARAMS.includes(param.split('=')[0]));
+
+  let path = ConfigService.catalogID;
+  if (table) path += `/${fixedEncodeURIComponent(table.schema)}:${fixedEncodeURIComponent(table.name)}`;
+  if (params.length > 0) path += `?${params.join('&')}`;
+
+  return `${windowRef.location.origin}${windowRef.location.pathname}#${path}`;
+}
+
+/**
  * the tables shown when focusing on rootId: tables it has an fk to, tables
  * with an fk to it, and for an inbound pure binary association the table on
  * its other side, without spending a hop on the association. repeated up to
@@ -538,4 +568,51 @@ export function getFocusTableIds(graph: ModelGraph, rootId: string, depth = FOCU
   }
 
   return new Set(hops.keys());
+}
+
+/**
+ * user-facing wording per relation: the legend's label and its tooltip, and the
+ * phrase in a header's tooltip ("<table> references <focus table>")
+ */
+export const FOCUS_RELATION_TEXT: Record<ModelFocusRelation, { legend: string; legendTooltip: string; tooltip: string }> = {
+  inbound: {
+    legend: 'Referencing',
+    legendTooltip: 'Tables with a foreign key to the focused table, or linked to it through an association.',
+    tooltip: 'references',
+  },
+  outbound: {
+    legend: 'Referenced by',
+    legendTooltip: 'Tables the focused table has a foreign key to.',
+    tooltip: 'is referenced by',
+  },
+  both: {
+    legend: 'Both',
+    legendTooltip: 'Tables that reference the focused table and are also referenced by it.',
+    tooltip: 'references and is referenced by',
+  },
+};
+
+/**
+ * how each direct neighbor relates to the focus table. a separate pass from
+ * getFocusTableIds, whose search keeps only the first path to a table and so
+ * could never see one related both ways.
+ */
+export function getFocusRelations(graph: ModelGraph, focusTableId: string): Map<string, ModelFocusRelation> {
+  const relations = new Map<string, ModelFocusRelation>();
+  const mark = (id: string, relation: 'inbound' | 'outbound') => {
+    // self references and self associations point back at the focus table itself
+    if (id === focusTableId || !graph.tables[id]) return;
+    const current = relations.get(id);
+    relations.set(id, current && current !== relation ? 'both' : relation);
+  };
+
+  graph.edges.forEach((edge) => {
+    if (edge.fromTable === focusTableId) mark(edge.toTable, 'outbound');
+    if (edge.toTable !== focusTableId) return;
+    mark(edge.fromTable, 'inbound');
+    // like the record page, an association and the table on its other side both count as inbound
+    graph.tables[edge.fromTable].associationTargets?.forEach((target) => mark(target, 'inbound'));
+  });
+
+  return relations;
 }

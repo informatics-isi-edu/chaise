@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use 'helpers';
 @use 'variables';
 @use 'scrollbar';
 
@@ -8,6 +9,18 @@
 // values that can drift from _color-map.scss.
 $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model-node-header-background',
   'model-node-row-border', 'model-fk-badge';
+
+// how a neighbor relates to the focus table; a table related both ways gets a gradient of the two
+$model-relation-backgrounds: (
+  'inbound': map.get(variables.$color-map, 'model-node-header-inbound'),
+  'outbound': map.get(variables.$color-map, 'model-node-header-outbound'),
+  'both':
+    linear-gradient(
+      to right,
+      map.get(variables.$color-map, 'model-node-header-inbound'),
+      map.get(variables.$color-map, 'model-node-header-outbound')
+    ),
+);
 
 .model-container {
   @each $key in $model-js-colors {
@@ -87,6 +100,13 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
     &.model-table-node-focus .model-table-node-header {
       background: map.get(variables.$color-map, 'primary');
       color: map.get(variables.$color-map, 'white');
+    }
+
+    // how a neighbor relates to the focus table, explained by the legend (relation-legend.tsx)
+    @each $relation, $background in $model-relation-backgrounds {
+      &.model-table-node-#{$relation} .model-table-node-header {
+        background: $background;
+      }
     }
 
     .model-table-node-row {
@@ -196,17 +216,50 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
       width: 100%;
 
       > label {
-        flex: 0 0 55px;
+        // fits the longest label, "Model Scope" with its tooltip icon, on one line
+        flex: 0 0 100px;
         margin: 0;
-        font-size: 12px;
-        font-weight: 600;
-        color: map.get(variables.$color-map, 'model-secondary-label');
+        white-space: nowrap;
       }
 
       // action buttons (remove overlaps, export pdf) fill their own row
       > button {
         flex: 1 1 auto;
         white-space: nowrap;
+      }
+    }
+
+    // the toggle and the menu's size; the menu itself is a SimpleSearchDropdownMenu (_simple-search-dropdown.scss)
+    .model-scope-dropdown {
+      // lets a long table name shrink to an ellipsis instead of widening the panel
+      min-width: 0;
+
+      // the toggle's value (ScopeLabel)
+      .model-scope-dropdown-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      // button.chaise-btn to beat _dropdown.scss's open toggle border
+      &.show > button.chaise-btn.dropdown-toggle,
+      .model-scope-dropdown-menu.show {
+        @include helpers.open-outline;
+      }
+
+      .model-scope-dropdown-menu {
+        width: 260px;
+        padding: 0 0 4px;
+      }
+
+      // the lighter dividers used elsewhere in the panel disappear on the tinted background
+      .model-scope-dropdown-all {
+        border-bottom: 1px solid map.get(variables.$color-map, 'border');
+      }
+
+      .dropdown-list {
+        max-height: 300px;
       }
     }
 
@@ -245,6 +298,15 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
       padding: 4px 0;
       font-size: 12px;
 
+      /*
+       * flex centers the text's line box, which includes the font's larger space
+       * above the letters than below, so the text sits high next to the buttons.
+       * em keeps the nudge proportional if the font size changes.
+       */
+      .model-checklist-summary-text {
+        padding-top: 0.15em;
+      }
+
       .chaise-btn {
         height: 25px;
         min-width: 25px;
@@ -276,6 +338,11 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
         label {
           // needed for text-overflow:ellipsis to work inside a flex row
           min-width: 0;
+          /*
+           * the box is a 20px :before at top 0; facets center on it only because their text's
+           * line is also ~20px. matching it here keeps the smaller text centered on the box
+           */
+          line-height: variables.$chaise-checkbox-height;
         }
 
         // the input sits on top of its label; let hovers fall through so the label's tooltip explains why it's disabled
@@ -291,7 +358,7 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
 
     .model-schemas-checklist .model-checklist {
       // make sure 5 schemas can show up
-      max-height: 120px;
+      max-height: 110px;
     }
 
     /*
@@ -336,6 +403,54 @@ $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model
 
     &:hover {
       opacity: 1;
+    }
+  }
+
+  // the zoom controls and the relation legend as two boxes
+  .model-bottom-left {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+
+    // the controls are a react-flow panel themselves; let them flow inside this one
+    > .react-flow__controls {
+      position: static;
+      margin: 0;
+    }
+  }
+
+  .model-relation-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px;
+    background: map.get(variables.$color-map, 'white');
+    // the same outline react-flow gives the zoom controls
+    box-shadow: var(--xy-controls-box-shadow, var(--xy-controls-box-shadow-default));
+    font-size: 12px;
+    white-space: nowrap;
+
+    .model-relation-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .model-relation-legend-swatch {
+      width: 12px;
+      height: 12px;
+      border: 1px solid map.get(variables.$color-map, 'model-node-border');
+      border-radius: 2px;
+    }
+
+    .model-relation-legend-focus {
+      background: map.get(variables.$color-map, 'primary');
+    }
+
+    @each $relation, $background in $model-relation-backgrounds {
+      .model-relation-legend-#{$relation} {
+        background: $background;
+      }
     }
   }
 

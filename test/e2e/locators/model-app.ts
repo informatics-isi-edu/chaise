@@ -123,7 +123,10 @@ export default class ModelAppLocators {
    * @param label the row label, e.g. 'Detail' or 'Layout'
    */
   static getToolbarRow(page: Page, label: string): Locator {
-    return ModelAppLocators.getToolbar(page).locator('.model-toolbar-row').filter({ hasText: label });
+    // the whole label, since a substring match would also find 'Mode' in 'Model Scope'
+    return ModelAppLocators.getToolbar(page)
+      .locator('.model-toolbar-row')
+      .filter({ has: page.getByText(label, { exact: true }) });
   }
 
   static getDisplayModeDropdown(page: Page): Locator {

@@ -148,3 +148,9 @@
     }
   }
 }
+
+// the outline on a dropdown's toggle and menu while it's open (foreign key, boolean, and the model app's scope dropdown)
+@mixin open-outline {
+  border: 2px solid map.get(variables.$color-map, 'primary');
+  border-radius: 6px;
+}

@@ -8,6 +8,11 @@ import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
+/**
+ * a search box only shows on lists with at least this many items
+ */
+const MIN_ITEMS_FOR_SEARCH = 10;
+
 export interface ModelChecklistItem {
   id: string;
   label: string;
@@ -34,8 +39,9 @@ interface ModelChecklistProps {
    */
   onSetMany?: (ids: string[], checked: boolean) => void;
   /**
-   * when onFilterTextChange is given, a search box filters the listed items. the text
-   * is owned by the parent so it survives this list unmounting with the toolbar.
+   * when onFilterTextChange is given, a search box filters the listed items once
+   * there are at least MIN_ITEMS_FOR_SEARCH of them. the text is owned by the
+   * parent so it survives this list unmounting with the toolbar.
    */
   filterText?: string;
   onFilterTextChange?: (filterText: string) => void;
@@ -58,7 +64,10 @@ const ModelChecklistRow = ({ item, checked, onToggle }: ModelChecklistRowProps):
 
   // a disabled row always explains itself; other rows only show the full label when it's cut off
   const tooltip = disabledReason
-    ? (isOverflowing: boolean) => (isOverflowing ? <>{item.label}<br />{disabledReason}</> : disabledReason)
+    ? (isOverflowing: boolean) => (
+      // italic, so the reason doesn't read as part of the name
+      isOverflowing ? <>{item.label}<br /><i>{disabledReason}</i></> : <i>{disabledReason}</i>
+    )
     : item.label;
 
   return (
@@ -91,6 +100,9 @@ const ModelChecklist = ({
   emptyMessage,
   className,
 }: ModelChecklistProps): JSX.Element => {
+  // kept while there's text, so a filter can't apply with no visible box
+  const showSearch = !!onFilterTextChange && (items.length >= MIN_ITEMS_FOR_SEARCH || filterText !== '');
+
   const listedItems = useMemo(() => {
     const term = filterText.trim().toLowerCase();
     if (!term) return items;
@@ -126,7 +138,7 @@ const ModelChecklist = ({
 
   const renderSummary = () => (
     <div className='model-checklist-summary'>
-      <span>
+      <span className='model-checklist-summary-text'>
         <span>Found {listedItems.length} of {items.length} </span>
         <ChaiseTooltip placement='right' tooltip={<span>{displayedTooltip}</span>}>
           <span className='chaise-icon-for-tooltip'>({listedCheckedCount} Displayed)</span>
@@ -176,7 +188,7 @@ const ModelChecklist = ({
     <div className={`model-checklist-container${className ? ` ${className}` : ''}`}>
       <div className='model-checklist-title'>{title}</div>
       {/* same markup as the viewer's annotation search, which also filters as you type */}
-      {onFilterTextChange && (
+      {showSearch && onFilterTextChange && (
         <div className='model-checklist-search chaise-search-box chaise-input-group'>
           <div className='chaise-input-control has-feedback'>
             <input
@@ -204,7 +216,7 @@ const ModelChecklist = ({
         <div className='model-checklist-empty'>{emptyMessage}</div>
       ) : (
         <>
-          {(onSetMany || onFilterTextChange) && renderSummary()}
+          {(onSetMany || showSearch) && renderSummary()}
           {renderList()}
         </>
       )}

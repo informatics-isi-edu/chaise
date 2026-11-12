@@ -1,0 +1,116 @@
+@use 'sass:map';
+@use 'scrollbar';
+@use 'variables';
+
+/*
+ * the "simple search dropdown" menu (components/simple-search-dropdown). option rules reach
+ * (0,4,0) and (0,5,0) to beat chaise's generic .chaise-dropdown item rules (_dropdown.scss),
+ * which would otherwise pad, wrap and gray-hover the options of a dropdown inside one.
+ */
+
+// the search box's magnifier and the options' check mark share this width, so labels start where the search text does
+$icon-column: 2.5rem;
+
+.dropdown-menu.simple-search-dropdown-menu {
+  // the search row sits flush at the top
+  padding-top: 0;
+  background-color: map.get(variables.$color-map, 'simple-search-dropdown-background');
+
+  // each dropdown sets its own max-height
+  .dropdown-list {
+    overflow-y: auto;
+    @include scrollbar.chaise-scrollbar-style;
+  }
+
+  // the search box sits flush on the list, so its bottom corners are square
+  .search-row .chaise-search-box {
+    .chaise-input-group-prepend > .chaise-input-group-text {
+      width: $icon-column;
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .chaise-input-group-append > .chaise-search-btn {
+      border-bottom-right-radius: 0;
+    }
+
+    // a live filter has no search button, so the input is the group's last element
+    > .chaise-input-control:last-child {
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  .dropdown-item.simple-search-dropdown-option,
+  .dropdown-item.no-results {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    // after the icon column, the same space as the search input's left padding
+    gap: variables.$btn-padding-x;
+    margin: 0;
+    padding: variables.$btn-padding-y variables.$btn-padding-x variables.$btn-padding-y 0;
+    line-height: inherit;
+    white-space: nowrap;
+    color: var(--bs-dropdown-link-color);
+  }
+
+  .dropdown-item.simple-search-dropdown-option {
+    cursor: pointer;
+
+    // :active too, or bootstrap's pressed state turns the text white (chaise only clears its background)
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--bs-dropdown-link-hover-color);
+      background-color: var(--bs-dropdown-link-hover-bg);
+    }
+
+    // keep pointer events so the tooltip can explain why; react-bootstrap already ignores the clicks
+    &.disabled,
+    &:disabled {
+      pointer-events: unset;
+      cursor: not-allowed;
+
+      &,
+      &:hover,
+      &:focus {
+        color: var(--bs-dropdown-link-disabled-color);
+      }
+    }
+  }
+
+  .dropdown-item.no-results {
+    cursor: default;
+
+    &:hover,
+    &:active {
+      color: var(--bs-dropdown-link-color);
+      background-color: transparent;
+    }
+  }
+
+  .simple-search-dropdown-check {
+    // a flex item could shrink to the glyph's width on long rows, misaligning the labels
+    flex: none;
+    width: $icon-column;
+    text-align: center;
+  }
+
+  .simple-search-dropdown-check-hidden {
+    visibility: hidden;
+  }
+
+  // fills the row, so a disabled option's reason shows wherever the row is hovered
+  .simple-search-dropdown-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .simple-search-dropdown-selected {
+    font-weight: 600;
+  }
+}

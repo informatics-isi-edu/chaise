@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+// models
+import type { ModelFocusRelation } from '@isrd-isi-edu/chaise/src/models/model-app';
 
 /**
  * whether ERD notions should be used or a simplified view
@@ -62,6 +64,12 @@ interface ModelStore {
    */
   focusTableId: string | null;
   setFocusTableId: (focusTableId: string | null) => void;
+
+  /**
+   * how each neighbor relates to the focus table; empty in catalog mode
+   */
+  focusRelations: Map<string, ModelFocusRelation>;
+  setFocusRelations: (focusRelations: Map<string, ModelFocusRelation>) => void;
 }
 
 /**
@@ -87,4 +95,7 @@ export const useModelStore = create<ModelStore>((set) => ({
 
   focusTableId: null,
   setFocusTableId: (focusTableId) => set({ focusTableId }),
+
+  focusRelations: new Map(),
+  setFocusRelations: (focusRelations) => set({ focusRelations }),
 }));

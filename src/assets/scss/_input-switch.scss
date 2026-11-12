@@ -1,4 +1,5 @@
 @use "sass:map";
+@use 'helpers';
 @use 'variables';
 
 
@@ -200,11 +201,6 @@
     }
   }
 
-  // rule for foreignkey dropdown with search input to remove space at the top of the dropdown menu above the search input
-  &.fk-dropdown .responsive-dropdown-menu.dropdown-menu {
-    padding-top: 0px;
-  }
-
 }
 
 .input-switch-boolean,
@@ -224,18 +220,18 @@
     */
     >.chaise-input-group:not([aria-disabled="true"]),
     .dropdown-menu {
-      border: 2px solid map.get(variables.$color-map, 'primary');
-      border-radius: 6px;
+      @include helpers.open-outline;
     }
   }
 
   .responsive-dropdown-menu,
   .dropdown-menu {
-    // make sure the menu expands the whole row
+    // exactly the row's width: long values end in an ellipsis instead of stretching the menu
     width: auto;
     min-width: 100%;
+    max-width: 100%;
     min-height: 75px;
-    background-color: #eef6ff;
+    background-color: map.get(variables.$color-map, 'simple-search-dropdown-background');
 
     // dropdown opens down
     &[data-popper-placement^="bottom"] {
@@ -247,87 +243,30 @@
       margin-bottom: -3px;
     }
 
-    // remove rounded borders for search input components when in a dropdown
-    .search-row .chaise-search-box {
-      .chaise-input-group-prepend>.chaise-input-group-text {
-        border-bottom-left-radius: 0;
-      }
-
-      .chaise-input-group-append>.chaise-search-btn {
-        border-bottom-right-radius: 0;
-      }
-    }
-
-    // for making the dropdown list scrollable (keeping the buttons sticky)
+    // the list scrolls under the sticky search box (_simple-search-dropdown.scss, which also styles the options)
     .dropdown-list {
-      // rules specifically for fk-dropdown list of options
       max-height: 355px;
-      overflow-y: auto;
       padding-top: 0.5rem;
-
-      .dropdown-item {
-        cursor: pointer;
-
-        &.disabled,
-        &:disabled {
-          pointer-events: unset;
-          cursor: unset;
-
-          // bootstrap stylesheets have :hover defined before :disabled so disabled always takes precedence
-          // redefine with the same hover color to override bootstrap order
-          &:hover {
-            background-color: map.get(variables.$color-map, 'recordedit-dropdown-hover');
-          }
-        }
-
-        label {
-          padding-left: 31px;
-          cursor: inherit;
-
-          // if we want to wrap text at dropdown width instead of stretching to accomodate
-          .dropdown-select-value {
-            // NOTE: text-wrap does what we want but is experimental and not supported by all browsers
-            //    text-wrap will balance between stretching the dropdown and forcing text to wrap
-            // text-wrap: balance;
-
-            // force text to wrap at dropdown width
-            white-space: normal;
-          }
-        }
-
-        .fa-check {
-          vertical-align: top;
-          padding-top: 0.25rem;
-        }
-
-        // check is `14px` wide, reduce the padding when it's visible
-        .fa-check~label {
-          padding-left: 17px;
-        }
-      }
     }
 
     .dropdown-item.load-more-row {
       // same height as chaise-btn-sm
       height: variables.$btn-height-sm;
+      cursor: pointer;
 
       a {
         pointer-events: none;
       }
     }
-
-    .dropdown-item.no-results {
-      &:active {
-        color: unset;
-      }
-
-      &:hover {
-        // matches the style when no hover event is happening
-        // setting to 'unset' might have unintended consequences
-        background-color: transparent;
-      }
-    }
   }
+}
+
+// the menu is capped at the input's width, so a long value ends in an ellipsis (boolean-field.tsx)
+.input-switch-boolean .dropdown-item .input-switch-boolean-option {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .input-switch-file {
@@ -347,16 +286,5 @@
 
   &.input-switch-error-warning {
     color: map.get(variables.$color-map, 'input-error-message-warning');
-  }
-}
-
-// used for foreignkey-dropdown-field
-// !important needs to be used here since bootstrap attaches styles directly to the component which override stylesheet styles
-.tooltip.reposition-li-tooltip {
-  left: 10px !important;
-
-  .tooltip-arrow {
-    left: 40px !important;
-    transform: unset !important;
   }
 }

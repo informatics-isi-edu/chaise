@@ -19,8 +19,9 @@ const modelSettings: ConfigServiceSettings = {
 };
 
 const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
+// the model app handles hash changes itself, see the hashchange listener in components/model/model.tsx
 root.render(
-  <AppWrapper appSettings={modelSettings} includeAlerts includeNavbar displaySpinner>
+  <AppWrapper appSettings={modelSettings} includeAlerts includeNavbar displaySpinner ignoreHashChange>
     <Model />
   </AppWrapper>
 );

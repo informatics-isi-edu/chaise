@@ -5,7 +5,11 @@ import { type JSX } from 'react';
 import { useModelStore, ModelDetailLevel } from '@isrd-isi-edu/chaise/src/providers/model';
 
 // utilities
-import { visibleColumns, type ModelTableNodeModel } from '@isrd-isi-edu/chaise/src/utils/model-utils';
+import {
+  FOCUS_RELATION_TEXT,
+  visibleColumns,
+  type ModelTableNodeModel,
+} from '@isrd-isi-edu/chaise/src/utils/model-utils';
 
 /**
  * custom react-flow node for a table: a header band plus one row per visible
@@ -14,15 +18,24 @@ import { visibleColumns, type ModelTableNodeModel } from '@isrd-isi-edu/chaise/s
  */
 const ModelTableNode = ({ id, data }: NodeProps<ModelTableNodeModel>): JSX.Element => {
   const detail = useModelStore((state) => state.detail);
-  const isFocusTable = useModelStore((state) => state.focusTableId === id);
+  const focusTableId = useModelStore((state) => state.focusTableId);
+  const relation = useModelStore((state) => state.focusRelations.get(id));
   const columns = visibleColumns(data.table, detail);
 
+  let className = 'model-table-node';
+  if (focusTableId === id) className += ' model-table-node-focus';
+  else if (relation) className += ` model-table-node-${relation}`;
+
+  // the color alone shouldn't carry the meaning
+  let headerTitle = `${data.table.schema}:${data.table.name}`;
+  if (relation) headerTitle += ` (${FOCUS_RELATION_TEXT[relation].tooltip} ${focusTableId})`;
+
   return (
-    <div className={`model-table-node${isFocusTable ? ' model-table-node-focus' : ''}`}>
+    <div className={className}>
       {/* custom nodes have no built-in handles; without these, edges won't render */}
       <Handle type='target' position={Position.Left} />
       <Handle type='source' position={Position.Right} />
-      <div className='model-table-node-header' title={`${data.table.schema}:${data.table.name}`}>
+      <div className='model-table-node-header' title={headerTitle}>
         {data.table.name}
       </div>
       {columns.map((col) => (

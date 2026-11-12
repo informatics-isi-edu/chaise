@@ -151,3 +151,10 @@ export function catalogToGraph(catalog: Catalog): ModelGraph {
 
   return { catalogId: catalog.id, tables, edges };
 }
+
+/**
+ * how a table relates to the table whose neighbors are shown: it has an fk to
+ * it (inbound, which includes a pure association and its far side), the shown
+ * table has an fk to it (outbound), or both
+ */
+export type ModelFocusRelation = 'inbound' | 'outbound' | 'both';
