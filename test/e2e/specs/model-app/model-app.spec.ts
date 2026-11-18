@@ -46,7 +46,7 @@ test.describe('Model app', () => {
         await expect.soft(ModelAppLocators.getNode(page, id)).toBeVisible();
       }
       const mainHeader = ModelAppLocators.getNodeHeader(ModelAppLocators.getNode(page, MAIN));
-      await expect.soft(mainHeader).toHaveText('main');
+      await expect.soft(mainHeader).toHaveText(MAIN);
       await expect.soft(mainHeader).toHaveAttribute('title', MAIN);
 
       await expect.soft(ModelAppLocators.getEdges(page)).toHaveCount(4);
@@ -228,7 +228,7 @@ test.describe('Model app', () => {
 
       // assert the position changed, never its absolute value
       await expect.poll(async () => node.evaluate((el) => el.style.transform)).not.toBe(before);
-      await expect.soft(ModelAppLocators.getNodeHeader(node)).toHaveText('isolated');
+      await expect.soft(ModelAppLocators.getNodeHeader(node)).toHaveText(ISOLATED);
       await expect.soft(AlertLocators.getAlerts(page)).toHaveCount(0);
     });
 

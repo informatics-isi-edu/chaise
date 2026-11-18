@@ -105,6 +105,11 @@ const DETAIL_LEVEL_LABELS: Record<ModelDetailLevel, string> = {
 };
 
 /**
+ * both lists' empty state when the focus table has no neighbors
+ */
+const NO_NEIGHBORS_MESSAGE = 'This table has no neighbors.';
+
+/**
  * display names as ELK itself titles them (minus the 'ELK ' prefix), see
  * https://eclipse.dev/elk/reference/algorithms.html
  */
@@ -293,33 +298,17 @@ const ModelInner = (): JSX.Element => {
   // show a checkbox for; that state is already fully explained by the schema
   // checklist, showing them here too would just be a second, confusing
   // control for the same thing.
-  // the focus table and its schema can't be unchecked, so focus mode never loses its focus
   const tableItems = useMemo(
     () =>
       allTables
         .filter((table) => visibleSchemas.has(table.schema))
-        .map((table) => ({
-          id: table.id,
-          label: table.id,
-          disabledReason:
-            table.id === focusTableId ? 'Neighbors of this table are shown, so it can\'t be hidden.' : undefined,
-        }))
+        .map((table) => ({ id: table.id, label: table.id }))
         // id is "schema:name", so this also groups by schema before alphabetizing within it
         .sort((a, b) => a.id.localeCompare(b.id)),
-    [allTables, visibleSchemas, focusTableId]
+    [allTables, visibleSchemas]
   );
 
-  const schemaItems = useMemo(() => {
-    const focusSchema = allTables.find((table) => table.id === focusTableId)?.schema;
-    return allSchemas.map((schema) => ({
-      id: schema,
-      label: schema,
-      disabledReason:
-        schema === focusSchema
-          ? 'This schema contains the table whose neighbors are shown, so it can\'t be hidden.'
-          : undefined,
-    }));
-  }, [allSchemas, allTables, focusTableId]);
+  const schemaItems = useMemo(() => allSchemas.map((schema) => ({ id: schema, label: schema })), [allSchemas]);
 
   //-------------------  callbacks:   --------------------//
 
@@ -346,6 +335,8 @@ const ModelInner = (): JSX.Element => {
       const tableIds = nextFocusTableId
         ? getFocusTableIds(graph, nextFocusTableId)
         : new Set(Object.keys(graph.tables));
+      // the lists only control the neighbors; the focus table is always drawn (graphToElk)
+      if (nextFocusTableId) tableIds.delete(nextFocusTableId);
       const tables = Array.from(tableIds, (id) => ({ id, schema: graph.tables[id].schema }));
       const sortedSchemas = Array.from(new Set(tables.map((table) => table.schema))).sort();
 
@@ -421,6 +412,7 @@ const ModelInner = (): JSX.Element => {
       algorithm: ModelBaseLayoutAlgorithm,
       schemas: Set<string>,
       tableIds: Set<string>,
+      focusTableId: string | null
     ) => {
       const requestId = ++layoutRequestRef.current;
       const isCurrent = () => requestId === layoutRequestRef.current;
@@ -429,7 +421,7 @@ const ModelInner = (): JSX.Element => {
       removeAllAlerts();
       let includedIds: Set<string> | null = null;
       try {
-        const elkGraph = graphToElk(graph, displayMode, level, algorithm, schemas, tableIds);
+        const elkGraph = graphToElk(graph, displayMode, level, algorithm, schemas, tableIds, focusTableId);
         includedIds = new Set((elkGraph.children ?? []).map((child) => child.id));
         if (includedIds.size === 0) {
           // nothing to place, and radial throws on an empty graph
@@ -528,9 +520,13 @@ const ModelInner = (): JSX.Element => {
   }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
+    // read here rather than subscribing this component to them; Export is disabled mid-relayout, so they match `nodes`
+    const { focusTableId: exportFocusTableId, focusRelations } = useModelStore.getState();
     // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
     import('@isrd-isi-edu/chaise/src/utils/model-pdf-export')
-      .then(({ exportModelToPdf }) => exportModelToPdf(nodes, edges, detail, displayMode))
+      .then(({ exportModelToPdf }) =>
+        exportModelToPdf({ nodes, edges, detail, displayMode, focusTableId: exportFocusTableId, focusRelations })
+      )
       .catch((error: unknown) => dispatchError({ error }));
   }, [nodes, edges, detail, displayMode, dispatchError]);
 
@@ -563,6 +559,11 @@ const ModelInner = (): JSX.Element => {
   const handleSetManyTables = useCallback(
     (tableIds: string[], checked: boolean) => setVisibleTableIds(withMany(visibleTableIds, tableIds, checked)),
     [visibleTableIds, setVisibleTableIds]
+  );
+
+  const handleSetManySchemas = useCallback(
+    (schemas: string[], checked: boolean) => setVisibleSchemas(withMany(visibleSchemas, schemas, checked)),
+    [visibleSchemas, setVisibleSchemas]
   );
 
   //-------------------  effects:   --------------------//
@@ -616,7 +617,8 @@ const ModelInner = (): JSX.Element => {
           initial.detail,
           initial.baseLayout,
           initial.visibleSchemas,
-          initial.visibleTableIds
+          initial.visibleTableIds,
+          initial.focusTableId
         );
       })
       .catch((error: unknown) => dispatchError({ error }));
@@ -660,8 +662,8 @@ const ModelInner = (): JSX.Element => {
    */
   useEffect(() => {
     if (!graphRef.current || !isInitialized) return;
-    void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds);
-  }, [isInitialized, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, relayout]);
+    void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId);
+  }, [isInitialized, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId, relayout]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the
@@ -765,7 +767,10 @@ const ModelInner = (): JSX.Element => {
                         <div className='model-toolbar-row'>
                           <ChaiseTooltip
                             placement='bottom-start'
-                            tooltip='Focus on a single table and its neighbors, or show the whole catalog.'
+                            tooltip={
+                              'Choose to explore the whole catalog (i.e. all tables) or focus on a specific table ' +
+                              'with its neighbors and relationships shown.'
+                            }
                           >
                             <label id='model-scope-label' className='chaise-icon-for-tooltip'>Model Scope</label>
                           </ChaiseTooltip>
@@ -870,6 +875,8 @@ const ModelInner = (): JSX.Element => {
                               type='button'
                               className='model-export-pdf-btn chaise-btn chaise-btn-secondary'
                               onClick={handleExportPdf}
+                              // like remove overlaps: the overlay doesn't stop the keyboard mid-layout
+                              disabled={isRelayouting}
                             >
                               <span className='chaise-btn-icon fa-solid fa-file-export' />
                               <span>Export PDF</span>
@@ -884,14 +891,16 @@ const ModelInner = (): JSX.Element => {
                           items={schemaItems}
                           checkedIds={visibleSchemas}
                           onToggle={handleToggleSchema}
+                          onSetMany={handleSetManySchemas}
                           filterText={schemaFilterText}
                           onFilterTextChange={setSchemaFilterText}
-                          emptyMessage='No schemas found.'
+                          emptyMessage={focusTableId ? NO_NEIGHBORS_MESSAGE : 'No schemas found.'}
                         />
+                        {/* in neighbors mode the focus table is drawn but not listed, so the counts say "neighboring" */}
                         <ModelChecklist
-                          title='Tables'
-                          itemName='table'
-                          itemsName='tables'
+                          title={focusTableId ? 'Neighboring Tables' : 'Tables'}
+                          itemName={focusTableId ? 'neighboring table' : 'table'}
+                          itemsName={focusTableId ? 'neighboring tables' : 'tables'}
                           className='model-tables-checklist'
                           items={tableItems}
                           checkedIds={visibleTableIds}
@@ -899,7 +908,11 @@ const ModelInner = (): JSX.Element => {
                           onSetMany={handleSetManyTables}
                           filterText={tableFilterText}
                           onFilterTextChange={setTableFilterText}
-                          emptyMessage='No tables to show. Select a schema above.'
+                          emptyMessage={
+                            focusTableId && allTables.length === 0
+                              ? NO_NEIGHBORS_MESSAGE
+                              : 'No tables to show. Select a schema above.'
+                          }
                         />
                       </Panel>
                     )}

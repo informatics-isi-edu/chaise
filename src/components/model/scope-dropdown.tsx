@@ -12,7 +12,7 @@ import SimpleSearchDropdownOption from '@isrd-isi-edu/chaise/src/components/simp
  */
 const ALL_TABLES_KEY = 'all-tables';
 
-const ALL_TABLES_LABEL = 'Catalog (All tables)';
+const ALL_TABLES_LABEL = 'Catalog (All Tables)';
 
 /**
  * the toggle's value on one line with an ellipsis; like the checklist rows, the full
@@ -121,7 +121,6 @@ const ModelScopeDropdown = ({ labelId, tableIds, focusTableId, onSelect }: Model
             eventKey={ALL_TABLES_KEY}
             label={ALL_TABLES_LABEL}
             isSelected={focusTableId === null}
-            className='model-scope-dropdown-all'
           />
         )}
         {listedTableIds.map((id) => (

@@ -9,6 +9,11 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import EllipsisWrapper from '@isrd-isi-edu/chaise/src/components/ellipsis-wrapper';
 
 /**
+ * the summary line and show/hide all buttons only show on lists with at least this many items
+ */
+const MIN_ITEMS_FOR_SUMMARY = 6;
+
+/**
  * a search box only shows on lists with at least this many items
  */
 const MIN_ITEMS_FOR_SEARCH = 10;
@@ -16,10 +21,6 @@ const MIN_ITEMS_FOR_SEARCH = 10;
 export interface ModelChecklistItem {
   id: string;
   label: string;
-  /**
-   * when set, the item can't be toggled and this explains why in its tooltip
-   */
-  disabledReason?: string;
 }
 
 interface ModelChecklistProps {
@@ -34,8 +35,8 @@ interface ModelChecklistProps {
   checkedIds: Set<string>;
   onToggle: (id: string) => void;
   /**
-   * when given, show all / hide all buttons are added. called with only the listed,
-   * enabled items whose state actually changes, and never with an empty list.
+   * when given, show all / hide all buttons join the summary line. called with only
+   * the listed items whose state actually changes, and never with an empty list.
    */
   onSetMany?: (ids: string[], checked: boolean) => void;
   /**
@@ -60,20 +61,11 @@ interface ModelChecklistRowProps {
 
 const ModelChecklistRow = ({ item, checked, onToggle }: ModelChecklistRowProps): JSX.Element => {
   const labelRef = useRef<HTMLLabelElement>(null);
-  const { disabledReason } = item;
-
-  // a disabled row always explains itself; other rows only show the full label when it's cut off
-  const tooltip = disabledReason
-    ? (isOverflowing: boolean) => (
-      // italic, so the reason doesn't read as part of the name
-      isOverflowing ? <>{item.label}<br /><i>{disabledReason}</i></> : <i>{disabledReason}</i>
-    )
-    : item.label;
 
   return (
     <li className='chaise-checkbox ellipsis-text'>
-      <input type='checkbox' checked={checked} disabled={!!disabledReason} onChange={() => onToggle(item.id)} />
-      <EllipsisWrapper tooltip={tooltip} elementRef={labelRef} placement='right'>
+      <input type='checkbox' checked={checked} onChange={() => onToggle(item.id)} />
+      <EllipsisWrapper tooltip={item.label} elementRef={labelRef} placement='right'>
         <label ref={labelRef}>{item.label}</label>
       </EllipsisWrapper>
     </li>
@@ -102,6 +94,7 @@ const ModelChecklist = ({
 }: ModelChecklistProps): JSX.Element => {
   // kept while there's text, so a filter can't apply with no visible box
   const showSearch = !!onFilterTextChange && (items.length >= MIN_ITEMS_FOR_SEARCH || filterText !== '');
+  const showSummary = showSearch || items.length >= MIN_ITEMS_FOR_SUMMARY;
 
   const listedItems = useMemo(() => {
     const term = filterText.trim().toLowerCase();
@@ -117,29 +110,28 @@ const ModelChecklist = ({
   );
 
   /**
-   * show or hide every listed item that can change. a click that changes nothing
+   * show or hide every listed item that would change. a click that changes nothing
    * must not reach the parent: a new but equal set would still trigger a relayout.
    */
   const setListed = (checked: boolean) => {
     if (!onSetMany) return;
-    const ids = listedItems
-      .filter((item) => !item.disabledReason && checkedIds.has(item.id) !== checked)
-      .map((item) => item.id);
+    const ids = listedItems.filter((item) => checkedIds.has(item.id) !== checked).map((item) => item.id);
     if (ids.length > 0) onSetMany(ids, checked);
   };
 
-  // same wording as the viewer's annotation list
+  // same wording as the viewer's annotation list; without a search, every item is listed
   const singular = listedCheckedCount === 1;
   const displayedTooltip = [
-    `${listedCheckedCount} ${singular ? itemName : itemsName} in the search list `,
-    checkedCount !== listedCheckedCount ? `(${checkedCount} total) ` : '',
+    `${listedCheckedCount} ${singular ? itemName : itemsName} `,
+    showSearch ? 'in the search list ' : '',
+    showSearch && checkedCount !== listedCheckedCount ? `(${checkedCount} total) ` : '',
     `${singular ? 'is' : 'are'} displayed in the diagram.`,
   ].join('');
 
   const renderSummary = () => (
     <div className='model-checklist-summary'>
       <span className='model-checklist-summary-text'>
-        <span>Found {listedItems.length} of {items.length} </span>
+        <span>{showSearch ? `Found ${listedItems.length} of ${items.length} ` : `Found ${items.length} `}</span>
         <ChaiseTooltip placement='right' tooltip={<span>{displayedTooltip}</span>}>
           <span className='chaise-icon-for-tooltip'>({listedCheckedCount} Displayed)</span>
         </ChaiseTooltip>
@@ -216,7 +208,7 @@ const ModelChecklist = ({
         <div className='model-checklist-empty'>{emptyMessage}</div>
       ) : (
         <>
-          {(onSetMany || showSearch) && renderSummary()}
+          {showSummary && renderSummary()}
           {renderList()}
         </>
       )}

@@ -8,7 +8,7 @@
 // that file can read them via getCssVariable() instead of hardcoding hex
 // values that can drift from _color-map.scss.
 $model-js-colors: 'white', 'placeholder', 'primary', 'model-node-border', 'model-node-header-background',
-  'model-node-row-border', 'model-fk-badge';
+  'model-node-header-inbound', 'model-node-header-outbound', 'model-node-row-border', 'model-fk-badge';
 
 // how a neighbor relates to the focus table; a table related both ways gets a gradient of the two
 $model-relation-backgrounds: (
@@ -72,7 +72,8 @@ $model-relation-backgrounds: (
   }
 
   // sizes below must stay in sync with the estimates in utils/model-utils.ts
-  // (NODE_SIZING: header/row heights, font sizes drive the width estimate)
+  // (NODE_SIZING: row height, header line height, font sizes drive the width estimate).
+  // the header's height is set inline from NODE_SIZING.
   .model-table-node {
     width: 100%;
     height: 100%;
@@ -83,8 +84,8 @@ $model-relation-backgrounds: (
     font-size: 12px;
     overflow: hidden;
 
+    // `schema:` and `table` spans (getNodeHeader), on one line or two
     .model-table-node-header {
-      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -93,7 +94,31 @@ $model-relation-backgrounds: (
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+
+      // text-overflow doesn't apply to the flex container itself, so each part ends in its own ellipsis
+      > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      // on one line the schema shrinks first, so a low width estimate costs schema characters, not the table name
+      .model-table-node-header-schema {
+        min-width: 0;
+      }
+
+      .model-table-node-header-table {
+        flex: none;
+        max-width: 100%;
+      }
+
+      &.model-table-node-header-two-lines {
+        flex-direction: column;
+        // stretched to the box's width, so each line can end in an ellipsis
+        align-items: stretch;
+        // NODE_SIZING.HEADER_LINE_HEIGHT
+        line-height: 16px;
+        text-align: center;
+      }
     }
 
     // not a thicker border: nodes are border-box with elk-estimated sizes, so it would clip the last row
@@ -253,11 +278,6 @@ $model-relation-backgrounds: (
         padding: 0 0 4px;
       }
 
-      // the lighter dividers used elsewhere in the panel disappear on the tinted background
-      .model-scope-dropdown-all {
-        border-bottom: 1px solid map.get(variables.$color-map, 'border');
-      }
-
       .dropdown-list {
         max-height: 300px;
       }
@@ -343,15 +363,6 @@ $model-relation-backgrounds: (
            * line is also ~20px. matching it here keeps the smaller text centered on the box
            */
           line-height: variables.$chaise-checkbox-height;
-        }
-
-        // the input sits on top of its label; let hovers fall through so the label's tooltip explains why it's disabled
-        input:disabled {
-          pointer-events: none;
-
-          + label {
-            cursor: not-allowed;
-          }
         }
       }
     }

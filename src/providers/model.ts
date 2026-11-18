@@ -55,7 +55,8 @@ interface ModelStore {
 
   // independent of visibleSchemas: a table only shows when both its schema
   // and its own id are checked. same "checked = visible" polarity and same
-  // "populate the full set at load" initialization as visibleSchemas.
+  // "populate the full set at load" initialization as visibleSchemas. the
+  // focus table ignores both sets: it always shows.
   visibleTableIds: Set<string>;
   setVisibleTableIds: (tableIds: Set<string>) => void;
 

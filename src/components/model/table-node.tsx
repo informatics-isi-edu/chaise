@@ -6,7 +6,8 @@ import { useModelStore, ModelDetailLevel } from '@isrd-isi-edu/chaise/src/provid
 
 // utilities
 import {
-  FOCUS_RELATION_TEXT,
+  getNodeHeader,
+  getNodeHeaderHeight,
   visibleColumns,
   type ModelTableNodeModel,
 } from '@isrd-isi-edu/chaise/src/utils/model-utils';
@@ -21,22 +22,25 @@ const ModelTableNode = ({ id, data }: NodeProps<ModelTableNodeModel>): JSX.Eleme
   const focusTableId = useModelStore((state) => state.focusTableId);
   const relation = useModelStore((state) => state.focusRelations.get(id));
   const columns = visibleColumns(data.table, detail);
+  const header = getNodeHeader(data.table);
 
   let className = 'model-table-node';
   if (focusTableId === id) className += ' model-table-node-focus';
   else if (relation) className += ` model-table-node-${relation}`;
-
-  // the color alone shouldn't carry the meaning
-  let headerTitle = `${data.table.schema}:${data.table.name}`;
-  if (relation) headerTitle += ` (${FOCUS_RELATION_TEXT[relation].tooltip} ${focusTableId})`;
 
   return (
     <div className={className}>
       {/* custom nodes have no built-in handles; without these, edges won't render */}
       <Handle type='target' position={Position.Left} />
       <Handle type='source' position={Position.Right} />
-      <div className='model-table-node-header' title={headerTitle}>
-        {data.table.name}
+      {/* the height matches the size estimate elk laid the box out with */}
+      <div
+        className={`model-table-node-header${header.lineCount === 2 ? ' model-table-node-header-two-lines' : ''}`}
+        style={{ height: getNodeHeaderHeight(header.lineCount) }}
+        title={`${data.table.schema}:${data.table.name}`}
+      >
+        <span className='model-table-node-header-schema'>{header.schemaPart}</span>
+        <span className='model-table-node-header-table'>{header.tablePart}</span>
       </div>
       {columns.map((col) => (
         <div key={col.name} className='model-table-node-row'>

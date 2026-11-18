@@ -19,9 +19,10 @@ const modelSettings: ConfigServiceSettings = {
 };
 
 const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
-// the model app handles hash changes itself, see the hashchange listener in components/model/model.tsx
+// once configured, the model app handles hash changes itself (see the hashchange listener in
+// components/model/model.tsx); until then, e.g. after a bad catalog, app-wrapper still reloads
 root.render(
-  <AppWrapper appSettings={modelSettings} includeAlerts includeNavbar displaySpinner ignoreHashChange>
+  <AppWrapper appSettings={modelSettings} includeAlerts includeNavbar displaySpinner ignoreHashChange='after-config'>
     <Model />
   </AppWrapper>
 );

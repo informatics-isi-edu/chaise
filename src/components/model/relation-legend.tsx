@@ -10,9 +10,11 @@ import type { ModelFocusRelation } from '@isrd-isi-edu/chaise/src/models/model-a
 import { useModelStore } from '@isrd-isi-edu/chaise/src/providers/model';
 
 // utilities
-import { FOCUS_RELATION_TEXT } from '@isrd-isi-edu/chaise/src/utils/model-utils';
-
-const RELATION_ORDER: ModelFocusRelation[] = ['inbound', 'outbound', 'both'];
+import {
+  FOCUS_RELATION_ORDER,
+  FOCUS_RELATION_TEXT,
+  FOCUS_TABLE_LEGEND_TEXT,
+} from '@isrd-isi-edu/chaise/src/utils/model-utils';
 
 interface ModelRelationLegendProps {
   /**
@@ -37,13 +39,21 @@ const ModelRelationLegend = ({ drawnTableIds }: ModelRelationLegendProps): JSX.E
   });
   return (
     <div className='model-relation-legend'>
-      <ChaiseTooltip placement='top' tooltip='The table picked in Model Scope. The other tables are its neighbors.'>
+      <ChaiseTooltip
+        placement='top'
+        tooltip={
+          <>
+            The table <code>{focusTableId}</code> that was selected to be in focus to have its neighbors and
+            relationships shown.
+          </>
+        }
+      >
         <span className='model-relation-legend-item'>
           <span className='model-relation-legend-swatch model-relation-legend-focus' />
-          Focused table
+          {FOCUS_TABLE_LEGEND_TEXT.legend}
         </span>
       </ChaiseTooltip>
-      {RELATION_ORDER.filter((relation) => present.has(relation)).map((relation) => (
+      {FOCUS_RELATION_ORDER.filter((relation) => present.has(relation)).map((relation) => (
         <ChaiseTooltip key={relation} placement='top' tooltip={FOCUS_RELATION_TEXT[relation].legendTooltip}>
           <span className='model-relation-legend-item'>
             <span className={`model-relation-legend-swatch model-relation-legend-${relation}`} />

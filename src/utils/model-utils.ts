@@ -78,7 +78,15 @@ export interface ModelRect {
  * what is drawn.
  */
 export const NODE_SIZING = {
+  /**
+   * a one-line header; each extra line adds HEADER_LINE_HEIGHT (see getNodeHeaderHeight)
+   */
   HEADER_HEIGHT: 28,
+  HEADER_LINE_HEIGHT: 16,
+  /**
+   * the header's horizontal padding plus the node's 1px border on each side
+   */
+  HEADER_EXTRA_WIDTH: 22,
   ROW_HEIGHT: 24,
   BORDER_HEIGHT: 2,
   MIN_WIDTH: 100,
@@ -204,13 +212,52 @@ export function visibleColumns(table: ModelTable, detail: ModelDetailLevel): Mod
   });
 }
 
+export interface ModelNodeHeader {
+  /**
+   * the schema name and its colon, e.g. `isa:`
+   */
+  schemaPart: string;
+  tablePart: string;
+  lineCount: 1 | 2;
+}
+
+/**
+ * a header's estimated width for a line of this many characters
+ */
+function headerWidth(charCount: number): number {
+  return charCount * NODE_SIZING.CHAR_WIDTH + NODE_SIZING.HEADER_EXTRA_WIDTH;
+}
+
+/**
+ * a table's header text, `schema:table` like the tables list. it takes two lines,
+ * `schema:` then `table`, when the whole name wouldn't fit the widest box. decided
+ * from the name's length before layout, rather than left to the browser's wrapping,
+ * so the header height elk lays out is the one drawn. shared by the table node,
+ * estimateNodeSize and the PDF export.
+ */
+export function getNodeHeader(table: ModelTable): ModelNodeHeader {
+  const schemaPart = `${table.schema}:`;
+  const fitsOneLine = headerWidth(schemaPart.length + table.name.length) <= NODE_SIZING.MAX_WIDTH;
+  return { schemaPart, tablePart: table.name, lineCount: fitsOneLine ? 1 : 2 };
+}
+
+/**
+ * a header's height for its line count, for the elk estimate, the node and the PDF
+ */
+export function getNodeHeaderHeight(lineCount: number): number {
+  return NODE_SIZING.HEADER_HEIGHT + (lineCount - 1) * NODE_SIZING.HEADER_LINE_HEIGHT;
+}
+
 function estimateNodeSize(
   table: ModelTable,
   detail: ModelDetailLevel
 ): { width: number; height: number } {
   const columns = visibleColumns(table, detail);
+  const header = getNodeHeader(table);
 
-  let width = table.name.length * NODE_SIZING.CHAR_WIDTH + 20;
+  let width = header.lineCount === 1
+    ? headerWidth(header.schemaPart.length + header.tablePart.length)
+    : headerWidth(Math.max(header.schemaPart.length, header.tablePart.length));
   columns.forEach((col) => {
     width = Math.max(
       width,
@@ -220,7 +267,7 @@ function estimateNodeSize(
 
   return {
     width: Math.min(NODE_SIZING.MAX_WIDTH, Math.max(NODE_SIZING.MIN_WIDTH, Math.round(width))),
-    height: NODE_SIZING.HEADER_HEIGHT + columns.length * NODE_SIZING.ROW_HEIGHT + NODE_SIZING.BORDER_HEIGHT,
+    height: getNodeHeaderHeight(header.lineCount) + columns.length * NODE_SIZING.ROW_HEIGHT + NODE_SIZING.BORDER_HEIGHT,
   };
 }
 
@@ -341,10 +388,10 @@ function layeredOnlyOptions(layout: ModelBaseLayoutAlgorithm): Record<string, st
  * turn the graph into elk's input shape. elk input is placement-only: rendered
  * edges are built separately from graph.edges in elkToFlow, so edges here are
  * deduped per table pair and self-loops are skipped (neither affects where
- * boxes go). a table shows only if both its schema (visibleSchemas) and its
- * own id (visibleTableIds) are checked; excluded tables, and any edge touching
- * one, are left out entirely, not just hidden visually, so they don't take up
- * layout space.
+ * boxes go). the focus table always shows; any other table shows only if both
+ * its schema (visibleSchemas) and its own id (visibleTableIds) are checked.
+ * excluded tables, and any edge touching one, are left out entirely, not just
+ * hidden visually, so they don't take up layout space.
  */
 export function graphToElk(
   graph: ModelGraph,
@@ -352,12 +399,13 @@ export function graphToElk(
   detail: ModelDetailLevel,
   layout: ModelBaseLayoutAlgorithm,
   visibleSchemas: Set<string>,
-  visibleTableIds: Set<string>
+  visibleTableIds: Set<string>,
+  focusTableId: string | null
 ): ElkNode {
-  const includedTables = Object.values(graph.tables).filter(
-    (table) =>
-      visibleSchemas.has(table.schema) && visibleTableIds.has(`${table.schema}:${table.name}`)
-  );
+  const includedTables = Object.values(graph.tables).filter((table) => {
+    const id = `${table.schema}:${table.name}`;
+    return id === focusTableId || (visibleSchemas.has(table.schema) && visibleTableIds.has(id));
+  });
   const includedIds = new Set(includedTables.map((table) => `${table.schema}:${table.name}`));
 
   const seen = new Set<string>();
@@ -571,24 +619,39 @@ export function getFocusTableIds(graph: ModelGraph, rootId: string, depth = FOCU
 }
 
 /**
- * user-facing wording per relation: the legend's label and its tooltip, and the
- * phrase in a header's tooltip ("<table> references <focus table>")
+ * the legend's first item, the focused table itself; shared by the screen and the PDF.
+ * its tooltip names the table, so it's built in relation-legend.tsx.
  */
-export const FOCUS_RELATION_TEXT: Record<ModelFocusRelation, { legend: string; legendTooltip: string; tooltip: string }> = {
+export const FOCUS_TABLE_LEGEND_TEXT = {
+  legend: 'Focused Table',
+};
+
+/**
+ * the order the legend lists relation kinds in, after the focused table
+ */
+export const FOCUS_RELATION_ORDER: ModelFocusRelation[] = ['inbound', 'outbound', 'both'];
+
+/**
+ * the legend's label and tooltip per relation. the labels describe the focused
+ * table, like deriva-py's table.referenced_by for inbound, so the tooltips spell
+ * out the direction.
+ */
+export const FOCUS_RELATION_TEXT: Record<ModelFocusRelation, { legend: string; legendTooltip: string }> = {
   inbound: {
-    legend: 'Referencing',
-    legendTooltip: 'Tables with a foreign key to the focused table, or linked to it through an association.',
-    tooltip: 'references',
+    legend: 'Referenced By',
+    legendTooltip:
+      'Neighboring tables that refer to the focused table through a direct relationship or association table ' +
+      '(i.e. the focused table is referenced by its neighboring tables).',
   },
   outbound: {
-    legend: 'Referenced by',
-    legendTooltip: 'Tables the focused table has a foreign key to.',
-    tooltip: 'is referenced by',
+    legend: 'Referencing',
+    legendTooltip:
+      'Neighboring tables that the focused table refers to through a direct relationship ' +
+      '(i.e. the focused table is referencing its neighboring tables).',
   },
   both: {
     legend: 'Both',
-    legendTooltip: 'Tables that reference the focused table and are also referenced by it.',
-    tooltip: 'references and is referenced by',
+    legendTooltip: 'Neighbors that are both referencing and being referenced by the focused table.',
   },
 };
 
