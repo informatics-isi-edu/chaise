@@ -12,7 +12,7 @@ import SimpleSearchDropdownOption from '@isrd-isi-edu/chaise/src/components/simp
  */
 const ALL_TABLES_KEY = 'all-tables';
 
-const ALL_TABLES_LABEL = 'Catalog (All Tables)';
+const ALL_TABLES_LABEL = 'Catalog (all tables)';
 
 /**
  * the toggle's value on one line with an ellipsis; like the checklist rows, the full

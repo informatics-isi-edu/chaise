@@ -623,7 +623,7 @@ export function getFocusTableIds(graph: ModelGraph, rootId: string, depth = FOCU
  * its tooltip names the table, so it's built in relation-legend.tsx.
  */
 export const FOCUS_TABLE_LEGEND_TEXT = {
-  legend: 'Focused Table',
+  legend: 'Focused table',
 };
 
 /**
@@ -638,7 +638,7 @@ export const FOCUS_RELATION_ORDER: ModelFocusRelation[] = ['inbound', 'outbound'
  */
 export const FOCUS_RELATION_TEXT: Record<ModelFocusRelation, { legend: string; legendTooltip: string }> = {
   inbound: {
-    legend: 'Referenced By',
+    legend: 'Referenced by',
     legendTooltip:
       'Neighboring tables that refer to the focused table through a direct relationship or association table ' +
       '(i.e. the focused table is referenced by its neighboring tables).',

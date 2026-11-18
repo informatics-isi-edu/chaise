@@ -91,7 +91,7 @@ test.describe('Model app', () => {
 
     await test.step('names detail hides all columns', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'Table Names').click();
+      await ModelAppLocators.getDropdownOption(page, 'Table names').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       await expect.soft(ModelAppLocators.getNodeRows(page)).toHaveCount(0);
@@ -100,7 +100,7 @@ test.describe('Model app', () => {
 
     await test.step('keys + foreign keys detail shows fk columns', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'Keys + Foreign Keys').click();
+      await ModelAppLocators.getDropdownOption(page, 'Keys + foreign keys').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       const main = ModelAppLocators.getNode(page, MAIN);
@@ -116,7 +116,7 @@ test.describe('Model app', () => {
 
     await test.step('all columns detail shows everything', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'All Columns').click();
+      await ModelAppLocators.getDropdownOption(page, 'All columns').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       const main = ModelAppLocators.getNode(page, MAIN);

@@ -98,10 +98,10 @@ const DISPLAY_MODE_LABELS: Record<ModelDisplayMode, string> = {
 };
 
 const DETAIL_LEVEL_LABELS: Record<ModelDetailLevel, string> = {
-  [ModelDetailLevel.NAMES]: 'Table Names',
+  [ModelDetailLevel.NAMES]: 'Table names',
   [ModelDetailLevel.KEYS]: 'Keys',
-  [ModelDetailLevel.KEYS_FKS]: 'Keys + Foreign Keys',
-  [ModelDetailLevel.FULL]: 'All Columns',
+  [ModelDetailLevel.KEYS_FKS]: 'Keys + foreign keys',
+  [ModelDetailLevel.FULL]: 'All columns',
 };
 
 /**
@@ -772,7 +772,7 @@ const ModelInner = (): JSX.Element => {
                               'with its neighbors and relationships shown.'
                             }
                           >
-                            <label id='model-scope-label' className='chaise-icon-for-tooltip'>Model Scope</label>
+                            <label id='model-scope-label' className='chaise-icon-for-tooltip'>Model scope</label>
                           </ChaiseTooltip>
                           <ModelScopeDropdown
                             labelId='model-scope-label'
@@ -862,7 +862,7 @@ const ModelInner = (): JSX.Element => {
                               disabled={isRelayouting}
                             >
                               <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
-                              <span>Remove Overlaps</span>
+                              <span>Remove overlaps</span>
                             </button>
                           </ChaiseTooltip>
                         </div>
@@ -898,7 +898,7 @@ const ModelInner = (): JSX.Element => {
                         />
                         {/* in neighbors mode the focus table is drawn but not listed, so the counts say "neighboring" */}
                         <ModelChecklist
-                          title={focusTableId ? 'Neighboring Tables' : 'Tables'}
+                          title={focusTableId ? 'Neighboring tables' : 'Tables'}
                           itemName={focusTableId ? 'neighboring table' : 'table'}
                           itemsName={focusTableId ? 'neighboring tables' : 'tables'}
                           className='model-tables-checklist'
