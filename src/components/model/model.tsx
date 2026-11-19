@@ -63,6 +63,7 @@ import {
   elkToFlow,
   getFocusRelations,
   getFocusTableIds,
+  getLaidOutBounds,
   getModelAppURL,
   graphToElk,
   resolveFocusFromURL,
@@ -152,7 +153,7 @@ interface CatalogSelection {
 const ModelInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
   const { addAlert, removeAllAlerts } = useAlert();
-  const { fitView } = useReactFlow();
+  const { fitBounds } = useReactFlow();
 
   const displayMode = useModelStore((state) => state.displayMode);
   const setDisplayMode = useModelStore((state) => state.setDisplayMode);
@@ -185,7 +186,7 @@ const ModelInner = (): JSX.Element => {
   // set by setup once the graph and the first scope are ready; the relayout effect then draws
   const [isGraphReady, setIsGraphReady] = useState(false);
   // set once the first layout is done
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized, isInitializedRef] = useStateRef(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
   // click-to-highlight; unrelated to focusTableId, which scopes the whole diagram
@@ -414,6 +415,21 @@ const ModelInner = (): JSX.Element => {
   // a stable callback, so the memoized scope dropdown doesn't re-render with the diagram
   const handleScopeSelect = useCallback((tableId: string | null) => goToFocus(tableId, true), [goToFocus]);
 
+  /**
+   * frame freshly laid out nodes. fitView frames only what react-flow has measured when it resolves,
+   * which races the new nodes' measurement, so it could frame a subset and leave the rest off-screen
+   * (and, with onlyRenderVisibleElements, unrendered). fitBounds uses elk's sizes directly. the first
+   * layout is framed by <ReactFlow fitView>, since react-flow only mounts once it's done.
+   */
+  const frameNodes = useCallback(
+    (laidOutNodes: ModelTableNodeModel[]) => {
+      if (!isInitializedRef.current) return;
+      // after react-flow has the new nodes, so the old ones don't flash at the new zoom
+      window.requestAnimationFrame(() => void fitBounds(getLaidOutBounds(laidOutNodes)));
+    },
+    [fitBounds, isInitializedRef]
+  );
+
   const relayout = useCallback(
     async (
       graph: ModelGraph,
@@ -444,8 +460,7 @@ const ModelInner = (): JSX.Element => {
           const flow = elkToFlow(graph, laidOut);
           setNodes(flow.nodes);
           setEdges(flow.edges);
-          // wait for react-flow to pick up the new nodes before framing them
-          window.requestAnimationFrame(() => fitView());
+          frameNodes(flow.nodes);
         }
         setDrawnTableIds(includedIds);
       } catch (error) {
@@ -469,7 +484,7 @@ const ModelInner = (): JSX.Element => {
       setIsInitialized(true);
       setIsRelayouting(false);
     },
-    [fitView, setNodes, setEdges, addAlert, removeAllAlerts, setDrawnTableIds, drawnTableIdsRef]
+    [frameNodes, setNodes, setEdges, addAlert, removeAllAlerts, setDrawnTableIds, drawnTableIdsRef, setIsInitialized]
   );
 
   /**
@@ -514,7 +529,7 @@ const ModelInner = (): JSX.Element => {
         const flow = elkToFlow(graphRef.current as ModelGraph, laidOut);
         setNodes(flow.nodes);
         setEdges(flow.edges);
-        window.requestAnimationFrame(() => fitView());
+        frameNodes(flow.nodes);
       })
       .catch(() => {
         if (!isCurrent()) return;
@@ -527,7 +542,7 @@ const ModelInner = (): JSX.Element => {
       .finally(() => {
         if (isCurrent()) setIsRelayouting(false);
       });
-  }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
+  }, [nodes, edges, frameNodes, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
     // read here rather than subscribing this component to them; Export is disabled mid-relayout, so they match `nodes`
@@ -934,7 +949,7 @@ const ModelInner = (): JSX.Element => {
 };
 
 /**
- * useReactFlow (used for fitView after re-layout) needs a ReactFlowProvider
+ * useReactFlow (used for fitBounds after re-layout) needs a ReactFlowProvider
  * above the component that calls it.
  */
 const Model = (): JSX.Element => (

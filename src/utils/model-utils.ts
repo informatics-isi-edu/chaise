@@ -512,6 +512,19 @@ export function elkToFlow(
   return { nodes, edges };
 }
 
+/**
+ * the box around laid out nodes, from elk's positions and sizes. react-flow's getNodesBounds
+ * warns in development without a nodeLookup, and the store's lookup still holds the old layout.
+ */
+export function getLaidOutBounds(nodes: ModelTableNodeModel[]): ModelRect {
+  if (nodes.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
+  const x = Math.min(...nodes.map((node) => node.position.x));
+  const y = Math.min(...nodes.map((node) => node.position.y));
+  const x2 = Math.max(...nodes.map((node) => node.position.x + (node.width ?? 0)));
+  const y2 = Math.max(...nodes.map((node) => node.position.y + (node.height ?? 0)));
+  return { x, y, width: x2 - x, height: y2 - y };
+}
+
 //-------------------  focus mode  --------------------//
 
 /**
