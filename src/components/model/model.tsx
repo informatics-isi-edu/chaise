@@ -182,6 +182,9 @@ const ModelInner = (): JSX.Element => {
    */
   const [nodes, setNodes, onNodesChange] = useNodesState<ModelTableNodeModel>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ModelEdgeModel>([]);
+  // set by setup once the graph and the first scope are ready; the relayout effect then draws
+  const [isGraphReady, setIsGraphReady] = useState(false);
+  // set once the first layout is done
   const [isInitialized, setIsInitialized] = useState(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
@@ -322,15 +325,22 @@ const ModelInner = (): JSX.Element => {
    * scope the diagram to a table's neighborhood (see getFocusTableIds), or to
    * the whole catalog when nextFocusTableId is null. resets both lists, what's
    * checked in them, and the click highlight, which may point outside the new
-   * set. setup lays out the first focus itself; later changes go through the
-   * relayout effect. when leaving focus mode, `restore` brings back the saved
-   * catalog view; without one, the view shows `previousFocusTableId`'s schema.
+   * set. every layout, the first one included, goes through the relayout
+   * effect.
+   * @param leaving how to rebuild the catalog view when a switch lands on it. goToFocus
+   * passes it on every switch, but it's only read when leaving focus mode; setup omits
+   * it, so a catalog url starts with only the first schema checked.
    */
   const applyFocus = useCallback(
     (
       graph: ModelGraph,
       nextFocusTableId: string | null,
-      leaving?: { restore: CatalogSelection | null; previousFocusTableId: string | null }
+      leaving?: {
+        // the catalog view saved when the user last left catalog mode; null when the page opened on a focus url
+        restore: CatalogSelection | null;
+        // the table in focus before this switch; with nothing to restore, the catalog view opens on its schema
+        previousFocusTableId: string | null;
+      }
     ) => {
       const tableIds = nextFocusTableId
         ? getFocusTableIds(graph, nextFocusTableId)
@@ -609,17 +619,7 @@ const ModelInner = (): JSX.Element => {
         setCatalogId(graph.catalogId);
         // throws for a url table that can't be focused, landing in the catch below
         applyFocus(graph, resolveFocusFromURL(cat, graph));
-
-        const initial = useModelStore.getState();
-        return relayout(
-          graph,
-          initial.displayMode,
-          initial.detail,
-          initial.baseLayout,
-          initial.visibleSchemas,
-          initial.visibleTableIds,
-          initial.focusTableId
-        );
+        setIsGraphReady(true);
       })
       .catch((error: unknown) => dispatchError({ error }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -655,15 +655,18 @@ const ModelInner = (): JSX.Element => {
   }, [goToFocus, isInitialized]);
 
   /**
-   * detail level, base algorithm, or which schemas/tables are visible all
-   * change the whole arrangement, so any of them re-runs the layout. manual
-   * repositioning is lost by design (remove-overlaps is the exception,
-   * see handleRemoveOverlaps).
+   * every layout, the first one included. detail level, base algorithm, or which
+   * schemas/tables are visible all change the whole arrangement, so any of them
+   * re-runs the layout. manual repositioning is lost by design (remove-overlaps
+   * is the exception, see handleRemoveOverlaps).
+   * the first layout runs here too, not in setup: a second one right after it
+   * would replace the nodes before react-flow measured their handles, and their
+   * edges would never draw.
    */
   useEffect(() => {
-    if (!graphRef.current || !isInitialized) return;
+    if (!graphRef.current || !isGraphReady) return;
     void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId);
-  }, [isInitialized, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId, relayout]);
+  }, [isGraphReady, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId, relayout]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the

@@ -257,7 +257,8 @@ export function getCatalogId(dontParseURL?: boolean, forcedDefault?: string): st
 
   let catalogId = '';
   if (isStringAndNotEmpty(hash)) {
-    catalogId = hash.substring(1).split('/')[0];
+    // a catalog-only hash can still carry query params (e.g. `#1?hideNavbar=true`)
+    catalogId = hash.substring(1).split('/')[0].split('?')[0];
   }
 
   if (isStringAndNotEmpty(catalogId)) {
