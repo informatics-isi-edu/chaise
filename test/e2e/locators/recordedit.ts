@@ -378,6 +378,28 @@ export default class RecordeditLocators {
     return container.locator('.dropdown-menu .search-row .chaise-input-control input');
   }
 
+  static getDropdownNoResults(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show .no-results');
+  }
+
+  static getDropdownSelectedOption(container: Locator | Page): Locator {
+    return container.locator('.dropdown-menu.show .simple-search-dropdown-selected');
+  }
+
+  /**
+   * an option's check mark, hidden unless the option is selected
+   */
+  static getDropdownOptionCheck(option: Locator): Locator {
+    return option.locator('.simple-search-dropdown-check');
+  }
+
+  /**
+   * the form element that gets `dropdown-open` while a dropdown needs room below the form
+   */
+  static getRecordeditFormContainer(container: Locator | Page): Locator {
+    return container.locator('.form-container .recordedit-form');
+  }
+
   // ------------- boolean dropdown selectors ----------------- //
   static getDropdownText(dropdown: Locator): Locator {
     return dropdown.locator('.chaise-input-control');

@@ -45,6 +45,14 @@ export default class ModelAppLocators {
     return page.locator(`.react-flow__node-modelTable[data-id="${tableId}"]`);
   }
 
+  /**
+   * the box inside a node, which carries the focus mode classes (`model-table-node-focus`,
+   * `model-table-node-inbound`, ...)
+   */
+  static getNodeBox(node: Locator): Locator {
+    return node.locator('.model-table-node');
+  }
+
   static getNodeHeader(node: Locator): Locator {
     return node.locator('.model-table-node-header');
   }
@@ -165,11 +173,31 @@ export default class ModelAppLocators {
     });
   }
 
+  static getSchemasChecklist(page: Page): Locator {
+    return page.locator('.model-schemas-checklist');
+  }
+
   /**
-   * the checkbox label has no htmlFor, so callers should locate the item then click its input
+   * titled 'Tables', or 'Neighboring tables' in focus mode
+   */
+  static getTablesChecklist(page: Page): Locator {
+    return page.locator('.model-tables-checklist');
+  }
+
+  static getChecklistTitle(checklist: Locator): Locator {
+    return checklist.locator('.model-checklist-title');
+  }
+
+  /**
+   * the checkbox label has no htmlFor, so callers should locate the item then click its input.
+   * matches the whole label: `model-test` would otherwise also find `model-test-focus-mode`.
    */
   static getChecklistItem(checklist: Locator, label: string): Locator {
-    return checklist.locator('li.chaise-checkbox').filter({ hasText: label });
+    return checklist.locator('li.chaise-checkbox').filter({ has: checklist.page().getByText(label, { exact: true }) });
+  }
+
+  static getChecklistItems(checklist: Locator): Locator {
+    return checklist.locator('li.chaise-checkbox');
   }
 
   static getChecklistCheckbox(item: Locator): Locator {
@@ -178,5 +206,73 @@ export default class ModelAppLocators {
 
   static getChecklistEmpty(checklist: Locator): Locator {
     return checklist.locator('.model-checklist-empty');
+  }
+
+  /**
+   * the "Found ..." line, shown on lists with 6 or more items
+   */
+  static getChecklistSummary(checklist: Locator): Locator {
+    return checklist.locator('.model-checklist-summary-text');
+  }
+
+  static getChecklistShowAll(checklist: Locator): Locator {
+    return checklist.locator('.model-checklist-show-all');
+  }
+
+  static getChecklistHideAll(checklist: Locator): Locator {
+    return checklist.locator('.model-checklist-hide-all');
+  }
+
+  /**
+   * shown on lists with 10 or more items
+   */
+  static getChecklistSearch(checklist: Locator): Locator {
+    return checklist.locator('.model-checklist-search input');
+  }
+
+  static getScopeDropdownToggle(page: Page): Locator {
+    return page.locator('.model-scope-dropdown .dropdown-toggle');
+  }
+
+  /**
+   * the menu stays mounted after it closes, so everything below is scoped to the open one
+   */
+  static getScopeDropdownMenu(page: Page): Locator {
+    return page.locator('.model-scope-dropdown-menu.show');
+  }
+
+  static getScopeDropdownSearch(page: Page): Locator {
+    return ModelAppLocators.getScopeDropdownMenu(page).locator('.search-row input');
+  }
+
+  static getScopeDropdownOptions(page: Page): Locator {
+    return ModelAppLocators.getScopeDropdownMenu(page).locator('.simple-search-dropdown-option');
+  }
+
+  /**
+   * @param label a table id, or 'Catalog (all tables)'. matched exactly: `focus` would otherwise
+   * also find `focus_tag`.
+   */
+  static getScopeDropdownOption(page: Page, label: string): Locator {
+    return ModelAppLocators.getScopeDropdownOptions(page).filter({ has: page.getByText(label, { exact: true }) });
+  }
+
+  static getScopeDropdownSelectedOption(page: Page): Locator {
+    return ModelAppLocators.getScopeDropdownMenu(page).locator('.simple-search-dropdown-selected');
+  }
+
+  static getScopeDropdownNoResults(page: Page): Locator {
+    return ModelAppLocators.getScopeDropdownMenu(page).locator('.no-results');
+  }
+
+  /**
+   * only shown in focus mode
+   */
+  static getLegend(page: Page): Locator {
+    return page.locator('.model-relation-legend');
+  }
+
+  static getLegendItems(page: Page): Locator {
+    return ModelAppLocators.getLegend(page).locator('.model-relation-legend-item');
   }
 }

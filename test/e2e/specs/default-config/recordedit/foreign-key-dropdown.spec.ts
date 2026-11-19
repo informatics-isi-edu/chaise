@@ -44,6 +44,11 @@ test('foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
     await expect.soft(RecordeditLocators.getDropdownSelectableOptions(page)).toHaveCount(10);
   });
 
+  await test.step('a search with no matches shows no results', async () => {
+    await RecordeditLocators.getDropdownSearch(page).fill('no_such_value');
+    await expect.soft(RecordeditLocators.getDropdownNoResults(page)).toHaveText('No Results');
+  });
+
   await test.step('clearing the search term should show the first set of 25 rows again and select option 2', async () => {
     await RecordeditLocators.getDropdownSearch(page).clear();
 
@@ -51,6 +56,21 @@ test('foreign key dropdown support', async ({ page, baseURL }, testInfo) => {
     await expect.soft(dropdownOptions).toHaveCount(25);
 
     await dropdownOptions.nth(1).click();
+  });
+
+  await test.step('reopening fk1 marks the selected option', async () => {
+    await RecordeditLocators.getDropdownElementByName(page, testParams.fk1_name, 1).click();
+    const selected = RecordeditLocators.getDropdownSelectedOption(page);
+    await expect.soft(selected).toHaveCount(1);
+    await expect.soft(selected).toHaveText('two');
+    await expect.soft(RecordeditLocators.getDropdownOptionCheck(selected)).toBeVisible();
+    // the menu wouldn't fit below this short form, so the form makes room for it
+    await expect.soft(RecordeditLocators.getRecordeditFormContainer(page)).toContainClass('dropdown-open');
+
+    // from inside the menu: the reopen leaves focus on the page, where the dropdown ignores Escape
+    await RecordeditLocators.getDropdownSearch(page).press('Escape');
+    await expect.soft(RecordeditLocators.getDropdownMenuByName(page, testParams.fk1_name, 1)).not.toBeVisible();
+    await expect.soft(RecordeditLocators.getRecordeditFormContainer(page)).not.toContainClass('dropdown-open');
   });
 
   await test.step('fk2 should have 20 values and select option 5', async () => {

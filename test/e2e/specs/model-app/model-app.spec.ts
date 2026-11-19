@@ -263,12 +263,23 @@ test.describe('Model app', () => {
     });
   });
 
+  // one test for both exports, since parallel tests would race on the same model.pdf
   test('export pdf', async ({ page, baseURL }, testInfo) => {
-    await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${getCatalogID(testInfo.project.name)}`);
+    const catalogId = getCatalogID(testInfo.project.name);
+    await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${catalogId}`);
     await ModelAppLocators.waitForPageReady(page);
 
-    await deleteDownloadedFiles([`${DOWNLOAD_FOLDER}/model.pdf`]);
-    await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    await test.step('catalog', async () => {
+      await deleteDownloadedFiles([`${DOWNLOAD_FOLDER}/model.pdf`]);
+      await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    });
+
+    await test.step('focus mode', async () => {
+      await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${catalogId}/model-test-focus-mode:focus`);
+      await ModelAppLocators.waitForLayoutSettled(page);
+      await expect.soft(ModelAppLocators.getLegend(page)).toBeVisible();
+      await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    });
   });
 
   test('no catalog specified', async ({ page, baseURL }) => {

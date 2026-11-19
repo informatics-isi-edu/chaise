@@ -11,6 +11,28 @@
                 "tables": {
                     "createNew": true
                 }
+            },
+            {
+                "catalog": {},
+                "schema": {
+                    "name": "model-test-focus-mode",
+                    "createNew": true,
+                    "path": "test/e2e/data_setup/schema/model-app/model-test-focus-mode.json"
+                },
+                "tables": {
+                    "createNew": true
+                }
+            },
+            {
+                "catalog": {},
+                "schema": {
+                    "name": "model-test-focus-mode-2",
+                    "createNew": true,
+                    "path": "test/e2e/data_setup/schema/model-app/model-test-focus-mode-2.json"
+                },
+                "tables": {
+                    "createNew": true
+                }
             }
         ],
         "schema": "model-test"
