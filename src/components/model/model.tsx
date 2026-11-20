@@ -66,7 +66,7 @@ import {
   getLaidOutBounds,
   getModelAppURL,
   graphToElk,
-  resolveFocusFromURL,
+  resolveScopeFromURL,
   SIMPLIFIED_ARROW_MARKER,
   type ModelEdgeModel,
   type ModelTableNodeModel,
@@ -124,7 +124,8 @@ const BASE_LAYOUT_LABELS: Record<ModelBaseLayoutAlgorithm, string> = {
 };
 
 /**
- * a copy of `set` with `ids` added (checked) or removed
+ * Returns a copy of `set` with `ids` added or removed
+ * @param checked whether to add or remove the ids
  */
 function withMany(set: Set<string>, ids: string[], checked: boolean): Set<string> {
   const next = new Set(set);
@@ -172,6 +173,7 @@ const ModelInner = (): JSX.Element => {
 
   const focusTableId = useModelStore((state) => state.focusTableId);
   const setFocusTableId = useModelStore((state) => state.setFocusTableId);
+
   const setFocusRelations = useModelStore((state) => state.setFocusRelations);
 
   //-------------------  state:   --------------------//
@@ -189,14 +191,15 @@ const ModelInner = (): JSX.Element => {
   const [isInitialized, setIsInitialized, isInitializedRef] = useStateRef(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
-  // click-to-highlight; unrelated to focusTableId, which scopes the whole diagram
+
   const [highlightedTableId, setHighlightedTableId] = useState<string | null>(null);
+
   const [toolbarOpen, setToolbarOpen] = useState(true);
 
   const [catalogId, setCatalogId] = useState<string | null>(null);
   const [allSchemas, setAllSchemas] = useState<string[]>([]);
 
-  // same pattern as allSchemas: set by applyFocus. keeps the schema field
+  // same pattern as allSchemas: set by applyScope. keeps the schema field
   // around so the table checklist can be scoped to currently visible schemas,
   // unlike allSchemas this isn't rendered as-is.
   const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
@@ -232,6 +235,9 @@ const ModelInner = (): JSX.Element => {
   // the catalog with its schemas (not ConfigService.catalog, which differs after a snapshot version correction)
   const catalogRef = useRef<Catalog | null>(null);
 
+  /**
+   * keep track of the selection, so we can get back to it when model scope changes
+   */
   const catalogSelectionRef = useRef<CatalogSelection | null>(null);
 
   //-------------------  derived values:   --------------------//
@@ -324,43 +330,50 @@ const ModelInner = (): JSX.Element => {
 
   /**
    * scope the diagram to a table's neighborhood (see getFocusTableIds), or to
-   * the whole catalog when nextFocusTableId is null. resets both lists, what's
+   * the whole catalog when scopeTableId is null. resets both lists, what's
    * checked in them, and the click highlight, which may point outside the new
    * set. every layout, the first one included, goes through the relayout
    * effect.
-   * @param leaving how to rebuild the catalog view when a switch lands on it. goToFocus
-   * passes it on every switch, but it's only read when leaving focus mode; setup omits
-   * it, so a catalog url starts with only the first schema checked.
    */
-  const applyFocus = useCallback(
+  const applyScope = useCallback(
     (
       graph: ModelGraph,
-      nextFocusTableId: string | null,
-      leaving?: {
-        // the catalog view saved when the user last left catalog mode; null when the page opened on a focus url
-        restore: CatalogSelection | null;
-        // the table in focus before this switch; with nothing to restore, the catalog view opens on its schema
-        previousFocusTableId: string | null;
+      /**
+       * the table id that will be focused, or null to show the whole catalog.
+       */
+      scopeTableId: string | null,
+      /**
+       * the previous state
+       */
+      prevState?: {
+        /**
+         * the catalog view saved when the user last left catalog mode (null when the page opened on a focus url)
+         */
+        catalogSelection: CatalogSelection | null;
+        /**
+         * the table in focus before this switch
+         */
+        focusTableId: string | null;
       }
     ) => {
-      const tableIds = nextFocusTableId
-        ? getFocusTableIds(graph, nextFocusTableId)
+      const tableIds = scopeTableId
+        ? getFocusTableIds(graph, scopeTableId)
         : new Set(Object.keys(graph.tables));
       // the lists only control the neighbors; the focus table is always drawn (graphToElk)
-      if (nextFocusTableId) tableIds.delete(nextFocusTableId);
+      if (scopeTableId) tableIds.delete(scopeTableId);
       const tables = Array.from(tableIds, (id) => ({ id, schema: graph.tables[id].schema }));
       const sortedSchemas = Array.from(new Set(tables.map((table) => table.schema))).sort();
 
       let schemas: Set<string>;
       let checkedTableIds = tableIds;
-      if (nextFocusTableId) {
+      if (scopeTableId) {
         schemas = new Set(sortedSchemas);
-      } else if (leaving?.restore) {
-        schemas = leaving.restore.schemas;
-        checkedTableIds = leaving.restore.tableIds;
-      } else if (leaving?.previousFocusTableId) {
+      } else if (prevState?.catalogSelection) {
+        schemas = prevState.catalogSelection.schemas;
+        checkedTableIds = prevState.catalogSelection.tableIds;
+      } else if (prevState?.focusTableId) {
         // the page opened on a focus url, so nothing was saved; stay near the table that was in focus
-        schemas = new Set([graph.tables[leaving.previousFocusTableId].schema]);
+        schemas = new Set([graph.tables[prevState.focusTableId].schema]);
       } else {
         /*
          * only the first schema starts checked: large catalogs would otherwise
@@ -371,49 +384,49 @@ const ModelInner = (): JSX.Element => {
 
       setAllSchemas(sortedSchemas);
       setAllTables(tables);
-      setFocusTableId(nextFocusTableId);
-      setFocusRelations(nextFocusTableId ? getFocusRelations(graph, nextFocusTableId) : new Map());
+      setFocusTableId(scopeTableId);
+      setFocusRelations(scopeTableId ? getFocusRelations(graph, scopeTableId) : new Map());
       setVisibleSchemas(schemas);
       setVisibleTableIds(checkedTableIds);
       setHighlightedTableId(null);
-      updateHeadTitle(`Data Model #${graph.catalogId}${nextFocusTableId ? `: ${nextFocusTableId}` : ''}`);
+      updateHeadTitle(`Data Model #${graph.catalogId}${scopeTableId ? `: ${scopeTableId}` : ''}`);
     },
     [setFocusTableId, setFocusRelations, setVisibleSchemas, setVisibleTableIds]
   );
 
   /**
-   * the single way focus changes after setup: the scope dropdown pushes a
+   * the single way the scope changes after setup: the scope dropdown pushes a
    * history entry; back/forward and hand-edited hashes don't.
    * state comes from the store, not this render, since the hashchange listener
    * outlives renders.
    */
-  const goToFocus = useCallback(
-    (nextFocusTableId: string | null, push: boolean) => {
+  const navigateToScope = useCallback(
+    (scopeTableId: string | null, push: boolean) => {
       const graph = graphRef.current;
       if (!graph) return;
       const { focusTableId: currentFocusTableId, visibleSchemas: schemas, visibleTableIds: tableIds } =
         useModelStore.getState();
-      if (nextFocusTableId === currentFocusTableId) return;
+      if (scopeTableId === currentFocusTableId) return;
 
       if (currentFocusTableId === null) {
         catalogSelectionRef.current = { schemas, tableIds };
       }
-      // before applyFocus, so its head title lands on the new history entry
+      // before applyScope, so its head title lands on the new history entry
       if (push) {
-        windowRef.history.pushState(null, '', getModelAppURL(nextFocusTableId ? graph.tables[nextFocusTableId] : null));
+        windowRef.history.pushState(null, '', getModelAppURL(scopeTableId ? graph.tables[scopeTableId] : null));
       }
       setSchemaFilterText('');
       setTableFilterText('');
-      applyFocus(graph, nextFocusTableId, {
-        restore: catalogSelectionRef.current,
-        previousFocusTableId: currentFocusTableId,
+      applyScope(graph, scopeTableId, {
+        catalogSelection: catalogSelectionRef.current,
+        focusTableId: currentFocusTableId,
       });
     },
-    [applyFocus]
+    [applyScope]
   );
 
   // a stable callback, so the memoized scope dropdown doesn't re-render with the diagram
-  const handleScopeSelect = useCallback((tableId: string | null) => goToFocus(tableId, true), [goToFocus]);
+  const handleScopeSelect = useCallback((tableId: string | null) => navigateToScope(tableId, true), [navigateToScope]);
 
   /**
    * frame freshly laid out nodes. fitView frames only what react-flow has measured when it resolves,
@@ -633,7 +646,7 @@ const ModelInner = (): JSX.Element => {
         setCatalogTableIds(Object.keys(graph.tables).sort((a, b) => a.localeCompare(b)));
         setCatalogId(graph.catalogId);
         // throws for a url table that can't be focused, landing in the catch below
-        applyFocus(graph, resolveFocusFromURL(cat, graph));
+        applyScope(graph, resolveScopeFromURL(cat, graph));
         setIsGraphReady(true);
       })
       .catch((error: unknown) => dispatchError({ error }));
@@ -641,7 +654,7 @@ const ModelInner = (): JSX.Element => {
   }, []);
 
   /**
-   * back/forward between the entries goToFocus pushes, and hand-edited hashes.
+   * back/forward between the entries navigateToScope pushes, and hand-edited hashes.
    * only a table switch within the loaded catalog is handled in place; anything
    * else reloads, so it takes the normal load path and error page. an error
    * dispatched after load would be terminal, with the old diagram under it.
@@ -656,18 +669,18 @@ const ModelInner = (): JSX.Element => {
         windowRef.location.reload();
         return;
       }
-      let nextFocusTableId: string | null;
+      let scopeTableId: string | null;
       try {
-        nextFocusTableId = resolveFocusFromURL(catalog, graph);
+        scopeTableId = resolveScopeFromURL(catalog, graph);
       } catch {
         windowRef.location.reload();
         return;
       }
-      goToFocus(nextFocusTableId, false);
+      navigateToScope(scopeTableId, false);
     };
     windowRef.addEventListener('hashchange', onHashChange);
     return () => windowRef.removeEventListener('hashchange', onHashChange);
-  }, [goToFocus, isInitialized]);
+  }, [navigateToScope, isInitialized]);
 
   /**
    * every layout, the first one included. detail level, base algorithm, or which

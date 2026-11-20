@@ -68,6 +68,8 @@ interface ModelStore {
 
   /**
    * how each neighbor relates to the focus table; empty in catalog mode
+   * The keys are the table ids (e.g. `schema:table`) of the neighbors,
+   * and the values are the relationship type (e.g. "parent" or "child").
    */
   focusRelations: Map<string, ModelFocusRelation>;
   setFocusRelations: (focusRelations: Map<string, ModelFocusRelation>) => void;

@@ -551,7 +551,7 @@ function hashHasTablePath(hash: string): boolean {
  * @throws ermrestjs errors for an unknown or ambiguous table, and a
  * NotFoundError for a table that exists but isn't part of the diagram
  */
-export function resolveFocusFromURL(catalog: Catalog, graph: ModelGraph): string | null {
+export function resolveScopeFromURL(catalog: Catalog, graph: ModelGraph): string | null {
   if (!hashHasTablePath(getURLHashFragment(windowRef.location).hash)) return null;
 
   const { ermrestUri } = chaiseURItoErmrestURI(windowRef.location);
