@@ -1,0 +1,41 @@
+{
+    "schema_name": "model-test-focus-mode-2",
+    "tables": {
+        "remote": {
+            "kind": "table",
+            "table_name": "remote",
+            "schema_name": "model-test-focus-mode-2",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode-2", "remote_focus_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "focus_id", "table_name": "remote", "schema_name": "model-test-focus-mode-2" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "focus_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        }
+    },
+    "table_names": ["remote"],
+    "comment": null,
+    "annotations": {}
+}

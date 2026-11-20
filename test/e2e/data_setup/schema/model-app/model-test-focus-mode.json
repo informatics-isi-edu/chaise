@@ -1,0 +1,283 @@
+{
+    "schema_name": "model-test-focus-mode",
+    "tables": {
+        "focus": {
+            "kind": "table",
+            "table_name": "focus",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "focus_outbound_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "outbound_id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "outbound_t", "schema_name": "model-test-focus-mode" }
+                    ]
+                },
+                {
+                    "names": [["model-test-focus-mode", "focus_both_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "both_id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "both_t", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "outbound_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                },
+                {
+                    "name": "both_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "outbound_t": {
+            "kind": "table",
+            "table_name": "outbound_t",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "outbound_t_two_hops_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "two_hops_id", "table_name": "outbound_t", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "two_hops", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "two_hops_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "inbound_t": {
+            "kind": "table",
+            "table_name": "inbound_t",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "inbound_t_focus_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "focus_id", "table_name": "inbound_t", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "focus_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "both_t": {
+            "kind": "table",
+            "table_name": "both_t",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "both_t_focus_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "focus_id", "table_name": "both_t", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "focus_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "focus_tag": {
+            "kind": "table",
+            "table_name": "focus_tag",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["focus_id", "tag_id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "focus_tag_focus_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "focus_id", "table_name": "focus_tag", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ]
+                },
+                {
+                    "names": [["model-test-focus-mode", "focus_tag_tag_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "tag_id", "table_name": "focus_tag", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "tag", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "focus_id",
+                    "nullok": false,
+                    "type": { "typename": "int4" }
+                },
+                {
+                    "name": "tag_id",
+                    "nullok": false,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "tag": {
+            "kind": "table",
+            "table_name": "tag",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                }
+            ]
+        },
+        "inbound_with_a_very_long_table_name": {
+            "kind": "table",
+            "table_name": "inbound_with_a_very_long_table_name",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["model-test-focus-mode", "inbound_with_a_very_long_table_name_focus_id_fkey"]],
+                    "foreign_key_columns": [
+                        { "column_name": "focus_id", "table_name": "inbound_with_a_very_long_table_name", "schema_name": "model-test-focus-mode" }
+                    ],
+                    "referenced_columns": [
+                        { "column_name": "id", "table_name": "focus", "schema_name": "model-test-focus-mode" }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                },
+                {
+                    "name": "focus_id",
+                    "nullok": true,
+                    "type": { "typename": "int4" }
+                }
+            ]
+        },
+        "two_hops": {
+            "kind": "table",
+            "table_name": "two_hops",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                }
+            ]
+        },
+        "unrelated": {
+            "kind": "table",
+            "table_name": "unrelated",
+            "schema_name": "model-test-focus-mode",
+            "keys": [
+                {
+                    "unique_columns": ["id"]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": { "typename": "serial4" }
+                }
+            ]
+        }
+    },
+    "table_names": ["focus", "outbound_t", "inbound_t", "both_t", "focus_tag", "tag", "inbound_with_a_very_long_table_name", "two_hops", "unrelated"],
+    "comment": null,
+    "annotations": {}
+}

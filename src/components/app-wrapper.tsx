@@ -15,6 +15,7 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { StrictMode, useEffect, useState, type JSX } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
@@ -74,9 +75,12 @@ type AppWrapperProps = {
    */
   smallSpinnerContainer?: HTMLElement,
   /**
-   * whether we should ignore hash change, or reload the page on hash change
+   * whether we should ignore hash change, or reload the page on hash change.
+   * 'after-config' reloads until config is done and ignores it after: for apps
+   * that handle their own hash once loaded (model), but have nothing listening
+   * when config fails.
    */
-  ignoreHashChange?: boolean,
+  ignoreHashChange?: boolean | 'after-config',
   /**
    * whether we should fetch the session on load or not
    * (useful when testing locally and webauthn is not available)
@@ -95,7 +99,8 @@ const AppWrapperInner = ({
   smallSpinnerContainer,
 }: AppWrapperProps): JSX.Element => {
   const { dispatchError, logTerminalError, errors } = useError();
-  const [configDone, setConfigDone] = useState(false);
+  // the hashchange listener is added once, so it reads the ref
+  const [configDone, setConfigDone, configDoneRef] = useStateRef(false);
   const [externalLink, setExternalLink] = useState<string>('');
 
   const { getSession, session } = useAuthn();
@@ -270,7 +275,8 @@ const AppWrapperInner = ({
       dispatchError({ error: event.reason });
     };
     const onHashChange = () => {
-      if (ignoreHashChange) return;
+      if (ignoreHashChange === true) return;
+      if (ignoreHashChange === 'after-config' && configDoneRef.current) return;
       windowRef.location.reload();
     };
 

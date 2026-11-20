@@ -14,6 +14,19 @@ type BooleanFieldProps = InputFieldProps & {
   columnModel?: any,
 }
 
+/**
+ * an option on one line, since the menu is as wide as the input; the full value shows in a
+ * tooltip when it's cut off
+ */
+const BooleanOption = ({ label }: { label: string }): JSX.Element => {
+  const labelRef = useRef<HTMLSpanElement>(null);
+  return (
+    <EllipsisWrapper tooltip={label} elementRef={labelRef} placement='bottom-start'>
+      <span ref={labelRef} className='input-switch-boolean-option'>{label}</span>
+    </EllipsisWrapper>
+  );
+};
+
 const BooleanField = (props: BooleanFieldProps): JSX.Element => {
 
 
@@ -124,7 +137,7 @@ const BooleanField = (props: BooleanFieldProps): JSX.Element => {
                     key={`boolean-val-${makeSafeIdAttr(props.name)}-${index}`}
                     onClick={() => onChange(rawOptions[index])}
                   >
-                    {option}
+                    <BooleanOption label={option} />
                   </Dropdown.Item>
                 ))}
               </Dropdown.Menu>}

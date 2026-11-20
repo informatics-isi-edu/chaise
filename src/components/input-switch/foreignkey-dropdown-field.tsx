@@ -6,8 +6,9 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Dropdown from 'react-bootstrap/Dropdown';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
+import SimpleSearchDropdownMenu from '@isrd-isi-edu/chaise/src/components/simple-search-dropdown/simple-search-dropdown-menu';
+import SimpleSearchDropdownOption from '@isrd-isi-edu/chaise/src/components/simple-search-dropdown/simple-search-dropdown-option';
 import Spinner from 'react-bootstrap/Spinner';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -149,14 +150,20 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
 
         const inputPositionFromBottomOfForm = formContainer.getBoundingClientRect().bottom - yBottom;
 
-        // if the dropdown is forced to render down and it's near bottom of the form
-        //   - dropdown has max height of 395px
-        //   - "padding-bottom" of ".entity-value" cell = 8px
-        //   - "padding-bottom" of ".main-body" = 40px
-        // to get the max space needed we do:
-        //    395 - (8 + 40) = 347
-        // use ~350 to give a little extra room
-        if (popperPlacement && popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < 350) {
+        /*
+         * the form clips the menu (its overflow-x: auto clips vertically too), so if the menu
+         * (forced down) would run past the form's bottom, dropdown-open pads the form to fit it.
+         * compare with the tallest the menu can get, not its current height: the rows may still
+         * be loading, so that's everything but the list plus the list at its max-height.
+         */
+        const menu = dropdownMenuRef.current;
+        const list = menu.querySelector<HTMLElement>('.dropdown-list');
+        const listMaxHeight = list ? parseFloat(windowRef.getComputedStyle(list).maxHeight) : NaN;
+        const menuMaxHeight = list && Number.isFinite(listMaxHeight)
+          ? menu.offsetHeight - list.offsetHeight + listMaxHeight
+          : menu.offsetHeight;
+
+        if (popperPlacement && popperPlacement.value === 'bottom-start' && inputPositionFromBottomOfForm < menuMaxHeight) {
           formContainer.classList.add('dropdown-open');
         }
 
@@ -482,59 +489,20 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
   }
 
 
-  const renderDropdownOptions = (onChange: any) => {
-    if (!dropdownInitialized) return;
-
-    const renderOptionRow = (row: any) => (
-      <Dropdown.Item
-        as='li'
-        onClick={(e) => onRowSelected(row.tuple, onChange)}
-        disabled={row.isDisabled}
-      >
-        {row.tuple.uniqueId === checkedRow?.uniqueId && <span className='fa-solid fa-check'></span>}
-        <label>
-          <DisplayValue
-            className='dropdown-select-value'
-            value={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
-          />
-        </label>
-
-      </Dropdown.Item>
-    )
-
-    if (dropdownRows.length === 0) {
-      // return a special row that doesn't use Dropdown.Item so it won't be selectable
-      return (
-        <li
-          key='fk-no_results_row'
-          className='dropdown-item no-results'
-        >
-          <label>
-            <DisplayValue
-              className='dropdown-select-value'
-              value={{ value: '<i>No Results</i>', isHTML: true }}
-            />
-          </label>
-        </li>
-      )
-    }
-
-    return dropdownRows.map((row: DropdownRow) => (
-      <div key={`fk-val-${row.tuple.uniqueId}`}>
-        {row.disabledType ?
-          // only add tooltip if single select and disabled
-          <ChaiseTooltip
-            tooltip={disabledRowTooltip(row.disabledType)}
-            placement='bottom-start'
-            className='reposition-li-tooltip'
-          >
-            <div>{renderOptionRow(row)}</div>
-          </ChaiseTooltip>
-          : renderOptionRow(row)
-        }
-      </div>
-    ))
-  }
+  /**
+   * the dropdown's options. the "No Results" row is the menu's (see SimpleSearchDropdownMenu)
+   */
+  const renderDropdownOptions = (onChange: any) => dropdownRows.map((row: DropdownRow) => (
+    <SimpleSearchDropdownOption
+      key={`fk-val-${row.tuple.uniqueId}`}
+      as='li'
+      label={{ value: row.tuple.rowName.value, isHTML: row.tuple.rowName.isHTML }}
+      isSelected={row.tuple.uniqueId === checkedRow?.uniqueId}
+      disabled={row.isDisabled}
+      disabledReason={row.disabledType ? disabledRowTooltip(row.disabledType) : undefined}
+      onClick={() => onRowSelected(row.tuple, onChange)}
+    />
+  ));
 
   const rules: any = {};
   if (props.foreignKeyCallbacks && props.foreignKeyCallbacks.onChange) {
@@ -586,26 +554,32 @@ const ForeignkeyDropdownField = (props: ForeignkeyDropdownFieldProps): JSX.Eleme
             {/* when there are very few columns in recordedit, foreign key dropdowns were opening
               up causing them to open "behind" the top container and making some options unclickable
               https://github.com/informatics-isi-edu/chaise/pull/2455 */}
-            {!props.disableInput && dropdownReference && <Dropdown.Menu flip={false} className='responsive-dropdown-menu' ref={dropdownMenuRef}>
-              <li className='search-row'>
-                <SearchInput
-                  initialSearchTerm=''
-                  searchCallback={searchCallback}
-                  searchColumns={dropdownReference.searchColumns}
-                  disabled={false}
-                  focus={true}
-                  dropdownDisplayMode={true}
-                />
-              </li>
-              <div className='dropdown-list'>
-                {renderDropdownOptions(onChange)}
-                {currentDropdownPage && currentDropdownPage.next && <>
+            {!props.disableInput && dropdownReference && (
+              <SimpleSearchDropdownMenu
+                ref={dropdownMenuRef}
+                flip={false}
+                className='responsive-dropdown-menu'
+                searchBox={
+                  <SearchInput
+                    initialSearchTerm=''
+                    searchCallback={searchCallback}
+                    searchColumns={dropdownReference.searchColumns}
+                    disabled={false}
+                    focus={true}
+                    dropdownDisplayMode={true}
+                  />
+                }
+                // only once loaded, or "No Results" would flash during the first read
+                noResults={dropdownInitialized && dropdownRows.length === 0}
+                footer={currentDropdownPage && currentDropdownPage.next && (
                   <li className='dropdown-item load-more-row' onClick={() => loadMoreOptions()}>
                     <div className='chaise-btn chaise-btn-sm chaise-btn-tertiary'><a>... load more</a></div>
                   </li>
-                </>}
-              </div>
-            </Dropdown.Menu>}
+                )}
+              >
+                {dropdownInitialized && renderDropdownOptions(onChange)}
+              </SimpleSearchDropdownMenu>
+            )}
           </Dropdown>
           <input className={`${props.inputClasses} ${props.inputClassName}`} {...field} type='hidden' />
         </div>

@@ -21,10 +21,12 @@ $map: (
   'model-loading-overlay-background': rgba(255, 255, 255, 0.6),
   'model-node-border': #999999,
   'model-node-header-background': #f0f0f0,
+  // neighbor header tints; light enough for dark text, and away from the focus table's blue
+  'model-node-header-inbound': #c8ece6,
+  'model-node-header-outbound': #f8ddbf,
   'model-node-row-border': #e5e5e5,
   'model-panel-border': #dddddd,
   'model-panel-shadow': rgba(0, 0, 0, 0.08),
-  'model-secondary-label': #666666,
   'gene-sequence-background': #f5f5f5,
   'facet-border': #ccc,
   'facet-border-active': rgb(51, 122, 183),
@@ -51,7 +53,6 @@ $map: (
   'primary': #4674a7,
   'primary-hover': #428bca,
   'recordedit-border': #888888,
-  'recordedit-dropdown-hover': #e9ecef, // same color as bootstrap dropdown-item hover
   'recordedit-highlighted-row': #f7f0cf,
   'recordedit-column-permission-warning': rgb(180, 95, 6),
   'record-status-danger': rgba(221, 170, 146, 0.68),
@@ -61,6 +62,8 @@ $map: (
   'record-status-success': rgba(113, 195, 129, 0.68),
   'record-status-warning': rgba(232, 170, 82, 0.38),
   'success': #5cb85c,
+  // the foreign key (components/simple-search-dropdown) and boolean dropdown menus' tint
+  'simple-search-dropdown-background': #eef6ff,
   'spinner': #6e6e6e,
   'spinner-alt': #828282,
   'spinner-background': #d9edf7,

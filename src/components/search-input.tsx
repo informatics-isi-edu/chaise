@@ -193,7 +193,10 @@ const SearchInput = ({
     <div className={'chaise-search-box chaise-input-group ' + (disabled ? 'disabled-element' : '')}>
       {dropdownDisplayMode &&
         <div className='chaise-input-group-prepend'>
-          <span className='chaise-input-group-text fa-solid fa-magnifying-glass' />
+          {/* the icon gets its own span: font awesome 7 gives .fa-solid a 1.25em width, too narrow for the addon's padding */}
+          <span className='chaise-input-group-text'>
+            <span className='fa-solid fa-magnifying-glass' />
+          </span>
         </div>
       }
       <div className='chaise-input-control has-feedback'>

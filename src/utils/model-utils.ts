@@ -1,17 +1,28 @@
 import { getStraightPath, MarkerType, type Edge, type Node } from '@xyflow/react';
 import type { ElkNode } from 'elkjs/lib/elk.bundled.js';
+import type { Catalog } from '@isrd-isi-edu/ermrestjs/src/models/catalog';
 
 // models
 import {
   edgeKey,
   ModelColumn,
   ModelEdge,
+  ModelFocusRelation,
   ModelGraph,
   ModelTable,
+  tableKey,
 } from '@isrd-isi-edu/chaise/src/models/model-app';
 
 // providers
 import { ModelDetailLevel, ModelBaseLayoutAlgorithm, ModelDisplayMode } from '@isrd-isi-edu/chaise/src/providers/model';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+
+// utilities
+import { escapeHTML } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { chaiseURItoErmrestURI, fixedEncodeURIComponent, getURLHashFragment } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 //-------------------  types  --------------------//
 
@@ -43,7 +54,7 @@ export interface ModelEdgeData extends Record<string, unknown> {
   isOptional: boolean;
   isOneToOne: boolean;
   /**
-   * stamped on by displayEdges when the edge touches the focused table, so the
+   * stamped on by displayEdges when the edge touches the highlighted table, so the
    * floating edge can pick the highlighted marker variants
    */
   highlighted?: boolean;
@@ -67,7 +78,15 @@ export interface ModelRect {
  * what is drawn.
  */
 export const NODE_SIZING = {
+  /**
+   * a one-line header; each extra line adds HEADER_LINE_HEIGHT (see getNodeHeaderHeight)
+   */
   HEADER_HEIGHT: 28,
+  HEADER_LINE_HEIGHT: 16,
+  /**
+   * the header's horizontal padding plus the node's 1px border on each side
+   */
+  HEADER_EXTRA_WIDTH: 22,
   ROW_HEIGHT: 24,
   BORDER_HEIGHT: 2,
   MIN_WIDTH: 100,
@@ -136,6 +155,18 @@ export const ERD_MARKERS = {
 export type ERDMarkerShape = keyof typeof ERD_MARKERS.SHAPES;
 
 /**
+ * the simplified mode's arrowhead. react-flow's arrow only fills part of its
+ * 20-unit box, so 30 draws it about 12px tall, matching the ERD symbols, and
+ * userSpaceOnUse keeps it that size on thicker highlighted edges, like them.
+ */
+export const SIMPLIFIED_ARROW_MARKER = {
+  type: MarkerType.ArrowClosed,
+  width: 30,
+  height: 30,
+  markerUnits: 'userSpaceOnUse',
+} as const;
+
+/**
  * dom id of one marker def
  */
 export function erdMarkerId(shape: ERDMarkerShape, highlighted?: boolean): string {
@@ -181,13 +212,52 @@ export function visibleColumns(table: ModelTable, detail: ModelDetailLevel): Mod
   });
 }
 
+export interface ModelNodeHeader {
+  /**
+   * the schema name and its colon, e.g. `isa:`
+   */
+  schemaPart: string;
+  tablePart: string;
+  lineCount: 1 | 2;
+}
+
+/**
+ * a header's estimated width for a line of this many characters
+ */
+function headerWidth(charCount: number): number {
+  return charCount * NODE_SIZING.CHAR_WIDTH + NODE_SIZING.HEADER_EXTRA_WIDTH;
+}
+
+/**
+ * a table's header text, `schema:table` like the tables list. it takes two lines,
+ * `schema:` then `table`, when the whole name wouldn't fit the widest box. decided
+ * from the name's length before layout, rather than left to the browser's wrapping,
+ * so the header height elk lays out is the one drawn. shared by the table node,
+ * estimateNodeSize and the PDF export.
+ */
+export function getNodeHeader(table: ModelTable): ModelNodeHeader {
+  const schemaPart = `${table.schema}:`;
+  const fitsOneLine = headerWidth(schemaPart.length + table.name.length) <= NODE_SIZING.MAX_WIDTH;
+  return { schemaPart, tablePart: table.name, lineCount: fitsOneLine ? 1 : 2 };
+}
+
+/**
+ * a header's height for its line count, for the elk estimate, the node and the PDF
+ */
+export function getNodeHeaderHeight(lineCount: number): number {
+  return NODE_SIZING.HEADER_HEIGHT + (lineCount - 1) * NODE_SIZING.HEADER_LINE_HEIGHT;
+}
+
 function estimateNodeSize(
   table: ModelTable,
   detail: ModelDetailLevel
 ): { width: number; height: number } {
   const columns = visibleColumns(table, detail);
+  const header = getNodeHeader(table);
 
-  let width = table.name.length * NODE_SIZING.CHAR_WIDTH + 20;
+  let width = header.lineCount === 1
+    ? headerWidth(header.schemaPart.length + header.tablePart.length)
+    : headerWidth(Math.max(header.schemaPart.length, header.tablePart.length));
   columns.forEach((col) => {
     width = Math.max(
       width,
@@ -197,7 +267,7 @@ function estimateNodeSize(
 
   return {
     width: Math.min(NODE_SIZING.MAX_WIDTH, Math.max(NODE_SIZING.MIN_WIDTH, Math.round(width))),
-    height: NODE_SIZING.HEADER_HEIGHT + columns.length * NODE_SIZING.ROW_HEIGHT + NODE_SIZING.BORDER_HEIGHT,
+    height: getNodeHeaderHeight(header.lineCount) + columns.length * NODE_SIZING.ROW_HEIGHT + NODE_SIZING.BORDER_HEIGHT,
   };
 }
 
@@ -303,12 +373,13 @@ export function computeEdgePath(
  * options that only mean something to the 'layered' algorithm ('elk.layered.*'
  * keys, and direction). elk silently ignores options an algorithm doesn't
  * recognize rather than erroring, so leaving them in for e.g. 'force' would
- * be dead config, not a bug that shows up.
+ * be dead config, not a bug that shows up. top-down puts tables holding an fk
+ * above the tables they reference.
  */
 function layeredOnlyOptions(layout: ModelBaseLayoutAlgorithm): Record<string, string> {
   if (layout !== ModelBaseLayoutAlgorithm.LAYERED) return {};
   return {
-    'elk.direction': 'RIGHT',
+    'elk.direction': 'DOWN',
     'elk.layered.spacing.nodeNodeBetweenLayers': '60',
   };
 }
@@ -317,10 +388,10 @@ function layeredOnlyOptions(layout: ModelBaseLayoutAlgorithm): Record<string, st
  * turn the graph into elk's input shape. elk input is placement-only: rendered
  * edges are built separately from graph.edges in elkToFlow, so edges here are
  * deduped per table pair and self-loops are skipped (neither affects where
- * boxes go). a table shows only if both its schema (visibleSchemas) and its
- * own id (visibleTableIds) are checked; excluded tables, and any edge touching
- * one, are left out entirely, not just hidden visually, so they don't take up
- * layout space.
+ * boxes go). the focus table always shows; any other table shows only if both
+ * its schema (visibleSchemas) and its own id (visibleTableIds) are checked.
+ * excluded tables, and any edge touching one, are left out entirely, not just
+ * hidden visually, so they don't take up layout space.
  */
 export function graphToElk(
   graph: ModelGraph,
@@ -328,12 +399,13 @@ export function graphToElk(
   detail: ModelDetailLevel,
   layout: ModelBaseLayoutAlgorithm,
   visibleSchemas: Set<string>,
-  visibleTableIds: Set<string>
+  visibleTableIds: Set<string>,
+  focusTableId: string | null
 ): ElkNode {
-  const includedTables = Object.values(graph.tables).filter(
-    (table) =>
-      visibleSchemas.has(table.schema) && visibleTableIds.has(`${table.schema}:${table.name}`)
-  );
+  const includedTables = Object.values(graph.tables).filter((table) => {
+    const id = `${table.schema}:${table.name}`;
+    return id === focusTableId || (visibleSchemas.has(table.schema) && visibleTableIds.has(id));
+  });
   const includedIds = new Set(includedTables.map((table) => `${table.schema}:${table.name}`));
 
   const seen = new Set<string>();
@@ -394,7 +466,7 @@ function buildFlowEdges(edges: ModelEdge[]): ModelEdgeModel[] {
         source: edge.fromTable,
         target: edge.toTable,
         type: 'modelFloating',
-        markerEnd: { type: MarkerType.ArrowClosed },
+        markerEnd: SIMPLIFIED_ARROW_MARKER,
         data: {
           offset: isSelfLoop ? 0 : edge.fromTable < edge.toTable ? raw : -raw,
           isSelfLoop,
@@ -438,4 +510,185 @@ export function elkToFlow(
   );
 
   return { nodes, edges };
+}
+
+/**
+ * the box around laid out nodes, from elk's positions and sizes. react-flow's getNodesBounds
+ * warns in development without a nodeLookup, and the store's lookup still holds the old layout.
+ */
+export function getLaidOutBounds(nodes: ModelTableNodeModel[]): ModelRect {
+  if (nodes.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
+  const x = Math.min(...nodes.map((node) => node.position.x));
+  const y = Math.min(...nodes.map((node) => node.position.y));
+  const x2 = Math.max(...nodes.map((node) => node.position.x + (node.width ?? 0)));
+  const y2 = Math.max(...nodes.map((node) => node.position.y + (node.height ?? 0)));
+  return { x, y, width: x2 - x, height: y2 - y };
+}
+
+//-------------------  focus mode  --------------------//
+
+/**
+ * how many hops from the focus table getFocusTableIds reaches
+ */
+const FOCUS_DEFAULT_DEPTH = 1;
+
+/**
+ * whether the hash names more than a catalog. mirrors chaiseURItoErmrestURI's
+ * own check, which falls back to chaise-config's defaultTable for a
+ * catalog-only hash, while here that has to mean catalog mode.
+ */
+function hashHasTablePath(hash: string): boolean {
+  const path = hash.split('?')[0];
+  const slashIndex = path.indexOf('/');
+  return slashIndex !== -1 && path.length - slashIndex > 1;
+}
+
+/**
+ * the focus table named in the url (`#catalog/schema:table`, or `#catalog/table`
+ * when unique), or null when the url only names a catalog. resolved the same
+ * way recordset resolves its table, so filters, facets, joins and modifiers in
+ * the url are understood too.
+ * @throws ermrestjs errors for an unknown or ambiguous table, and a
+ * NotFoundError for a table that exists but isn't part of the diagram
+ */
+export function resolveScopeFromURL(catalog: Catalog, graph: ModelGraph): string | null {
+  if (!hashHasTablePath(getURLHashFragment(windowRef.location).hash)) return null;
+
+  const { ermrestUri } = chaiseURItoErmrestURI(windowRef.location);
+  // no catalog object: parse rejects one whose id doesn't match the url's snapshot exactly
+  const location: { tableName: string; schemaName: string } = ConfigService.ERMrest.parse(ermrestUri);
+  const table = catalog.schemas.findTable(location.tableName, location.schemaName);
+  const id = tableKey(table.schema.name, table.name);
+
+  if (!graph.tables[id]) {
+    throw new ConfigService.ERMrest.NotFoundError(
+      '',
+      // the error modal renders messages as html
+      `Table ${escapeHTML(id)} is not part of the data model diagram. ` +
+        'Views, ignored tables, and tables in system schemas are not drawn.'
+    );
+  }
+
+  return id;
+}
+
+/**
+ * hash query params that only describe how this page was reached (for logging),
+ * so they don't belong on the urls the app pushes while switching focus
+ */
+const LOGGING_QUERY_PARAMS = ['pcid', 'ppid', 'paction'];
+
+/**
+ * the model app url for a focus table, or for the whole catalog when table is null.
+ * the current hash's query params carry over: chaise reads hideNavbar and config
+ * from there. location.search is dropped, since with the `?` instead of `#` form
+ * it holds the old table.
+ */
+export function getModelAppURL(table: ModelTable | null): string {
+  const { hash } = getURLHashFragment(windowRef.location);
+  const queryIndex = hash.indexOf('?');
+  const params = queryIndex === -1
+    ? []
+    : hash
+      .substring(queryIndex + 1)
+      .split('&')
+      .filter((param) => param && !LOGGING_QUERY_PARAMS.includes(param.split('=')[0]));
+
+  let path = ConfigService.catalogID;
+  if (table) path += `/${fixedEncodeURIComponent(table.schema)}:${fixedEncodeURIComponent(table.name)}`;
+  if (params.length > 0) path += `?${params.join('&')}`;
+
+  return `${windowRef.location.origin}${windowRef.location.pathname}#${path}`;
+}
+
+/**
+ * the tables shown when focusing on rootId: tables it has an fk to, tables
+ * with an fk to it, and for an inbound pure binary association the table on
+ * its other side, without spending a hop on the association. repeated up to
+ * `depth` hops. bfs, so each table is reached at its shortest distance.
+ */
+export function getFocusTableIds(graph: ModelGraph, rootId: string, depth = FOCUS_DEFAULT_DEPTH): Set<string> {
+  const hops = new Map<string, number>([[rootId, 0]]);
+  const queue = [rootId];
+  const visit = (id: string, hop: number) => {
+    if (hops.has(id) || !graph.tables[id]) return;
+    hops.set(id, hop);
+    queue.push(id);
+  };
+
+  while (queue.length > 0) {
+    const id = queue.shift() as string;
+    const hop = hops.get(id) as number;
+    if (hop >= depth) continue;
+    graph.edges.forEach((edge) => {
+      if (edge.fromTable === id) visit(edge.toTable, hop + 1);
+      if (edge.toTable !== id) return;
+      visit(edge.fromTable, hop + 1);
+      graph.tables[edge.fromTable].associationTargets?.forEach((target) => visit(target, hop + 1));
+    });
+  }
+
+  return new Set(hops.keys());
+}
+
+/**
+ * the legend's first item, the focused table itself; shared by the screen and the PDF.
+ * its tooltip names the table, so it's built in relation-legend.tsx.
+ */
+export const FOCUS_TABLE_LEGEND_TEXT = {
+  legend: 'Focused table',
+};
+
+/**
+ * the order the legend lists relation kinds in, after the focused table
+ */
+export const FOCUS_RELATION_ORDER: ModelFocusRelation[] = ['inbound', 'outbound', 'both'];
+
+/**
+ * the legend's label and tooltip per relation. the labels describe the focused
+ * table, like deriva-py's table.referenced_by for inbound, so the tooltips spell
+ * out the direction.
+ */
+export const FOCUS_RELATION_TEXT: Record<ModelFocusRelation, { legend: string; legendTooltip: string }> = {
+  inbound: {
+    legend: 'Referenced by',
+    legendTooltip:
+      'Neighboring tables that refer to the focused table through a direct relationship or association table ' +
+      '(i.e. the focused table is referenced by its neighboring tables).',
+  },
+  outbound: {
+    legend: 'Referencing',
+    legendTooltip:
+      'Neighboring tables that the focused table refers to through a direct relationship ' +
+      '(i.e. the focused table is referencing its neighboring tables).',
+  },
+  both: {
+    legend: 'Both',
+    legendTooltip: 'Neighbors that are both referencing and being referenced by the focused table.',
+  },
+};
+
+/**
+ * how each direct neighbor relates to the focus table. a separate pass from
+ * getFocusTableIds, whose search keeps only the first path to a table and so
+ * could never see one related both ways.
+ */
+export function getFocusRelations(graph: ModelGraph, focusTableId: string): Map<string, ModelFocusRelation> {
+  const relations = new Map<string, ModelFocusRelation>();
+  const mark = (id: string, relation: 'inbound' | 'outbound') => {
+    // self references and self associations point back at the focus table itself
+    if (id === focusTableId || !graph.tables[id]) return;
+    const current = relations.get(id);
+    relations.set(id, current && current !== relation ? 'both' : relation);
+  };
+
+  graph.edges.forEach((edge) => {
+    if (edge.fromTable === focusTableId) mark(edge.toTable, 'outbound');
+    if (edge.toTable !== focusTableId) return;
+    mark(edge.fromTable, 'inbound');
+    // like the record page, an association and the table on its other side both count as inbound
+    graph.tables[edge.fromTable].associationTargets?.forEach((target) => mark(target, 'inbound'));
+  });
+
+  return relations;
 }

@@ -23,7 +23,10 @@ export interface ModelTable {
    */
   kind: string;
   columns: Array<ModelColumn>;
-  isAssociation: boolean;
+  /**
+   * for a pure binary association, the `schema:table` keys of the two tables it links
+   */
+  associationTargets?: Array<string>;
 }
 
 export interface ModelEdge {
@@ -103,7 +106,10 @@ function createModelTable(table: Table): ModelTable {
       isForeignKey: fkColumns.has(col.name),
       isSystemColumn: col.isSystemColumn,
     })),
-    isAssociation: table.isPureBinaryAssociation,
+    // the getter can return undefined despite its type, so gate on isPureBinaryAssociation
+    associationTargets: table.isPureBinaryAssociation
+      ? (table.pureBinaryForeignKeys ?? []).map((fk) => tableKey(fk.key.table.schema.name, fk.key.table.name))
+      : undefined,
   };
 }
 
@@ -145,3 +151,10 @@ export function catalogToGraph(catalog: Catalog): ModelGraph {
 
   return { catalogId: catalog.id, tables, edges };
 }
+
+/**
+ * how a table relates to the table whose neighbors are shown: it has an fk to
+ * it (inbound, which includes a pure association and its far side), the shown
+ * table has an fk to it (outbound), or both
+ */
+export type ModelFocusRelation = 'inbound' | 'outbound' | 'both';

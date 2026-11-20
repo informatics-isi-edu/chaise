@@ -4,7 +4,6 @@ import '@xyflow/react/dist/style.css';
 import {
   Background,
   Controls,
-  MarkerType,
   MiniMap,
   Panel,
   ReactFlow,
@@ -19,6 +18,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 // components
 import ModelChecklist from '@isrd-isi-edu/chaise/src/components/model/checklist';
 import ErdMarkerDefs from '@isrd-isi-edu/chaise/src/components/model/marker-defs';
+import ModelRelationLegend from '@isrd-isi-edu/chaise/src/components/model/relation-legend';
+import ModelScopeDropdown from '@isrd-isi-edu/chaise/src/components/model/scope-dropdown';
 import ModelFloatingEdge from '@isrd-isi-edu/chaise/src/components/model/floating-edge';
 import ModelTableNode from '@isrd-isi-edu/chaise/src/components/model/table-node';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -37,8 +38,10 @@ import {
 } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
+import type { Catalog } from '@isrd-isi-edu/ermrestjs/src/models/catalog';
 import { catalogToGraph, type ModelGraph } from '@isrd-isi-edu/chaise/src/models/model-app';
 import { CustomError } from '@isrd-isi-edu/chaise/src/models/errors';
 
@@ -58,11 +61,19 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utilities
 import {
   elkToFlow,
+  getFocusRelations,
+  getFocusTableIds,
+  getLaidOutBounds,
+  getModelAppURL,
   graphToElk,
+  resolveScopeFromURL,
+  SIMPLIFIED_ARROW_MARKER,
   type ModelEdgeModel,
   type ModelTableNodeModel,
 } from '@isrd-isi-edu/chaise/src/utils/model-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { getCatalogId } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   attachContainerHeightSensors,
   getCssVariable,
@@ -88,11 +99,16 @@ const DISPLAY_MODE_LABELS: Record<ModelDisplayMode, string> = {
 };
 
 const DETAIL_LEVEL_LABELS: Record<ModelDetailLevel, string> = {
-  [ModelDetailLevel.NAMES]: 'Table Names',
+  [ModelDetailLevel.NAMES]: 'Table names',
   [ModelDetailLevel.KEYS]: 'Keys',
-  [ModelDetailLevel.KEYS_FKS]: 'Keys + Foreign Keys',
-  [ModelDetailLevel.FULL]: 'All Columns',
+  [ModelDetailLevel.KEYS_FKS]: 'Keys + foreign keys',
+  [ModelDetailLevel.FULL]: 'All columns',
 };
+
+/**
+ * both lists' empty state when the focus table has no neighbors
+ */
+const NO_NEIGHBORS_MESSAGE = 'This table has no neighbors.';
 
 /**
  * display names as ELK itself titles them (minus the 'ELK ' prefix), see
@@ -107,10 +123,38 @@ const BASE_LAYOUT_LABELS: Record<ModelBaseLayoutAlgorithm, string> = {
   [ModelBaseLayoutAlgorithm.RECTPACKING]: 'Rectangle Packing',
 };
 
+/**
+ * Returns a copy of `set` with `ids` added or removed
+ * @param checked whether to add or remove the ids
+ */
+function withMany(set: Set<string>, ids: string[], checked: boolean): Set<string> {
+  const next = new Set(set);
+  ids.forEach((id) => {
+    if (checked) next.add(id);
+    else next.delete(id);
+  });
+  return next;
+}
+
+/**
+ * whether two sets hold the same ids
+ */
+function sameMembers(a: Set<string>, b: Set<string>): boolean {
+  return a.size === b.size && Array.from(a).every((id) => b.has(id));
+}
+
+/**
+ * what's checked in catalog mode, saved when entering focus mode so leaving it restores the same view
+ */
+interface CatalogSelection {
+  schemas: Set<string>;
+  tableIds: Set<string>;
+}
+
 const ModelInner = (): JSX.Element => {
   const { dispatchError, errors } = useError();
   const { addAlert, removeAllAlerts } = useAlert();
-  const { fitView } = useReactFlow();
+  const { fitBounds } = useReactFlow();
 
   const displayMode = useModelStore((state) => state.displayMode);
   const setDisplayMode = useModelStore((state) => state.setDisplayMode);
@@ -127,6 +171,11 @@ const ModelInner = (): JSX.Element => {
   const visibleTableIds = useModelStore((state) => state.visibleTableIds);
   const setVisibleTableIds = useModelStore((state) => state.setVisibleTableIds);
 
+  const focusTableId = useModelStore((state) => state.focusTableId);
+  const setFocusTableId = useModelStore((state) => state.setFocusTableId);
+
+  const setFocusRelations = useModelStore((state) => state.setFocusRelations);
+
   //-------------------  state:   --------------------//
 
   /**
@@ -136,19 +185,37 @@ const ModelInner = (): JSX.Element => {
    */
   const [nodes, setNodes, onNodesChange] = useNodesState<ModelTableNodeModel>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ModelEdgeModel>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // set by setup once the graph and the first scope are ready; the relayout effect then draws
+  const [isGraphReady, setIsGraphReady] = useState(false);
+  // set once the first layout is done
+  const [isInitialized, setIsInitialized, isInitializedRef] = useStateRef(false);
 
   const [isRelayouting, setIsRelayouting] = useState(false);
-  const [focusedTableId, setFocusedTableId] = useState<string | null>(null);
+
+  const [highlightedTableId, setHighlightedTableId] = useState<string | null>(null);
+
   const [toolbarOpen, setToolbarOpen] = useState(true);
 
   const [catalogId, setCatalogId] = useState<string | null>(null);
   const [allSchemas, setAllSchemas] = useState<string[]>([]);
 
-  // same pattern as allSchemas: set once at load, static afterward. keeps
-  // the schema field around so the table checklist can be scoped to
-  // currently visible schemas, unlike allSchemas this isn't rendered as-is.
+  // same pattern as allSchemas: set by applyScope. keeps the schema field
+  // around so the table checklist can be scoped to currently visible schemas,
+  // unlike allSchemas this isn't rendered as-is.
   const [allTables, setAllTables] = useState<{ id: string; schema: string }[]>([]);
+
+  // kept here rather than in the checklists, which unmount when the toolbar collapses
+  const [schemaFilterText, setSchemaFilterText] = useState('');
+  const [tableFilterText, setTableFilterText] = useState('');
+
+  // every table in the catalog's diagram, for the scope dropdown; set once at load
+  const [catalogTableIds, setCatalogTableIds] = useState<string[]>([]);
+
+  /*
+   * the tables in the last committed layout: the legend lists only their kinds, and a failed
+   * layout reads the ref to tell whether they still match
+   */
+  const [drawnTableIds, setDrawnTableIds, drawnTableIdsRef] = useStateRef<Set<string>>(new Set());
 
   //-------------------  refs:   --------------------//
 
@@ -158,37 +225,58 @@ const ModelInner = (): JSX.Element => {
   // guard against strict mode calling the effect twice in dev mode
   const setupStarted = useRef<boolean>(false);
 
+  /*
+   * every layout takes the next number and only the latest may commit. elk's
+   * queue keeps its own results in order, but the empty-diagram path in
+   * relayout skips it, so an older queued layout could land after it.
+   */
+  const layoutRequestRef = useRef<number>(0);
+
+  // the catalog with its schemas (not ConfigService.catalog, which differs after a snapshot version correction)
+  const catalogRef = useRef<Catalog | null>(null);
+
+  /**
+   * keep track of the selection, so we can get back to it when model scope changes
+   */
+  const catalogSelectionRef = useRef<CatalogSelection | null>(null);
+
   //-------------------  derived values:   --------------------//
 
+  // a highlighted table that has since been hidden must not dim everything that's left
+  const activeHighlightId = useMemo(
+    () => (highlightedTableId && nodes.some((node) => node.id === highlightedTableId) ? highlightedTableId : null),
+    [nodes, highlightedTableId]
+  );
+
   const connectedTableIds = useMemo(() => {
-    if (!focusedTableId) return null;
+    if (!activeHighlightId) return null;
     const ids = new Set<string>();
     edges.forEach((edge) => {
-      if (edge.source === focusedTableId) ids.add(edge.target);
-      if (edge.target === focusedTableId) ids.add(edge.source);
+      if (edge.source === activeHighlightId) ids.add(edge.target);
+      if (edge.target === activeHighlightId) ids.add(edge.source);
     });
     return ids;
-  }, [edges, focusedTableId]);
+  }, [edges, activeHighlightId]);
 
   // nodes/edges as actually rendered: same objects, with a className
-  // stamped on based on the current focus. react-flow applies Node/Edge
+  // stamped on based on the current highlight. react-flow applies Node/Edge
   // className to their wrapper elements itself, so table-node.tsx and
   // floating-edge.tsx need no changes for this.
   const displayNodes = useMemo(() => {
-    if (!focusedTableId) return nodes;
+    if (!activeHighlightId) return nodes;
     return nodes.map((node) => ({
       ...node,
       className:
-        node.id === focusedTableId
-          ? 'model-node-focused'
+        node.id === activeHighlightId
+          ? 'model-node-highlighted'
           : connectedTableIds?.has(node.id)
             ? ''
             : 'model-node-dimmed',
     }));
-  }, [nodes, focusedTableId, connectedTableIds]);
+  }, [nodes, activeHighlightId, connectedTableIds]);
 
   const displayEdges = useMemo(() => {
-    if (!focusedTableId) return edges;
+    if (!activeHighlightId) return edges;
     /*
      * marker fill doesn't follow the path's CSS stroke color, so read the same color-map
      * value the highlighted stroke uses (see $model-js-colors in _model.scss)
@@ -199,7 +287,7 @@ const ModelInner = (): JSX.Element => {
       '#4674a7'
     );
     return edges.map((edge) => {
-      const connected = edge.source === focusedTableId || edge.target === focusedTableId;
+      const connected = edge.source === activeHighlightId || edge.target === activeHighlightId;
       return {
         ...edge,
         className: connected ? 'model-edge-highlighted' : 'model-edge-dimmed',
@@ -209,18 +297,18 @@ const ModelInner = (): JSX.Element => {
          * applies to the simplified mode
          */
         markerEnd: connected && displayMode === ModelDisplayMode.SIMPLIFIED
-          ? { type: MarkerType.ArrowClosed, color: highlightColor }
+          ? { ...SIMPLIFIED_ARROW_MARKER, color: highlightColor }
           : edge.markerEnd,
         data: edge.data && { ...edge.data, highlighted: connected },
       };
     });
-  }, [edges, focusedTableId, displayMode]);
+  }, [edges, activeHighlightId, displayMode]);
 
   // tables whose schema is currently hidden are dropped from the list they'd
   // show a checkbox for; that state is already fully explained by the schema
   // checklist, showing them here too would just be a second, confusing
   // control for the same thing.
-  const visibleSchemaTableItems = useMemo(
+  const tableItems = useMemo(
     () =>
       allTables
         .filter((table) => visibleSchemas.has(table.schema))
@@ -230,13 +318,130 @@ const ModelInner = (): JSX.Element => {
     [allTables, visibleSchemas]
   );
 
+  const schemaItems = useMemo(() => allSchemas.map((schema) => ({ id: schema, label: schema })), [allSchemas]);
+
   //-------------------  callbacks:   --------------------//
 
   const handleNodeClick: NodeMouseHandler<ModelTableNodeModel> = useCallback((_event, node) => {
-    setFocusedTableId((current) => (current === node.id ? null : node.id));
+    setHighlightedTableId((current) => (current === node.id ? null : node.id));
   }, []);
 
-  const handlePaneClick = useCallback(() => setFocusedTableId(null), []);
+  const handlePaneClick = useCallback(() => setHighlightedTableId(null), []);
+
+  /**
+   * scope the diagram to a table's neighborhood (see getFocusTableIds), or to
+   * the whole catalog when scopeTableId is null. resets both lists, what's
+   * checked in them, and the click highlight, which may point outside the new
+   * set. every layout, the first one included, goes through the relayout
+   * effect.
+   */
+  const applyScope = useCallback(
+    (
+      graph: ModelGraph,
+      /**
+       * the table id that will be focused, or null to show the whole catalog.
+       */
+      scopeTableId: string | null,
+      /**
+       * the previous state
+       */
+      prevState?: {
+        /**
+         * the catalog view saved when the user last left catalog mode (null when the page opened on a focus url)
+         */
+        catalogSelection: CatalogSelection | null;
+        /**
+         * the table in focus before this switch
+         */
+        focusTableId: string | null;
+      }
+    ) => {
+      const tableIds = scopeTableId
+        ? getFocusTableIds(graph, scopeTableId)
+        : new Set(Object.keys(graph.tables));
+      // the lists only control the neighbors; the focus table is always drawn (graphToElk)
+      if (scopeTableId) tableIds.delete(scopeTableId);
+      const tables = Array.from(tableIds, (id) => ({ id, schema: graph.tables[id].schema }));
+      const sortedSchemas = Array.from(new Set(tables.map((table) => table.schema))).sort();
+
+      let schemas: Set<string>;
+      let checkedTableIds = tableIds;
+      if (scopeTableId) {
+        schemas = new Set(sortedSchemas);
+      } else if (prevState?.catalogSelection) {
+        schemas = prevState.catalogSelection.schemas;
+        checkedTableIds = prevState.catalogSelection.tableIds;
+      } else if (prevState?.focusTableId) {
+        // the page opened on a focus url, so nothing was saved; stay near the table that was in focus
+        schemas = new Set([graph.tables[prevState.focusTableId].schema]);
+      } else {
+        /*
+         * only the first schema starts checked: large catalogs would otherwise
+         * pay a slow first layout over everything before the user trims it
+         */
+        schemas = new Set(sortedSchemas.slice(0, 1));
+      }
+
+      setAllSchemas(sortedSchemas);
+      setAllTables(tables);
+      setFocusTableId(scopeTableId);
+      setFocusRelations(scopeTableId ? getFocusRelations(graph, scopeTableId) : new Map());
+      setVisibleSchemas(schemas);
+      setVisibleTableIds(checkedTableIds);
+      setHighlightedTableId(null);
+      updateHeadTitle(`Data Model #${graph.catalogId}${scopeTableId ? `: ${scopeTableId}` : ''}`);
+    },
+    [setFocusTableId, setFocusRelations, setVisibleSchemas, setVisibleTableIds]
+  );
+
+  /**
+   * the single way the scope changes after setup: the scope dropdown pushes a
+   * history entry; back/forward and hand-edited hashes don't.
+   * state comes from the store, not this render, since the hashchange listener
+   * outlives renders.
+   */
+  const navigateToScope = useCallback(
+    (scopeTableId: string | null, push: boolean) => {
+      const graph = graphRef.current;
+      if (!graph) return;
+      const { focusTableId: currentFocusTableId, visibleSchemas: schemas, visibleTableIds: tableIds } =
+        useModelStore.getState();
+      if (scopeTableId === currentFocusTableId) return;
+
+      if (currentFocusTableId === null) {
+        catalogSelectionRef.current = { schemas, tableIds };
+      }
+      // before applyScope, so its head title lands on the new history entry
+      if (push) {
+        windowRef.history.pushState(null, '', getModelAppURL(scopeTableId ? graph.tables[scopeTableId] : null));
+      }
+      setSchemaFilterText('');
+      setTableFilterText('');
+      applyScope(graph, scopeTableId, {
+        catalogSelection: catalogSelectionRef.current,
+        focusTableId: currentFocusTableId,
+      });
+    },
+    [applyScope]
+  );
+
+  // a stable callback, so the memoized scope dropdown doesn't re-render with the diagram
+  const handleScopeSelect = useCallback((tableId: string | null) => navigateToScope(tableId, true), [navigateToScope]);
+
+  /**
+   * frame freshly laid out nodes. fitView frames only what react-flow has measured when it resolves,
+   * which races the new nodes' measurement, so it could frame a subset and leave the rest off-screen
+   * (and, with onlyRenderVisibleElements, unrendered). fitBounds uses elk's sizes directly. the first
+   * layout is framed by <ReactFlow fitView>, since react-flow only mounts once it's done.
+   */
+  const frameNodes = useCallback(
+    (laidOutNodes: ModelTableNodeModel[]) => {
+      if (!isInitializedRef.current) return;
+      // after react-flow has the new nodes, so the old ones don't flash at the new zoom
+      window.requestAnimationFrame(() => void fitBounds(getLaidOutBounds(laidOutNodes)));
+    },
+    [fitBounds, isInitializedRef]
+  );
 
   const relayout = useCallback(
     async (
@@ -246,20 +451,43 @@ const ModelInner = (): JSX.Element => {
       algorithm: ModelBaseLayoutAlgorithm,
       schemas: Set<string>,
       tableIds: Set<string>,
+      focusTableId: string | null
     ) => {
+      const requestId = ++layoutRequestRef.current;
+      const isCurrent = () => requestId === layoutRequestRef.current;
       setIsRelayouting(true);
       // any alert from a previous attempt no longer applies to this one
       removeAllAlerts();
+      let includedIds: Set<string> | null = null;
       try {
-        const elk = await elkPromise;
-        const laidOut = await elk.layout(graphToElk(graph, displayMode, level, algorithm, schemas, tableIds));
-        const flow = elkToFlow(graph, laidOut);
-        setNodes(flow.nodes);
-        setEdges(flow.edges);
-        // wait for react-flow to pick up the new nodes before framing them
-        window.requestAnimationFrame(() => fitView());
+        const elkGraph = graphToElk(graph, displayMode, level, algorithm, schemas, tableIds, focusTableId);
+        includedIds = new Set((elkGraph.children ?? []).map((child) => child.id));
+        if (includedIds.size === 0) {
+          // nothing to place, and radial throws on an empty graph
+          setNodes([]);
+          setEdges([]);
+        } else {
+          const elk = await elkPromise;
+          const laidOut = await elk.layout(elkGraph);
+          if (!isCurrent()) return;
+          const flow = elkToFlow(graph, laidOut);
+          setNodes(flow.nodes);
+          setEdges(flow.edges);
+          frameNodes(flow.nodes);
+        }
+        setDrawnTableIds(includedIds);
       } catch (error) {
         $log.error('elk layout failed', error);
+        if (!isCurrent()) return;
+        /*
+         * after a focus switch, the old tables would stay drawn under the new
+         * lists and title. when only the algorithm changed they're still right.
+         */
+        if (!includedIds || !sameMembers(includedIds, drawnTableIdsRef.current)) {
+          setNodes([]);
+          setEdges([]);
+          setDrawnTableIds(new Set());
+        }
         addAlert(
           `Could not lay out the diagram with the "${BASE_LAYOUT_LABELS[algorithm]}" algorithm. ` +
             'Try a different layout algorithm from the Layout dropdown.',
@@ -269,7 +497,7 @@ const ModelInner = (): JSX.Element => {
       setIsInitialized(true);
       setIsRelayouting(false);
     },
-    [fitView, setNodes, setEdges, addAlert, removeAllAlerts]
+    [frameNodes, setNodes, setEdges, addAlert, removeAllAlerts, setDrawnTableIds, drawnTableIdsRef, setIsInitialized]
   );
 
   /**
@@ -280,6 +508,8 @@ const ModelInner = (): JSX.Element => {
    */
   const handleRemoveOverlaps = useCallback(() => {
     if (!graphRef.current) return;
+    const requestId = ++layoutRequestRef.current;
+    const isCurrent = () => requestId === layoutRequestRef.current;
     setIsRelayouting(true);
     elkPromise
       .then((elk) =>
@@ -308,25 +538,33 @@ const ModelInner = (): JSX.Element => {
         })
       )
       .then((laidOut) => {
+        if (!isCurrent()) return;
         const flow = elkToFlow(graphRef.current as ModelGraph, laidOut);
         setNodes(flow.nodes);
         setEdges(flow.edges);
-        window.requestAnimationFrame(() => fitView());
+        frameNodes(flow.nodes);
       })
       .catch(() => {
+        if (!isCurrent()) return;
         addAlert(
           'Could not automatically resolve overlapping tables. Try a different layout algorithm, ' +
             'or drag tables apart manually.',
           ChaiseAlertType.WARNING
         );
       })
-      .finally(() => setIsRelayouting(false));
-  }, [nodes, edges, fitView, setNodes, setEdges, addAlert]);
+      .finally(() => {
+        if (isCurrent()) setIsRelayouting(false);
+      });
+  }, [nodes, edges, frameNodes, setNodes, setEdges, addAlert]);
 
   const handleExportPdf = useCallback(() => {
+    // read here rather than subscribing this component to them; Export is disabled mid-relayout, so they match `nodes`
+    const { focusTableId: exportFocusTableId, focusRelations } = useModelStore.getState();
     // jspdf/svg2pdf are only needed here, so the whole export module is fetched on first use
     import('@isrd-isi-edu/chaise/src/utils/model-pdf-export')
-      .then(({ exportModelToPdf }) => exportModelToPdf(nodes, edges, detail, displayMode))
+      .then(({ exportModelToPdf }) =>
+        exportModelToPdf({ nodes, edges, detail, displayMode, focusTableId: exportFocusTableId, focusRelations })
+      )
       .catch((error: unknown) => dispatchError({ error }));
   }, [nodes, edges, detail, displayMode, dispatchError]);
 
@@ -354,6 +592,16 @@ const ModelInner = (): JSX.Element => {
       setVisibleTableIds(next);
     },
     [visibleTableIds, setVisibleTableIds]
+  );
+
+  const handleSetManyTables = useCallback(
+    (tableIds: string[], checked: boolean) => setVisibleTableIds(withMany(visibleTableIds, tableIds, checked)),
+    [visibleTableIds, setVisibleTableIds]
+  );
+
+  const handleSetManySchemas = useCallback(
+    (schemas: string[], checked: boolean) => setVisibleSchemas(withMany(visibleSchemas, schemas, checked)),
+    [visibleSchemas, setVisibleSchemas]
   );
 
   //-------------------  effects:   --------------------//
@@ -391,50 +639,62 @@ const ModelInner = (): JSX.Element => {
     catalog.server.catalogs
       .get(catalog.id)
       .then((cat: typeof catalog) => {
-        graphRef.current = catalogToGraph(cat);
-        setCatalogId(graphRef.current.catalogId);
-        updateHeadTitle(`Data Model #${graphRef.current.catalogId}`);
-
-        const schemas = new Set(
-          Object.values(graphRef.current.tables).map((table) => table.schema)
-        );
-        const sortedSchemas = Array.from(schemas).sort();
-        // only the first schema starts checked: large catalogs would otherwise
-        // pay a slow first layout over everything before the user trims it
-        setVisibleSchemas(new Set(sortedSchemas.slice(0, 1)));
-        setAllSchemas(sortedSchemas);
-
-        const tables = Object.values(graphRef.current.tables).map((table) => ({
-          id: `${table.schema}:${table.name}`,
-          schema: table.schema,
-        }));
-        setAllTables(tables);
-        setVisibleTableIds(new Set(tables.map((table) => table.id)));
-
-        const initial = useModelStore.getState();
-        return relayout(
-          graphRef.current,
-          initial.displayMode,
-          initial.detail,
-          initial.baseLayout,
-          initial.visibleSchemas,
-          initial.visibleTableIds
-        );
+        const graph = catalogToGraph(cat);
+        graphRef.current = graph;
+        catalogRef.current = cat;
+        // "schema:name" ids, so this groups by schema before alphabetizing within it
+        setCatalogTableIds(Object.keys(graph.tables).sort((a, b) => a.localeCompare(b)));
+        setCatalogId(graph.catalogId);
+        // throws for a url table that can't be focused, landing in the catch below
+        applyScope(graph, resolveScopeFromURL(cat, graph));
+        setIsGraphReady(true);
       })
       .catch((error: unknown) => dispatchError({ error }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
-   * detail level, base algorithm, or which schemas/tables are visible all
-   * change the whole arrangement, so any of them re-runs the layout. manual
-   * repositioning is lost by design (remove-overlaps is the exception,
-   * see handleRemoveOverlaps).
+   * back/forward between the entries navigateToScope pushes, and hand-edited hashes.
+   * only a table switch within the loaded catalog is handled in place; anything
+   * else reloads, so it takes the normal load path and error page. an error
+   * dispatched after load would be terminal, with the old diagram under it.
+   * app-wrapper's own reload on hash change is off, see pages/model.tsx.
    */
   useEffect(() => {
-    if (!graphRef.current || !isInitialized) return;
-    void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds);
-  }, [isInitialized, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, relayout]);
+    const onHashChange = () => {
+      const graph = graphRef.current;
+      const catalog = catalogRef.current;
+      // until setup finishes, including after a setup error, reload so the new hash takes the load path
+      if (!isInitialized || !graph || !catalog || getCatalogId() !== ConfigService.catalogID) {
+        windowRef.location.reload();
+        return;
+      }
+      let scopeTableId: string | null;
+      try {
+        scopeTableId = resolveScopeFromURL(catalog, graph);
+      } catch {
+        windowRef.location.reload();
+        return;
+      }
+      navigateToScope(scopeTableId, false);
+    };
+    windowRef.addEventListener('hashchange', onHashChange);
+    return () => windowRef.removeEventListener('hashchange', onHashChange);
+  }, [navigateToScope, isInitialized]);
+
+  /**
+   * every layout, the first one included. detail level, base algorithm, or which
+   * schemas/tables are visible all change the whole arrangement, so any of them
+   * re-runs the layout. manual repositioning is lost by design (remove-overlaps
+   * is the exception, see handleRemoveOverlaps).
+   * the first layout runs here too, not in setup: a second one right after it
+   * would replace the nodes before react-flow measured their handles, and their
+   * edges would never draw.
+   */
+  useEffect(() => {
+    if (!graphRef.current || !isGraphReady) return;
+    void relayout(graphRef.current, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId);
+  }, [isGraphReady, displayMode, detail, baseLayout, visibleSchemas, visibleTableIds, focusTableId, relayout]);
 
   /**
    * chaise sets the height of bottom-panel-container in js, not css, so the
@@ -485,6 +745,8 @@ const ModelInner = (): JSX.Element => {
                     onEdgesChange={onEdgesChange}
                     onNodeClick={handleNodeClick}
                     onPaneClick={handlePaneClick}
+                    // the default (Backspace) would delete the selected table from the diagram
+                    deleteKeyCode={null}
                     fitView
                     nodesConnectable={false}
                     edgesReconnectable={false}
@@ -494,13 +756,20 @@ const ModelInner = (): JSX.Element => {
                     minZoom={0.05}
                   >
                     <Background />
-                    <Controls showInteractive={false} orientation='horizontal' />
+                    {/* the legend sits beside the zoom buttons */}
+                    <Panel position='bottom-left' className='model-bottom-left'>
+                      <Controls showInteractive={false} orientation='horizontal' />
+                      <ModelRelationLegend drawnTableIds={drawnTableIds} />
+                    </Panel>
                     <Panel position='top-center' className='model-title'>
-                      <h3>Catalog {catalogId} Data Model</h3>
+                      <h3>
+                        Catalog {catalogId} Data Model
+                        {focusTableId && <>: <code>{focusTableId}</code> and its neighbors</>}
+                      </h3>
                     </Panel>
                     {!toolbarOpen ? (
                       <Panel position='top-left' className='model-toolbar-collapsed'>
-                        <ChaiseTooltip placement='top' tooltip='Click to show settings'>
+                        <ChaiseTooltip placement='bottom-start' tooltip='Click to show settings'>
                           <button
                             type='button'
                             className='chaise-btn chaise-btn-tertiary'
@@ -515,7 +784,7 @@ const ModelInner = (): JSX.Element => {
                       <Panel position='top-left' className='model-toolbar'>
                         <div className='model-toolbar-header'>
                           <h3 className='model-toolbar-title'>Settings</h3>
-                          <ChaiseTooltip placement='top' tooltip='Click to hide settings'>
+                          <ChaiseTooltip placement='bottom-start' tooltip='Click to hide settings'>
                             <button
                               type='button'
                               className='chaise-btn chaise-btn-tertiary chaise-sidebar-open'
@@ -525,6 +794,23 @@ const ModelInner = (): JSX.Element => {
                               <span>Hide settings</span>
                             </button>
                           </ChaiseTooltip>
+                        </div>
+                        <div className='model-toolbar-row'>
+                          <ChaiseTooltip
+                            placement='bottom-start'
+                            tooltip={
+                              'Choose to explore the whole catalog (i.e. all tables) or focus on a specific table ' +
+                              'with its neighbors and relationships shown.'
+                            }
+                          >
+                            <label id='model-scope-label' className='chaise-icon-for-tooltip'>Model scope</label>
+                          </ChaiseTooltip>
+                          <ModelScopeDropdown
+                            labelId='model-scope-label'
+                            tableIds={catalogTableIds}
+                            focusTableId={focusTableId}
+                            onSelect={handleScopeSelect}
+                          />
                         </div>
                         <div className='model-toolbar-row'>
                           <label>Mode</label>
@@ -596,28 +882,32 @@ const ModelInner = (): JSX.Element => {
                         </div>
                         <div className='model-toolbar-row'>
                           <ChaiseTooltip
-                            placement='top'
+                            placement='bottom-start'
                             tooltip='Spread out overlapping tables in the current layout.'
                           >
                             <button
                               type='button'
                               className='model-remove-overlaps-btn chaise-btn chaise-btn-secondary'
                               onClick={handleRemoveOverlaps}
+                              // the overlay blocks the mouse, not the keyboard; this would replace the running layout
+                              disabled={isRelayouting}
                             >
                               <span className='chaise-btn-icon fa-solid fa-object-ungroup' />
-                              <span>Remove Overlaps</span>
+                              <span>Remove overlaps</span>
                             </button>
                           </ChaiseTooltip>
                         </div>
                         <div className='model-toolbar-row'>
                           <ChaiseTooltip
-                            placement='top'
+                            placement='bottom-start'
                             tooltip='Download the current diagram as a PDF.'
                           >
                             <button
                               type='button'
                               className='model-export-pdf-btn chaise-btn chaise-btn-secondary'
                               onClick={handleExportPdf}
+                              // like remove overlaps: the overlay doesn't stop the keyboard mid-layout
+                              disabled={isRelayouting}
                             >
                               <span className='chaise-btn-icon fa-solid fa-file-export' />
                               <span>Export PDF</span>
@@ -626,19 +916,34 @@ const ModelInner = (): JSX.Element => {
                         </div>
                         <ModelChecklist
                           title='Schemas'
+                          itemName='schema'
+                          itemsName='schemas'
                           className='model-schemas-checklist'
-                          items={allSchemas.map((schema) => ({ id: schema, label: schema }))}
+                          items={schemaItems}
                           checkedIds={visibleSchemas}
                           onToggle={handleToggleSchema}
-                          emptyMessage='No schemas found.'
+                          onSetMany={handleSetManySchemas}
+                          filterText={schemaFilterText}
+                          onFilterTextChange={setSchemaFilterText}
+                          emptyMessage={focusTableId ? NO_NEIGHBORS_MESSAGE : 'No schemas found.'}
                         />
+                        {/* in neighbors mode the focus table is drawn but not listed, so the counts say "neighboring" */}
                         <ModelChecklist
-                          title='Tables'
+                          title={focusTableId ? 'Neighboring tables' : 'Tables'}
+                          itemName={focusTableId ? 'neighboring table' : 'table'}
+                          itemsName={focusTableId ? 'neighboring tables' : 'tables'}
                           className='model-tables-checklist'
-                          items={visibleSchemaTableItems}
+                          items={tableItems}
                           checkedIds={visibleTableIds}
                           onToggle={handleToggleTable}
-                          emptyMessage='No tables to show. Select a schema above.'
+                          onSetMany={handleSetManyTables}
+                          filterText={tableFilterText}
+                          onFilterTextChange={setTableFilterText}
+                          emptyMessage={
+                            focusTableId && allTables.length === 0
+                              ? NO_NEIGHBORS_MESSAGE
+                              : 'No tables to show. Select a schema above.'
+                          }
                         />
                       </Panel>
                     )}
@@ -657,7 +962,7 @@ const ModelInner = (): JSX.Element => {
 };
 
 /**
- * useReactFlow (used for fitView after re-layout) needs a ReactFlowProvider
+ * useReactFlow (used for fitBounds after re-layout) needs a ReactFlowProvider
  * above the component that calls it.
  */
 const Model = (): JSX.Element => (

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+// models
+import type { ModelFocusRelation } from '@isrd-isi-edu/chaise/src/models/model-app';
 
 /**
  * whether ERD notions should be used or a simplified view
@@ -53,9 +55,24 @@ interface ModelStore {
 
   // independent of visibleSchemas: a table only shows when both its schema
   // and its own id are checked. same "checked = visible" polarity and same
-  // "populate the full set at load" initialization as visibleSchemas.
+  // "populate the full set at load" initialization as visibleSchemas. the
+  // focus table ignores both sets: it always shows.
   visibleTableIds: Set<string>;
   setVisibleTableIds: (tableIds: Set<string>) => void;
+
+  /**
+   * `schema:table` key of the table the diagram is scoped to, or null for the whole catalog
+   */
+  focusTableId: string | null;
+  setFocusTableId: (focusTableId: string | null) => void;
+
+  /**
+   * how each neighbor relates to the focus table; empty in catalog mode
+   * The keys are the table ids (e.g. `schema:table`) of the neighbors,
+   * and the values are the relationship type (e.g. "parent" or "child").
+   */
+  focusRelations: Map<string, ModelFocusRelation>;
+  setFocusRelations: (focusRelations: Map<string, ModelFocusRelation>) => void;
 }
 
 /**
@@ -78,4 +95,10 @@ export const useModelStore = create<ModelStore>((set) => ({
 
   visibleTableIds: new Set(),
   setVisibleTableIds: (tableIds) => set({ visibleTableIds: tableIds }),
+
+  focusTableId: null,
+  setFocusTableId: (focusTableId) => set({ focusTableId }),
+
+  focusRelations: new Map(),
+  setFocusRelations: (focusRelations) => set({ focusRelations }),
 }));

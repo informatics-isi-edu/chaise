@@ -46,7 +46,7 @@ test.describe('Model app', () => {
         await expect.soft(ModelAppLocators.getNode(page, id)).toBeVisible();
       }
       const mainHeader = ModelAppLocators.getNodeHeader(ModelAppLocators.getNode(page, MAIN));
-      await expect.soft(mainHeader).toHaveText('main');
+      await expect.soft(mainHeader).toHaveText(MAIN);
       await expect.soft(mainHeader).toHaveAttribute('title', MAIN);
 
       await expect.soft(ModelAppLocators.getEdges(page)).toHaveCount(4);
@@ -91,7 +91,7 @@ test.describe('Model app', () => {
 
     await test.step('names detail hides all columns', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'Table Names').click();
+      await ModelAppLocators.getDropdownOption(page, 'Table names').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       await expect.soft(ModelAppLocators.getNodeRows(page)).toHaveCount(0);
@@ -100,7 +100,7 @@ test.describe('Model app', () => {
 
     await test.step('keys + foreign keys detail shows fk columns', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'Keys + Foreign Keys').click();
+      await ModelAppLocators.getDropdownOption(page, 'Keys + foreign keys').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       const main = ModelAppLocators.getNode(page, MAIN);
@@ -116,7 +116,7 @@ test.describe('Model app', () => {
 
     await test.step('all columns detail shows everything', async () => {
       await ModelAppLocators.getDetailDropdown(page).click();
-      await ModelAppLocators.getDropdownOption(page, 'All Columns').click();
+      await ModelAppLocators.getDropdownOption(page, 'All columns').click();
       await ModelAppLocators.waitForLayoutSettled(page);
 
       const main = ModelAppLocators.getNode(page, MAIN);
@@ -130,30 +130,30 @@ test.describe('Model app', () => {
     await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${getCatalogID(testInfo.project.name)}`);
     await ModelAppLocators.waitForPageReady(page);
 
-    await test.step('focus dims unconnected tables', async () => {
+    await test.step('highlight dims unconnected tables', async () => {
       await ModelAppLocators.getNode(page, OUTBOUND).click();
 
-      await expect.soft(ModelAppLocators.getFocusedNodes(page)).toHaveCount(1);
-      await expect.soft(ModelAppLocators.getNode(page, OUTBOUND)).toHaveClass(/model-node-focused/);
+      await expect.soft(ModelAppLocators.getHighlightedNodes(page)).toHaveCount(1);
+      await expect.soft(ModelAppLocators.getNode(page, OUTBOUND)).toHaveClass(/model-node-highlighted/);
       await expect.soft(ModelAppLocators.getNode(page, ISOLATED)).toHaveClass(/model-node-dimmed/);
       await expect.soft(ModelAppLocators.getNode(page, INBOUND)).toHaveClass(/model-node-dimmed/);
       await expect.soft(ModelAppLocators.getNode(page, SELF_REF)).toHaveClass(/model-node-dimmed/);
       await expect
         .soft(ModelAppLocators.getNode(page, MAIN))
-        .not.toHaveClass(/model-node-dimmed|model-node-focused/);
+        .not.toHaveClass(/model-node-dimmed|model-node-highlighted/);
 
-      // both parallel fks touch the focused pair, so both highlight
+      // both parallel fks touch the highlighted pair, so both highlight
       await expect.soft(ModelAppLocators.getEdge(page, MAIN_FK1)).toHaveClass(/model-edge-highlighted/);
       await expect.soft(ModelAppLocators.getEdge(page, MAIN_FK2)).toHaveClass(/model-edge-highlighted/);
       await expect.soft(ModelAppLocators.getEdge(page, INBOUND_FK)).toHaveClass(/model-edge-dimmed/);
       await expect.soft(ModelAppLocators.getEdge(page, SELF_FK)).toHaveClass(/model-edge-dimmed/);
     });
 
-    await test.step('pane click clears focus', async () => {
+    await test.step('pane click clears highlight', async () => {
       // click a corner so we don't land on a node
       await ModelAppLocators.getPane(page).click({ position: { x: 5, y: 5 } });
 
-      await expect.soft(ModelAppLocators.getFocusedNodes(page)).toHaveCount(0);
+      await expect.soft(ModelAppLocators.getHighlightedNodes(page)).toHaveCount(0);
       await expect.soft(ModelAppLocators.getDimmedNodes(page)).toHaveCount(0);
       await expect.soft(ModelAppLocators.getHighlightedEdges(page)).toHaveCount(0);
       await expect.soft(ModelAppLocators.getDimmedEdges(page)).toHaveCount(0);
@@ -228,7 +228,7 @@ test.describe('Model app', () => {
 
       // assert the position changed, never its absolute value
       await expect.poll(async () => node.evaluate((el) => el.style.transform)).not.toBe(before);
-      await expect.soft(ModelAppLocators.getNodeHeader(node)).toHaveText('isolated');
+      await expect.soft(ModelAppLocators.getNodeHeader(node)).toHaveText(ISOLATED);
       await expect.soft(AlertLocators.getAlerts(page)).toHaveCount(0);
     });
 
@@ -263,12 +263,23 @@ test.describe('Model app', () => {
     });
   });
 
+  // one test for both exports, since parallel tests would race on the same model.pdf
   test('export pdf', async ({ page, baseURL }, testInfo) => {
-    await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${getCatalogID(testInfo.project.name)}`);
+    const catalogId = getCatalogID(testInfo.project.name);
+    await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${catalogId}`);
     await ModelAppLocators.waitForPageReady(page);
 
-    await deleteDownloadedFiles([`${DOWNLOAD_FOLDER}/model.pdf`]);
-    await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    await test.step('catalog', async () => {
+      await deleteDownloadedFiles([`${DOWNLOAD_FOLDER}/model.pdf`]);
+      await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    });
+
+    await test.step('focus mode', async () => {
+      await page.goto(`${baseURL}/${APP_NAMES.MODEL}/#${catalogId}/model-test-focus-mode:focus`);
+      await ModelAppLocators.waitForLayoutSettled(page);
+      await expect.soft(ModelAppLocators.getLegend(page)).toBeVisible();
+      await clickAndVerifyDownload(ModelAppLocators.getExportPdfButton(page), 'model.pdf');
+    });
   });
 
   test('no catalog specified', async ({ page, baseURL }) => {
